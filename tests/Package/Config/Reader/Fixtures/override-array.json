@@ -1,0 +1,4 @@
+{
+    "name": "my/application",
+    "override": [ "acme/blog-extension1", "acme/blog-extension2" ]
+}

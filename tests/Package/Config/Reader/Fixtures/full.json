@@ -1,0 +1,11 @@
+{
+    "name": "my/application",
+    "resources": {
+        "/app": "res"
+    },
+    "tags": {
+        "/app/config*.yml": "config"
+    },
+    "override": "acme/blog",
+    "package-order": [ "acme/blog-extension1", "acme/blog-extension2" ]
+}

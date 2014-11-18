@@ -1,0 +1,4 @@
+{
+    "name": "my/application",
+    "tags": [ "/app/config*.yml", "config" ]
+}

@@ -1,0 +1,6 @@
+{
+    "name": "my/application",
+    "resources": {
+        "/app": [ 12345 ]
+    }
+}

@@ -1,0 +1,6 @@
+{
+    "name": "my/application",
+    "package-order": {
+        "acme/blog-extension1": "acme/blog-extension2"
+    }
+}

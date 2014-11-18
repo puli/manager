@@ -1,0 +1,35 @@
+{
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+        "name": {
+            "type": "string",
+            "description": "Package name, including \"vendor-name/\" prefix.",
+            "required": true
+        },
+        "resources": {
+            "type": "object",
+            "additionalProperties": {
+                "type": [ "string", "array" ]
+            }
+        },
+        "tags": {
+            "type": "object",
+            "additionalProperties": {
+                "type": [ "string", "array" ]
+            }
+        },
+        "override": {
+            "type": [ "string", "array" ],
+            "items": {
+                "type": "string"
+            }
+        },
+        "package-order": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
+        }
+    }
+}

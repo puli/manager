@@ -1,0 +1,6 @@
+{
+    "name": "my/application",
+    "resources": {
+        "/app/config*.yml": 12345
+    }
+}

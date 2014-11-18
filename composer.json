@@ -1,0 +1,32 @@
+{
+    "name": "puli/puli-packages",
+    "description": "Generates Puli repositories from configured packages.",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Bernhard Schussek",
+            "email": "bschussek@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.3.9",
+        "puli/puli": "~1.0@dev",
+        "puli/json": "~1.0@dev"
+    },
+    "minimum-stability": "dev",
+    "autoload": {
+        "psr-4": {
+            "Puli\\Packages\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Puli\\Packages\\Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "1.0-dev"
+        }
+    }
+}
