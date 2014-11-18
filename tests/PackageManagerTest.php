@@ -15,7 +15,7 @@ use Puli\Packages\Package\Config\PackageConfig;
 use Puli\Packages\Package\Config\Reader\PackageConfigReaderInterface;
 use Puli\Packages\Package\Config\RootPackageConfig;
 use Puli\Packages\PackageManager;
-use Puli\Packages\Repository\Config\PackageDefinition;
+use Puli\Packages\Repository\Config\PackageDescriptor;
 use Puli\Packages\Repository\Config\Reader\RepositoryConfigReaderInterface;
 use Puli\Packages\Repository\Config\RepositoryConfig;
 
@@ -54,8 +54,8 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
         $package1Config = new PackageConfig('package1');
         $package2Config = new PackageConfig('package2');
         $repositoryConfig = new RepositoryConfig();
-        $repositoryConfig->addPackageDefinition(new PackageDefinition('relative/package1'));
-        $repositoryConfig->addPackageDefinition(new PackageDefinition('/absolute/package2'));
+        $repositoryConfig->addPackageDescriptor(new PackageDescriptor('relative/package1'));
+        $repositoryConfig->addPackageDescriptor(new PackageDescriptor('/absolute/package2'));
 
         $this->packageConfigReader->expects($this->once())
             ->method('readRootPackageConfig')

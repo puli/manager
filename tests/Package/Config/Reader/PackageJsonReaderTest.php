@@ -13,8 +13,8 @@ namespace Puli\Packages\Tests\Package\Config\Reader;
 
 use Puli\Packages\Package\Config\PackageConfig;
 use Puli\Packages\Package\Config\Reader\PackageJsonReader;
-use Puli\Packages\Package\Config\ResourceDefinition;
-use Puli\Packages\Package\Config\TagDefinition;
+use Puli\Packages\Package\Config\ResourceDescriptor;
+use Puli\Packages\Package\Config\TagDescriptor;
 
 /**
  * @since  1.0
@@ -232,16 +232,16 @@ class PackageJsonReaderTest extends \PHPUnit_Framework_TestCase
     private function assertFullConfig(PackageConfig $config)
     {
         $this->assertSame('my/application', $config->getPackageName());
-        $this->assertEquals(array(new ResourceDefinition('/app', array('res'))), $config->getResourceDefinitions());
-        $this->assertEquals(array(new TagDefinition('/app/config*.yml', array('config'))), $config->getTagDefinitions());
+        $this->assertEquals(array(new ResourceDescriptor('/app', array('res'))), $config->getResourceDescriptors());
+        $this->assertEquals(array(new TagDescriptor('/app/config*.yml', array('config'))), $config->getTagDescriptors());
         $this->assertSame(array('acme/blog'), $config->getOverriddenPackages());
     }
 
     private function assertMinimalConfig(PackageConfig $config)
     {
         $this->assertSame('my/application', $config->getPackageName());
-        $this->assertSame(array(), $config->getResourceDefinitions());
-        $this->assertSame(array(), $config->getTagDefinitions());
+        $this->assertSame(array(), $config->getResourceDescriptors());
+        $this->assertSame(array(), $config->getTagDescriptors());
         $this->assertSame(array(), $config->getOverriddenPackages());
     }
 }

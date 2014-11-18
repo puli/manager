@@ -11,7 +11,7 @@
 
 namespace Puli\Packages\Tests\Repository\Config\Reader;
 
-use Puli\Packages\Repository\Config\PackageDefinition;
+use Puli\Packages\Repository\Config\PackageDescriptor;
 use Puli\Packages\Repository\Config\Reader\RepositoryJsonReader;
 
 /**
@@ -32,14 +32,14 @@ class RepositoryJsonReaderTest extends \PHPUnit_Framework_TestCase
 
     public function testReadConfig()
     {
-        $package1 = new PackageDefinition('/path/to/package1');
-        $package2 = new PackageDefinition('/path/to/package2');
+        $package1 = new PackageDescriptor('/path/to/package1');
+        $package2 = new PackageDescriptor('/path/to/package2');
         $package2->setNew(false);
 
         $config = $this->reader->readRepositoryConfig(__DIR__.'/Fixtures/config.json');
 
         $this->assertInstanceOf('Puli\Packages\Repository\Config\RepositoryConfig', $config);
-        $this->assertEquals(array($package1, $package2), $config->getPackageDefinitions());
+        $this->assertEquals(array($package1, $package2), $config->getPackageDescriptors());
     }
 
     /**

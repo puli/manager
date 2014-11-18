@@ -12,12 +12,12 @@
 namespace Puli\Packages\Repository\Config;
 
 /**
- * A package in the package repository configuration.
+ * Describes a package in the repository configuration.
  *
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class PackageDefinition
+class PackageDescriptor
 {
     /**
      * @var string
@@ -30,7 +30,7 @@ class PackageDefinition
     private $new = true;
 
     /**
-     * Creates a new package definition.
+     * Creates a new package descriptor.
      *
      * @param string $installPath The path where the package is installed.
      *                            If a relative path is given, the path is

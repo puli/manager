@@ -12,12 +12,12 @@
 namespace Puli\Packages\Package\Config;
 
 /**
- * Maps a Puli selector to one or more tags.
+ * Describes a tag mapping in the package configuration.
  *
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class TagDefinition
+class TagDescriptor
 {
     /**
      * @var string
@@ -30,18 +30,18 @@ class TagDefinition
     private $tags = array();
 
     /**
-     * Creates a new tag definition.
+     * Creates a new tag descriptor.
      *
-     * The definition maps a Puli selector to one or more tags. The Puli
+     * The descriptor maps a Puli selector to one or more tags. The Puli
      * selector can be a Puli path or a pattern containing wildcards.
      *
-     * @param string   $puliSelector   The Puli path.
-     * @param string[] $tags The local paths.
+     * @param string          $puliSelector   The Puli path.
+     * @param string|string[] $tags The local paths.
      */
-    function __construct($puliSelector, array $tags)
+    function __construct($puliSelector, $tags)
     {
         $this->puliSelector = $puliSelector;
-        $this->tags = $tags;
+        $this->tags = (array) $tags;
     }
 
     /**

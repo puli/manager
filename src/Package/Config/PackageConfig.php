@@ -27,12 +27,12 @@ class PackageConfig
     /**
      * @var string[]
      */
-    private $resourceDefinitions = array();
+    private $resourceDescriptors = array();
 
     /**
      * @var string[]
      */
-    private $tagDefinitions = array();
+    private $tagDescriptors = array();
 
     /**
      * @var string[]
@@ -82,50 +82,50 @@ class PackageConfig
     /**
      * Sets the names of the packages this package overrides.
      *
-     * @param string[] $overriddenPackages The names of the overridden packages.
+     * @param string|string[] $overriddenPackages The names of the overridden packages.
      */
-    public function setOverriddenPackages(array $overriddenPackages)
+    public function setOverriddenPackages($overriddenPackages)
     {
-        $this->overriddenPackages = $overriddenPackages;
+        $this->overriddenPackages = (array) $overriddenPackages;
     }
 
     /**
-     * Returns the resource definitions.
+     * Returns the resource descriptors.
      *
-     * @return ResourceDefinition[] The resource definition.
+     * @return ResourceDescriptor[] The resource descriptor.
      */
-    public function getResourceDefinitions()
+    public function getResourceDescriptors()
     {
-        return $this->resourceDefinitions;
+        return $this->resourceDescriptors;
     }
 
     /**
-     * Adds a resource definition.
+     * Adds a resource descriptor.
      *
-     * @param ResourceDefinition $resourceDefinition The resource definition.
+     * @param ResourceDescriptor $resourceDescriptor The resource descriptor.
      */
-    public function addResourceDefinition(ResourceDefinition $resourceDefinition)
+    public function addResourceDescriptor(ResourceDescriptor $resourceDescriptor)
     {
-        $this->resourceDefinitions[] = $resourceDefinition;
+        $this->resourceDescriptors[] = $resourceDescriptor;
     }
 
     /**
-     * Returns the tag definitions.
+     * Returns the tag descriptors.
      *
-     * @return TagDefinition[] The tag definitions.
+     * @return TagDescriptor[] The tag descriptors.
      */
-    public function getTagDefinitions()
+    public function getTagDescriptors()
     {
-        return $this->tagDefinitions;
+        return $this->tagDescriptors;
     }
 
     /**
-     * Adds a tag definition.
+     * Adds a tag descriptor.
      *
-     * @param TagDefinition $tagDefinition The tag definition.
+     * @param TagDescriptor $tagDescriptor The tag descriptor.
      */
-    public function addTagDefinition(TagDefinition $tagDefinition)
+    public function addTagDescriptor(TagDescriptor $tagDescriptor)
     {
-        $this->tagDefinitions[] = $tagDefinition;
+        $this->tagDescriptors[] = $tagDescriptor;
     }
 }

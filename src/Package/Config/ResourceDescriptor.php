@@ -12,12 +12,12 @@
 namespace Puli\Packages\Package\Config;
 
 /**
- * Maps a puli path to one or more relative file paths.
+ * Describes a resource mapping in the package configuration.
  *
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class ResourceDefinition
+class ResourceDescriptor
 {
     /**
      * @var string
@@ -27,21 +27,21 @@ class ResourceDefinition
     /**
      * @var string[]
      */
-    private $relativeLocalPaths = array();
+    private $localPaths = array();
 
     /**
-     * Creates a new resource definition.
+     * Creates a new resource descriptor.
      *
-     * The definition maps a Puli path to one or more file paths relative to
+     * The descriptor maps a Puli path to one or more file paths relative to
      * the root of the package.
      *
-     * @param string   $puliPath   The Puli path.
-     * @param string[] $localPaths The local paths.
+     * @param string          $puliPath   The Puli path.
+     * @param string|string[] $localPaths The local paths.
      */
-    function __construct($puliPath, array $localPaths)
+    function __construct($puliPath, $localPaths)
     {
         $this->puliPath = $puliPath;
-        $this->relativeLocalPaths = $localPaths;
+        $this->localPaths = (array) $localPaths;
     }
 
     /**
@@ -61,8 +61,8 @@ class ResourceDefinition
      *
      * @return string[] The relative local paths.
      */
-    public function getRelativeLocalPaths()
+    public function getLocalPaths()
     {
-        return $this->relativeLocalPaths;
+        return $this->localPaths;
     }
 }

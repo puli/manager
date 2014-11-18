@@ -20,37 +20,37 @@ namespace Puli\Packages\Repository\Config;
 class RepositoryConfig
 {
     /**
-     * @var PackageDefinition[]
+     * @var PackageDescriptor[]
      */
-    private $packageDefinitions = array();
+    private $packageDescriptors = array();
 
     /**
-     * Returns the package definitions.
+     * Returns the package descriptors.
      *
-     * @return PackageDefinition[] The package definitions.
+     * @return PackageDescriptor[] The package descriptors.
      */
-    public function getPackageDefinitions()
+    public function getPackageDescriptors()
     {
-        return $this->packageDefinitions;
+        return $this->packageDescriptors;
     }
 
     /**
-     * Sets the package definitions.
+     * Sets the package descriptors.
      *
-     * @param PackageDefinition[] $definitions The package definitions.
+     * @param PackageDescriptor[] $descriptors The package descriptors.
      */
-    public function setPackageDefinitions(array $definitions)
+    public function setPackageDescriptors(array $descriptors)
     {
-        $this->packageDefinitions = $definitions;
+        $this->packageDescriptors = $descriptors;
     }
 
     /**
-     * Adds a package definition.
+     * Adds a package descriptor.
      *
-     * @param PackageDefinition $definition The package definition.
+     * @param PackageDescriptor $descriptor The package descriptor.
      */
-    public function addPackageDefinition(PackageDefinition $definition)
+    public function addPackageDescriptor(PackageDescriptor $descriptor)
     {
-        $this->packageDefinitions[] = $definition;
+        $this->packageDescriptors[] = $descriptor;
     }
 }

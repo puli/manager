@@ -72,7 +72,7 @@ class PackageManager
         $repositoryConfig = $this->rootPackageConfig->getRepositoryConfig();
         $this->repositoryConfig = $repositoryConfigReader->readRepositoryConfig($rootDirectory.'/'.$repositoryConfig);
 
-        foreach ($this->repositoryConfig->getPackageDefinitions() as $packageDefinition) {
+        foreach ($this->repositoryConfig->getPackageDescriptors() as $packageDefinition) {
             $installPath = Path::makeAbsolute($packageDefinition->getInstallPath(), $rootDirectory);
             $config = $this->packageConfigReader->readPackageConfig($installPath.'/puli.json');
             $package = new Package($config, $installPath);

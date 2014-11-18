@@ -16,9 +16,9 @@ use Puli\Json\JsonDecoder;
 use Puli\Packages\FileNotFoundException;
 use Puli\Packages\InvalidConfigException;
 use Puli\Packages\Package\Config\PackageConfig;
-use Puli\Packages\Package\Config\ResourceDefinition;
+use Puli\Packages\Package\Config\ResourceDescriptor;
 use Puli\Packages\Package\Config\RootPackageConfig;
-use Puli\Packages\Package\Config\TagDefinition;
+use Puli\Packages\Package\Config\TagDescriptor;
 
 /**
  * Reads package configuration from a JSON file.
@@ -86,13 +86,13 @@ class PackageJsonReader implements PackageConfigReaderInterface
 
         if (isset($jsonData->resources)) {
             foreach ($jsonData->resources as $path => $relativePaths) {
-                $config->addResourceDefinition(new ResourceDefinition($path, (array) $relativePaths));
+                $config->addResourceDescriptor(new ResourceDescriptor($path, (array) $relativePaths));
             }
         }
 
         if (isset($jsonData->tags)) {
             foreach ((array) $jsonData->tags as $selector => $tags) {
-                $config->addTagDefinition(new TagDefinition($selector, (array) $tags));
+                $config->addTagDescriptor(new TagDescriptor($selector, (array) $tags));
             }
         }
 

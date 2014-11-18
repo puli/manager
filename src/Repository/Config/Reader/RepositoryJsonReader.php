@@ -15,7 +15,7 @@ use Puli\Json\InvalidJsonException;
 use Puli\Json\JsonDecoder;
 use Puli\Packages\FileNotFoundException;
 use Puli\Packages\InvalidConfigException;
-use Puli\Packages\Repository\Config\PackageDefinition;
+use Puli\Packages\Repository\Config\PackageDescriptor;
 use Puli\Packages\Repository\Config\RepositoryConfig;
 
 /**
@@ -46,10 +46,10 @@ class RepositoryJsonReader implements RepositoryConfigReaderInterface
         $array = $this->decodeFile($path);
 
         foreach ($array as $packageData) {
-            $packageDefinition = new PackageDefinition($packageData->installPath);
-            $packageDefinition->setNew(isset($packageData->new) && $packageData->new);
+            $descriptor = new PackageDescriptor($packageData->installPath);
+            $descriptor->setNew(isset($packageData->new) && $packageData->new);
 
-            $config->addPackageDefinition($packageDefinition);
+            $config->addPackageDescriptor($descriptor);
         }
 
         return $config;
