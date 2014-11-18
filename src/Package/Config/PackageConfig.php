@@ -40,6 +40,16 @@ class PackageConfig
     private $overriddenPackages = array();
 
     /**
+     * Creates a new package configuration.
+     *
+     * @param string|null $packageName The package name. Optional.
+     */
+    public function __construct($packageName = null)
+    {
+        $this->packageName = $packageName;
+    }
+
+    /**
      * Returns the package name.
      *
      * @return string The package name.

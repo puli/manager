@@ -33,6 +33,9 @@ class PackageDefinition
      * Creates a new package definition.
      *
      * @param string $installPath The path where the package is installed.
+     *                            If a relative path is given, the path is
+     *                            assumed to be relative to the install path
+     *                            of the root package.
      */
     public function __construct($installPath)
     {
@@ -42,7 +45,9 @@ class PackageDefinition
     /**
      * Returns the path where the package is installed.
      *
-     * @return string The path where the package is installed.
+     * @return string The path where the package is installed. The path is
+     *                either absolute or relative to the install path of the
+     *                root package.
      */
     public function getInstallPath()
     {

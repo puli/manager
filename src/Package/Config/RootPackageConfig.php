@@ -25,6 +25,11 @@ class RootPackageConfig extends PackageConfig
     private $packageOrder = array();
 
     /**
+     * @var string|null
+     */
+    private $repositoryConfig;
+
+    /**
      * Returns the order in which some packages should be loaded.
      *
      * If packages contain conflicting resource definitions, this setting can be
@@ -49,4 +54,30 @@ class RootPackageConfig extends PackageConfig
     {
         $this->packageOrder = $packageOrder;
     }
+
+    /**
+     * Returns the path to the repository configuration file.
+     *
+     * The path is relative to the install path of the root package.
+     *
+     * @return null|string The path or `null` if none is set.
+     */
+    public function getRepositoryConfig()
+    {
+        return $this->repositoryConfig;
+    }
+
+    /**
+     * Sets the path to the repository configuration file.
+     *
+     * The path should be relative to the install path of the root package.
+     *
+     * @param string $repositoryConfig The path to the configuration file.
+     */
+    public function setRepositoryConfig($repositoryConfig)
+    {
+        $this->repositoryConfig = $repositoryConfig;
+    }
+
+
 }
