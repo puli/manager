@@ -1,0 +1,9 @@
+[
+    {
+        "installPath": "/path/to/package1",
+        "new": true
+    },
+    {
+        "installPath": "/path/to/package2"
+    }
+]

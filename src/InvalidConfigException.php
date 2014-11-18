@@ -9,10 +9,10 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\Packages\Package\Config\Reader;
+namespace Puli\Packages;
 
 /**
- * Thrown when the configuration is invalid.
+ * Thrown when configuration is invalid.
  *
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>

@@ -1,0 +1,15 @@
+{
+    "type": "array",
+    "items": {
+        "type": "object",
+        "properties": {
+            "installPath": {
+                "type": "string",
+                "required": true
+            },
+            "new": {
+                "type": "boolean"
+            }
+        }
+    }
+}

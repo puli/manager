@@ -12,6 +12,7 @@
 namespace Puli\Packages\Package\Config\Reader;
 
 use Puli\Packages\FileNotFoundException;
+use Puli\Packages\InvalidConfigException;
 use Puli\Packages\Package\Config\PackageConfig;
 use Puli\Packages\Package\Config\RootPackageConfig;
 
@@ -21,29 +22,29 @@ use Puli\Packages\Package\Config\RootPackageConfig;
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-interface ConfigReaderInterface
+interface PackageConfigReaderInterface
 {
     /**
      * Reads package configuration from a data source.
      *
      * @param mixed $source The data source.
      *
-     * @return PackageConfig The configuration read from the data source.
+     * @return PackageConfig The package configuration.
      *
      * @throws FileNotFoundException If the data source was not found.
      * @throws InvalidConfigException If the source contains invalid configuration.
      */
-    public function readConfig($source);
+    public function readPackageConfig($source);
 
     /**
      * Reads root package configuration from a data source.
      *
      * @param mixed $source The data source.
      *
-     * @return RootPackageConfig The configuration read from the data source.
+     * @return RootPackageConfig The root package configuration.
      *
      * @throws FileNotFoundException If the data source was not found.
      * @throws InvalidConfigException If the source contains invalid configuration.
      */
-    public function readRootConfig($source);
+    public function readRootPackageConfig($source);
 }

@@ -14,6 +14,7 @@ namespace Puli\Packages\Package\Config\Reader;
 use Puli\Json\InvalidJsonException;
 use Puli\Json\JsonDecoder;
 use Puli\Packages\FileNotFoundException;
+use Puli\Packages\InvalidConfigException;
 use Puli\Packages\Package\Config\PackageConfig;
 use Puli\Packages\Package\Config\ResourceDefinition;
 use Puli\Packages\Package\Config\RootPackageConfig;
@@ -28,7 +29,7 @@ use Puli\Packages\Package\Config\TagDefinition;
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class JsonConfigReader implements ConfigReaderInterface
+class PackageJsonReader implements PackageConfigReaderInterface
 {
     /**
      * Reads package configuration from a JSON file.
@@ -36,14 +37,14 @@ class JsonConfigReader implements ConfigReaderInterface
      * The data in the JSON file is validated against the schema
      * `res/schema/config-schema.json`.
      *
-     * @param mixed $path The path to the JSON file.
+     * @param string $path The path to the JSON file.
      *
      * @return PackageConfig The configuration read from the JSON file.
      *
      * @throws FileNotFoundException If the JSON file was not found.
      * @throws InvalidConfigException If the JSON file is invalid.
      */
-    public function readConfig($path)
+    public function readPackageConfig($path)
     {
         $config = new PackageConfig();
 
@@ -60,14 +61,14 @@ class JsonConfigReader implements ConfigReaderInterface
      * The data in the JSON file is validated against the schema
      * `res/schema/config-schema.json`.
      *
-     * @param mixed $path The path to the JSON file.
+     * @param string $path The path to the JSON file.
      *
      * @return RootPackageConfig The configuration read from the JSON file.
      *
      * @throws FileNotFoundException If the JSON file was not found.
      * @throws InvalidConfigException If the JSON file is invalid.
      */
-    public function readRootConfig($path)
+    public function readRootPackageConfig($path)
     {
         $config = new RootPackageConfig();
 
@@ -110,7 +111,7 @@ class JsonConfigReader implements ConfigReaderInterface
     private function decodeFile($path)
     {
         $decoder = new JsonDecoder();
-        $schema = realpath(__DIR__.'/../../../../res/schema/config-schema.json');
+        $schema = realpath(__DIR__.'/../../../../res/schema/package-schema.json');
 
         if (!file_exists($path)) {
             throw new FileNotFoundException(sprintf(
