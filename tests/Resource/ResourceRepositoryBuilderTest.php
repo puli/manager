@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the Puli Packages package.
+ * This file is part of the Puli PackageManager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,17 +9,17 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\Packages\Tests\Resource;
+namespace Puli\PackageManager\Tests\Resource;
 
 use Puli\Filesystem\Resource\LocalDirectoryResource;
-use Puli\Packages\Package\Config\PackageConfig;
-use Puli\Packages\Package\Config\ResourceDescriptor;
-use Puli\Packages\Package\Config\RootPackageConfig;
-use Puli\Packages\Package\Config\TagDescriptor;
-use Puli\Packages\Package\Package;
-use Puli\Packages\Package\RootPackage;
-use Puli\Packages\Repository\PackageRepository;
-use Puli\Packages\Resource\ResourceRepositoryBuilder;
+use Puli\PackageManager\Package\Config\PackageConfig;
+use Puli\PackageManager\Package\Config\ResourceDescriptor;
+use Puli\PackageManager\Package\Config\RootPackageConfig;
+use Puli\PackageManager\Package\Config\TagDescriptor;
+use Puli\PackageManager\Package\Package;
+use Puli\PackageManager\Package\RootPackage;
+use Puli\PackageManager\Repository\PackageRepository;
+use Puli\PackageManager\Resource\ResourceRepositoryBuilder;
 use Puli\Repository\ManageableRepositoryInterface;
 
 /**
@@ -111,7 +111,7 @@ class ResourceRepositoryBuilderTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\Packages\Resource\ResourceDefinitionException
+     * @expectedException \Puli\PackageManager\Resource\ResourceDefinitionException
      */
     public function testFailIfReferencedPackageCouldNotBeFound()
     {
@@ -364,7 +364,7 @@ class ResourceRepositoryBuilderTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\Packages\Resource\ResourceConflictException
+     * @expectedException \Puli\PackageManager\Resource\ResourceConflictException
      */
     public function testConflictIfSamePathsButNoOverrideStatement()
     {
@@ -385,7 +385,7 @@ class ResourceRepositoryBuilderTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\Packages\Resource\ResourceConflictException
+     * @expectedException \Puli\PackageManager\Resource\ResourceConflictException
      */
     public function testConflictIfExistingSubPathAndNoOverrideStatement()
     {
@@ -456,7 +456,7 @@ class ResourceRepositoryBuilderTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\Packages\Resource\ResourceConflictException
+     * @expectedException \Puli\PackageManager\Resource\ResourceConflictException
      */
     public function testPackageOrderInNonRootPackageIsIgnored()
     {

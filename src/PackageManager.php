@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the Puli Packages package.
+ * This file is part of the Puli PackageManager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,15 +9,15 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\Packages;
+namespace Puli\PackageManager;
 
-use Puli\Packages\Package\Config\Reader\PackageConfigReaderInterface;
-use Puli\Packages\Package\Config\RootPackageConfig;
-use Puli\Packages\Package\Package;
-use Puli\Packages\Package\RootPackage;
-use Puli\Packages\Repository\Config\Reader\RepositoryConfigReaderInterface;
-use Puli\Packages\Repository\Config\RepositoryConfig;
-use Puli\Packages\Repository\PackageRepository;
+use Puli\PackageManager\Package\Config\Reader\PackageConfigReaderInterface;
+use Puli\PackageManager\Package\Config\RootPackageConfig;
+use Puli\PackageManager\Package\Package;
+use Puli\PackageManager\Package\RootPackage;
+use Puli\PackageManager\Repository\Config\Reader\RepositoryConfigReaderInterface;
+use Puli\PackageManager\Repository\Config\RepositoryConfig;
+use Puli\PackageManager\Repository\PackageRepository;
 use Puli\Util\Path;
 
 /**

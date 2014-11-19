@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the Puli Packages package.
+ * This file is part of the Puli PackageManager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,11 +9,11 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\Packages\Repository\Config\Reader;
+namespace Puli\PackageManager\Repository\Config\Reader;
 
-use Puli\Packages\FileNotFoundException;
-use Puli\Packages\InvalidConfigException;
-use Puli\Packages\Repository\Config\RepositoryConfig;
+use Puli\PackageManager\FileNotFoundException;
+use Puli\PackageManager\InvalidConfigException;
+use Puli\PackageManager\Repository\Config\RepositoryConfig;
 
 /**
  * Reads repository configuration from a data source.

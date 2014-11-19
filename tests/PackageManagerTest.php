@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the Puli Packages package.
+ * This file is part of the Puli PackageManager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,15 +9,15 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\Packages\Tests;
+namespace Puli\PackageManager\Tests;
 
-use Puli\Packages\Package\Config\PackageConfig;
-use Puli\Packages\Package\Config\Reader\PackageConfigReaderInterface;
-use Puli\Packages\Package\Config\RootPackageConfig;
-use Puli\Packages\PackageManager;
-use Puli\Packages\Repository\Config\PackageDescriptor;
-use Puli\Packages\Repository\Config\Reader\RepositoryConfigReaderInterface;
-use Puli\Packages\Repository\Config\RepositoryConfig;
+use Puli\PackageManager\Package\Config\PackageConfig;
+use Puli\PackageManager\Package\Config\Reader\PackageConfigReaderInterface;
+use Puli\PackageManager\Package\Config\RootPackageConfig;
+use Puli\PackageManager\PackageManager;
+use Puli\PackageManager\Repository\Config\PackageDescriptor;
+use Puli\PackageManager\Repository\Config\Reader\RepositoryConfigReaderInterface;
+use Puli\PackageManager\Repository\Config\RepositoryConfig;
 
 /**
  * @since  1.0
@@ -43,8 +43,8 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
     protected function setUp()
     {
         $this->rootDir = '/root';
-        $this->repositoryConfigReader = $this->getMock('Puli\Packages\Repository\Config\Reader\RepositoryConfigReaderInterface');
-        $this->packageConfigReader = $this->getMock('Puli\Packages\Package\Config\Reader\PackageConfigReaderInterface');
+        $this->repositoryConfigReader = $this->getMock('Puli\PackageManager\Repository\Config\Reader\RepositoryConfigReaderInterface');
+        $this->packageConfigReader = $this->getMock('Puli\PackageManager\Package\Config\Reader\PackageConfigReaderInterface');
     }
 
     public function testLoadRepository()
@@ -84,17 +84,17 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
         $packages = $manager->getPackageRepository()->getPackages();
 
         $this->assertCount(3, $packages);
-        $this->assertInstanceOf('Puli\Packages\Package\RootPackage', $packages['root']);
+        $this->assertInstanceOf('Puli\PackageManager\Package\RootPackage', $packages['root']);
         $this->assertSame('root', $packages['root']->getName());
         $this->assertSame($this->rootDir, $packages['root']->getInstallPath());
         $this->assertSame($rootConfig, $packages['root']->getConfig());
 
-        $this->assertInstanceOf('Puli\Packages\Package\Package', $packages['package1']);
+        $this->assertInstanceOf('Puli\PackageManager\Package\Package', $packages['package1']);
         $this->assertSame('package1', $packages['package1']->getName());
         $this->assertSame($this->rootDir.'/relative/package1', $packages['package1']->getInstallPath());
         $this->assertSame($package1Config, $packages['package1']->getConfig());
 
-        $this->assertInstanceOf('Puli\Packages\Package\Package', $packages['package2']);
+        $this->assertInstanceOf('Puli\PackageManager\Package\Package', $packages['package2']);
         $this->assertSame('package2', $packages['package2']->getName());
         $this->assertSame('/absolute/package2', $packages['package2']->getInstallPath());
         $this->assertSame($package2Config, $packages['package2']->getConfig());

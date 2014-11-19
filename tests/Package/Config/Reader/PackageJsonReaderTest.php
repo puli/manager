@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the Puli Packages package.
+ * This file is part of the Puli PackageManager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,12 +9,12 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\Packages\Tests\Package\Config\Reader;
+namespace Puli\PackageManager\Tests\Package\Config\Reader;
 
-use Puli\Packages\Package\Config\PackageConfig;
-use Puli\Packages\Package\Config\Reader\PackageJsonReader;
-use Puli\Packages\Package\Config\ResourceDescriptor;
-use Puli\Packages\Package\Config\TagDescriptor;
+use Puli\PackageManager\Package\Config\PackageConfig;
+use Puli\PackageManager\Package\Config\Reader\PackageJsonReader;
+use Puli\PackageManager\Package\Config\ResourceDescriptor;
+use Puli\PackageManager\Package\Config\TagDescriptor;
 
 /**
  * @since  1.0
@@ -36,8 +36,8 @@ class PackageJsonReaderTest extends \PHPUnit_Framework_TestCase
     {
         $config = $this->reader->readPackageConfig(__DIR__.'/Fixtures/full.json');
 
-        $this->assertInstanceOf('Puli\Packages\Package\Config\PackageConfig', $config);
-        $this->assertNotInstanceOf('Puli\Packages\Package\Config\RootPackageConfig', $config);
+        $this->assertInstanceOf('Puli\PackageManager\Package\Config\PackageConfig', $config);
+        $this->assertNotInstanceOf('Puli\PackageManager\Package\Config\RootPackageConfig', $config);
         $this->assertFullConfig($config);
     }
 
@@ -45,7 +45,7 @@ class PackageJsonReaderTest extends \PHPUnit_Framework_TestCase
     {
         $config = $this->reader->readRootPackageConfig(__DIR__.'/Fixtures/full.json');
 
-        $this->assertInstanceOf('Puli\Packages\Package\Config\RootPackageConfig', $config);
+        $this->assertInstanceOf('Puli\PackageManager\Package\Config\RootPackageConfig', $config);
         $this->assertFullConfig($config);
         $this->assertSame(array('acme/blog-extension1', 'acme/blog-extension2'), $config->getPackageOrder());
     }
@@ -54,8 +54,8 @@ class PackageJsonReaderTest extends \PHPUnit_Framework_TestCase
     {
         $config = $this->reader->readPackageConfig(__DIR__.'/Fixtures/minimal.json');
 
-        $this->assertInstanceOf('Puli\Packages\Package\Config\PackageConfig', $config);
-        $this->assertNotInstanceOf('Puli\Packages\Package\Config\RootPackageConfig', $config);
+        $this->assertInstanceOf('Puli\PackageManager\Package\Config\PackageConfig', $config);
+        $this->assertNotInstanceOf('Puli\PackageManager\Package\Config\RootPackageConfig', $config);
         $this->assertMinimalConfig($config);
     }
 
@@ -63,13 +63,13 @@ class PackageJsonReaderTest extends \PHPUnit_Framework_TestCase
     {
         $config = $this->reader->readRootPackageConfig(__DIR__.'/Fixtures/minimal.json');
 
-        $this->assertInstanceOf('Puli\Packages\Package\Config\RootPackageConfig', $config);
+        $this->assertInstanceOf('Puli\PackageManager\Package\Config\RootPackageConfig', $config);
         $this->assertMinimalConfig($config);
         $this->assertSame(array(), $config->getPackageOrder());
     }
 
     /**
-     * @expectedException \Puli\Packages\InvalidConfigException
+     * @expectedException \Puli\PackageManager\InvalidConfigException
      */
     public function testReadConfigValidatesSchema()
     {
@@ -77,7 +77,7 @@ class PackageJsonReaderTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\Packages\InvalidConfigException
+     * @expectedException \Puli\PackageManager\InvalidConfigException
      */
     public function testReadRootConfigValidatesSchema()
     {
@@ -85,7 +85,7 @@ class PackageJsonReaderTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\Packages\FileNotFoundException
+     * @expectedException \Puli\PackageManager\FileNotFoundException
      */
     public function testReadConfigFailsIfNotFound()
     {
@@ -93,7 +93,7 @@ class PackageJsonReaderTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\Packages\FileNotFoundException
+     * @expectedException \Puli\PackageManager\FileNotFoundException
      */
     public function testReadRootConfigFailsIfNotFound()
     {
@@ -105,7 +105,7 @@ class PackageJsonReaderTest extends \PHPUnit_Framework_TestCase
     ////////////////////////////////////////////////////////////////////////////
 
     /**
-     * @expectedException \Puli\Packages\InvalidConfigException
+     * @expectedException \Puli\PackageManager\InvalidConfigException
      */
     public function testNameMustBeString()
     {
@@ -113,7 +113,7 @@ class PackageJsonReaderTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\Packages\InvalidConfigException
+     * @expectedException \Puli\PackageManager\InvalidConfigException
      */
     public function testNameIsRequired()
     {
@@ -121,7 +121,7 @@ class PackageJsonReaderTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\Packages\InvalidConfigException
+     * @expectedException \Puli\PackageManager\InvalidConfigException
      */
     public function testResourcesMustBeObject()
     {
@@ -129,7 +129,7 @@ class PackageJsonReaderTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\Packages\InvalidConfigException
+     * @expectedException \Puli\PackageManager\InvalidConfigException
      */
     public function testResourceEntriesMustBeStrings()
     {
@@ -145,7 +145,7 @@ class PackageJsonReaderTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\Packages\InvalidConfigException
+     * @expectedException \Puli\PackageManager\InvalidConfigException
      */
     public function testResourceEntryNestedEntriesMustBeStrings()
     {
@@ -156,7 +156,7 @@ class PackageJsonReaderTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\Packages\InvalidConfigException
+     * @expectedException \Puli\PackageManager\InvalidConfigException
      */
     public function testTagsMustBeObject()
     {
@@ -164,7 +164,7 @@ class PackageJsonReaderTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\Packages\InvalidConfigException
+     * @expectedException \Puli\PackageManager\InvalidConfigException
      */
     public function testTagEntriesMustBeStrings()
     {
@@ -180,7 +180,7 @@ class PackageJsonReaderTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\Packages\InvalidConfigException
+     * @expectedException \Puli\PackageManager\InvalidConfigException
      */
     public function testTagEntryNestedEntriesMustBeStrings()
     {
@@ -198,7 +198,7 @@ class PackageJsonReaderTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\Packages\InvalidConfigException
+     * @expectedException \Puli\PackageManager\InvalidConfigException
      */
     public function testOverrideMustBeStringOrArray()
     {
@@ -206,7 +206,7 @@ class PackageJsonReaderTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\Packages\InvalidConfigException
+     * @expectedException \Puli\PackageManager\InvalidConfigException
      */
     public function testOverrideEntriesMustBeStrings()
     {
@@ -214,7 +214,7 @@ class PackageJsonReaderTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\Packages\InvalidConfigException
+     * @expectedException \Puli\PackageManager\InvalidConfigException
      */
     public function testPackageOrderMustBeArray()
     {
@@ -222,7 +222,7 @@ class PackageJsonReaderTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\Packages\InvalidConfigException
+     * @expectedException \Puli\PackageManager\InvalidConfigException
      */
     public function testPackageOrderEntriesMustBeStrings()
     {

@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the Puli Packages package.
+ * This file is part of the Puli PackageManager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,9 +9,9 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\Packages\Tests\Package\Graph;
+namespace Puli\PackageManager\Tests\Package\Graph;
 
-use Puli\Packages\Package\Graph\PackageNameGraph;
+use Puli\PackageManager\Package\Graph\PackageNameGraph;
 
 /**
  * @since  1.0
@@ -127,7 +127,7 @@ class PackageNameGraphTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\Packages\Package\Graph\CycleException
+     * @expectedException \Puli\PackageManager\Package\Graph\CycleException
      */
     public function testAddEdgeFailsIfCycle()
     {

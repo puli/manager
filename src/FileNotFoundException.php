@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the Puli CLI package.
+ * This file is part of the Puli PackageManager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\Packages;
+namespace Puli\PackageManager;
 
 /**
  * Thrown when a file was not found.

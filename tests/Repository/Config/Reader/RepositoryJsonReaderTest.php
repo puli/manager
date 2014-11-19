@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the Puli Packages package.
+ * This file is part of the Puli PackageManager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,10 +9,10 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\Packages\Tests\Repository\Config\Reader;
+namespace Puli\PackageManager\Tests\Repository\Config\Reader;
 
-use Puli\Packages\Repository\Config\PackageDescriptor;
-use Puli\Packages\Repository\Config\Reader\RepositoryJsonReader;
+use Puli\PackageManager\Repository\Config\PackageDescriptor;
+use Puli\PackageManager\Repository\Config\Reader\RepositoryJsonReader;
 
 /**
  * @since  1.0
@@ -38,12 +38,12 @@ class RepositoryJsonReaderTest extends \PHPUnit_Framework_TestCase
 
         $config = $this->reader->readRepositoryConfig(__DIR__.'/Fixtures/config.json');
 
-        $this->assertInstanceOf('Puli\Packages\Repository\Config\RepositoryConfig', $config);
+        $this->assertInstanceOf('Puli\PackageManager\Repository\Config\RepositoryConfig', $config);
         $this->assertEquals(array($package1, $package2), $config->getPackageDescriptors());
     }
 
     /**
-     * @expectedException \Puli\Packages\InvalidConfigException
+     * @expectedException \Puli\PackageManager\InvalidConfigException
      */
     public function testReadConfigValidatesSchema()
     {
@@ -51,7 +51,7 @@ class RepositoryJsonReaderTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\Packages\FileNotFoundException
+     * @expectedException \Puli\PackageManager\FileNotFoundException
      */
     public function testReadConfigFailsIfNotFound()
     {

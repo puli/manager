@@ -2,7 +2,7 @@
 
 <phpunit bootstrap="vendor/autoload.php" colors="true">
     <testsuites>
-        <testsuite name="Puli Packages Test Suite">
+        <testsuite name="Puli Package Manager Test Suite">
             <directory suffix="Test.php">./tests/</directory>
         </testsuite>
     </testsuites>
