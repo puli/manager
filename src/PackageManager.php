@@ -307,6 +307,16 @@ EOF
     }
 
     /**
+     * Returns the root package.
+     *
+     * @return RootPackage The root package.
+     */
+    public function getRootPackage()
+    {
+        return $this->packageRepository->getRootPackage();
+    }
+
+    /**
      * Returns all installed packages.
      *
      * @return Package[] The list of installed packages, indexed by their names.

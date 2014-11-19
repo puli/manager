@@ -548,4 +548,16 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
 
         $this->manager->getPackage('foobar');
     }
+
+    public function testGetRootPackage()
+    {
+        $this->initDefaultManager();
+
+        $rootPackage = $this->manager->getRootPackage();
+
+        $this->assertInstanceOf('Puli\PackageManager\Package\RootPackage', $rootPackage);
+        $this->assertSame('root', $rootPackage->getName());
+        $this->assertSame($this->rootDir, $rootPackage->getInstallPath());
+        $this->assertSame($this->rootConfig, $rootPackage->getConfig());
+    }
 }
