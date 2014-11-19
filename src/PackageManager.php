@@ -15,12 +15,17 @@ use Puli\Filesystem\PhpCacheRepository;
 use Puli\PackageManager\Package\Config\Reader\PackageConfigReaderInterface;
 use Puli\PackageManager\Package\Config\Reader\PackageJsonReader;
 use Puli\PackageManager\Package\Config\RootPackageConfig;
+use Puli\PackageManager\Package\Config\Writer\PackageConfigWriterInterface;
+use Puli\PackageManager\Package\Config\Writer\PackageJsonWriter;
 use Puli\PackageManager\Package\Package;
 use Puli\PackageManager\Package\RootPackage;
 use Puli\PackageManager\Plugin\PluginInterface;
+use Puli\PackageManager\Repository\Config\PackageDescriptor;
 use Puli\PackageManager\Repository\Config\PackageRepositoryConfig;
 use Puli\PackageManager\Repository\Config\Reader\RepositoryConfigReaderInterface;
 use Puli\PackageManager\Repository\Config\Reader\RepositoryJsonReader;
+use Puli\PackageManager\Repository\Config\Writer\RepositoryConfigWriterInterface;
+use Puli\PackageManager\Repository\Config\Writer\RepositoryJsonWriter;
 use Puli\PackageManager\Repository\PackageRepository;
 use Puli\PackageManager\Resource\ResourceConflictException;
 use Puli\PackageManager\Resource\ResourceDefinitionException;
@@ -41,6 +46,11 @@ use Symfony\Component\Filesystem\Filesystem;
 class PackageManager
 {
     /**
+     * The name of the Puli package config file.
+     */
+    const PACKAGE_CONFIG = 'puli.json';
+
+    /**
      * @var EventDispatcher
      */
     private $dispatcher;
@@ -51,9 +61,19 @@ class PackageManager
     private $repositoryConfigReader;
 
     /**
+     * @var RepositoryConfigWriterInterface
+     */
+    private $repositoryConfigWriter;
+
+    /**
      * @var PackageConfigReaderInterface
      */
     private $packageConfigReader;
+
+    /**
+     * @var PackageConfigWriterInterface
+     */
+    private $packageConfigWriter;
 
     /**
      * @var RootPackageConfig
@@ -79,7 +99,16 @@ class PackageManager
      */
     public static function createDefault($rootDirectory)
     {
-        return new static($rootDirectory, new EventDispatcher(), new RepositoryJsonReader(), new PackageJsonReader());
+        $dispatcher = new EventDispatcher();
+
+        return new static(
+            $rootDirectory,
+            $dispatcher,
+            new RepositoryJsonReader(),
+            new RepositoryJsonWriter(),
+            new PackageJsonReader($dispatcher),
+            new PackageJsonWriter($dispatcher)
+        );
     }
 
     /**
@@ -88,15 +117,26 @@ class PackageManager
      * @param string                          $rootDirectory          The directory containing the root package.
      * @param EventDispatcherInterface        $dispatcher             The event dispatcher.
      * @param RepositoryConfigReaderInterface $repositoryConfigReader The repository config file reader.
+     * @param RepositoryConfigWriterInterface $repositoryConfigWriter The repository config file writer.
      * @param PackageConfigReaderInterface    $packageConfigReader    The package config file reader.
+     * @param PackageConfigWriterInterface    $packageConfigWriter    The package config file writer.
      */
-    public function __construct($rootDirectory, EventDispatcherInterface $dispatcher, RepositoryConfigReaderInterface $repositoryConfigReader, PackageConfigReaderInterface $packageConfigReader)
+    public function __construct(
+        $rootDirectory,
+        EventDispatcherInterface $dispatcher,
+        RepositoryConfigReaderInterface $repositoryConfigReader,
+        RepositoryConfigWriterInterface $repositoryConfigWriter,
+        PackageConfigReaderInterface $packageConfigReader,
+        PackageConfigWriterInterface $packageConfigWriter
+    )
     {
         $this->packageRepository = new PackageRepository();
         $this->dispatcher = $dispatcher;
         $this->repositoryConfigReader = $repositoryConfigReader;
+        $this->repositoryConfigWriter = $repositoryConfigWriter;
         $this->packageConfigReader = $packageConfigReader;
-        $this->rootPackageConfig = $packageConfigReader->readRootPackageConfig($rootDirectory.'/puli.json');
+        $this->packageConfigWriter = $packageConfigWriter;
+        $this->rootPackageConfig = $packageConfigReader->readRootPackageConfig($rootDirectory.'/'.self::PACKAGE_CONFIG);
 
         $this->activatePlugins();
         $this->loadPackages($rootDirectory);
@@ -173,6 +213,52 @@ EOF
     }
 
     /**
+     * Installs the package at the given path in the repository.
+     *
+     * @param string $installPath The path to the package.
+     *
+     * @throws NameConflictException If another package has the same name as
+     *                               the installed package.
+     */
+    public function installPackage($installPath)
+    {
+        $rootDirectory = $this->packageRepository->getRootPackage()->getInstallPath();
+        $installPath = Path::makeAbsolute($installPath, $rootDirectory);
+
+        if ($this->isPackageInstalled($installPath)) {
+            return;
+        }
+
+        // Try to load the package
+        $config = $this->packageConfigReader->readPackageConfig($installPath.'/'.self::PACKAGE_CONFIG);
+        $packageName = $config->getPackageName();
+
+        if ($this->packageRepository->containsPackage($packageName)) {
+            $conflictingPackage = $this->packageRepository->getPackage($packageName);
+
+            throw new NameConflictException(sprintf(
+                'The package name "%s" is already in use by the package at '.
+                '%s. Could not install package %s.',
+                $packageName,
+                $conflictingPackage->getInstallPath(),
+                $installPath
+            ));
+        }
+
+        // OK, now add it
+        $package = new Package($config, $installPath);
+        $relInstallPath = Path::makeRelative($installPath, $rootDirectory);
+        $this->repositoryConfig->addPackageDescriptor(new PackageDescriptor($relInstallPath));
+        $this->packageRepository->addPackage($package);
+
+        // Write package repository configuration
+        $configPath = $this->rootPackageConfig->getPackageRepositoryConfig();
+        $configPath = Path::makeAbsolute($configPath, $rootDirectory);
+
+        $this->repositoryConfigWriter->writeRepositoryConfig($this->repositoryConfig, $configPath);
+    }
+
+    /**
      * @return PackageRepository
      */
     public function getPackageRepository()
@@ -210,15 +296,28 @@ EOF
         $this->packageRepository->addPackage(new RootPackage($this->rootPackageConfig, $rootDirectory));
 
         $repositoryConfig = $this->rootPackageConfig->getPackageRepositoryConfig();
-        $this->repositoryConfig = $this->repositoryConfigReader->readRepositoryConfig($rootDirectory.'/'.$repositoryConfig);
+        $repositoryConfig = Path::makeAbsolute($repositoryConfig, $rootDirectory);
+
+        $this->repositoryConfig = $this->repositoryConfigReader->readRepositoryConfig($repositoryConfig);
 
         foreach ($this->repositoryConfig->getPackageDescriptors() as $packageDefinition) {
             $installPath = Path::makeAbsolute($packageDefinition->getInstallPath(),
                 $rootDirectory);
-            $config = $this->packageConfigReader->readPackageConfig($installPath.'/puli.json');
+            $config = $this->packageConfigReader->readPackageConfig($installPath.'/'.self::PACKAGE_CONFIG);
             $package = new Package($config, $installPath);
 
             $this->packageRepository->addPackage($package);
         }
+    }
+
+    private function isPackageInstalled($installPath)
+    {
+        foreach ($this->getPackageRepository()->getPackages() as $package) {
+            if ($installPath === $package->getInstallPath()) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

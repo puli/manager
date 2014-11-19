@@ -11,9 +11,6 @@
 
 namespace Puli\PackageManager\Repository\Config\Writer;
 
-use Puli\PackageManager\FileNotFoundException;
-use Puli\PackageManager\InvalidConfigException;
-use Puli\PackageManager\Package\Config\PackageConfig;
 use Puli\PackageManager\Repository\Config\PackageRepositoryConfig;
 
 /**
