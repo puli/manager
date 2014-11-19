@@ -37,9 +37,29 @@ class PackageDescriptor
      *                            assumed to be relative to the install path
      *                            of the root package.
      * @param bool   $new         Whether the package is new. Optional.
+     *
+     * @throws \InvalidArgumentException If any of the arguments is invalid.
      */
     public function __construct($installPath, $new = true)
     {
+        if (!is_string($installPath)) {
+            throw new \InvalidArgumentException(sprintf(
+                'The passed install path must be a string. Got: %s',
+                is_object($installPath) ? get_class($installPath) : gettype($installPath)
+            ));
+        }
+
+        if ('' === $installPath) {
+            throw new \InvalidArgumentException('The passed install path must not be empty.');
+        }
+
+        if (!is_bool($new)) {
+            throw new \InvalidArgumentException(sprintf(
+                'The parameter $new must be a bool. Got: %s',
+                is_object($new) ? get_class($new) : gettype($new)
+            ));
+        }
+
         $this->installPath = $installPath;
         $this->new = $new;
     }

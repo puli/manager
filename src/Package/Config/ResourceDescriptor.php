@@ -37,6 +37,8 @@ class ResourceDescriptor
      *
      * @param string          $puliPath   The Puli path.
      * @param string|string[] $localPaths The local paths.
+     *
+     * @throws \InvalidArgumentException If any of the arguments is invalid.
      */
     function __construct($puliPath, $localPaths)
     {
