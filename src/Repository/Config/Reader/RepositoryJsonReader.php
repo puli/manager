@@ -16,7 +16,7 @@ use Puli\Json\JsonDecoder;
 use Puli\PackageManager\FileNotFoundException;
 use Puli\PackageManager\InvalidConfigException;
 use Puli\PackageManager\Repository\Config\PackageDescriptor;
-use Puli\PackageManager\Repository\Config\RepositoryConfig;
+use Puli\PackageManager\Repository\Config\PackageRepositoryConfig;
 
 /**
  * Reads package configuration from a JSON file.
@@ -34,14 +34,14 @@ class RepositoryJsonReader implements RepositoryConfigReaderInterface
      *
      * @param string $path The data source.
      *
-     * @return RepositoryConfig The repository configuration.
+     * @return PackageRepositoryConfig The repository configuration.
      *
      * @throws FileNotFoundException If the JSON file was not found.
      * @throws InvalidConfigException If the JSON file is invalid.
      */
     public function readRepositoryConfig($path)
     {
-        $config = new RepositoryConfig();
+        $config = new PackageRepositoryConfig();
 
         $array = $this->decodeFile($path);
 

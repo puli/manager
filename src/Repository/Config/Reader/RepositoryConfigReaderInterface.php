@@ -13,10 +13,10 @@ namespace Puli\PackageManager\Repository\Config\Reader;
 
 use Puli\PackageManager\FileNotFoundException;
 use Puli\PackageManager\InvalidConfigException;
-use Puli\PackageManager\Repository\Config\RepositoryConfig;
+use Puli\PackageManager\Repository\Config\PackageRepositoryConfig;
 
 /**
- * Reads repository configuration from a data source.
+ * Reads package repository configuration from a data source.
  *
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
@@ -28,7 +28,7 @@ interface RepositoryConfigReaderInterface
      *
      * @param mixed $source The data source.
      *
-     * @return RepositoryConfig The repository configuration.
+     * @return PackageRepositoryConfig The repository configuration.
      *
      * @throws FileNotFoundException If the data source was not found.
      * @throws InvalidConfigException If the source contains invalid configuration.

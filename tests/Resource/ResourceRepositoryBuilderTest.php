@@ -54,9 +54,9 @@ class ResourceRepositoryBuilderTest extends \PHPUnit_Framework_TestCase
         $this->packageRepository = new PackageRepository();
         $this->repo = $this->getMock('Puli\Repository\ManageableRepositoryInterface');
         $this->builder = new ResourceRepositoryBuilder();
-        $this->package1Root = __DIR__.'/Fixtures/package1';
-        $this->package2Root = __DIR__.'/Fixtures/package2';
-        $this->package3Root = __DIR__.'/Fixtures/package3';
+        $this->package1Root = __DIR__.'/../Fixtures/package1';
+        $this->package2Root = __DIR__.'/../Fixtures/package2';
+        $this->package3Root = __DIR__.'/../Fixtures/package3';
     }
 
     public function testIgnorePackageWithoutResources()

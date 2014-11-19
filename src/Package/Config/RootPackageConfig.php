@@ -11,6 +11,8 @@
 
 namespace Puli\PackageManager\Package\Config;
 
+use Puli\PackageManager\InvalidConfigException;
+
 /**
  * The configuration of the root Puli package.
  *
@@ -25,9 +27,19 @@ class RootPackageConfig extends PackageConfig
     private $packageOrder = array();
 
     /**
-     * @var string|null
+     * @var string
      */
-    private $repositoryConfig;
+    private $packageRepositoryConfig = '.puli/packages.json';
+
+    /**
+     * @var string
+     */
+    private $generatedResourceRepository = '.puli/resource-repository.php';
+
+    /**
+     * @var string
+     */
+    private $resourceRepositoryCache = '.puli/cache';
 
     /**
      * Returns the order in which some packages should be loaded.
@@ -50,34 +62,123 @@ class RootPackageConfig extends PackageConfig
      *
      * @param string[] $packageOrder A list of package names.
      */
-    public function setPackageOrder($packageOrder)
+    public function setPackageOrder(array $packageOrder)
     {
         $this->packageOrder = $packageOrder;
     }
 
     /**
-     * Returns the path to the repository configuration file.
+     * Returns the path to the package repository configuration file.
      *
-     * The path is relative to the install path of the root package.
+     * If the path is relative, it is calculated relative to the install path
+     * of the root package.
      *
-     * @return null|string The path or `null` if none is set.
+     * @return string The path to the configuration file.
      */
-    public function getRepositoryConfig()
+    public function getPackageRepositoryConfig()
     {
-        return $this->repositoryConfig;
+        return $this->packageRepositoryConfig;
     }
 
     /**
-     * Sets the path to the repository configuration file.
+     * Sets the path to the package repository configuration file.
      *
-     * The path should be relative to the install path of the root package.
+     * If the path is relative, it is calculated relative to the install path
+     * of the root package.
      *
-     * @param string $repositoryConfig The path to the configuration file.
+     * @param string $configPath The path to the configuration file.
      */
-    public function setRepositoryConfig($repositoryConfig)
+    public function setPackageRepositoryConfig($configPath)
     {
-        $this->repositoryConfig = $repositoryConfig;
+        if (!is_string($configPath)) {
+            throw new InvalidConfigException(sprintf(
+                'The path to the repository configuration should be a string. '.
+                'Got: %s',
+                is_object($configPath) ? get_class($configPath) : gettype($configPath)
+            ));
+        }
+
+        if ('' === $configPath) {
+            throw new InvalidConfigException('The path to the repository configuration should not be empty.');
+        }
+
+        $this->packageRepositoryConfig = $configPath;
     }
 
+    /**
+     * Returns the path where generated resource repository is placed.
+     *
+     * If the path is relative, it is calculated relative to the install path
+     * of the root package.
+     *
+     * @return string The path to the generated resource repository.
+     */
+    public function getGeneratedResourceRepository()
+    {
+        return $this->generatedResourceRepository;
+    }
 
+    /**
+     * Sets the path where generated resource repository is placed.
+     *
+     * If the path is relative, it is calculated relative to the install path
+     * of the root package.
+     *
+     * @param string $repoPath The path to the generated resource
+     *                               repository.
+     */
+    public function setGeneratedResourceRepository($repoPath)
+    {
+        if (!is_string($repoPath)) {
+            throw new InvalidConfigException(sprintf(
+                'The path to the generated resource repository should be a '.
+                'string. Got: %s',
+                is_object($repoPath) ? get_class($repoPath) : gettype($repoPath)
+            ));
+        }
+
+        if ('' === $repoPath) {
+            throw new InvalidConfigException('The path to the generated resource repository should not be empty.');
+        }
+
+        $this->generatedResourceRepository = $repoPath;
+    }
+
+    /**
+     * Returns the path where the generated resource repository caches its files.
+     *
+     * If the path is relative, it is calculated relative to the install path
+     * of the root package.
+     *
+     * @return string The path to the resource repository cache.
+     */
+    public function getResourceRepositoryCache()
+    {
+        return $this->resourceRepositoryCache;
+    }
+
+    /**
+     * Sets the path where the generated resource repository caches its files.
+     *
+     * If the path is relative, it is calculated relative to the install path
+     * of the root package.
+     *
+     * @param string $cachePath The path to the resource repository cache.
+     */
+    public function setResourceRepositoryCache($cachePath)
+    {
+        if (!is_string($cachePath)) {
+            throw new InvalidConfigException(sprintf(
+                'The path to the resource repository cache should be a string. '.
+                'Got: %s',
+                is_object($cachePath) ? get_class($cachePath) : gettype($cachePath)
+            ));
+        }
+
+        if ('' === $cachePath) {
+            throw new InvalidConfigException('The path to the resource repository cache should not be empty.');
+        }
+
+        $this->resourceRepositoryCache = $cachePath;
+    }
 }

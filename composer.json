@@ -13,6 +13,9 @@
         "puli/puli": "~1.0@dev",
         "puli/json": "~1.0@dev"
     },
+    "require-dev": {
+        "symfony/filesystem": "~2.3"
+    },
     "minimum-stability": "dev",
     "autoload": {
         "psr-4": {
