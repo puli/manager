@@ -7,5 +7,11 @@
         "/app/config*.yml": "config"
     },
     "override": "acme/blog",
-    "package-order": [ "acme/blog-extension1", "acme/blog-extension2" ]
+    "package-order": [ "acme/blog-extension1", "acme/blog-extension2" ],
+    "package-repository": "packages.json",
+    "resource-repository": "resource-repository.php",
+    "resource-cache": "cache",
+    "plugins": [
+        "Puli\\PackageManager\\Tests\\Config\\Fixtures\\TestPlugin"
+    ]
 }

@@ -11,6 +11,7 @@
 
 namespace Puli\PackageManager\Tests\Package\Config\Writer;
 
+use Puli\PackageManager\Config\GlobalConfig;
 use Puli\PackageManager\Event\JsonEvent;
 use Puli\PackageManager\Event\PackageEvents;
 use Puli\PackageManager\Package\Config\PackageConfig;
@@ -60,12 +61,17 @@ class PackageJsonWriterTest extends \PHPUnit_Framework_TestCase
 
     public function testWriteRootConfig()
     {
-        $config = new RootPackageConfig();
+        $globalConfig = new GlobalConfig();
+        $config = new RootPackageConfig($globalConfig);
         $config->setPackageName('my/application');
         $config->addResourceDescriptor(new ResourceDescriptor('/app', 'res'));
         $config->addTagDescriptor(new TagDescriptor('/app/config*.yml', 'config'));
         $config->setOverriddenPackages('acme/blog');
         $config->setPackageOrder(array('acme/blog-extension1', 'acme/blog-extension2'));
+        $config->setPackageRepositoryConfig('packages.json');
+        $config->setGeneratedResourceRepository('resource-repository.php');
+        $config->setResourceRepositoryCache('cache');
+        $config->addPluginClass('Puli\PackageManager\Tests\Config\Fixtures\TestPlugin');
 
         $this->writer->writePackageConfig($config, $this->tempFile);
 
@@ -73,18 +79,32 @@ class PackageJsonWriterTest extends \PHPUnit_Framework_TestCase
         $this->assertFileEquals(__DIR__.'/Fixtures/full-root.json', $this->tempFile);
     }
 
-    public function testWriteRootConfigWithoutRootParameters()
+    public function testWriteMinimalRootConfig()
     {
-        $config = new RootPackageConfig();
+        $globalConfig = new GlobalConfig();
+        $config = new RootPackageConfig($globalConfig);
         $config->setPackageName('my/application');
-        $config->addResourceDescriptor(new ResourceDescriptor('/app', 'res'));
-        $config->addTagDescriptor(new TagDescriptor('/app/config*.yml', 'config'));
-        $config->setOverriddenPackages('acme/blog');
 
         $this->writer->writePackageConfig($config, $this->tempFile);
 
         $this->assertFileExists($this->tempFile);
-        $this->assertFileEquals(__DIR__.'/Fixtures/full.json', $this->tempFile);
+        $this->assertFileEquals(__DIR__.'/Fixtures/minimal.json', $this->tempFile);
+    }
+
+    public function testWriteRootConfigDoesNotWriteGlobalValues()
+    {
+        $globalConfig = new GlobalConfig();
+        $globalConfig->setPackageRepositoryConfig('packages.json');
+        $globalConfig->setGeneratedResourceRepository('resource-repository.php');
+        $globalConfig->setResourceRepositoryCache('cache');
+        $globalConfig->addPluginClass('Puli\PackageManager\Tests\Config\Fixtures\TestPlugin');
+        $config = new RootPackageConfig($globalConfig);
+        $config->setPackageName('my/application');
+
+        $this->writer->writePackageConfig($config, $this->tempFile);
+
+        $this->assertFileExists($this->tempFile);
+        $this->assertFileEquals(__DIR__.'/Fixtures/minimal.json', $this->tempFile);
     }
 
     public function testWriteResourcesWithMultipleLocalPaths()

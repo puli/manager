@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\PackageManager\Tests\Package\Config\Fixtures;
+namespace Puli\PackageManager\Tests\Config\Fixtures;
 
 use Puli\PackageManager\PackageManager;
 use Puli\PackageManager\Plugin\PluginInterface;
@@ -19,8 +19,12 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class TestPluginWithoutConstructor implements PluginInterface
+class TestPluginWithoutNoArgConstructor implements PluginInterface
 {
+    public function __construct($arg)
+    {
+    }
+
     public function activate(PackageManager $manager, EventDispatcherInterface $dispatcher)
     {
     }

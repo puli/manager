@@ -11,6 +11,7 @@
 
 namespace Puli\PackageManager\Repository\Config\Reader;
 
+use Puli\Json\DecodingFailedException;
 use Puli\Json\JsonDecoder;
 use Puli\Json\ValidationFailedException;
 use Puli\PackageManager\FileNotFoundException;
@@ -63,7 +64,7 @@ class RepositoryJsonReader implements RepositoryConfigReaderInterface
 
         if (!file_exists($path)) {
             throw new FileNotFoundException(sprintf(
-                'The file "%s" does not exist.',
+                'The file %s does not exist.',
                 $path
             ));
         }
@@ -72,10 +73,16 @@ class RepositoryJsonReader implements RepositoryConfigReaderInterface
             return $decoder->decodeFile($path, $schema);
         } catch (ValidationFailedException $e) {
             throw new InvalidConfigException(sprintf(
-                "The configuration in \"%s\" is invalid:\n%s",
+                "The configuration in %s is invalid:\n%s",
                 $path,
                 $e->getErrorsAsString()
             ), 0, $e);
+        } catch (DecodingFailedException $e) {
+            throw new InvalidConfigException(sprintf(
+                "The configuration in %s could not be decoded:\n%s",
+                $path,
+                $e->getMessage()
+            ), $e->getCode(), $e);
         }
     }
 }

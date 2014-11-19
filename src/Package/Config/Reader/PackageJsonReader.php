@@ -15,6 +15,7 @@ use Puli\Json\DecodingFailedException;
 use Puli\Json\JsonDecoder;
 use Puli\Json\JsonValidator;
 use Puli\Json\ValidationFailedException;
+use Puli\PackageManager\Config\GlobalConfig;
 use Puli\PackageManager\Event\JsonEvent;
 use Puli\PackageManager\Event\PackageEvents;
 use Puli\PackageManager\FileNotFoundException;
@@ -37,6 +38,11 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 class PackageJsonReader implements PackageConfigReaderInterface
 {
     /**
+     * @var GlobalConfig
+     */
+    private $globalConfig;
+
+    /**
      * @var EventDispatcherInterface|null
      */
     private $dispatcher;
@@ -47,10 +53,12 @@ class PackageJsonReader implements PackageConfigReaderInterface
      * You can pass an event dispatcher if you want to listen to events
      * triggered by the reader.
      *
-     * @param EventDispatcherInterface|null $dispatcher The event dispatcher. Optional.
+     * @param GlobalConfig                  $globalConfig The global configuration.
+     * @param EventDispatcherInterface|null $dispatcher   The event dispatcher. Optional.
      */
-    public function __construct(EventDispatcherInterface $dispatcher = null)
+    public function __construct(GlobalConfig $globalConfig, EventDispatcherInterface $dispatcher = null)
     {
+        $this->globalConfig = $globalConfig;
         $this->dispatcher = $dispatcher;
     }
 
@@ -93,7 +101,7 @@ class PackageJsonReader implements PackageConfigReaderInterface
      */
     public function readRootPackageConfig($path)
     {
-        $config = new RootPackageConfig();
+        $config = new RootPackageConfig($this->globalConfig);
 
         $jsonData = $this->decodeFile($path);
 
@@ -129,6 +137,22 @@ class PackageJsonReader implements PackageConfigReaderInterface
         if (isset($jsonData->{'package-order'})) {
             $config->setPackageOrder((array) $jsonData->{'package-order'});
         }
+
+        if (isset($jsonData->{'package-repository'})) {
+            $config->setPackageRepositoryConfig($jsonData->{'package-repository'});
+        }
+
+        if (isset($jsonData->{'resource-repository'})) {
+            $config->setGeneratedResourceRepository($jsonData->{'resource-repository'});
+        }
+
+        if (isset($jsonData->{'resource-cache'})) {
+            $config->setResourceRepositoryCache($jsonData->{'resource-cache'});
+        }
+
+        if (isset($jsonData->{'plugins'})) {
+            $config->setPluginClasses($jsonData->{'plugins'});
+        }
     }
 
     private function decodeFile($path)
@@ -139,7 +163,7 @@ class PackageJsonReader implements PackageConfigReaderInterface
 
         if (!file_exists($path)) {
             throw new FileNotFoundException(sprintf(
-                'The file "%s" does not exist.',
+                'The file %s does not exist.',
                 $path
             ));
         }
@@ -148,7 +172,7 @@ class PackageJsonReader implements PackageConfigReaderInterface
             $jsonData = $decoder->decodeFile($path);
         } catch (DecodingFailedException $e) {
             throw new InvalidConfigException(sprintf(
-                "The configuration in \"%s\" could not be decoded:\n%s",
+                "The configuration in %s could not be decoded:\n%s",
                 $path,
                 $e->getMessage()
             ), $e->getCode(), $e);
@@ -166,7 +190,7 @@ class PackageJsonReader implements PackageConfigReaderInterface
             $validator->validate($jsonData, $schema);
         } catch (ValidationFailedException $e) {
             throw new InvalidConfigException(sprintf(
-                "The configuration in \"%s\" is invalid:\n%s",
+                "The configuration in %s is invalid:\n%s",
                 $path,
                 $e->getErrorsAsString()
             ), $e->getCode(), $e);

@@ -11,6 +11,7 @@
 
 namespace Puli\PackageManager\Tests;
 
+use Puli\PackageManager\Config\GlobalConfig;
 use Puli\PackageManager\Package\Config\PackageConfig;
 use Puli\PackageManager\Package\Config\Reader\PackageConfigReaderInterface;
 use Puli\PackageManager\Package\Config\ResourceDescriptor;
@@ -21,7 +22,7 @@ use Puli\PackageManager\Repository\Config\PackageDescriptor;
 use Puli\PackageManager\Repository\Config\PackageRepositoryConfig;
 use Puli\PackageManager\Repository\Config\Reader\RepositoryConfigReaderInterface;
 use Puli\PackageManager\Repository\Config\Writer\RepositoryConfigWriterInterface;
-use Puli\PackageManager\Tests\Fixtures\TestPlugin;
+use Puli\PackageManager\Tests\Config\Fixtures\TestPlugin;
 use Puli\Repository\ResourceRepositoryInterface;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -89,6 +90,11 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
     private $manager;
 
     /**
+     * @var GlobalConfig
+     */
+    private $globalConfig;
+
+    /**
      * @var RootPackageConfig
      */
     private $rootConfig;
@@ -123,7 +129,8 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
         $this->package2Dir = $this->tempDir.'/package2';
         $this->package3Dir = $this->tempDir.'/package3';
 
-        $this->rootConfig = new RootPackageConfig('root');
+        $this->globalConfig = new GlobalConfig();
+        $this->rootConfig = new RootPackageConfig($this->globalConfig, 'root');
         $this->package1Config = new PackageConfig('package1');
         $this->package2Config = new PackageConfig('package2');
         $this->packageRepoConfig = new PackageRepositoryConfig();
@@ -140,7 +147,7 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
 
     public function testLoadPackageRepository()
     {
-        $rootConfig = new RootPackageConfig('root');
+        $rootConfig = new RootPackageConfig($this->globalConfig, 'root');
         $rootConfig->setPackageRepositoryConfig('repository.json');
         $package1Config = new PackageConfig('package1');
         $package2Config = new PackageConfig('package2');
@@ -204,7 +211,7 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
      */
     public function testLoadPackageRepositoryFailsIfNameConflict()
     {
-        $rootConfig = new RootPackageConfig('root');
+        $rootConfig = new RootPackageConfig($this->globalConfig, 'root');
         $rootConfig->setPackageRepositoryConfig('repository.json');
         $package1Config = new PackageConfig('package1');
         $package2Config = new PackageConfig('package1');
@@ -240,6 +247,13 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
             $this->packageConfigReader,
             $this->packageConfigWriter
         );
+    }
+
+    public function testCreateDefault()
+    {
+        $manager = PackageManager::createDefault(__DIR__.'/Fixtures/real-root-package');
+
+        $this->assertInstanceOf('Puli\PackageManager\PackageManager', $manager);
     }
 
     private function initDefaultManager()
@@ -395,7 +409,7 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
 
     public function testPlugins()
     {
-        $this->rootConfig->addPluginClass(__NAMESPACE__.'\Fixtures\TestPlugin');
+        $this->rootConfig->addPluginClass(__NAMESPACE__.'\Config\Fixtures\TestPlugin');
 
         $this->initDefaultManager();
 

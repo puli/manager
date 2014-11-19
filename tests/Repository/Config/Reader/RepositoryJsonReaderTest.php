@@ -44,6 +44,7 @@ class RepositoryJsonReaderTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @expectedException \Puli\PackageManager\InvalidConfigException
+     * @expectedExceptionMessage invalid.json
      */
     public function testReadConfigValidatesSchema()
     {
@@ -52,9 +53,19 @@ class RepositoryJsonReaderTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @expectedException \Puli\PackageManager\FileNotFoundException
+     * @expectedExceptionMessage bogus.json
      */
     public function testReadConfigFailsIfNotFound()
     {
         $this->reader->readRepositoryConfig('bogus.json');
+    }
+
+    /**
+     * @expectedException \Puli\PackageManager\InvalidConfigException
+     * @expectedExceptionMessage win-1258.json
+     */
+    public function testReadConfigFailsIfDecodingNotPossible()
+    {
+        $this->reader->readRepositoryConfig(__DIR__.'/Fixtures/win-1258.json');
     }
 }

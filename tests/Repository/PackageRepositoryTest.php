@@ -11,6 +11,7 @@
 
 namespace Puli\PackageManager\Tests\Repository;
 
+use Puli\PackageManager\Config\GlobalConfig;
 use Puli\PackageManager\Package\Config\PackageConfig;
 use Puli\PackageManager\Package\Config\RootPackageConfig;
 use Puli\PackageManager\Package\Package;
@@ -35,8 +36,7 @@ class PackageRepositoryTest extends \PHPUnit_Framework_TestCase
 
     public function testGetPackage()
     {
-        $config = new PackageConfig();
-        $config->setPackageName('package');
+        $config = new PackageConfig('package');
         $package = new Package($config, '/path');
 
         $this->repository->addPackage($package);
@@ -59,16 +59,14 @@ class PackageRepositoryTest extends \PHPUnit_Framework_TestCase
 
     public function testGetRootPackageReturnsAddedRootPackage()
     {
-        $config1 = new PackageConfig();
-        $config1->setPackageName('package1');
+        $config1 = new PackageConfig('package1');
         $package1 = new Package($config1, '/path1');
 
-        $config2 = new PackageConfig();
-        $config2->setPackageName('package2');
+        $config2 = new PackageConfig('package2');
         $package2 = new Package($config2, '/path2');
 
-        $rootConfig = new RootPackageConfig();
-        $rootConfig->setPackageName('root');
+        $globalConfig = new GlobalConfig();
+        $rootConfig = new RootPackageConfig($globalConfig, 'root');
         $rootPackage = new RootPackage($rootConfig, '/path3');
 
         $this->repository->addPackage($package1);

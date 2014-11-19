@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\PackageManager\Tests\Package\Config\Fixtures;
+namespace Puli\PackageManager\Tests\Config\Fixtures;
 
 /**
  * @since  1.0

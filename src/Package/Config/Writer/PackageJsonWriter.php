@@ -112,6 +112,23 @@ class PackageJsonWriter implements PackageConfigWriterInterface
         if (count($packageOrder) > 0) {
             $jsonData->{'package-order'} = $packageOrder;
         }
+
+        // Pass false to disable fallback to the global configuration values
+        if (null !== $config->getPackageRepositoryConfig(false)) {
+            $jsonData->{'package-repository'} = $config->getPackageRepositoryConfig();
+        }
+
+        if (null !== $config->getGeneratedResourceRepository(false)) {
+            $jsonData->{'resource-repository'} = $config->getGeneratedResourceRepository();
+        }
+
+        if (null !== $config->getResourceRepositoryCache(false)) {
+            $jsonData->{'resource-cache'} = $config->getResourceRepositoryCache();
+        }
+
+        if (array() !== $config->getPluginClasses(false)) {
+            $jsonData->{'plugins'} = $config->getPluginClasses();
+        }
     }
 
     private function encodeFile($path, \stdClass $jsonData)

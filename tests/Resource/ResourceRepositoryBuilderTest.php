@@ -12,6 +12,7 @@
 namespace Puli\PackageManager\Tests\Resource;
 
 use Puli\Filesystem\Resource\LocalDirectoryResource;
+use Puli\PackageManager\Config\GlobalConfig;
 use Puli\PackageManager\Package\Config\PackageConfig;
 use Puli\PackageManager\Package\Config\ResourceDescriptor;
 use Puli\PackageManager\Package\Config\RootPackageConfig;
@@ -436,7 +437,8 @@ class ResourceRepositoryBuilderTest extends \PHPUnit_Framework_TestCase
         $config2 = new PackageConfig('package2');
         $config2->addResourceDescriptor(new ResourceDescriptor('/path', 'override'));
 
-        $rootConfig = new RootPackageConfig('root');
+        $globalConfig = new GlobalConfig();
+        $rootConfig = new RootPackageConfig($globalConfig, 'root');
         $rootConfig->setPackageOrder(array('package1', 'package2'));
 
         $this->packageRepository->addPackage(new Package($config1, $this->package1Root));
@@ -466,7 +468,8 @@ class ResourceRepositoryBuilderTest extends \PHPUnit_Framework_TestCase
         $config2 = new PackageConfig('package2');
         $config2->addResourceDescriptor(new ResourceDescriptor('/path', 'override'));
 
-        $pseudoRootConfig = new RootPackageConfig('root');
+        $globalConfig = new GlobalConfig();
+        $pseudoRootConfig = new RootPackageConfig($globalConfig, 'root');
         $pseudoRootConfig->setPackageOrder(array('package1', 'package2'));
 
         $this->packageRepository->addPackage(new Package($config1, $this->package1Root));

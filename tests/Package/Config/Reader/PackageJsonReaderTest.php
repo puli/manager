@@ -11,6 +11,7 @@
 
 namespace Puli\PackageManager\Tests\Package\Config\Reader;
 
+use Puli\PackageManager\Config\GlobalConfig;
 use Puli\PackageManager\Event\JsonEvent;
 use Puli\PackageManager\Event\PackageEvents;
 use Puli\PackageManager\Package\Config\PackageConfig;
@@ -26,13 +27,19 @@ use Symfony\Component\EventDispatcher\EventDispatcher;
 class PackageJsonReaderTest extends \PHPUnit_Framework_TestCase
 {
     /**
+     * @var GlobalConfig
+     */
+    private $globalConfig;
+
+    /**
      * @var PackageJsonReader
      */
     private $reader;
 
     protected function setUp()
     {
-        $this->reader = new PackageJsonReader();
+        $this->globalConfig = new GlobalConfig();
+        $this->reader = new PackageJsonReader($this->globalConfig);
     }
 
     public function testReadFullConfig()
@@ -51,6 +58,10 @@ class PackageJsonReaderTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf('Puli\PackageManager\Package\Config\RootPackageConfig', $config);
         $this->assertFullConfig($config);
         $this->assertSame(array('acme/blog-extension1', 'acme/blog-extension2'), $config->getPackageOrder());
+        $this->assertSame('packages.json', $config->getPackageRepositoryConfig());
+        $this->assertSame('resource-repository.php', $config->getGeneratedResourceRepository());
+        $this->assertSame('cache', $config->getResourceRepositoryCache());
+        $this->assertSame(array('Puli\PackageManager\Tests\Config\Fixtures\TestPlugin'), $config->getPluginClasses());
     }
 
     public function testReadMinimalConfig()
@@ -71,8 +82,18 @@ class PackageJsonReaderTest extends \PHPUnit_Framework_TestCase
         $this->assertSame(array(), $config->getPackageOrder());
     }
 
+    public function testRootConfigReceivesGlobalConfig()
+    {
+        $config = $this->reader->readRootPackageConfig(__DIR__.'/Fixtures/minimal.json');
+
+        $this->globalConfig->setPackageRepositoryConfig('modified');
+
+        $this->assertSame('modified', $config->getPackageRepositoryConfig());
+    }
+
     /**
      * @expectedException \Puli\PackageManager\InvalidConfigException
+     * @expectedExceptionMessage extra-prop.json
      */
     public function testReadConfigValidatesSchema()
     {
@@ -81,6 +102,7 @@ class PackageJsonReaderTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @expectedException \Puli\PackageManager\InvalidConfigException
+     * @expectedExceptionMessage extra-prop.json
      */
     public function testReadRootConfigValidatesSchema()
     {
@@ -89,6 +111,7 @@ class PackageJsonReaderTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @expectedException \Puli\PackageManager\FileNotFoundException
+     * @expectedExceptionMessage bogus.json
      */
     public function testReadConfigFailsIfNotFound()
     {
@@ -97,10 +120,29 @@ class PackageJsonReaderTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @expectedException \Puli\PackageManager\FileNotFoundException
+     * @expectedExceptionMessage bogus.json
      */
     public function testReadRootConfigFailsIfNotFound()
     {
         $this->reader->readRootPackageConfig('bogus.json');
+    }
+
+    /**
+     * @expectedException \Puli\PackageManager\InvalidConfigException
+     * @expectedExceptionMessage win-1258.json
+     */
+    public function testReadConfigFailsIfDecodingNotPossible()
+    {
+        $this->reader->readPackageConfig(__DIR__.'/Fixtures/win-1258.json');
+    }
+
+    /**
+     * @expectedException \Puli\PackageManager\InvalidConfigException
+     * @expectedExceptionMessage win-1258.json
+     */
+    public function testReadRootConfigFailsIfDecodingNotPossible()
+    {
+        $this->reader->readRootPackageConfig(__DIR__.'/Fixtures/win-1258.json');
     }
 
     public function testReadConfigDispatchesEvent()
@@ -119,7 +161,7 @@ class PackageJsonReaderTest extends \PHPUnit_Framework_TestCase
             $event->setJsonData($data);
         });
 
-        $this->reader = new PackageJsonReader($dispatcher);
+        $this->reader = new PackageJsonReader($this->globalConfig, $dispatcher);
 
         $config = $this->reader->readPackageConfig(__DIR__.'/Fixtures/minimal.json');
 
@@ -143,7 +185,7 @@ class PackageJsonReaderTest extends \PHPUnit_Framework_TestCase
             $event->setJsonData($data);
         });
 
-        $this->reader = new PackageJsonReader($dispatcher);
+        $this->reader = new PackageJsonReader($this->globalConfig, $dispatcher);
 
         $config = $this->reader->readRootPackageConfig(__DIR__.'/Fixtures/minimal.json');
 
@@ -167,7 +209,7 @@ class PackageJsonReaderTest extends \PHPUnit_Framework_TestCase
             $event->setJsonData($data);
         });
 
-        $this->reader = new PackageJsonReader($dispatcher);
+        $this->reader = new PackageJsonReader($this->globalConfig, $dispatcher);
 
         $config = $this->reader->readPackageConfig(__DIR__.'/Fixtures/name-missing.json');
 

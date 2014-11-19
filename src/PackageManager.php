@@ -12,6 +12,7 @@
 namespace Puli\PackageManager;
 
 use Puli\Filesystem\PhpCacheRepository;
+use Puli\PackageManager\Config\GlobalConfig;
 use Puli\PackageManager\Package\Config\Reader\PackageConfigReaderInterface;
 use Puli\PackageManager\Package\Config\Reader\PackageJsonReader;
 use Puli\PackageManager\Package\Config\RootPackageConfig;
@@ -107,7 +108,7 @@ class PackageManager
             $dispatcher,
             new RepositoryJsonReader(),
             new RepositoryJsonWriter(),
-            new PackageJsonReader($dispatcher),
+            new PackageJsonReader(GlobalConfig::createDefault(), $dispatcher),
             new PackageJsonWriter($dispatcher)
         );
     }
