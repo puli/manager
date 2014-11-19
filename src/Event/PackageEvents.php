@@ -17,7 +17,7 @@ namespace Puli\PackageManager\Event;
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class Events
+class PackageEvents
 {
     /**
      * Thrown when a package JSON file was loaded.

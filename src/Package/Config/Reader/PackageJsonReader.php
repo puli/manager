@@ -13,7 +13,7 @@ namespace Puli\PackageManager\Package\Config\Reader;
 
 use Puli\Json\InvalidJsonException;
 use Puli\Json\JsonDecoder;
-use Puli\PackageManager\Event\Events;
+use Puli\PackageManager\Event\PackageEvents;
 use Puli\PackageManager\Event\JsonEvent;
 use Puli\PackageManager\FileNotFoundException;
 use Puli\PackageManager\InvalidConfigException;
@@ -151,9 +151,9 @@ class PackageJsonReader implements PackageConfigReaderInterface
             ), 0, $e);
         }
 
-        if ($this->dispatcher && $this->dispatcher->hasListeners(Events::PACKAGE_JSON_LOADED)) {
+        if ($this->dispatcher && $this->dispatcher->hasListeners(PackageEvents::PACKAGE_JSON_LOADED)) {
             $event = new JsonEvent($jsonData);
-            $this->dispatcher->dispatch(Events::PACKAGE_JSON_LOADED, $event);
+            $this->dispatcher->dispatch(PackageEvents::PACKAGE_JSON_LOADED, $event);
             $jsonData = $event->getJsonData();
         }
 

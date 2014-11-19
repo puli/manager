@@ -11,7 +11,7 @@
 
 namespace Puli\PackageManager\Tests\Package\Config\Reader;
 
-use Puli\PackageManager\Event\Events;
+use Puli\PackageManager\Event\PackageEvents;
 use Puli\PackageManager\Event\JsonEvent;
 use Puli\PackageManager\Package\Config\PackageConfig;
 use Puli\PackageManager\Package\Config\Reader\PackageJsonReader;
@@ -106,7 +106,7 @@ class PackageJsonReaderTest extends \PHPUnit_Framework_TestCase
     public function testReadConfigDispatchesEvent()
     {
         $dispatcher = new EventDispatcher();
-        $dispatcher->addListener(Events::PACKAGE_JSON_LOADED, function (JsonEvent $event) {
+        $dispatcher->addListener(PackageEvents::PACKAGE_JSON_LOADED, function (JsonEvent $event) {
             $data = $event->getJsonData();
 
             \PHPUnit_Framework_Assert::assertInternalType('object', $data);
@@ -129,7 +129,7 @@ class PackageJsonReaderTest extends \PHPUnit_Framework_TestCase
     public function testReadRootConfigDispatchesEvent()
     {
         $dispatcher = new EventDispatcher();
-        $dispatcher->addListener(Events::PACKAGE_JSON_LOADED, function (JsonEvent $event) {
+        $dispatcher->addListener(PackageEvents::PACKAGE_JSON_LOADED, function (JsonEvent $event) {
             $data = $event->getJsonData();
 
             \PHPUnit_Framework_Assert::assertInternalType('object', $data);
