@@ -199,6 +199,49 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
         $this->assertSame($package2Config, $packages['package2']->getConfig());
     }
 
+    /**
+     * @expectedException \Puli\PackageManager\NameConflictException
+     */
+    public function testLoadPackageRepositoryFailsIfNameConflict()
+    {
+        $rootConfig = new RootPackageConfig('root');
+        $rootConfig->setPackageRepositoryConfig('repository.json');
+        $package1Config = new PackageConfig('package1');
+        $package2Config = new PackageConfig('package1');
+
+        $packageRepoConfig = new PackageRepositoryConfig();
+        $packageRepoConfig->addPackageDescriptor(new PackageDescriptor($this->package1Dir));
+        $packageRepoConfig->addPackageDescriptor(new PackageDescriptor($this->package2Dir));
+
+        $this->packageConfigReader->expects($this->once())
+            ->method('readRootPackageConfig')
+            ->with($this->rootDir.'/puli.json')
+            ->will($this->returnValue($rootConfig));
+
+        $this->packageConfigReader->expects($this->at(1))
+            ->method('readPackageConfig')
+            ->with($this->package1Dir.'/puli.json')
+            ->will($this->returnValue($package1Config));
+        $this->packageConfigReader->expects($this->at(2))
+            ->method('readPackageConfig')
+            ->with($this->package2Dir.'/puli.json')
+            ->will($this->returnValue($package2Config));
+
+        $this->repositoryConfigReader->expects($this->once())
+            ->method('readRepositoryConfig')
+            ->with($this->rootDir.'/repository.json')
+            ->will($this->returnValue($packageRepoConfig));
+
+        new PackageManager(
+            $this->rootDir,
+            $this->dispatcher,
+            $this->repositoryConfigReader,
+            $this->repositoryConfigWriter,
+            $this->packageConfigReader,
+            $this->packageConfigWriter
+        );
+    }
+
     private function initDefaultManager()
     {
         $filesystem = new Filesystem();

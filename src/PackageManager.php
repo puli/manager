@@ -304,9 +304,22 @@ EOF
             $installPath = Path::makeAbsolute($packageDefinition->getInstallPath(),
                 $rootDirectory);
             $config = $this->packageConfigReader->readPackageConfig($installPath.'/'.self::PACKAGE_CONFIG);
-            $package = new Package($config, $installPath);
+            $packageName = $config->getPackageName();
 
-            $this->packageRepository->addPackage($package);
+            if ($this->packageRepository->containsPackage($packageName)) {
+                $conflictingPackage = $this->packageRepository->getPackage($packageName);
+
+                throw new NameConflictException(sprintf(
+                    'Failed to load repository %s: The packages %s and %s have '.
+                    'the same name "%s".',
+                    $repositoryConfig,
+                    $conflictingPackage->getInstallPath(),
+                    $installPath,
+                    $packageName
+                ));
+            }
+
+            $this->packageRepository->addPackage(new Package($config, $installPath));
         }
     }
 
