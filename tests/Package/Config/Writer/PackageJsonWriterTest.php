@@ -107,6 +107,18 @@ class PackageJsonWriterTest extends \PHPUnit_Framework_TestCase
         $this->assertFileEquals(__DIR__.'/Fixtures/minimal.json', $this->tempFile);
     }
 
+    public function testWriteRootConfigDoesNotWriteDefaultPackageName()
+    {
+        $globalConfig = new GlobalConfig();
+        $config = new RootPackageConfig($globalConfig);
+        $config->setPackageName('__root__');
+
+        $this->writer->writePackageConfig($config, $this->tempFile);
+
+        $this->assertFileExists($this->tempFile);
+        $this->assertFileEquals(__DIR__.'/Fixtures/empty.json', $this->tempFile);
+    }
+
     public function testWriteResourcesWithMultipleLocalPaths()
     {
         $config = new PackageConfig();
@@ -202,6 +214,6 @@ class PackageJsonWriterTest extends \PHPUnit_Framework_TestCase
         $this->writer->writePackageConfig($config, $this->tempFile);
 
         $this->assertFileExists($this->tempFile);
-        $this->assertFileEquals(__DIR__.'/Fixtures/empty-object.json', $this->tempFile);
+        $this->assertFileEquals(__DIR__.'/Fixtures/empty.json', $this->tempFile);
     }
 }

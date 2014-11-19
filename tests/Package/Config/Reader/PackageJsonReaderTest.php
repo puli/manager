@@ -93,6 +93,22 @@ class PackageJsonReaderTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @expectedException \Puli\PackageManager\InvalidConfigException
+     * @expectedExceptionMessage empty.json
+     */
+    public function testReadConfigRequiresName()
+    {
+        $this->reader->readPackageConfig(__DIR__.'/Fixtures/empty.json');
+    }
+
+    public function testReadRootConfigSetsNameToDefault()
+    {
+        $config = $this->reader->readRootPackageConfig(__DIR__.'/Fixtures/empty.json');
+
+        $this->assertSame('__root__', $config->getPackageName());
+    }
+
+    /**
+     * @expectedException \Puli\PackageManager\InvalidConfigException
      * @expectedExceptionMessage extra-prop.json
      */
     public function testReadConfigValidatesSchema()

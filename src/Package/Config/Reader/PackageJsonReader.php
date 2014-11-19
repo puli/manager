@@ -103,7 +103,8 @@ class PackageJsonReader implements PackageConfigReaderInterface
     {
         $config = new RootPackageConfig($this->globalConfig);
 
-        $jsonData = $this->decodeFile($path);
+        // Set the package name to "__root__" by default
+        $jsonData = $this->decodeFile($path, '__root__');
 
         $this->populateConfig($config, $jsonData);
         $this->populateRootConfig($config, $jsonData);
@@ -155,7 +156,7 @@ class PackageJsonReader implements PackageConfigReaderInterface
         }
     }
 
-    private function decodeFile($path)
+    private function decodeFile($path, $defaultPackageName = null)
     {
         $decoder = new JsonDecoder();
         $validator = new JsonValidator();
@@ -176,6 +177,11 @@ class PackageJsonReader implements PackageConfigReaderInterface
                 $path,
                 $e->getMessage()
             ), $e->getCode(), $e);
+        }
+
+        // Set the name of the root package to a default value
+        if (!isset($jsonData->name) && null !== $defaultPackageName) {
+            $jsonData->name = $defaultPackageName;
         }
 
         // Event listeners have the opportunity to make invalid loaded files

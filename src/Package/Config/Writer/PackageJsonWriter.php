@@ -60,14 +60,19 @@ class PackageJsonWriter implements PackageConfigWriterInterface
     public function writePackageConfig(PackageConfig $config, $path)
     {
         $jsonData = new \stdClass();
+        $defaultPackageName = null;
 
         $this->addConfig($jsonData, $config);
 
         if ($config instanceof RootPackageConfig) {
             $this->addRootConfig($jsonData, $config);
+
+            // Set a default package name for the root config. This name will
+            // not be written to the file.
+            $defaultPackageName = '__root__';
         }
 
-        $this->encodeFile($path, $jsonData);
+        $this->encodeFile($path, $jsonData, $defaultPackageName);
     }
 
     private function addConfig(\stdClass $jsonData, PackageConfig $config)
@@ -131,7 +136,7 @@ class PackageJsonWriter implements PackageConfigWriterInterface
         }
     }
 
-    private function encodeFile($path, \stdClass $jsonData)
+    private function encodeFile($path, \stdClass $jsonData, $defaultPackageName = null)
     {
         $encoder = new JsonEncoder();
         $encoder->setPrettyPrinting(true);
@@ -143,6 +148,11 @@ class PackageJsonWriter implements PackageConfigWriterInterface
 
         // Validate before dispatching the event
         $validator->validate($jsonData, $schema);
+
+        // Remove the package name if it matches the default package name
+        if ($defaultPackageName === $jsonData->name) {
+            unset($jsonData->name);
+        }
 
         // Listeners may create invalid JSON files (e.g. remove the name)
         // However, they must also make the JSON data valid again upon reading,
