@@ -157,7 +157,7 @@ class PackageJsonReader implements PackageConfigReaderInterface
         // Event listeners have the opportunity to make invalid loaded files
         // valid here (e.g. add the name if it's missing)
         if ($this->dispatcher && $this->dispatcher->hasListeners(PackageEvents::PACKAGE_JSON_LOADED)) {
-            $event = new JsonEvent($jsonData);
+            $event = new JsonEvent($path, $jsonData);
             $this->dispatcher->dispatch(PackageEvents::PACKAGE_JSON_LOADED, $event);
             $jsonData = $event->getJsonData();
         }

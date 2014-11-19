@@ -107,8 +107,9 @@ class PackageJsonReaderTest extends \PHPUnit_Framework_TestCase
     {
         $dispatcher = new EventDispatcher();
         $dispatcher->addListener(PackageEvents::PACKAGE_JSON_LOADED, function (JsonEvent $event) {
-            $data = $event->getJsonData();
+            \PHPUnit_Framework_Assert::assertSame(__DIR__.'/Fixtures/minimal.json', $event->getJsonPath());
 
+            $data = $event->getJsonData();
             \PHPUnit_Framework_Assert::assertInternalType('object', $data);
             \PHPUnit_Framework_Assert::assertObjectHasAttribute('name', $data);
             \PHPUnit_Framework_Assert::assertSame('my/application', $data->name);
@@ -130,8 +131,9 @@ class PackageJsonReaderTest extends \PHPUnit_Framework_TestCase
     {
         $dispatcher = new EventDispatcher();
         $dispatcher->addListener(PackageEvents::PACKAGE_JSON_LOADED, function (JsonEvent $event) {
-            $data = $event->getJsonData();
+            \PHPUnit_Framework_Assert::assertSame(__DIR__.'/Fixtures/minimal.json', $event->getJsonPath());
 
+            $data = $event->getJsonData();
             \PHPUnit_Framework_Assert::assertInternalType('object', $data);
             \PHPUnit_Framework_Assert::assertObjectHasAttribute('name', $data);
             \PHPUnit_Framework_Assert::assertSame('my/application', $data->name);
@@ -153,8 +155,9 @@ class PackageJsonReaderTest extends \PHPUnit_Framework_TestCase
     {
         $dispatcher = new EventDispatcher();
         $dispatcher->addListener(PackageEvents::PACKAGE_JSON_LOADED, function (JsonEvent $event) {
-            $data = $event->getJsonData();
+            \PHPUnit_Framework_Assert::assertSame(__DIR__.'/Fixtures/name-missing.json', $event->getJsonPath());
 
+            $data = $event->getJsonData();
             \PHPUnit_Framework_Assert::assertInternalType('object', $data);
             \PHPUnit_Framework_Assert::assertObjectNotHasAttribute('name', $data);
 

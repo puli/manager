@@ -131,7 +131,7 @@ class PackageJsonWriter implements PackageConfigWriterInterface
         // However, they must also make the JSON data valid again upon reading,
         // otherwise the reader will fail schema validation.
         if ($this->dispatcher && $this->dispatcher->hasListeners(PackageEvents::PACKAGE_JSON_GENERATED)) {
-            $event = new JsonEvent($jsonData);
+            $event = new JsonEvent($path, $jsonData);
             $this->dispatcher->dispatch(PackageEvents::PACKAGE_JSON_GENERATED, $event);
             $jsonData = $event->getJsonData();
         }

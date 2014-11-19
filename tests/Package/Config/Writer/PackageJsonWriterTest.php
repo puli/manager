@@ -125,10 +125,13 @@ class PackageJsonWriterTest extends \PHPUnit_Framework_TestCase
 
     public function testWriteConfigDispatchesEvent()
     {
-        $dispatcher = new EventDispatcher();
-        $dispatcher->addListener(PackageEvents::PACKAGE_JSON_GENERATED, function (JsonEvent $event) {
-            $data = $event->getJsonData();
+        $tempFile = $this->tempFile;
 
+        $dispatcher = new EventDispatcher();
+        $dispatcher->addListener(PackageEvents::PACKAGE_JSON_GENERATED, function (JsonEvent $event) use ($tempFile) {
+            \PHPUnit_Framework_Assert::assertSame($tempFile, $event->getJsonPath());
+
+            $data = $event->getJsonData();
             \PHPUnit_Framework_Assert::assertInternalType('object', $data);
             \PHPUnit_Framework_Assert::assertObjectHasAttribute('name', $data);
             \PHPUnit_Framework_Assert::assertSame('my/application', $data->name);
@@ -151,10 +154,13 @@ class PackageJsonWriterTest extends \PHPUnit_Framework_TestCase
 
     public function testWriteConfigDispatchesEventAfterSchemaValidation()
     {
-        $dispatcher = new EventDispatcher();
-        $dispatcher->addListener(PackageEvents::PACKAGE_JSON_GENERATED, function (JsonEvent $event) {
-            $data = $event->getJsonData();
+        $tempFile = $this->tempFile;
 
+        $dispatcher = new EventDispatcher();
+        $dispatcher->addListener(PackageEvents::PACKAGE_JSON_GENERATED, function (JsonEvent $event) use ($tempFile) {
+            \PHPUnit_Framework_Assert::assertSame($tempFile, $event->getJsonPath());
+
+            $data = $event->getJsonData();
             \PHPUnit_Framework_Assert::assertInternalType('object', $data);
             \PHPUnit_Framework_Assert::assertObjectHasAttribute('name', $data);
             \PHPUnit_Framework_Assert::assertSame('my/application', $data->name);

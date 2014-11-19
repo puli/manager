@@ -14,13 +14,18 @@ namespace Puli\PackageManager\Event;
 use Symfony\Component\EventDispatcher\Event;
 
 /**
- * Dispatched when JSON data is loaded or saved.
+ * Dispatched when JSON data is loaded or saved from/to a JSON file.
  *
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class JsonEvent extends Event
 {
+    /**
+     * @var string
+     */
+    private $jsonPath;
+
     /**
      * @var mixed
      */
@@ -29,11 +34,23 @@ class JsonEvent extends Event
     /**
      * Creates the event.
      *
-     * @param mixed $jsonData The decoded JSON data.
+     * @param string $jsonPath The path to the JSON file.
+     * @param mixed  $jsonData The decoded JSON data.
      */
-    public function __construct($jsonData)
+    public function __construct($jsonPath, $jsonData)
     {
+        $this->jsonPath = $jsonPath;
         $this->jsonData = $jsonData;
+    }
+
+    /**
+     * Returns the path to the JSON file.
+     *
+     * @return string The path to the JSON file.
+     */
+    public function getJsonPath()
+    {
+        return $this->jsonPath;
     }
 
     /**
