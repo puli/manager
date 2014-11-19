@@ -281,13 +281,13 @@ EOF
     }
 
     /**
-     * Returns whether the repository contains the package with the given name.
+     * Returns whether the manager has the package with the given name.
      *
      * @param string $name The package name.
      *
-     * @return bool Whether a package with that name is in the repository.
+     * @return bool Whether the manager has a package with that name.
      */
-    public function containsPackage($name)
+    public function hasPackage($name)
     {
         return $this->packageRepository->containsPackage($name);
     }

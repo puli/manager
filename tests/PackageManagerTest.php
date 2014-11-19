@@ -510,14 +510,14 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($this->manager->isPackageInstalled('../package3'));
     }
 
-    public function testContainsPackage()
+    public function testHasPackage()
     {
         $this->initDefaultManager();
 
-        $this->assertTrue($this->manager->containsPackage('root'));
-        $this->assertTrue($this->manager->containsPackage('package1'));
-        $this->assertTrue($this->manager->containsPackage('package2'));
-        $this->assertFalse($this->manager->containsPackage('package3'));
+        $this->assertTrue($this->manager->hasPackage('root'));
+        $this->assertTrue($this->manager->hasPackage('package1'));
+        $this->assertTrue($this->manager->hasPackage('package2'));
+        $this->assertFalse($this->manager->hasPackage('package3'));
     }
 
     public function testGetPackage()
