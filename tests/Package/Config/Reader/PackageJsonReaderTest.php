@@ -11,10 +11,13 @@
 
 namespace Puli\PackageManager\Tests\Package\Config\Reader;
 
+use Puli\PackageManager\Event\Events;
+use Puli\PackageManager\Event\JsonEvent;
 use Puli\PackageManager\Package\Config\PackageConfig;
 use Puli\PackageManager\Package\Config\Reader\PackageJsonReader;
 use Puli\PackageManager\Package\Config\ResourceDescriptor;
 use Puli\PackageManager\Package\Config\TagDescriptor;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 
 /**
  * @since  1.0
@@ -98,6 +101,52 @@ class PackageJsonReaderTest extends \PHPUnit_Framework_TestCase
     public function testReadRootConfigFailsIfNotFound()
     {
         $this->reader->readRootPackageConfig('bogus.json');
+    }
+
+    public function testReadConfigDispatchesEvent()
+    {
+        $dispatcher = new EventDispatcher();
+        $dispatcher->addListener(Events::PACKAGE_JSON_LOADED, function (JsonEvent $event) {
+            $data = $event->getJsonData();
+
+            \PHPUnit_Framework_Assert::assertInternalType('object', $data);
+            \PHPUnit_Framework_Assert::assertObjectHasAttribute('name', $data);
+            \PHPUnit_Framework_Assert::assertSame('my/application', $data->name);
+
+            $data->name = 'modified';
+
+            $event->setJsonData($data);
+        });
+
+        $this->reader = new PackageJsonReader($dispatcher);
+
+        $config = $this->reader->readPackageConfig(__DIR__.'/Fixtures/minimal.json');
+
+        $this->assertInstanceOf('Puli\PackageManager\Package\Config\PackageConfig', $config);
+        $this->assertSame('modified', $config->getPackageName());
+    }
+
+    public function testReadRootConfigDispatchesEvent()
+    {
+        $dispatcher = new EventDispatcher();
+        $dispatcher->addListener(Events::PACKAGE_JSON_LOADED, function (JsonEvent $event) {
+            $data = $event->getJsonData();
+
+            \PHPUnit_Framework_Assert::assertInternalType('object', $data);
+            \PHPUnit_Framework_Assert::assertObjectHasAttribute('name', $data);
+            \PHPUnit_Framework_Assert::assertSame('my/application', $data->name);
+
+            $data->name = 'modified';
+
+            $event->setJsonData($data);
+        });
+
+        $this->reader = new PackageJsonReader($dispatcher);
+
+        $config = $this->reader->readRootPackageConfig(__DIR__.'/Fixtures/minimal.json');
+
+        $this->assertInstanceOf('Puli\PackageManager\Package\Config\RootPackageConfig', $config);
+        $this->assertSame('modified', $config->getPackageName());
     }
 
     ////////////////////////////////////////////////////////////////////////////

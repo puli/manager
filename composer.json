@@ -11,7 +11,8 @@
     "require": {
         "php": ">=5.3.9",
         "puli/puli": "~1.0@dev",
-        "puli/json": "~1.0@dev"
+        "puli/json": "~1.0@dev",
+        "symfony/event-dispatcher": "~2.3"
     },
     "require-dev": {
         "symfony/filesystem": "~2.3"

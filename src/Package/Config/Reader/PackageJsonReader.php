@@ -13,12 +13,15 @@ namespace Puli\PackageManager\Package\Config\Reader;
 
 use Puli\Json\InvalidJsonException;
 use Puli\Json\JsonDecoder;
+use Puli\PackageManager\Event\Events;
+use Puli\PackageManager\Event\JsonEvent;
 use Puli\PackageManager\FileNotFoundException;
 use Puli\PackageManager\InvalidConfigException;
 use Puli\PackageManager\Package\Config\PackageConfig;
 use Puli\PackageManager\Package\Config\ResourceDescriptor;
 use Puli\PackageManager\Package\Config\RootPackageConfig;
 use Puli\PackageManager\Package\Config\TagDescriptor;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
  * Reads package configuration from a JSON file.
@@ -31,6 +34,24 @@ use Puli\PackageManager\Package\Config\TagDescriptor;
  */
 class PackageJsonReader implements PackageConfigReaderInterface
 {
+    /**
+     * @var EventDispatcherInterface|null
+     */
+    private $dispatcher;
+
+    /**
+     * Creates a new configuration reader.
+     *
+     * You can pass an event dispatcher if you want to listen to events
+     * triggered by the reader.
+     *
+     * @param EventDispatcherInterface|null $dispatcher The event dispatcher. Optional.
+     */
+    public function __construct(EventDispatcherInterface $dispatcher = null)
+    {
+        $this->dispatcher = $dispatcher;
+    }
+
     /**
      * Reads package configuration from a JSON file.
      *
@@ -121,7 +142,7 @@ class PackageJsonReader implements PackageConfigReaderInterface
         }
 
         try {
-            return $decoder->decodeFile($path, $schema);
+            $jsonData = $decoder->decodeFile($path, $schema);
         } catch (InvalidJsonException $e) {
             throw new InvalidConfigException(sprintf(
                 "The configuration in \"%s\" is invalid:\n%s",
@@ -129,5 +150,13 @@ class PackageJsonReader implements PackageConfigReaderInterface
                 $e->getErrorsAsString()
             ), 0, $e);
         }
+
+        if ($this->dispatcher && $this->dispatcher->hasListeners(Events::PACKAGE_JSON_LOADED)) {
+            $event = new JsonEvent($jsonData);
+            $this->dispatcher->dispatch(Events::PACKAGE_JSON_LOADED, $event);
+            $jsonData = $event->getJsonData();
+        }
+
+        return $jsonData;
     }
 }

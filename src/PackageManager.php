@@ -13,11 +13,14 @@ namespace Puli\PackageManager;
 
 use Puli\Filesystem\PhpCacheRepository;
 use Puli\PackageManager\Package\Config\Reader\PackageConfigReaderInterface;
+use Puli\PackageManager\Package\Config\Reader\PackageJsonReader;
 use Puli\PackageManager\Package\Config\RootPackageConfig;
 use Puli\PackageManager\Package\Package;
 use Puli\PackageManager\Package\RootPackage;
-use Puli\PackageManager\Repository\Config\Reader\RepositoryConfigReaderInterface;
+use Puli\PackageManager\Plugin\PluginInterface;
 use Puli\PackageManager\Repository\Config\PackageRepositoryConfig;
+use Puli\PackageManager\Repository\Config\Reader\RepositoryConfigReaderInterface;
+use Puli\PackageManager\Repository\Config\Reader\RepositoryJsonReader;
 use Puli\PackageManager\Repository\PackageRepository;
 use Puli\PackageManager\Resource\ResourceConflictException;
 use Puli\PackageManager\Resource\ResourceDefinitionException;
@@ -25,6 +28,8 @@ use Puli\PackageManager\Resource\ResourceRepositoryBuilder;
 use Puli\Repository\ResourceRepository;
 use Puli\Resource\NoDirectoryException;
 use Puli\Util\Path;
+use Symfony\Component\EventDispatcher\EventDispatcher;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Filesystem\Filesystem;
 
 /**
@@ -35,6 +40,11 @@ use Symfony\Component\Filesystem\Filesystem;
  */
 class PackageManager
 {
+    /**
+     * @var EventDispatcher
+     */
+    private $dispatcher;
+
     /**
      * @var RepositoryConfigReaderInterface
      */
@@ -61,31 +71,35 @@ class PackageManager
     private $packageRepository;
 
     /**
+     * Creates package manager with default configuration.
+     *
+     * @param string $rootDirectory The directory containing the root package.
+     *
+     * @return static The package manager.
+     */
+    public static function createDefault($rootDirectory)
+    {
+        return new static($rootDirectory, new EventDispatcher(), new RepositoryJsonReader(), new PackageJsonReader());
+    }
+
+    /**
      * Loads the repository at the given root directory.
      *
      * @param string                          $rootDirectory          The directory containing the root package.
+     * @param EventDispatcherInterface        $dispatcher             The event dispatcher.
      * @param RepositoryConfigReaderInterface $repositoryConfigReader The repository config file reader.
      * @param PackageConfigReaderInterface    $packageConfigReader    The package config file reader.
      */
-    public function __construct($rootDirectory, RepositoryConfigReaderInterface $repositoryConfigReader, PackageConfigReaderInterface $packageConfigReader)
+    public function __construct($rootDirectory, EventDispatcherInterface $dispatcher, RepositoryConfigReaderInterface $repositoryConfigReader, PackageConfigReaderInterface $packageConfigReader)
     {
         $this->packageRepository = new PackageRepository();
+        $this->dispatcher = $dispatcher;
         $this->repositoryConfigReader = $repositoryConfigReader;
         $this->packageConfigReader = $packageConfigReader;
         $this->rootPackageConfig = $packageConfigReader->readRootPackageConfig($rootDirectory.'/puli.json');
 
-        $this->packageRepository->addPackage(new RootPackage($this->rootPackageConfig, $rootDirectory));
-
-        $repositoryConfig = $this->rootPackageConfig->getPackageRepositoryConfig();
-        $this->repositoryConfig = $repositoryConfigReader->readRepositoryConfig($rootDirectory.'/'.$repositoryConfig);
-
-        foreach ($this->repositoryConfig->getPackageDescriptors() as $packageDefinition) {
-            $installPath = Path::makeAbsolute($packageDefinition->getInstallPath(), $rootDirectory);
-            $config = $this->packageConfigReader->readPackageConfig($installPath.'/puli.json');
-            $package = new Package($config, $installPath);
-
-            $this->packageRepository->addPackage($package);
-        }
+        $this->activatePlugins();
+        $this->loadPackages($rootDirectory);
     }
 
     /**
@@ -180,5 +194,31 @@ EOF
     public function getRootPackageConfig()
     {
         return $this->rootPackageConfig;
+    }
+
+    private function activatePlugins()
+    {
+        foreach ($this->rootPackageConfig->getPluginClasses() as $pluginClass) {
+            /** @var PluginInterface $plugin */
+            $plugin = new $pluginClass();
+            $plugin->activate($this, $this->dispatcher);
+        }
+    }
+
+    private function loadPackages($rootDirectory)
+    {
+        $this->packageRepository->addPackage(new RootPackage($this->rootPackageConfig, $rootDirectory));
+
+        $repositoryConfig = $this->rootPackageConfig->getPackageRepositoryConfig();
+        $this->repositoryConfig = $this->repositoryConfigReader->readRepositoryConfig($rootDirectory.'/'.$repositoryConfig);
+
+        foreach ($this->repositoryConfig->getPackageDescriptors() as $packageDefinition) {
+            $installPath = Path::makeAbsolute($packageDefinition->getInstallPath(),
+                $rootDirectory);
+            $config = $this->packageConfigReader->readPackageConfig($installPath.'/puli.json');
+            $package = new Package($config, $installPath);
+
+            $this->packageRepository->addPackage($package);
+        }
     }
 }

@@ -17,9 +17,12 @@ use Puli\PackageManager\Package\Config\ResourceDescriptor;
 use Puli\PackageManager\Package\Config\RootPackageConfig;
 use Puli\PackageManager\PackageManager;
 use Puli\PackageManager\Repository\Config\PackageDescriptor;
-use Puli\PackageManager\Repository\Config\Reader\RepositoryConfigReaderInterface;
 use Puli\PackageManager\Repository\Config\PackageRepositoryConfig;
+use Puli\PackageManager\Repository\Config\Reader\RepositoryConfigReaderInterface;
+use Puli\PackageManager\Tests\Fixtures\TestPlugin;
 use Puli\Repository\ResourceRepositoryInterface;
+use Symfony\Component\EventDispatcher\EventDispatcher;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Filesystem\Filesystem;
 
 /**
@@ -47,6 +50,11 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
      * @var string
      */
     private $package2Dir;
+
+    /**
+     * @var EventDispatcherInterface
+     */
+    private $dispatcher;
 
     /**
      * @var \PHPUnit_Framework_MockObject_MockObject|RepositoryConfigReaderInterface
@@ -87,9 +95,18 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
     {
         while (false === mkdir($this->tempDir = sys_get_temp_dir().'/puli-plugin/PackageManagerTest'.rand(10000, 99999), 0777, true)) {}
 
-        $this->rootDir = '/root';
+        $this->dispatcher = new EventDispatcher();
         $this->repositoryConfigReader = $this->getMock('Puli\PackageManager\Repository\Config\Reader\RepositoryConfigReaderInterface');
         $this->packageConfigReader = $this->getMock('Puli\PackageManager\Package\Config\Reader\PackageConfigReaderInterface');
+
+        $this->rootDir = $this->tempDir.'/root-package';
+        $this->package1Dir = $this->tempDir.'/package1';
+        $this->package2Dir = $this->tempDir.'/package2';
+
+        $this->rootConfig = new RootPackageConfig($this->rootDir);
+        $this->package1Config = new PackageConfig('package1');
+        $this->package2Config = new PackageConfig('package2');
+        $this->packageRepoConfig = new PackageRepositoryConfig();
     }
 
     protected function tearDown()
@@ -131,7 +148,7 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
             ->with($this->rootDir.'/repository.json')
             ->will($this->returnValue($packageRepoConfig));
 
-        $manager = new PackageManager($this->rootDir, $this->repositoryConfigReader, $this->packageConfigReader);
+        $manager = new PackageManager($this->rootDir, $this->dispatcher, $this->repositoryConfigReader, $this->packageConfigReader);
 
         $this->assertSame($rootConfig, $manager->getRootPackageConfig());
         $this->assertSame($packageRepoConfig, $manager->getRepositoryConfig());
@@ -163,12 +180,7 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
         $this->rootDir = $this->tempDir.'/root-package';
         $this->package1Dir = $this->tempDir.'/package1';
         $this->package2Dir = $this->tempDir.'/package2';
-        $this->rootConfig = new RootPackageConfig($this->rootDir);
         $this->rootConfig->setPackageRepositoryConfig('repository.json');
-        $this->package1Config = new PackageConfig('package1');
-        $this->package2Config = new PackageConfig('package2');
-
-        $this->packageRepoConfig = new PackageRepositoryConfig();
         $this->packageRepoConfig->addPackageDescriptor(new PackageDescriptor('../package1'));
         $this->packageRepoConfig->addPackageDescriptor(new PackageDescriptor('../package2'));
 
@@ -191,7 +203,7 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
             ->with($this->rootDir.'/repository.json')
             ->will($this->returnValue($this->packageRepoConfig));
 
-        $this->manager = new PackageManager($this->rootDir, $this->repositoryConfigReader, $this->packageConfigReader);
+        $this->manager = new PackageManager($this->rootDir, $this->dispatcher, $this->repositoryConfigReader, $this->packageConfigReader);
     }
 
     public function testGenerateResourceRepository()
@@ -302,5 +314,15 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
         $repo = require $this->tempDir.'/repository.php';
 
         $this->assertSame($this->rootDir.'/resources', $repo->get('/root')->getLocalPath());
+    }
+
+    public function testPlugins()
+    {
+        $this->rootConfig->addPluginClass(__NAMESPACE__.'\Fixtures\TestPlugin');
+
+        $this->initDefaultManager();
+
+        $this->assertSame($this->manager, TestPlugin::getManager());
+        $this->assertSame($this->dispatcher, TestPlugin::getDispatcher());
     }
 }

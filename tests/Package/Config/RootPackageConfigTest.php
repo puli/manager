@@ -76,4 +76,51 @@ class RootPackageConfigTest extends \PHPUnit_Framework_TestCase
     {
         $this->config->setResourceRepositoryCache('');
     }
+
+    /**
+     * @expectedException \Puli\PackageManager\InvalidConfigException
+     */
+    public function testPluginClassMustBeExistingClass()
+    {
+        $this->config->addPluginClass('\Puli\Foobar');
+    }
+
+    /**
+     * @expectedException \Puli\PackageManager\InvalidConfigException
+     */
+    public function testPluginClassMustImplementPluginInterface()
+    {
+        $this->config->addPluginClass('\stdClass');
+    }
+
+    /**
+     * @expectedException \Puli\PackageManager\InvalidConfigException
+     */
+    public function testPluginClassMustHaveNoArgConstructor()
+    {
+        $this->config->addPluginClass(__NAMESPACE__.'\Fixtures\TestPluginWithoutNoArgConstructor');
+    }
+
+    public function testPluginClassMayHaveNoConstructor()
+    {
+        $this->config->addPluginClass(__NAMESPACE__.'\Fixtures\TestPluginWithoutConstructor');
+
+        $this->assertSame(array(__NAMESPACE__.'\Fixtures\TestPluginWithoutConstructor'), $this->config->getPluginClasses());
+    }
+
+    /**
+     * @expectedException \Puli\PackageManager\InvalidConfigException
+     */
+    public function testPluginClassMustNotBeInterface()
+    {
+        $this->config->addPluginClass(__NAMESPACE__.'\Fixtures\TestPluginInterface');
+    }
+
+    /**
+     * @expectedException \Puli\PackageManager\InvalidConfigException
+     */
+    public function testPluginClassMustNotBeTrait()
+    {
+        $this->config->addPluginClass(__NAMESPACE__.'\Fixtures\TestPluginTrait');
+    }
 }

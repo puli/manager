@@ -42,6 +42,11 @@ class RootPackageConfig extends PackageConfig
     private $resourceRepositoryCache = '.puli/cache';
 
     /**
+     * @var string[]
+     */
+    private $pluginClasses = array();
+
+    /**
      * Returns the order in which some packages should be loaded.
      *
      * If packages contain conflicting resource definitions, this setting can be
@@ -87,6 +92,8 @@ class RootPackageConfig extends PackageConfig
      * of the root package.
      *
      * @param string $configPath The path to the configuration file.
+     *
+     * @throws InvalidConfigException If the path is empty or not a string.
      */
     public function setPackageRepositoryConfig($configPath)
     {
@@ -124,8 +131,9 @@ class RootPackageConfig extends PackageConfig
      * If the path is relative, it is calculated relative to the install path
      * of the root package.
      *
-     * @param string $repoPath The path to the generated resource
-     *                               repository.
+     * @param string $repoPath The path to the generated resource repository.
+     *
+     * @throws InvalidConfigException If the path is empty or not a string.
      */
     public function setGeneratedResourceRepository($repoPath)
     {
@@ -164,6 +172,8 @@ class RootPackageConfig extends PackageConfig
      * of the root package.
      *
      * @param string $cachePath The path to the resource repository cache.
+     *
+     * @throws InvalidConfigException If the path is empty or not a string.
      */
     public function setResourceRepositoryCache($cachePath)
     {
@@ -180,5 +190,80 @@ class RootPackageConfig extends PackageConfig
         }
 
         $this->resourceRepositoryCache = $cachePath;
+    }
+
+    /**
+     * Returns the plugin classes.
+     *
+     * @return string[] The fully qualified plugin class names.
+     *
+     * @see addPluginClass
+     */
+    public function getPluginClasses()
+    {
+        return $this->pluginClasses;
+    }
+
+    /**
+     * Adds a plugin class.
+     *
+     * The plugin class must be a fully-qualified class name that implements
+     * {@link \Puli\PackageManager\Plugin\PluginInterface}. If the class is not
+     * found or does not implement that interface, an exception is thrown.
+     *
+     * The plugin class must not have required parameters in its constructor
+     * so that the package manager can successfully instantiate it. If the
+     * constructor has required parameters, an exception is thrown.
+     *
+     * @param string $pluginClass The fully qualified plugin class name.
+     *
+     * @throws InvalidConfigException If the class is not found, is not a class,
+     *                                does not implement
+     *                                {@link \Puli\PackageManager\Plugin\PluginInterface}
+     *                                or has required constructor parameters.
+     */
+    public function addPluginClass($pluginClass)
+    {
+        try {
+            $reflClass = new \ReflectionClass($pluginClass);
+        } catch (\ReflectionException $e) {
+            throw new InvalidConfigException(sprintf(
+                'The plugin class %s does not exist.',
+                $pluginClass
+            ), 0, $e);
+        }
+
+        if ($reflClass->isInterface()) {
+            throw new InvalidConfigException(sprintf(
+                'The plugin class %s should be a class, but is an interface.',
+                $pluginClass
+            ));
+        }
+
+        if ($reflClass->isTrait()) {
+            throw new InvalidConfigException(sprintf(
+                'The plugin class %s should be a class, but is a trait.',
+                $pluginClass
+            ));
+        }
+
+        if (!$reflClass->implementsInterface('\Puli\PackageManager\Plugin\PluginInterface')) {
+            throw new InvalidConfigException(sprintf(
+                'The plugin class %s must implement \Puli\PackageManager\Plugin\PluginInterface.',
+                $pluginClass
+            ));
+        }
+
+        $constructor = $reflClass->getConstructor();
+
+        if (null !== $constructor && $constructor->getNumberOfRequiredParameters() > 0) {
+            throw new InvalidConfigException(sprintf(
+                'The constructor of the plugin class %s must not have required '.
+                'parameters.',
+                $pluginClass
+            ));
+        }
+
+        $this->pluginClasses[] = $pluginClass;
     }
 }
