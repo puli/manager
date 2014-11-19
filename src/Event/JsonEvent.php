@@ -14,7 +14,7 @@ namespace Puli\PackageManager\Event;
 use Symfony\Component\EventDispatcher\Event;
 
 /**
- * Thrown when JSON data is loaded or saved.
+ * Dispatched when JSON data is loaded or saved.
  *
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>

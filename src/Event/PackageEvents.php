@@ -20,9 +20,14 @@ namespace Puli\PackageManager\Event;
 class PackageEvents
 {
     /**
-     * Thrown when a package JSON file was loaded.
+     * Dispatched when a package JSON file was loaded.
      */
     const PACKAGE_JSON_LOADED = 'package-json-loaded';
+
+    /**
+     * Dispatched when package JSON data was generated.
+     */
+    const PACKAGE_JSON_GENERATED = 'package-json-generated';
 
     private final function __construct()
     {

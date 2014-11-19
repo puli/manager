@@ -11,8 +11,8 @@
 
 namespace Puli\PackageManager\Repository\Config\Reader;
 
-use Puli\Json\InvalidJsonException;
 use Puli\Json\JsonDecoder;
+use Puli\Json\ValidationFailedException;
 use Puli\PackageManager\FileNotFoundException;
 use Puli\PackageManager\InvalidConfigException;
 use Puli\PackageManager\Repository\Config\PackageDescriptor;
@@ -70,7 +70,7 @@ class RepositoryJsonReader implements RepositoryConfigReaderInterface
 
         try {
             return $decoder->decodeFile($path, $schema);
-        } catch (InvalidJsonException $e) {
+        } catch (ValidationFailedException $e) {
             throw new InvalidConfigException(sprintf(
                 "The configuration in \"%s\" is invalid:\n%s",
                 $path,

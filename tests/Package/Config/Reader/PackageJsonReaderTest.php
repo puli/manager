@@ -11,8 +11,8 @@
 
 namespace Puli\PackageManager\Tests\Package\Config\Reader;
 
-use Puli\PackageManager\Event\PackageEvents;
 use Puli\PackageManager\Event\JsonEvent;
+use Puli\PackageManager\Event\PackageEvents;
 use Puli\PackageManager\Package\Config\PackageConfig;
 use Puli\PackageManager\Package\Config\Reader\PackageJsonReader;
 use Puli\PackageManager\Package\Config\ResourceDescriptor;
@@ -147,6 +147,29 @@ class PackageJsonReaderTest extends \PHPUnit_Framework_TestCase
 
         $this->assertInstanceOf('Puli\PackageManager\Package\Config\RootPackageConfig', $config);
         $this->assertSame('modified', $config->getPackageName());
+    }
+
+    public function testReadConfigDispatchesEventBeforeValidation()
+    {
+        $dispatcher = new EventDispatcher();
+        $dispatcher->addListener(PackageEvents::PACKAGE_JSON_LOADED, function (JsonEvent $event) {
+            $data = $event->getJsonData();
+
+            \PHPUnit_Framework_Assert::assertInternalType('object', $data);
+            \PHPUnit_Framework_Assert::assertObjectNotHasAttribute('name', $data);
+
+            // Add name
+            $data->name = 'my/application';
+
+            $event->setJsonData($data);
+        });
+
+        $this->reader = new PackageJsonReader($dispatcher);
+
+        $config = $this->reader->readPackageConfig(__DIR__.'/Fixtures/name-missing.json');
+
+        $this->assertInstanceOf('Puli\PackageManager\Package\Config\PackageConfig', $config);
+        $this->assertSame('my/application', $config->getPackageName());
     }
 
     ////////////////////////////////////////////////////////////////////////////

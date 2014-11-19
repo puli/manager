@@ -11,10 +11,12 @@
 
 namespace Puli\PackageManager\Package\Config\Reader;
 
-use Puli\Json\InvalidJsonException;
+use Puli\Json\DecodingFailedException;
 use Puli\Json\JsonDecoder;
-use Puli\PackageManager\Event\PackageEvents;
+use Puli\Json\JsonValidator;
+use Puli\Json\ValidationFailedException;
 use Puli\PackageManager\Event\JsonEvent;
+use Puli\PackageManager\Event\PackageEvents;
 use Puli\PackageManager\FileNotFoundException;
 use Puli\PackageManager\InvalidConfigException;
 use Puli\PackageManager\Package\Config\PackageConfig;
@@ -132,6 +134,7 @@ class PackageJsonReader implements PackageConfigReaderInterface
     private function decodeFile($path)
     {
         $decoder = new JsonDecoder();
+        $validator = new JsonValidator();
         $schema = realpath(__DIR__.'/../../../../res/schema/package-schema.json');
 
         if (!file_exists($path)) {
@@ -142,19 +145,31 @@ class PackageJsonReader implements PackageConfigReaderInterface
         }
 
         try {
-            $jsonData = $decoder->decodeFile($path, $schema);
-        } catch (InvalidJsonException $e) {
+            $jsonData = $decoder->decodeFile($path);
+        } catch (DecodingFailedException $e) {
             throw new InvalidConfigException(sprintf(
-                "The configuration in \"%s\" is invalid:\n%s",
+                "The configuration in \"%s\" could not be decoded:\n%s",
                 $path,
-                $e->getErrorsAsString()
-            ), 0, $e);
+                $e->getMessage()
+            ), $e->getCode(), $e);
         }
 
+        // Event listeners have the opportunity to make invalid loaded files
+        // valid here (e.g. add the name if it's missing)
         if ($this->dispatcher && $this->dispatcher->hasListeners(PackageEvents::PACKAGE_JSON_LOADED)) {
             $event = new JsonEvent($jsonData);
             $this->dispatcher->dispatch(PackageEvents::PACKAGE_JSON_LOADED, $event);
             $jsonData = $event->getJsonData();
+        }
+
+        try {
+            $validator->validate($jsonData, $schema);
+        } catch (ValidationFailedException $e) {
+            throw new InvalidConfigException(sprintf(
+                "The configuration in \"%s\" is invalid:\n%s",
+                $path,
+                $e->getErrorsAsString()
+            ), $e->getCode(), $e);
         }
 
         return $jsonData;

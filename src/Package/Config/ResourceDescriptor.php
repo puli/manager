@@ -40,8 +40,38 @@ class ResourceDescriptor
      */
     function __construct($puliPath, $localPaths)
     {
+        if (!is_string($puliPath)) {
+            throw new \InvalidArgumentException(sprintf(
+                'The passed Puli path must be a string. Got: %s',
+                is_object($puliPath) ? get_class($puliPath) : gettype($puliPath)
+            ));
+        }
+
+        if ('' === $puliPath) {
+            throw new \InvalidArgumentException('The passed Puli path must not be empty.');
+        }
+
+        $localPaths = (array) $localPaths;
+
+        if (0 === count($localPaths)) {
+            throw new \InvalidArgumentException('At least one local path must be passed.');
+        }
+
+        foreach ($localPaths as $localPath) {
+            if (!is_string($localPath)) {
+                throw new \InvalidArgumentException(sprintf(
+                    'The passed local paths must be strings. Got: %s',
+                    is_object($localPath) ? get_class($localPath) : gettype($localPath)
+                ));
+            }
+
+            if ('' === $localPath) {
+                throw new \InvalidArgumentException('The passed local paths must not be empty.');
+            }
+        }
+
         $this->puliPath = $puliPath;
-        $this->localPaths = (array) $localPaths;
+        $this->localPaths = $localPaths;
     }
 
     /**

@@ -1,0 +1,7 @@
+{
+    "name": "my/application",
+    "override": [
+        "acme/blog1",
+        "acme/blog2"
+    ]
+}
