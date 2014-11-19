@@ -116,7 +116,7 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
 
     protected function setUp()
     {
-        while (false === mkdir($this->tempDir = sys_get_temp_dir().'/puli-plugin/PackageManagerTest'.rand(10000, 99999), 0777, true)) {}
+        while (false === mkdir($this->tempDir = sys_get_temp_dir().'/puli-manager/PackageManagerTest'.rand(10000, 99999), 0777, true)) {}
 
         $this->dispatcher = new EventDispatcher();
         $this->repositoryConfigReader = $this->getMock('Puli\PackageManager\Repository\Config\Reader\RepositoryConfigReaderInterface');
