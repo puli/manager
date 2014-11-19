@@ -26,6 +26,7 @@ use Puli\PackageManager\Repository\Config\Reader\RepositoryConfigReaderInterface
 use Puli\PackageManager\Repository\Config\Reader\RepositoryJsonReader;
 use Puli\PackageManager\Repository\Config\Writer\RepositoryConfigWriterInterface;
 use Puli\PackageManager\Repository\Config\Writer\RepositoryJsonWriter;
+use Puli\PackageManager\Repository\NoSuchPackageException;
 use Puli\PackageManager\Repository\PackageRepository;
 use Puli\PackageManager\Resource\ResourceConflictException;
 use Puli\PackageManager\Resource\ResourceDefinitionException;
@@ -259,11 +260,60 @@ EOF
     }
 
     /**
-     * @return PackageRepository
+     * Returns whether the package with the given path is installed.
+     *
+     * @param string $installPath The install path of the package.
+     *
+     * @return bool Whether that package is installed.
      */
-    public function getPackageRepository()
+    public function isPackageInstalled($installPath)
     {
-        return $this->packageRepository;
+        $rootDirectory = $this->packageRepository->getRootPackage()->getInstallPath();
+        $installPath = Path::makeAbsolute($installPath, $rootDirectory);
+
+        foreach ($this->packageRepository->getPackages() as $package) {
+            if ($installPath === $package->getInstallPath()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Returns whether the repository contains the package with the given name.
+     *
+     * @param string $name The package name.
+     *
+     * @return bool Whether a package with that name is in the repository.
+     */
+    public function containsPackage($name)
+    {
+        return $this->packageRepository->containsPackage($name);
+    }
+
+    /**
+     * Returns a package by name.
+     *
+     * @param string $name The package name.
+     *
+     * @return Package The package.
+     *
+     * @throws NoSuchPackageException If the package was not found.
+     */
+    public function getPackage($name)
+    {
+        return $this->packageRepository->getPackage($name);
+    }
+
+    /**
+     * Returns all installed packages.
+     *
+     * @return Package[] The list of installed packages, indexed by their names.
+     */
+    public function getPackages()
+    {
+        return $this->packageRepository->getPackages();
     }
 
     /**
@@ -321,16 +371,5 @@ EOF
 
             $this->packageRepository->addPackage(new Package($config, $installPath));
         }
-    }
-
-    private function isPackageInstalled($installPath)
-    {
-        foreach ($this->getPackageRepository()->getPackages() as $package) {
-            if ($installPath === $package->getInstallPath()) {
-                return true;
-            }
-        }
-
-        return false;
     }
 }

@@ -180,7 +180,7 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
         $this->assertSame($rootConfig, $manager->getRootPackageConfig());
         $this->assertSame($packageRepoConfig, $manager->getRepositoryConfig());
 
-        $packages = $manager->getPackageRepository()->getPackages();
+        $packages = $manager->getPackages();
 
         $this->assertCount(3, $packages);
         $this->assertInstanceOf('Puli\PackageManager\Package\RootPackage', $packages['root']);
@@ -492,5 +492,60 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
             ->method('writeRepositoryConfig');
 
         $this->manager->installPackage($this->package3Dir);
+    }
+
+    public function testIsPackageInstalled()
+    {
+        $this->initDefaultManager();
+
+        $this->assertTrue($this->manager->isPackageInstalled($this->package1Dir));
+        $this->assertFalse($this->manager->isPackageInstalled($this->package3Dir));
+    }
+
+    public function testIsPackageInstalledAcceptsRelativePath()
+    {
+        $this->initDefaultManager();
+
+        $this->assertTrue($this->manager->isPackageInstalled('../package1'));
+        $this->assertFalse($this->manager->isPackageInstalled('../package3'));
+    }
+
+    public function testContainsPackage()
+    {
+        $this->initDefaultManager();
+
+        $this->assertTrue($this->manager->containsPackage('root'));
+        $this->assertTrue($this->manager->containsPackage('package1'));
+        $this->assertTrue($this->manager->containsPackage('package2'));
+        $this->assertFalse($this->manager->containsPackage('package3'));
+    }
+
+    public function testGetPackage()
+    {
+        $this->initDefaultManager();
+
+        $rootPackage = $this->manager->getPackage('root');
+
+        $this->assertInstanceOf('Puli\PackageManager\Package\RootPackage', $rootPackage);
+        $this->assertSame('root', $rootPackage->getName());
+        $this->assertSame($this->rootDir, $rootPackage->getInstallPath());
+        $this->assertSame($this->rootConfig, $rootPackage->getConfig());
+
+        $package1 = $this->manager->getPackage('package1');
+
+        $this->assertInstanceOf('Puli\PackageManager\Package\Package', $package1);
+        $this->assertSame('package1', $package1->getName());
+        $this->assertSame($this->package1Dir, $package1->getInstallPath());
+        $this->assertSame($this->package1Config, $package1->getConfig());
+    }
+
+    /**
+     * @expectedException \Puli\PackageManager\Repository\NoSuchPackageException
+     */
+    public function testGetPackageFailsIfNotFound()
+    {
+        $this->initDefaultManager();
+
+        $this->manager->getPackage('foobar');
     }
 }
