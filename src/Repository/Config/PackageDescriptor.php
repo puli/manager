@@ -27,7 +27,7 @@ class PackageDescriptor
     /**
      * @var bool
      */
-    private $new = true;
+    private $new;
 
     /**
      * Creates a new package descriptor.
@@ -36,10 +36,12 @@ class PackageDescriptor
      *                            If a relative path is given, the path is
      *                            assumed to be relative to the install path
      *                            of the root package.
+     * @param bool   $new         Whether the package is new. Optional.
      */
-    public function __construct($installPath)
+    public function __construct($installPath, $new = true)
     {
         $this->installPath = $installPath;
+        $this->new = $new;
     }
 
     /**

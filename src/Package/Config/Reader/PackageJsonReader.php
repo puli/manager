@@ -29,7 +29,7 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
  * Reads package configuration from a JSON file.
  *
  * The data in the JSON file is validated against the schema
- * `res/schema/config-schema.json`.
+ * `res/schema/package-schema.json`.
  *
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
@@ -58,7 +58,7 @@ class PackageJsonReader implements PackageConfigReaderInterface
      * Reads package configuration from a JSON file.
      *
      * The data in the JSON file is validated against the schema
-     * `res/schema/config-schema.json`.
+     * `res/schema/package-schema.json`.
      *
      * @param string $path The path to the JSON file.
      *
@@ -82,7 +82,7 @@ class PackageJsonReader implements PackageConfigReaderInterface
      * Reads root package configuration from a JSON file.
      *
      * The data in the JSON file is validated against the schema
-     * `res/schema/config-schema.json`.
+     * `res/schema/package-schema.json`.
      *
      * @param string $path The path to the JSON file.
      *

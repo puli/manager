@@ -22,7 +22,7 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 /**
  * Writes package configuration to a JSON file.
  *
- * The data is validated against the schema `res/schema/config-schema.json`
+ * The data is validated against the schema `res/schema/package-schema.json`
  * before writing.
  *
  * @since  1.0
@@ -51,7 +51,7 @@ class PackageJsonWriter implements PackageConfigWriterInterface
     /**
      * Writes package configuration to a JSON file.
      *
-     * The data is validated against the schema `res/schema/config-schema.json`
+     * The data is validated against the schema `res/schema/package-schema.json`
      * before writing.
      *
      * @param PackageConfig $config The configuration to write.

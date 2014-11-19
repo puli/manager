@@ -19,10 +19,10 @@ use Puli\PackageManager\Repository\Config\PackageDescriptor;
 use Puli\PackageManager\Repository\Config\PackageRepositoryConfig;
 
 /**
- * Reads package configuration from a JSON file.
+ * Reads package repository configuration from a JSON file.
  *
  * The data in the JSON file is validated against the schema
- * `res/schema/config-schema.json`.
+ * `res/schema/repository-schema.json`.
  *
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
