@@ -13,6 +13,7 @@ namespace Puli\PackageManager\Tests\Config\Writer;
 
 use Puli\PackageManager\Config\GlobalConfig;
 use Puli\PackageManager\Config\Writer\ConfigJsonWriter;
+use Symfony\Component\Filesystem\Filesystem;
 
 /**
  * @since  1.0
@@ -29,15 +30,20 @@ class ConfigJsonWriterTest extends \PHPUnit_Framework_TestCase
 
     private $tempFile;
 
+    private $tempDir;
+
     protected function setUp()
     {
         $this->writer = new ConfigJsonWriter();
-        $this->tempFile = tempnam(sys_get_temp_dir(), 'PackageJsonWriterTest');
+        $this->tempFile = tempnam(sys_get_temp_dir(), 'ConfigJsonWriterTest');
+        while (false === mkdir($this->tempDir = sys_get_temp_dir().'/puli-manager/ConfigJsonWriterTest_temp'.rand(10000, 99999), 0777, true)) {}
     }
 
     protected function tearDown()
     {
-        unlink($this->tempFile);
+        $filesystem = new Filesystem();
+        $filesystem->remove($this->tempFile);
+        $filesystem->remove($this->tempDir);
     }
 
     public function testWriteConfig()
@@ -59,5 +65,16 @@ class ConfigJsonWriterTest extends \PHPUnit_Framework_TestCase
 
         $this->assertFileExists($this->tempFile);
         $this->assertFileEquals(__DIR__.'/Fixtures/empty.json', $this->tempFile);
+    }
+
+    public function testCreateMissingDirectoriesOnDemand()
+    {
+        $config = new GlobalConfig();
+        $file = $this->tempDir.'/new/config.json';
+
+        $this->writer->writeGlobalConfig($config, $file);
+
+        $this->assertFileExists($file);
+        $this->assertFileEquals(__DIR__.'/Fixtures/empty.json', $file);
     }
 }

@@ -129,7 +129,7 @@ class PackageManager
     private $packageRepository;
 
     /**
-     * Returns the system's home directory used by Puli.
+     * Returns the user's home directory used by Puli.
      *
      * @return string The path to the home directory.
      *
@@ -174,23 +174,42 @@ class PackageManager
     }
 
     /**
-     * Creates package manager with default configuration.
+     * Parses the global configuration in the users's home directory.
      *
-     * @param string $rootDir The directory containing the root package.
+     * @return GlobalConfig The global configuration.
      *
-     * @return static The package manager.
+     * @throws \RuntimeException If no home directory can be found or if the
+     *                           found path points to a file.
      */
-    public static function createDefault($rootDir)
+    public static function parseGlobalConfig()
     {
-        $dispatcher = new EventDispatcher();
         $globalConfigReader = new ConfigJsonReader();
         $homeDir = self::getHomeDirectory();
         $globalConfigFile = $homeDir.'/'.self::GLOBAL_CONFIG;
 
         // Read config.json from the home directory, if possible
-        $globalConfig = null !== $homeDir && file_exists($globalConfigFile)
-            ? $globalConfigReader->readGlobalConfig($globalConfigFile)
-            : new GlobalConfig();
+        if (null !== $homeDir && file_exists($globalConfigFile)){
+            return $globalConfigReader->readGlobalConfig($globalConfigFile);
+        }
+
+        return new GlobalConfig();
+    }
+
+    /**
+     * Creates package manager with default configuration.
+     *
+     * @param string $rootDir The directory containing the root package.
+     *
+     * @return static The package manager.
+     *
+     * @throws \RuntimeException If no home directory can be found or if the
+     *                           found path points to a file.
+     */
+    public static function createDefault($rootDir)
+    {
+        $dispatcher = new EventDispatcher();
+        $homeDir = self::getHomeDirectory();
+        $globalConfig = self::parseGlobalConfig();
 
         self::denyWebAccess($homeDir);
 
@@ -199,13 +218,57 @@ class PackageManager
             $homeDir,
             $dispatcher,
             $globalConfig,
-            $globalConfigReader,
+            new ConfigJsonReader(),
             new ConfigJsonWriter(),
             new RepositoryJsonReader(),
             new RepositoryJsonWriter(),
             new PackageJsonReader($globalConfig, $dispatcher),
             new PackageJsonWriter($dispatcher)
         );
+    }
+
+    /**
+     * Returns whether a project has Puli support.
+     *
+     * This method looks for a file puli.json in the project directory. If the
+     * file is not found, this method returns `false`.
+     *
+     * @param string $rootDir The project directory.
+     *
+     * @return bool Whether the project has Puli support.
+     */
+    public static function isPuliProject($rootDir)
+    {
+        return file_exists($rootDir.'/'.self::PACKAGE_CONFIG);
+    }
+
+    /**
+     * Adds Puli support to a project.
+     *
+     * This method will create a file puli.json in the project's root directory.
+     * If the file exists already, an exception is thrown.
+     *
+     * @param string $rootDir The project directory.
+     * @param string $name    The name of the project. Optional.
+     *
+     * @throws \RuntimeException If the passed path is not a directory.
+     */
+    public static function initializePuliProject($rootDir, $name = '__root__')
+    {
+        if (self::isPuliProject($rootDir)) {
+            return;
+        }
+
+        if (!is_dir($rootDir)) {
+            $filesystem = new Filesystem();
+            $filesystem->mkdir($rootDir);
+        }
+
+        $globalConfig = self::parseGlobalConfig();
+        $config = new RootPackageConfig($globalConfig, $name);
+
+        $writer = new PackageJsonWriter();
+        $writer->writePackageConfig($config, $rootDir.'/'.self::PACKAGE_CONFIG);
     }
 
     /**
@@ -219,7 +282,8 @@ class PackageManager
     {
         if (!file_exists($directory.'/.htaccess')) {
             if (!is_dir($directory)) {
-                @mkdir($directory, 0777, true);
+                $filesystem = new Filesystem();
+                $filesystem->mkdir($directory);
             }
 
             @file_put_contents($directory.'/.htaccess', 'Deny from all');
@@ -325,7 +389,8 @@ class PackageManager
         PhpCacheRepository::dumpRepository($repo, $cachePath);
 
         if (!file_exists($repoDir)) {
-            mkdir($repoDir, 0777, true);
+            $filesystem = new Filesystem();
+            $filesystem->mkdir($repoDir);
         }
 
         file_put_contents($repoPath, <<<EOF
@@ -564,7 +629,12 @@ EOF
         $repositoryConfig = $this->rootPackageConfig->getPackageRepositoryConfig();
         $repositoryConfig = Path::makeAbsolute($repositoryConfig, $rootDir);
 
-        $this->repositoryConfig = $this->repositoryConfigReader->readRepositoryConfig($repositoryConfig);
+        try {
+            $this->repositoryConfig = $this->repositoryConfigReader->readRepositoryConfig($repositoryConfig);
+        } catch (FileNotFoundException $e) {
+            $this->repositoryConfig = new PackageRepositoryConfig();
+            $this->repositoryConfigWriter->writeRepositoryConfig($this->repositoryConfig, $repositoryConfig);
+        }
 
         foreach ($this->repositoryConfig->getPackageDescriptors() as $packageDefinition) {
             $installPath = Path::makeAbsolute($packageDefinition->getInstallPath(),

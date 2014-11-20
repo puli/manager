@@ -13,6 +13,8 @@ namespace Puli\PackageManager\Repository\Config\Writer;
 
 use Puli\Json\JsonEncoder;
 use Puli\PackageManager\Repository\Config\PackageRepositoryConfig;
+use Puli\Util\Path;
+use Symfony\Component\Filesystem\Filesystem;
 
 /**
  * Writes package repository configuration to a JSON file.
@@ -56,6 +58,11 @@ class RepositoryJsonWriter implements RepositoryConfigWriterInterface
         $encoder->setEscapeSlash(false);
         $encoder->setTerminateWithLineFeed(true);
         $schema = realpath(__DIR__.'/../../../../res/schema/repository-schema.json');
+
+        if (!is_dir($dir = Path::getDirectory($path))) {
+            $filesystem = new Filesystem();
+            $filesystem->mkdir($dir);
+        }
 
         $encoder->encodeFile($path, $jsonData, $schema);
     }

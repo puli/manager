@@ -14,6 +14,7 @@ namespace Puli\PackageManager\Tests;
 use Puli\PackageManager\Config\GlobalConfig;
 use Puli\PackageManager\Config\Reader\GlobalConfigReaderInterface;
 use Puli\PackageManager\Config\Writer\GlobalConfigWriterInterface;
+use Puli\PackageManager\FileNotFoundException;
 use Puli\PackageManager\Package\Config\PackageConfig;
 use Puli\PackageManager\Package\Config\Reader\PackageConfigReaderInterface;
 use Puli\PackageManager\Package\Config\ResourceDescriptor;
@@ -390,63 +391,29 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
         );
     }
 
-    public function testCreateDefault()
+    public function testEmptyPackageRepositoryConfigCreatedOnDemand()
     {
-        $filesystem = new Filesystem();
-        $filesystem->mirror(__DIR__.'/Fixtures/home', $this->tempHome);
-
-        putenv('PULI_HOME='.$this->tempHome);
-
-        $manager = PackageManager::createDefault(__DIR__.'/Fixtures/real-root-package');
-
-        $this->assertInstanceOf('Puli\PackageManager\PackageManager', $manager);
-
-        // Directory is protected
-        $this->assertFileExists($this->tempHome.'/.htaccess');
-        $this->assertSame('Deny from all', file_get_contents($this->tempHome.'/.htaccess'));
-    }
-
-    /**
-     * @expectedException \RuntimeException
-     * @expectedExceptionMessage HOME
-     */
-    public function testCreateDefaultFailsIfNoHomeFound()
-    {
-        PackageManager::createDefault(__DIR__.'/Fixtures/real-root-package');
-    }
-
-    private function initDefaultManager()
-    {
-        $filesystem = new Filesystem();
-        $filesystem->mirror(__DIR__.'/Fixtures', $this->tempDir);
-
-        $this->rootDir = $this->tempDir.'/root-package';
-        $this->package1Dir = $this->tempDir.'/package1';
-        $this->package2Dir = $this->tempDir.'/package2';
-        $this->rootConfig->setPackageRepositoryConfig('repository.json');
-        $this->packageRepoConfig->addPackageDescriptor(new PackageDescriptor('../package1', false));
-        $this->packageRepoConfig->addPackageDescriptor(new PackageDescriptor('../package2', false));
+        $rootConfig = new RootPackageConfig($this->globalConfig, 'root');
+        $rootConfig->setPackageRepositoryConfig('repository.json');
 
         $this->packageConfigReader->expects($this->once())
             ->method('readRootPackageConfig')
             ->with($this->rootDir.'/puli.json')
-            ->will($this->returnValue($this->rootConfig));
-
-        $this->packageConfigReader->expects($this->at(1))
-            ->method('readPackageConfig')
-            ->with($this->package1Dir.'/puli.json')
-            ->will($this->returnValue($this->package1Config));
-        $this->packageConfigReader->expects($this->at(2))
-            ->method('readPackageConfig')
-            ->with($this->package2Dir.'/puli.json')
-            ->will($this->returnValue($this->package2Config));
+            ->will($this->returnValue($rootConfig));
 
         $this->repositoryConfigReader->expects($this->once())
             ->method('readRepositoryConfig')
             ->with($this->rootDir.'/repository.json')
-            ->will($this->returnValue($this->packageRepoConfig));
+            ->will($this->throwException(new FileNotFoundException()));
 
-        $this->manager = new PackageManager(
+        $this->repositoryConfigWriter->expects($this->once())
+            ->method('writeRepositoryConfig')
+            ->with($this->isInstanceOf('Puli\PackageManager\Repository\Config\PackageRepositoryConfig'))
+            ->will($this->returnCallback(function (PackageRepositoryConfig $config) {
+                \PHPUnit_Framework_Assert::assertCount(0, $config->getPackageDescriptors());
+            }));
+
+        $manager = new PackageManager(
             $this->rootDir,
             $this->tempHome,
             $this->dispatcher,
@@ -458,6 +425,89 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
             $this->packageConfigReader,
             $this->packageConfigWriter
         );
+
+        // Only root package
+        $this->assertCount(1, $manager->getPackages());
+    }
+
+    public function testCreateDefault()
+    {
+        $this->initHome();
+
+        $filesystem = new Filesystem();
+        $filesystem->mirror(__DIR__.'/Fixtures/real-root-package', $this->tempDir);
+
+        $manager = PackageManager::createDefault($this->tempDir);
+
+        $this->assertInstanceOf('Puli\PackageManager\PackageManager', $manager);
+
+        // Directory is protected
+        $this->assertFileExists($this->tempHome.'/.htaccess');
+        $this->assertSame('Deny from all', file_get_contents($this->tempHome.'/.htaccess'));
+    }
+
+    public function testIsPuliProject()
+    {
+        $this->assertTrue(PackageManager::isPuliProject(__DIR__.'/Fixtures/real-root-package'));
+        $this->assertFalse(PackageManager::isPuliProject(__DIR__.'/Fixtures/no-puli'));
+    }
+
+    public function testInitializePuliProject()
+    {
+        $this->initHome();
+
+        PackageManager::initializePuliProject($this->tempDir);
+
+        $manager = PackageManager::createDefault($this->tempDir);
+
+        $this->assertSame('__root__', $manager->getRootPackage()->getName());
+    }
+
+    public function testInitializePuliProjectWithName()
+    {
+        $this->initHome();
+
+        PackageManager::initializePuliProject($this->tempDir, 'project-name');
+
+        $manager = PackageManager::createDefault($this->tempDir);
+
+        $this->assertSame('project-name', $manager->getRootPackage()->getName());
+    }
+
+    public function testInitializePuliProjectIgnoresExistingProject()
+    {
+        $this->initHome();
+
+        $filesystem = new Filesystem();
+        $filesystem->mirror(__DIR__.'/Fixtures/real-root-package', $this->tempDir);
+
+        PackageManager::initializePuliProject($this->tempDir);
+
+        $manager = PackageManager::createDefault($this->tempDir);
+
+        $this->assertSame('real-root', $manager->getRootPackage()->getName());
+    }
+
+    /**
+     * @expectedException \RuntimeException
+     * @expectedExceptionMessage not-a-dir
+     */
+    public function testInitializePuliFailsIfFilePath()
+    {
+        $this->initHome();
+
+        touch($this->tempDir.'/not-a-dir');
+
+        PackageManager::initializePuliProject($this->tempDir.'/not-a-dir');
+    }
+
+    /**
+     * @expectedException \RuntimeException
+     * @expectedExceptionMessage HOME
+     */
+    public function testCreateDefaultFailsIfNoHomeFound()
+    {
+        PackageManager::createDefault(__DIR__.'/Fixtures/real-root-package');
     }
 
     public function testGenerateResourceRepository()
@@ -875,5 +925,58 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
 
         $this->assertFalse($this->manager->isPluginClassInstalled('foobar', true));
         $this->assertFalse($this->manager->isPluginClassInstalled('foobar', false));
+    }
+
+    private function initDefaultManager()
+    {
+        $filesystem = new Filesystem();
+        $filesystem->mirror(__DIR__.'/Fixtures', $this->tempDir);
+
+        $this->rootDir = $this->tempDir.'/root-package';
+        $this->package1Dir = $this->tempDir.'/package1';
+        $this->package2Dir = $this->tempDir.'/package2';
+        $this->rootConfig->setPackageRepositoryConfig('repository.json');
+        $this->packageRepoConfig->addPackageDescriptor(new PackageDescriptor('../package1', false));
+        $this->packageRepoConfig->addPackageDescriptor(new PackageDescriptor('../package2', false));
+
+        $this->packageConfigReader->expects($this->once())
+            ->method('readRootPackageConfig')
+            ->with($this->rootDir.'/puli.json')
+            ->will($this->returnValue($this->rootConfig));
+
+        $this->packageConfigReader->expects($this->at(1))
+            ->method('readPackageConfig')
+            ->with($this->package1Dir.'/puli.json')
+            ->will($this->returnValue($this->package1Config));
+        $this->packageConfigReader->expects($this->at(2))
+            ->method('readPackageConfig')
+            ->with($this->package2Dir.'/puli.json')
+            ->will($this->returnValue($this->package2Config));
+
+        $this->repositoryConfigReader->expects($this->once())
+            ->method('readRepositoryConfig')
+            ->with($this->rootDir.'/repository.json')
+            ->will($this->returnValue($this->packageRepoConfig));
+
+        $this->manager = new PackageManager(
+            $this->rootDir,
+            $this->tempHome,
+            $this->dispatcher,
+            $this->globalConfig,
+            $this->globalConfigReader,
+            $this->globalConfigWriter,
+            $this->repositoryConfigReader,
+            $this->repositoryConfigWriter,
+            $this->packageConfigReader,
+            $this->packageConfigWriter
+        );
+    }
+
+    private function initHome()
+    {
+        $filesystem = new Filesystem();
+        $filesystem->mirror(__DIR__.'/Fixtures/home', $this->tempHome);
+
+        putenv('PULI_HOME='.$this->tempHome);
     }
 }

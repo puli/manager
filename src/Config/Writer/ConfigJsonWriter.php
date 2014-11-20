@@ -13,6 +13,8 @@ namespace Puli\PackageManager\Config\Writer;
 
 use Puli\Json\JsonEncoder;
 use Puli\PackageManager\Config\GlobalConfig;
+use Puli\Util\Path;
+use Symfony\Component\Filesystem\Filesystem;
 
 /**
  * Writes global configuration to a JSON file.
@@ -56,6 +58,11 @@ class ConfigJsonWriter implements GlobalConfigWriterInterface
         $encoder->setEscapeSlash(false);
         $encoder->setTerminateWithLineFeed(true);
         $schema = realpath(__DIR__.'/../../../res/schema/global-schema.json');
+
+        if (!is_dir($dir = Path::getDirectory($path))) {
+            $filesystem = new Filesystem();
+            $filesystem->mkdir($dir);
+        }
 
         $encoder->encodeFile($path, $jsonData, $schema);
     }

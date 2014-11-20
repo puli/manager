@@ -17,7 +17,9 @@ use Puli\PackageManager\Event\JsonEvent;
 use Puli\PackageManager\Event\PackageEvents;
 use Puli\PackageManager\Package\Config\PackageConfig;
 use Puli\PackageManager\Package\Config\RootPackageConfig;
+use Puli\Util\Path;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\Filesystem\Filesystem;
 
 /**
  * Writes package configuration to a JSON file.
@@ -161,6 +163,11 @@ class PackageJsonWriter implements PackageConfigWriterInterface
             $event = new JsonEvent($path, $jsonData);
             $this->dispatcher->dispatch(PackageEvents::PACKAGE_JSON_GENERATED, $event);
             $jsonData = $event->getJsonData();
+        }
+
+        if (!is_dir($dir = Path::getDirectory($path))) {
+            $filesystem = new Filesystem();
+            $filesystem->mkdir($dir);
         }
 
         $encoder->encodeFile($path, $jsonData);

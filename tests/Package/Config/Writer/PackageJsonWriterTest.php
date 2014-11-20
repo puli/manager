@@ -20,6 +20,7 @@ use Puli\PackageManager\Package\Config\RootPackageConfig;
 use Puli\PackageManager\Package\Config\TagDescriptor;
 use Puli\PackageManager\Package\Config\Writer\PackageJsonWriter;
 use Symfony\Component\EventDispatcher\EventDispatcher;
+use Symfony\Component\Filesystem\Filesystem;
 
 /**
  * @since  1.0
@@ -34,15 +35,20 @@ class PackageJsonWriterTest extends \PHPUnit_Framework_TestCase
 
     private $tempFile;
 
+    private $tempDir;
+
     protected function setUp()
     {
         $this->writer = new PackageJsonWriter();
         $this->tempFile = tempnam(sys_get_temp_dir(), 'PackageJsonWriterTest');
+        while (false === mkdir($this->tempDir = sys_get_temp_dir().'/puli-manager/PackageJsonWriterTest_temp'.rand(10000, 99999), 0777, true)) {}
     }
 
     protected function tearDown()
     {
-        unlink($this->tempFile);
+        $filesystem = new Filesystem();
+        $filesystem->remove($this->tempFile);
+        $filesystem->remove($this->tempDir);
     }
 
     public function testWriteConfig()
@@ -153,6 +159,18 @@ class PackageJsonWriterTest extends \PHPUnit_Framework_TestCase
 
         $this->assertFileExists($this->tempFile);
         $this->assertFileEquals(__DIR__.'/Fixtures/multi-overrides.json', $this->tempFile);
+    }
+
+    public function testCreateMissingDirectoriesOnDemand()
+    {
+        $config = new PackageConfig();
+        $config->setPackageName('my/application');
+        $file = $this->tempDir.'/new/config.json';
+
+        $this->writer->writePackageConfig($config, $file);
+
+        $this->assertFileExists($file);
+        $this->assertFileEquals(__DIR__.'/Fixtures/minimal.json', $file);
     }
 
     public function testWriteConfigDispatchesEvent()
