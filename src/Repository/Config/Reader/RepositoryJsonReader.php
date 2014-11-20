@@ -42,8 +42,7 @@ class RepositoryJsonReader implements RepositoryConfigReaderInterface
      */
     public function readRepositoryConfig($path)
     {
-        $config = new PackageRepositoryConfig();
-        $config->setPath($path);
+        $config = new PackageRepositoryConfig($path);
 
         $array = $this->decodeFile($path);
 

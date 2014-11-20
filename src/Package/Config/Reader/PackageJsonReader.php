@@ -77,8 +77,7 @@ class PackageJsonReader implements PackageConfigReaderInterface
      */
     public function readPackageConfig($path)
     {
-        $config = new PackageConfig();
-        $config->setPath($path);
+        $config = new PackageConfig(null, $path);
 
         $jsonData = $this->decodeFile($path);
 
@@ -102,8 +101,7 @@ class PackageJsonReader implements PackageConfigReaderInterface
      */
     public function readRootPackageConfig($path)
     {
-        $config = new RootPackageConfig($this->globalConfig);
-        $config->setPath($path);
+        $config = new RootPackageConfig($this->globalConfig, null, $path);
 
         // Set the package name to "__root__" by default
         $jsonData = $this->decodeFile($path, '__root__');

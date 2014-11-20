@@ -48,10 +48,15 @@ class RootPackageConfig extends PackageConfig
      *
      * @param GlobalConfig $globalConfig The global configuration.
      * @param string|null  $packageName  The package name. Optional.
+     * @param string|null  $path         The path where the configuration is
+     *                                   stored or `null` if this configuration
+     *                                   is not stored on the file system.
+     *
+     * @throws \InvalidArgumentException If the path is not a string or empty.
      */
-    public function __construct(GlobalConfig $globalConfig, $packageName = null)
+    public function __construct(GlobalConfig $globalConfig, $packageName = null, $path = null)
     {
-        parent::__construct($packageName);
+        parent::__construct($packageName, $path);
 
         $this->globalConfig = $globalConfig;
         $this->localConfig = new GlobalConfig();

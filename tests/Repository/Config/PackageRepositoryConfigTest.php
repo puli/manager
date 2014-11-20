@@ -29,26 +29,27 @@ class PackageRepositoryConfigTest extends \PHPUnit_Framework_TestCase
         $this->config = new PackageRepositoryConfig();
     }
 
-    public function testSetPath()
+    public function testGetPath()
     {
         $this->assertNull($this->config->getPath());
-        $this->config->setPath('/foo');
+
+        $this->config = new PackageRepositoryConfig('/foo');
         $this->assertSame('/foo', $this->config->getPath());
     }
 
     /**
      * @expectedException \InvalidArgumentException
      */
-    public function testSetPathFailsIfNotString()
+    public function testPathMustBeString()
     {
-        $this->config->setPath(12345);
+        new PackageRepositoryConfig(12345);
     }
 
     /**
      * @expectedException \InvalidArgumentException
      */
-    public function testSetPathFailsIfEmpty()
+    public function testPathMustNotBeEmpty()
     {
-        $this->config->setPath('');
+        new PackageRepositoryConfig('');
     }
 }

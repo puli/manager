@@ -30,23 +30,15 @@ class PackageRepositoryConfig
     private $packageDescriptors = array();
 
     /**
-     * Returns the file system path of the configuration file.
+     * Creates a new repository configuration.
      *
-     * @return string|null The path or `null` if this configuration is not
-     *                     stored on the file system.
-     */
-    public function getPath()
-    {
-        return $this->path;
-    }
-
-    /**
-     * Sets the file system path where the configuration file is stored.
+     * @param string|null $path The path where the configuration is stored or
+     *                          `null` if this configuration is not stored on
+     *                          the file system.
      *
-     * @param string|null $path The path or `null` if this configuration is not
-     *                          stored on the file system.
+     * @throws \InvalidArgumentException If the path is not a string or empty.
      */
-    public function setPath($path)
+    public function __construct($path = null)
     {
         if (!is_string($path) && null !== $path) {
             throw new \InvalidArgumentException(sprintf(
@@ -61,6 +53,17 @@ class PackageRepositoryConfig
         }
 
         $this->path = $path;
+    }
+
+    /**
+     * Returns the file system path of the configuration file.
+     *
+     * @return string|null The path or `null` if this configuration is not
+     *                     stored on the file system.
+     */
+    public function getPath()
+    {
+        return $this->path;
     }
 
     /**

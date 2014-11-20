@@ -48,10 +48,28 @@ class PackageConfig
      * Creates a new package configuration.
      *
      * @param string|null $packageName The package name. Optional.
+     * @param string|null $path        The path where the configuration is
+     *                                 stored or `null` if this configuration is
+     *                                 not stored on the file system.
+     *
+     * @throws \InvalidArgumentException If the path is not a string or empty.
      */
-    public function __construct($packageName = null)
+    public function __construct($packageName = null, $path = null)
     {
+        if (!is_string($path) && null !== $path) {
+            throw new \InvalidArgumentException(sprintf(
+                'The path to the package configuration should be a string '.
+                'or null. Got: %s',
+                is_object($path) ? get_class($path) : gettype($path)
+            ));
+        }
+
+        if ('' === $path) {
+            throw new \InvalidArgumentException('The path to the package configuration should not be empty.');
+        }
+
         $this->packageName = $packageName;
+        $this->path = $path;
     }
 
     /**
@@ -83,29 +101,6 @@ class PackageConfig
     public function getPath()
     {
         return $this->path;
-    }
-
-    /**
-     * Sets the file system path where the configuration file is stored.
-     *
-     * @param string|null $path The path or `null` if this configuration is not
-     *                          stored on the file system.
-     */
-    public function setPath($path)
-    {
-        if (!is_string($path) && null !== $path) {
-            throw new \InvalidArgumentException(sprintf(
-                'The path to the package configuration should be a string '.
-                'or null. Got: %s',
-                is_object($path) ? get_class($path) : gettype($path)
-            ));
-        }
-
-        if ('' === $path) {
-            throw new \InvalidArgumentException('The path to the package configuration should not be empty.');
-        }
-
-        $this->path = $path;
     }
 
     /**

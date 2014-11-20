@@ -44,8 +44,7 @@ class ConfigJsonReader implements GlobalConfigReaderInterface
      */
     public function readGlobalConfig($path)
     {
-        $config = new GlobalConfig();
-        $config->setPath($path);
+        $config = new GlobalConfig($path);
 
         $jsonData = $this->decodeFile($path);
 
