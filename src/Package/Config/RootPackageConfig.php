@@ -95,7 +95,8 @@ class RootPackageConfig extends PackageConfig
      */
     public function getPackageRepositoryConfig($fallback = true)
     {
-        $configPath = $this->localConfig->getPackageRepositoryConfig();
+        // No fallback to default value
+        $configPath = $this->localConfig->getPackageRepositoryConfig(false);
 
         if (null === $configPath && $fallback) {
             return $this->globalConfig->getPackageRepositoryConfig();
@@ -145,7 +146,8 @@ class RootPackageConfig extends PackageConfig
      */
     public function getGeneratedResourceRepository($fallback = true)
     {
-        $repoPath = $this->localConfig->getGeneratedResourceRepository();
+        // No fallback to default value
+        $repoPath = $this->localConfig->getGeneratedResourceRepository(false);
 
         if (null === $repoPath && $fallback) {
             return $this->globalConfig->getGeneratedResourceRepository();
@@ -195,7 +197,8 @@ class RootPackageConfig extends PackageConfig
      */
     public function getResourceRepositoryCache($fallback = true)
     {
-        $cachePath = $this->localConfig->getResourceRepositoryCache();
+        // No fallback to default value
+        $cachePath = $this->localConfig->getResourceRepositoryCache(false);
 
         if (null === $cachePath && $fallback) {
             return $this->globalConfig->getResourceRepositoryCache();

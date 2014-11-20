@@ -9,20 +9,21 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\PackageManager\Tests\Repository\Config\Writer;
+namespace Puli\PackageManager\Tests\Config\Writer;
 
-use Puli\PackageManager\Repository\Config\PackageDescriptor;
-use Puli\PackageManager\Repository\Config\PackageRepositoryConfig;
-use Puli\PackageManager\Repository\Config\Writer\RepositoryJsonWriter;
+use Puli\PackageManager\Config\GlobalConfig;
+use Puli\PackageManager\Config\Writer\ConfigJsonWriter;
 
 /**
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class RepositoryJsonWriterTest extends \PHPUnit_Framework_TestCase
+class ConfigJsonWriterTest extends \PHPUnit_Framework_TestCase
 {
+    const PLUGIN_CLASS = 'Puli\PackageManager\Tests\Config\Fixtures\TestPlugin';
+
     /**
-     * @var RepositoryJsonWriter
+     * @var ConfigJsonWriter
      */
     private $writer;
 
@@ -30,7 +31,7 @@ class RepositoryJsonWriterTest extends \PHPUnit_Framework_TestCase
 
     protected function setUp()
     {
-        $this->writer = new RepositoryJsonWriter();
+        $this->writer = new ConfigJsonWriter();
         $this->tempFile = tempnam(sys_get_temp_dir(), 'PackageJsonWriterTest');
     }
 
@@ -41,11 +42,10 @@ class RepositoryJsonWriterTest extends \PHPUnit_Framework_TestCase
 
     public function testWriteConfig()
     {
-        $config = new PackageRepositoryConfig();
-        $config->addPackageDescriptor(new PackageDescriptor('/path/to/package1', true));
-        $config->addPackageDescriptor(new PackageDescriptor('/path/to/package2', false));
+        $config = new GlobalConfig();
+        $config->addPluginClass(self::PLUGIN_CLASS);
 
-        $this->writer->writeRepositoryConfig($config, $this->tempFile);
+        $this->writer->writeGlobalConfig($config, $this->tempFile);
 
         $this->assertFileExists($this->tempFile);
         $this->assertFileEquals(__DIR__.'/Fixtures/config.json', $this->tempFile);
@@ -53,9 +53,9 @@ class RepositoryJsonWriterTest extends \PHPUnit_Framework_TestCase
 
     public function testWriteEmptyConfig()
     {
-        $config = new PackageRepositoryConfig();
+        $config = new GlobalConfig();
 
-        $this->writer->writeRepositoryConfig($config, $this->tempFile);
+        $this->writer->writeGlobalConfig($config, $this->tempFile);
 
         $this->assertFileExists($this->tempFile);
         $this->assertFileEquals(__DIR__.'/Fixtures/empty.json', $this->tempFile);

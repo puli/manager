@@ -1,0 +1,12 @@
+{
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+        "plugins": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
+        }
+    }
+}

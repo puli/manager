@@ -24,6 +24,27 @@ use Puli\PackageManager\InvalidConfigException;
 class GlobalConfig
 {
     /**
+     * The default location of the package repository configuration.
+     *
+     * This value is used when no custom value is configured.
+     */
+    const DEFAULT_PACKAGE_REPOSITORY_CONFIG = '.puli/packages.json';
+
+    /**
+     * The default location of the generated resource repository.
+     *
+     * This value is used when no custom value is configured.
+     */
+    const DEFAULT_GENERATED_RESOURCE_REPOSITORY = '.puli/resource-repository.php';
+
+    /**
+     * The default location of the resource repository cache.
+     *
+     * This value is used when no custom value is configured.
+     */
+    const DEFAULT_RESOURCE_REPOSITORY_CACHE = '.puli/cache';
+
+    /**
      * @var string|null
      */
     private $packageRepositoryConfig;
@@ -44,32 +65,24 @@ class GlobalConfig
     private $pluginClasses = array();
 
     /**
-     * Creates a global configuration with predefined default values.
-     *
-     * @return GlobalConfig The default configuration.
-     */
-    public static function createDefault()
-    {
-        $config = new self();
-        $config->setPackageRepositoryConfig('.puli/packages.json');
-        $config->setGeneratedResourceRepository('.puli/resource-repository.php');
-        $config->setResourceRepositoryCache('.puli/cache');
-
-        return $config;
-    }
-
-    /**
      * Returns the path to the package repository configuration file.
      *
      * If the path is relative, it is calculated relative to the install path
      * of the root package.
      *
+     * If no path is set and fallback is enabled, a default path is returned.
+     *
+     * @param bool $fallback Whether to fall back to a predefined default value
+     *                       if no value was set. Defaults to `true`.
+     *
      * @return string|null The path to the configuration file of `null` if none
      *                     is set.
      */
-    public function getPackageRepositoryConfig()
+    public function getPackageRepositoryConfig($fallback = true)
     {
-        return $this->packageRepositoryConfig;
+        return null === $this->packageRepositoryConfig && $fallback
+            ? self::DEFAULT_PACKAGE_REPOSITORY_CONFIG
+            : $this->packageRepositoryConfig;
     }
 
     /**
@@ -106,12 +119,19 @@ class GlobalConfig
      * If the path is relative, it is calculated relative to the install path
      * of the root package.
      *
+     * If no path is set and fallback is enabled, a default path is returned.
+     *
+     * @param bool $fallback Whether to fall back to a predefined default value
+     *                       if no value was set. Defaults to `true`.
+     *
      * @return string|null The path to the generated resource repository or
      *                     `null` if none is set.
      */
-    public function getGeneratedResourceRepository()
+    public function getGeneratedResourceRepository($fallback = true)
     {
-        return $this->generatedResourceRepository;
+        return null === $this->generatedResourceRepository && $fallback
+            ? self::DEFAULT_GENERATED_RESOURCE_REPOSITORY
+            : $this->generatedResourceRepository;
     }
 
     /**
@@ -148,12 +168,19 @@ class GlobalConfig
      * If the path is relative, it is calculated relative to the install path
      * of the root package.
      *
+     * If no path is set and fallback is enabled, a default path is returned.
+     *
+     * @param bool $fallback Whether to fall back to a predefined default value
+     *                       if no value was set. Defaults to `true`.
+     *
      * @return string|null The path to the resource repository cache or `null`
      *                     if none is set.
      */
-    public function getResourceRepositoryCache()
+    public function getResourceRepositoryCache($fallback = true)
     {
-        return $this->resourceRepositoryCache;
+        return null === $this->resourceRepositoryCache && $fallback
+            ? self::DEFAULT_RESOURCE_REPOSITORY_CACHE
+            : $this->resourceRepositoryCache;
     }
 
     /**

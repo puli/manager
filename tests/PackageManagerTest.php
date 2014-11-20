@@ -12,6 +12,8 @@
 namespace Puli\PackageManager\Tests;
 
 use Puli\PackageManager\Config\GlobalConfig;
+use Puli\PackageManager\Config\Reader\GlobalConfigReaderInterface;
+use Puli\PackageManager\Config\Writer\GlobalConfigWriterInterface;
 use Puli\PackageManager\Package\Config\PackageConfig;
 use Puli\PackageManager\Package\Config\Reader\PackageConfigReaderInterface;
 use Puli\PackageManager\Package\Config\ResourceDescriptor;
@@ -42,6 +44,11 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
     /**
      * @var string
      */
+    private $tempHome;
+
+    /**
+     * @var string
+     */
     private $rootDir;
 
     /**
@@ -63,6 +70,16 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
      * @var EventDispatcherInterface
      */
     private $dispatcher;
+
+    /**
+     * @var \PHPUnit_Framework_MockObject_MockObject|GlobalConfigReaderInterface
+     */
+    private $globalConfigReader;
+
+    /**
+     * @var \PHPUnit_Framework_MockObject_MockObject|GlobalConfigWriterInterface
+     */
+    private $globalConfigWriter;
 
     /**
      * @var \PHPUnit_Framework_MockObject_MockObject|RepositoryConfigReaderInterface
@@ -116,9 +133,12 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
 
     protected function setUp()
     {
-        while (false === mkdir($this->tempDir = sys_get_temp_dir().'/puli-manager/PackageManagerTest'.rand(10000, 99999), 0777, true)) {}
+        while (false === mkdir($this->tempDir = sys_get_temp_dir().'/puli-manager/PackageManagerTest_temp'.rand(10000, 99999), 0777, true)) {}
+        while (false === mkdir($this->tempHome = sys_get_temp_dir().'/puli-manager/PackageManagerTest_home'.rand(10000, 99999), 0777, true)) {}
 
         $this->dispatcher = new EventDispatcher();
+        $this->globalConfigReader = $this->getMock('Puli\PackageManager\Config\Reader\GlobalConfigReaderInterface');
+        $this->globalConfigWriter = $this->getMock('Puli\PackageManager\Config\Writer\GlobalConfigWriterInterface');
         $this->repositoryConfigReader = $this->getMock('Puli\PackageManager\Repository\Config\Reader\RepositoryConfigReaderInterface');
         $this->repositoryConfigWriter = $this->getMock('Puli\PackageManager\Repository\Config\Writer\RepositoryConfigWriterInterface');
         $this->packageConfigReader = $this->getMock('Puli\PackageManager\Package\Config\Reader\PackageConfigReaderInterface');
@@ -143,6 +163,115 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
 
         $filesystem = new Filesystem();
         $filesystem->remove($this->tempDir);
+        $filesystem->remove($this->tempHome);
+
+        // Unset env variables
+        putenv('PULI_HOME');
+        putenv('HOME');
+        putenv('APPDATA');
+    }
+
+    public function testGetHomeDirectory()
+    {
+        putenv('HOME=/path/to/home');
+
+        $this->assertSame('/path/to/home/.puli', PackageManager::getHomeDirectory());
+    }
+
+    public function testGetHomeDirectoryBackslashes()
+    {
+        putenv('HOME=\path\to\home');
+
+        $this->assertSame('/path/to/home/.puli', PackageManager::getHomeDirectory());
+    }
+
+    public function testGetOverwrittenHomeDirectory()
+    {
+        putenv('HOME=/path/to/home');
+        putenv('PULI_HOME=/custom/home');
+
+        $this->assertSame('/custom/home', PackageManager::getHomeDirectory());
+    }
+
+    public function testGetOverwrittenHomeDirectoryBackslashes()
+    {
+        putenv('HOME=\path\to\home');
+        putenv('PULI_HOME=\custom\home');
+
+        $this->assertSame('/custom/home', PackageManager::getHomeDirectory());
+    }
+
+    public function testGetHomeDirectoryOnWindows()
+    {
+        putenv('APPDATA=C:/path/to/home');
+
+        $this->assertSame('C:/path/to/home/Puli', PackageManager::getHomeDirectory());
+    }
+
+    public function testGetHomeDirectoryOnWindowsBackslashes()
+    {
+        putenv('APPDATA=C:\path\to\home');
+
+        $this->assertSame('C:/path/to/home/Puli', PackageManager::getHomeDirectory());
+    }
+
+    public function testGetOverwrittenHomeDirectoryOnWindows()
+    {
+        putenv('APPDATA=C:/path/to/home');
+        putenv('PULI_HOME=C:/custom/home');
+
+        $this->assertSame('C:/custom/home', PackageManager::getHomeDirectory());
+    }
+
+    public function testGetOverwrittenHomeDirectoryOnWindowsBackslashes()
+    {
+        putenv('APPDATA=C:\path\to\home');
+        putenv('PULI_HOME=C:\custom\home');
+
+        $this->assertSame('C:/custom/home', PackageManager::getHomeDirectory());
+    }
+
+    public function testFailIfNoHomeDirectoryFound()
+    {
+        $isWin = defined('PHP_WINDOWS_VERSION_MAJOR');
+
+        // Mention correct variable in the exception message
+        $this->setExpectedException('\RuntimeException', $isWin ? 'APPDATA' : ' HOME ');
+
+        PackageManager::getHomeDirectory();
+    }
+
+    /**
+     * @expectedException \RuntimeException
+     * @expectedExceptionMessage PULI_HOME
+     */
+    public function testFailIfHomeNotADirectory()
+    {
+        putenv('PULI_HOME='.__DIR__.'/Fixtures/home/some-file');
+
+        PackageManager::getHomeDirectory();
+    }
+
+    /**
+     * @expectedException \RuntimeException
+     * @expectedExceptionMessage HOME
+     */
+    public function testFailIfLinuxHomeNotADirectory()
+    {
+        putenv('HOME='.__DIR__.'/Fixtures/home/some-file');
+
+        PackageManager::getHomeDirectory();
+    }
+
+    /**
+     * @expectedException \RuntimeException
+     * @expectedExceptionMessage APPDATA
+     */
+    public function testFailIfWindowsHomeNotADirectory()
+    {
+        putenv('APPDATA='.__DIR__.'/Fixtures/home/some-file');
+
+        PackageManager::getHomeDirectory();
     }
 
     public function testLoadPackageRepository()
@@ -178,6 +307,8 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
         $manager = new PackageManager(
             $this->rootDir,
             $this->dispatcher,
+            $this->globalConfigReader,
+            $this->globalConfigWriter,
             $this->repositoryConfigReader,
             $this->repositoryConfigWriter,
             $this->packageConfigReader,
@@ -242,6 +373,8 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
         new PackageManager(
             $this->rootDir,
             $this->dispatcher,
+            $this->globalConfigReader,
+            $this->globalConfigWriter,
             $this->repositoryConfigReader,
             $this->repositoryConfigWriter,
             $this->packageConfigReader,
@@ -251,9 +384,27 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
 
     public function testCreateDefault()
     {
+        $filesystem = new Filesystem();
+        $filesystem->mirror(__DIR__.'/Fixtures/home', $this->tempHome);
+
+        putenv('PULI_HOME='.$this->tempHome);
+
         $manager = PackageManager::createDefault(__DIR__.'/Fixtures/real-root-package');
 
         $this->assertInstanceOf('Puli\PackageManager\PackageManager', $manager);
+
+        // Directory is protected
+        $this->assertFileExists($this->tempHome.'/.htaccess');
+        $this->assertSame('Deny from all', file_get_contents($this->tempHome.'/.htaccess'));
+    }
+
+    /**
+     * @expectedException \RuntimeException
+     * @expectedExceptionMessage HOME
+     */
+    public function testCreateDefaultFailsIfNoHomeFound()
+    {
+        PackageManager::createDefault(__DIR__.'/Fixtures/real-root-package');
     }
 
     private function initDefaultManager()
@@ -290,6 +441,8 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
         $this->manager = new PackageManager(
             $this->rootDir,
             $this->dispatcher,
+            $this->globalConfigReader,
+            $this->globalConfigWriter,
             $this->repositoryConfigReader,
             $this->repositoryConfigWriter,
             $this->packageConfigReader,

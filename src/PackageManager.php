@@ -13,6 +13,10 @@ namespace Puli\PackageManager;
 
 use Puli\Filesystem\PhpCacheRepository;
 use Puli\PackageManager\Config\GlobalConfig;
+use Puli\PackageManager\Config\Reader\ConfigJsonReader;
+use Puli\PackageManager\Config\Reader\GlobalConfigReaderInterface;
+use Puli\PackageManager\Config\Writer\ConfigJsonWriter;
+use Puli\PackageManager\Config\Writer\GlobalConfigWriterInterface;
 use Puli\PackageManager\Package\Config\Reader\PackageConfigReaderInterface;
 use Puli\PackageManager\Package\Config\Reader\PackageJsonReader;
 use Puli\PackageManager\Package\Config\RootPackageConfig;
@@ -42,11 +46,18 @@ use Symfony\Component\Filesystem\Filesystem;
 /**
  * Manages the package repository.
  *
+ * Many parts of this class are inspired by Composer.
+ *
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class PackageManager
 {
+    /**
+     * The name of the global Puli configuration file.
+     */
+    const GLOBAL_CONFIG = 'config.json';
+
     /**
      * The name of the Puli package config file.
      */
@@ -93,39 +104,120 @@ class PackageManager
     private $packageRepository;
 
     /**
+     * Returns the system's home directory used by Puli.
+     *
+     * @return string The path to the home directory.
+     *
+     * @throws \RuntimeException If no home directory can be found or if the
+     *                           found path points to a file.
+     */
+    public static function getHomeDirectory()
+    {
+        if ($value = getenv('PULI_HOME')) {
+            $homeDir = $value;
+            $env = 'PULI_HOME';
+        } elseif ($value = getenv('HOME')) {
+            $homeDir = $value;
+            $env = 'HOME';
+        } elseif ($value = getenv('APPDATA')) {
+            $homeDir = $value;
+            $env = 'APPDATA';
+        } else {
+            throw new \RuntimeException(sprintf(
+                'Either the environment variable PULI_HOME or %s must be set for '.
+                'Puli to run.',
+                defined('PHP_WINDOWS_VERSION_MAJOR') ? 'APPDATA' : 'HOME'
+            ));
+        }
+
+        $homeDir = strtr($homeDir, array('\\' => '/'));
+
+        if (is_file($homeDir)) {
+            throw new \RuntimeException(sprintf(
+                'The home path %s defined in the environment variable %s '.
+                'points to a file. Expected a directory path.',
+                $homeDir,
+                $env
+            ));
+        }
+
+        return 'PULI_HOME' === $env
+            ? $homeDir // user defined
+            : ('HOME' === $env
+                ? $homeDir.'/.puli' // Linux/Mac
+                : $homeDir.'/Puli'); // Windows
+    }
+
+    /**
      * Creates package manager with default configuration.
      *
-     * @param string $rootDirectory The directory containing the root package.
+     * @param string $rootDir The directory containing the root package.
      *
      * @return static The package manager.
      */
-    public static function createDefault($rootDirectory)
+    public static function createDefault($rootDir)
     {
         $dispatcher = new EventDispatcher();
+        $globalConfigReader = new ConfigJsonReader();
+        $homeDir = self::getHomeDirectory();
+        $globalConfigFile = $homeDir.'/'.self::GLOBAL_CONFIG;
+
+        // Read config.json from the home directory, if possible
+        $globalConfig = null !== $homeDir && file_exists($globalConfigFile)
+            ? $globalConfigReader->readGlobalConfig($globalConfigFile)
+            : new GlobalConfig();
+
+        self::denyWebAccess($homeDir);
 
         return new static(
-            $rootDirectory,
+            $rootDir,
             $dispatcher,
+            $globalConfigReader,
+            new ConfigJsonWriter(),
             new RepositoryJsonReader(),
             new RepositoryJsonWriter(),
-            new PackageJsonReader(GlobalConfig::createDefault(), $dispatcher),
+            new PackageJsonReader($globalConfig, $dispatcher),
             new PackageJsonWriter($dispatcher)
         );
     }
 
     /**
+     * Protects a directory from web access with a .htaccess file.
+     *
+     * If the directory does not exist, it is created.
+     *
+     * @param string $directory The directory path.
+     */
+    private static function denyWebAccess($directory)
+    {
+        if (!file_exists($directory.'/.htaccess')) {
+            if (!is_dir($directory)) {
+                @mkdir($directory, 0777, true);
+            }
+
+            @file_put_contents($directory.'/.htaccess', 'Deny from all');
+        }
+    }
+
+    /**
      * Loads the repository at the given root directory.
      *
-     * @param string                          $rootDirectory          The directory containing the root package.
+     * @param string                          $rootDir                The directory containing the root package.
      * @param EventDispatcherInterface        $dispatcher             The event dispatcher.
+     * @param GlobalConfigReaderInterface     $globalConfigReader     The global config file reader.
+     * @param GlobalConfigWriterInterface     $globalConfigWriter     The global config file writer.
      * @param RepositoryConfigReaderInterface $repositoryConfigReader The repository config file reader.
      * @param RepositoryConfigWriterInterface $repositoryConfigWriter The repository config file writer.
      * @param PackageConfigReaderInterface    $packageConfigReader    The package config file reader.
      * @param PackageConfigWriterInterface    $packageConfigWriter    The package config file writer.
+     *
+     * @throws NameConflictException
      */
     public function __construct(
-        $rootDirectory,
+        $rootDir,
         EventDispatcherInterface $dispatcher,
+        GlobalConfigReaderInterface $globalConfigReader,
+        GlobalConfigWriterInterface $globalConfigWriter,
         RepositoryConfigReaderInterface $repositoryConfigReader,
         RepositoryConfigWriterInterface $repositoryConfigWriter,
         PackageConfigReaderInterface $packageConfigReader,
@@ -138,10 +230,10 @@ class PackageManager
         $this->repositoryConfigWriter = $repositoryConfigWriter;
         $this->packageConfigReader = $packageConfigReader;
         $this->packageConfigWriter = $packageConfigWriter;
-        $this->rootPackageConfig = $packageConfigReader->readRootPackageConfig($rootDirectory.'/'.self::PACKAGE_CONFIG);
+        $this->rootPackageConfig = $packageConfigReader->readRootPackageConfig($rootDir.'/'.self::PACKAGE_CONFIG);
 
         $this->activatePlugins();
-        $this->loadPackages($rootDirectory);
+        $this->loadPackages($rootDir);
     }
 
     /**
@@ -224,8 +316,8 @@ EOF
      */
     public function installPackage($installPath)
     {
-        $rootDirectory = $this->packageRepository->getRootPackage()->getInstallPath();
-        $installPath = Path::makeAbsolute($installPath, $rootDirectory);
+        $rootDir = $this->packageRepository->getRootPackage()->getInstallPath();
+        $installPath = Path::makeAbsolute($installPath, $rootDir);
 
         if ($this->isPackageInstalled($installPath)) {
             return;
@@ -249,13 +341,13 @@ EOF
 
         // OK, now add it
         $package = new Package($config, $installPath);
-        $relInstallPath = Path::makeRelative($installPath, $rootDirectory);
+        $relInstallPath = Path::makeRelative($installPath, $rootDir);
         $this->repositoryConfig->addPackageDescriptor(new PackageDescriptor($relInstallPath));
         $this->packageRepository->addPackage($package);
 
         // Write package repository configuration
         $configPath = $this->rootPackageConfig->getPackageRepositoryConfig();
-        $configPath = Path::makeAbsolute($configPath, $rootDirectory);
+        $configPath = Path::makeAbsolute($configPath, $rootDir);
 
         $this->repositoryConfigWriter->writeRepositoryConfig($this->repositoryConfig, $configPath);
     }
@@ -269,8 +361,8 @@ EOF
      */
     public function isPackageInstalled($installPath)
     {
-        $rootDirectory = $this->packageRepository->getRootPackage()->getInstallPath();
-        $installPath = Path::makeAbsolute($installPath, $rootDirectory);
+        $rootDir = $this->packageRepository->getRootPackage()->getInstallPath();
+        $installPath = Path::makeAbsolute($installPath, $rootDir);
 
         foreach ($this->packageRepository->getPackages() as $package) {
             if ($installPath === $package->getInstallPath()) {
@@ -352,18 +444,18 @@ EOF
         }
     }
 
-    private function loadPackages($rootDirectory)
+    private function loadPackages($rootDir)
     {
-        $this->packageRepository->addPackage(new RootPackage($this->rootPackageConfig, $rootDirectory));
+        $this->packageRepository->addPackage(new RootPackage($this->rootPackageConfig, $rootDir));
 
         $repositoryConfig = $this->rootPackageConfig->getPackageRepositoryConfig();
-        $repositoryConfig = Path::makeAbsolute($repositoryConfig, $rootDirectory);
+        $repositoryConfig = Path::makeAbsolute($repositoryConfig, $rootDir);
 
         $this->repositoryConfig = $this->repositoryConfigReader->readRepositoryConfig($repositoryConfig);
 
         foreach ($this->repositoryConfig->getPackageDescriptors() as $packageDefinition) {
             $installPath = Path::makeAbsolute($packageDefinition->getInstallPath(),
-                $rootDirectory);
+                $rootDir);
             $config = $this->packageConfigReader->readPackageConfig($installPath.'/'.self::PACKAGE_CONFIG);
             $packageName = $config->getPackageName();
 

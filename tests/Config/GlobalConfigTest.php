@@ -29,14 +29,27 @@ class GlobalConfigTest extends \PHPUnit_Framework_TestCase
         $this->config = new GlobalConfig();
     }
 
-    public function testCreateDefault()
+    public function testGetPackageRepositoryConfig()
     {
-        $config = GlobalConfig::createDefault();
+        $this->config->setPackageRepositoryConfig('custom/packages.json');
 
-        $this->assertSame('.puli/packages.json', $config->getPackageRepositoryConfig());
-        $this->assertSame('.puli/resource-repository.php', $config->getGeneratedResourceRepository());
-        $this->assertSame('.puli/cache', $config->getResourceRepositoryCache());
-        $this->assertSame(array(), $config->getPluginClasses());
+        $this->assertSame('custom/packages.json', $this->config->getPackageRepositoryConfig());
+        $this->assertSame('custom/packages.json', $this->config->getPackageRepositoryConfig(false));
+    }
+
+    public function testGetPackageRepositoryConfigWhenNoneIsSet()
+    {
+        $this->assertSame('.puli/packages.json', $this->config->getPackageRepositoryConfig());
+        $this->assertNull($this->config->getPackageRepositoryConfig(false));
+    }
+
+    public function testGetPackageRepositoryConfigWhenSetToNull()
+    {
+        $this->config->setPackageRepositoryConfig('custom/packages.json');
+        $this->config->setPackageRepositoryConfig(null);
+
+        $this->assertSame('.puli/packages.json', $this->config->getPackageRepositoryConfig());
+        $this->assertNull($this->config->getPackageRepositoryConfig(false));
     }
 
     /**
@@ -55,6 +68,29 @@ class GlobalConfigTest extends \PHPUnit_Framework_TestCase
         $this->config->setPackageRepositoryConfig('');
     }
 
+    public function testGetGeneratedResourceRepository()
+    {
+        $this->config->setGeneratedResourceRepository('custom/resource-repository.php');
+
+        $this->assertSame('custom/resource-repository.php', $this->config->getGeneratedResourceRepository());
+        $this->assertSame('custom/resource-repository.php', $this->config->getGeneratedResourceRepository(false));
+    }
+
+    public function testGetGeneratedResourceRepositoryWhenNoneIsSet()
+    {
+        $this->assertSame('.puli/resource-repository.php', $this->config->getGeneratedResourceRepository());
+        $this->assertNull($this->config->getGeneratedResourceRepository(false));
+    }
+
+    public function testGetGeneratedResourceRepositoryWhenSetToNull()
+    {
+        $this->config->setGeneratedResourceRepository('custom/resource-repository.php');
+        $this->config->setGeneratedResourceRepository(null);
+
+        $this->assertSame('.puli/resource-repository.php', $this->config->getGeneratedResourceRepository());
+        $this->assertNull($this->config->getGeneratedResourceRepository(false));
+    }
+
     /**
      * @expectedException \Puli\PackageManager\InvalidConfigException
      */
@@ -69,6 +105,29 @@ class GlobalConfigTest extends \PHPUnit_Framework_TestCase
     public function testGeneratedResourceRepositoryMustNotBeEmpty()
     {
         $this->config->setGeneratedResourceRepository('');
+    }
+
+    public function testGetResourceRepositoryCache()
+    {
+        $this->config->setResourceRepositoryCache('custom/cache');
+
+        $this->assertSame('custom/cache', $this->config->getResourceRepositoryCache());
+        $this->assertSame('custom/cache', $this->config->getResourceRepositoryCache(false));
+    }
+
+    public function testGetResourceRepositoryCacheWhenNoneIsSet()
+    {
+        $this->assertSame('.puli/cache', $this->config->getResourceRepositoryCache());
+        $this->assertNull($this->config->getResourceRepositoryCache(false));
+    }
+
+    public function testGetResourceRepositoryCacheWhenSetToNull()
+    {
+        $this->config->setResourceRepositoryCache('custom/cache');
+        $this->config->setResourceRepositoryCache(null);
+
+        $this->assertSame('.puli/cache', $this->config->getResourceRepositoryCache());
+        $this->assertNull($this->config->getResourceRepositoryCache(false));
     }
 
     /**

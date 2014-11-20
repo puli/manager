@@ -1,0 +1,5 @@
+{
+    "plugins": [
+        "Puli\\PackageManager\\Tests\\Config\\Fixtures\\TestPlugin"
+    ]
+}
