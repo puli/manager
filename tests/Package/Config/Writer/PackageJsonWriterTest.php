@@ -234,4 +234,25 @@ class PackageJsonWriterTest extends \PHPUnit_Framework_TestCase
         $this->assertFileExists($this->tempFile);
         $this->assertFileEquals(__DIR__.'/Fixtures/empty.json', $this->tempFile);
     }
+
+    public function provideInvalidPaths()
+    {
+        return array(
+            array(null),
+            array(''),
+            array('/'),
+        );
+    }
+
+    /**
+     * @dataProvider provideInvalidPaths
+     * @expectedException \Puli\PackageManager\IOException
+     */
+    public function testWriteConfigExpectsValidPath($invalidPath)
+    {
+        $config = new PackageConfig();
+        $config->setPackageName('my/application');
+
+        $this->writer->writePackageConfig($config, $invalidPath);
+    }
 }

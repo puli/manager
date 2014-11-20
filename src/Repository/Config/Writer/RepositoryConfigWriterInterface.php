@@ -11,10 +11,11 @@
 
 namespace Puli\PackageManager\Repository\Config\Writer;
 
+use Puli\PackageManager\IOException;
 use Puli\PackageManager\Repository\Config\PackageRepositoryConfig;
 
 /**
- * Writes package repository configuration to a data source.
+ * Writes package repository configuration to a file.
  *
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
@@ -22,10 +23,12 @@ use Puli\PackageManager\Repository\Config\PackageRepositoryConfig;
 interface RepositoryConfigWriterInterface
 {
     /**
-     * Writes repository configuration to a data source.
+     * Writes repository configuration to a file.
      *
-     * @param PackageRepositoryConfig $config      The configuration to write.
-     * @param mixed                   $destination The destination to write to.
+     * @param PackageRepositoryConfig $config The configuration to write.
+     * @param string                  $path   The file path to write to.
+     *
+     * @throws IOException If the path cannot be written.
      */
-    public function writeRepositoryConfig(PackageRepositoryConfig $config, $destination);
+    public function writeRepositoryConfig(PackageRepositoryConfig $config, $path);
 }

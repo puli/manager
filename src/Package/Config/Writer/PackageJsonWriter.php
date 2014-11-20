@@ -15,6 +15,7 @@ use Puli\Json\JsonEncoder;
 use Puli\Json\JsonValidator;
 use Puli\PackageManager\Event\JsonEvent;
 use Puli\PackageManager\Event\PackageEvents;
+use Puli\PackageManager\IOException;
 use Puli\PackageManager\Package\Config\PackageConfig;
 use Puli\PackageManager\Package\Config\RootPackageConfig;
 use Puli\Util\Path;
@@ -58,6 +59,8 @@ class PackageJsonWriter implements PackageConfigWriterInterface
      *
      * @param PackageConfig $config The configuration to write.
      * @param string        $path   The path to the JSON file.
+     *
+     * @throws IOException If the path cannot be written.
      */
     public function writePackageConfig(PackageConfig $config, $path)
     {
@@ -140,6 +143,20 @@ class PackageJsonWriter implements PackageConfigWriterInterface
 
     private function encodeFile($path, \stdClass $jsonData, $defaultPackageName = null)
     {
+        if (!Path::isAbsolute($path)) {
+            throw new IOException(sprintf(
+                'Cannot write "%s": Expected an absolute path.',
+                $path
+            ));
+        }
+
+        if (is_dir($path)) {
+            throw new IOException(sprintf(
+                'Cannot write %s: Is a directory.',
+                $path
+            ));
+        }
+
         $encoder = new JsonEncoder();
         $encoder->setPrettyPrinting(true);
         $encoder->setEscapeSlash(false);

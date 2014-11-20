@@ -12,9 +12,10 @@
 namespace Puli\PackageManager\Config\Writer;
 
 use Puli\PackageManager\Config\GlobalConfig;
+use Puli\PackageManager\IOException;
 
 /**
- * Writes global configuration to a data source.
+ * Writes global configuration to a file.
  *
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
@@ -22,10 +23,12 @@ use Puli\PackageManager\Config\GlobalConfig;
 interface GlobalConfigWriterInterface
 {
     /**
-     * Writes global configuration to a data source.
+     * Writes global configuration to a file.
      *
-     * @param GlobalConfig $config      The configuration to write.
-     * @param mixed        $destination The destination to write to.
+     * @param GlobalConfig $config The configuration to write.
+     * @param string       $path   The file path to write to.
+     *
+     * @throws IOException If the path cannot be written.
      */
-    public function writeGlobalConfig(GlobalConfig $config, $destination);
+    public function writeGlobalConfig(GlobalConfig $config, $path);
 }

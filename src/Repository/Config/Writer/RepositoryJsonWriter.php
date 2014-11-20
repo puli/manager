@@ -12,6 +12,7 @@
 namespace Puli\PackageManager\Repository\Config\Writer;
 
 use Puli\Json\JsonEncoder;
+use Puli\PackageManager\IOException;
 use Puli\PackageManager\Repository\Config\PackageRepositoryConfig;
 use Puli\Util\Path;
 use Symfony\Component\Filesystem\Filesystem;
@@ -53,6 +54,20 @@ class RepositoryJsonWriter implements RepositoryConfigWriterInterface
 
     private function encodeFile($path, $jsonData)
     {
+        if (!Path::isAbsolute($path)) {
+            throw new IOException(sprintf(
+                'Cannot write "%s": Expected an absolute path.',
+                $path
+            ));
+        }
+
+        if (is_dir($path)) {
+            throw new IOException(sprintf(
+                'Cannot write %s: Is a directory.',
+                $path
+            ));
+        }
+
         $encoder = new JsonEncoder();
         $encoder->setPrettyPrinting(true);
         $encoder->setEscapeSlash(false);

@@ -13,6 +13,7 @@ namespace Puli\PackageManager\Config\Writer;
 
 use Puli\Json\JsonEncoder;
 use Puli\PackageManager\Config\GlobalConfig;
+use Puli\PackageManager\IOException;
 use Puli\Util\Path;
 use Symfony\Component\Filesystem\Filesystem;
 
@@ -35,6 +36,8 @@ class ConfigJsonWriter implements GlobalConfigWriterInterface
      *
      * @param GlobalConfig $config The configuration to write.
      * @param string       $path   The path to the JSON file.
+     *
+     * @throws IOException If the path cannot be written.
      */
     public function writeGlobalConfig(GlobalConfig $config, $path)
     {
@@ -53,6 +56,20 @@ class ConfigJsonWriter implements GlobalConfigWriterInterface
 
     private function encodeFile($path, $jsonData)
     {
+        if (!Path::isAbsolute($path)) {
+            throw new IOException(sprintf(
+                'Cannot write "%s": Expected an absolute path.',
+                $path
+            ));
+        }
+
+        if (is_dir($path)) {
+            throw new IOException(sprintf(
+                'Cannot write %s: Is a directory.',
+                $path
+            ));
+        }
+
         $encoder = new JsonEncoder();
         $encoder->setPrettyPrinting(true);
         $encoder->setEscapeSlash(false);

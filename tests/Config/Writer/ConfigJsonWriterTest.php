@@ -13,6 +13,7 @@ namespace Puli\PackageManager\Tests\Config\Writer;
 
 use Puli\PackageManager\Config\GlobalConfig;
 use Puli\PackageManager\Config\Writer\ConfigJsonWriter;
+use Symfony\Component\Filesystem\Exception\IOException;
 use Symfony\Component\Filesystem\Filesystem;
 
 /**
@@ -76,5 +77,23 @@ class ConfigJsonWriterTest extends \PHPUnit_Framework_TestCase
 
         $this->assertFileExists($file);
         $this->assertFileEquals(__DIR__.'/Fixtures/empty.json', $file);
+    }
+
+    public function provideInvalidPaths()
+    {
+        return array(
+            array(null),
+            array(''),
+            array('/'),
+        );
+    }
+
+    /**
+     * @dataProvider provideInvalidPaths
+     * @expectedException \Puli\PackageManager\IOException
+     */
+    public function testWriteConfigExpectsValidPath($invalidPath)
+    {
+        $this->writer->writeGlobalConfig(new GlobalConfig(), $invalidPath);
     }
 }

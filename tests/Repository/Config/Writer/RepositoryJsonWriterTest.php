@@ -77,4 +77,22 @@ class RepositoryJsonWriterTest extends \PHPUnit_Framework_TestCase
         $this->assertFileExists($file);
         $this->assertFileEquals(__DIR__.'/Fixtures/empty.json', $file);
     }
+
+    public function provideInvalidPaths()
+    {
+        return array(
+            array(null),
+            array(''),
+            array('/'),
+        );
+    }
+
+    /**
+     * @dataProvider provideInvalidPaths
+     * @expectedException \Puli\PackageManager\IOException
+     */
+    public function testWriteConfigExpectsValidPath($invalidPath)
+    {
+        $this->writer->writeRepositoryConfig(new PackageRepositoryConfig(), $invalidPath);
+    }
 }

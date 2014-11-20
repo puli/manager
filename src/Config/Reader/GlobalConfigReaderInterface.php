@@ -16,7 +16,7 @@ use Puli\PackageManager\FileNotFoundException;
 use Puli\PackageManager\InvalidConfigException;
 
 /**
- * Reads global configuration from a data source.
+ * Reads global configuration from a file.
  *
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
@@ -24,14 +24,14 @@ use Puli\PackageManager\InvalidConfigException;
 interface GlobalConfigReaderInterface
 {
     /**
-     * Reads global configuration from a data source.
+     * Reads global configuration from a file.
      *
-     * @param mixed $source The data source.
+     * @param string $path The file path to read.
      *
      * @return GlobalConfig The global configuration.
      *
-     * @throws FileNotFoundException If the data source was not found.
+     * @throws FileNotFoundException If the file was not found.
      * @throws InvalidConfigException If the source contains invalid configuration.
      */
-    public function readGlobalConfig($source);
+    public function readGlobalConfig($path);
 }
