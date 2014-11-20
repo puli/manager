@@ -48,6 +48,7 @@ class PackageJsonReaderTest extends \PHPUnit_Framework_TestCase
 
         $this->assertInstanceOf('Puli\PackageManager\Package\Config\PackageConfig', $config);
         $this->assertNotInstanceOf('Puli\PackageManager\Package\Config\RootPackageConfig', $config);
+        $this->assertSame(__DIR__.'/Fixtures/full.json', $config->getPath());
         $this->assertFullConfig($config);
     }
 
@@ -56,6 +57,7 @@ class PackageJsonReaderTest extends \PHPUnit_Framework_TestCase
         $config = $this->reader->readRootPackageConfig(__DIR__.'/Fixtures/full.json');
 
         $this->assertInstanceOf('Puli\PackageManager\Package\Config\RootPackageConfig', $config);
+        $this->assertSame(__DIR__.'/Fixtures/full.json', $config->getPath());
         $this->assertFullConfig($config);
         $this->assertSame(array('acme/blog-extension1', 'acme/blog-extension2'), $config->getPackageOrder());
         $this->assertSame('packages.json', $config->getPackageRepositoryConfig());

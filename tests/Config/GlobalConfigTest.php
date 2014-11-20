@@ -275,4 +275,27 @@ class GlobalConfigTest extends \PHPUnit_Framework_TestCase
 
         $this->assertTrue($this->config->hasPluginClass('\\'.self::PLUGIN_CLASS));
     }
+
+    public function testSetPath()
+    {
+        $this->assertNull($this->config->getPath());
+        $this->config->setPath('/foo');
+        $this->assertSame('/foo', $this->config->getPath());
+    }
+
+    /**
+     * @expectedException \InvalidArgumentException
+     */
+    public function testSetPathFailsIfNotString()
+    {
+        $this->config->setPath(12345);
+    }
+
+    /**
+     * @expectedException \InvalidArgumentException
+     */
+    public function testSetPathFailsIfEmpty()
+    {
+        $this->config->setPath('');
+    }
 }

@@ -39,6 +39,7 @@ class RepositoryJsonReaderTest extends \PHPUnit_Framework_TestCase
         $config = $this->reader->readRepositoryConfig(__DIR__.'/Fixtures/config.json');
 
         $this->assertInstanceOf('Puli\PackageManager\Repository\Config\PackageRepositoryConfig', $config);
+        $this->assertSame(__DIR__.'/Fixtures/config.json', $config->getPath());
         $this->assertEquals(array($package1, $package2), $config->getPackageDescriptors());
     }
 

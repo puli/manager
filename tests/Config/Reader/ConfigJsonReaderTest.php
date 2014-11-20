@@ -36,6 +36,7 @@ class ConfigJsonReaderTest extends \PHPUnit_Framework_TestCase
         $config = $this->reader->readGlobalConfig(__DIR__.'/Fixtures/config.json');
 
         $this->assertInstanceOf('Puli\PackageManager\Config\GlobalConfig', $config);
+        $this->assertSame(__DIR__.'/Fixtures/config.json', $config->getPath());
         $this->assertSame(array(self::PLUGIN_CLASS), $config->getPluginClasses());
 
         // non-configurable values

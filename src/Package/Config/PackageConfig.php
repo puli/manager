@@ -20,9 +20,14 @@ namespace Puli\PackageManager\Package\Config;
 class PackageConfig
 {
     /**
-     * @var string
+     * @var string|null
      */
     private $packageName;
+
+    /**
+     * @var string|null
+     */
+    private $path;
 
     /**
      * @var string[]
@@ -52,7 +57,7 @@ class PackageConfig
     /**
      * Returns the package name.
      *
-     * @return string The package name.
+     * @return string|null The package name or `null` if none is set.
      */
     public function getPackageName()
     {
@@ -62,11 +67,45 @@ class PackageConfig
     /**
      * Sets the package name.
      *
-     * @param string $packageName The package name.
+     * @param string|null $packageName The package name or `null` to unset.
      */
     public function setPackageName($packageName)
     {
         $this->packageName = $packageName;
+    }
+
+    /**
+     * Returns the file system path of the configuration file.
+     *
+     * @return string|null The path or `null` if this configuration is not
+     *                     stored on the file system.
+     */
+    public function getPath()
+    {
+        return $this->path;
+    }
+
+    /**
+     * Sets the file system path where the configuration file is stored.
+     *
+     * @param string|null $path The path or `null` if this configuration is not
+     *                          stored on the file system.
+     */
+    public function setPath($path)
+    {
+        if (!is_string($path) && null !== $path) {
+            throw new \InvalidArgumentException(sprintf(
+                'The path to the package configuration should be a string '.
+                'or null. Got: %s',
+                is_object($path) ? get_class($path) : gettype($path)
+            ));
+        }
+
+        if ('' === $path) {
+            throw new \InvalidArgumentException('The path to the package configuration should not be empty.');
+        }
+
+        $this->path = $path;
     }
 
     /**

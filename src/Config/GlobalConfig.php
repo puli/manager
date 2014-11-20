@@ -47,6 +47,11 @@ class GlobalConfig
     /**
      * @var string|null
      */
+    private $path;
+
+    /**
+     * @var string|null
+     */
     private $packageRepositoryConfig;
 
     /**
@@ -63,6 +68,40 @@ class GlobalConfig
      * @var string[]
      */
     private $pluginClasses = array();
+
+    /**
+     * Returns the file system path of the configuration file.
+     *
+     * @return string|null The path or `null` if this configuration is not
+     *                     stored on the file system.
+     */
+    public function getPath()
+    {
+        return $this->path;
+    }
+
+    /**
+     * Sets the file system path where the configuration file is stored.
+     *
+     * @param string|null $path The path or `null` if this configuration is not
+     *                          stored on the file system.
+     */
+    public function setPath($path)
+    {
+        if (!is_string($path) && null !== $path) {
+            throw new \InvalidArgumentException(sprintf(
+                'The path to the global configuration should be a string '.
+                'or null. Got: %s',
+                is_object($path) ? get_class($path) : gettype($path)
+            ));
+        }
+
+        if ('' === $path) {
+            throw new \InvalidArgumentException('The path to the global configuration should not be empty.');
+        }
+
+        $this->path = $path;
+    }
 
     /**
      * Returns the path to the package repository configuration file.
