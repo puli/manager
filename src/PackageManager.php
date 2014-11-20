@@ -69,6 +69,31 @@ class PackageManager
     private $dispatcher;
 
     /**
+     * @var string
+     */
+    private $rootDir;
+
+    /**
+     * @var string
+     */
+    private $homeDir;
+
+    /**
+     * @var GlobalConfig
+     */
+    private $globalConfig;
+
+    /**
+     * @var GlobalConfigReaderInterface
+     */
+    private $globalConfigReader;
+
+    /**
+     * @var GlobalConfigWriterInterface
+     */
+    private $globalConfigWriter;
+
+    /**
      * @var RepositoryConfigReaderInterface
      */
     private $repositoryConfigReader;
@@ -171,7 +196,9 @@ class PackageManager
 
         return new static(
             $rootDir,
+            $homeDir,
             $dispatcher,
+            $globalConfig,
             $globalConfigReader,
             new ConfigJsonWriter(),
             new RepositoryJsonReader(),
@@ -203,7 +230,9 @@ class PackageManager
      * Loads the repository at the given root directory.
      *
      * @param string                          $rootDir                The directory containing the root package.
+     * @param string                          $homeDir                The Puli home directory.
      * @param EventDispatcherInterface        $dispatcher             The event dispatcher.
+     * @param GlobalConfig                    $globalConfig           The global configuration.
      * @param GlobalConfigReaderInterface     $globalConfigReader     The global config file reader.
      * @param GlobalConfigWriterInterface     $globalConfigWriter     The global config file writer.
      * @param RepositoryConfigReaderInterface $repositoryConfigReader The repository config file reader.
@@ -215,7 +244,9 @@ class PackageManager
      */
     public function __construct(
         $rootDir,
+        $homeDir,
         EventDispatcherInterface $dispatcher,
+        GlobalConfig $globalConfig,
         GlobalConfigReaderInterface $globalConfigReader,
         GlobalConfigWriterInterface $globalConfigWriter,
         RepositoryConfigReaderInterface $repositoryConfigReader,
@@ -225,7 +256,12 @@ class PackageManager
     )
     {
         $this->packageRepository = new PackageRepository();
+        $this->rootDir = $rootDir;
+        $this->homeDir = $homeDir;
         $this->dispatcher = $dispatcher;
+        $this->globalConfig = $globalConfig;
+        $this->globalConfigReader = $globalConfigReader;
+        $this->globalConfigWriter = $globalConfigWriter;
         $this->repositoryConfigReader = $repositoryConfigReader;
         $this->repositoryConfigWriter = $repositoryConfigWriter;
         $this->packageConfigReader = $packageConfigReader;
@@ -271,12 +307,11 @@ class PackageManager
     {
         $repo = new ResourceRepository();
         $builder = new ResourceRepositoryBuilder();
-        $rootDir = $this->packageRepository->getRootPackage()->getInstallPath();
         $repoPath = $repoPath ?: $this->rootPackageConfig->getGeneratedResourceRepository();
-        $repoPath = Path::makeAbsolute($repoPath, $rootDir);
+        $repoPath = Path::makeAbsolute($repoPath, $this->rootDir);
         $repoDir = Path::getDirectory($repoPath);
         $cachePath = $cachePath ?: $this->rootPackageConfig->getResourceRepositoryCache();
-        $cachePath = Path::makeAbsolute($cachePath, $rootDir);
+        $cachePath = Path::makeAbsolute($cachePath, $this->rootDir);
         $relCachePath = Path::makeRelative($cachePath, Path::getDirectory($repoPath));
 
         $builder->loadPackages($this->packageRepository);
@@ -316,8 +351,7 @@ EOF
      */
     public function installPackage($installPath)
     {
-        $rootDir = $this->packageRepository->getRootPackage()->getInstallPath();
-        $installPath = Path::makeAbsolute($installPath, $rootDir);
+        $installPath = Path::makeAbsolute($installPath, $this->rootDir);
 
         if ($this->isPackageInstalled($installPath)) {
             return;
@@ -341,13 +375,13 @@ EOF
 
         // OK, now add it
         $package = new Package($config, $installPath);
-        $relInstallPath = Path::makeRelative($installPath, $rootDir);
+        $relInstallPath = Path::makeRelative($installPath, $this->rootDir);
         $this->repositoryConfig->addPackageDescriptor(new PackageDescriptor($relInstallPath));
         $this->packageRepository->addPackage($package);
 
         // Write package repository configuration
         $configPath = $this->rootPackageConfig->getPackageRepositoryConfig();
-        $configPath = Path::makeAbsolute($configPath, $rootDir);
+        $configPath = Path::makeAbsolute($configPath, $this->rootDir);
 
         $this->repositoryConfigWriter->writeRepositoryConfig($this->repositoryConfig, $configPath);
     }
@@ -361,8 +395,7 @@ EOF
      */
     public function isPackageInstalled($installPath)
     {
-        $rootDir = $this->packageRepository->getRootPackage()->getInstallPath();
-        $installPath = Path::makeAbsolute($installPath, $rootDir);
+        $installPath = Path::makeAbsolute($installPath, $this->rootDir);
 
         foreach ($this->packageRepository->getPackages() as $package) {
             if ($installPath === $package->getInstallPath()) {
@@ -417,6 +450,68 @@ EOF
     public function getPackages()
     {
         return $this->packageRepository->getPackages();
+    }
+
+    /**
+     * Installs a plugin class.
+     *
+     * The plugin class must be passed as fully-qualified name of a class that
+     * implements {@link \Puli\PackageManager\Plugin\PluginInterface}. Plugin
+     * constructors must not have mandatory parameters.
+     *
+     * By default, plugins are installed in the configuration of the root
+     * package. Set the parameter `$global` to `true` if you want to install the
+     * plugin globally.
+     **
+     * @param string $pluginClass The fully qualified plugin class name.
+     * @param bool   $global      Whether to install the plugin system-wide.
+     *                            Defaults to `false?.
+     *
+     * @throws InvalidConfigException If a class is not found, is not a class,
+     *                                does not implement
+     *                                {@link \Puli\PackageManager\Plugin\PluginInterface}
+     *                                or has required constructor parameters.
+     */
+    public function installPluginClass($pluginClass, $global = false)
+    {
+        $config = $global ? $this->globalConfig : $this->rootPackageConfig;
+
+        if (in_array($pluginClass, $config->getPluginClasses())) {
+            // Already installed
+            return;
+        }
+
+        $config->addPluginClass($pluginClass);
+
+        // Write changes to disk
+        if ($global) {
+            $path = $this->homeDir.'/'.self::GLOBAL_CONFIG;
+            $this->globalConfigWriter->writeGlobalConfig($config, $path);
+
+            return;
+        }
+
+        $path = $this->rootDir.'/'.self::PACKAGE_CONFIG;
+        $this->packageConfigWriter->writePackageConfig($config, $path);
+    }
+
+    /**
+     * Returns all installed plugin classes.
+     *
+     * @param bool $includeGlobal If set to `true`, both plugins installed in
+     *                            the configuration of the root package and
+     *                            plugins installed in the global configuration
+     *                            are returned. If set to `false`, only the
+     *                            plugins defined in the root pacakge are
+     *                            returned.
+     *
+     * @return string[] The fully qualified plugin class names.
+     *
+     * @see installPluginClass()
+     */
+    public function getPluginClasses($includeGlobal = true)
+    {
+        return $this->rootPackageConfig->getPluginClasses($includeGlobal);
     }
 
     /**

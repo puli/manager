@@ -36,6 +36,10 @@ use Symfony\Component\Filesystem\Filesystem;
  */
 class PackageManagerTest extends \PHPUnit_Framework_TestCase
 {
+    const PLUGIN_CLASS = 'Puli\PackageManager\Tests\Config\Fixtures\TestPlugin';
+
+    const OTHER_PLUGIN_CLASS = 'Puli\PackageManager\Tests\Config\Fixtures\OtherPlugin';
+
     /**
      * @var string
      */
@@ -306,7 +310,9 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
 
         $manager = new PackageManager(
             $this->rootDir,
+            $this->tempHome,
             $this->dispatcher,
+            $this->globalConfig,
             $this->globalConfigReader,
             $this->globalConfigWriter,
             $this->repositoryConfigReader,
@@ -372,7 +378,9 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
 
         new PackageManager(
             $this->rootDir,
+            $this->tempHome,
             $this->dispatcher,
+            $this->globalConfig,
             $this->globalConfigReader,
             $this->globalConfigWriter,
             $this->repositoryConfigReader,
@@ -440,7 +448,9 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
 
         $this->manager = new PackageManager(
             $this->rootDir,
+            $this->tempHome,
             $this->dispatcher,
+            $this->globalConfig,
             $this->globalConfigReader,
             $this->globalConfigWriter,
             $this->repositoryConfigReader,
@@ -726,5 +736,128 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
         $this->assertSame('root', $rootPackage->getName());
         $this->assertSame($this->rootDir, $rootPackage->getInstallPath());
         $this->assertSame($this->rootConfig, $rootPackage->getConfig());
+    }
+
+    public function testInstallLocalPlugin()
+    {
+        $this->initDefaultManager();
+
+        $this->assertSame(array(), $this->manager->getPluginClasses(false));
+        $this->assertSame(array(), $this->manager->getPluginClasses(true));
+
+        $this->packageConfigWriter->expects($this->once())
+            ->method('writePackageConfig')
+            ->with($this->isInstanceOf('Puli\PackageManager\Package\Config\RootPackageConfig'))
+            ->will($this->returnCallback(function (RootPackageConfig $config) {
+                \PHPUnit_Framework_Assert::assertSame(array(self::PLUGIN_CLASS), $config->getPluginClasses(false));
+                \PHPUnit_Framework_Assert::assertSame(array(self::PLUGIN_CLASS), $config->getPluginClasses(true));
+            }));
+
+        $this->globalConfigWriter->expects($this->never())
+            ->method('writeGlobalConfig');
+
+        $this->manager->installPluginClass(self::PLUGIN_CLASS);
+
+        $this->assertSame(array(self::PLUGIN_CLASS), $this->manager->getPluginClasses(false));
+        $this->assertSame(array(self::PLUGIN_CLASS), $this->manager->getPluginClasses(true));
+    }
+
+    public function testInstallLocalDoesNothingIfPluginExistsGlobally()
+    {
+        $this->initDefaultManager();
+
+        $this->globalConfig->addPluginClass(self::PLUGIN_CLASS);
+
+        $this->packageConfigWriter->expects($this->never())
+            ->method('writePackageConfig');
+
+        $this->globalConfigWriter->expects($this->never())
+            ->method('writeGlobalConfig');
+
+        $this->manager->installPluginClass(self::PLUGIN_CLASS);
+
+        $this->assertSame(array(), $this->manager->getPluginClasses(false));
+        $this->assertSame(array(self::PLUGIN_CLASS), $this->manager->getPluginClasses(true));
+    }
+
+    public function testInstallLocalDoesNothingIfPluginExistsLocally()
+    {
+        $this->initDefaultManager();
+
+        $this->rootConfig->addPluginClass(self::PLUGIN_CLASS);
+
+        $this->packageConfigWriter->expects($this->never())
+            ->method('writePackageConfig');
+
+        $this->globalConfigWriter->expects($this->never())
+            ->method('writeGlobalConfig');
+
+        $this->manager->installPluginClass(self::PLUGIN_CLASS);
+
+        $this->assertSame(array(self::PLUGIN_CLASS), $this->manager->getPluginClasses(false));
+        $this->assertSame(array(self::PLUGIN_CLASS), $this->manager->getPluginClasses(true));
+    }
+
+    public function testInstallGlobalPlugin()
+    {
+        $this->initDefaultManager();
+
+        $this->assertSame(array(), $this->manager->getPluginClasses(false));
+        $this->assertSame(array(), $this->manager->getPluginClasses(true));
+
+        $this->packageConfigWriter->expects($this->never())
+            ->method('writePackageConfig');
+
+        $this->globalConfigWriter->expects($this->once())
+            ->method('writeGlobalConfig')
+            ->with($this->isInstanceOf('Puli\PackageManager\Config\GlobalConfig'))
+            ->will($this->returnCallback(function (GlobalConfig $config) {
+                \PHPUnit_Framework_Assert::assertSame(array(self::PLUGIN_CLASS), $config->getPluginClasses());
+            }));
+
+        $this->manager->installPluginClass(self::PLUGIN_CLASS, true);
+
+        $this->assertSame(array(), $this->manager->getPluginClasses(false));
+        $this->assertSame(array(self::PLUGIN_CLASS), $this->manager->getPluginClasses(true));
+    }
+
+    public function testInstallGlobalDoesNothingIfPluginExistsGlobally()
+    {
+        $this->initDefaultManager();
+
+        $this->globalConfig->addPluginClass(self::PLUGIN_CLASS);
+
+        $this->packageConfigWriter->expects($this->never())
+            ->method('writePackageConfig');
+
+        $this->globalConfigWriter->expects($this->never())
+            ->method('writeGlobalConfig');
+
+        $this->manager->installPluginClass(self::PLUGIN_CLASS, true);
+
+        $this->assertSame(array(), $this->manager->getPluginClasses(false));
+        $this->assertSame(array(self::PLUGIN_CLASS), $this->manager->getPluginClasses(true));
+    }
+
+    public function testInstallGlobalWritesConfigEvenThoughPluginExistsLocally()
+    {
+        $this->initDefaultManager();
+
+        $this->rootConfig->addPluginClass(self::PLUGIN_CLASS);
+
+        $this->packageConfigWriter->expects($this->never())
+            ->method('writePackageConfig');
+
+        $this->globalConfigWriter->expects($this->once())
+            ->method('writeGlobalConfig')
+            ->with($this->isInstanceOf('Puli\PackageManager\Config\GlobalConfig'))
+            ->will($this->returnCallback(function (GlobalConfig $config) {
+                \PHPUnit_Framework_Assert::assertSame(array(self::PLUGIN_CLASS), $config->getPluginClasses());
+            }));
+
+        $this->manager->installPluginClass(self::PLUGIN_CLASS, true);
+
+        $this->assertSame(array(self::PLUGIN_CLASS), $this->manager->getPluginClasses(false));
+        $this->assertSame(array(self::PLUGIN_CLASS), $this->manager->getPluginClasses(true));
     }
 }
