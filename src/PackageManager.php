@@ -496,13 +496,31 @@ EOF
     }
 
     /**
+     * Returns whether a plugin class is installed.
+     *
+     * @param string $pluginClass   The fully qualified plugin class name.
+     * @param bool   $includeGlobal If set to `true`, both plugins installed in
+     *                              the configuration of the root package and
+     *                              plugins installed in the global configuration
+     *                              are considered. If set to `false`, only the
+     *                              plugins defined in the root package are
+     *                              considered.
+     *
+     * @return bool Whether the plugin class is installed.
+     */
+    public function isPluginClassInstalled($pluginClass, $includeGlobal = true)
+    {
+        return in_array($pluginClass, $this->rootPackageConfig->getPluginClasses($includeGlobal));
+    }
+
+    /**
      * Returns all installed plugin classes.
      *
      * @param bool $includeGlobal If set to `true`, both plugins installed in
      *                            the configuration of the root package and
      *                            plugins installed in the global configuration
      *                            are returned. If set to `false`, only the
-     *                            plugins defined in the root pacakge are
+     *                            plugins defined in the root package are
      *                            returned.
      *
      * @return string[] The fully qualified plugin class names.

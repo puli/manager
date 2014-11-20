@@ -860,4 +860,20 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
         $this->assertSame(array(self::PLUGIN_CLASS), $this->manager->getPluginClasses(false));
         $this->assertSame(array(self::PLUGIN_CLASS), $this->manager->getPluginClasses(true));
     }
+
+    public function testIsPluginClassInstalled()
+    {
+        $this->initDefaultManager();
+
+        $this->globalConfig->addPluginClass(self::PLUGIN_CLASS);
+        $this->rootConfig->addPluginClass(self::OTHER_PLUGIN_CLASS);
+
+        $this->assertTrue($this->manager->isPluginClassInstalled(self::PLUGIN_CLASS, true));
+        $this->assertTrue($this->manager->isPluginClassInstalled(self::OTHER_PLUGIN_CLASS, true));
+        $this->assertFalse($this->manager->isPluginClassInstalled(self::PLUGIN_CLASS, false));
+        $this->assertTrue($this->manager->isPluginClassInstalled(self::OTHER_PLUGIN_CLASS, false));
+
+        $this->assertFalse($this->manager->isPluginClassInstalled('foobar', true));
+        $this->assertFalse($this->manager->isPluginClassInstalled('foobar', false));
+    }
 }
