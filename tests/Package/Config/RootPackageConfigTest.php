@@ -209,4 +209,15 @@ class RootPackageConfigTest extends \PHPUnit_Framework_TestCase
         $this->assertSame(array(self::GLOBAL_PLUGIN, self::LOCAL_PLUGIN), $this->config->getPluginClasses());
         $this->assertSame(array(self::GLOBAL_PLUGIN, self::LOCAL_PLUGIN), $this->config->getPluginClasses(false));
     }
+
+    public function testHasPluginClass()
+    {
+        $this->globalConfig->addPluginClass(self::GLOBAL_PLUGIN);
+        $this->config->addPluginClass(self::LOCAL_PLUGIN);
+
+        $this->assertTrue($this->config->hasPluginClass(self::GLOBAL_PLUGIN, true));
+        $this->assertTrue($this->config->hasPluginClass(self::LOCAL_PLUGIN, true));
+        $this->assertFalse($this->config->hasPluginClass(self::GLOBAL_PLUGIN, false));
+        $this->assertTrue($this->config->hasPluginClass(self::LOCAL_PLUGIN, false));
+    }
 }

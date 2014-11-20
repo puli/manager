@@ -510,7 +510,7 @@ EOF
      */
     public function isPluginClassInstalled($pluginClass, $includeGlobal = true)
     {
-        return in_array($pluginClass, $this->rootPackageConfig->getPluginClasses($includeGlobal));
+        return $this->rootPackageConfig->hasPluginClass($pluginClass, $includeGlobal);
     }
 
     /**

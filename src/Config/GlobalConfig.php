@@ -332,4 +332,16 @@ class GlobalConfig
     {
         unset($this->pluginClasses[ltrim($pluginClass, '\\')]);
     }
+
+    /**
+     * Returns whether the configuration contains a plugin class.
+     *
+     * @param string $pluginClass The fully qualified plugin class name.
+     *
+     * @return bool Whether the configuration contains the plugin class.
+     */
+    public function hasPluginClass($pluginClass)
+    {
+        return isset($this->pluginClasses[ltrim($pluginClass, '\\')]);
+    }
 }

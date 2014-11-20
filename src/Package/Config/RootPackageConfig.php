@@ -320,6 +320,32 @@ class RootPackageConfig extends PackageConfig
     }
 
     /**
+     * Returns whether the configuration contains a plugin class.
+     *
+     * @param string $pluginClass The fully qualified plugin class name.
+     * @param bool   $fallback    Whether to consider plugins configured in the
+     *                            global configuration. If set to `false`, only
+     *                            plugins configured in this configuration will
+     *                            be considered. Defaults to `true`.
+     *
+     * @return bool Whether the configuration contains the plugin class.
+     *
+     * @see GlobalConfig::hasPluginClass()
+     */
+    public function hasPluginClass($pluginClass, $fallback = true)
+    {
+        if ($this->localConfig->hasPluginClass($pluginClass)) {
+            return true;
+        }
+
+        if ($fallback && $this->globalConfig->hasPluginClass($pluginClass)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
      * Resets the plugin classes to the classes defined in the global
      * configuration.
      *

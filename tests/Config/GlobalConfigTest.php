@@ -19,6 +19,8 @@ use Puli\PackageManager\Config\GlobalConfig;
  */
 class GlobalConfigTest extends \PHPUnit_Framework_TestCase
 {
+    const PLUGIN_CLASS = 'Puli\PackageManager\Tests\Config\Fixtures\TestPlugin';
+    const OTHER_PLUGIN_CLASS = 'Puli\PackageManager\Tests\Config\Fixtures\OtherPlugin';
     /**
      * @var GlobalConfig
      */
@@ -167,14 +169,14 @@ class GlobalConfigTest extends \PHPUnit_Framework_TestCase
      */
     public function testPluginClassMustHaveNoArgConstructor()
     {
-        $this->config->addPluginClass(__NAMESPACE__.'\Fixtures\TestPluginWithoutNoArgConstructor');
+        $this->config->addPluginClass('Puli\PackageManager\Tests\Config\Fixtures\TestPluginWithoutNoArgConstructor');
     }
 
     public function testPluginClassMayHaveNoConstructor()
     {
-        $this->config->addPluginClass(__NAMESPACE__.'\Fixtures\TestPluginWithoutConstructor');
+        $this->config->addPluginClass('Puli\PackageManager\Tests\Config\Fixtures\TestPluginWithoutConstructor');
 
-        $this->assertSame(array(__NAMESPACE__.'\Fixtures\TestPluginWithoutConstructor'), $this->config->getPluginClasses());
+        $this->assertSame(array('Puli\PackageManager\Tests\Config\Fixtures\TestPluginWithoutConstructor'), $this->config->getPluginClasses());
     }
 
     /**
@@ -182,7 +184,7 @@ class GlobalConfigTest extends \PHPUnit_Framework_TestCase
      */
     public function testPluginClassMustNotBeInterface()
     {
-        $this->config->addPluginClass(__NAMESPACE__.'\Fixtures\TestPluginInterface');
+        $this->config->addPluginClass('Puli\PackageManager\Tests\Config\Fixtures\TestPluginInterface');
     }
 
     /**
@@ -190,37 +192,37 @@ class GlobalConfigTest extends \PHPUnit_Framework_TestCase
      */
     public function testPluginClassMustNotBeTrait()
     {
-        $this->config->addPluginClass(__NAMESPACE__.'\Fixtures\TestPluginTrait');
+        $this->config->addPluginClass('Puli\PackageManager\Tests\Config\Fixtures\TestPluginTrait');
     }
 
     public function testDuplicatePluginClassesIgnored()
     {
-        $this->config->addPluginClass(__NAMESPACE__.'\Fixtures\TestPlugin');
-        $this->config->addPluginClass(__NAMESPACE__.'\Fixtures\TestPlugin');
+        $this->config->addPluginClass(self::PLUGIN_CLASS);
+        $this->config->addPluginClass(self::PLUGIN_CLASS);
 
-        $this->assertSame(array(__NAMESPACE__.'\Fixtures\TestPlugin'), $this->config->getPluginClasses());
+        $this->assertSame(array(self::PLUGIN_CLASS), $this->config->getPluginClasses());
     }
 
     public function testAddPluginClassIgnoresLeadingSlash()
     {
-        $this->config->addPluginClass('\\'.__NAMESPACE__.'\Fixtures\TestPlugin');
+        $this->config->addPluginClass('\\'.self::PLUGIN_CLASS);
 
-        $this->assertSame(array(__NAMESPACE__.'\Fixtures\TestPlugin'), $this->config->getPluginClasses());
+        $this->assertSame(array(self::PLUGIN_CLASS), $this->config->getPluginClasses());
     }
 
     public function testSetPluginClasses()
     {
         $this->config->setPluginClasses(array(
-            __NAMESPACE__.'\Fixtures\TestPlugin',
-            __NAMESPACE__.'\Fixtures\OtherPlugin',
+            self::PLUGIN_CLASS,
+            self::OTHER_PLUGIN_CLASS,
         ));
 
-        $this->assertSame(array(__NAMESPACE__.'\Fixtures\TestPlugin', __NAMESPACE__.'\Fixtures\OtherPlugin'), $this->config->getPluginClasses());
+        $this->assertSame(array(self::PLUGIN_CLASS, self::OTHER_PLUGIN_CLASS), $this->config->getPluginClasses());
     }
 
     public function testSetPluginClassesToEmptyArray()
     {
-        $this->config->addPluginClass(__NAMESPACE__.'\Fixtures\TestPlugin');
+        $this->config->addPluginClass(self::PLUGIN_CLASS);
         $this->config->setPluginClasses(array());
 
         $this->assertSame(array(), $this->config->getPluginClasses());
@@ -229,30 +231,48 @@ class GlobalConfigTest extends \PHPUnit_Framework_TestCase
     public function testRemovePluginClass()
     {
         $this->config->setPluginClasses(array(
-            __NAMESPACE__.'\Fixtures\TestPlugin',
-            __NAMESPACE__.'\Fixtures\OtherPlugin',
+            self::PLUGIN_CLASS,
+            self::OTHER_PLUGIN_CLASS,
         ));
-        $this->config->removePluginClass(__NAMESPACE__.'\Fixtures\TestPlugin');
+        $this->config->removePluginClass(self::PLUGIN_CLASS);
 
-        $this->assertSame(array(__NAMESPACE__.'\Fixtures\OtherPlugin'), $this->config->getPluginClasses());
+        $this->assertSame(array(self::OTHER_PLUGIN_CLASS), $this->config->getPluginClasses());
     }
 
     public function testRemovePluginClassIgnoresLeadingSlash()
     {
         $this->config->setPluginClasses(array(
-            __NAMESPACE__.'\Fixtures\TestPlugin',
-            __NAMESPACE__.'\Fixtures\OtherPlugin',
+            self::PLUGIN_CLASS,
+            self::OTHER_PLUGIN_CLASS,
         ));
-        $this->config->removePluginClass('\\'.__NAMESPACE__.'\Fixtures\TestPlugin');
+        $this->config->removePluginClass('\\'.self::PLUGIN_CLASS);
 
-        $this->assertSame(array(__NAMESPACE__.'\Fixtures\OtherPlugin'), $this->config->getPluginClasses());
+        $this->assertSame(array(self::OTHER_PLUGIN_CLASS), $this->config->getPluginClasses());
     }
 
     public function testRemovePluginClassDoesNothingIfNotFound()
     {
-        $this->config->addPluginClass(__NAMESPACE__.'\Fixtures\TestPlugin');
-        $this->config->removePluginClass(__NAMESPACE__.'\Fixtures\OtherPlugin');
+        $this->config->addPluginClass(self::PLUGIN_CLASS);
+        $this->config->removePluginClass(self::OTHER_PLUGIN_CLASS);
 
-        $this->assertSame(array(__NAMESPACE__.'\Fixtures\TestPlugin'), $this->config->getPluginClasses());
+        $this->assertSame(array(self::PLUGIN_CLASS), $this->config->getPluginClasses());
+    }
+
+    public function testHasPluginClass()
+    {
+        $this->assertFalse($this->config->hasPluginClass(self::PLUGIN_CLASS));
+
+        $this->config->addPluginClass(self::PLUGIN_CLASS);
+
+        $this->assertTrue($this->config->hasPluginClass(self::PLUGIN_CLASS));
+    }
+
+    public function testHasPluginClassIgnoresLeadingSlash()
+    {
+        $this->assertFalse($this->config->hasPluginClass('\\'.self::PLUGIN_CLASS));
+
+        $this->config->addPluginClass(self::PLUGIN_CLASS);
+
+        $this->assertTrue($this->config->hasPluginClass('\\'.self::PLUGIN_CLASS));
     }
 }
