@@ -239,6 +239,24 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
         new PackageManager($this->rootDir, $this->environment, $this->configManager, $this->dispatcher);
     }
 
+    /**
+     * @expectedException \Puli\PackageManager\FileNotFoundException
+     * @expectedExceptionMessage /foobar
+     */
+    public function testFailIfNonExistingRootDir()
+    {
+        new PackageManager(__DIR__.'/foobar', $this->environment, $this->configManager, $this->dispatcher);
+    }
+
+    /**
+     * @expectedException \Puli\PackageManager\NoDirectoryException
+     * @expectedExceptionMessage /file
+     */
+    public function testFailIfRootDirNoDirectory()
+    {
+        new PackageManager($this->rootDir.'/file', $this->environment, $this->configManager, $this->dispatcher);
+    }
+
     public function testGenerateResourceRepository()
     {
         $this->initDefaultManager();
@@ -453,6 +471,28 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
             ->method('saveRepositoryConfig');
 
         $this->manager->installPackage($this->package3Dir);
+    }
+
+    /**
+     * @expectedException \Puli\PackageManager\FileNotFoundException
+     * @expectedExceptionMessage /foobar
+     */
+    public function testInstallPackageFailsIfDirectoryNotFound()
+    {
+        $this->initDefaultManager();
+
+        $this->manager->installPackage(__DIR__.'/foobar');
+    }
+
+    /**
+     * @expectedException \Puli\PackageManager\NoDirectoryException
+     * @expectedExceptionMessage /file
+     */
+    public function testInstallPackageFailsIfNoDirectory()
+    {
+        $this->initDefaultManager();
+
+        $this->manager->installPackage($this->rootDir.'/file');
     }
 
     public function testIsPackageInstalled()

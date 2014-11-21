@@ -30,7 +30,6 @@ use Puli\PackageManager\Resource\ResourceConflictException;
 use Puli\PackageManager\Resource\ResourceDefinitionException;
 use Puli\PackageManager\Resource\ResourceRepositoryBuilder;
 use Puli\Repository\ResourceRepository;
-use Puli\Resource\NoDirectoryException;
 use Puli\Util\Path;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -142,6 +141,8 @@ class PackageManager
      * @throws InvalidConfigException If the global configuration or the
      *                                configuration of the root package is
      *                                invalid.
+     * @throws FileNotFoundException If the root directory does not exist.
+     * @throws NoDirectoryException If the root path points to a file.
      */
     public static function createPackageManager($rootDir, PuliEnvironment $environment = null)
     {
@@ -159,9 +160,27 @@ class PackageManager
      * @param PuliEnvironment          $environment   The system environment.
      * @param ConfigManager            $configManager The config file manager.
      * @param EventDispatcherInterface $dispatcher    The event dispatcher.
+     *
+     * @throws FileNotFoundException If the root directory does not exist.
+     * @throws NoDirectoryException If the root path points to a file.
      */
     public function __construct($rootDir, PuliEnvironment $environment, ConfigManager $configManager, EventDispatcherInterface $dispatcher)
     {
+        if (!file_exists($rootDir)) {
+            throw new FileNotFoundException(sprintf(
+                'Could not load package manager: The root %s does not exist.',
+                $rootDir
+            ));
+        }
+
+        if (!is_dir($rootDir)) {
+            throw new NoDirectoryException(sprintf(
+                'Could not load package manager: The root %s is a file. '.
+                'Expected a directory.',
+                $rootDir
+            ));
+        }
+
         $this->packageRepository = new PackageRepository();
         $this->rootDir = $rootDir;
         $this->environment = $environment;
@@ -248,6 +267,8 @@ EOF
      *
      * @param string $installPath The path to the package.
      *
+     * @throws FileNotFoundException If the package directory does not exist.
+     * @throws NoDirectoryException If the package path points to a file.
      * @throws InvalidConfigException If the package is not configured correctly.
      * @throws NameConflictException If the package has the same name as another
      *                               loaded package.
@@ -255,6 +276,21 @@ EOF
     public function installPackage($installPath)
     {
         $installPath = Path::makeAbsolute($installPath, $this->rootDir);
+
+        if (!file_exists($installPath)) {
+            throw new FileNotFoundException(sprintf(
+                'Could not install package: The directory %s does not exist.',
+                $installPath
+            ));
+        }
+
+        if (!is_dir($installPath)) {
+            throw new NoDirectoryException(sprintf(
+                'Could not install package: The path %s is a file. '.
+                'Expected a directory.',
+                $installPath
+            ));
+        }
 
         if ($this->isPackageInstalled($installPath)) {
             return;
