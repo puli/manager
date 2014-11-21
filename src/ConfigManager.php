@@ -136,6 +136,8 @@ class ConfigManager
     /**
      * Loads package repository configuration from a file path.
      *
+     * If the file does not exist, an empty configuration is returned.
+     *
      * @param string $path The path to the repository configuration file.
      *
      * @return PackageRepositoryConfig The loaded package repository configuration.
@@ -201,10 +203,17 @@ class ConfigManager
         }
 
         if (null === $config->getPackageName()) {
+            if (isset($e)) {
+                throw new InvalidConfigException(sprintf(
+                    'The file %s is missing.',
+                    $config->getPath()
+                ), $e->getCode(), $e);
+            }
+
             throw new InvalidConfigException(sprintf(
                 'The "name" key is missing in %s.',
                 $config->getPath()
-            ), isset($e) ? $e->getCode() : 0, isset($e) ? $e : null);
+            ));
         }
 
         return $config;
