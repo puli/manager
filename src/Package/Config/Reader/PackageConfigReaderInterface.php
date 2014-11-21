@@ -11,6 +11,7 @@
 
 namespace Puli\PackageManager\Package\Config\Reader;
 
+use Puli\PackageManager\Config\GlobalConfig;
 use Puli\PackageManager\FileNotFoundException;
 use Puli\PackageManager\InvalidConfigException;
 use Puli\PackageManager\Package\Config\PackageConfig;
@@ -39,12 +40,15 @@ interface PackageConfigReaderInterface
     /**
      * Reads root package configuration from a file.
      *
-     * @param string $path The file path to read.
+     * @param string       $path         The file path to read.
+     * @param GlobalConfig $globalConfig The global configuration that the root
+     *                                   configuration will inherit its settings
+     *                                   from.
      *
      * @return RootPackageConfig The root package configuration.
      *
      * @throws FileNotFoundException If the file was not found.
-     * @throws InvalidConfigException If the source contains invalid configuration.
+     * @throws InvalidConfigException If the file contains invalid configuration.
      */
-    public function readRootPackageConfig($path);
+    public function readRootPackageConfig($path, GlobalConfig $globalConfig);
 }

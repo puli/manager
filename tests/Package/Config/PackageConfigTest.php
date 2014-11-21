@@ -19,37 +19,94 @@ use Puli\PackageManager\Package\Config\PackageConfig;
  */
 class PackageConfigTest extends \PHPUnit_Framework_TestCase
 {
+    public function provideValidPaths()
+    {
+        return array(
+            array(null),
+            array('/foo'),
+        );
+    }
+
     /**
-     * @var PackageConfig
+     * @dataProvider provideValidPaths
      */
-    private $config;
-
-    protected function setUp()
+    public function testGetPath($path)
     {
-        $this->config = new PackageConfig();
+        $config = new PackageConfig(null, $path);
+
+        $this->assertSame($path, $config->getPath());
     }
 
-    public function testGetPath()
+    public function provideInvalidPaths()
     {
-        $this->assertNull($this->config->getPath());
-
-        $this->config = new PackageConfig(null, '/foo');
-        $this->assertSame('/foo', $this->config->getPath());
+        return array(
+            array(12345),
+            array(''),
+        );
     }
 
     /**
+     * @dataProvider provideInvalidPaths
      * @expectedException \InvalidArgumentException
      */
-    public function testPathMustBeString()
+    public function testPathMustBeValid($invalidPath)
     {
-        new PackageConfig(null, 12345);
+        new PackageConfig(null, $invalidPath);
+    }
+
+    public function provideValidPackageNames()
+    {
+        return array(
+            array(null),
+            array('/foo'),
+        );
     }
 
     /**
+     * @dataProvider provideValidPackageNames
+     */
+    public function testGetPackageName($name)
+    {
+        $config = new PackageConfig($name);
+
+        $this->assertSame($name, $config->getPackageName());
+    }
+
+    /**
+     * @dataProvider provideValidPackageNames
+     */
+    public function testGetPackageNameSetter($name)
+    {
+        $config = new PackageConfig();
+        $config->setPackageName($name);
+
+        $this->assertSame($name, $config->getPackageName());
+    }
+
+    public function provideInvalidPackageNames()
+    {
+        return array(
+            array(12345),
+            array(''),
+        );
+    }
+
+    /**
+     * @dataProvider provideInvalidPaths
      * @expectedException \InvalidArgumentException
      */
-    public function testPathMustNotBeEmpty()
+    public function testPackageNameMustBeValid($invalidName)
     {
-        new PackageConfig(null, '');
+        new PackageConfig($invalidName);
+    }
+
+    /**
+     * @dataProvider provideInvalidPaths
+     * @expectedException \InvalidArgumentException
+     */
+    public function testPackageNameMustBeValidSetter($invalidName)
+    {
+        $config = new PackageConfig();
+        $config->setPackageName($invalidName);
     }
 }

@@ -31,7 +31,7 @@ interface GlobalConfigReaderInterface
      * @return GlobalConfig The global configuration.
      *
      * @throws FileNotFoundException If the file was not found.
-     * @throws InvalidConfigException If the source contains invalid configuration.
+     * @throws InvalidConfigException If the file contains invalid configuration.
      */
     public function readGlobalConfig($path);
 }

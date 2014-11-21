@@ -12,14 +12,10 @@
 namespace Puli\PackageManager\Package\Config\Writer;
 
 use Puli\Json\JsonEncoder;
-use Puli\Json\JsonValidator;
-use Puli\PackageManager\Event\JsonEvent;
-use Puli\PackageManager\Event\PackageEvents;
 use Puli\PackageManager\IOException;
 use Puli\PackageManager\Package\Config\PackageConfig;
 use Puli\PackageManager\Package\Config\RootPackageConfig;
 use Puli\Util\Path;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Filesystem\Filesystem;
 
 /**
@@ -33,24 +29,6 @@ use Symfony\Component\Filesystem\Filesystem;
  */
 class PackageJsonWriter implements PackageConfigWriterInterface
 {
-    /**
-     * @var EventDispatcherInterface|null
-     */
-    private $dispatcher;
-
-    /**
-     * Creates a new configuration reader.
-     *
-     * You can pass an event dispatcher if you want to listen to events
-     * triggered by the reader.
-     *
-     * @param EventDispatcherInterface|null $dispatcher The event dispatcher. Optional.
-     */
-    public function __construct(EventDispatcherInterface $dispatcher = null)
-    {
-        $this->dispatcher = $dispatcher;
-    }
-
     /**
      * Writes package configuration to a JSON file.
      *
@@ -71,13 +49,9 @@ class PackageJsonWriter implements PackageConfigWriterInterface
 
         if ($config instanceof RootPackageConfig) {
             $this->addRootConfig($jsonData, $config);
-
-            // Set a default package name for the root config. This name will
-            // not be written to the file.
-            $defaultPackageName = '__root__';
         }
 
-        $this->encodeFile($path, $jsonData, $defaultPackageName);
+        $this->encodeFile($path, $jsonData);
     }
 
     private function addConfig(\stdClass $jsonData, PackageConfig $config)
@@ -86,7 +60,9 @@ class PackageJsonWriter implements PackageConfigWriterInterface
         $tagDescriptors = $config->getTagDescriptors();
         $overrides = $config->getOverriddenPackages();
 
-        $jsonData->name = $config->getPackageName();
+        if (null !== $config->getPackageName()) {
+            $jsonData->name = $config->getPackageName();
+        }
 
         if (count($resourceDescriptors) > 0) {
             $jsonData->resources = new \stdClass();
@@ -141,7 +117,7 @@ class PackageJsonWriter implements PackageConfigWriterInterface
         }
     }
 
-    private function encodeFile($path, \stdClass $jsonData, $defaultPackageName = null)
+    private function encodeFile($path, \stdClass $jsonData)
     {
         if (!Path::isAbsolute($path)) {
             throw new IOException(sprintf(
@@ -161,32 +137,13 @@ class PackageJsonWriter implements PackageConfigWriterInterface
         $encoder->setPrettyPrinting(true);
         $encoder->setEscapeSlash(false);
         $encoder->setTerminateWithLineFeed(true);
-
-        $validator = new JsonValidator();
         $schema = realpath(__DIR__.'/../../../../res/schema/package-schema.json');
-
-        // Validate before dispatching the event
-        $validator->validate($jsonData, $schema);
-
-        // Remove the package name if it matches the default package name
-        if ($defaultPackageName === $jsonData->name) {
-            unset($jsonData->name);
-        }
-
-        // Listeners may create invalid JSON files (e.g. remove the name)
-        // However, they must also make the JSON data valid again upon reading,
-        // otherwise the reader will fail schema validation.
-        if ($this->dispatcher && $this->dispatcher->hasListeners(PackageEvents::PACKAGE_JSON_GENERATED)) {
-            $event = new JsonEvent($path, $jsonData);
-            $this->dispatcher->dispatch(PackageEvents::PACKAGE_JSON_GENERATED, $event);
-            $jsonData = $event->getJsonData();
-        }
 
         if (!is_dir($dir = Path::getDirectory($path))) {
             $filesystem = new Filesystem();
             $filesystem->mkdir($dir);
         }
 
-        $encoder->encodeFile($path, $jsonData);
+        $encoder->encodeFile($path, $jsonData, $schema);
     }
 }

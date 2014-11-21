@@ -19,37 +19,38 @@ use Puli\PackageManager\Repository\Config\PackageRepositoryConfig;
  */
 class PackageRepositoryConfigTest extends \PHPUnit_Framework_TestCase
 {
+    public function provideValidPaths()
+    {
+        return array(
+            array(null),
+            array('/foo'),
+        );
+    }
+
     /**
-     * @var PackageRepositoryConfig
+     * @dataProvider provideValidPaths
      */
-    private $config;
-
-    protected function setUp()
+    public function testGetPath($path)
     {
-        $this->config = new PackageRepositoryConfig();
+        $config = new PackageRepositoryConfig($path);
+
+        $this->assertSame($path, $config->getPath());
     }
 
-    public function testGetPath()
+    public function provideInvalidPaths()
     {
-        $this->assertNull($this->config->getPath());
-
-        $this->config = new PackageRepositoryConfig('/foo');
-        $this->assertSame('/foo', $this->config->getPath());
+        return array(
+            array(12345),
+            array(''),
+        );
     }
 
     /**
+     * @dataProvider provideInvalidPaths
      * @expectedException \InvalidArgumentException
      */
-    public function testPathMustBeString()
+    public function testPathMustBeValid($invalidPath)
     {
-        new PackageRepositoryConfig(12345);
-    }
-
-    /**
-     * @expectedException \InvalidArgumentException
-     */
-    public function testPathMustNotBeEmpty()
-    {
-        new PackageRepositoryConfig('');
+        new PackageRepositoryConfig($invalidPath);
     }
 }

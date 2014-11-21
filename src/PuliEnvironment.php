@@ -12,10 +12,6 @@
 namespace Puli\PackageManager;
 
 use Puli\PackageManager\Config\GlobalConfig;
-use Puli\PackageManager\Config\Reader\ConfigJsonReader;
-use Puli\PackageManager\Config\Reader\GlobalConfigReaderInterface;
-use Puli\PackageManager\Config\Writer\ConfigJsonWriter;
-use Puli\PackageManager\Config\Writer\GlobalConfigWriterInterface;
 use Symfony\Component\Filesystem\Filesystem;
 
 /**
@@ -36,22 +32,17 @@ class PuliEnvironment
     private $homeDir;
 
     /**
+     * @var ConfigManager
+     */
+    private $configManager;
+
+    /**
      * @var GlobalConfig
      */
     private $globalConfig;
 
     /**
-     * @var GlobalConfigReaderInterface
-     */
-    private $configReader;
-
-    /**
-     * @var GlobalConfigWriterInterface
-     */
-    private $configWriter;
-
-    /**
-     * Creates the Puli environment from the system's environment variables.
+     * Parses environment variables for Puli's home directory.
      *
      * This method scans the environment variables "PULI_HOME", "HOME" and
      * "APPDATA" to determine Puli's home directory:
@@ -64,23 +55,12 @@ class PuliEnvironment
      *    variable contains the path of the application data by default on
      *    Windows.
      *
-     * A .htaccess file is put into Puli's home directory to protect it from
-     * web access.
+     * @return string The path to Puli's home directory.
      *
      * @throws BootstrapException If the home directory is not found or is not
      *                            a directory.
-     * @throws InvalidConfigException If the global configuration is invalid.
      */
-    public static function createFromSystem()
-    {
-        $homeDir = self::parseHomeDirectory();
-
-        self::denyWebAccess($homeDir);
-
-        return new self($homeDir, new ConfigJsonReader(), new ConfigJsonWriter());
-    }
-
-    private static function parseHomeDirectory()
+    public static function parseHomeDirectory()
     {
         if ($value = getenv('PULI_HOME')) {
             $homeDir = $value;
@@ -120,7 +100,15 @@ class PuliEnvironment
         }
     }
 
-    private static function denyWebAccess($directory)
+    /**
+     * Denies web access to a directory path.
+     *
+     * A .htaccess file with the contents "Deny from all" is placed in the
+     * directory, unless a .htaccess file exists already.
+     *
+     * @param string $directory The path to a directory.
+     */
+    public static function denyWebAccess($directory)
     {
         if (!file_exists($directory.'/.htaccess')) {
             if (!is_dir($directory)) {
@@ -139,31 +127,16 @@ class PuliEnvironment
      * If that file exists, it is loaded into memory. Use the other methods in
      * this class to read and modify the configuration values.
      *
-     * @param string                      $homeDir      The path to Puli's home directory.
-     * @param GlobalConfigReaderInterface $configReader The global config file reader.
-     * @param GlobalConfigWriterInterface $configWriter The global config file writer
+     * @param string        $homeDir       The path to Puli's home directory.
+     * @param ConfigManager $configManager The configuration file manager.
      *
      * @throws InvalidConfigException If the global configuration is invalid.
      */
-    public function __construct(
-        $homeDir,
-        GlobalConfigReaderInterface $configReader,
-        GlobalConfigWriterInterface $configWriter
-    )
+    public function __construct($homeDir, ConfigManager $configManager)
     {
         $this->homeDir = $homeDir;
-        $this->configReader = $configReader;
-        $this->configWriter = $configWriter;
-
-        $configPath = $this->homeDir.'/config.json';
-
-        try {
-            // Don't use file_exists() in order to let the config reader decide
-            // when to throw FileNotFoundException
-            $this->globalConfig = $this->configReader->readGlobalConfig($configPath);
-        } catch (FileNotFoundException $e) {
-            $this->globalConfig = new GlobalConfig($configPath);
-        }
+        $this->configManager = $configManager;
+        $this->globalConfig = $configManager->loadGlobalConfig($this->homeDir.'/config.json');
     }
 
     /**
@@ -209,7 +182,7 @@ class PuliEnvironment
 
         $this->globalConfig->addPluginClass($pluginClass);
 
-        $this->configWriter->writeGlobalConfig($this->globalConfig, $this->globalConfig->getPath());
+        $this->configManager->saveGlobalConfig($this->globalConfig);
     }
 
     /**

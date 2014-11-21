@@ -13,18 +13,14 @@ namespace Puli\PackageManager\Package\Config\Reader;
 
 use Puli\Json\DecodingFailedException;
 use Puli\Json\JsonDecoder;
-use Puli\Json\JsonValidator;
 use Puli\Json\ValidationFailedException;
 use Puli\PackageManager\Config\GlobalConfig;
-use Puli\PackageManager\Event\JsonEvent;
-use Puli\PackageManager\Event\PackageEvents;
 use Puli\PackageManager\FileNotFoundException;
 use Puli\PackageManager\InvalidConfigException;
 use Puli\PackageManager\Package\Config\PackageConfig;
 use Puli\PackageManager\Package\Config\ResourceDescriptor;
 use Puli\PackageManager\Package\Config\RootPackageConfig;
 use Puli\PackageManager\Package\Config\TagDescriptor;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
  * Reads package configuration from a JSON file.
@@ -37,31 +33,6 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
  */
 class PackageJsonReader implements PackageConfigReaderInterface
 {
-    /**
-     * @var GlobalConfig
-     */
-    private $globalConfig;
-
-    /**
-     * @var EventDispatcherInterface|null
-     */
-    private $dispatcher;
-
-    /**
-     * Creates a new configuration reader.
-     *
-     * You can pass an event dispatcher if you want to listen to events
-     * triggered by the reader.
-     *
-     * @param GlobalConfig                  $globalConfig The global configuration.
-     * @param EventDispatcherInterface|null $dispatcher   The event dispatcher. Optional.
-     */
-    public function __construct(GlobalConfig $globalConfig, EventDispatcherInterface $dispatcher = null)
-    {
-        $this->globalConfig = $globalConfig;
-        $this->dispatcher = $dispatcher;
-    }
-
     /**
      * Reads package configuration from a JSON file.
      *
@@ -92,19 +63,21 @@ class PackageJsonReader implements PackageConfigReaderInterface
      * The data in the JSON file is validated against the schema
      * `res/schema/package-schema.json`.
      *
-     * @param string $path The path to the JSON file.
+     * @param string       $path         The path to the JSON file.
+     * @param GlobalConfig $globalConfig The global configuration that the root
+     *                                   configuration will inherit its settings
+     *                                   from.
      *
      * @return RootPackageConfig The configuration read from the JSON file.
      *
      * @throws FileNotFoundException If the JSON file was not found.
      * @throws InvalidConfigException If the JSON file is invalid.
      */
-    public function readRootPackageConfig($path)
+    public function readRootPackageConfig($path, GlobalConfig $globalConfig)
     {
-        $config = new RootPackageConfig($this->globalConfig, null, $path);
+        $config = new RootPackageConfig($globalConfig, null, $path);
 
-        // Set the package name to "__root__" by default
-        $jsonData = $this->decodeFile($path, '__root__');
+        $jsonData = $this->decodeFile($path);
 
         $this->populateConfig($config, $jsonData);
         $this->populateRootConfig($config, $jsonData);
@@ -114,7 +87,9 @@ class PackageJsonReader implements PackageConfigReaderInterface
 
     private function populateConfig(PackageConfig $config, \stdClass $jsonData)
     {
-        $config->setPackageName($jsonData->name);
+        if (isset($jsonData->name)) {
+            $config->setPackageName($jsonData->name);
+        }
 
         if (isset($jsonData->resources)) {
             foreach ($jsonData->resources as $path => $relativePaths) {
@@ -156,10 +131,9 @@ class PackageJsonReader implements PackageConfigReaderInterface
         }
     }
 
-    private function decodeFile($path, $defaultPackageName = null)
+    private function decodeFile($path)
     {
         $decoder = new JsonDecoder();
-        $validator = new JsonValidator();
         $schema = realpath(__DIR__.'/../../../../res/schema/package-schema.json');
 
         if (!file_exists($path)) {
@@ -170,30 +144,13 @@ class PackageJsonReader implements PackageConfigReaderInterface
         }
 
         try {
-            $jsonData = $decoder->decodeFile($path);
+            $jsonData = $decoder->decodeFile($path, $schema);
         } catch (DecodingFailedException $e) {
             throw new InvalidConfigException(sprintf(
                 "The configuration in %s could not be decoded:\n%s",
                 $path,
                 $e->getMessage()
             ), $e->getCode(), $e);
-        }
-
-        // Set the name of the root package to a default value
-        if (!isset($jsonData->name) && null !== $defaultPackageName) {
-            $jsonData->name = $defaultPackageName;
-        }
-
-        // Event listeners have the opportunity to make invalid loaded files
-        // valid here (e.g. add the name if it's missing)
-        if ($this->dispatcher && $this->dispatcher->hasListeners(PackageEvents::PACKAGE_JSON_LOADED)) {
-            $event = new JsonEvent($path, $jsonData);
-            $this->dispatcher->dispatch(PackageEvents::PACKAGE_JSON_LOADED, $event);
-            $jsonData = $event->getJsonData();
-        }
-
-        try {
-            $validator->validate($jsonData, $schema);
         } catch (ValidationFailedException $e) {
             throw new InvalidConfigException(sprintf(
                 "The configuration in %s is invalid:\n%s",

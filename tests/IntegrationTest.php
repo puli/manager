@@ -53,7 +53,7 @@ class IntegrationTest extends \PHPUnit_Framework_TestCase
 
     public function testCreatePackageManager()
     {
-        $manager = PackageManager::createDefault($this->tempDir);
+        $manager = PackageManager::createPackageManager($this->tempDir);
 
         $this->assertInstanceOf('Puli\PackageManager\PackageManager', $manager);
 

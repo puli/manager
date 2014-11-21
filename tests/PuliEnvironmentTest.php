@@ -12,9 +12,7 @@
 namespace Puli\PackageManager\Tests;
 
 use Puli\PackageManager\Config\GlobalConfig;
-use Puli\PackageManager\Config\Reader\GlobalConfigReaderInterface;
-use Puli\PackageManager\Config\Writer\GlobalConfigWriterInterface;
-use Puli\PackageManager\FileNotFoundException;
+use Puli\PackageManager\ConfigManager;
 use Puli\PackageManager\PuliEnvironment;
 use Symfony\Component\Filesystem\Filesystem;
 
@@ -44,14 +42,9 @@ class PuliEnvironmentTest extends \PHPUnit_Framework_TestCase
     private $globalConfig;
 
     /**
-     * @var \PHPUnit_Framework_MockObject_MockObject|GlobalConfigReaderInterface
+     * @var \PHPUnit_Framework_MockObject_MockObject|ConfigManager
      */
-    private $configReader;
-
-    /**
-     * @var \PHPUnit_Framework_MockObject_MockObject|GlobalConfigWriterInterface
-     */
-    private $configWriter;
+    private $configManager;
 
     protected function setUp()
     {
@@ -61,8 +54,9 @@ class PuliEnvironmentTest extends \PHPUnit_Framework_TestCase
         $filesystem->mirror(__DIR__.'/Fixtures/home', $this->tempHome);
 
         $this->globalConfig = new GlobalConfig();
-        $this->configReader = $this->getMock('Puli\PackageManager\Config\Reader\GlobalConfigReaderInterface');
-        $this->configWriter = $this->getMock('Puli\PackageManager\Config\Writer\GlobalConfigWriterInterface');
+        $this->configManager = $this->getMockBuilder('Puli\PackageManager\ConfigManager')
+            ->disableOriginalConstructor()
+            ->getMock();
     }
 
     protected function tearDown()
@@ -76,101 +70,64 @@ class PuliEnvironmentTest extends \PHPUnit_Framework_TestCase
         putenv('APPDATA');
     }
 
-    public function testInitHomeDirectory()
+    public function testParseHomeDirectory()
     {
         putenv('HOME='.$this->tempHome);
 
-        $env = PuliEnvironment::createFromSystem();
-
-        $this->assertTrue(is_dir($this->tempHome.'/.puli'));
-        $this->assertSame($this->tempHome.'/.puli', $env->getHomeDirectory());
+        $this->assertSame($this->tempHome.'/.puli', PuliEnvironment::parseHomeDirectory());
     }
 
-    public function testInitHomeDirectoryBackslashes()
+    public function testParseHomeDirectoryBackslashes()
     {
         putenv('HOME='.strtr($this->tempHome, '/', '\\'));
 
-        $env = PuliEnvironment::createFromSystem();
-
-        $this->assertTrue(is_dir($this->tempHome.'/.puli'));
-        $this->assertSame($this->tempHome.'/.puli', $env->getHomeDirectory());
+        $this->assertSame($this->tempHome.'/.puli', PuliEnvironment::parseHomeDirectory());
     }
 
-    public function testGetOverwrittenHomeDirectory()
+    public function testParseOverwrittenHomeDirectory()
     {
         putenv('HOME=/path/to/home');
         putenv('PULI_HOME='.$this->tempHome.'/custom-home');
 
-        $env = PuliEnvironment::createFromSystem();
-
-        $this->assertTrue(is_dir($this->tempHome.'/custom-home'));
-        $this->assertSame($this->tempHome.'/custom-home', $env->getHomeDirectory());
+        $this->assertSame($this->tempHome.'/custom-home', PuliEnvironment::parseHomeDirectory());
     }
 
-    public function testGetOverwrittenHomeDirectoryBackslashes()
+    public function testParseOverwrittenHomeDirectoryBackslashes()
     {
         putenv('HOME=\path\to\home');
         putenv('PULI_HOME='.strtr($this->tempHome, '/', '\\').'\custom-home');
 
-        $env = PuliEnvironment::createFromSystem();
-
-        $this->assertTrue(is_dir($this->tempHome.'/custom-home'));
-        $this->assertSame($this->tempHome.'/custom-home', $env->getHomeDirectory());
+        $this->assertSame($this->tempHome.'/custom-home', PuliEnvironment::parseHomeDirectory());
     }
 
-    public function testInitHomeDirectoryOnWindows()
+    public function testParseHomeDirectoryOnWindows()
     {
         putenv('APPDATA='.$this->tempHome);
 
-        $env = PuliEnvironment::createFromSystem();
-
-        $this->assertTrue(is_dir($this->tempHome.'/Puli'));
-        $this->assertSame($this->tempHome.'/Puli', $env->getHomeDirectory());
+        $this->assertSame($this->tempHome.'/Puli', PuliEnvironment::parseHomeDirectory());
     }
 
-    public function testInitHomeDirectoryOnWindowsBackslashes()
+    public function testParseHomeDirectoryOnWindowsBackslashes()
     {
         putenv('APPDATA='.strtr($this->tempHome, '/', '\\'));
 
-        $env = PuliEnvironment::createFromSystem();
-
-        $this->assertTrue(is_dir($this->tempHome.'/Puli'));
-        $this->assertSame($this->tempHome.'/Puli', $env->getHomeDirectory());
+        $this->assertSame($this->tempHome.'/Puli', PuliEnvironment::parseHomeDirectory());
     }
 
-    public function testDenyWebAccessToHome()
-    {
-        putenv('PULI_HOME='.$this->tempHome);
-
-        $this->assertFileNotExists($this->tempHome.'/.htaccess');
-
-        PuliEnvironment::createFromSystem();
-
-        // Directory is protected
-        $this->assertFileExists($this->tempHome.'/.htaccess');
-        $this->assertSame('Deny from all', file_get_contents($this->tempHome.'/.htaccess'));
-    }
-
-    public function testGetOverwrittenHomeDirectoryOnWindows()
+    public function testParseOverwrittenHomeDirectoryOnWindows()
     {
         putenv('APPDATA=C:/path/to/home');
         putenv('PULI_HOME='.$this->tempHome.'/custom-home');
 
-        $env = PuliEnvironment::createFromSystem();
-
-        $this->assertTrue(is_dir($this->tempHome.'/custom-home'));
-        $this->assertSame($this->tempHome.'/custom-home', $env->getHomeDirectory());
+        $this->assertSame($this->tempHome.'/custom-home', PuliEnvironment::parseHomeDirectory());
     }
 
-    public function testGetOverwrittenHomeDirectoryOnWindowsBackslashes()
+    public function testParseOverwrittenHomeDirectoryOnWindowsBackslashes()
     {
         putenv('APPDATA=C:\path\to\home');
         putenv('PULI_HOME='.strtr($this->tempHome, '/', '\\').'\custom-home');
 
-        $env = PuliEnvironment::createFromSystem();
-
-        $this->assertTrue(is_dir($this->tempHome.'/custom-home'));
-        $this->assertSame($this->tempHome.'/custom-home', $env->getHomeDirectory());
+        $this->assertSame($this->tempHome.'/custom-home', PuliEnvironment::parseHomeDirectory());
     }
 
     public function testFailIfNoHomeDirectoryFound()
@@ -180,7 +137,7 @@ class PuliEnvironmentTest extends \PHPUnit_Framework_TestCase
         // Mention correct variable in the exception message
         $this->setExpectedException('\Puli\PackageManager\BootstrapException', $isWin ? 'APPDATA' : ' HOME ');
 
-        PuliEnvironment::createFromSystem();
+        PuliEnvironment::parseHomeDirectory();
     }
 
     /**
@@ -191,7 +148,7 @@ class PuliEnvironmentTest extends \PHPUnit_Framework_TestCase
     {
         putenv('PULI_HOME='.$this->tempHome.'/some-file');
 
-        PuliEnvironment::createFromSystem();
+        PuliEnvironment::parseHomeDirectory();
     }
 
     /**
@@ -202,7 +159,7 @@ class PuliEnvironmentTest extends \PHPUnit_Framework_TestCase
     {
         putenv('HOME='.$this->tempHome.'/some-file');
 
-        PuliEnvironment::createFromSystem();
+        PuliEnvironment::parseHomeDirectory();
     }
 
     /**
@@ -213,7 +170,18 @@ class PuliEnvironmentTest extends \PHPUnit_Framework_TestCase
     {
         putenv('APPDATA='.$this->tempHome.'/some-file');
 
-        PuliEnvironment::createFromSystem();
+        PuliEnvironment::parseHomeDirectory();
+    }
+
+    public function testDenyWebAccess()
+    {
+        $this->assertFileNotExists($this->tempHome.'/.htaccess');
+
+        PuliEnvironment::denyWebAccess($this->tempHome);
+
+        // Directory is protected
+        $this->assertFileExists($this->tempHome.'/.htaccess');
+        $this->assertSame('Deny from all', file_get_contents($this->tempHome.'/.htaccess'));
     }
 
     public function testReadConfigOnConstruct()
@@ -221,32 +189,17 @@ class PuliEnvironmentTest extends \PHPUnit_Framework_TestCase
         $globalConfig = new GlobalConfig();
         $globalConfig->addPluginClass(self::PLUGIN_CLASS);
 
-        $this->configReader->expects($this->once())
-            ->method('readGlobalConfig')
+        $this->configManager->expects($this->once())
+            ->method('loadGlobalConfig')
             ->with($this->tempHome.'/config.json')
             ->will($this->returnValue($globalConfig));
 
-        $this->configWriter->expects($this->never())
-            ->method('writeGlobalConfig');
+        $this->configManager->expects($this->never())
+            ->method('saveGlobalConfig');
 
-        $env = new PuliEnvironment($this->tempHome, $this->configReader, $this->configWriter);
+        $env = new PuliEnvironment($this->tempHome, $this->configManager, $this->configManager);
 
         $this->assertSame(array(self::PLUGIN_CLASS), $env->getGlobalPluginClasses());
-    }
-
-    public function testCreateEmptyConfigIfNotFound()
-    {
-        $this->configReader->expects($this->once())
-            ->method('readGlobalConfig')
-            ->with($this->tempHome.'/config.json')
-            ->will($this->throwException(new FileNotFoundException()));
-
-        $this->configWriter->expects($this->never())
-            ->method('writeGlobalConfig');
-
-        $env = new PuliEnvironment($this->tempHome, $this->configReader, $this->configWriter);
-
-        $this->assertSame(array(), $env->getGlobalPluginClasses());
     }
 
     public function testInstallGlobalPlugin()
@@ -254,6 +207,13 @@ class PuliEnvironmentTest extends \PHPUnit_Framework_TestCase
         $this->initEnv();
 
         $this->assertSame(array(), $this->env->getGlobalPluginClasses());
+
+        $this->configManager->expects($this->once())
+            ->method('saveGlobalConfig')
+            ->with($this->globalConfig)
+            ->will($this->returnCallback(function (GlobalConfig $config) {
+                \PHPUnit_Framework_Assert::assertSame(array(self::PLUGIN_CLASS), $config->getPluginClasses());
+            }));
 
         $this->env->installGlobalPluginClass(self::PLUGIN_CLASS);
 
@@ -267,6 +227,9 @@ class PuliEnvironmentTest extends \PHPUnit_Framework_TestCase
         $this->globalConfig->addPluginClass(self::PLUGIN_CLASS);
 
         $this->assertSame(array(self::PLUGIN_CLASS), $this->env->getGlobalPluginClasses());
+
+        $this->configManager->expects($this->never())
+            ->method('saveGlobalConfig');
 
         $this->env->installGlobalPluginClass(self::PLUGIN_CLASS);
 
@@ -288,17 +251,17 @@ class PuliEnvironmentTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($this->env->isGlobalPluginClassInstalled(self::OTHER_PLUGIN_CLASS));
     }
 
-    protected function initEnv()
+    private function initEnv()
     {
-        $this->configReader->expects($this->once())
-            ->method('readGlobalConfig')
+        $this->configManager->expects($this->once())
+            ->method('loadGlobalConfig')
             ->with($this->tempHome.'/config.json')
             ->will($this->returnValue($this->globalConfig));
 
         $this->env = new PuliEnvironment(
             $this->tempHome,
-            $this->configReader,
-            $this->configWriter
+            $this->configManager,
+            $this->configManager
         );
     }
 }

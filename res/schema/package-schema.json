@@ -3,9 +3,7 @@
     "additionalProperties": false,
     "properties": {
         "name": {
-            "type": "string",
-            "description": "Package name, including \"vendor-name/\" prefix.",
-            "required": true
+            "type": "string"
         },
         "resources": {
             "type": "object",

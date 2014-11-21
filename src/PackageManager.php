@@ -12,19 +12,17 @@
 namespace Puli\PackageManager;
 
 use Puli\Filesystem\PhpCacheRepository;
-use Puli\PackageManager\Package\Config\Reader\PackageConfigReaderInterface;
+use Puli\PackageManager\Config\Reader\ConfigJsonReader;
+use Puli\PackageManager\Config\Writer\ConfigJsonWriter;
 use Puli\PackageManager\Package\Config\Reader\PackageJsonReader;
 use Puli\PackageManager\Package\Config\RootPackageConfig;
-use Puli\PackageManager\Package\Config\Writer\PackageConfigWriterInterface;
 use Puli\PackageManager\Package\Config\Writer\PackageJsonWriter;
 use Puli\PackageManager\Package\Package;
 use Puli\PackageManager\Package\RootPackage;
 use Puli\PackageManager\Plugin\PluginInterface;
 use Puli\PackageManager\Repository\Config\PackageDescriptor;
 use Puli\PackageManager\Repository\Config\PackageRepositoryConfig;
-use Puli\PackageManager\Repository\Config\Reader\RepositoryConfigReaderInterface;
 use Puli\PackageManager\Repository\Config\Reader\RepositoryJsonReader;
-use Puli\PackageManager\Repository\Config\Writer\RepositoryConfigWriterInterface;
 use Puli\PackageManager\Repository\Config\Writer\RepositoryJsonWriter;
 use Puli\PackageManager\Repository\NoSuchPackageException;
 use Puli\PackageManager\Repository\PackageRepository;
@@ -49,11 +47,6 @@ use Symfony\Component\Filesystem\Filesystem;
 class PackageManager
 {
     /**
-     * @var EventDispatcher
-     */
-    private $dispatcher;
-
-    /**
      * @var string
      */
     private $rootDir;
@@ -64,24 +57,14 @@ class PackageManager
     private $environment;
 
     /**
-     * @var RepositoryConfigReaderInterface
+     * @var ConfigManager
      */
-    private $repositoryConfigReader;
+    private $configManager;
 
     /**
-     * @var RepositoryConfigWriterInterface
+     * @var EventDispatcherInterface
      */
-    private $repositoryConfigWriter;
-
-    /**
-     * @var PackageConfigReaderInterface
-     */
-    private $packageConfigReader;
-
-    /**
-     * @var PackageConfigWriterInterface
-     */
-    private $packageConfigWriter;
+    private $dispatcher;
 
     /**
      * @var RootPackageConfig
@@ -99,62 +82,91 @@ class PackageManager
     private $packageRepository;
 
     /**
-     * Creates package manager with default configuration.
+     * Creates a configuration manager with default dependencies.
      *
-     * @param string $rootDir The directory containing the root package.
+     * @param EventDispatcherInterface|null $dispatcher The event dispatcher to use. Optional.
+     *
+     * @return ConfigManager The configuration manager.
+     */
+    public static function createConfigManager(EventDispatcherInterface $dispatcher = null)
+    {
+        return new ConfigManager(
+            new ConfigJsonReader(),
+            new ConfigJsonWriter(),
+            new RepositoryJsonReader(),
+            new RepositoryJsonWriter(),
+            new PackageJsonReader(),
+            new PackageJsonWriter(),
+            $dispatcher
+        );
+    }
+
+    /**
+     * Creates the Puli environment from the system's environment variables.
+     *
+     * A .htaccess file is put into Puli's home directory to protect it from
+     * web access.
+     *
+     * @param ConfigManager|null $configManager The configuration file manager.
+     *                                          If none is passed, the default
+     *                                          configuration file manager is
+     *                                          created.
+     *
+     * @return PuliEnvironment The created environment.
+     *
+     * @throws BootstrapException If the home directory is not found or is not
+     *                            a directory.
+     * @throws InvalidConfigException If the global configuration is invalid.
+     *
+     * @see PuliEnvironment::parseHomeDirectory()
+     */
+    public static function createEnvironment(ConfigManager $configManager = null)
+    {
+        $homeDir = PuliEnvironment::parseHomeDirectory();
+
+        PuliEnvironment::denyWebAccess($homeDir);
+
+        return new PuliEnvironment($homeDir, $configManager ?: self::createConfigManager());
+    }
+
+    /**
+     * Creates package manager with default dependencies.
+     *
+     * @param string $rootDir The directory path to the root package.
      *
      * @return static The package manager.
      *
-     * @throws \RuntimeException If no home directory can be found or if the
-     *                           found path points to a file.
+     * @throws BootstrapException If the home directory is not found or is not
+     *                            a directory.
+     * @throws InvalidConfigException If the global configuration or the
+     *                                configuration of the root package is
+     *                                invalid.
      */
-    public static function createDefault($rootDir)
+    public static function createPackageManager($rootDir)
     {
         $dispatcher = new EventDispatcher();
-        $environment = PuliEnvironment::createFromSystem();
+        $configManager = self::createConfigManager($dispatcher);
+        $environment = self::createEnvironment($configManager);
 
-        return new static(
-            $rootDir,
-            $environment,
-            $dispatcher,
-            new RepositoryJsonReader(),
-            new RepositoryJsonWriter(),
-            new PackageJsonReader($environment->getGlobalConfig(), $dispatcher),
-            new PackageJsonWriter($dispatcher)
-        );
+        return new static($rootDir, $environment, $configManager, $dispatcher);
     }
 
     /**
      * Loads the repository at the given root directory.
      *
-     * @param string                          $rootDir                The directory containing the root package.
-     * @param PuliEnvironment                 $environment            The system environment.
-     * @param EventDispatcherInterface        $dispatcher             The event dispatcher.
-     * @param RepositoryConfigReaderInterface $repositoryConfigReader The repository config file reader.
-     * @param RepositoryConfigWriterInterface $repositoryConfigWriter The repository config file writer.
-     * @param PackageConfigReaderInterface    $packageConfigReader    The package config file reader.
-     * @param PackageConfigWriterInterface    $packageConfigWriter    The package config file writer.
-     *
+     * @param string                   $rootDir       The directory containing the root package.
+     * @param PuliEnvironment          $environment   The system environment.
+     * @param ConfigManager            $configManager The config file manager.
+     * @param EventDispatcherInterface $dispatcher    The event dispatcher.
      */
-    public function __construct(
-        $rootDir,
-        PuliEnvironment $environment,
-        EventDispatcherInterface $dispatcher,
-        RepositoryConfigReaderInterface $repositoryConfigReader,
-        RepositoryConfigWriterInterface $repositoryConfigWriter,
-        PackageConfigReaderInterface $packageConfigReader,
-        PackageConfigWriterInterface $packageConfigWriter
-    )
+    public function __construct($rootDir, PuliEnvironment $environment, ConfigManager $configManager, EventDispatcherInterface $dispatcher)
     {
         $this->packageRepository = new PackageRepository();
         $this->rootDir = $rootDir;
         $this->environment = $environment;
+        $this->configManager = $configManager;
         $this->dispatcher = $dispatcher;
-        $this->repositoryConfigReader = $repositoryConfigReader;
-        $this->repositoryConfigWriter = $repositoryConfigWriter;
-        $this->packageConfigReader = $packageConfigReader;
-        $this->packageConfigWriter = $packageConfigWriter;
-        $this->rootPackageConfig = $packageConfigReader->readRootPackageConfig($rootDir.'/puli.json');
+        $this->rootPackageConfig = $configManager->loadRootPackageConfig($rootDir.'/puli.json', $environment->getGlobalConfig());
 
         $this->activatePlugins();
         $this->loadPackages();
@@ -235,8 +247,9 @@ EOF
      *
      * @param string $installPath The path to the package.
      *
-     * @throws NameConflictException If another package has the same name as
-     *                               the installed package.
+     * @throws InvalidConfigException If the package is not configured correctly.
+     * @throws NameConflictException If the package has the same name as another
+     *                               loaded package.
      */
     public function installPackage($installPath)
     {
@@ -254,8 +267,7 @@ EOF
         $this->repositoryConfig->addPackageDescriptor(new PackageDescriptor($relInstallPath));
         $this->packageRepository->addPackage($package);
 
-        // Write package repository configuration
-        $this->repositoryConfigWriter->writeRepositoryConfig($this->repositoryConfig, $this->repositoryConfig->getPath());
+        $this->configManager->saveRepositoryConfig($this->repositoryConfig);
     }
 
     /**
@@ -364,10 +376,7 @@ EOF
 
         $this->rootPackageConfig->addPluginClass($pluginClass);
 
-        $this->packageConfigWriter->writePackageConfig(
-            $this->rootPackageConfig,
-            $this->rootPackageConfig->getPath()
-        );
+        $this->configManager->savePackageConfig($this->rootPackageConfig);
     }
 
     /**
@@ -434,6 +443,13 @@ EOF
         }
     }
 
+    /**
+     * Loads all packages referenced by the package repository configuration.
+     *
+     * @throws InvalidConfigException If a package is not configured correctly.
+     * @throws NameConflictException If a package has the same name as another
+     *                               loaded package.
+     */
     private function loadPackages()
     {
         $this->packageRepository->addPackage(new RootPackage($this->rootPackageConfig, $this->rootDir));
@@ -441,14 +457,7 @@ EOF
         $configPath = $this->rootPackageConfig->getPackageRepositoryConfig();
         $configPath = Path::makeAbsolute($configPath, $this->rootDir);
 
-        try {
-            // Don't use file_exists() in order to let the config reader decide
-            // when to throw FileNotFoundException
-            $this->repositoryConfig = $this->repositoryConfigReader->readRepositoryConfig($configPath);
-        } catch (FileNotFoundException $e) {
-            $this->repositoryConfig = new PackageRepositoryConfig($configPath);
-            $this->repositoryConfigWriter->writeRepositoryConfig($this->repositoryConfig, $configPath);
-        }
+        $this->repositoryConfig = $this->configManager->loadRepositoryConfig($configPath);
 
         foreach ($this->repositoryConfig->getPackageDescriptors() as $packageDefinition) {
             $installPath = Path::makeAbsolute($packageDefinition->getInstallPath(), $this->rootDir);
@@ -460,7 +469,7 @@ EOF
 
     private function loadPackage($installPath)
     {
-        $config = $this->packageConfigReader->readPackageConfig($installPath.'/puli.json');
+        $config = $this->configManager->loadPackageConfig($installPath.'/puli.json');
         $packageName = $config->getPackageName();
 
         if ($this->packageRepository->containsPackage($packageName)) {

@@ -52,7 +52,7 @@ class PackageConfig
      *                                 stored or `null` if this configuration is
      *                                 not stored on the file system.
      *
-     * @throws \InvalidArgumentException If the path is not a string or empty.
+     * @throws \InvalidArgumentException If the name/path is not a string or empty.
      */
     public function __construct($packageName = null, $path = null)
     {
@@ -68,8 +68,8 @@ class PackageConfig
             throw new \InvalidArgumentException('The path to the package configuration should not be empty.');
         }
 
-        $this->packageName = $packageName;
         $this->path = $path;
+        $this->setPackageName($packageName);
     }
 
     /**
@@ -86,9 +86,22 @@ class PackageConfig
      * Sets the package name.
      *
      * @param string|null $packageName The package name or `null` to unset.
+     *
+     * @throws \InvalidArgumentException If the name is not a string or empty.
      */
     public function setPackageName($packageName)
     {
+        if (!is_string($packageName) && null !== $packageName) {
+            throw new \InvalidArgumentException(sprintf(
+                'The package name should be a string or null. Got: %s',
+                is_object($packageName) ? get_class($packageName) : gettype($packageName)
+            ));
+        }
+
+        if ('' === $packageName) {
+            throw new \InvalidArgumentException('The package name should not be empty.');
+        }
+
         $this->packageName = $packageName;
     }
 

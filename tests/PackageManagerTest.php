@@ -12,6 +12,7 @@
 namespace Puli\PackageManager\Tests;
 
 use Puli\PackageManager\Config\GlobalConfig;
+use Puli\PackageManager\ConfigManager;
 use Puli\PackageManager\FileNotFoundException;
 use Puli\PackageManager\Package\Config\PackageConfig;
 use Puli\PackageManager\Package\Config\Reader\PackageConfigReaderInterface;
@@ -76,24 +77,9 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
     private $environment;
 
     /**
-     * @var \PHPUnit_Framework_MockObject_MockObject|RepositoryConfigReaderInterface
+     * @var \PHPUnit_Framework_MockObject_MockObject|ConfigManager
      */
-    private $repositoryConfigReader;
-
-    /**
-     * @var \PHPUnit_Framework_MockObject_MockObject|RepositoryConfigWriterInterface
-     */
-    private $repositoryConfigWriter;
-
-    /**
-     * @var \PHPUnit_Framework_MockObject_MockObject|PackageConfigReaderInterface
-     */
-    private $packageConfigReader;
-
-    /**
-     * @var \PHPUnit_Framework_MockObject_MockObject|PackageConfigWriterInterface
-     */
-    private $packageConfigWriter;
+    private $configManager;
 
     /**
      * @var PackageManager
@@ -130,25 +116,28 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
         while (false === mkdir($this->tempDir = sys_get_temp_dir().'/puli-manager/PackageManagerTest_temp'.rand(10000, 99999), 0777, true)) {}
 
         $this->dispatcher = new EventDispatcher();
-        $this->repositoryConfigReader = $this->getMock('Puli\PackageManager\Repository\Config\Reader\RepositoryConfigReaderInterface');
-        $this->repositoryConfigWriter = $this->getMock('Puli\PackageManager\Repository\Config\Writer\RepositoryConfigWriterInterface');
-        $this->packageConfigReader = $this->getMock('Puli\PackageManager\Package\Config\Reader\PackageConfigReaderInterface');
-        $this->packageConfigWriter = $this->getMock('Puli\PackageManager\Package\Config\Writer\PackageConfigWriterInterface');
 
         $this->rootDir = __DIR__.'/Fixtures/root-package';
         $this->package1Dir = __DIR__.'/Fixtures/package1';
         $this->package2Dir = __DIR__.'/Fixtures/package2';
         $this->package3Dir = __DIR__.'/Fixtures/package3';
 
-        $this->environment = $this->getMockBuilder('Puli\PackageManager\PuliEnvironment')
-            ->disableOriginalConstructor()
-            ->getMock();
-
         $this->globalConfig = new GlobalConfig();
         $this->rootConfig = new RootPackageConfig($this->globalConfig, 'root');
         $this->package1Config = new PackageConfig('package1');
         $this->package2Config = new PackageConfig('package2');
         $this->packageRepoConfig = new PackageRepositoryConfig();
+
+        $this->environment = $this->getMockBuilder('Puli\PackageManager\PuliEnvironment')
+            ->disableOriginalConstructor()
+            ->getMock();
+        $this->configManager = $this->getMockBuilder('Puli\PackageManager\ConfigManager')
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $this->environment->expects($this->any())
+            ->method('getGlobalConfig')
+            ->will($this->returnValue($this->globalConfig));
     }
 
     protected function tearDown()
@@ -171,34 +160,26 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
         $packageRepoConfig->addPackageDescriptor(new PackageDescriptor('relative/path/to/package1'));
         $packageRepoConfig->addPackageDescriptor(new PackageDescriptor('/absolute/path/to/package2'));
 
-        $this->packageConfigReader->expects($this->once())
-            ->method('readRootPackageConfig')
-            ->with($this->rootDir.'/puli.json')
+        $this->configManager->expects($this->at(0))
+            ->method('loadRootPackageConfig')
+            ->with($this->rootDir.'/puli.json', $this->globalConfig)
             ->will($this->returnValue($rootConfig));
 
-        $this->packageConfigReader->expects($this->at(1))
-            ->method('readPackageConfig')
-            ->with($this->rootDir.'/relative/path/to/package1/puli.json')
-            ->will($this->returnValue($package1Config));
-        $this->packageConfigReader->expects($this->at(2))
-            ->method('readPackageConfig')
-            ->with('/absolute/path/to/package2/puli.json')
-            ->will($this->returnValue($package2Config));
-
-        $this->repositoryConfigReader->expects($this->once())
-            ->method('readRepositoryConfig')
+        $this->configManager->expects($this->at(1))
+            ->method('loadRepositoryConfig')
             ->with($this->rootDir.'/repository.json')
             ->will($this->returnValue($packageRepoConfig));
 
-        $manager = new PackageManager(
-            $this->rootDir,
-            $this->environment,
-            $this->dispatcher,
-            $this->repositoryConfigReader,
-            $this->repositoryConfigWriter,
-            $this->packageConfigReader,
-            $this->packageConfigWriter
-        );
+        $this->configManager->expects($this->at(2))
+            ->method('loadPackageConfig')
+            ->with($this->rootDir.'/relative/path/to/package1/puli.json')
+            ->will($this->returnValue($package1Config));
+        $this->configManager->expects($this->at(3))
+            ->method('loadPackageConfig')
+            ->with('/absolute/path/to/package2/puli.json')
+            ->will($this->returnValue($package2Config));
+
+        $manager = new PackageManager($this->rootDir, $this->environment, $this->configManager, $this->dispatcher);
 
         $this->assertSame($rootConfig, $manager->getRootPackageConfig());
         $this->assertSame($packageRepoConfig, $manager->getRepositoryConfig());
@@ -236,70 +217,26 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
         $packageRepoConfig->addPackageDescriptor(new PackageDescriptor($this->package1Dir));
         $packageRepoConfig->addPackageDescriptor(new PackageDescriptor($this->package2Dir));
 
-        $this->packageConfigReader->expects($this->once())
-            ->method('readRootPackageConfig')
-            ->with($this->rootDir.'/puli.json')
+        $this->configManager->expects($this->at(0))
+            ->method('loadRootPackageConfig')
+            ->with($this->rootDir.'/puli.json', $this->globalConfig)
             ->will($this->returnValue($rootConfig));
 
-        $this->packageConfigReader->expects($this->at(1))
-            ->method('readPackageConfig')
-            ->with($this->package1Dir.'/puli.json')
-            ->will($this->returnValue($package1Config));
-        $this->packageConfigReader->expects($this->at(2))
-            ->method('readPackageConfig')
-            ->with($this->package2Dir.'/puli.json')
-            ->will($this->returnValue($package2Config));
-
-        $this->repositoryConfigReader->expects($this->once())
-            ->method('readRepositoryConfig')
+        $this->configManager->expects($this->at(1))
+            ->method('loadRepositoryConfig')
             ->with($this->rootDir.'/repository.json')
             ->will($this->returnValue($packageRepoConfig));
 
-        new PackageManager(
-            $this->rootDir,
-            $this->environment,
-            $this->dispatcher,
-            $this->repositoryConfigReader,
-            $this->repositoryConfigWriter,
-            $this->packageConfigReader,
-            $this->packageConfigWriter
-        );
-    }
+        $this->configManager->expects($this->at(2))
+            ->method('loadPackageConfig')
+            ->with($this->package1Dir.'/puli.json')
+            ->will($this->returnValue($package1Config));
+        $this->configManager->expects($this->at(3))
+            ->method('loadPackageConfig')
+            ->with($this->package2Dir.'/puli.json')
+            ->will($this->returnValue($package2Config));
 
-    public function testEmptyPackageRepositoryConfigCreatedOnDemand()
-    {
-        $rootConfig = new RootPackageConfig($this->globalConfig, 'root');
-        $rootConfig->setPackageRepositoryConfig('repository.json');
-
-        $this->packageConfigReader->expects($this->once())
-            ->method('readRootPackageConfig')
-            ->with($this->rootDir.'/puli.json')
-            ->will($this->returnValue($rootConfig));
-
-        $this->repositoryConfigReader->expects($this->once())
-            ->method('readRepositoryConfig')
-            ->with($this->rootDir.'/repository.json')
-            ->will($this->throwException(new FileNotFoundException()));
-
-        $this->repositoryConfigWriter->expects($this->once())
-            ->method('writeRepositoryConfig')
-            ->with($this->isInstanceOf('Puli\PackageManager\Repository\Config\PackageRepositoryConfig'))
-            ->will($this->returnCallback(function (PackageRepositoryConfig $config) {
-                \PHPUnit_Framework_Assert::assertCount(0, $config->getPackageDescriptors());
-            }));
-
-        $manager = new PackageManager(
-            $this->rootDir,
-            $this->environment,
-            $this->dispatcher,
-            $this->repositoryConfigReader,
-            $this->repositoryConfigWriter,
-            $this->packageConfigReader,
-            $this->packageConfigWriter
-        );
-
-        // Only root package
-        $this->assertCount(1, $manager->getPackages());
+        new PackageManager($this->rootDir, $this->environment, $this->configManager, $this->dispatcher);
     }
 
     public function testGenerateResourceRepository()
@@ -433,13 +370,13 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
 
         $config = new PackageConfig('package3');
 
-        $this->packageConfigReader->expects($this->at(0))
-            ->method('readPackageConfig')
+        $this->configManager->expects($this->at(0))
+            ->method('loadPackageConfig')
             ->with($this->package3Dir.'/puli.json')
             ->will($this->returnValue($config));
 
-        $this->repositoryConfigWriter->expects($this->once())
-            ->method('writeRepositoryConfig')
+        $this->configManager->expects($this->once())
+            ->method('saveRepositoryConfig')
             ->with($this->isInstanceOf('Puli\PackageManager\Repository\Config\PackageRepositoryConfig'))
             ->will($this->returnCallback(function (PackageRepositoryConfig $config) {
                 $descriptors = $config->getPackageDescriptors();
@@ -462,13 +399,13 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
 
         $config = new PackageConfig('package3');
 
-        $this->packageConfigReader->expects($this->at(0))
-            ->method('readPackageConfig')
+        $this->configManager->expects($this->at(0))
+            ->method('loadPackageConfig')
             ->with($this->package3Dir.'/puli.json')
             ->will($this->returnValue($config));
 
-        $this->repositoryConfigWriter->expects($this->once())
-            ->method('writeRepositoryConfig')
+        $this->configManager->expects($this->once())
+            ->method('saveRepositoryConfig')
             ->with($this->isInstanceOf('Puli\PackageManager\Repository\Config\PackageRepositoryConfig'))
             ->will($this->returnCallback(function (PackageRepositoryConfig $config) {
                 $descriptors = $config->getPackageDescriptors();
@@ -489,11 +426,11 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
     {
         $this->initDefaultManager();
 
-        $this->packageConfigReader->expects($this->never())
-            ->method('readPackageConfig');
+        $this->configManager->expects($this->never())
+            ->method('loadPackageConfig');
 
-        $this->repositoryConfigWriter->expects($this->never())
-            ->method('writeRepositoryConfig');
+        $this->configManager->expects($this->never())
+            ->method('saveRepositoryConfig');
 
         $this->manager->installPackage($this->package2Dir);
     }
@@ -507,13 +444,13 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
 
         $config = new PackageConfig('package2');
 
-        $this->packageConfigReader->expects($this->at(0))
-            ->method('readPackageConfig')
+        $this->configManager->expects($this->at(0))
+            ->method('loadPackageConfig')
             ->with($this->package3Dir.'/puli.json')
             ->will($this->returnValue($config));
 
-        $this->repositoryConfigWriter->expects($this->never())
-            ->method('writeRepositoryConfig');
+        $this->configManager->expects($this->never())
+            ->method('saveRepositoryConfig');
 
         $this->manager->installPackage($this->package3Dir);
     }
@@ -597,8 +534,8 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
         $this->environment->expects($this->never())
             ->method('installGlobalPluginClass');
 
-        $this->packageConfigWriter->expects($this->once())
-            ->method('writePackageConfig')
+        $this->configManager->expects($this->once())
+            ->method('savePackageConfig')
             ->with($this->isInstanceOf('Puli\PackageManager\Package\Config\RootPackageConfig'))
             ->will($this->returnCallback(function (RootPackageConfig $config) {
                 \PHPUnit_Framework_Assert::assertSame(array(self::PLUGIN_CLASS), $config->getPluginClasses(false));
@@ -622,8 +559,8 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
         $this->environment->expects($this->never())
             ->method('installGlobalPluginClass');
 
-        $this->packageConfigWriter->expects($this->never())
-            ->method('writePackageConfig');
+        $this->configManager->expects($this->never())
+            ->method('savePackageConfig');
 
         $this->manager->installPluginClass(self::PLUGIN_CLASS);
 
@@ -642,8 +579,8 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
         $this->environment->expects($this->never())
             ->method('installGlobalPluginClass');
 
-        $this->packageConfigWriter->expects($this->never())
-            ->method('writePackageConfig');
+        $this->configManager->expects($this->never())
+            ->method('savePackageConfig');
 
         $this->rootConfig->addPluginClass(self::PLUGIN_CLASS);
 
@@ -665,8 +602,8 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
             ->method('installGlobalPluginClass')
             ->with(self::PLUGIN_CLASS);
 
-        $this->packageConfigWriter->expects($this->never())
-            ->method('writePackageConfig');
+        $this->configManager->expects($this->never())
+            ->method('savePackageConfig');
 
         $this->manager->installPluginClass(self::PLUGIN_CLASS, true);
 
@@ -685,8 +622,8 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
         $this->environment->expects($this->never())
             ->method('installGlobalPluginClass');
 
-        $this->packageConfigWriter->expects($this->never())
-            ->method('writePackageConfig');
+        $this->configManager->expects($this->never())
+            ->method('savePackageConfig');
 
         $this->manager->installPluginClass(self::PLUGIN_CLASS, true);
 
@@ -706,8 +643,8 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
             ->method('installGlobalPluginClass')
             ->with(self::PLUGIN_CLASS);
 
-        $this->packageConfigWriter->expects($this->never())
-            ->method('writePackageConfig');
+        $this->configManager->expects($this->never())
+            ->method('savePackageConfig');
 
         $this->rootConfig->addPluginClass(self::PLUGIN_CLASS);
 
@@ -738,33 +675,25 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
         $this->packageRepoConfig->addPackageDescriptor(new PackageDescriptor($this->package1Dir, false));
         $this->packageRepoConfig->addPackageDescriptor(new PackageDescriptor($this->package2Dir, false));
 
-        $this->packageConfigReader->expects($this->once())
-            ->method('readRootPackageConfig')
-            ->with($this->rootDir.'/puli.json')
+        $this->configManager->expects($this->at(0))
+            ->method('loadRootPackageConfig')
+            ->with($this->rootDir.'/puli.json', $this->globalConfig)
             ->will($this->returnValue($this->rootConfig));
 
-        $this->packageConfigReader->expects($this->at(1))
-            ->method('readPackageConfig')
-            ->with($this->package1Dir.'/puli.json')
-            ->will($this->returnValue($this->package1Config));
-        $this->packageConfigReader->expects($this->at(2))
-            ->method('readPackageConfig')
-            ->with($this->package2Dir.'/puli.json')
-            ->will($this->returnValue($this->package2Config));
-
-        $this->repositoryConfigReader->expects($this->once())
-            ->method('readRepositoryConfig')
+        $this->configManager->expects($this->at(1))
+            ->method('loadRepositoryConfig')
             ->with($this->rootDir.'/repository.json')
             ->will($this->returnValue($this->packageRepoConfig));
 
-        $this->manager = new PackageManager(
-            $this->rootDir,
-            $this->environment,
-            $this->dispatcher,
-            $this->repositoryConfigReader,
-            $this->repositoryConfigWriter,
-            $this->packageConfigReader,
-            $this->packageConfigWriter
-        );
+        $this->configManager->expects($this->at(2))
+            ->method('loadPackageConfig')
+            ->with($this->package1Dir.'/puli.json')
+            ->will($this->returnValue($this->package1Config));
+        $this->configManager->expects($this->at(3))
+            ->method('loadPackageConfig')
+            ->with($this->package2Dir.'/puli.json')
+            ->will($this->returnValue($this->package2Config));
+
+        $this->manager = new PackageManager($this->rootDir, $this->environment, $this->configManager, $this->dispatcher);
     }
 }
