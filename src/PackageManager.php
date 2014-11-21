@@ -277,21 +277,6 @@ EOF
     {
         $installPath = Path::makeAbsolute($installPath, $this->rootDir);
 
-        if (!file_exists($installPath)) {
-            throw new FileNotFoundException(sprintf(
-                'Could not install package: The directory %s does not exist.',
-                $installPath
-            ));
-        }
-
-        if (!is_dir($installPath)) {
-            throw new NoDirectoryException(sprintf(
-                'Could not install package: The path %s is a file. '.
-                'Expected a directory.',
-                $installPath
-            ));
-        }
-
         if ($this->isPackageInstalled($installPath)) {
             return;
         }
@@ -506,6 +491,21 @@ EOF
 
     private function loadPackage($installPath)
     {
+        if (!file_exists($installPath)) {
+            throw new FileNotFoundException(sprintf(
+                'Could not load package: The directory %s does not exist.',
+                $installPath
+            ));
+        }
+
+        if (!is_dir($installPath)) {
+            throw new NoDirectoryException(sprintf(
+                'Could not install package: The path %s is a file. '.
+                'Expected a directory.',
+                $installPath
+            ));
+        }
+
         $config = $this->configManager->loadPackageConfig($installPath.'/puli.json');
         $packageName = $config->getPackageName();
 

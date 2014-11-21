@@ -157,8 +157,8 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
         $package2Config = new PackageConfig('package2');
 
         $packageRepoConfig = new PackageRepositoryConfig();
-        $packageRepoConfig->addPackageDescriptor(new PackageDescriptor('relative/path/to/package1'));
-        $packageRepoConfig->addPackageDescriptor(new PackageDescriptor('/absolute/path/to/package2'));
+        $packageRepoConfig->addPackageDescriptor(new PackageDescriptor('../package1'));
+        $packageRepoConfig->addPackageDescriptor(new PackageDescriptor(realpath($this->rootDir.'/../package2')));
 
         $this->configManager->expects($this->at(0))
             ->method('loadRootPackageConfig')
@@ -172,11 +172,11 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
 
         $this->configManager->expects($this->at(2))
             ->method('loadPackageConfig')
-            ->with($this->rootDir.'/relative/path/to/package1/puli.json')
+            ->with($this->package1Dir.'/puli.json')
             ->will($this->returnValue($package1Config));
         $this->configManager->expects($this->at(3))
             ->method('loadPackageConfig')
-            ->with('/absolute/path/to/package2/puli.json')
+            ->with($this->package2Dir.'/puli.json')
             ->will($this->returnValue($package2Config));
 
         $manager = new PackageManager($this->rootDir, $this->environment, $this->configManager, $this->dispatcher);
@@ -194,12 +194,12 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
 
         $this->assertInstanceOf('Puli\PackageManager\Package\Package', $packages['package1']);
         $this->assertSame('package1', $packages['package1']->getName());
-        $this->assertSame($this->rootDir.'/relative/path/to/package1', $packages['package1']->getInstallPath());
+        $this->assertSame($this->package1Dir, $packages['package1']->getInstallPath());
         $this->assertSame($package1Config, $packages['package1']->getConfig());
 
         $this->assertInstanceOf('Puli\PackageManager\Package\Package', $packages['package2']);
         $this->assertSame('package2', $packages['package2']->getName());
-        $this->assertSame('/absolute/path/to/package2', $packages['package2']->getInstallPath());
+        $this->assertSame($this->package2Dir, $packages['package2']->getInstallPath());
         $this->assertSame($package2Config, $packages['package2']->getConfig());
     }
 
@@ -235,6 +235,56 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
             ->method('loadPackageConfig')
             ->with($this->package2Dir.'/puli.json')
             ->will($this->returnValue($package2Config));
+
+        new PackageManager($this->rootDir, $this->environment, $this->configManager, $this->dispatcher);
+    }
+
+    /**
+     * @expectedException \Puli\PackageManager\FileNotFoundException
+     * @expectedExceptionMessage foobar
+     */
+    public function testLoadPackageRepositoryFailsIfPackageDirNotFound()
+    {
+        $rootConfig = new RootPackageConfig($this->globalConfig, 'root');
+        $rootConfig->setPackageRepositoryConfig('repository.json');
+
+        $packageRepoConfig = new PackageRepositoryConfig();
+        $packageRepoConfig->addPackageDescriptor(new PackageDescriptor('foobar'));
+
+        $this->configManager->expects($this->at(0))
+            ->method('loadRootPackageConfig')
+            ->with($this->rootDir.'/puli.json', $this->globalConfig)
+            ->will($this->returnValue($rootConfig));
+
+        $this->configManager->expects($this->at(1))
+            ->method('loadRepositoryConfig')
+            ->with($this->rootDir.'/repository.json')
+            ->will($this->returnValue($packageRepoConfig));
+
+        new PackageManager($this->rootDir, $this->environment, $this->configManager, $this->dispatcher);
+    }
+
+    /**
+     * @expectedException \Puli\PackageManager\NoDirectoryException
+     * @expectedExceptionMessage /file
+     */
+    public function testLoadPackageRepositoryFailsIfPackageNoDirectory()
+    {
+        $rootConfig = new RootPackageConfig($this->globalConfig, 'root');
+        $rootConfig->setPackageRepositoryConfig('repository.json');
+
+        $packageRepoConfig = new PackageRepositoryConfig();
+        $packageRepoConfig->addPackageDescriptor(new PackageDescriptor($this->rootDir.'/file'));
+
+        $this->configManager->expects($this->at(0))
+            ->method('loadRootPackageConfig')
+            ->with($this->rootDir.'/puli.json', $this->globalConfig)
+            ->will($this->returnValue($rootConfig));
+
+        $this->configManager->expects($this->at(1))
+            ->method('loadRepositoryConfig')
+            ->with($this->rootDir.'/repository.json')
+            ->will($this->returnValue($packageRepoConfig));
 
         new PackageManager($this->rootDir, $this->environment, $this->configManager, $this->dispatcher);
     }
