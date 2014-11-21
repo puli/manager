@@ -97,7 +97,7 @@ class PackageManager
             new RepositoryJsonWriter(),
             new PackageJsonReader(),
             new PackageJsonWriter(),
-            $dispatcher
+            $dispatcher ?: new EventDispatcher()
         );
     }
 

@@ -65,4 +65,18 @@ class IntegrationTest extends \PHPUnit_Framework_TestCase
         $this->assertSame('package2', $packages['package2']->getName());
     }
 
+    public function testCreateConfigManager()
+    {
+        $manager = PackageManager::createConfigManager();
+
+        $this->assertInstanceOf('Puli\PackageManager\ConfigManager', $manager);
+    }
+
+    public function testCreateEnvironment()
+    {
+        $environment = PackageManager::createEnvironment();
+
+        $this->assertInstanceOf('Puli\PackageManager\PuliEnvironment', $environment);
+    }
+
 }
