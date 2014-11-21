@@ -59,6 +59,8 @@ class RootPackageConfig extends PackageConfig
         parent::__construct($packageName, $path);
 
         $this->globalConfig = $globalConfig;
+
+        // Another instance for storing locally modified global parameters
         $this->localConfig = new GlobalConfig();
     }
 

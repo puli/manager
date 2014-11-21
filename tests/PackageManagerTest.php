@@ -12,8 +12,6 @@
 namespace Puli\PackageManager\Tests;
 
 use Puli\PackageManager\Config\GlobalConfig;
-use Puli\PackageManager\Config\Reader\GlobalConfigReaderInterface;
-use Puli\PackageManager\Config\Writer\GlobalConfigWriterInterface;
 use Puli\PackageManager\FileNotFoundException;
 use Puli\PackageManager\Package\Config\PackageConfig;
 use Puli\PackageManager\Package\Config\Reader\PackageConfigReaderInterface;
@@ -21,6 +19,7 @@ use Puli\PackageManager\Package\Config\ResourceDescriptor;
 use Puli\PackageManager\Package\Config\RootPackageConfig;
 use Puli\PackageManager\Package\Config\Writer\PackageConfigWriterInterface;
 use Puli\PackageManager\PackageManager;
+use Puli\PackageManager\PuliEnvironment;
 use Puli\PackageManager\Repository\Config\PackageDescriptor;
 use Puli\PackageManager\Repository\Config\PackageRepositoryConfig;
 use Puli\PackageManager\Repository\Config\Reader\RepositoryConfigReaderInterface;
@@ -49,11 +48,6 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
     /**
      * @var string
      */
-    private $tempHome;
-
-    /**
-     * @var string
-     */
     private $rootDir;
 
     /**
@@ -77,14 +71,9 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
     private $dispatcher;
 
     /**
-     * @var \PHPUnit_Framework_MockObject_MockObject|GlobalConfigReaderInterface
+     * @var \PHPUnit_Framework_MockObject_MockObject|PuliEnvironment
      */
-    private $globalConfigReader;
-
-    /**
-     * @var \PHPUnit_Framework_MockObject_MockObject|GlobalConfigWriterInterface
-     */
-    private $globalConfigWriter;
+    private $environment;
 
     /**
      * @var \PHPUnit_Framework_MockObject_MockObject|RepositoryConfigReaderInterface
@@ -139,20 +128,21 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
     protected function setUp()
     {
         while (false === mkdir($this->tempDir = sys_get_temp_dir().'/puli-manager/PackageManagerTest_temp'.rand(10000, 99999), 0777, true)) {}
-        while (false === mkdir($this->tempHome = sys_get_temp_dir().'/puli-manager/PackageManagerTest_home'.rand(10000, 99999), 0777, true)) {}
 
         $this->dispatcher = new EventDispatcher();
-        $this->globalConfigReader = $this->getMock('Puli\PackageManager\Config\Reader\GlobalConfigReaderInterface');
-        $this->globalConfigWriter = $this->getMock('Puli\PackageManager\Config\Writer\GlobalConfigWriterInterface');
         $this->repositoryConfigReader = $this->getMock('Puli\PackageManager\Repository\Config\Reader\RepositoryConfigReaderInterface');
         $this->repositoryConfigWriter = $this->getMock('Puli\PackageManager\Repository\Config\Writer\RepositoryConfigWriterInterface');
         $this->packageConfigReader = $this->getMock('Puli\PackageManager\Package\Config\Reader\PackageConfigReaderInterface');
         $this->packageConfigWriter = $this->getMock('Puli\PackageManager\Package\Config\Writer\PackageConfigWriterInterface');
 
-        $this->rootDir = $this->tempDir.'/root-package';
-        $this->package1Dir = $this->tempDir.'/package1';
-        $this->package2Dir = $this->tempDir.'/package2';
-        $this->package3Dir = $this->tempDir.'/package3';
+        $this->rootDir = __DIR__.'/Fixtures/root-package';
+        $this->package1Dir = __DIR__.'/Fixtures/package1';
+        $this->package2Dir = __DIR__.'/Fixtures/package2';
+        $this->package3Dir = __DIR__.'/Fixtures/package3';
+
+        $this->environment = $this->getMockBuilder('Puli\PackageManager\PuliEnvironment')
+            ->disableOriginalConstructor()
+            ->getMock();
 
         $this->globalConfig = new GlobalConfig();
         $this->rootConfig = new RootPackageConfig($this->globalConfig, 'root');
@@ -168,115 +158,6 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
 
         $filesystem = new Filesystem();
         $filesystem->remove($this->tempDir);
-        $filesystem->remove($this->tempHome);
-
-        // Unset env variables
-        putenv('PULI_HOME');
-        putenv('HOME');
-        putenv('APPDATA');
-    }
-
-    public function testGetHomeDirectory()
-    {
-        putenv('HOME=/path/to/home');
-
-        $this->assertSame('/path/to/home/.puli', PackageManager::getHomeDirectory());
-    }
-
-    public function testGetHomeDirectoryBackslashes()
-    {
-        putenv('HOME=\path\to\home');
-
-        $this->assertSame('/path/to/home/.puli', PackageManager::getHomeDirectory());
-    }
-
-    public function testGetOverwrittenHomeDirectory()
-    {
-        putenv('HOME=/path/to/home');
-        putenv('PULI_HOME=/custom/home');
-
-        $this->assertSame('/custom/home', PackageManager::getHomeDirectory());
-    }
-
-    public function testGetOverwrittenHomeDirectoryBackslashes()
-    {
-        putenv('HOME=\path\to\home');
-        putenv('PULI_HOME=\custom\home');
-
-        $this->assertSame('/custom/home', PackageManager::getHomeDirectory());
-    }
-
-    public function testGetHomeDirectoryOnWindows()
-    {
-        putenv('APPDATA=C:/path/to/home');
-
-        $this->assertSame('C:/path/to/home/Puli', PackageManager::getHomeDirectory());
-    }
-
-    public function testGetHomeDirectoryOnWindowsBackslashes()
-    {
-        putenv('APPDATA=C:\path\to\home');
-
-        $this->assertSame('C:/path/to/home/Puli', PackageManager::getHomeDirectory());
-    }
-
-    public function testGetOverwrittenHomeDirectoryOnWindows()
-    {
-        putenv('APPDATA=C:/path/to/home');
-        putenv('PULI_HOME=C:/custom/home');
-
-        $this->assertSame('C:/custom/home', PackageManager::getHomeDirectory());
-    }
-
-    public function testGetOverwrittenHomeDirectoryOnWindowsBackslashes()
-    {
-        putenv('APPDATA=C:\path\to\home');
-        putenv('PULI_HOME=C:\custom\home');
-
-        $this->assertSame('C:/custom/home', PackageManager::getHomeDirectory());
-    }
-
-    public function testFailIfNoHomeDirectoryFound()
-    {
-        $isWin = defined('PHP_WINDOWS_VERSION_MAJOR');
-
-        // Mention correct variable in the exception message
-        $this->setExpectedException('\RuntimeException', $isWin ? 'APPDATA' : ' HOME ');
-
-        PackageManager::getHomeDirectory();
-    }
-
-    /**
-     * @expectedException \RuntimeException
-     * @expectedExceptionMessage PULI_HOME
-     */
-    public function testFailIfHomeNotADirectory()
-    {
-        putenv('PULI_HOME='.__DIR__.'/Fixtures/home/some-file');
-
-        PackageManager::getHomeDirectory();
-    }
-
-    /**
-     * @expectedException \RuntimeException
-     * @expectedExceptionMessage HOME
-     */
-    public function testFailIfLinuxHomeNotADirectory()
-    {
-        putenv('HOME='.__DIR__.'/Fixtures/home/some-file');
-
-        PackageManager::getHomeDirectory();
-    }
-
-    /**
-     * @expectedException \RuntimeException
-     * @expectedExceptionMessage APPDATA
-     */
-    public function testFailIfWindowsHomeNotADirectory()
-    {
-        putenv('APPDATA='.__DIR__.'/Fixtures/home/some-file');
-
-        PackageManager::getHomeDirectory();
     }
 
     public function testLoadPackageRepository()
@@ -311,11 +192,8 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
 
         $manager = new PackageManager(
             $this->rootDir,
-            $this->tempHome,
+            $this->environment,
             $this->dispatcher,
-            $this->globalConfig,
-            $this->globalConfigReader,
-            $this->globalConfigWriter,
             $this->repositoryConfigReader,
             $this->repositoryConfigWriter,
             $this->packageConfigReader,
@@ -379,11 +257,8 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
 
         new PackageManager(
             $this->rootDir,
-            $this->tempHome,
+            $this->environment,
             $this->dispatcher,
-            $this->globalConfig,
-            $this->globalConfigReader,
-            $this->globalConfigWriter,
             $this->repositoryConfigReader,
             $this->repositoryConfigWriter,
             $this->packageConfigReader,
@@ -415,11 +290,8 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
 
         $manager = new PackageManager(
             $this->rootDir,
-            $this->tempHome,
+            $this->environment,
             $this->dispatcher,
-            $this->globalConfig,
-            $this->globalConfigReader,
-            $this->globalConfigWriter,
             $this->repositoryConfigReader,
             $this->repositoryConfigWriter,
             $this->packageConfigReader,
@@ -428,86 +300,6 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
 
         // Only root package
         $this->assertCount(1, $manager->getPackages());
-    }
-
-    public function testCreateDefault()
-    {
-        $this->initHome();
-
-        $filesystem = new Filesystem();
-        $filesystem->mirror(__DIR__.'/Fixtures/real-root-package', $this->tempDir);
-
-        $manager = PackageManager::createDefault($this->tempDir);
-
-        $this->assertInstanceOf('Puli\PackageManager\PackageManager', $manager);
-
-        // Directory is protected
-        $this->assertFileExists($this->tempHome.'/.htaccess');
-        $this->assertSame('Deny from all', file_get_contents($this->tempHome.'/.htaccess'));
-    }
-
-    public function testIsPuliProject()
-    {
-        $this->assertTrue(PackageManager::isPuliProject(__DIR__.'/Fixtures/real-root-package'));
-        $this->assertFalse(PackageManager::isPuliProject(__DIR__.'/Fixtures/no-puli'));
-    }
-
-    public function testInitializePuliProject()
-    {
-        $this->initHome();
-
-        PackageManager::initializePuliProject($this->tempDir);
-
-        $manager = PackageManager::createDefault($this->tempDir);
-
-        $this->assertSame('__root__', $manager->getRootPackage()->getName());
-    }
-
-    public function testInitializePuliProjectWithName()
-    {
-        $this->initHome();
-
-        PackageManager::initializePuliProject($this->tempDir, 'project-name');
-
-        $manager = PackageManager::createDefault($this->tempDir);
-
-        $this->assertSame('project-name', $manager->getRootPackage()->getName());
-    }
-
-    public function testInitializePuliProjectIgnoresExistingProject()
-    {
-        $this->initHome();
-
-        $filesystem = new Filesystem();
-        $filesystem->mirror(__DIR__.'/Fixtures/real-root-package', $this->tempDir);
-
-        PackageManager::initializePuliProject($this->tempDir);
-
-        $manager = PackageManager::createDefault($this->tempDir);
-
-        $this->assertSame('real-root', $manager->getRootPackage()->getName());
-    }
-
-    /**
-     * @expectedException \RuntimeException
-     * @expectedExceptionMessage not-a-dir
-     */
-    public function testInitializePuliFailsIfFilePath()
-    {
-        $this->initHome();
-
-        touch($this->tempDir.'/not-a-dir');
-
-        PackageManager::initializePuliProject($this->tempDir.'/not-a-dir');
-    }
-
-    /**
-     * @expectedException \RuntimeException
-     * @expectedExceptionMessage HOME
-     */
-    public function testCreateDefaultFailsIfNoHomeFound()
-    {
-        PackageManager::createDefault(__DIR__.'/Fixtures/real-root-package');
     }
 
     public function testGenerateResourceRepository()
@@ -561,6 +353,11 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
 
     public function testGenerateResourceRepositoryWithRelativePaths()
     {
+        $filesystem = new Filesystem();
+        $filesystem->mirror($this->rootDir, $this->tempDir);
+
+        $this->rootDir = $this->tempDir;
+
         $this->initDefaultManager();
 
         $this->rootConfig->setResourceRepositoryCache('cache-dir/cache');
@@ -570,13 +367,13 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
 
         $this->manager->generateResourceRepository();
 
-        $this->assertFileExists($this->rootDir.'/cache-dir/cache');
-        $this->assertFileExists($this->rootDir.'/repo-dir/repository.php');
+        $this->assertFileExists($this->tempDir.'/cache-dir/cache');
+        $this->assertFileExists($this->tempDir.'/repo-dir/repository.php');
 
         /** @var ResourceRepositoryInterface $repo */
-        $repo = require $this->rootDir.'/repo-dir/repository.php';
+        $repo = require $this->tempDir.'/repo-dir/repository.php';
 
-        $this->assertSame($this->rootDir.'/resources', $repo->get('/root')->getLocalPath());
+        $this->assertSame($this->tempDir.'/resources', $repo->get('/root')->getLocalPath());
     }
 
     public function testGenerateResourceRepositoryWithCustomRepositoryPath()
@@ -648,9 +445,9 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
                 $descriptors = $config->getPackageDescriptors();
 
                 \PHPUnit_Framework_Assert::assertCount(3, $descriptors);
-                \PHPUnit_Framework_Assert::assertSame('../package1', $descriptors[0]->getInstallPath());
+                \PHPUnit_Framework_Assert::assertSame($this->package1Dir, $descriptors[0]->getInstallPath());
                 \PHPUnit_Framework_Assert::assertFalse($descriptors[0]->isNew());
-                \PHPUnit_Framework_Assert::assertSame('../package2', $descriptors[1]->getInstallPath());
+                \PHPUnit_Framework_Assert::assertSame($this->package2Dir, $descriptors[1]->getInstallPath());
                 \PHPUnit_Framework_Assert::assertFalse($descriptors[1]->isNew());
                 \PHPUnit_Framework_Assert::assertSame('../package3', $descriptors[2]->getInstallPath());
                 \PHPUnit_Framework_Assert::assertTrue($descriptors[2]->isNew());
@@ -677,9 +474,9 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
                 $descriptors = $config->getPackageDescriptors();
 
                 \PHPUnit_Framework_Assert::assertCount(3, $descriptors);
-                \PHPUnit_Framework_Assert::assertSame('../package1', $descriptors[0]->getInstallPath());
+                \PHPUnit_Framework_Assert::assertSame($this->package1Dir, $descriptors[0]->getInstallPath());
                 \PHPUnit_Framework_Assert::assertFalse($descriptors[0]->isNew());
-                \PHPUnit_Framework_Assert::assertSame('../package2', $descriptors[1]->getInstallPath());
+                \PHPUnit_Framework_Assert::assertSame($this->package2Dir, $descriptors[1]->getInstallPath());
                 \PHPUnit_Framework_Assert::assertFalse($descriptors[1]->isNew());
                 \PHPUnit_Framework_Assert::assertSame('../package3', $descriptors[2]->getInstallPath());
                 \PHPUnit_Framework_Assert::assertTrue($descriptors[2]->isNew());
@@ -792,8 +589,13 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
     {
         $this->initDefaultManager();
 
-        $this->assertSame(array(), $this->manager->getPluginClasses(false));
-        $this->assertSame(array(), $this->manager->getPluginClasses(true));
+        $this->environment->expects($this->once())
+            ->method('isGlobalPluginClassInstalled')
+            ->with(self::PLUGIN_CLASS)
+            ->will($this->returnValue(false));
+
+        $this->environment->expects($this->never())
+            ->method('installGlobalPluginClass');
 
         $this->packageConfigWriter->expects($this->once())
             ->method('writePackageConfig')
@@ -803,112 +605,115 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
                 \PHPUnit_Framework_Assert::assertSame(array(self::PLUGIN_CLASS), $config->getPluginClasses(true));
             }));
 
-        $this->globalConfigWriter->expects($this->never())
-            ->method('writeGlobalConfig');
-
         $this->manager->installPluginClass(self::PLUGIN_CLASS);
 
         $this->assertSame(array(self::PLUGIN_CLASS), $this->manager->getPluginClasses(false));
-        $this->assertSame(array(self::PLUGIN_CLASS), $this->manager->getPluginClasses(true));
     }
 
     public function testInstallLocalDoesNothingIfPluginExistsGlobally()
     {
         $this->initDefaultManager();
 
-        $this->globalConfig->addPluginClass(self::PLUGIN_CLASS);
+        $this->environment->expects($this->once())
+            ->method('isGlobalPluginClassInstalled')
+            ->with(self::PLUGIN_CLASS)
+            ->will($this->returnValue(true));
+
+        $this->environment->expects($this->never())
+            ->method('installGlobalPluginClass');
 
         $this->packageConfigWriter->expects($this->never())
             ->method('writePackageConfig');
 
-        $this->globalConfigWriter->expects($this->never())
-            ->method('writeGlobalConfig');
-
         $this->manager->installPluginClass(self::PLUGIN_CLASS);
 
         $this->assertSame(array(), $this->manager->getPluginClasses(false));
-        $this->assertSame(array(self::PLUGIN_CLASS), $this->manager->getPluginClasses(true));
     }
 
     public function testInstallLocalDoesNothingIfPluginExistsLocally()
     {
         $this->initDefaultManager();
 
-        $this->rootConfig->addPluginClass(self::PLUGIN_CLASS);
+        $this->environment->expects($this->once())
+            ->method('isGlobalPluginClassInstalled')
+            ->with(self::PLUGIN_CLASS)
+            ->will($this->returnValue(false));
+
+        $this->environment->expects($this->never())
+            ->method('installGlobalPluginClass');
 
         $this->packageConfigWriter->expects($this->never())
             ->method('writePackageConfig');
 
-        $this->globalConfigWriter->expects($this->never())
-            ->method('writeGlobalConfig');
+        $this->rootConfig->addPluginClass(self::PLUGIN_CLASS);
 
         $this->manager->installPluginClass(self::PLUGIN_CLASS);
 
         $this->assertSame(array(self::PLUGIN_CLASS), $this->manager->getPluginClasses(false));
-        $this->assertSame(array(self::PLUGIN_CLASS), $this->manager->getPluginClasses(true));
     }
 
     public function testInstallGlobalPlugin()
     {
         $this->initDefaultManager();
 
-        $this->assertSame(array(), $this->manager->getPluginClasses(false));
-        $this->assertSame(array(), $this->manager->getPluginClasses(true));
+        $this->environment->expects($this->once())
+            ->method('isGlobalPluginClassInstalled')
+            ->with(self::PLUGIN_CLASS)
+            ->will($this->returnValue(false));
+
+        $this->environment->expects($this->once())
+            ->method('installGlobalPluginClass')
+            ->with(self::PLUGIN_CLASS);
 
         $this->packageConfigWriter->expects($this->never())
             ->method('writePackageConfig');
 
-        $this->globalConfigWriter->expects($this->once())
-            ->method('writeGlobalConfig')
-            ->with($this->isInstanceOf('Puli\PackageManager\Config\GlobalConfig'))
-            ->will($this->returnCallback(function (GlobalConfig $config) {
-                \PHPUnit_Framework_Assert::assertSame(array(self::PLUGIN_CLASS), $config->getPluginClasses());
-            }));
-
         $this->manager->installPluginClass(self::PLUGIN_CLASS, true);
 
         $this->assertSame(array(), $this->manager->getPluginClasses(false));
-        $this->assertSame(array(self::PLUGIN_CLASS), $this->manager->getPluginClasses(true));
     }
 
     public function testInstallGlobalDoesNothingIfPluginExistsGlobally()
     {
         $this->initDefaultManager();
 
-        $this->globalConfig->addPluginClass(self::PLUGIN_CLASS);
+        $this->environment->expects($this->once())
+            ->method('isGlobalPluginClassInstalled')
+            ->with(self::PLUGIN_CLASS)
+            ->will($this->returnValue(true));
+
+        $this->environment->expects($this->never())
+            ->method('installGlobalPluginClass');
 
         $this->packageConfigWriter->expects($this->never())
             ->method('writePackageConfig');
 
-        $this->globalConfigWriter->expects($this->never())
-            ->method('writeGlobalConfig');
-
         $this->manager->installPluginClass(self::PLUGIN_CLASS, true);
 
         $this->assertSame(array(), $this->manager->getPluginClasses(false));
-        $this->assertSame(array(self::PLUGIN_CLASS), $this->manager->getPluginClasses(true));
     }
 
     public function testInstallGlobalWritesConfigEvenThoughPluginExistsLocally()
     {
         $this->initDefaultManager();
 
-        $this->rootConfig->addPluginClass(self::PLUGIN_CLASS);
+        $this->environment->expects($this->once())
+            ->method('isGlobalPluginClassInstalled')
+            ->with(self::PLUGIN_CLASS)
+            ->will($this->returnValue(false));
+
+        $this->environment->expects($this->once())
+            ->method('installGlobalPluginClass')
+            ->with(self::PLUGIN_CLASS);
 
         $this->packageConfigWriter->expects($this->never())
             ->method('writePackageConfig');
 
-        $this->globalConfigWriter->expects($this->once())
-            ->method('writeGlobalConfig')
-            ->with($this->isInstanceOf('Puli\PackageManager\Config\GlobalConfig'))
-            ->will($this->returnCallback(function (GlobalConfig $config) {
-                \PHPUnit_Framework_Assert::assertSame(array(self::PLUGIN_CLASS), $config->getPluginClasses());
-            }));
+        $this->rootConfig->addPluginClass(self::PLUGIN_CLASS);
 
         $this->manager->installPluginClass(self::PLUGIN_CLASS, true);
 
         $this->assertSame(array(self::PLUGIN_CLASS), $this->manager->getPluginClasses(false));
-        $this->assertSame(array(self::PLUGIN_CLASS), $this->manager->getPluginClasses(true));
     }
 
     public function testIsPluginClassInstalled()
@@ -929,15 +734,9 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
 
     private function initDefaultManager()
     {
-        $filesystem = new Filesystem();
-        $filesystem->mirror(__DIR__.'/Fixtures', $this->tempDir);
-
-        $this->rootDir = $this->tempDir.'/root-package';
-        $this->package1Dir = $this->tempDir.'/package1';
-        $this->package2Dir = $this->tempDir.'/package2';
         $this->rootConfig->setPackageRepositoryConfig('repository.json');
-        $this->packageRepoConfig->addPackageDescriptor(new PackageDescriptor('../package1', false));
-        $this->packageRepoConfig->addPackageDescriptor(new PackageDescriptor('../package2', false));
+        $this->packageRepoConfig->addPackageDescriptor(new PackageDescriptor($this->package1Dir, false));
+        $this->packageRepoConfig->addPackageDescriptor(new PackageDescriptor($this->package2Dir, false));
 
         $this->packageConfigReader->expects($this->once())
             ->method('readRootPackageConfig')
@@ -960,23 +759,12 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
 
         $this->manager = new PackageManager(
             $this->rootDir,
-            $this->tempHome,
+            $this->environment,
             $this->dispatcher,
-            $this->globalConfig,
-            $this->globalConfigReader,
-            $this->globalConfigWriter,
             $this->repositoryConfigReader,
             $this->repositoryConfigWriter,
             $this->packageConfigReader,
             $this->packageConfigWriter
         );
-    }
-
-    private function initHome()
-    {
-        $filesystem = new Filesystem();
-        $filesystem->mirror(__DIR__.'/Fixtures/home', $this->tempHome);
-
-        putenv('PULI_HOME='.$this->tempHome);
     }
 }

@@ -13,7 +13,6 @@ namespace Puli\PackageManager\Tests\Config\Writer;
 
 use Puli\PackageManager\Config\GlobalConfig;
 use Puli\PackageManager\Config\Writer\ConfigJsonWriter;
-use Symfony\Component\Filesystem\Exception\IOException;
 use Symfony\Component\Filesystem\Filesystem;
 
 /**

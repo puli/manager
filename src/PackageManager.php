@@ -12,11 +12,6 @@
 namespace Puli\PackageManager;
 
 use Puli\Filesystem\PhpCacheRepository;
-use Puli\PackageManager\Config\GlobalConfig;
-use Puli\PackageManager\Config\Reader\ConfigJsonReader;
-use Puli\PackageManager\Config\Reader\GlobalConfigReaderInterface;
-use Puli\PackageManager\Config\Writer\ConfigJsonWriter;
-use Puli\PackageManager\Config\Writer\GlobalConfigWriterInterface;
 use Puli\PackageManager\Package\Config\Reader\PackageConfigReaderInterface;
 use Puli\PackageManager\Package\Config\Reader\PackageJsonReader;
 use Puli\PackageManager\Package\Config\RootPackageConfig;
@@ -54,16 +49,6 @@ use Symfony\Component\Filesystem\Filesystem;
 class PackageManager
 {
     /**
-     * The name of the global Puli configuration file.
-     */
-    const GLOBAL_CONFIG = 'config.json';
-
-    /**
-     * The name of the Puli package config file.
-     */
-    const PACKAGE_CONFIG = 'puli.json';
-
-    /**
      * @var EventDispatcher
      */
     private $dispatcher;
@@ -74,24 +59,9 @@ class PackageManager
     private $rootDir;
 
     /**
-     * @var string
+     * @var PuliEnvironment
      */
-    private $homeDir;
-
-    /**
-     * @var GlobalConfig
-     */
-    private $globalConfig;
-
-    /**
-     * @var GlobalConfigReaderInterface
-     */
-    private $globalConfigReader;
-
-    /**
-     * @var GlobalConfigWriterInterface
-     */
-    private $globalConfigWriter;
+    private $environment;
 
     /**
      * @var RepositoryConfigReaderInterface
@@ -129,73 +99,6 @@ class PackageManager
     private $packageRepository;
 
     /**
-     * Returns the user's home directory used by Puli.
-     *
-     * @return string The path to the home directory.
-     *
-     * @throws \RuntimeException If no home directory can be found or if the
-     *                           found path points to a file.
-     */
-    public static function getHomeDirectory()
-    {
-        if ($value = getenv('PULI_HOME')) {
-            $homeDir = $value;
-            $env = 'PULI_HOME';
-        } elseif ($value = getenv('HOME')) {
-            $homeDir = $value;
-            $env = 'HOME';
-        } elseif ($value = getenv('APPDATA')) {
-            $homeDir = $value;
-            $env = 'APPDATA';
-        } else {
-            throw new \RuntimeException(sprintf(
-                'Either the environment variable PULI_HOME or %s must be set for '.
-                'Puli to run.',
-                defined('PHP_WINDOWS_VERSION_MAJOR') ? 'APPDATA' : 'HOME'
-            ));
-        }
-
-        $homeDir = strtr($homeDir, array('\\' => '/'));
-
-        if (is_file($homeDir)) {
-            throw new \RuntimeException(sprintf(
-                'The home path %s defined in the environment variable %s '.
-                'points to a file. Expected a directory path.',
-                $homeDir,
-                $env
-            ));
-        }
-
-        return 'PULI_HOME' === $env
-            ? $homeDir // user defined
-            : ('HOME' === $env
-                ? $homeDir.'/.puli' // Linux/Mac
-                : $homeDir.'/Puli'); // Windows
-    }
-
-    /**
-     * Parses the global configuration in the users's home directory.
-     *
-     * @return GlobalConfig The global configuration.
-     *
-     * @throws \RuntimeException If no home directory can be found or if the
-     *                           found path points to a file.
-     */
-    public static function parseGlobalConfig()
-    {
-        $globalConfigReader = new ConfigJsonReader();
-        $homeDir = self::getHomeDirectory();
-        $globalConfigFile = $homeDir.'/'.self::GLOBAL_CONFIG;
-
-        // Read config.json from the home directory, if possible
-        if (null !== $homeDir && file_exists($globalConfigFile)){
-            return $globalConfigReader->readGlobalConfig($globalConfigFile);
-        }
-
-        return new GlobalConfig();
-    }
-
-    /**
      * Creates package manager with default configuration.
      *
      * @param string $rootDir The directory containing the root package.
@@ -208,111 +111,35 @@ class PackageManager
     public static function createDefault($rootDir)
     {
         $dispatcher = new EventDispatcher();
-        $homeDir = self::getHomeDirectory();
-        $globalConfig = self::parseGlobalConfig();
-
-        self::denyWebAccess($homeDir);
+        $environment = PuliEnvironment::createFromSystem();
 
         return new static(
             $rootDir,
-            $homeDir,
+            $environment,
             $dispatcher,
-            $globalConfig,
-            new ConfigJsonReader(),
-            new ConfigJsonWriter(),
             new RepositoryJsonReader(),
             new RepositoryJsonWriter(),
-            new PackageJsonReader($globalConfig, $dispatcher),
+            new PackageJsonReader($environment->getGlobalConfig(), $dispatcher),
             new PackageJsonWriter($dispatcher)
         );
-    }
-
-    /**
-     * Returns whether a project has Puli support.
-     *
-     * This method looks for a file puli.json in the project directory. If the
-     * file is not found, this method returns `false`.
-     *
-     * @param string $rootDir The project directory.
-     *
-     * @return bool Whether the project has Puli support.
-     */
-    public static function isPuliProject($rootDir)
-    {
-        return file_exists($rootDir.'/'.self::PACKAGE_CONFIG);
-    }
-
-    /**
-     * Adds Puli support to a project.
-     *
-     * This method will create a file puli.json in the project's root directory.
-     * If the file exists already, an exception is thrown.
-     *
-     * @param string $rootDir The project directory.
-     * @param string $name    The name of the project. Optional.
-     *
-     * @throws \RuntimeException If the passed path is not a directory.
-     */
-    public static function initializePuliProject($rootDir, $name = '__root__')
-    {
-        if (self::isPuliProject($rootDir)) {
-            return;
-        }
-
-        if (!is_dir($rootDir)) {
-            $filesystem = new Filesystem();
-            $filesystem->mkdir($rootDir);
-        }
-
-        $globalConfig = self::parseGlobalConfig();
-        $config = new RootPackageConfig($globalConfig, $name);
-
-        $writer = new PackageJsonWriter();
-        $writer->writePackageConfig($config, $rootDir.'/'.self::PACKAGE_CONFIG);
-    }
-
-    /**
-     * Protects a directory from web access with a .htaccess file.
-     *
-     * If the directory does not exist, it is created.
-     *
-     * @param string $directory The directory path.
-     */
-    private static function denyWebAccess($directory)
-    {
-        if (!file_exists($directory.'/.htaccess')) {
-            if (!is_dir($directory)) {
-                $filesystem = new Filesystem();
-                $filesystem->mkdir($directory);
-            }
-
-            @file_put_contents($directory.'/.htaccess', 'Deny from all');
-        }
     }
 
     /**
      * Loads the repository at the given root directory.
      *
      * @param string                          $rootDir                The directory containing the root package.
-     * @param string                          $homeDir                The Puli home directory.
+     * @param PuliEnvironment                 $environment            The system environment.
      * @param EventDispatcherInterface        $dispatcher             The event dispatcher.
-     * @param GlobalConfig                    $globalConfig           The global configuration.
-     * @param GlobalConfigReaderInterface     $globalConfigReader     The global config file reader.
-     * @param GlobalConfigWriterInterface     $globalConfigWriter     The global config file writer.
      * @param RepositoryConfigReaderInterface $repositoryConfigReader The repository config file reader.
      * @param RepositoryConfigWriterInterface $repositoryConfigWriter The repository config file writer.
      * @param PackageConfigReaderInterface    $packageConfigReader    The package config file reader.
      * @param PackageConfigWriterInterface    $packageConfigWriter    The package config file writer.
      *
-     * @throws NameConflictException
      */
     public function __construct(
         $rootDir,
-        $homeDir,
+        PuliEnvironment $environment,
         EventDispatcherInterface $dispatcher,
-        GlobalConfig $globalConfig,
-        GlobalConfigReaderInterface $globalConfigReader,
-        GlobalConfigWriterInterface $globalConfigWriter,
         RepositoryConfigReaderInterface $repositoryConfigReader,
         RepositoryConfigWriterInterface $repositoryConfigWriter,
         PackageConfigReaderInterface $packageConfigReader,
@@ -321,19 +148,16 @@ class PackageManager
     {
         $this->packageRepository = new PackageRepository();
         $this->rootDir = $rootDir;
-        $this->homeDir = $homeDir;
+        $this->environment = $environment;
         $this->dispatcher = $dispatcher;
-        $this->globalConfig = $globalConfig;
-        $this->globalConfigReader = $globalConfigReader;
-        $this->globalConfigWriter = $globalConfigWriter;
         $this->repositoryConfigReader = $repositoryConfigReader;
         $this->repositoryConfigWriter = $repositoryConfigWriter;
         $this->packageConfigReader = $packageConfigReader;
         $this->packageConfigWriter = $packageConfigWriter;
-        $this->rootPackageConfig = $packageConfigReader->readRootPackageConfig($rootDir.'/'.self::PACKAGE_CONFIG);
+        $this->rootPackageConfig = $packageConfigReader->readRootPackageConfig($rootDir.'/puli.json');
 
         $this->activatePlugins();
-        $this->loadPackages($rootDir);
+        $this->loadPackages();
     }
 
     /**
@@ -396,7 +220,7 @@ class PackageManager
         file_put_contents($repoPath, <<<EOF
 <?php
 
-// resource-repository.php generated by the Puli PackageManager
+// generated by the Puli package manager
 
 use Puli\Filesystem\PhpCacheRepository;
 
@@ -423,32 +247,15 @@ EOF
         }
 
         // Try to load the package
-        $config = $this->packageConfigReader->readPackageConfig($installPath.'/'.self::PACKAGE_CONFIG);
-        $packageName = $config->getPackageName();
-
-        if ($this->packageRepository->containsPackage($packageName)) {
-            $conflictingPackage = $this->packageRepository->getPackage($packageName);
-
-            throw new NameConflictException(sprintf(
-                'The package name "%s" is already in use by the package at '.
-                '%s. Could not install package %s.',
-                $packageName,
-                $conflictingPackage->getInstallPath(),
-                $installPath
-            ));
-        }
+        $package = $this->loadPackage($installPath);
 
         // OK, now add it
-        $package = new Package($config, $installPath);
         $relInstallPath = Path::makeRelative($installPath, $this->rootDir);
         $this->repositoryConfig->addPackageDescriptor(new PackageDescriptor($relInstallPath));
         $this->packageRepository->addPackage($package);
 
         // Write package repository configuration
-        $configPath = $this->rootPackageConfig->getPackageRepositoryConfig();
-        $configPath = Path::makeAbsolute($configPath, $this->rootDir);
-
-        $this->repositoryConfigWriter->writeRepositoryConfig($this->repositoryConfig, $configPath);
+        $this->repositoryConfigWriter->writeRepositoryConfig($this->repositoryConfig, $this->repositoryConfig->getPath());
     }
 
     /**
@@ -527,7 +334,7 @@ EOF
      * By default, plugins are installed in the configuration of the root
      * package. Set the parameter `$global` to `true` if you want to install the
      * plugin globally.
-     **
+     *
      * @param string $pluginClass The fully qualified plugin class name.
      * @param bool   $global      Whether to install the plugin system-wide.
      *                            Defaults to `false?.
@@ -539,25 +346,28 @@ EOF
      */
     public function installPluginClass($pluginClass, $global = false)
     {
-        $config = $global ? $this->globalConfig : $this->rootPackageConfig;
-
-        if (in_array($pluginClass, $config->getPluginClasses())) {
-            // Already installed
+        if ($this->environment->isGlobalPluginClassInstalled($pluginClass)) {
+            // Already installed globally
             return;
         }
 
-        $config->addPluginClass($pluginClass);
-
-        // Write changes to disk
         if ($global) {
-            $path = $this->homeDir.'/'.self::GLOBAL_CONFIG;
-            $this->globalConfigWriter->writeGlobalConfig($config, $path);
+            $this->environment->installGlobalPluginClass($pluginClass);
 
             return;
         }
 
-        $path = $this->rootDir.'/'.self::PACKAGE_CONFIG;
-        $this->packageConfigWriter->writePackageConfig($config, $path);
+        if ($this->rootPackageConfig->hasPluginClass($pluginClass)) {
+            // Already installed locally
+            return;
+        }
+
+        $this->rootPackageConfig->addPluginClass($pluginClass);
+
+        $this->packageConfigWriter->writePackageConfig(
+            $this->rootPackageConfig,
+            $this->rootPackageConfig->getPath()
+        );
     }
 
     /**
@@ -572,6 +382,8 @@ EOF
      *                              considered.
      *
      * @return bool Whether the plugin class is installed.
+     *
+     * @see installPluginClass()
      */
     public function isPluginClassInstalled($pluginClass, $includeGlobal = true)
     {
@@ -622,40 +434,47 @@ EOF
         }
     }
 
-    private function loadPackages($rootDir)
+    private function loadPackages()
     {
-        $this->packageRepository->addPackage(new RootPackage($this->rootPackageConfig, $rootDir));
+        $this->packageRepository->addPackage(new RootPackage($this->rootPackageConfig, $this->rootDir));
 
-        $repositoryConfig = $this->rootPackageConfig->getPackageRepositoryConfig();
-        $repositoryConfig = Path::makeAbsolute($repositoryConfig, $rootDir);
+        $configPath = $this->rootPackageConfig->getPackageRepositoryConfig();
+        $configPath = Path::makeAbsolute($configPath, $this->rootDir);
 
         try {
-            $this->repositoryConfig = $this->repositoryConfigReader->readRepositoryConfig($repositoryConfig);
+            // Don't use file_exists() in order to let the config reader decide
+            // when to throw FileNotFoundException
+            $this->repositoryConfig = $this->repositoryConfigReader->readRepositoryConfig($configPath);
         } catch (FileNotFoundException $e) {
-            $this->repositoryConfig = new PackageRepositoryConfig();
-            $this->repositoryConfigWriter->writeRepositoryConfig($this->repositoryConfig, $repositoryConfig);
+            $this->repositoryConfig = new PackageRepositoryConfig($configPath);
+            $this->repositoryConfigWriter->writeRepositoryConfig($this->repositoryConfig, $configPath);
         }
 
         foreach ($this->repositoryConfig->getPackageDescriptors() as $packageDefinition) {
-            $installPath = Path::makeAbsolute($packageDefinition->getInstallPath(),
-                $rootDir);
-            $config = $this->packageConfigReader->readPackageConfig($installPath.'/'.self::PACKAGE_CONFIG);
-            $packageName = $config->getPackageName();
+            $installPath = Path::makeAbsolute($packageDefinition->getInstallPath(), $this->rootDir);
+            $package = $this->loadPackage($installPath);
 
-            if ($this->packageRepository->containsPackage($packageName)) {
-                $conflictingPackage = $this->packageRepository->getPackage($packageName);
-
-                throw new NameConflictException(sprintf(
-                    'Failed to load repository %s: The packages %s and %s have '.
-                    'the same name "%s".',
-                    $repositoryConfig,
-                    $conflictingPackage->getInstallPath(),
-                    $installPath,
-                    $packageName
-                ));
-            }
-
-            $this->packageRepository->addPackage(new Package($config, $installPath));
+            $this->packageRepository->addPackage($package);
         }
+    }
+
+    private function loadPackage($installPath)
+    {
+        $config = $this->packageConfigReader->readPackageConfig($installPath.'/puli.json');
+        $packageName = $config->getPackageName();
+
+        if ($this->packageRepository->containsPackage($packageName)) {
+            $conflictingPackage = $this->packageRepository->getPackage($packageName);
+
+            throw new NameConflictException(sprintf(
+                'Cannot load package "%s" at %s: The package at %s has the '.
+                'same name.',
+                $packageName,
+                $installPath,
+                $conflictingPackage->getInstallPath()
+            ));
+        }
+
+        return new Package($config, $installPath);
     }
 }

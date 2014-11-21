@@ -1,1 +1,8 @@
-[]
+[
+    {
+        "installPath": "package1"
+    },
+    {
+        "installPath": "package2"
+    }
+]
