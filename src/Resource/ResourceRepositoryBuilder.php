@@ -151,8 +151,21 @@ class ResourceRepositoryBuilder
                 // Reference to install path of other package
                 if ('@' === $relativePath[0] && false !== ($pos = strpos($relativePath, ':'))) {
                     $refPackageName = substr($relativePath, 1, $pos - 1);
+                    $optional = false;
+
+                    // Package references can be made optional by prefixing
+                    // with "@?" instead of just "@"
+                    // Useful for suggested packages, for example
+                    if ('?' === $refPackageName[0]) {
+                        $refPackageName = substr($refPackageName, 1);
+                        $optional = true;
+                    }
 
                     if (!$this->packageRepository->containsPackage($refPackageName)) {
+                        if ($optional) {
+                            continue;
+                        }
+
                         throw new ResourceDefinitionException(sprintf(
                             'The package "%s" referred to a non-existing '.
                             'package "%s" in the resource path "%s". Did you '.

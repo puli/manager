@@ -128,6 +128,20 @@ class ResourceRepositoryBuilderTest extends \PHPUnit_Framework_TestCase
         $this->builder->buildRepository($this->repo);
     }
 
+    public function testDoNotFailIfReferencedOptionalPackageCouldNotBeFound()
+    {
+        $config = new PackageConfig('package1');
+        $config->addResourceDescriptor(new ResourceDescriptor('/package', '@?package2:resources'));
+
+        $this->packageRepository->addPackage(new Package($config, $this->package1Root));
+
+        $this->repo->expects($this->never())
+            ->method('add');
+
+        $this->builder->loadPackages($this->packageRepository);
+        $this->builder->buildRepository($this->repo);
+    }
+
     /**
      * @expectedException \Puli\Filesystem\FilesystemException
      */
