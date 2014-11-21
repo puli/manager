@@ -22,12 +22,12 @@ class PackageEvents
     /**
      * Dispatched when a package JSON file was loaded.
      */
-    const LOAD_PACKAGE_CONFIG = 'package-json-loaded';
+    const LOAD_PACKAGE_CONFIG = 'package-config.load';
 
     /**
      * Dispatched when package JSON data was generated.
      */
-    const SAVE_PACKAGE_CONFIG = 'package-json-generated';
+    const SAVE_PACKAGE_CONFIG = 'package-config.save';
 
     private final function __construct()
     {
