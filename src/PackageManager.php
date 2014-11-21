@@ -132,7 +132,8 @@ class PackageManager
     /**
      * Creates package manager with default dependencies.
      *
-     * @param string $rootDir The directory path to the root package.
+     * @param string          $rootDir     The directory path to the root package.
+     * @param PuliEnvironment $environment The Puli environment.
      *
      * @return static The package manager.
      *
@@ -142,11 +143,11 @@ class PackageManager
      *                                configuration of the root package is
      *                                invalid.
      */
-    public static function createPackageManager($rootDir)
+    public static function createPackageManager($rootDir, PuliEnvironment $environment = null)
     {
         $dispatcher = new EventDispatcher();
         $configManager = self::createConfigManager($dispatcher);
-        $environment = self::createEnvironment($configManager);
+        $environment = $environment ?: self::createEnvironment($configManager);
 
         return new static($rootDir, $environment, $configManager, $dispatcher);
     }
