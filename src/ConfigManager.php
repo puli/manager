@@ -247,9 +247,6 @@ class ConfigManager
      * loading the configuration. You can attach listeners to this event to
      * modify loaded configurations.
      *
-     * If the package configuration has no name set, the name is set to
-     * "__root__" automatically.
-     *
      * @param string       $path         The path to the package configuration file.
      * @param GlobalConfig $globalConfig The global configuration that the root
      *                                   configuration will inherit its settings
@@ -273,10 +270,6 @@ class ConfigManager
             $this->dispatcher->dispatch(PackageEvents::LOAD_PACKAGE_CONFIG, $event);
         }
 
-        if (null === $config->getPackageName()) {
-            $config->setPackageName('__root__');
-        }
-
         return $config;
     }
 
@@ -294,10 +287,6 @@ class ConfigManager
         if ($this->dispatcher->hasListeners(PackageEvents::SAVE_PACKAGE_CONFIG)) {
             $event = new PackageConfigEvent($config);
             $this->dispatcher->dispatch(PackageEvents::SAVE_PACKAGE_CONFIG, $event);
-        }
-
-        if ('__root__' === $config->getPackageName()) {
-            $config->setPackageName(null);
         }
 
         $this->packageConfigWriter->writePackageConfig($config, $config->getPath());

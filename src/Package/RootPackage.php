@@ -30,6 +30,10 @@ class RootPackage extends Package
     public function __construct(RootPackageConfig $config, $installPath)
     {
         parent::__construct($config, $installPath);
+
+        if (null === $this->getName()) {
+            $this->setName('__root__');
+        }
     }
 
     /**

@@ -308,21 +308,6 @@ class ConfigManagerTest extends \PHPUnit_Framework_TestCase
         $this->assertSame($config, $this->manager->loadRootPackageConfig('/path', $globalConfig));
     }
 
-    public function testLoadRootPackageConfigUsesDefaultNameIfNoneSet()
-    {
-        $globalConfig = new GlobalConfig();
-        $config = new RootPackageConfig($globalConfig);
-
-        $this->packageConfigReader->expects($this->once())
-            ->method('readRootPackageConfig')
-            ->with('/path')
-            ->will($this->returnValue($config));
-
-        $config = $this->manager->loadRootPackageConfig('/path', $globalConfig);
-
-        $this->assertSame('__root__', $config->getPackageName());
-    }
-
     public function testLoadRootPackageConfigDispatchesEvent()
     {
         $globalConfig = new GlobalConfig();
@@ -348,20 +333,6 @@ class ConfigManagerTest extends \PHPUnit_Framework_TestCase
         $this->assertSame($config, $this->manager->loadRootPackageConfig('/path', $globalConfig));
     }
 
-    public function testLoadRootPackageConfigCreatesNewIfNotFound()
-    {
-        $globalConfig = new GlobalConfig();
-
-        $this->packageConfigReader->expects($this->once())
-            ->method('readRootPackageConfig')
-            ->with('/path')
-            ->will($this->throwException(new FileNotFoundException()));
-
-        $config = new RootPackageConfig($globalConfig, '__root__', '/path');
-
-        $this->assertEquals($config, $this->manager->loadRootPackageConfig('/path', $globalConfig));
-    }
-
     public function testSaveRootPackageConfig()
     {
         $globalConfig = new GlobalConfig();
@@ -370,21 +341,6 @@ class ConfigManagerTest extends \PHPUnit_Framework_TestCase
         $this->packageConfigWriter->expects($this->once())
             ->method('writePackageConfig')
             ->with($config, '/path');
-
-        $this->manager->saveRootPackageConfig($config);
-    }
-
-    public function testSaveRootPackageConfigRemovesDefaultName()
-    {
-        $globalConfig = new GlobalConfig();
-        $config = new RootPackageConfig($globalConfig, '__root__', '/path');
-
-        $this->packageConfigWriter->expects($this->once())
-            ->method('writePackageConfig')
-            ->with($config, '/path')
-            ->will($this->returnValue(function (RootPackageConfig $config) {
-                \PHPUnit_Framework_Assert::assertNull($config->getPackageName());
-            }));
 
         $this->manager->saveRootPackageConfig($config);
     }

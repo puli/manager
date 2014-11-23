@@ -78,4 +78,14 @@ class Package
     {
         return $this->config;
     }
+
+    /**
+     * Sets the package name.
+     *
+     * @param string $name The package name.
+     */
+    protected function setName($name)
+    {
+        $this->name = $name;
+    }
 }
