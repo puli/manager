@@ -9,14 +9,14 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\PackageManager;
+namespace Puli\PackageManager\Manager;
 
 /**
- * Thrown when the Puli environment cannot be bootstrapped.
+ * Thrown when two packages have the same name.
  *
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class BootstrapException extends \Exception
+class NameConflictException extends \Exception
 {
 }

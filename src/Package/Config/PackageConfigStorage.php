@@ -9,20 +9,16 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\PackageManager;
+namespace Puli\PackageManager\Package\Config;
 
 use Puli\PackageManager\Config\GlobalConfig;
-use Puli\PackageManager\Config\Reader\GlobalConfigReaderInterface;
-use Puli\PackageManager\Config\Writer\GlobalConfigWriterInterface;
 use Puli\PackageManager\Event\PackageConfigEvent;
 use Puli\PackageManager\Event\PackageEvents;
-use Puli\PackageManager\Package\Config\PackageConfig;
+use Puli\PackageManager\FileNotFoundException;
+use Puli\PackageManager\InvalidConfigException;
+use Puli\PackageManager\IOException;
 use Puli\PackageManager\Package\Config\Reader\PackageConfigReaderInterface;
-use Puli\PackageManager\Package\Config\RootPackageConfig;
 use Puli\PackageManager\Package\Config\Writer\PackageConfigWriterInterface;
-use Puli\PackageManager\Repository\Config\PackageRepositoryConfig;
-use Puli\PackageManager\Repository\Config\Reader\RepositoryConfigReaderInterface;
-use Puli\PackageManager\Repository\Config\Writer\RepositoryConfigWriterInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
@@ -31,28 +27,8 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class ConfigManager
+class PackageConfigStorage
 {
-    /**
-     * @var GlobalConfigReaderInterface
-     */
-    private $globalConfigReader;
-
-    /**
-     * @var GlobalConfigWriterInterface
-     */
-    private $globalConfigWriter;
-
-    /**
-     * @var RepositoryConfigReaderInterface
-     */
-    private $repositoryConfigReader;
-
-    /**
-     * @var RepositoryConfigWriterInterface
-     */
-    private $repositoryConfigWriter;
-
     /**
      * @var PackageConfigReaderInterface
      */
@@ -71,103 +47,19 @@ class ConfigManager
     /**
      * Creates a new configuration manager.
      *
-     * @param GlobalConfigReaderInterface     $globalConfigReader     The reader for global config files.
-     * @param GlobalConfigWriterInterface     $globalConfigWriter     The writer for global config files.
-     * @param RepositoryConfigReaderInterface $repositoryConfigReader The reader for repository config files.
-     * @param RepositoryConfigWriterInterface $repositoryConfigWriter The writer for repository config files.
      * @param PackageConfigReaderInterface    $packageConfigReader    The reader for package config files.
      * @param PackageConfigWriterInterface    $packageConfigWriter    The writer for package config files.
      * @param EventDispatcherInterface        $dispatcher             The event dispatcher to use.
      */
     public function __construct(
-        GlobalConfigReaderInterface $globalConfigReader,
-        GlobalConfigWriterInterface $globalConfigWriter,
-        RepositoryConfigReaderInterface $repositoryConfigReader,
-        RepositoryConfigWriterInterface $repositoryConfigWriter,
         PackageConfigReaderInterface $packageConfigReader,
         PackageConfigWriterInterface $packageConfigWriter,
         EventDispatcherInterface $dispatcher
     )
     {
-        $this->globalConfigReader = $globalConfigReader;
-        $this->globalConfigWriter = $globalConfigWriter;
-        $this->repositoryConfigReader = $repositoryConfigReader;
-        $this->repositoryConfigWriter = $repositoryConfigWriter;
         $this->packageConfigReader = $packageConfigReader;
         $this->packageConfigWriter = $packageConfigWriter;
         $this->dispatcher = $dispatcher;
-    }
-
-    /**
-     * Loads global configuration from a file path.
-     *
-     * If the file does not exist, an empty configuration is returned.
-     *
-     * @param string $path The path to the global configuration file.
-     *
-     * @return GlobalConfig The loaded global configuration.
-     *
-     * @throws InvalidConfigException If the file contains invalid configuration.
-     */
-    public function loadGlobalConfig($path)
-    {
-        try {
-            // Don't use file_exists() to decouple from the file system
-            return $this->globalConfigReader->readGlobalConfig($path);
-        } catch (FileNotFoundException $e) {
-            return new GlobalConfig($path);
-        }
-    }
-
-    /**
-     * Saves global configuration.
-     *
-     * The global configuration is saved to the same path that it was read from.
-     *
-     * @param GlobalConfig $config The global configuration to save.
-     *
-     * @throws IOException If the configuration cannot be written.
-     */
-    public function saveGlobalConfig(GlobalConfig $config)
-    {
-        $this->globalConfigWriter->writeGlobalConfig($config, $config->getPath());
-    }
-
-    /**
-     * Loads package repository configuration from a file path.
-     *
-     * If the file does not exist, an empty configuration is returned.
-     *
-     * @param string $path The path to the repository configuration file.
-     *
-     * @return PackageRepositoryConfig The loaded package repository configuration.
-     *
-     * @throws InvalidConfigException If the file contains invalid configuration.
-     */
-    public function loadRepositoryConfig($path)
-    {
-        try {
-            // Don't use file_exists() to decouple from the file system
-            return $this->repositoryConfigReader->readRepositoryConfig($path);
-        } catch (FileNotFoundException $e) {
-            return new PackageRepositoryConfig($path);
-        }
-    }
-
-    /**
-     * Saves package repository configuration.
-     *
-     * The repository configuration is saved to the same path that it was read
-     * from.
-     *
-     * @param PackageRepositoryConfig $config The package repository
-     *                                        configuration to save.
-     *
-     * @throws IOException If the configuration cannot be written.
-     */
-    public function saveRepositoryConfig(PackageRepositoryConfig $config)
-    {
-        $this->repositoryConfigWriter->writeRepositoryConfig($config, $config->getPath());
     }
 
     /**

@@ -11,7 +11,7 @@
 
 namespace Puli\PackageManager\Plugin;
 
-use Puli\PackageManager\PackageManager;
+use Puli\PackageManager\Manager\ProjectEnvironment;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
@@ -25,8 +25,7 @@ interface PluginInterface
     /**
      * Activates the plugin.
      *
-     * @param PackageManager           $manager    The package manager.
-     * @param EventDispatcherInterface $dispatcher The manager's event dispatcher.
+     * @param ProjectEnvironment $environment The project environment.
      */
-    public function activate(PackageManager $manager, EventDispatcherInterface $dispatcher);
+    public function activate(ProjectEnvironment $environment);
 }

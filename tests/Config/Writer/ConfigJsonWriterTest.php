@@ -36,7 +36,7 @@ class ConfigJsonWriterTest extends \PHPUnit_Framework_TestCase
     {
         $this->writer = new ConfigJsonWriter();
         $this->tempFile = tempnam(sys_get_temp_dir(), 'ConfigJsonWriterTest');
-        while (false === mkdir($this->tempDir = sys_get_temp_dir().'/puli-manager/ConfigJsonWriterTest_temp'.rand(10000, 99999), 0777, true)) {}
+        while (false === @mkdir($this->tempDir = sys_get_temp_dir().'/puli-manager/ConfigJsonWriterTest_temp'.rand(10000, 99999), 0777, true)) {}
     }
 
     protected function tearDown()

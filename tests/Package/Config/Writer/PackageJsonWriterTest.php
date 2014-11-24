@@ -38,7 +38,7 @@ class PackageJsonWriterTest extends \PHPUnit_Framework_TestCase
     {
         $this->writer = new PackageJsonWriter();
         $this->tempFile = tempnam(sys_get_temp_dir(), 'PackageJsonWriterTest');
-        while (false === mkdir($this->tempDir = sys_get_temp_dir().'/puli-manager/PackageJsonWriterTest_temp'.rand(10000, 99999), 0777, true)) {}
+        while (false === @mkdir($this->tempDir = sys_get_temp_dir().'/puli-manager/PackageJsonWriterTest_temp'.rand(10000, 99999), 0777, true)) {}
     }
 
     protected function tearDown()

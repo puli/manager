@@ -11,7 +11,7 @@
 
 namespace Puli\PackageManager\Tests\Config\Fixtures;
 
-use Puli\PackageManager\PackageManager;
+use Puli\PackageManager\Manager\ProjectEnvironment;
 use Puli\PackageManager\Plugin\PluginInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
@@ -22,34 +22,20 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 class TestPlugin implements PluginInterface
 {
     /**
-     * @var bool
+     * @var ProjectEnvironment
      */
-    private static $dispatcher = false;
+    private static $environment;
 
     /**
-     * @var PackageManager
+     * @return ProjectEnvironment
      */
-    private static $manager;
-
-    /**
-     * @return PackageManager
-     */
-    public static function getManager()
+    public static function getEnvironment()
     {
-        return self::$manager;
+        return self::$environment;
     }
 
-    /**
-     * @return bool
-     */
-    public static function getDispatcher()
+    public function activate(ProjectEnvironment $environment)
     {
-        return self::$dispatcher;
-    }
-
-    public function activate(PackageManager $manager, EventDispatcherInterface $dispatcher)
-    {
-        self::$manager = $manager;
-        self::$dispatcher = $dispatcher;
+        self::$environment = $environment;
     }
 }

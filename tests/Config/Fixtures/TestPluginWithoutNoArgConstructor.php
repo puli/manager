@@ -11,7 +11,7 @@
 
 namespace Puli\PackageManager\Tests\Config\Fixtures;
 
-use Puli\PackageManager\PackageManager;
+use Puli\PackageManager\Manager\ProjectEnvironment;
 use Puli\PackageManager\Plugin\PluginInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
@@ -25,7 +25,7 @@ class TestPluginWithoutNoArgConstructor implements PluginInterface
     {
     }
 
-    public function activate(PackageManager $manager, EventDispatcherInterface $dispatcher)
+    public function activate(ProjectEnvironment $environment)
     {
     }
 }

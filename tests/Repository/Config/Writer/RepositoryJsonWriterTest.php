@@ -35,7 +35,7 @@ class RepositoryJsonWriterTest extends \PHPUnit_Framework_TestCase
     {
         $this->writer = new RepositoryJsonWriter();
         $this->tempFile = tempnam(sys_get_temp_dir(), 'RepositoryJsonWriterTest');
-        while (false === mkdir($this->tempDir = sys_get_temp_dir().'/puli-manager/RepositoryJsonWriterTest_temp'.rand(10000, 99999), 0777, true)) {}
+        while (false === @mkdir($this->tempDir = sys_get_temp_dir().'/puli-manager/RepositoryJsonWriterTest_temp'.rand(10000, 99999), 0777, true)) {}
     }
 
     protected function tearDown()
