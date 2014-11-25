@@ -15,7 +15,7 @@ use Puli\PackageManager\Config\GlobalConfig;
 use Puli\PackageManager\Config\GlobalConfigStorage;
 use Puli\PackageManager\Config\Reader\GlobalConfigReaderInterface;
 use Puli\PackageManager\Config\Writer\GlobalConfigWriterInterface;
-use Puli\PackageManager\Manager\ProjectEnvironment;
+use Puli\PackageManager\Environment\ProjectEnvironment;
 use Puli\PackageManager\Package\Config\PackageConfig;
 use Puli\PackageManager\Package\Config\PackageConfigStorage;
 use Puli\PackageManager\Package\Config\Reader\PackageConfigReaderInterface;
@@ -31,12 +31,12 @@ class TestProjectEnvironment extends ProjectEnvironment implements GlobalConfigR
 {
     private $globalConfig;
 
-    private $projectConfig;
+    private $rootPackageConfig;
 
     public function __construct($homeDir, $rootDir, GlobalConfig $globalConfig, RootPackageConfig $rootPackageConfig, EventDispatcherInterface $dispatcher)
     {
         $this->globalConfig = $globalConfig;
-        $this->projectConfig = $rootPackageConfig;
+        $this->rootPackageConfig = $rootPackageConfig;
 
         parent::__construct($homeDir, $rootDir, new GlobalConfigStorage($this, $this), new PackageConfigStorage($this, $this, $dispatcher), $dispatcher);
     }
@@ -56,7 +56,7 @@ class TestProjectEnvironment extends ProjectEnvironment implements GlobalConfigR
 
     public function readRootPackageConfig($path, GlobalConfig $globalConfig)
     {
-        return $this->projectConfig;
+        return $this->rootPackageConfig;
     }
 
     public function writePackageConfig(PackageConfig $config, $path)

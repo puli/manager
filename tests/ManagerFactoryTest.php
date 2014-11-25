@@ -56,7 +56,7 @@ class ManagerFactoryTest extends \PHPUnit_Framework_TestCase
     {
         $environment = ManagerFactory::createGlobalEnvironment();
 
-        $this->assertInstanceOf('Puli\PackageManager\Manager\GlobalEnvironment', $environment);
+        $this->assertInstanceOf('Puli\PackageManager\Environment\GlobalEnvironment', $environment);
         $this->assertInstanceOf('Puli\PackageManager\Config\GlobalConfig', $environment->getGlobalConfig());
         $this->assertInstanceOf('Symfony\Component\EventDispatcher\EventDispatcherInterface', $environment->getEventDispatcher());
         $this->assertSame($this->tempHome, $environment->getHomeDirectory());
@@ -77,14 +77,14 @@ class ManagerFactoryTest extends \PHPUnit_Framework_TestCase
     {
         $environment = ManagerFactory::createProjectEnvironment($this->tempDir);
 
-        $this->assertInstanceOf('Puli\PackageManager\Manager\ProjectEnvironment', $environment);
+        $this->assertInstanceOf('Puli\PackageManager\Environment\ProjectEnvironment', $environment);
         $this->assertInstanceOf('Puli\PackageManager\Config\GlobalConfig', $environment->getGlobalConfig());
-        $this->assertInstanceOf('Puli\PackageManager\Package\Config\RootPackageConfig', $environment->getProjectConfig());
+        $this->assertInstanceOf('Puli\PackageManager\Package\Config\RootPackageConfig', $environment->getRootPackageConfig());
         $this->assertInstanceOf('Symfony\Component\EventDispatcher\EventDispatcherInterface', $environment->getEventDispatcher());
         $this->assertSame($this->tempHome, $environment->getHomeDirectory());
         $this->assertSame($this->tempDir, $environment->getRootDirectory());
         $this->assertSame($this->tempHome.'/config.json', $environment->getGlobalConfig()->getPath());
-        $this->assertSame($this->tempDir.'/puli.json', $environment->getProjectConfig()->getPath());
+        $this->assertSame($this->tempDir.'/puli.json', $environment->getRootPackageConfig()->getPath());
     }
 
     public function testCreateProjectEnvironmentProtectsHome()

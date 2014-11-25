@@ -12,6 +12,7 @@
 namespace Puli\PackageManager\Manager;
 
 use Puli\Filesystem\PhpCacheRepository;
+use Puli\PackageManager\Environment\ProjectEnvironment;
 use Puli\PackageManager\FileNotFoundException;
 use Puli\PackageManager\InvalidConfigException;
 use Puli\PackageManager\NoDirectoryException;
@@ -93,7 +94,7 @@ class PackageManager
     )
     {
         $this->environment = $environment;
-        $this->rootPackageConfig = $environment->getProjectConfig();
+        $this->rootPackageConfig = $environment->getRootPackageConfig();
         $this->rootDir = $environment->getRootDirectory();
         $this->repositoryConfigStorage = $repositoryConfigStorage;
         $this->packageConfigStorage = $packageConfigStorage;

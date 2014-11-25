@@ -9,11 +9,11 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\PackageManager\Tests\Manager;
+namespace Puli\PackageManager\Tests\Environment;
 
 use Puli\PackageManager\Config\GlobalConfig;
 use Puli\PackageManager\Config\GlobalConfigStorage;
-use Puli\PackageManager\Manager\GlobalEnvironment;
+use Puli\PackageManager\Environment\GlobalEnvironment;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**

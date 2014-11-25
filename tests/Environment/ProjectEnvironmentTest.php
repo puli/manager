@@ -9,11 +9,11 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\PackageManager\Tests\Manager;
+namespace Puli\PackageManager\Tests\Environment;
 
 use Puli\PackageManager\Config\GlobalConfig;
 use Puli\PackageManager\Config\GlobalConfigStorage;
-use Puli\PackageManager\Manager\ProjectEnvironment;
+use Puli\PackageManager\Environment\ProjectEnvironment;
 use Puli\PackageManager\Package\Config\PackageConfigStorage;
 use Puli\PackageManager\Package\Config\RootPackageConfig;
 use Puli\PackageManager\Tests\Config\Fixtures\TestPlugin;
@@ -53,7 +53,7 @@ class ProjectEnvironmentTest extends \PHPUnit_Framework_TestCase
     protected function setUp()
     {
         $this->homeDir = __DIR__.'/Fixtures/home';
-        $this->rootDir = __DIR__.'/Fixtures/root-package';
+        $this->rootDir = __DIR__.'/Fixtures/root';
         $this->globalConfigStorage = $this->getMockBuilder('Puli\PackageManager\Config\GlobalConfigStorage')
             ->disableOriginalConstructor()
             ->getMock();
@@ -89,7 +89,7 @@ class ProjectEnvironmentTest extends \PHPUnit_Framework_TestCase
         $this->assertSame($this->homeDir, $environment->getHomeDirectory());
         $this->assertSame($this->rootDir, $environment->getRootDirectory());
         $this->assertSame($globalConfig, $environment->getGlobalConfig());
-        $this->assertSame($rootConfig, $environment->getProjectConfig());
+        $this->assertSame($rootConfig, $environment->getRootPackageConfig());
         $this->assertSame($this->dispatcher, $environment->getEventDispatcher());
     }
 

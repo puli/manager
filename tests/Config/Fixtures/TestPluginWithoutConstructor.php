@@ -11,7 +11,7 @@
 
 namespace Puli\PackageManager\Tests\Config\Fixtures;
 
-use Puli\PackageManager\Manager\ProjectEnvironment;
+use Puli\PackageManager\Environment\ProjectEnvironment;
 use Puli\PackageManager\Plugin\PluginInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 

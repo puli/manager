@@ -11,6 +11,7 @@
 
 namespace Puli\PackageManager\Manager;
 
+use Puli\PackageManager\Environment\ProjectEnvironment;
 use Puli\PackageManager\InvalidConfigException;
 use Puli\PackageManager\Package\Config\PackageConfigStorage;
 use Puli\PackageManager\Package\Config\RootPackageConfig;
@@ -53,7 +54,7 @@ class ProjectConfigManager
     public function __construct(ProjectEnvironment $environment, PackageConfigStorage $configStorage, GlobalConfigManager $globalConfigManager)
     {
         $this->environment = $environment;
-        $this->rootPackageConfig = $environment->getProjectConfig();
+        $this->rootPackageConfig = $environment->getRootPackageConfig();
         $this->configStorage = $configStorage;
         $this->globalConfigManager = $globalConfigManager;
     }

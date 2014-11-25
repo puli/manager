@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\PackageManager\Manager;
+namespace Puli\PackageManager\Environment;
 
 use Puli\PackageManager\Config\GlobalConfig;
 use Puli\PackageManager\Config\GlobalConfigStorage;

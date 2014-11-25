@@ -9,9 +9,10 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\PackageManager\Manager;
+namespace Puli\PackageManager\Environment;
 
 use Puli\PackageManager\Config\GlobalConfigStorage;
+use Puli\PackageManager\Environment\GlobalEnvironment;
 use Puli\PackageManager\FileNotFoundException;
 use Puli\PackageManager\NoDirectoryException;
 use Puli\PackageManager\Package\Config\PackageConfigStorage;
@@ -35,7 +36,7 @@ class ProjectEnvironment extends GlobalEnvironment
     /**
      * @var RootPackageConfig
      */
-    private $projectConfig;
+    private $rootPackageConfig;
 
     /**
      * Creates the project environment.
@@ -46,7 +47,7 @@ class ProjectEnvironment extends GlobalEnvironment
      *
      * The passed root directory will be be scanned for a file "puli.json".
      * If that file exists, it is loaded into memory. Use
-     * {@link getProjectConfig()} to access the loaded configuration.
+     * {@link getRootPackageConfig()} to access the loaded configuration.
      *
      * @param string                   $homeDir              The path to Puli's home directory.
      * @param GlobalConfigStorage      $rootDir              The path to the project directory.
@@ -77,12 +78,12 @@ class ProjectEnvironment extends GlobalEnvironment
         parent::__construct($homeDir, $globalConfigStorage, $dispatcher);
 
         $this->rootDir = $rootDir;
-        $this->projectConfig = $packageConfigStorage->loadRootPackageConfig(
+        $this->rootPackageConfig = $packageConfigStorage->loadRootPackageConfig(
             $rootDir.'/puli.json',
             $this->getGlobalConfig()
         );
 
-        foreach ($this->projectConfig->getPluginClasses() as $pluginClass) {
+        foreach ($this->rootPackageConfig->getPluginClasses() as $pluginClass) {
             /** @var PluginInterface $plugin */
             $plugin = new $pluginClass();
             $plugin->activate($this, $this->getEventDispatcher());
@@ -104,8 +105,8 @@ class ProjectEnvironment extends GlobalEnvironment
      *
      * @return RootPackageConfig The project configuration.
      */
-    public function getProjectConfig()
+    public function getRootPackageConfig()
     {
-        return $this->projectConfig;
+        return $this->rootPackageConfig;
     }
 }

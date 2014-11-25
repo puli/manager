@@ -15,7 +15,7 @@ use Puli\PackageManager\Config\GlobalConfig;
 use Puli\PackageManager\Config\GlobalConfigStorage;
 use Puli\PackageManager\Config\Reader\GlobalConfigReaderInterface;
 use Puli\PackageManager\Config\Writer\GlobalConfigWriterInterface;
-use Puli\PackageManager\Manager\GlobalEnvironment;
+use Puli\PackageManager\Environment\GlobalEnvironment;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**

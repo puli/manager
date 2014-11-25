@@ -13,6 +13,7 @@ namespace Puli\PackageManager\Manager;
 
 use Puli\PackageManager\Config\GlobalConfig;
 use Puli\PackageManager\Config\GlobalConfigStorage;
+use Puli\PackageManager\Environment\GlobalEnvironment;
 use Puli\PackageManager\InvalidConfigException;
 
 /**
