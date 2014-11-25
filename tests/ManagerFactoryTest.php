@@ -139,4 +139,22 @@ class ManagerFactoryTest extends \PHPUnit_Framework_TestCase
         $this->assertSame('package1', $packages['package1']->getName());
         $this->assertSame('package2', $packages['package2']->getName());
     }
+
+    public function testCreateResourceRepository()
+    {
+        $environment = ManagerFactory::createProjectEnvironment($this->tempDir);
+        $repo = ManagerFactory::createResourceRepository($environment);
+
+        $this->assertInstanceOf('Puli\Repository\ResourceRepositoryInterface', $repo);
+    }
+
+    public function testCreateResourceRepositoryIfAlreadyGenerated()
+    {
+        $environment = ManagerFactory::createProjectEnvironment($this->tempDir);
+        $manager = ManagerFactory::createPackageManager($environment);
+        $manager->generateResourceRepository();
+        $repo = ManagerFactory::createResourceRepository($environment);
+
+        $this->assertInstanceOf('Puli\Repository\ResourceRepositoryInterface', $repo);
+    }
 }

@@ -26,6 +26,8 @@ use Puli\PackageManager\Repository\Config\PackageRepositoryConfigStorage;
 use Puli\PackageManager\Repository\Config\Reader\RepositoryJsonReader;
 use Puli\PackageManager\Repository\Config\Writer\RepositoryJsonWriter;
 use Puli\PackageManager\Util\System;
+use Puli\Repository\ResourceRepositoryInterface;
+use Puli\Util\Path;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
@@ -187,6 +189,28 @@ class ManagerFactory
             self::createPackageConfigStorage($environment->getEventDispatcher()),
             self::createRepositoryConfigStorage()
         );
+    }
+
+    /**
+     * Creates the resource repository for a Puli project.
+     *
+     * @param ProjectEnvironment $environment The project environment.
+     *
+     * @return ResourceRepositoryInterface The resource repository.
+     */
+    public static function createResourceRepository(ProjectEnvironment $environment)
+    {
+        $repoPath = Path::makeAbsolute(
+            $environment->getRootPackageConfig()->getGeneratedResourceRepository(),
+            $environment->getRootDirectory()
+        );
+
+        if (!file_exists($repoPath)) {
+            $manager = self::createPackageManager($environment);
+            $manager->generateResourceRepository();
+        }
+
+        return include $repoPath;
     }
 
     private static function createGlobalConfigStorage()
