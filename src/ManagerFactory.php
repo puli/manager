@@ -198,13 +198,16 @@ class ManagerFactory
     /**
      * Creates the resource repository manager for a Puli project.
      *
-     * @param ProjectEnvironment $environment The project environment.
+     * @param ProjectEnvironment $environment    The project environment.
+     * @param PackageManager     $packageManager The package manager. Optional.
      *
      * @return RepositoryManager The repository manager.
      */
-    public static function createRepositoryManager(ProjectEnvironment $environment)
+    public static function createRepositoryManager(ProjectEnvironment $environment, PackageManager $packageManager = null)
     {
-        return new RepositoryManager($environment, self::createPackageManager($environment)->getPackages());
+        $packageManager = $packageManager ?: self::createPackageManager($environment);
+
+        return new RepositoryManager($environment, $packageManager->getPackages());
     }
 
     /**
