@@ -13,8 +13,8 @@ namespace Puli\RepositoryManager\Tests\Package\Config;
 
 use Puli\RepositoryManager\Config\GlobalConfig;
 use Puli\RepositoryManager\Event\PackageConfigEvent;
-use Puli\RepositoryManager\ManagerEvents;
 use Puli\RepositoryManager\FileNotFoundException;
+use Puli\RepositoryManager\ManagerEvents;
 use Puli\RepositoryManager\Package\Config\PackageConfig;
 use Puli\RepositoryManager\Package\Config\PackageConfigStorage;
 use Puli\RepositoryManager\Package\Config\Reader\PackageConfigReaderInterface;

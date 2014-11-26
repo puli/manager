@@ -11,12 +11,12 @@
 
 namespace Puli\RepositoryManager\Config\Reader;
 
-use Puli\Json\DecodingFailedException;
-use Puli\Json\JsonDecoder;
-use Puli\Json\ValidationFailedException;
 use Puli\RepositoryManager\Config\GlobalConfig;
 use Puli\RepositoryManager\FileNotFoundException;
 use Puli\RepositoryManager\InvalidConfigException;
+use Webmozart\Json\DecodingFailedException;
+use Webmozart\Json\JsonDecoder;
+use Webmozart\Json\ValidationFailedException;
 
 /**
  * Reads global configuration from a JSON file.

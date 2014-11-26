@@ -14,14 +14,12 @@ namespace Puli\RepositoryManager\Tests\Package;
 use Puli\RepositoryManager\Config\GlobalConfig;
 use Puli\RepositoryManager\Package\Config\PackageConfig;
 use Puli\RepositoryManager\Package\Config\PackageConfigStorage;
-use Puli\RepositoryManager\Package\Config\ResourceDescriptor;
 use Puli\RepositoryManager\Package\Config\RootPackageConfig;
 use Puli\RepositoryManager\Package\InstallFile\InstallFile;
 use Puli\RepositoryManager\Package\InstallFile\InstallFileStorage;
 use Puli\RepositoryManager\Package\InstallFile\PackageDescriptor;
 use Puli\RepositoryManager\Package\PackageManager;
 use Puli\RepositoryManager\Tests\Package\Fixtures\TestProjectEnvironment;
-use Puli\Repository\ResourceRepositoryInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Filesystem\Filesystem;
 

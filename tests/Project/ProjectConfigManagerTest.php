@@ -12,7 +12,6 @@
 namespace Puli\RepositoryManager\Tests\Project;
 
 use Puli\RepositoryManager\Config\GlobalConfig;
-use Puli\RepositoryManager\Config\GlobalConfigManager;
 use Puli\RepositoryManager\Package\Config\PackageConfigStorage;
 use Puli\RepositoryManager\Package\Config\RootPackageConfig;
 use Puli\RepositoryManager\Project\ProjectConfigManager;

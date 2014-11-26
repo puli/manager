@@ -11,9 +11,6 @@
 
 namespace Puli\RepositoryManager\Package\Config\Reader;
 
-use Puli\Json\DecodingFailedException;
-use Puli\Json\JsonDecoder;
-use Puli\Json\ValidationFailedException;
 use Puli\RepositoryManager\Config\GlobalConfig;
 use Puli\RepositoryManager\FileNotFoundException;
 use Puli\RepositoryManager\InvalidConfigException;
@@ -21,6 +18,9 @@ use Puli\RepositoryManager\Package\Config\PackageConfig;
 use Puli\RepositoryManager\Package\Config\ResourceDescriptor;
 use Puli\RepositoryManager\Package\Config\RootPackageConfig;
 use Puli\RepositoryManager\Package\Config\TagDescriptor;
+use Webmozart\Json\DecodingFailedException;
+use Webmozart\Json\JsonDecoder;
+use Webmozart\Json\ValidationFailedException;
 
 /**
  * Reads package configuration from a JSON file.

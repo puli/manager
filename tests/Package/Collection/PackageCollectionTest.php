@@ -12,10 +12,10 @@
 namespace Puli\RepositoryManager\Tests\Package\Collection;
 
 use Puli\RepositoryManager\Config\GlobalConfig;
+use Puli\RepositoryManager\Package\Collection\PackageCollection;
 use Puli\RepositoryManager\Package\Config\PackageConfig;
 use Puli\RepositoryManager\Package\Config\RootPackageConfig;
 use Puli\RepositoryManager\Package\Package;
-use Puli\RepositoryManager\Package\Collection\PackageCollection;
 use Puli\RepositoryManager\Package\RootPackage;
 
 /**

@@ -12,16 +12,16 @@
 namespace Puli\RepositoryManager\Tests\Repository;
 
 use Puli\Filesystem\Resource\LocalDirectoryResource;
+use Puli\Repository\ManageableRepositoryInterface;
 use Puli\RepositoryManager\Config\GlobalConfig;
+use Puli\RepositoryManager\Package\Collection\PackageCollection;
 use Puli\RepositoryManager\Package\Config\PackageConfig;
 use Puli\RepositoryManager\Package\Config\ResourceDescriptor;
 use Puli\RepositoryManager\Package\Config\RootPackageConfig;
 use Puli\RepositoryManager\Package\Config\TagDescriptor;
 use Puli\RepositoryManager\Package\Package;
-use Puli\RepositoryManager\Package\Collection\PackageCollection;
 use Puli\RepositoryManager\Package\RootPackage;
 use Puli\RepositoryManager\Repository\RepositoryBuilder;
-use Puli\Repository\ManageableRepositoryInterface;
 
 /**
  * @since  1.0

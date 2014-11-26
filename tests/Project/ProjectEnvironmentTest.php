@@ -13,9 +13,9 @@ namespace Puli\RepositoryManager\Tests\Project;
 
 use Puli\RepositoryManager\Config\GlobalConfig;
 use Puli\RepositoryManager\Config\GlobalConfigStorage;
-use Puli\RepositoryManager\Project\ProjectEnvironment;
 use Puli\RepositoryManager\Package\Config\PackageConfigStorage;
 use Puli\RepositoryManager\Package\Config\RootPackageConfig;
+use Puli\RepositoryManager\Project\ProjectEnvironment;
 use Puli\RepositoryManager\Tests\Config\Fixtures\TestPlugin;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 

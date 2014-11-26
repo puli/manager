@@ -11,8 +11,8 @@
 
 namespace Puli\RepositoryManager\Tests\Config\Fixtures;
 
-use Puli\RepositoryManager\Project\ProjectEnvironment;
 use Puli\RepositoryManager\Plugin\PluginInterface;
+use Puli\RepositoryManager\Project\ProjectEnvironment;
 
 /**
  * @since  1.0

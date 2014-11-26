@@ -11,6 +11,7 @@
 
 namespace Puli\RepositoryManager\Tests\Repository;
 
+use Puli\Repository\ResourceRepositoryInterface;
 use Puli\RepositoryManager\Config\GlobalConfig;
 use Puli\RepositoryManager\Package\Collection\PackageCollection;
 use Puli\RepositoryManager\Package\Config\PackageConfig;
@@ -20,7 +21,6 @@ use Puli\RepositoryManager\Package\Package;
 use Puli\RepositoryManager\Package\RootPackage;
 use Puli\RepositoryManager\Repository\RepositoryManager;
 use Puli\RepositoryManager\Tests\Package\Fixtures\TestProjectEnvironment;
-use Puli\Repository\ResourceRepositoryInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Filesystem\Filesystem;
 

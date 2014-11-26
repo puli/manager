@@ -15,12 +15,12 @@ use Puli\RepositoryManager\Config\GlobalConfig;
 use Puli\RepositoryManager\Config\GlobalConfigStorage;
 use Puli\RepositoryManager\Config\Reader\GlobalConfigReaderInterface;
 use Puli\RepositoryManager\Config\Writer\GlobalConfigWriterInterface;
-use Puli\RepositoryManager\Project\ProjectEnvironment;
 use Puli\RepositoryManager\Package\Config\PackageConfig;
 use Puli\RepositoryManager\Package\Config\PackageConfigStorage;
 use Puli\RepositoryManager\Package\Config\Reader\PackageConfigReaderInterface;
 use Puli\RepositoryManager\Package\Config\RootPackageConfig;
 use Puli\RepositoryManager\Package\Config\Writer\PackageConfigWriterInterface;
+use Puli\RepositoryManager\Project\ProjectEnvironment;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**

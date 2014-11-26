@@ -11,13 +11,13 @@
 
 namespace Puli\RepositoryManager\Package\InstallFile\Reader;
 
-use Puli\Json\DecodingFailedException;
-use Puli\Json\JsonDecoder;
-use Puli\Json\ValidationFailedException;
 use Puli\RepositoryManager\FileNotFoundException;
 use Puli\RepositoryManager\InvalidConfigException;
 use Puli\RepositoryManager\Package\InstallFile\InstallFile;
 use Puli\RepositoryManager\Package\InstallFile\PackageDescriptor;
+use Webmozart\Json\DecodingFailedException;
+use Webmozart\Json\JsonDecoder;
+use Webmozart\Json\ValidationFailedException;
 
 /**
  * Reads an install file from a JSON file.

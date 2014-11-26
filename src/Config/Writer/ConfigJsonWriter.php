@@ -11,10 +11,10 @@
 
 namespace Puli\RepositoryManager\Config\Writer;
 
-use Puli\Json\JsonEncoder;
 use Puli\RepositoryManager\Config\GlobalConfig;
 use Puli\RepositoryManager\IOException;
 use Symfony\Component\Filesystem\Filesystem;
+use Webmozart\Json\JsonEncoder;
 use Webmozart\PathUtil\Path;
 
 /**
