@@ -40,42 +40,42 @@ class RootPackageConfigTest extends \PHPUnit_Framework_TestCase
         $this->config = new RootPackageConfig($this->globalConfig);
     }
 
-    public function testNoLocalPackageRepositoryConfig()
+    public function testNoLocalInstallFile()
     {
-        $this->globalConfig->setPackageRepositoryConfig('global');
+        $this->globalConfig->setInstallFile('global');
 
-        $this->assertSame('global', $this->config->getPackageRepositoryConfig());
-        $this->assertNull($this->config->getPackageRepositoryConfig(false));
+        $this->assertSame('global', $this->config->getInstallFile());
+        $this->assertNull($this->config->getInstallFile(false));
     }
 
-    public function testLocalPackageRepositoryConfig()
+    public function testLocalInstallFile()
     {
-        $this->globalConfig->setPackageRepositoryConfig('global');
-        $this->config->setPackageRepositoryConfig('local');
+        $this->globalConfig->setInstallFile('global');
+        $this->config->setInstallFile('local');
 
-        $this->assertSame('local', $this->config->getPackageRepositoryConfig());
-        $this->assertSame('local', $this->config->getPackageRepositoryConfig(false));
+        $this->assertSame('local', $this->config->getInstallFile());
+        $this->assertSame('local', $this->config->getInstallFile(false));
     }
 
-    public function testGetPackageRepositoryConfigIfSameValues()
+    public function testGetInstallFileIfSameValues()
     {
-        $this->globalConfig->setPackageRepositoryConfig('global');
+        $this->globalConfig->setInstallFile('global');
 
         // Deliberately set to same value
-        $this->config->setPackageRepositoryConfig('global');
+        $this->config->setInstallFile('global');
 
-        $this->assertSame('global', $this->config->getPackageRepositoryConfig());
-        $this->assertSame('global', $this->config->getPackageRepositoryConfig(false));
+        $this->assertSame('global', $this->config->getInstallFile());
+        $this->assertSame('global', $this->config->getInstallFile(false));
     }
 
-    public function testResetPackageRepositoryConfig()
+    public function testResetInstallFile()
     {
-        $this->globalConfig->setPackageRepositoryConfig('global');
-        $this->config->setPackageRepositoryConfig('local');
-        $this->config->resetPackageRepositoryConfig();
+        $this->globalConfig->setInstallFile('global');
+        $this->config->setInstallFile('local');
+        $this->config->resetInstallFile();
 
-        $this->assertSame('global', $this->config->getPackageRepositoryConfig());
-        $this->assertNull($this->config->getPackageRepositoryConfig(false));
+        $this->assertSame('global', $this->config->getInstallFile());
+        $this->assertNull($this->config->getInstallFile(false));
     }
 
     public function testNoLocalGeneratedResourceRepository()

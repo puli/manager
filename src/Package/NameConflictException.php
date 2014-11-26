@@ -9,18 +9,14 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\PackageManager\Tests\Config\Fixtures;
-
-use Puli\PackageManager\Project\ProjectEnvironment;
-use Puli\PackageManager\Plugin\PluginInterface;
+namespace Puli\PackageManager\Package;
 
 /**
+ * Thrown when two packages have the same name.
+ *
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class TestPluginWithoutConstructor implements PluginInterface
+class NameConflictException extends \Exception
 {
-    public function activate(ProjectEnvironment $environment)
-    {
-    }
 }

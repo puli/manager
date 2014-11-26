@@ -91,54 +91,53 @@ class RootPackageConfig extends PackageConfig
     }
 
     /**
-     * Returns the path to the package repository configuration file.
+     * Returns the path to the install file.
      *
      * @param bool $fallback Whether to fall back to the global configuration
      *                       value if no value was set. Defaults to `true`.
      *
-     * @return string The path to the configuration file.
+     * @return string The path to the install file.
      *
-     * @see GlobalConfig::getPackageRepositoryConfig()
+     * @see GlobalConfig::getInstallFile()
      */
-    public function getPackageRepositoryConfig($fallback = true)
+    public function getInstallFile($fallback = true)
     {
         // No fallback to default value
-        $configPath = $this->localConfig->getPackageRepositoryConfig(false);
+        $configPath = $this->localConfig->getInstallFile(false);
 
         if (null === $configPath && $fallback) {
-            return $this->globalConfig->getPackageRepositoryConfig();
+            return $this->globalConfig->getInstallFile();
         }
 
         return $configPath;
     }
 
     /**
-     * Sets the path to the package repository configuration file.
+     * Sets the path to the install file.
      *
      * This value will overshadow the value from the global configuration. You
-     * can use {@link resetPackageRepositoryConfig()} to reset the value back to
-     * the global value.
+     * can use {@link resetInstallFile()} to reset the value back to the global
+     * value.
      *
-     * @param string $configPath The path to the configuration file.
+     * @param string $path The path to the install file.
      *
      * @throws InvalidConfigException If the path is empty or not a string.
      *
-     * @see GlobalConfig::setPackageRepositoryConfig()
+     * @see GlobalConfig::setInstallFile()
      */
-    public function setPackageRepositoryConfig($configPath)
+    public function setInstallFile($path)
     {
-        $this->localConfig->setPackageRepositoryConfig($configPath);
+        $this->localConfig->setInstallFile($path);
     }
 
     /**
-     * Resets the path to the package repository configuration file to the
-     * global value.
+     * Resets the path to the install file to the global value.
      *
-     * @see setPackageRepositoryConfig()
+     * @see setInstallFile()
      */
-    public function resetPackageRepositoryConfig()
+    public function resetInstallFile()
     {
-        $this->localConfig->setPackageRepositoryConfig(null);
+        $this->localConfig->setInstallFile(null);
     }
 
     /**

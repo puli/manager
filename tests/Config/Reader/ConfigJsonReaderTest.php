@@ -40,7 +40,7 @@ class ConfigJsonReaderTest extends \PHPUnit_Framework_TestCase
         $this->assertSame(array(self::PLUGIN_CLASS), $config->getPluginClasses());
 
         // non-configurable values
-        $this->assertNull($config->getPackageRepositoryConfig(false));
+        $this->assertNull($config->getInstallFile(false));
         $this->assertNull($config->getGeneratedResourceRepository(false));
         $this->assertNull($config->getResourceRepositoryCache(false));
     }
@@ -53,7 +53,7 @@ class ConfigJsonReaderTest extends \PHPUnit_Framework_TestCase
         $this->assertSame(array(), $config->getPluginClasses());
 
         // non-configurable values
-        $this->assertNull($config->getPackageRepositoryConfig(false));
+        $this->assertNull($config->getInstallFile(false));
         $this->assertNull($config->getGeneratedResourceRepository(false));
         $this->assertNull($config->getResourceRepositoryCache(false));
     }

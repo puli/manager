@@ -9,18 +9,14 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\PackageManager\Tests\Config\Fixtures;
-
-use Puli\PackageManager\Project\ProjectEnvironment;
-use Puli\PackageManager\Plugin\PluginInterface;
+namespace Puli\PackageManager\Package\Repository;
 
 /**
+ * Thrown when a package was not found.
+ *
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class TestPluginWithoutConstructor implements PluginInterface
+class NoSuchPackageException extends \RuntimeException
 {
-    public function activate(ProjectEnvironment $environment)
-    {
-    }
 }

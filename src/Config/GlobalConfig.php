@@ -24,11 +24,11 @@ use Puli\PackageManager\InvalidConfigException;
 class GlobalConfig
 {
     /**
-     * The default location of the package repository configuration.
+     * The default location of the install file.
      *
      * This value is used when no custom value is configured.
      */
-    const DEFAULT_PACKAGE_REPOSITORY_CONFIG = '.puli/packages.json';
+    const DEFAULT_INSTALL_FILE = '.puli/packages.json';
 
     /**
      * The default location of the generated resource repository.
@@ -52,7 +52,7 @@ class GlobalConfig
     /**
      * @var string|null
      */
-    private $packageRepositoryConfig;
+    private $installFile;
 
     /**
      * @var string|null
@@ -107,7 +107,7 @@ class GlobalConfig
     }
 
     /**
-     * Returns the path to the package repository configuration file.
+     * Returns the path to the install file.
      *
      * If the path is relative, it is calculated relative to the install path
      * of the root package.
@@ -117,42 +117,39 @@ class GlobalConfig
      * @param bool $fallback Whether to fall back to a predefined default value
      *                       if no value was set. Defaults to `true`.
      *
-     * @return string|null The path to the configuration file of `null` if none
-     *                     is set.
+     * @return string|null The path to the install file of `null` if none is set.
      */
-    public function getPackageRepositoryConfig($fallback = true)
+    public function getInstallFile($fallback = true)
     {
-        return null === $this->packageRepositoryConfig && $fallback
-            ? self::DEFAULT_PACKAGE_REPOSITORY_CONFIG
-            : $this->packageRepositoryConfig;
+        return null === $this->installFile && $fallback
+            ? self::DEFAULT_INSTALL_FILE
+            : $this->installFile;
     }
 
     /**
-     * Sets the path to the package repository configuration file.
+     * Sets the path to the install file.
      *
      * If the path is relative, it is calculated relative to the install path
      * of the root package.
      *
-     * @param string|null $configPath The path to the configuration file or
-     *                                `null` to unset.
+     * @param string|null $path The path to the install file or `null` to unset.
      *
      * @throws InvalidConfigException If the path is empty or not a string/`null`.
      */
-    public function setPackageRepositoryConfig($configPath)
+    public function setInstallFile($path)
     {
-        if (!is_string($configPath) && null !== $configPath) {
+        if (!is_string($path) && null !== $path) {
             throw new InvalidConfigException(sprintf(
-                'The path to the repository configuration should be a string '.
-                'or null. Got: %s',
-                is_object($configPath) ? get_class($configPath) : gettype($configPath)
+                'The path to the install file should be a string or null. Got: %s',
+                is_object($path) ? get_class($path) : gettype($path)
             ));
         }
 
-        if ('' === $configPath) {
-            throw new InvalidConfigException('The path to the repository configuration should not be empty.');
+        if ('' === $path) {
+            throw new InvalidConfigException('The path to the install file should not be empty.');
         }
 
-        $this->packageRepositoryConfig = $configPath;
+        $this->installFile = $path;
     }
 
     /**

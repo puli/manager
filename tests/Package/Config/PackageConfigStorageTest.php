@@ -13,7 +13,7 @@ namespace Puli\PackageManager\Tests\Package\Config;
 
 use Puli\PackageManager\Config\GlobalConfig;
 use Puli\PackageManager\Event\PackageConfigEvent;
-use Puli\PackageManager\Event\PackageEvents;
+use Puli\PackageManager\ManagerEvents;
 use Puli\PackageManager\FileNotFoundException;
 use Puli\PackageManager\Package\Config\PackageConfig;
 use Puli\PackageManager\Package\Config\PackageConfigStorage;
@@ -36,12 +36,12 @@ class PackageConfigStorageTest extends \PHPUnit_Framework_TestCase
     /**
      * @var \PHPUnit_Framework_MockObject_MockObject|PackageConfigReaderInterface
      */
-    private $packageConfigReader;
+    private $reader;
 
     /**
      * @var \PHPUnit_Framework_MockObject_MockObject|PackageConfigWriterInterface
      */
-    private $packageConfigWriter;
+    private $writer;
 
     /**
      * @var \PHPUnit_Framework_MockObject_MockObject|EventDispatcherInterface
@@ -50,22 +50,18 @@ class PackageConfigStorageTest extends \PHPUnit_Framework_TestCase
 
     protected function setUp()
     {
-        $this->packageConfigReader = $this->getMock('Puli\PackageManager\Package\Config\Reader\PackageConfigReaderInterface');
-        $this->packageConfigWriter = $this->getMock('Puli\PackageManager\Package\Config\Writer\PackageConfigWriterInterface');
+        $this->reader = $this->getMock('Puli\PackageManager\Package\Config\Reader\PackageConfigReaderInterface');
+        $this->writer = $this->getMock('Puli\PackageManager\Package\Config\Writer\PackageConfigWriterInterface');
         $this->dispatcher = $this->getMock('Symfony\Component\EventDispatcher\EventDispatcherInterface');
 
-        $this->storage = new PackageConfigStorage(
-            $this->packageConfigReader,
-            $this->packageConfigWriter,
-            $this->dispatcher
-        );
+        $this->storage = new PackageConfigStorage($this->reader, $this->writer, $this->dispatcher);
     }
 
     public function testLoadPackageConfig()
     {
         $config = new PackageConfig('package-name');
 
-        $this->packageConfigReader->expects($this->once())
+        $this->reader->expects($this->once())
             ->method('readPackageConfig')
             ->with('/path')
             ->will($this->returnValue($config));
@@ -80,7 +76,7 @@ class PackageConfigStorageTest extends \PHPUnit_Framework_TestCase
     {
         $config = new PackageConfig();
 
-        $this->packageConfigReader->expects($this->once())
+        $this->reader->expects($this->once())
             ->method('readPackageConfig')
             ->with('/path')
             ->will($this->returnValue($config));
@@ -92,19 +88,19 @@ class PackageConfigStorageTest extends \PHPUnit_Framework_TestCase
     {
         $config = new PackageConfig('package-name');
 
-        $this->packageConfigReader->expects($this->once())
+        $this->reader->expects($this->once())
             ->method('readPackageConfig')
             ->with('/path')
             ->will($this->returnValue($config));
 
         $this->dispatcher->expects($this->once())
             ->method('hasListeners')
-            ->with(PackageEvents::LOAD_PACKAGE_CONFIG)
+            ->with(ManagerEvents::LOAD_PACKAGE_CONFIG)
             ->will($this->returnValue(true));
 
         $this->dispatcher->expects($this->once())
             ->method('dispatch')
-            ->with(PackageEvents::LOAD_PACKAGE_CONFIG, $this->isInstanceOf('Puli\PackageManager\Event\PackageConfigEvent'))
+            ->with(ManagerEvents::LOAD_PACKAGE_CONFIG, $this->isInstanceOf('Puli\PackageManager\Event\PackageConfigEvent'))
             ->will($this->returnCallback(function ($eventName, PackageConfigEvent $event) use ($config) {
                 \PHPUnit_Framework_Assert::assertSame($config, $event->getPackageConfig());
             }));
@@ -114,19 +110,19 @@ class PackageConfigStorageTest extends \PHPUnit_Framework_TestCase
 
     public function testLoadPackageConfigCreatesNewIfNotFoundAndNameSetByListener()
     {
-        $this->packageConfigReader->expects($this->once())
+        $this->reader->expects($this->once())
             ->method('readPackageConfig')
             ->with('/path')
             ->will($this->throwException(new FileNotFoundException()));
 
         $this->dispatcher->expects($this->once())
             ->method('hasListeners')
-            ->with(PackageEvents::LOAD_PACKAGE_CONFIG)
+            ->with(ManagerEvents::LOAD_PACKAGE_CONFIG)
             ->will($this->returnValue(true));
 
         $this->dispatcher->expects($this->once())
             ->method('dispatch')
-            ->with(PackageEvents::LOAD_PACKAGE_CONFIG, $this->isInstanceOf('Puli\PackageManager\Event\PackageConfigEvent'))
+            ->with(ManagerEvents::LOAD_PACKAGE_CONFIG, $this->isInstanceOf('Puli\PackageManager\Event\PackageConfigEvent'))
             ->will($this->returnCallback(function ($eventName, PackageConfigEvent $event) {
                 $event->getPackageConfig()->setPackageName('package-name');
             }));
@@ -140,7 +136,7 @@ class PackageConfigStorageTest extends \PHPUnit_Framework_TestCase
     {
         $config = new PackageConfig(null, '/path');
 
-        $this->packageConfigWriter->expects($this->once())
+        $this->writer->expects($this->once())
             ->method('writePackageConfig')
             ->with($config, '/path');
 
@@ -151,18 +147,18 @@ class PackageConfigStorageTest extends \PHPUnit_Framework_TestCase
     {
         $config = new PackageConfig('package-name', '/path');
 
-        $this->packageConfigWriter->expects($this->once())
+        $this->writer->expects($this->once())
             ->method('writePackageConfig')
             ->with($config, '/path');
 
         $this->dispatcher->expects($this->once())
             ->method('hasListeners')
-            ->with(PackageEvents::SAVE_PACKAGE_CONFIG)
+            ->with(ManagerEvents::SAVE_PACKAGE_CONFIG)
             ->will($this->returnValue(true));
 
         $this->dispatcher->expects($this->once())
             ->method('dispatch')
-            ->with(PackageEvents::SAVE_PACKAGE_CONFIG, $this->isInstanceOf('Puli\PackageManager\Event\PackageConfigEvent'))
+            ->with(ManagerEvents::SAVE_PACKAGE_CONFIG, $this->isInstanceOf('Puli\PackageManager\Event\PackageConfigEvent'))
             ->will($this->returnCallback(function ($eventName, PackageConfigEvent $event) use ($config) {
                 \PHPUnit_Framework_Assert::assertSame($config, $event->getPackageConfig());
             }));
@@ -174,7 +170,7 @@ class PackageConfigStorageTest extends \PHPUnit_Framework_TestCase
     {
         $config = new PackageConfig('package-name', '/path');
 
-        $this->packageConfigWriter->expects($this->once())
+        $this->writer->expects($this->once())
             ->method('writePackageConfig')
             ->with($config, '/path')
             ->will($this->returnValue(function (PackageConfig $config) {
@@ -183,12 +179,12 @@ class PackageConfigStorageTest extends \PHPUnit_Framework_TestCase
 
         $this->dispatcher->expects($this->once())
             ->method('hasListeners')
-            ->with(PackageEvents::SAVE_PACKAGE_CONFIG)
+            ->with(ManagerEvents::SAVE_PACKAGE_CONFIG)
             ->will($this->returnValue(true));
 
         $this->dispatcher->expects($this->once())
             ->method('dispatch')
-            ->with(PackageEvents::SAVE_PACKAGE_CONFIG, $this->isInstanceOf('Puli\PackageManager\Event\PackageConfigEvent'))
+            ->with(ManagerEvents::SAVE_PACKAGE_CONFIG, $this->isInstanceOf('Puli\PackageManager\Event\PackageConfigEvent'))
             ->will($this->returnCallback(function ($eventName, PackageConfigEvent $event) {
                 $event->getPackageConfig()->setPackageName(null);
             }));
@@ -201,7 +197,7 @@ class PackageConfigStorageTest extends \PHPUnit_Framework_TestCase
         $globalConfig = new GlobalConfig();
         $config = new RootPackageConfig($globalConfig, 'package-name');
 
-        $this->packageConfigReader->expects($this->once())
+        $this->reader->expects($this->once())
             ->method('readRootPackageConfig')
             ->with('/path')
             ->will($this->returnValue($config));
@@ -214,19 +210,19 @@ class PackageConfigStorageTest extends \PHPUnit_Framework_TestCase
         $globalConfig = new GlobalConfig();
         $config = new RootPackageConfig($globalConfig, 'package-name');
 
-        $this->packageConfigReader->expects($this->once())
+        $this->reader->expects($this->once())
             ->method('readRootPackageConfig')
             ->with('/path')
             ->will($this->returnValue($config));
 
         $this->dispatcher->expects($this->once())
             ->method('hasListeners')
-            ->with(PackageEvents::LOAD_PACKAGE_CONFIG)
+            ->with(ManagerEvents::LOAD_PACKAGE_CONFIG)
             ->will($this->returnValue(true));
 
         $this->dispatcher->expects($this->once())
             ->method('dispatch')
-            ->with(PackageEvents::LOAD_PACKAGE_CONFIG, $this->isInstanceOf('Puli\PackageManager\Event\PackageConfigEvent'))
+            ->with(ManagerEvents::LOAD_PACKAGE_CONFIG, $this->isInstanceOf('Puli\PackageManager\Event\PackageConfigEvent'))
             ->will($this->returnCallback(function ($eventName, PackageConfigEvent $event) use ($config) {
                 \PHPUnit_Framework_Assert::assertSame($config, $event->getPackageConfig());
             }));
@@ -239,7 +235,7 @@ class PackageConfigStorageTest extends \PHPUnit_Framework_TestCase
         $globalConfig = new GlobalConfig();
         $config = new RootPackageConfig($globalConfig, null, '/path');
 
-        $this->packageConfigWriter->expects($this->once())
+        $this->writer->expects($this->once())
             ->method('writePackageConfig')
             ->with($config, '/path');
 
@@ -251,18 +247,18 @@ class PackageConfigStorageTest extends \PHPUnit_Framework_TestCase
         $globalConfig = new GlobalConfig();
         $config = new RootPackageConfig($globalConfig, 'package-name', '/path');
 
-        $this->packageConfigWriter->expects($this->once())
+        $this->writer->expects($this->once())
             ->method('writePackageConfig')
             ->with($config, '/path');
 
         $this->dispatcher->expects($this->once())
             ->method('hasListeners')
-            ->with(PackageEvents::SAVE_PACKAGE_CONFIG)
+            ->with(ManagerEvents::SAVE_PACKAGE_CONFIG)
             ->will($this->returnValue(true));
 
         $this->dispatcher->expects($this->once())
             ->method('dispatch')
-            ->with(PackageEvents::SAVE_PACKAGE_CONFIG, $this->isInstanceOf('Puli\PackageManager\Event\PackageConfigEvent'))
+            ->with(ManagerEvents::SAVE_PACKAGE_CONFIG, $this->isInstanceOf('Puli\PackageManager\Event\PackageConfigEvent'))
             ->will($this->returnCallback(function ($eventName, PackageConfigEvent $event) use ($config) {
                 \PHPUnit_Framework_Assert::assertSame($config, $event->getPackageConfig());
             }));
@@ -275,7 +271,7 @@ class PackageConfigStorageTest extends \PHPUnit_Framework_TestCase
         $globalConfig = new GlobalConfig();
         $config = new RootPackageConfig($globalConfig, 'package-name', '/path');
 
-        $this->packageConfigWriter->expects($this->once())
+        $this->writer->expects($this->once())
             ->method('writePackageConfig')
             ->with($config, '/path')
             ->will($this->returnValue(function (RootPackageConfig $config) {
@@ -284,12 +280,12 @@ class PackageConfigStorageTest extends \PHPUnit_Framework_TestCase
 
         $this->dispatcher->expects($this->once())
             ->method('hasListeners')
-            ->with(PackageEvents::SAVE_PACKAGE_CONFIG)
+            ->with(ManagerEvents::SAVE_PACKAGE_CONFIG)
             ->will($this->returnValue(true));
 
         $this->dispatcher->expects($this->once())
             ->method('dispatch')
-            ->with(PackageEvents::SAVE_PACKAGE_CONFIG, $this->isInstanceOf('Puli\PackageManager\Event\PackageConfigEvent'))
+            ->with(ManagerEvents::SAVE_PACKAGE_CONFIG, $this->isInstanceOf('Puli\PackageManager\Event\PackageConfigEvent'))
             ->will($this->returnCallback(function ($eventName, PackageConfigEvent $event) {
                 $event->getPackageConfig()->setPackageName(null);
             }));

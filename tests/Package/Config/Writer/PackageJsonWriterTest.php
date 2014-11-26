@@ -16,7 +16,7 @@ use Puli\PackageManager\Package\Config\PackageConfig;
 use Puli\PackageManager\Package\Config\ResourceDescriptor;
 use Puli\PackageManager\Package\Config\RootPackageConfig;
 use Puli\PackageManager\Package\Config\TagDescriptor;
-use Puli\PackageManager\Package\Config\Writer\PackageJsonWriter;
+use Puli\PackageManager\Package\Config\Writer\PuliJsonWriter;
 use Symfony\Component\Filesystem\Filesystem;
 
 /**
@@ -26,7 +26,7 @@ use Symfony\Component\Filesystem\Filesystem;
 class PackageJsonWriterTest extends \PHPUnit_Framework_TestCase
 {
     /**
-     * @var PackageJsonWriter
+     * @var PuliJsonWriter
      */
     private $writer;
 
@@ -36,7 +36,7 @@ class PackageJsonWriterTest extends \PHPUnit_Framework_TestCase
 
     protected function setUp()
     {
-        $this->writer = new PackageJsonWriter();
+        $this->writer = new PuliJsonWriter();
         $this->tempFile = tempnam(sys_get_temp_dir(), 'PackageJsonWriterTest');
         while (false === @mkdir($this->tempDir = sys_get_temp_dir().'/puli-manager/PackageJsonWriterTest_temp'.rand(10000, 99999), 0777, true)) {}
     }
@@ -71,7 +71,7 @@ class PackageJsonWriterTest extends \PHPUnit_Framework_TestCase
         $config->addTagDescriptor(new TagDescriptor('/app/config*.yml', 'config'));
         $config->setOverriddenPackages('acme/blog');
         $config->setPackageOrder(array('acme/blog-extension1', 'acme/blog-extension2'));
-        $config->setPackageRepositoryConfig('packages.json');
+        $config->setInstallFile('packages.json');
         $config->setGeneratedResourceRepository('resource-repository.php');
         $config->setResourceRepositoryCache('cache');
         $config->addPluginClass('Puli\PackageManager\Tests\Config\Fixtures\TestPlugin');
@@ -96,7 +96,7 @@ class PackageJsonWriterTest extends \PHPUnit_Framework_TestCase
     public function testWriteRootConfigDoesNotWriteGlobalValues()
     {
         $globalConfig = new GlobalConfig();
-        $globalConfig->setPackageRepositoryConfig('packages.json');
+        $globalConfig->setInstallFile('packages.json');
         $globalConfig->setGeneratedResourceRepository('resource-repository.php');
         $globalConfig->setResourceRepositoryCache('cache');
         $globalConfig->addPluginClass('Puli\PackageManager\Tests\Config\Fixtures\TestPlugin');

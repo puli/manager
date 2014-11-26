@@ -16,8 +16,8 @@ use Puli\Filesystem\Resource\LocalFileResource;
 use Puli\Filesystem\Resource\LocalResourceInterface;
 use Puli\PackageManager\Package\Graph\PackageNameGraph;
 use Puli\PackageManager\Package\Package;
+use Puli\PackageManager\Package\Repository\PackageRepository;
 use Puli\PackageManager\Package\RootPackage;
-use Puli\PackageManager\Repository\PackageRepository;
 use Puli\Repository\ManageableRepositoryInterface;
 use Puli\Resource\DirectoryResourceInterface;
 

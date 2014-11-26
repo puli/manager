@@ -18,7 +18,12 @@ use Puli\PackageManager\InvalidConfigException;
 use Puli\PackageManager\IOException;
 
 /**
- * Manages the loading and saving of configuration.
+ * Loads and saves global configuration.
+ *
+ * This class adds a layer on top of {@link GlobalConfigReaderInterface} and
+ * {@link GlobalConfigWriterInterface}. Any logic that is related to the loading
+ * and saving of global configuration, but not directly related to the
+ * reading/writing of a specific file format, is executed by this class.
  *
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
@@ -28,26 +33,23 @@ class GlobalConfigStorage
     /**
      * @var GlobalConfigReaderInterface
      */
-    private $globalConfigReader;
+    private $reader;
 
     /**
      * @var GlobalConfigWriterInterface
      */
-    private $globalConfigWriter;
+    private $writer;
 
     /**
      * Creates a new configuration manager.
      *
-     * @param GlobalConfigReaderInterface     $globalConfigReader     The reader for global config files.
-     * @param GlobalConfigWriterInterface     $globalConfigWriter     The writer for global config files.
+     * @param GlobalConfigReaderInterface $reader The reader for global config files.
+     * @param GlobalConfigWriterInterface $writer The writer for global config files.
      */
-    public function __construct(
-        GlobalConfigReaderInterface $globalConfigReader,
-        GlobalConfigWriterInterface $globalConfigWriter
-    )
+    public function __construct(GlobalConfigReaderInterface $reader, GlobalConfigWriterInterface $writer)
     {
-        $this->globalConfigReader = $globalConfigReader;
-        $this->globalConfigWriter = $globalConfigWriter;
+        $this->reader = $reader;
+        $this->writer = $writer;
     }
 
     /**
@@ -65,7 +67,7 @@ class GlobalConfigStorage
     {
         try {
             // Don't use file_exists() to decouple from the file system
-            return $this->globalConfigReader->readGlobalConfig($path);
+            return $this->reader->readGlobalConfig($path);
         } catch (FileNotFoundException $e) {
             return new GlobalConfig($path);
         }
@@ -82,6 +84,6 @@ class GlobalConfigStorage
      */
     public function saveGlobalConfig(GlobalConfig $config)
     {
-        $this->globalConfigWriter->writeGlobalConfig($config, $config->getPath());
+        $this->writer->writeGlobalConfig($config, $config->getPath());
     }
 }

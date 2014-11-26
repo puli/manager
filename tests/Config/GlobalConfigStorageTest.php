@@ -31,29 +31,26 @@ class GlobalConfigStorageTest extends \PHPUnit_Framework_TestCase
     /**
      * @var \PHPUnit_Framework_MockObject_MockObject|GlobalConfigReaderInterface
      */
-    private $globalConfigReader;
+    private $reader;
 
     /**
      * @var \PHPUnit_Framework_MockObject_MockObject|GlobalConfigWriterInterface
      */
-    private $globalConfigWriter;
+    private $writer;
 
     protected function setUp()
     {
-        $this->globalConfigReader = $this->getMock('Puli\PackageManager\Config\Reader\GlobalConfigReaderInterface');
-        $this->globalConfigWriter = $this->getMock('Puli\PackageManager\Config\Writer\GlobalConfigWriterInterface');
+        $this->reader = $this->getMock('Puli\PackageManager\Config\Reader\GlobalConfigReaderInterface');
+        $this->writer = $this->getMock('Puli\PackageManager\Config\Writer\GlobalConfigWriterInterface');
 
-        $this->storage = new GlobalConfigStorage(
-            $this->globalConfigReader,
-            $this->globalConfigWriter
-        );
+        $this->storage = new GlobalConfigStorage($this->reader, $this->writer);
     }
 
     public function testLoadGlobalConfig()
     {
         $config = new GlobalConfig();
 
-        $this->globalConfigReader->expects($this->once())
+        $this->reader->expects($this->once())
             ->method('readGlobalConfig')
             ->with('/path')
             ->will($this->returnValue($config));
@@ -63,7 +60,7 @@ class GlobalConfigStorageTest extends \PHPUnit_Framework_TestCase
 
     public function testLoadGlobalConfigCreatesNewIfNotFound()
     {
-        $this->globalConfigReader->expects($this->once())
+        $this->reader->expects($this->once())
             ->method('readGlobalConfig')
             ->with('/path')
             ->will($this->throwException(new FileNotFoundException()));
@@ -75,7 +72,7 @@ class GlobalConfigStorageTest extends \PHPUnit_Framework_TestCase
     {
         $config = new GlobalConfig('/path');
 
-        $this->globalConfigWriter->expects($this->once())
+        $this->writer->expects($this->once())
             ->method('writeGlobalConfig')
             ->with($config, '/path');
 

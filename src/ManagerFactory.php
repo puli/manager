@@ -11,20 +11,20 @@
 
 namespace Puli\PackageManager;
 
+use Puli\PackageManager\Config\GlobalConfigManager;
 use Puli\PackageManager\Config\GlobalConfigStorage;
+use Puli\PackageManager\Config\GlobalEnvironment;
 use Puli\PackageManager\Config\Reader\ConfigJsonReader;
 use Puli\PackageManager\Config\Writer\ConfigJsonWriter;
-use Puli\PackageManager\Manager\ProjectConfigManager;
-use Puli\PackageManager\Manager\GlobalConfigManager;
-use Puli\PackageManager\Environment\GlobalEnvironment;
-use Puli\PackageManager\Environment\ProjectEnvironment;
-use Puli\PackageManager\Manager\PackageManager;
 use Puli\PackageManager\Package\Config\PackageConfigStorage;
-use Puli\PackageManager\Package\Config\Reader\PackageJsonReader;
-use Puli\PackageManager\Package\Config\Writer\PackageJsonWriter;
-use Puli\PackageManager\Repository\Config\PackageRepositoryConfigStorage;
-use Puli\PackageManager\Repository\Config\Reader\RepositoryJsonReader;
-use Puli\PackageManager\Repository\Config\Writer\RepositoryJsonWriter;
+use Puli\PackageManager\Package\Config\Reader\PuliJsonReader;
+use Puli\PackageManager\Package\Config\Writer\PuliJsonWriter;
+use Puli\PackageManager\Package\InstallFile\InstallFileStorage;
+use Puli\PackageManager\Package\InstallFile\Reader\PackagesJsonReader;
+use Puli\PackageManager\Package\InstallFile\Writer\PackagesJsonWriter;
+use Puli\PackageManager\Package\PackageManager;
+use Puli\PackageManager\Project\ProjectConfigManager;
+use Puli\PackageManager\Project\ProjectEnvironment;
 use Puli\PackageManager\Util\System;
 use Puli\Repository\ResourceRepositoryInterface;
 use Puli\Util\Path;
@@ -187,7 +187,7 @@ class ManagerFactory
         return new PackageManager(
             $environment,
             self::createPackageConfigStorage($environment->getEventDispatcher()),
-            self::createRepositoryConfigStorage()
+            self::createInstallFileStorage()
         );
     }
 
@@ -221,19 +221,19 @@ class ManagerFactory
         );
     }
 
-    private static function createRepositoryConfigStorage()
+    private static function createInstallFileStorage()
     {
-        return new PackageRepositoryConfigStorage(
-            new RepositoryJsonReader(),
-            new RepositoryJsonWriter()
+        return new InstallFileStorage(
+            new PackagesJsonReader(),
+            new PackagesJsonWriter()
         );
     }
 
     private static function createPackageConfigStorage(EventDispatcherInterface $dispatcher)
     {
         return new PackageConfigStorage(
-            new PackageJsonReader(),
-            new PackageJsonWriter(),
+            new PuliJsonReader(),
+            new PuliJsonWriter(),
             $dispatcher
         );
     }

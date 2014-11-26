@@ -11,8 +11,7 @@
 
 namespace Puli\PackageManager\Plugin;
 
-use Puli\PackageManager\Environment\ProjectEnvironment;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Puli\PackageManager\Project\ProjectEnvironment;
 
 /**
  * A plugin for the package manager.

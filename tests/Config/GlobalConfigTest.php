@@ -31,43 +31,43 @@ class GlobalConfigTest extends \PHPUnit_Framework_TestCase
         $this->config = new GlobalConfig();
     }
 
-    public function testGetPackageRepositoryConfig()
+    public function testGetInstallFile()
     {
-        $this->config->setPackageRepositoryConfig('custom/packages.json');
+        $this->config->setInstallFile('custom/packages.json');
 
-        $this->assertSame('custom/packages.json', $this->config->getPackageRepositoryConfig());
-        $this->assertSame('custom/packages.json', $this->config->getPackageRepositoryConfig(false));
+        $this->assertSame('custom/packages.json', $this->config->getInstallFile());
+        $this->assertSame('custom/packages.json', $this->config->getInstallFile(false));
     }
 
-    public function testGetPackageRepositoryConfigWhenNoneIsSet()
+    public function testGetInstallFileWhenNoneIsSet()
     {
-        $this->assertSame('.puli/packages.json', $this->config->getPackageRepositoryConfig());
-        $this->assertNull($this->config->getPackageRepositoryConfig(false));
+        $this->assertSame('.puli/packages.json', $this->config->getInstallFile());
+        $this->assertNull($this->config->getInstallFile(false));
     }
 
-    public function testGetPackageRepositoryConfigWhenSetToNull()
+    public function testGetInstallFileWhenSetToNull()
     {
-        $this->config->setPackageRepositoryConfig('custom/packages.json');
-        $this->config->setPackageRepositoryConfig(null);
+        $this->config->setInstallFile('custom/packages.json');
+        $this->config->setInstallFile(null);
 
-        $this->assertSame('.puli/packages.json', $this->config->getPackageRepositoryConfig());
-        $this->assertNull($this->config->getPackageRepositoryConfig(false));
-    }
-
-    /**
-     * @expectedException \Puli\PackageManager\InvalidConfigException
-     */
-    public function testPackageRepositoryConfigMustBeString()
-    {
-        $this->config->setPackageRepositoryConfig(12345);
+        $this->assertSame('.puli/packages.json', $this->config->getInstallFile());
+        $this->assertNull($this->config->getInstallFile(false));
     }
 
     /**
      * @expectedException \Puli\PackageManager\InvalidConfigException
      */
-    public function testPackageRepositoryConfigMustNotBeEmpty()
+    public function testInstallFileMustBeString()
     {
-        $this->config->setPackageRepositoryConfig('');
+        $this->config->setInstallFile(12345);
+    }
+
+    /**
+     * @expectedException \Puli\PackageManager\InvalidConfigException
+     */
+    public function testInstallFileMustNotBeEmpty()
+    {
+        $this->config->setInstallFile('');
     }
 
     public function testGetGeneratedResourceRepository()

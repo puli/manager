@@ -13,7 +13,7 @@ namespace Puli\PackageManager\Package\Config;
 
 use Puli\PackageManager\Config\GlobalConfig;
 use Puli\PackageManager\Event\PackageConfigEvent;
-use Puli\PackageManager\Event\PackageEvents;
+use Puli\PackageManager\ManagerEvents;
 use Puli\PackageManager\FileNotFoundException;
 use Puli\PackageManager\InvalidConfigException;
 use Puli\PackageManager\IOException;
@@ -22,7 +22,16 @@ use Puli\PackageManager\Package\Config\Writer\PackageConfigWriterInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
- * Manages the loading and saving of configuration.
+ * Loads and saves package configuration.
+ *
+ * This class adds a layer on top of {@link PackageConfigReaderInterface} and
+ * {@link PackageConfigWriterInterface}. Any logic that is related to the
+ * loading and saving of package configuration, but not directly related to the
+ * reading/writing of a specific file format, is executed by this class.
+ *
+ * The events {@link ManagerEvents::LOAD_PACKAGE_CONFIG} and
+ * {@link ManagerEvents::SAVE_PACKAGE_CONFIG} are dispatched when package
+ * configuration is loaded/saved.
  *
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
@@ -32,12 +41,12 @@ class PackageConfigStorage
     /**
      * @var PackageConfigReaderInterface
      */
-    private $packageConfigReader;
+    private $reader;
 
     /**
      * @var PackageConfigWriterInterface
      */
-    private $packageConfigWriter;
+    private $writer;
 
     /**
      * @var EventDispatcherInterface
@@ -47,18 +56,14 @@ class PackageConfigStorage
     /**
      * Creates a new configuration manager.
      *
-     * @param PackageConfigReaderInterface    $packageConfigReader    The reader for package config files.
-     * @param PackageConfigWriterInterface    $packageConfigWriter    The writer for package config files.
-     * @param EventDispatcherInterface        $dispatcher             The event dispatcher to use.
+     * @param PackageConfigReaderInterface $reader     The reader for package config files.
+     * @param PackageConfigWriterInterface $writer     The writer for package config files.
+     * @param EventDispatcherInterface     $dispatcher The event dispatcher to use.
      */
-    public function __construct(
-        PackageConfigReaderInterface $packageConfigReader,
-        PackageConfigWriterInterface $packageConfigWriter,
-        EventDispatcherInterface $dispatcher
-    )
+    public function __construct(PackageConfigReaderInterface $reader, PackageConfigWriterInterface $writer, EventDispatcherInterface $dispatcher)
     {
-        $this->packageConfigReader = $packageConfigReader;
-        $this->packageConfigWriter = $packageConfigWriter;
+        $this->reader = $reader;
+        $this->writer = $writer;
         $this->dispatcher = $dispatcher;
     }
 
@@ -67,7 +72,7 @@ class PackageConfigStorage
      *
      * If the file does not exist, an empty configuration is returned.
      *
-     * The event {@link PackageEvents::LOAD_PACKAGE_CONFIG} is dispatched after
+     * The event {@link ManagerEvents::LOAD_PACKAGE_CONFIG} is dispatched after
      * loading the configuration. You can attach listeners to this event to
      * modify loaded configurations.
      *
@@ -84,14 +89,14 @@ class PackageConfigStorage
     {
         try {
             // Don't use file_exists() to decouple from the file system
-            $config = $this->packageConfigReader->readPackageConfig($path);
+            $config = $this->reader->readPackageConfig($path);
         } catch (FileNotFoundException $e) {
             $config = new PackageConfig(null, $path);
         }
 
-        if ($this->dispatcher->hasListeners(PackageEvents::LOAD_PACKAGE_CONFIG)) {
+        if ($this->dispatcher->hasListeners(ManagerEvents::LOAD_PACKAGE_CONFIG)) {
             $event = new PackageConfigEvent($config);
-            $this->dispatcher->dispatch(PackageEvents::LOAD_PACKAGE_CONFIG, $event);
+            $this->dispatcher->dispatch(ManagerEvents::LOAD_PACKAGE_CONFIG, $event);
         }
 
         if (null === $config->getPackageName()) {
@@ -122,12 +127,12 @@ class PackageConfigStorage
      */
     public function savePackageConfig(PackageConfig $config)
     {
-        if ($this->dispatcher->hasListeners(PackageEvents::SAVE_PACKAGE_CONFIG)) {
+        if ($this->dispatcher->hasListeners(ManagerEvents::SAVE_PACKAGE_CONFIG)) {
             $event = new PackageConfigEvent($config);
-            $this->dispatcher->dispatch(PackageEvents::SAVE_PACKAGE_CONFIG, $event);
+            $this->dispatcher->dispatch(ManagerEvents::SAVE_PACKAGE_CONFIG, $event);
         }
 
-        $this->packageConfigWriter->writePackageConfig($config, $config->getPath());
+        $this->writer->writePackageConfig($config, $config->getPath());
     }
 
     /**
@@ -135,7 +140,7 @@ class PackageConfigStorage
      *
      * If the file does not exist, an empty configuration is returned.
      *
-     * The event {@link PackageEvents::LOAD_PACKAGE_CONFIG} is dispatched after
+     * The event {@link ManagerEvents::LOAD_PACKAGE_CONFIG} is dispatched after
      * loading the configuration. You can attach listeners to this event to
      * modify loaded configurations.
      *
@@ -152,14 +157,14 @@ class PackageConfigStorage
     {
         try {
             // Don't use file_exists() to decouple from the file system
-            $config = $this->packageConfigReader->readRootPackageConfig($path, $globalConfig);
+            $config = $this->reader->readRootPackageConfig($path, $globalConfig);
         } catch (FileNotFoundException $e) {
             $config = new RootPackageConfig($globalConfig, null, $path);
         }
 
-        if ($this->dispatcher->hasListeners(PackageEvents::LOAD_PACKAGE_CONFIG)) {
+        if ($this->dispatcher->hasListeners(ManagerEvents::LOAD_PACKAGE_CONFIG)) {
             $event = new PackageConfigEvent($config);
-            $this->dispatcher->dispatch(PackageEvents::LOAD_PACKAGE_CONFIG, $event);
+            $this->dispatcher->dispatch(ManagerEvents::LOAD_PACKAGE_CONFIG, $event);
         }
 
         return $config;
@@ -176,11 +181,11 @@ class PackageConfigStorage
      */
     public function saveRootPackageConfig(RootPackageConfig $config)
     {
-        if ($this->dispatcher->hasListeners(PackageEvents::SAVE_PACKAGE_CONFIG)) {
+        if ($this->dispatcher->hasListeners(ManagerEvents::SAVE_PACKAGE_CONFIG)) {
             $event = new PackageConfigEvent($config);
-            $this->dispatcher->dispatch(PackageEvents::SAVE_PACKAGE_CONFIG, $event);
+            $this->dispatcher->dispatch(ManagerEvents::SAVE_PACKAGE_CONFIG, $event);
         }
 
-        $this->packageConfigWriter->writePackageConfig($config, $config->getPath());
+        $this->writer->writePackageConfig($config, $config->getPath());
     }
 }

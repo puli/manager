@@ -13,7 +13,7 @@ namespace Puli\PackageManager\Tests\Package\Config\Reader;
 
 use Puli\PackageManager\Config\GlobalConfig;
 use Puli\PackageManager\Package\Config\PackageConfig;
-use Puli\PackageManager\Package\Config\Reader\PackageJsonReader;
+use Puli\PackageManager\Package\Config\Reader\PuliJsonReader;
 use Puli\PackageManager\Package\Config\ResourceDescriptor;
 use Puli\PackageManager\Package\Config\TagDescriptor;
 
@@ -29,14 +29,14 @@ class PackageJsonReaderTest extends \PHPUnit_Framework_TestCase
     private $globalConfig;
 
     /**
-     * @var PackageJsonReader
+     * @var PuliJsonReader
      */
     private $reader;
 
     protected function setUp()
     {
         $this->globalConfig = new GlobalConfig();
-        $this->reader = new PackageJsonReader();
+        $this->reader = new PuliJsonReader();
     }
 
     public function testReadFullConfig()
@@ -57,7 +57,7 @@ class PackageJsonReaderTest extends \PHPUnit_Framework_TestCase
         $this->assertSame(__DIR__.'/Fixtures/full.json', $config->getPath());
         $this->assertFullConfig($config);
         $this->assertSame(array('acme/blog-extension1', 'acme/blog-extension2'), $config->getPackageOrder());
-        $this->assertSame('packages.json', $config->getPackageRepositoryConfig());
+        $this->assertSame('packages.json', $config->getInstallFile());
         $this->assertSame('resource-repository.php', $config->getGeneratedResourceRepository());
         $this->assertSame('cache', $config->getResourceRepositoryCache());
         $this->assertSame(array('Puli\PackageManager\Tests\Config\Fixtures\TestPlugin'), $config->getPluginClasses());
@@ -85,9 +85,9 @@ class PackageJsonReaderTest extends \PHPUnit_Framework_TestCase
     {
         $config = $this->reader->readRootPackageConfig(__DIR__.'/Fixtures/minimal.json', $this->globalConfig);
 
-        $this->globalConfig->setPackageRepositoryConfig('modified');
+        $this->globalConfig->setInstallFile('modified');
 
-        $this->assertSame('modified', $config->getPackageRepositoryConfig());
+        $this->assertSame('modified', $config->getInstallFile());
     }
 
     /**

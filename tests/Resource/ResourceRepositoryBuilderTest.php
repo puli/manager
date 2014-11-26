@@ -18,8 +18,8 @@ use Puli\PackageManager\Package\Config\ResourceDescriptor;
 use Puli\PackageManager\Package\Config\RootPackageConfig;
 use Puli\PackageManager\Package\Config\TagDescriptor;
 use Puli\PackageManager\Package\Package;
+use Puli\PackageManager\Package\Repository\PackageRepository;
 use Puli\PackageManager\Package\RootPackage;
-use Puli\PackageManager\Repository\PackageRepository;
 use Puli\PackageManager\Resource\ResourceRepositoryBuilder;
 use Puli\Repository\ManageableRepositoryInterface;
 
@@ -55,9 +55,9 @@ class ResourceRepositoryBuilderTest extends \PHPUnit_Framework_TestCase
         $this->packageRepository = new PackageRepository();
         $this->repo = $this->getMock('Puli\Repository\ManageableRepositoryInterface');
         $this->builder = new ResourceRepositoryBuilder();
-        $this->package1Root = __DIR__.'/../Manager/Fixtures/package1';
-        $this->package2Root = __DIR__.'/../Manager/Fixtures/package2';
-        $this->package3Root = __DIR__.'/../Manager/Fixtures/package3';
+        $this->package1Root = __DIR__.'/../Package/Fixtures/package1';
+        $this->package2Root = __DIR__.'/../Package/Fixtures/package2';
+        $this->package3Root = __DIR__.'/../Package/Fixtures/package3';
     }
 
     public function testIgnorePackageWithoutResources()
