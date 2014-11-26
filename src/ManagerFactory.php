@@ -11,6 +11,7 @@
 
 namespace Puli\RepositoryManager;
 
+use Puli\Repository\ResourceRepositoryInterface;
 use Puli\RepositoryManager\Config\GlobalConfigManager;
 use Puli\RepositoryManager\Config\GlobalConfigStorage;
 use Puli\RepositoryManager\Config\GlobalEnvironment;
@@ -27,10 +28,9 @@ use Puli\RepositoryManager\Project\ProjectConfigManager;
 use Puli\RepositoryManager\Project\ProjectEnvironment;
 use Puli\RepositoryManager\Repository\RepositoryManager;
 use Puli\RepositoryManager\Util\System;
-use Puli\Repository\ResourceRepositoryInterface;
-use Puli\Util\Path;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Webmozart\PathUtil\Path;
 
 /**
  * Creates environment and manager instances.

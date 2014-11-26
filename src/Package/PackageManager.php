@@ -11,24 +11,18 @@
 
 namespace Puli\RepositoryManager\Package;
 
-use Puli\Filesystem\PhpCacheRepository;
 use Puli\RepositoryManager\FileNotFoundException;
 use Puli\RepositoryManager\InvalidConfigException;
 use Puli\RepositoryManager\NoDirectoryException;
+use Puli\RepositoryManager\Package\Collection\NoSuchPackageException;
+use Puli\RepositoryManager\Package\Collection\PackageCollection;
 use Puli\RepositoryManager\Package\Config\PackageConfigStorage;
 use Puli\RepositoryManager\Package\Config\RootPackageConfig;
 use Puli\RepositoryManager\Package\InstallFile\InstallFile;
 use Puli\RepositoryManager\Package\InstallFile\InstallFileStorage;
 use Puli\RepositoryManager\Package\InstallFile\PackageDescriptor;
-use Puli\RepositoryManager\Package\Collection\NoSuchPackageException;
-use Puli\RepositoryManager\Package\Collection\PackageCollection;
 use Puli\RepositoryManager\Project\ProjectEnvironment;
-use Puli\RepositoryManager\Repository\ResourceConflictException;
-use Puli\RepositoryManager\Repository\ResourceDefinitionException;
-use Puli\RepositoryManager\Repository\RepositoryBuilder;
-use Puli\Repository\ResourceRepository;
-use Puli\Util\Path;
-use Symfony\Component\Filesystem\Filesystem;
+use Webmozart\PathUtil\Path;
 
 /**
  * Manages the package repository of a Puli project.

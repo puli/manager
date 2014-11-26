@@ -13,10 +13,10 @@ namespace Puli\RepositoryManager\Package\Config;
 
 use Puli\RepositoryManager\Config\GlobalConfig;
 use Puli\RepositoryManager\Event\PackageConfigEvent;
-use Puli\RepositoryManager\ManagerEvents;
 use Puli\RepositoryManager\FileNotFoundException;
 use Puli\RepositoryManager\InvalidConfigException;
 use Puli\RepositoryManager\IOException;
+use Puli\RepositoryManager\ManagerEvents;
 use Puli\RepositoryManager\Package\Config\Reader\PackageConfigReaderInterface;
 use Puli\RepositoryManager\Package\Config\Writer\PackageConfigWriterInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;

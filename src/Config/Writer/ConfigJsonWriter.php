@@ -14,8 +14,8 @@ namespace Puli\RepositoryManager\Config\Writer;
 use Puli\Json\JsonEncoder;
 use Puli\RepositoryManager\Config\GlobalConfig;
 use Puli\RepositoryManager\IOException;
-use Puli\Util\Path;
 use Symfony\Component\Filesystem\Filesystem;
+use Webmozart\PathUtil\Path;
 
 /**
  * Writes global configuration to a JSON file.

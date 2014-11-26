@@ -15,8 +15,8 @@ use Puli\Json\JsonEncoder;
 use Puli\RepositoryManager\IOException;
 use Puli\RepositoryManager\Package\Config\PackageConfig;
 use Puli\RepositoryManager\Package\Config\RootPackageConfig;
-use Puli\Util\Path;
 use Symfony\Component\Filesystem\Filesystem;
+use Webmozart\PathUtil\Path;
 
 /**
  * Writes package configuration to a JSON file.

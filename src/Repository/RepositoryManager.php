@@ -12,13 +12,13 @@
 namespace Puli\RepositoryManager\Repository;
 
 use Puli\Filesystem\PhpCacheRepository;
+use Puli\Repository\ResourceRepository;
 use Puli\RepositoryManager\Package\Collection\PackageCollection;
 use Puli\RepositoryManager\Package\Config\RootPackageConfig;
 use Puli\RepositoryManager\Project\ProjectEnvironment;
-use Puli\Repository\ResourceRepository;
 use Puli\Resource\NoDirectoryException;
-use Puli\Util\Path;
 use Symfony\Component\Filesystem\Filesystem;
+use Webmozart\PathUtil\Path;
 
 /**
  * Manages the resource repository of a Puli project.
