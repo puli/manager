@@ -9,14 +9,14 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\PackageManager\Resource;
+namespace Puli\PackageManager\Repository;
 
 /**
- * Thrown when a resource descriptor is invalid.
+ * Thrown when two packages have conflicting resource descriptors.
  *
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class ResourceDefinitionException extends \Exception
+class ResourceConflictException extends \Exception
 {
 }

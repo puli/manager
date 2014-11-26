@@ -36,8 +36,8 @@ class ManagerFactoryTest extends \PHPUnit_Framework_TestCase
         while (false === @mkdir($this->tempHome = sys_get_temp_dir().'/puli-manager/PackageManagerTest_home'.rand(10000, 99999), 0777, true)) {}
 
         $filesystem = new Filesystem();
-        $filesystem->mirror(__DIR__.'/Package/Fixtures/real-root-package', $this->tempDir);
-        $filesystem->mirror(__DIR__.'/Package/Fixtures/home', $this->tempHome);
+        $filesystem->mirror(__DIR__.'/Fixtures/root', $this->tempDir);
+        $filesystem->mirror(__DIR__.'/Fixtures/home', $this->tempHome);
 
         putenv('PULI_HOME='.$this->tempHome);
     }
@@ -143,7 +143,7 @@ class ManagerFactoryTest extends \PHPUnit_Framework_TestCase
     public function testCreateResourceRepository()
     {
         $environment = ManagerFactory::createProjectEnvironment($this->tempDir);
-        $repo = ManagerFactory::createResourceRepository($environment);
+        $repo = ManagerFactory::createRepository($environment);
 
         $this->assertInstanceOf('Puli\Repository\ResourceRepositoryInterface', $repo);
     }
@@ -151,9 +151,9 @@ class ManagerFactoryTest extends \PHPUnit_Framework_TestCase
     public function testCreateResourceRepositoryIfAlreadyGenerated()
     {
         $environment = ManagerFactory::createProjectEnvironment($this->tempDir);
-        $manager = ManagerFactory::createPackageManager($environment);
-        $manager->generateResourceRepository();
-        $repo = ManagerFactory::createResourceRepository($environment);
+        $manager = ManagerFactory::createRepositoryManager($environment);
+        $manager->dumpRepository();
+        $repo = ManagerFactory::createRepository($environment);
 
         $this->assertInstanceOf('Puli\Repository\ResourceRepositoryInterface', $repo);
     }

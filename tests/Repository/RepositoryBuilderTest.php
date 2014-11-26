@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\PackageManager\Tests\Resource;
+namespace Puli\PackageManager\Tests\Repository;
 
 use Puli\Filesystem\Resource\LocalDirectoryResource;
 use Puli\PackageManager\Config\GlobalConfig;
@@ -18,21 +18,21 @@ use Puli\PackageManager\Package\Config\ResourceDescriptor;
 use Puli\PackageManager\Package\Config\RootPackageConfig;
 use Puli\PackageManager\Package\Config\TagDescriptor;
 use Puli\PackageManager\Package\Package;
-use Puli\PackageManager\Package\Repository\PackageRepository;
+use Puli\PackageManager\Package\Collection\PackageCollection;
 use Puli\PackageManager\Package\RootPackage;
-use Puli\PackageManager\Resource\ResourceRepositoryBuilder;
+use Puli\PackageManager\Repository\RepositoryBuilder;
 use Puli\Repository\ManageableRepositoryInterface;
 
 /**
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class ResourceRepositoryBuilderTest extends \PHPUnit_Framework_TestCase
+class RepositoryBuilderTest extends \PHPUnit_Framework_TestCase
 {
     /**
-     * @var PackageRepository
+     * @var PackageCollection
      */
-    private $packageRepository;
+    private $packageCollection;
 
     /**
      * @var \PHPUnit_Framework_MockObject_MockObject|ManageableRepositoryInterface
@@ -40,7 +40,7 @@ class ResourceRepositoryBuilderTest extends \PHPUnit_Framework_TestCase
     private $repo;
 
     /**
-     * @var ResourceRepositoryBuilder
+     * @var RepositoryBuilder
      */
     private $builder;
 
@@ -52,24 +52,24 @@ class ResourceRepositoryBuilderTest extends \PHPUnit_Framework_TestCase
 
     protected function setUp()
     {
-        $this->packageRepository = new PackageRepository();
+        $this->packageCollection = new PackageCollection();
         $this->repo = $this->getMock('Puli\Repository\ManageableRepositoryInterface');
-        $this->builder = new ResourceRepositoryBuilder();
-        $this->package1Root = __DIR__.'/../Package/Fixtures/package1';
-        $this->package2Root = __DIR__.'/../Package/Fixtures/package2';
-        $this->package3Root = __DIR__.'/../Package/Fixtures/package3';
+        $this->builder = new RepositoryBuilder();
+        $this->package1Root = __DIR__.'/Fixtures/package1';
+        $this->package2Root = __DIR__.'/Fixtures/package2';
+        $this->package3Root = __DIR__.'/Fixtures/package3';
     }
 
     public function testIgnorePackageWithoutResources()
     {
         $config = new PackageConfig('package');
 
-        $this->packageRepository->addPackage(new Package($config, $this->package1Root));
+        $this->packageCollection->add(new Package($config, $this->package1Root));
 
         $this->repo->expects($this->never())
             ->method('add');
 
-        $this->builder->loadPackages($this->packageRepository);
+        $this->builder->loadPackages($this->packageCollection);
         $this->builder->buildRepository($this->repo);
     }
 
@@ -79,7 +79,7 @@ class ResourceRepositoryBuilderTest extends \PHPUnit_Framework_TestCase
         $config->addResourceDescriptor(new ResourceDescriptor('/package', 'resources'));
         $config->addResourceDescriptor(new ResourceDescriptor('/package/css', 'assets/css'));
 
-        $this->packageRepository->addPackage(new Package($config, $this->package1Root));
+        $this->packageCollection->add(new Package($config, $this->package1Root));
 
         $this->repo->expects($this->at(0))
             ->method('add')
@@ -89,7 +89,7 @@ class ResourceRepositoryBuilderTest extends \PHPUnit_Framework_TestCase
             ->method('add')
             ->with('/package/css', new LocalDirectoryResource($this->package1Root.'/assets/css'));
 
-        $this->builder->loadPackages($this->packageRepository);
+        $this->builder->loadPackages($this->packageCollection);
         $this->builder->buildRepository($this->repo);
     }
 
@@ -100,31 +100,31 @@ class ResourceRepositoryBuilderTest extends \PHPUnit_Framework_TestCase
 
         $config2 = new PackageConfig('package2');
 
-        $this->packageRepository->addPackage(new Package($config1, $this->package1Root));
-        $this->packageRepository->addPackage(new Package($config2, $this->package2Root));
+        $this->packageCollection->add(new Package($config1, $this->package1Root));
+        $this->packageCollection->add(new Package($config2, $this->package2Root));
 
         $this->repo->expects($this->once())
             ->method('add')
             ->with('/package', new LocalDirectoryResource($this->package2Root.'/resources'));
 
-        $this->builder->loadPackages($this->packageRepository);
+        $this->builder->loadPackages($this->packageCollection);
         $this->builder->buildRepository($this->repo);
     }
 
     /**
-     * @expectedException \Puli\PackageManager\Resource\ResourceDefinitionException
+     * @expectedException \Puli\PackageManager\Repository\ResourceDefinitionException
      */
     public function testFailIfReferencedPackageCouldNotBeFound()
     {
         $config = new PackageConfig('package1');
         $config->addResourceDescriptor(new ResourceDescriptor('/package', '@package2:resources'));
 
-        $this->packageRepository->addPackage(new Package($config, $this->package1Root));
+        $this->packageCollection->add(new Package($config, $this->package1Root));
 
         $this->repo->expects($this->never())
             ->method('add');
 
-        $this->builder->loadPackages($this->packageRepository);
+        $this->builder->loadPackages($this->packageCollection);
         $this->builder->buildRepository($this->repo);
     }
 
@@ -133,12 +133,12 @@ class ResourceRepositoryBuilderTest extends \PHPUnit_Framework_TestCase
         $config = new PackageConfig('package1');
         $config->addResourceDescriptor(new ResourceDescriptor('/package', '@?package2:resources'));
 
-        $this->packageRepository->addPackage(new Package($config, $this->package1Root));
+        $this->packageCollection->add(new Package($config, $this->package1Root));
 
         $this->repo->expects($this->never())
             ->method('add');
 
-        $this->builder->loadPackages($this->packageRepository);
+        $this->builder->loadPackages($this->packageCollection);
         $this->builder->buildRepository($this->repo);
     }
 
@@ -150,9 +150,9 @@ class ResourceRepositoryBuilderTest extends \PHPUnit_Framework_TestCase
         $config = new PackageConfig('package1');
         $config->addResourceDescriptor(new ResourceDescriptor('/package', 'foobar'));
 
-        $this->packageRepository->addPackage(new Package($config, $this->package1Root));
+        $this->packageCollection->add(new Package($config, $this->package1Root));
 
-        $this->builder->loadPackages($this->packageRepository);
+        $this->builder->loadPackages($this->packageCollection);
     }
 
     public function testIgnoreResourceOrder()
@@ -161,7 +161,7 @@ class ResourceRepositoryBuilderTest extends \PHPUnit_Framework_TestCase
         $config->addResourceDescriptor(new ResourceDescriptor('/package/css', 'assets/css'));
         $config->addResourceDescriptor(new ResourceDescriptor('/package', 'resources'));
 
-        $this->packageRepository->addPackage(new Package($config, $this->package1Root));
+        $this->packageCollection->add(new Package($config, $this->package1Root));
 
         $this->repo->expects($this->at(0))
             ->method('add')
@@ -171,7 +171,7 @@ class ResourceRepositoryBuilderTest extends \PHPUnit_Framework_TestCase
             ->method('add')
             ->with('/package/css', new LocalDirectoryResource($this->package1Root.'/assets/css'));
 
-        $this->builder->loadPackages($this->packageRepository);
+        $this->builder->loadPackages($this->packageCollection);
         $this->builder->buildRepository($this->repo);
     }
 
@@ -180,7 +180,7 @@ class ResourceRepositoryBuilderTest extends \PHPUnit_Framework_TestCase
         $config = new PackageConfig('package');
         $config->addResourceDescriptor(new ResourceDescriptor('/package', array('resources', 'assets')));
 
-        $this->packageRepository->addPackage(new Package($config, $this->package1Root));
+        $this->packageCollection->add(new Package($config, $this->package1Root));
 
         $this->repo->expects($this->at(0))
             ->method('add')
@@ -190,7 +190,7 @@ class ResourceRepositoryBuilderTest extends \PHPUnit_Framework_TestCase
             ->method('add')
             ->with('/package', new LocalDirectoryResource($this->package1Root.'/assets'));
 
-        $this->builder->loadPackages($this->packageRepository);
+        $this->builder->loadPackages($this->packageCollection);
         $this->builder->buildRepository($this->repo);
     }
 
@@ -206,8 +206,8 @@ class ResourceRepositoryBuilderTest extends \PHPUnit_Framework_TestCase
         $overrider->setOverriddenPackages('package1');
 
         // Add overridden package first
-        $this->packageRepository->addPackage(new Package($overridden, $this->package1Root));
-        $this->packageRepository->addPackage(new Package($overrider, $this->package2Root));
+        $this->packageCollection->add(new Package($overridden, $this->package1Root));
+        $this->packageCollection->add(new Package($overrider, $this->package2Root));
 
         $this->repo->expects($this->at(0))
             ->method('add')
@@ -225,7 +225,7 @@ class ResourceRepositoryBuilderTest extends \PHPUnit_Framework_TestCase
             ->method('add')
             ->with('/package1/css', new LocalDirectoryResource($this->package2Root.'/css-override'));
 
-        $this->builder->loadPackages($this->packageRepository);
+        $this->builder->loadPackages($this->packageCollection);
         $this->builder->buildRepository($this->repo);
     }
 
@@ -241,8 +241,8 @@ class ResourceRepositoryBuilderTest extends \PHPUnit_Framework_TestCase
         $overrider->setOverriddenPackages('package1');
 
         // Add overriding package first
-        $this->packageRepository->addPackage(new Package($overrider, $this->package2Root));
-        $this->packageRepository->addPackage(new Package($overridden, $this->package1Root));
+        $this->packageCollection->add(new Package($overrider, $this->package2Root));
+        $this->packageCollection->add(new Package($overridden, $this->package1Root));
 
         $this->repo->expects($this->at(0))
             ->method('add')
@@ -260,7 +260,7 @@ class ResourceRepositoryBuilderTest extends \PHPUnit_Framework_TestCase
             ->method('add')
             ->with('/package1/css', new LocalDirectoryResource($this->package2Root.'/css-override'));
 
-        $this->builder->loadPackages($this->packageRepository);
+        $this->builder->loadPackages($this->packageCollection);
         $this->builder->buildRepository($this->repo);
     }
 
@@ -277,9 +277,9 @@ class ResourceRepositoryBuilderTest extends \PHPUnit_Framework_TestCase
         $config3->addResourceDescriptor(new ResourceDescriptor('/package1', 'override2'));
         $config3->setOverriddenPackages('package2');
 
-        $this->packageRepository->addPackage(new Package($config1, $this->package1Root));
-        $this->packageRepository->addPackage(new Package($config2, $this->package2Root));
-        $this->packageRepository->addPackage(new Package($config3, $this->package3Root));
+        $this->packageCollection->add(new Package($config1, $this->package1Root));
+        $this->packageCollection->add(new Package($config2, $this->package2Root));
+        $this->packageCollection->add(new Package($config3, $this->package3Root));
 
         $this->repo->expects($this->at(0))
             ->method('add')
@@ -293,7 +293,7 @@ class ResourceRepositoryBuilderTest extends \PHPUnit_Framework_TestCase
             ->method('add')
             ->with('/package1', new LocalDirectoryResource($this->package3Root.'/override2'));
 
-        $this->builder->loadPackages($this->packageRepository);
+        $this->builder->loadPackages($this->packageCollection);
         $this->builder->buildRepository($this->repo);
     }
 
@@ -310,9 +310,9 @@ class ResourceRepositoryBuilderTest extends \PHPUnit_Framework_TestCase
         $config3->addResourceDescriptor(new ResourceDescriptor('/package2', 'override2'));
         $config3->setOverriddenPackages(array('package1', 'package2'));
 
-        $this->packageRepository->addPackage(new Package($config1, $this->package1Root));
-        $this->packageRepository->addPackage(new Package($config2, $this->package2Root));
-        $this->packageRepository->addPackage(new Package($config3, $this->package3Root));
+        $this->packageCollection->add(new Package($config1, $this->package1Root));
+        $this->packageCollection->add(new Package($config2, $this->package2Root));
+        $this->packageCollection->add(new Package($config3, $this->package3Root));
 
         $this->repo->expects($this->at(0))
             ->method('add')
@@ -330,7 +330,7 @@ class ResourceRepositoryBuilderTest extends \PHPUnit_Framework_TestCase
             ->method('add')
             ->with('/package2', new LocalDirectoryResource($this->package3Root.'/override2'));
 
-        $this->builder->loadPackages($this->packageRepository);
+        $this->builder->loadPackages($this->packageCollection);
         $this->builder->buildRepository($this->repo);
     }
 
@@ -340,13 +340,13 @@ class ResourceRepositoryBuilderTest extends \PHPUnit_Framework_TestCase
         $config->addResourceDescriptor(new ResourceDescriptor('/package', 'resources'));
         $config->setOverriddenPackages('foobar');
 
-        $this->packageRepository->addPackage(new Package($config, $this->package1Root));
+        $this->packageCollection->add(new Package($config, $this->package1Root));
 
         $this->repo->expects($this->at(0))
             ->method('add')
             ->with('/package', new LocalDirectoryResource($this->package1Root.'/resources'));
 
-        $this->builder->loadPackages($this->packageRepository);
+        $this->builder->loadPackages($this->packageCollection);
         $this->builder->buildRepository($this->repo);
     }
 
@@ -359,8 +359,8 @@ class ResourceRepositoryBuilderTest extends \PHPUnit_Framework_TestCase
         $overrider->addResourceDescriptor(new ResourceDescriptor('/package1', array('override', 'css-override')));
         $overrider->setOverriddenPackages('package1');
 
-        $this->packageRepository->addPackage(new Package($overridden, $this->package1Root));
-        $this->packageRepository->addPackage(new Package($overrider, $this->package2Root));
+        $this->packageCollection->add(new Package($overridden, $this->package1Root));
+        $this->packageCollection->add(new Package($overrider, $this->package2Root));
 
         $this->repo->expects($this->at(0))
             ->method('add')
@@ -374,12 +374,12 @@ class ResourceRepositoryBuilderTest extends \PHPUnit_Framework_TestCase
             ->method('add')
             ->with('/package1', new LocalDirectoryResource($this->package2Root.'/css-override'));
 
-        $this->builder->loadPackages($this->packageRepository);
+        $this->builder->loadPackages($this->packageCollection);
         $this->builder->buildRepository($this->repo);
     }
 
     /**
-     * @expectedException \Puli\PackageManager\Resource\ResourceConflictException
+     * @expectedException \Puli\PackageManager\Repository\ResourceConflictException
      */
     public function testConflictIfSamePathsButNoOverrideStatement()
     {
@@ -389,18 +389,18 @@ class ResourceRepositoryBuilderTest extends \PHPUnit_Framework_TestCase
         $config2 = new PackageConfig('package2');
         $config2->addResourceDescriptor(new ResourceDescriptor('/path', 'resources'));
 
-        $this->packageRepository->addPackage(new Package($config1, $this->package1Root));
-        $this->packageRepository->addPackage(new Package($config2, $this->package2Root));
+        $this->packageCollection->add(new Package($config1, $this->package1Root));
+        $this->packageCollection->add(new Package($config2, $this->package2Root));
 
         $this->repo->expects($this->never())
             ->method('add');
 
-        $this->builder->loadPackages($this->packageRepository);
+        $this->builder->loadPackages($this->packageCollection);
         $this->builder->buildRepository($this->repo);
     }
 
     /**
-     * @expectedException \Puli\PackageManager\Resource\ResourceConflictException
+     * @expectedException \Puli\PackageManager\Repository\ResourceConflictException
      */
     public function testConflictIfExistingSubPathAndNoOverrideStatement()
     {
@@ -410,13 +410,13 @@ class ResourceRepositoryBuilderTest extends \PHPUnit_Framework_TestCase
         $config2 = new PackageConfig('package2');
         $config2->addResourceDescriptor(new ResourceDescriptor('/path/config', 'override'));
 
-        $this->packageRepository->addPackage(new Package($config1, $this->package1Root));
-        $this->packageRepository->addPackage(new Package($config2, $this->package2Root));
+        $this->packageCollection->add(new Package($config1, $this->package1Root));
+        $this->packageCollection->add(new Package($config2, $this->package2Root));
 
         $this->repo->expects($this->never())
             ->method('add');
 
-        $this->builder->loadPackages($this->packageRepository);
+        $this->builder->loadPackages($this->packageCollection);
         $this->builder->buildRepository($this->repo);
     }
 
@@ -428,8 +428,8 @@ class ResourceRepositoryBuilderTest extends \PHPUnit_Framework_TestCase
         $config2 = new PackageConfig('package2');
         $config2->addResourceDescriptor(new ResourceDescriptor('/path/new', 'override'));
 
-        $this->packageRepository->addPackage(new Package($config1, $this->package1Root));
-        $this->packageRepository->addPackage(new Package($config2, $this->package2Root));
+        $this->packageCollection->add(new Package($config1, $this->package1Root));
+        $this->packageCollection->add(new Package($config2, $this->package2Root));
 
         $this->repo->expects($this->at(0))
             ->method('add')
@@ -439,7 +439,7 @@ class ResourceRepositoryBuilderTest extends \PHPUnit_Framework_TestCase
             ->method('add')
             ->with('/path/new', new LocalDirectoryResource($this->package2Root.'/override'));
 
-        $this->builder->loadPackages($this->packageRepository);
+        $this->builder->loadPackages($this->packageCollection);
         $this->builder->buildRepository($this->repo);
     }
 
@@ -455,9 +455,9 @@ class ResourceRepositoryBuilderTest extends \PHPUnit_Framework_TestCase
         $rootConfig = new RootPackageConfig($globalConfig, 'root');
         $rootConfig->setPackageOrder(array('package1', 'package2'));
 
-        $this->packageRepository->addPackage(new Package($config1, $this->package1Root));
-        $this->packageRepository->addPackage(new Package($config2, $this->package2Root));
-        $this->packageRepository->addPackage(new RootPackage($rootConfig, $this->package3Root));
+        $this->packageCollection->add(new Package($config1, $this->package1Root));
+        $this->packageCollection->add(new Package($config2, $this->package2Root));
+        $this->packageCollection->add(new RootPackage($rootConfig, $this->package3Root));
 
         $this->repo->expects($this->at(0))
             ->method('add')
@@ -467,12 +467,12 @@ class ResourceRepositoryBuilderTest extends \PHPUnit_Framework_TestCase
             ->method('add')
             ->with('/path', new LocalDirectoryResource($this->package2Root.'/override'));
 
-        $this->builder->loadPackages($this->packageRepository);
+        $this->builder->loadPackages($this->packageCollection);
         $this->builder->buildRepository($this->repo);
     }
 
     /**
-     * @expectedException \Puli\PackageManager\Resource\ResourceConflictException
+     * @expectedException \Puli\PackageManager\Repository\ResourceConflictException
      */
     public function testPackageOrderInNonRootPackageIsIgnored()
     {
@@ -486,14 +486,14 @@ class ResourceRepositoryBuilderTest extends \PHPUnit_Framework_TestCase
         $pseudoRootConfig = new RootPackageConfig($globalConfig, 'root');
         $pseudoRootConfig->setPackageOrder(array('package1', 'package2'));
 
-        $this->packageRepository->addPackage(new Package($config1, $this->package1Root));
-        $this->packageRepository->addPackage(new Package($config2, $this->package2Root));
-        $this->packageRepository->addPackage(new Package($pseudoRootConfig, $this->package3Root));
+        $this->packageCollection->add(new Package($config1, $this->package1Root));
+        $this->packageCollection->add(new Package($config2, $this->package2Root));
+        $this->packageCollection->add(new Package($pseudoRootConfig, $this->package3Root));
 
         $this->repo->expects($this->never())
             ->method('add');
 
-        $this->builder->loadPackages($this->packageRepository);
+        $this->builder->loadPackages($this->packageCollection);
         $this->builder->buildRepository($this->repo);
     }
 
@@ -503,7 +503,7 @@ class ResourceRepositoryBuilderTest extends \PHPUnit_Framework_TestCase
         $config->addResourceDescriptor(new ResourceDescriptor('/package', 'resources'));
         $config->addTagDescriptor(new TagDescriptor('/package', 'tag'));
 
-        $this->packageRepository->addPackage(new Package($config, $this->package1Root));
+        $this->packageCollection->add(new Package($config, $this->package1Root));
 
         $this->repo->expects($this->at(0))
             ->method('add')
@@ -513,7 +513,7 @@ class ResourceRepositoryBuilderTest extends \PHPUnit_Framework_TestCase
             ->method('tag')
             ->with('/package', 'tag');
 
-        $this->builder->loadPackages($this->packageRepository);
+        $this->builder->loadPackages($this->packageCollection);
         $this->builder->buildRepository($this->repo);
     }
 
@@ -525,8 +525,8 @@ class ResourceRepositoryBuilderTest extends \PHPUnit_Framework_TestCase
         $config2 = new PackageConfig('package2');
         $config2->addTagDescriptor(new TagDescriptor('/package1', 'tag'));
 
-        $this->packageRepository->addPackage(new Package($config1, $this->package1Root));
-        $this->packageRepository->addPackage(new Package($config2, $this->package2Root));
+        $this->packageCollection->add(new Package($config1, $this->package1Root));
+        $this->packageCollection->add(new Package($config2, $this->package2Root));
 
         $this->repo->expects($this->at(0))
             ->method('add')
@@ -536,7 +536,7 @@ class ResourceRepositoryBuilderTest extends \PHPUnit_Framework_TestCase
             ->method('tag')
             ->with('/package1', 'tag');
 
-        $this->builder->loadPackages($this->packageRepository);
+        $this->builder->loadPackages($this->packageCollection);
         $this->builder->buildRepository($this->repo);
     }
 
@@ -548,8 +548,8 @@ class ResourceRepositoryBuilderTest extends \PHPUnit_Framework_TestCase
         $config2 = new PackageConfig('package2');
         $config2->addResourceDescriptor(new ResourceDescriptor('/package2', 'resources'));
 
-        $this->packageRepository->addPackage(new Package($config1, $this->package1Root));
-        $this->packageRepository->addPackage(new Package($config2, $this->package2Root));
+        $this->packageCollection->add(new Package($config1, $this->package1Root));
+        $this->packageCollection->add(new Package($config2, $this->package2Root));
 
         $this->repo->expects($this->at(0))
             ->method('add')
@@ -559,7 +559,7 @@ class ResourceRepositoryBuilderTest extends \PHPUnit_Framework_TestCase
             ->method('tag')
             ->with('/package2', 'tag');
 
-        $this->builder->loadPackages($this->packageRepository);
+        $this->builder->loadPackages($this->packageCollection);
         $this->builder->buildRepository($this->repo);
     }
 
@@ -572,8 +572,8 @@ class ResourceRepositoryBuilderTest extends \PHPUnit_Framework_TestCase
         $config2 = new PackageConfig('package2');
         $config2->addTagDescriptor(new TagDescriptor('/package1', 'tag2'));
 
-        $this->packageRepository->addPackage(new Package($config1, $this->package1Root));
-        $this->packageRepository->addPackage(new Package($config2, $this->package2Root));
+        $this->packageCollection->add(new Package($config1, $this->package1Root));
+        $this->packageCollection->add(new Package($config2, $this->package2Root));
 
         $this->repo->expects($this->at(0))
             ->method('add')
@@ -587,7 +587,7 @@ class ResourceRepositoryBuilderTest extends \PHPUnit_Framework_TestCase
             ->method('tag')
             ->with('/package1', 'tag2');
 
-        $this->builder->loadPackages($this->packageRepository);
+        $this->builder->loadPackages($this->packageCollection);
         $this->builder->buildRepository($this->repo);
     }
 
@@ -600,8 +600,8 @@ class ResourceRepositoryBuilderTest extends \PHPUnit_Framework_TestCase
         $config2 = new PackageConfig('package2');
         $config2->addTagDescriptor(new TagDescriptor('/package1', 'tag'));
 
-        $this->packageRepository->addPackage(new Package($config1, $this->package1Root));
-        $this->packageRepository->addPackage(new Package($config2, $this->package2Root));
+        $this->packageCollection->add(new Package($config1, $this->package1Root));
+        $this->packageCollection->add(new Package($config2, $this->package2Root));
 
         $this->repo->expects($this->at(0))
             ->method('add')
@@ -611,7 +611,7 @@ class ResourceRepositoryBuilderTest extends \PHPUnit_Framework_TestCase
             ->method('tag')
             ->with('/package1', 'tag');
 
-        $this->builder->loadPackages($this->packageRepository);
+        $this->builder->loadPackages($this->packageCollection);
         $this->builder->buildRepository($this->repo);
     }
 
@@ -621,7 +621,7 @@ class ResourceRepositoryBuilderTest extends \PHPUnit_Framework_TestCase
         $config->addResourceDescriptor(new ResourceDescriptor('/package1', 'resources'));
         $config->addTagDescriptor(new TagDescriptor('/package1', array('tag1', 'tag2')));
 
-        $this->packageRepository->addPackage(new Package($config, $this->package1Root));
+        $this->packageCollection->add(new Package($config, $this->package1Root));
 
         $this->repo->expects($this->at(0))
             ->method('add')
@@ -635,7 +635,7 @@ class ResourceRepositoryBuilderTest extends \PHPUnit_Framework_TestCase
             ->method('tag')
             ->with('/package1', 'tag2');
 
-        $this->builder->loadPackages($this->packageRepository);
+        $this->builder->loadPackages($this->packageCollection);
         $this->builder->buildRepository($this->repo);
     }
 

@@ -9,14 +9,14 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\PackageManager\Resource;
+namespace Puli\PackageManager\Repository;
 
 use Puli\Filesystem\Resource\LocalDirectoryResource;
 use Puli\Filesystem\Resource\LocalFileResource;
 use Puli\Filesystem\Resource\LocalResourceInterface;
 use Puli\PackageManager\Package\Graph\PackageNameGraph;
 use Puli\PackageManager\Package\Package;
-use Puli\PackageManager\Package\Repository\PackageRepository;
+use Puli\PackageManager\Package\Collection\PackageCollection;
 use Puli\PackageManager\Package\RootPackage;
 use Puli\Repository\ManageableRepositoryInterface;
 use Puli\Resource\DirectoryResourceInterface;
@@ -33,12 +33,12 @@ use Puli\Resource\DirectoryResourceInterface;
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class ResourceRepositoryBuilder
+class RepositoryBuilder
 {
     /**
-     * @var PackageRepository
+     * @var PackageCollection|Package[]
      */
-    private $packageRepository;
+    private $packages;
 
     /**
      * @var PackageNameGraph
@@ -74,15 +74,15 @@ class ResourceRepositoryBuilder
      * If this method succeeds, call {@link buildRepository()} to add the
      * loaded resources to a resource repository.
      *
-     * @param PackageRepository $packageRepository The package repository.
+     * @param PackageCollection $packages The packages.
      *
      * @throws ResourceConflictException If two packages contain conflicting
      *                                   resource definitions.
      * @throws ResourceDefinitionException If a resource definition is invalid.
      */
-    public function loadPackages(PackageRepository $packageRepository)
+    public function loadPackages(PackageCollection $packages)
     {
-        $this->packageRepository = $packageRepository;
+        $this->packages = $packages;
         $this->packageGraph = new PackageNameGraph();
         $this->packageOverrides = array();
         $this->resources = array();
@@ -115,9 +115,7 @@ class ResourceRepositoryBuilder
 
     private function loadPackageConfiguration()
     {
-        $packages = $this->packageRepository->getPackages();
-
-        foreach ($packages as $package) {
+        foreach ($this->packages as $package) {
             $this->packageGraph->addPackageName($package->getName());
 
             $this->processResources($package);
@@ -161,7 +159,7 @@ class ResourceRepositoryBuilder
                         $optional = true;
                     }
 
-                    if (!$this->packageRepository->containsPackage($refPackageName)) {
+                    if (!$this->packages->contains($refPackageName)) {
                         if ($optional) {
                             continue;
                         }
@@ -177,7 +175,7 @@ class ResourceRepositoryBuilder
                         ));
                     }
 
-                    $refPackage = $this->packageRepository->getPackage($refPackageName);
+                    $refPackage = $this->packages->get($refPackageName);
                     $absolutePath = $refPackage->getInstallPath().'/'.substr($relativePath, $pos + 1);
                 } else {
                     $absolutePath = $package->getInstallPath().'/'.$relativePath;

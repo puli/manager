@@ -25,6 +25,7 @@ use Puli\PackageManager\Package\InstallFile\Writer\PackagesJsonWriter;
 use Puli\PackageManager\Package\PackageManager;
 use Puli\PackageManager\Project\ProjectConfigManager;
 use Puli\PackageManager\Project\ProjectEnvironment;
+use Puli\PackageManager\Repository\RepositoryManager;
 use Puli\PackageManager\Util\System;
 use Puli\Repository\ResourceRepositoryInterface;
 use Puli\Util\Path;
@@ -176,7 +177,7 @@ class ManagerFactory
     }
 
     /**
-     * Creates a package manager for a Puli project.
+     * Creates the package manager for a Puli project.
      *
      * @param ProjectEnvironment $environment The project environment.
      *
@@ -192,13 +193,25 @@ class ManagerFactory
     }
 
     /**
+     * Creates the resource repository manager for a Puli project.
+     *
+     * @param ProjectEnvironment $environment The project environment.
+     *
+     * @return RepositoryManager The repository manager.
+     */
+    public static function createRepositoryManager(ProjectEnvironment $environment)
+    {
+        return new RepositoryManager($environment, self::createPackageManager($environment)->getPackages());
+    }
+
+    /**
      * Creates the resource repository for a Puli project.
      *
      * @param ProjectEnvironment $environment The project environment.
      *
      * @return ResourceRepositoryInterface The resource repository.
      */
-    public static function createResourceRepository(ProjectEnvironment $environment)
+    public static function createRepository(ProjectEnvironment $environment)
     {
         $repoPath = Path::makeAbsolute(
             $environment->getRootPackageConfig()->getGeneratedResourceRepository(),
@@ -206,8 +219,8 @@ class ManagerFactory
         );
 
         if (!file_exists($repoPath)) {
-            $manager = self::createPackageManager($environment);
-            $manager->generateResourceRepository();
+            $manager = self::createRepositoryManager($environment);
+            $manager->dumpRepository();
         }
 
         return include $repoPath;

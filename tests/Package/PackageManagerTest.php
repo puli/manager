@@ -118,7 +118,7 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
         $this->dispatcher = $this->getMock('Symfony\Component\EventDispatcher\EventDispatcherInterface');
 
         $this->homeDir = __DIR__.'/Fixtures/home';
-        $this->rootDir = __DIR__.'/Fixtures/root-package';
+        $this->rootDir = __DIR__.'/Fixtures/root';
         $this->package1Dir = __DIR__.'/Fixtures/package1';
         $this->package2Dir = __DIR__.'/Fixtures/package2';
         $this->package3Dir = __DIR__.'/Fixtures/package3';
@@ -254,7 +254,7 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
         $this->rootConfig->setInstallFile('repository.json');
 
         $installFile = new InstallFile();
-        $installFile->addPackageDescriptor(new PackageDescriptor($this->rootDir.'/file'));
+        $installFile->addPackageDescriptor(new PackageDescriptor(__DIR__.'/Fixtures/file'));
 
         $this->installFileStorage->expects($this->once())
             ->method('loadInstallFile')
@@ -262,122 +262,6 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
             ->will($this->returnValue($installFile));
 
         new PackageManager($this->environment, $this->packageConfigStorage, $this->installFileStorage);
-    }
-
-    public function testGenerateResourceRepository()
-    {
-        $this->initDefaultManager();
-
-        $this->rootConfig->setResourceRepositoryCache($this->tempDir.'/cache');
-        $this->rootConfig->setGeneratedResourceRepository($this->tempDir.'/repository.php');
-
-        $this->rootConfig->addResourceDescriptor(new ResourceDescriptor('/root', 'resources'));
-        $this->package1Config->addResourceDescriptor(new ResourceDescriptor('/package1', 'resources'));
-        $this->package2Config->addResourceDescriptor(new ResourceDescriptor('/package2', 'resources'));
-
-        $this->manager->generateResourceRepository();
-
-        $this->assertFileExists($this->tempDir.'/cache');
-        $this->assertFileExists($this->tempDir.'/repository.php');
-
-        /** @var ResourceRepositoryInterface $repo */
-        $repo = require $this->tempDir.'/repository.php';
-
-        $this->assertSame($this->rootDir.'/resources', $repo->get('/root')->getLocalPath());
-        $this->assertSame($this->package1Dir.'/resources', $repo->get('/package1')->getLocalPath());
-        $this->assertSame($this->package2Dir.'/resources', $repo->get('/package2')->getLocalPath());
-    }
-
-    public function testGenerateResourceRepositoryReplacesExistingFiles()
-    {
-        $this->initDefaultManager();
-
-        $this->rootConfig->setResourceRepositoryCache($this->tempDir.'/cache');
-        $this->rootConfig->setGeneratedResourceRepository($this->tempDir.'/repository.php');
-
-        mkdir($this->tempDir.'/cache');
-        touch($this->tempDir.'/cache/old');
-        touch($this->tempDir.'/repository.php');
-
-        $this->rootConfig->addResourceDescriptor(new ResourceDescriptor('/root', 'resources'));
-
-        $this->manager->generateResourceRepository();
-
-        $this->assertFileExists($this->tempDir.'/cache');
-        $this->assertFileExists($this->tempDir.'/repository.php');
-        $this->assertFileNotExists($this->tempDir.'/cache/old');
-
-        /** @var ResourceRepositoryInterface $repo */
-        $repo = require $this->tempDir.'/repository.php';
-
-        $this->assertSame($this->rootDir.'/resources', $repo->get('/root')->getLocalPath());
-    }
-
-    public function testGenerateResourceRepositoryWithRelativePaths()
-    {
-        $filesystem = new Filesystem();
-        $filesystem->mirror($this->rootDir, $this->tempDir);
-
-        $this->rootDir = $this->tempDir;
-
-        $this->initEnvironment();
-        $this->initDefaultManager();
-
-        $this->rootConfig->setResourceRepositoryCache('cache-dir/cache');
-        $this->rootConfig->setGeneratedResourceRepository('repo-dir/repository.php');
-
-        $this->rootConfig->addResourceDescriptor(new ResourceDescriptor('/root', 'resources'));
-
-        $this->manager->generateResourceRepository();
-
-        $this->assertFileExists($this->tempDir.'/cache-dir/cache');
-        $this->assertFileExists($this->tempDir.'/repo-dir/repository.php');
-
-        /** @var ResourceRepositoryInterface $repo */
-        $repo = require $this->tempDir.'/repo-dir/repository.php';
-
-        $this->assertSame($this->tempDir.'/resources', $repo->get('/root')->getLocalPath());
-    }
-
-    public function testGenerateResourceRepositoryWithCustomRepositoryPath()
-    {
-        $this->initDefaultManager();
-
-        $this->rootConfig->setResourceRepositoryCache($this->tempDir.'/cache');
-        $this->rootConfig->setGeneratedResourceRepository($this->tempDir.'/repository.php');
-
-        $this->rootConfig->addResourceDescriptor(new ResourceDescriptor('/root', 'resources'));
-
-        $this->manager->generateResourceRepository($this->tempDir.'/custom-repository.php');
-
-        $this->assertFileExists($this->tempDir.'/cache');
-        $this->assertFileExists($this->tempDir.'/custom-repository.php');
-        $this->assertFileNotExists($this->tempDir.'/repository.php');
-
-        /** @var ResourceRepositoryInterface $repo */
-        $repo = require $this->tempDir.'/custom-repository.php';
-
-        $this->assertSame($this->rootDir.'/resources', $repo->get('/root')->getLocalPath());
-    }
-
-    public function testGenerateResourceRepositoryWithCustomCachePath()
-    {
-        $this->initDefaultManager();
-
-        $this->rootConfig->setResourceRepositoryCache($this->tempDir.'/cache');
-        $this->rootConfig->setGeneratedResourceRepository($this->tempDir.'/repository.php');
-
-        $this->rootConfig->addResourceDescriptor(new ResourceDescriptor('/root', 'resources'));
-
-        $this->manager->generateResourceRepository(null, $this->tempDir.'/custom-cache');
-
-        $this->assertFileExists($this->tempDir.'/custom-cache');
-        $this->assertFileNotExists($this->tempDir.'/cache');
-
-        /** @var ResourceRepositoryInterface $repo */
-        $repo = require $this->tempDir.'/repository.php';
-
-        $this->assertSame($this->rootDir.'/resources', $repo->get('/root')->getLocalPath());
     }
 
     public function testInstallPackage()
@@ -490,7 +374,7 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
     {
         $this->initDefaultManager();
 
-        $this->manager->installPackage($this->rootDir.'/file');
+        $this->manager->installPackage(__DIR__.'/Fixtures/file');
     }
 
     public function testIsPackageInstalled()
@@ -539,7 +423,7 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\PackageManager\Package\Repository\NoSuchPackageException
+     * @expectedException \Puli\PackageManager\Package\Collection\NoSuchPackageException
      */
     public function testGetPackageFailsIfNotFound()
     {
