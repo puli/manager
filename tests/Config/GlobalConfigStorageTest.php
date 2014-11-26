@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the Puli PackageManager package.
+ * This file is part of the Puli Repository Manager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,13 +9,13 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\PackageManager\Tests\Config;
+namespace Puli\RepositoryManager\Tests\Config;
 
-use Puli\PackageManager\Config\GlobalConfig;
-use Puli\PackageManager\Config\GlobalConfigStorage;
-use Puli\PackageManager\Config\Reader\GlobalConfigReaderInterface;
-use Puli\PackageManager\Config\Writer\GlobalConfigWriterInterface;
-use Puli\PackageManager\FileNotFoundException;
+use Puli\RepositoryManager\Config\GlobalConfig;
+use Puli\RepositoryManager\Config\GlobalConfigStorage;
+use Puli\RepositoryManager\Config\Reader\GlobalConfigReaderInterface;
+use Puli\RepositoryManager\Config\Writer\GlobalConfigWriterInterface;
+use Puli\RepositoryManager\FileNotFoundException;
 
 /**
  * @since  1.0
@@ -40,8 +40,8 @@ class GlobalConfigStorageTest extends \PHPUnit_Framework_TestCase
 
     protected function setUp()
     {
-        $this->reader = $this->getMock('Puli\PackageManager\Config\Reader\GlobalConfigReaderInterface');
-        $this->writer = $this->getMock('Puli\PackageManager\Config\Writer\GlobalConfigWriterInterface');
+        $this->reader = $this->getMock('Puli\RepositoryManager\Config\Reader\GlobalConfigReaderInterface');
+        $this->writer = $this->getMock('Puli\RepositoryManager\Config\Writer\GlobalConfigWriterInterface');
 
         $this->storage = new GlobalConfigStorage($this->reader, $this->writer);
     }

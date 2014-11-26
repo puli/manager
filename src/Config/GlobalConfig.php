@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the Puli PackageManager package.
+ * This file is part of the Puli Repository Manager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,9 +9,9 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\PackageManager\Config;
+namespace Puli\RepositoryManager\Config;
 
-use Puli\PackageManager\InvalidConfigException;
+use Puli\RepositoryManager\InvalidConfigException;
 
 /**
  * The system-wide Puli configuration.
@@ -266,12 +266,12 @@ class GlobalConfig
      * Sets the plugin classes.
      *
      * The plugin classes must be fully-qualified class names that implement
-     * {@link \Puli\PackageManager\Plugin\PluginInterface}. If a class is not
+     * {@link \Puli\RepositoryManager\Plugin\PluginInterface}. If a class is not
      * found or does not implement that interface, an exception is thrown.
      *
      * The plugin classes must not have required parameters in their constructor
-     * so that the package manager can successfully instantiate them. If a
-     * constructor has required parameters, an exception is thrown.
+     * so that they can be successfully instantiated. If a constructor has
+     * required parameters, an exception is thrown.
      *
      * Leading backslashes are removed from the fully-qualified class names.
      *
@@ -279,7 +279,7 @@ class GlobalConfig
      *
      * @throws InvalidConfigException If a class is not found, is not a class,
      *                                does not implement
-     *                                {@link \Puli\PackageManager\Plugin\PluginInterface}
+     *                                {@link \Puli\RepositoryManager\Plugin\PluginInterface}
      *                                or has required constructor parameters.
      */
     public function setPluginClasses(array $pluginClasses)
@@ -295,12 +295,12 @@ class GlobalConfig
      * Adds a plugin class.
      *
      * The plugin class must be a fully-qualified class name that implements
-     * {@link \Puli\PackageManager\Plugin\PluginInterface}. If the class is not
+     * {@link \Puli\RepositoryManager\Plugin\PluginInterface}. If the class is not
      * found or does not implement that interface, an exception is thrown.
      *
      * The plugin class must not have required parameters in its constructor
-     * so that the package manager can successfully instantiate it. If the
-     * constructor has required parameters, an exception is thrown.
+     * so that it can be successfully instantiate. If the constructor has
+     * required parameters, an exception is thrown.
      *
      * Leading backslashes are removed from the fully-qualified class name.
      *
@@ -308,7 +308,7 @@ class GlobalConfig
      *
      * @throws InvalidConfigException If the class is not found, is not a class,
      *                                does not implement
-     *                                {@link \Puli\PackageManager\Plugin\PluginInterface}
+     *                                {@link \Puli\RepositoryManager\Plugin\PluginInterface}
      *                                or has required constructor parameters.
      */
     public function addPluginClass($pluginClass)
@@ -336,9 +336,9 @@ class GlobalConfig
             ));
         }
 
-        if (!$reflClass->implementsInterface('\Puli\PackageManager\Plugin\PluginInterface')) {
+        if (!$reflClass->implementsInterface('\Puli\RepositoryManager\Plugin\PluginInterface')) {
             throw new InvalidConfigException(sprintf(
-                'The plugin class %s must implement \Puli\PackageManager\Plugin\PluginInterface.',
+                'The plugin class %s must implement \Puli\RepositoryManager\Plugin\PluginInterface.',
                 $pluginClass
             ));
         }

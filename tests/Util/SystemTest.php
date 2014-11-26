@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the Puli PackageManager package.
+ * This file is part of the Puli Repository Manager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,9 +9,9 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\PackageManager\Tests\Util;
+namespace Puli\RepositoryManager\Tests\Util;
 
-use Puli\PackageManager\Util\System;
+use Puli\RepositoryManager\Util\System;
 use Symfony\Component\Filesystem\Filesystem;
 
 /**
@@ -27,7 +27,7 @@ class SystemTest extends \PHPUnit_Framework_TestCase
 
     protected function setUp()
     {
-        while (false === @mkdir($this->tempHome = sys_get_temp_dir().'/puli-manager/SystemTest_home'.rand(10000, 99999), 0777, true)) {}
+        while (false === @mkdir($this->tempHome = sys_get_temp_dir().'/puli-repo-manager/SystemTest_home'.rand(10000, 99999), 0777, true)) {}
     }
 
     protected function tearDown()
@@ -106,13 +106,13 @@ class SystemTest extends \PHPUnit_Framework_TestCase
         $isWin = defined('PHP_WINDOWS_VERSION_MAJOR');
 
         // Mention correct variable in the exception message
-        $this->setExpectedException('\Puli\PackageManager\InvalidConfigException', $isWin ? 'APPDATA' : ' HOME ');
+        $this->setExpectedException('\Puli\RepositoryManager\InvalidConfigException', $isWin ? 'APPDATA' : ' HOME ');
 
         System::parseHomeDirectory();
     }
 
     /**
-     * @expectedException \Puli\PackageManager\NoDirectoryException
+     * @expectedException \Puli\RepositoryManager\NoDirectoryException
      * @expectedExceptionMessage PULI_HOME
      */
     public function testFailIfHomeNoDirectory()
@@ -125,7 +125,7 @@ class SystemTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\PackageManager\NoDirectoryException
+     * @expectedException \Puli\RepositoryManager\NoDirectoryException
      * @expectedExceptionMessage HOME
      */
     public function testFailIfLinuxHomeNoDirectory()
@@ -138,7 +138,7 @@ class SystemTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\PackageManager\NoDirectoryException
+     * @expectedException \Puli\RepositoryManager\NoDirectoryException
      * @expectedExceptionMessage APPDATA
      */
     public function testFailIfWindowsHomeNoDirectory()
@@ -151,7 +151,7 @@ class SystemTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\PackageManager\FileNotFoundException
+     * @expectedException \Puli\RepositoryManager\FileNotFoundException
      * @expectedExceptionMessage PULI_HOME
      */
     public function testFailIfHomeDirectoryNotFound()
@@ -162,7 +162,7 @@ class SystemTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\PackageManager\FileNotFoundException
+     * @expectedException \Puli\RepositoryManager\FileNotFoundException
      * @expectedExceptionMessage HOME
      */
     public function testFailIfLinuxHomeDirectoryNotFound()
@@ -173,7 +173,7 @@ class SystemTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\PackageManager\FileNotFoundException
+     * @expectedException \Puli\RepositoryManager\FileNotFoundException
      * @expectedExceptionMessage APPDATA
      */
     public function testFailIfWindowsHomeDirectoryNotFound()

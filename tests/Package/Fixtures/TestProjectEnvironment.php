@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the Puli PackageManager package.
+ * This file is part of the Puli Repository Manager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,18 +9,18 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\PackageManager\Tests\Package\Fixtures;
+namespace Puli\RepositoryManager\Tests\Package\Fixtures;
 
-use Puli\PackageManager\Config\GlobalConfig;
-use Puli\PackageManager\Config\GlobalConfigStorage;
-use Puli\PackageManager\Config\Reader\GlobalConfigReaderInterface;
-use Puli\PackageManager\Config\Writer\GlobalConfigWriterInterface;
-use Puli\PackageManager\Project\ProjectEnvironment;
-use Puli\PackageManager\Package\Config\PackageConfig;
-use Puli\PackageManager\Package\Config\PackageConfigStorage;
-use Puli\PackageManager\Package\Config\Reader\PackageConfigReaderInterface;
-use Puli\PackageManager\Package\Config\RootPackageConfig;
-use Puli\PackageManager\Package\Config\Writer\PackageConfigWriterInterface;
+use Puli\RepositoryManager\Config\GlobalConfig;
+use Puli\RepositoryManager\Config\GlobalConfigStorage;
+use Puli\RepositoryManager\Config\Reader\GlobalConfigReaderInterface;
+use Puli\RepositoryManager\Config\Writer\GlobalConfigWriterInterface;
+use Puli\RepositoryManager\Project\ProjectEnvironment;
+use Puli\RepositoryManager\Package\Config\PackageConfig;
+use Puli\RepositoryManager\Package\Config\PackageConfigStorage;
+use Puli\RepositoryManager\Package\Config\Reader\PackageConfigReaderInterface;
+use Puli\RepositoryManager\Package\Config\RootPackageConfig;
+use Puli\RepositoryManager\Package\Config\Writer\PackageConfigWriterInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**

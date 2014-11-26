@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the Puli PackageManager package.
+ * This file is part of the Puli Repository Manager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,12 +9,12 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\PackageManager\Project;
+namespace Puli\RepositoryManager\Project;
 
-use Puli\PackageManager\Config\GlobalConfigManager;
-use Puli\PackageManager\InvalidConfigException;
-use Puli\PackageManager\Package\Config\PackageConfigStorage;
-use Puli\PackageManager\Package\Config\RootPackageConfig;
+use Puli\RepositoryManager\Config\GlobalConfigManager;
+use Puli\RepositoryManager\InvalidConfigException;
+use Puli\RepositoryManager\Package\Config\PackageConfigStorage;
+use Puli\RepositoryManager\Package\Config\RootPackageConfig;
 
 /**
  * Manages changes to the project configuration.
@@ -76,7 +76,7 @@ class ProjectConfigManager
      * Installs a plugin class.
      *
      * The plugin class must be passed as fully-qualified name of a class that
-     * implements {@link \Puli\PackageManager\Plugin\PluginInterface}. Plugin
+     * implements {@link \Puli\RepositoryManager\Plugin\PluginInterface}. Plugin
      * constructors must not have mandatory parameters.
      *
      * By default, plugins are installed in the configuration of the root
@@ -89,7 +89,7 @@ class ProjectConfigManager
      *
      * @throws InvalidConfigException If a class is not found, is not a class,
      *                                does not implement
-     *                                {@link \Puli\PackageManager\Plugin\PluginInterface}
+     *                                {@link \Puli\RepositoryManager\Plugin\PluginInterface}
      *                                or has required constructor parameters.
      */
     public function installPluginClass($pluginClass, $global = false)

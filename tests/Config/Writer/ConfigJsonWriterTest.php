@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the Puli PackageManager package.
+ * This file is part of the Puli Repository Manager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,10 +9,10 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\PackageManager\Tests\Config\Writer;
+namespace Puli\RepositoryManager\Tests\Config\Writer;
 
-use Puli\PackageManager\Config\GlobalConfig;
-use Puli\PackageManager\Config\Writer\ConfigJsonWriter;
+use Puli\RepositoryManager\Config\GlobalConfig;
+use Puli\RepositoryManager\Config\Writer\ConfigJsonWriter;
 use Symfony\Component\Filesystem\Filesystem;
 
 /**
@@ -21,7 +21,7 @@ use Symfony\Component\Filesystem\Filesystem;
  */
 class ConfigJsonWriterTest extends \PHPUnit_Framework_TestCase
 {
-    const PLUGIN_CLASS = 'Puli\PackageManager\Tests\Config\Fixtures\TestPlugin';
+    const PLUGIN_CLASS = 'Puli\RepositoryManager\Tests\Config\Fixtures\TestPlugin';
 
     /**
      * @var ConfigJsonWriter
@@ -36,7 +36,7 @@ class ConfigJsonWriterTest extends \PHPUnit_Framework_TestCase
     {
         $this->writer = new ConfigJsonWriter();
         $this->tempFile = tempnam(sys_get_temp_dir(), 'ConfigJsonWriterTest');
-        while (false === @mkdir($this->tempDir = sys_get_temp_dir().'/puli-manager/ConfigJsonWriterTest_temp'.rand(10000, 99999), 0777, true)) {}
+        while (false === @mkdir($this->tempDir = sys_get_temp_dir().'/puli-repo-manager/ConfigJsonWriterTest_temp'.rand(10000, 99999), 0777, true)) {}
     }
 
     protected function tearDown()
@@ -89,7 +89,7 @@ class ConfigJsonWriterTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @dataProvider provideInvalidPaths
-     * @expectedException \Puli\PackageManager\IOException
+     * @expectedException \Puli\RepositoryManager\IOException
      */
     public function testWriteConfigExpectsValidPath($invalidPath)
     {

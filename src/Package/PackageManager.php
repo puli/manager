@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the Puli PackageManager package.
+ * This file is part of the Puli Repository Manager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,23 +9,23 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\PackageManager\Package;
+namespace Puli\RepositoryManager\Package;
 
 use Puli\Filesystem\PhpCacheRepository;
-use Puli\PackageManager\FileNotFoundException;
-use Puli\PackageManager\InvalidConfigException;
-use Puli\PackageManager\NoDirectoryException;
-use Puli\PackageManager\Package\Config\PackageConfigStorage;
-use Puli\PackageManager\Package\Config\RootPackageConfig;
-use Puli\PackageManager\Package\InstallFile\InstallFile;
-use Puli\PackageManager\Package\InstallFile\InstallFileStorage;
-use Puli\PackageManager\Package\InstallFile\PackageDescriptor;
-use Puli\PackageManager\Package\Collection\NoSuchPackageException;
-use Puli\PackageManager\Package\Collection\PackageCollection;
-use Puli\PackageManager\Project\ProjectEnvironment;
-use Puli\PackageManager\Repository\ResourceConflictException;
-use Puli\PackageManager\Repository\ResourceDefinitionException;
-use Puli\PackageManager\Repository\RepositoryBuilder;
+use Puli\RepositoryManager\FileNotFoundException;
+use Puli\RepositoryManager\InvalidConfigException;
+use Puli\RepositoryManager\NoDirectoryException;
+use Puli\RepositoryManager\Package\Config\PackageConfigStorage;
+use Puli\RepositoryManager\Package\Config\RootPackageConfig;
+use Puli\RepositoryManager\Package\InstallFile\InstallFile;
+use Puli\RepositoryManager\Package\InstallFile\InstallFileStorage;
+use Puli\RepositoryManager\Package\InstallFile\PackageDescriptor;
+use Puli\RepositoryManager\Package\Collection\NoSuchPackageException;
+use Puli\RepositoryManager\Package\Collection\PackageCollection;
+use Puli\RepositoryManager\Project\ProjectEnvironment;
+use Puli\RepositoryManager\Repository\ResourceConflictException;
+use Puli\RepositoryManager\Repository\ResourceDefinitionException;
+use Puli\RepositoryManager\Repository\RepositoryBuilder;
 use Puli\Repository\ResourceRepository;
 use Puli\Util\Path;
 use Symfony\Component\Filesystem\Filesystem;

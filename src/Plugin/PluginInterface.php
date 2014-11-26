@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the Puli PackageManager package.
+ * This file is part of the Puli Repository Manager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,12 +9,12 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\PackageManager\Plugin;
+namespace Puli\RepositoryManager\Plugin;
 
-use Puli\PackageManager\Project\ProjectEnvironment;
+use Puli\RepositoryManager\Project\ProjectEnvironment;
 
 /**
- * A plugin for the package manager.
+ * A plugin for the repository manager.
  *
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>

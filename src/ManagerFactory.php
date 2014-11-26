@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the Puli PackageManager package.
+ * This file is part of the Puli Repository Manager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,24 +9,24 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\PackageManager;
+namespace Puli\RepositoryManager;
 
-use Puli\PackageManager\Config\GlobalConfigManager;
-use Puli\PackageManager\Config\GlobalConfigStorage;
-use Puli\PackageManager\Config\GlobalEnvironment;
-use Puli\PackageManager\Config\Reader\ConfigJsonReader;
-use Puli\PackageManager\Config\Writer\ConfigJsonWriter;
-use Puli\PackageManager\Package\Config\PackageConfigStorage;
-use Puli\PackageManager\Package\Config\Reader\PuliJsonReader;
-use Puli\PackageManager\Package\Config\Writer\PuliJsonWriter;
-use Puli\PackageManager\Package\InstallFile\InstallFileStorage;
-use Puli\PackageManager\Package\InstallFile\Reader\PackagesJsonReader;
-use Puli\PackageManager\Package\InstallFile\Writer\PackagesJsonWriter;
-use Puli\PackageManager\Package\PackageManager;
-use Puli\PackageManager\Project\ProjectConfigManager;
-use Puli\PackageManager\Project\ProjectEnvironment;
-use Puli\PackageManager\Repository\RepositoryManager;
-use Puli\PackageManager\Util\System;
+use Puli\RepositoryManager\Config\GlobalConfigManager;
+use Puli\RepositoryManager\Config\GlobalConfigStorage;
+use Puli\RepositoryManager\Config\GlobalEnvironment;
+use Puli\RepositoryManager\Config\Reader\ConfigJsonReader;
+use Puli\RepositoryManager\Config\Writer\ConfigJsonWriter;
+use Puli\RepositoryManager\Package\Config\PackageConfigStorage;
+use Puli\RepositoryManager\Package\Config\Reader\PuliJsonReader;
+use Puli\RepositoryManager\Package\Config\Writer\PuliJsonWriter;
+use Puli\RepositoryManager\Package\InstallFile\InstallFileStorage;
+use Puli\RepositoryManager\Package\InstallFile\Reader\PackagesJsonReader;
+use Puli\RepositoryManager\Package\InstallFile\Writer\PackagesJsonWriter;
+use Puli\RepositoryManager\Package\PackageManager;
+use Puli\RepositoryManager\Project\ProjectConfigManager;
+use Puli\RepositoryManager\Project\ProjectEnvironment;
+use Puli\RepositoryManager\Repository\RepositoryManager;
+use Puli\RepositoryManager\Util\System;
 use Puli\Repository\ResourceRepositoryInterface;
 use Puli\Util\Path;
 use Symfony\Component\EventDispatcher\EventDispatcher;
@@ -56,7 +56,7 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
  *    home directory and local settings stored in "puli.json" of the project.
  *    Local environments are created with {@link createProjectEnvironment()}.
  *
- * The factory creates three kinds of managers:
+ * The factory creates four kinds of managers:
  *
  *  * The "global config manager" allows you to modify entries of the
  *    "config.json" file in the home directory. Global config managers are
@@ -68,6 +68,9 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
  *  * The "package manager" manages the administration of the package
  *    repository of a Puli project. A package manager can be created with
  *    {@link createPackageManager()}.
+ *
+ *  * The "repository manager" manages the resource repository of a Puli
+ *    project. It can be created with {@link createRepositoryManager()}.
  *
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>

@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the Puli PackageManager package.
+ * This file is part of the Puli Repository Manager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,14 +9,14 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\PackageManager\Tests\Project;
+namespace Puli\RepositoryManager\Tests\Project;
 
-use Puli\PackageManager\Config\GlobalConfig;
-use Puli\PackageManager\Config\GlobalConfigStorage;
-use Puli\PackageManager\Project\ProjectEnvironment;
-use Puli\PackageManager\Package\Config\PackageConfigStorage;
-use Puli\PackageManager\Package\Config\RootPackageConfig;
-use Puli\PackageManager\Tests\Config\Fixtures\TestPlugin;
+use Puli\RepositoryManager\Config\GlobalConfig;
+use Puli\RepositoryManager\Config\GlobalConfigStorage;
+use Puli\RepositoryManager\Project\ProjectEnvironment;
+use Puli\RepositoryManager\Package\Config\PackageConfigStorage;
+use Puli\RepositoryManager\Package\Config\RootPackageConfig;
+use Puli\RepositoryManager\Tests\Config\Fixtures\TestPlugin;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
@@ -54,10 +54,10 @@ class ProjectEnvironmentTest extends \PHPUnit_Framework_TestCase
     {
         $this->homeDir = __DIR__.'/Fixtures/home';
         $this->rootDir = __DIR__.'/Fixtures/root';
-        $this->globalConfigStorage = $this->getMockBuilder('Puli\PackageManager\Config\GlobalConfigStorage')
+        $this->globalConfigStorage = $this->getMockBuilder('Puli\RepositoryManager\Config\GlobalConfigStorage')
             ->disableOriginalConstructor()
             ->getMock();
-        $this->packageConfigStorage = $this->getMockBuilder('Puli\PackageManager\Package\Config\PackageConfigStorage')
+        $this->packageConfigStorage = $this->getMockBuilder('Puli\RepositoryManager\Package\Config\PackageConfigStorage')
             ->disableOriginalConstructor()
             ->getMock();
         $this->dispatcher = $this->getMock('Symfony\Component\EventDispatcher\EventDispatcherInterface');
@@ -94,7 +94,7 @@ class ProjectEnvironmentTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\PackageManager\FileNotFoundException
+     * @expectedException \Puli\RepositoryManager\FileNotFoundException
      * @expectedExceptionMessage /foobar
      */
     public function testFailIfNonExistingRootDir()
@@ -109,7 +109,7 @@ class ProjectEnvironmentTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\PackageManager\NoDirectoryException
+     * @expectedException \Puli\RepositoryManager\NoDirectoryException
      * @expectedExceptionMessage /file
      */
     public function testFailIfRootDirNoDirectory()
@@ -127,7 +127,7 @@ class ProjectEnvironmentTest extends \PHPUnit_Framework_TestCase
     {
         $globalConfig = new GlobalConfig();
         $rootConfig = new RootPackageConfig($globalConfig);
-        $rootConfig->addPluginClass('Puli\PackageManager\Tests\Config\Fixtures\TestPlugin');
+        $rootConfig->addPluginClass('Puli\RepositoryManager\Tests\Config\Fixtures\TestPlugin');
 
         $this->globalConfigStorage->expects($this->once())
             ->method('loadGlobalConfig')

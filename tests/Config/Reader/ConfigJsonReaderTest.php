@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the Puli PackageManager package.
+ * This file is part of the Puli Repository Manager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,9 +9,9 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\PackageManager\Tests\Config\Reader;
+namespace Puli\RepositoryManager\Tests\Config\Reader;
 
-use Puli\PackageManager\Config\Reader\ConfigJsonReader;
+use Puli\RepositoryManager\Config\Reader\ConfigJsonReader;
 
 /**
  * @since  1.0
@@ -19,7 +19,7 @@ use Puli\PackageManager\Config\Reader\ConfigJsonReader;
  */
 class ConfigJsonReaderTest extends \PHPUnit_Framework_TestCase
 {
-    const PLUGIN_CLASS = 'Puli\PackageManager\Tests\Config\Fixtures\TestPlugin';
+    const PLUGIN_CLASS = 'Puli\RepositoryManager\Tests\Config\Fixtures\TestPlugin';
 
     /**
      * @var ConfigJsonReader
@@ -35,7 +35,7 @@ class ConfigJsonReaderTest extends \PHPUnit_Framework_TestCase
     {
         $config = $this->reader->readGlobalConfig(__DIR__.'/Fixtures/config.json');
 
-        $this->assertInstanceOf('Puli\PackageManager\Config\GlobalConfig', $config);
+        $this->assertInstanceOf('Puli\RepositoryManager\Config\GlobalConfig', $config);
         $this->assertSame(__DIR__.'/Fixtures/config.json', $config->getPath());
         $this->assertSame(array(self::PLUGIN_CLASS), $config->getPluginClasses());
 
@@ -49,7 +49,7 @@ class ConfigJsonReaderTest extends \PHPUnit_Framework_TestCase
     {
         $config = $this->reader->readGlobalConfig(__DIR__.'/Fixtures/minimal.json');
 
-        $this->assertInstanceOf('Puli\PackageManager\Config\GlobalConfig', $config);
+        $this->assertInstanceOf('Puli\RepositoryManager\Config\GlobalConfig', $config);
         $this->assertSame(array(), $config->getPluginClasses());
 
         // non-configurable values
@@ -59,7 +59,7 @@ class ConfigJsonReaderTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\PackageManager\InvalidConfigException
+     * @expectedException \Puli\RepositoryManager\InvalidConfigException
      * @expectedExceptionMessage invalid.json
      */
     public function testReadConfigValidatesSchema()
@@ -68,7 +68,7 @@ class ConfigJsonReaderTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\PackageManager\FileNotFoundException
+     * @expectedException \Puli\RepositoryManager\FileNotFoundException
      * @expectedExceptionMessage bogus.json
      */
     public function testReadConfigFailsIfNotFound()
@@ -77,7 +77,7 @@ class ConfigJsonReaderTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\PackageManager\InvalidConfigException
+     * @expectedException \Puli\RepositoryManager\InvalidConfigException
      * @expectedExceptionMessage win-1258.json
      */
     public function testReadConfigFailsIfDecodingNotPossible()

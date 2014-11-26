@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the Puli PackageManager package.
+ * This file is part of the Puli Repository Manager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,16 +9,16 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\PackageManager\Package\Config;
+namespace Puli\RepositoryManager\Package\Config;
 
-use Puli\PackageManager\Config\GlobalConfig;
-use Puli\PackageManager\Event\PackageConfigEvent;
-use Puli\PackageManager\ManagerEvents;
-use Puli\PackageManager\FileNotFoundException;
-use Puli\PackageManager\InvalidConfigException;
-use Puli\PackageManager\IOException;
-use Puli\PackageManager\Package\Config\Reader\PackageConfigReaderInterface;
-use Puli\PackageManager\Package\Config\Writer\PackageConfigWriterInterface;
+use Puli\RepositoryManager\Config\GlobalConfig;
+use Puli\RepositoryManager\Event\PackageConfigEvent;
+use Puli\RepositoryManager\ManagerEvents;
+use Puli\RepositoryManager\FileNotFoundException;
+use Puli\RepositoryManager\InvalidConfigException;
+use Puli\RepositoryManager\IOException;
+use Puli\RepositoryManager\Package\Config\Reader\PackageConfigReaderInterface;
+use Puli\RepositoryManager\Package\Config\Writer\PackageConfigWriterInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**

@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the Puli PackageManager package.
+ * This file is part of the Puli Repository Manager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,10 +9,10 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\PackageManager\Tests\Config\Fixtures;
+namespace Puli\RepositoryManager\Tests\Config\Fixtures;
 
-use Puli\PackageManager\Project\ProjectEnvironment;
-use Puli\PackageManager\Plugin\PluginInterface;
+use Puli\RepositoryManager\Project\ProjectEnvironment;
+use Puli\RepositoryManager\Plugin\PluginInterface;
 
 /**
  * @since  1.0

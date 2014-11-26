@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the Puli PackageManager package.
+ * This file is part of the Puli Repository Manager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,15 +9,15 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\PackageManager\Repository;
+namespace Puli\RepositoryManager\Repository;
 
 use Puli\Filesystem\Resource\LocalDirectoryResource;
 use Puli\Filesystem\Resource\LocalFileResource;
 use Puli\Filesystem\Resource\LocalResourceInterface;
-use Puli\PackageManager\Package\Graph\PackageNameGraph;
-use Puli\PackageManager\Package\Package;
-use Puli\PackageManager\Package\Collection\PackageCollection;
-use Puli\PackageManager\Package\RootPackage;
+use Puli\RepositoryManager\Package\Graph\PackageNameGraph;
+use Puli\RepositoryManager\Package\Package;
+use Puli\RepositoryManager\Package\Collection\PackageCollection;
+use Puli\RepositoryManager\Package\RootPackage;
 use Puli\Repository\ManageableRepositoryInterface;
 use Puli\Resource\DirectoryResourceInterface;
 

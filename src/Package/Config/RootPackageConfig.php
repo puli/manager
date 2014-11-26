@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the Puli PackageManager package.
+ * This file is part of the Puli Repository Manager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,10 +9,10 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\PackageManager\Package\Config;
+namespace Puli\RepositoryManager\Package\Config;
 
-use Puli\PackageManager\Config\GlobalConfig;
-use Puli\PackageManager\InvalidConfigException;
+use Puli\RepositoryManager\Config\GlobalConfig;
+use Puli\RepositoryManager\InvalidConfigException;
 
 /**
  * The configuration of the root Puli package.
@@ -278,7 +278,7 @@ class RootPackageConfig extends PackageConfig
      *
      * @throws InvalidConfigException If a class is not found, is not a class,
      *                                does not implement
-     *                                {@link \Puli\PackageManager\Plugin\PluginInterface}
+     *                                {@link \Puli\RepositoryManager\Plugin\PluginInterface}
      *                                or has required constructor parameters.
      *
      * @see GlobalConfig::setPluginClasses()
@@ -299,7 +299,7 @@ class RootPackageConfig extends PackageConfig
      *
      * @throws InvalidConfigException If the class is not found, is not a class,
      *                                does not implement
-     *                                {@link \Puli\PackageManager\Plugin\PluginInterface}
+     *                                {@link \Puli\RepositoryManager\Plugin\PluginInterface}
      *                                or has required constructor parameters.
      *
      * @see GlobalConfig::addPluginClass()

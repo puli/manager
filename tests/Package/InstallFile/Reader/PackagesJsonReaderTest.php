@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the Puli PackageManager package.
+ * This file is part of the Puli Repository Manager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,10 +9,10 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\PackageManager\Tests\Package\InstallFile\Reader;
+namespace Puli\RepositoryManager\Tests\Package\InstallFile\Reader;
 
-use Puli\PackageManager\Package\InstallFile\PackageDescriptor;
-use Puli\PackageManager\Package\InstallFile\Reader\PackagesJsonReader;
+use Puli\RepositoryManager\Package\InstallFile\PackageDescriptor;
+use Puli\RepositoryManager\Package\InstallFile\Reader\PackagesJsonReader;
 
 /**
  * @since  1.0
@@ -38,13 +38,13 @@ class PackagesJsonReaderTest extends \PHPUnit_Framework_TestCase
 
         $config = $this->reader->readInstallFile(__DIR__.'/Fixtures/config.json');
 
-        $this->assertInstanceOf('Puli\PackageManager\Package\InstallFile\InstallFile', $config);
+        $this->assertInstanceOf('Puli\RepositoryManager\Package\InstallFile\InstallFile', $config);
         $this->assertSame(__DIR__.'/Fixtures/config.json', $config->getPath());
         $this->assertEquals(array($package1, $package2), $config->getPackageDescriptors());
     }
 
     /**
-     * @expectedException \Puli\PackageManager\InvalidConfigException
+     * @expectedException \Puli\RepositoryManager\InvalidConfigException
      * @expectedExceptionMessage invalid.json
      */
     public function testReadConfigValidatesSchema()
@@ -53,7 +53,7 @@ class PackagesJsonReaderTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\PackageManager\FileNotFoundException
+     * @expectedException \Puli\RepositoryManager\FileNotFoundException
      * @expectedExceptionMessage bogus.json
      */
     public function testReadConfigFailsIfNotFound()
@@ -62,7 +62,7 @@ class PackagesJsonReaderTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\PackageManager\InvalidConfigException
+     * @expectedException \Puli\RepositoryManager\InvalidConfigException
      * @expectedExceptionMessage win-1258.json
      */
     public function testReadConfigFailsIfDecodingNotPossible()

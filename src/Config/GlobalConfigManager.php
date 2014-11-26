@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the Puli PackageManager package.
+ * This file is part of the Puli Repository Manager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,9 +9,9 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\PackageManager\Config;
+namespace Puli\RepositoryManager\Config;
 
-use Puli\PackageManager\InvalidConfigException;
+use Puli\RepositoryManager\InvalidConfigException;
 
 /**
  * Manages changes to the global configuration.
@@ -66,14 +66,14 @@ class GlobalConfigManager
      * Installs a plugin class in the global configuration.
      *
      * The plugin class must be passed as fully-qualified name of a class that
-     * implements {@link \Puli\PackageManager\Plugin\PluginInterface}. Plugin
+     * implements {@link \Puli\RepositoryManager\Plugin\PluginInterface}. Plugin
      * constructors must not have mandatory parameters.
      *
      * @param string $pluginClass The fully qualified plugin class name.
      *
      * @throws InvalidConfigException If a class is not found, is not a class,
      *                                does not implement
-     *                                {@link \Puli\PackageManager\Plugin\PluginInterface}
+     *                                {@link \Puli\RepositoryManager\Plugin\PluginInterface}
      *                                or has required constructor parameters.
      */
     public function installGlobalPluginClass($pluginClass)

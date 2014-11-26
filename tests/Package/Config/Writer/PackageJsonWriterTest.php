@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the Puli PackageManager package.
+ * This file is part of the Puli Repository Manager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,14 +9,14 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\PackageManager\Tests\Package\Config\Writer;
+namespace Puli\RepositoryManager\Tests\Package\Config\Writer;
 
-use Puli\PackageManager\Config\GlobalConfig;
-use Puli\PackageManager\Package\Config\PackageConfig;
-use Puli\PackageManager\Package\Config\ResourceDescriptor;
-use Puli\PackageManager\Package\Config\RootPackageConfig;
-use Puli\PackageManager\Package\Config\TagDescriptor;
-use Puli\PackageManager\Package\Config\Writer\PuliJsonWriter;
+use Puli\RepositoryManager\Config\GlobalConfig;
+use Puli\RepositoryManager\Package\Config\PackageConfig;
+use Puli\RepositoryManager\Package\Config\ResourceDescriptor;
+use Puli\RepositoryManager\Package\Config\RootPackageConfig;
+use Puli\RepositoryManager\Package\Config\TagDescriptor;
+use Puli\RepositoryManager\Package\Config\Writer\PuliJsonWriter;
 use Symfony\Component\Filesystem\Filesystem;
 
 /**
@@ -38,7 +38,7 @@ class PackageJsonWriterTest extends \PHPUnit_Framework_TestCase
     {
         $this->writer = new PuliJsonWriter();
         $this->tempFile = tempnam(sys_get_temp_dir(), 'PackageJsonWriterTest');
-        while (false === @mkdir($this->tempDir = sys_get_temp_dir().'/puli-manager/PackageJsonWriterTest_temp'.rand(10000, 99999), 0777, true)) {}
+        while (false === @mkdir($this->tempDir = sys_get_temp_dir().'/puli-repo-manager/PackageJsonWriterTest_temp'.rand(10000, 99999), 0777, true)) {}
     }
 
     protected function tearDown()
@@ -74,7 +74,7 @@ class PackageJsonWriterTest extends \PHPUnit_Framework_TestCase
         $config->setInstallFile('packages.json');
         $config->setGeneratedResourceRepository('resource-repository.php');
         $config->setResourceRepositoryCache('cache');
-        $config->addPluginClass('Puli\PackageManager\Tests\Config\Fixtures\TestPlugin');
+        $config->addPluginClass('Puli\RepositoryManager\Tests\Config\Fixtures\TestPlugin');
 
         $this->writer->writePackageConfig($config, $this->tempFile);
 
@@ -99,7 +99,7 @@ class PackageJsonWriterTest extends \PHPUnit_Framework_TestCase
         $globalConfig->setInstallFile('packages.json');
         $globalConfig->setGeneratedResourceRepository('resource-repository.php');
         $globalConfig->setResourceRepositoryCache('cache');
-        $globalConfig->addPluginClass('Puli\PackageManager\Tests\Config\Fixtures\TestPlugin');
+        $globalConfig->addPluginClass('Puli\RepositoryManager\Tests\Config\Fixtures\TestPlugin');
         $config = new RootPackageConfig($globalConfig);
 
         $this->writer->writePackageConfig($config, $this->tempFile);
@@ -166,7 +166,7 @@ class PackageJsonWriterTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @dataProvider provideInvalidPaths
-     * @expectedException \Puli\PackageManager\IOException
+     * @expectedException \Puli\RepositoryManager\IOException
      */
     public function testWriteConfigExpectsValidPath($invalidPath)
     {

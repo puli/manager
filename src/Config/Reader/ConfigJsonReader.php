@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the Puli PackageManager package.
+ * This file is part of the Puli Repository Manager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,14 +9,14 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\PackageManager\Config\Reader;
+namespace Puli\RepositoryManager\Config\Reader;
 
 use Puli\Json\DecodingFailedException;
 use Puli\Json\JsonDecoder;
 use Puli\Json\ValidationFailedException;
-use Puli\PackageManager\Config\GlobalConfig;
-use Puli\PackageManager\FileNotFoundException;
-use Puli\PackageManager\InvalidConfigException;
+use Puli\RepositoryManager\Config\GlobalConfig;
+use Puli\RepositoryManager\FileNotFoundException;
+use Puli\RepositoryManager\InvalidConfigException;
 
 /**
  * Reads global configuration from a JSON file.

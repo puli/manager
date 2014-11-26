@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the Puli PackageManager package.
+ * This file is part of the Puli Repository Manager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,10 +9,10 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\PackageManager\Tests\Package\Config;
+namespace Puli\RepositoryManager\Tests\Package\Config;
 
-use Puli\PackageManager\Config\GlobalConfig;
-use Puli\PackageManager\Package\Config\RootPackageConfig;
+use Puli\RepositoryManager\Config\GlobalConfig;
+use Puli\RepositoryManager\Package\Config\RootPackageConfig;
 
 /**
  * @since  1.0
@@ -20,9 +20,9 @@ use Puli\PackageManager\Package\Config\RootPackageConfig;
  */
 class RootPackageConfigTest extends \PHPUnit_Framework_TestCase
 {
-    const GLOBAL_PLUGIN = 'Puli\PackageManager\Tests\Config\Fixtures\TestPlugin';
+    const GLOBAL_PLUGIN = 'Puli\RepositoryManager\Tests\Config\Fixtures\TestPlugin';
 
-    const LOCAL_PLUGIN = 'Puli\PackageManager\Tests\Config\Fixtures\OtherPlugin';
+    const LOCAL_PLUGIN = 'Puli\RepositoryManager\Tests\Config\Fixtures\OtherPlugin';
 
     /**
      * @var GlobalConfig

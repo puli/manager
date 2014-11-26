@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the Puli PackageManager package.
+ * This file is part of the Puli Repository Manager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,11 +9,11 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\PackageManager\Tests\Package\InstallFile\Writer;
+namespace Puli\RepositoryManager\Tests\Package\InstallFile\Writer;
 
-use Puli\PackageManager\Package\InstallFile\InstallFile;
-use Puli\PackageManager\Package\InstallFile\PackageDescriptor;
-use Puli\PackageManager\Package\InstallFile\Writer\PackagesJsonWriter;
+use Puli\RepositoryManager\Package\InstallFile\InstallFile;
+use Puli\RepositoryManager\Package\InstallFile\PackageDescriptor;
+use Puli\RepositoryManager\Package\InstallFile\Writer\PackagesJsonWriter;
 use Symfony\Component\Filesystem\Filesystem;
 
 /**
@@ -35,7 +35,7 @@ class PackagesJsonWriterTest extends \PHPUnit_Framework_TestCase
     {
         $this->writer = new PackagesJsonWriter();
         $this->tempFile = tempnam(sys_get_temp_dir(), 'PackagesJsonWriterTest');
-        while (false === @mkdir($this->tempDir = sys_get_temp_dir().'/puli-manager/RepositoryJsonWriterTest_temp'.rand(10000, 99999), 0777, true)) {}
+        while (false === @mkdir($this->tempDir = sys_get_temp_dir().'/puli-repo-manager/RepositoryJsonWriterTest_temp'.rand(10000, 99999), 0777, true)) {}
     }
 
     protected function tearDown()
@@ -89,7 +89,7 @@ class PackagesJsonWriterTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @dataProvider provideInvalidPaths
-     * @expectedException \Puli\PackageManager\IOException
+     * @expectedException \Puli\RepositoryManager\IOException
      */
     public function testWriteConfigExpectsValidPath($invalidPath)
     {

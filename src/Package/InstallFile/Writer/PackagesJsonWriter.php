@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the Puli PackageManager package.
+ * This file is part of the Puli Repository Manager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,11 +9,11 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\PackageManager\Package\InstallFile\Writer;
+namespace Puli\RepositoryManager\Package\InstallFile\Writer;
 
 use Puli\Json\JsonEncoder;
-use Puli\PackageManager\IOException;
-use Puli\PackageManager\Package\InstallFile\InstallFile;
+use Puli\RepositoryManager\IOException;
+use Puli\RepositoryManager\Package\InstallFile\InstallFile;
 use Puli\Util\Path;
 use Symfony\Component\Filesystem\Filesystem;
 

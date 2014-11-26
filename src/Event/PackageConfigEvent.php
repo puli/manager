@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the Puli PackageManager package.
+ * This file is part of the Puli Repository Manager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,9 +9,9 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\PackageManager\Event;
+namespace Puli\RepositoryManager\Event;
 
-use Puli\PackageManager\Package\Config\PackageConfig;
+use Puli\RepositoryManager\Package\Config\PackageConfig;
 use Symfony\Component\EventDispatcher\Event;
 
 /**

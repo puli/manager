@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the Puli PackageManager package.
+ * This file is part of the Puli Repository Manager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,11 +9,11 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\PackageManager\Tests\Config;
+namespace Puli\RepositoryManager\Tests\Config;
 
-use Puli\PackageManager\Config\GlobalConfig;
-use Puli\PackageManager\Config\GlobalConfigStorage;
-use Puli\PackageManager\Config\GlobalEnvironment;
+use Puli\RepositoryManager\Config\GlobalConfig;
+use Puli\RepositoryManager\Config\GlobalConfigStorage;
+use Puli\RepositoryManager\Config\GlobalEnvironment;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
@@ -40,7 +40,7 @@ class GlobalEnvironmentTest extends \PHPUnit_Framework_TestCase
     protected function setUp()
     {
         $this->homeDir = __DIR__.'/Fixtures/home';
-        $this->globalConfigStorage = $this->getMockBuilder('Puli\PackageManager\Config\GlobalConfigStorage')
+        $this->globalConfigStorage = $this->getMockBuilder('Puli\RepositoryManager\Config\GlobalConfigStorage')
             ->disableOriginalConstructor()
             ->getMock();
         $this->dispatcher = $this->getMock('Symfony\Component\EventDispatcher\EventDispatcherInterface');
@@ -55,7 +55,7 @@ class GlobalEnvironmentTest extends \PHPUnit_Framework_TestCase
             ->with($this->homeDir.'/config.json')
             ->will($this->returnValue($globalConfig));
 
-        $environment = new \Puli\PackageManager\Config\GlobalEnvironment(
+        $environment = new \Puli\RepositoryManager\Config\GlobalEnvironment(
             $this->homeDir,
             $this->globalConfigStorage,
             $this->dispatcher
@@ -67,7 +67,7 @@ class GlobalEnvironmentTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\PackageManager\FileNotFoundException
+     * @expectedException \Puli\RepositoryManager\FileNotFoundException
      * @expectedExceptionMessage /foobar
      */
     public function testFailIfNonExistingHomeDir()
@@ -80,12 +80,12 @@ class GlobalEnvironmentTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\PackageManager\NoDirectoryException
+     * @expectedException \Puli\RepositoryManager\NoDirectoryException
      * @expectedExceptionMessage /file
      */
     public function testFailIfHomeDirNoDirectory()
     {
-        new \Puli\PackageManager\Config\GlobalEnvironment(
+        new \Puli\RepositoryManager\Config\GlobalEnvironment(
             $this->homeDir.'/file',
             $this->globalConfigStorage,
             $this->dispatcher

@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the Puli PackageManager package.
+ * This file is part of the Puli Repository Manager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,14 +9,14 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\PackageManager\Tests\Package\Collection;
+namespace Puli\RepositoryManager\Tests\Package\Collection;
 
-use Puli\PackageManager\Config\GlobalConfig;
-use Puli\PackageManager\Package\Config\PackageConfig;
-use Puli\PackageManager\Package\Config\RootPackageConfig;
-use Puli\PackageManager\Package\Package;
-use Puli\PackageManager\Package\Collection\PackageCollection;
-use Puli\PackageManager\Package\RootPackage;
+use Puli\RepositoryManager\Config\GlobalConfig;
+use Puli\RepositoryManager\Package\Config\PackageConfig;
+use Puli\RepositoryManager\Package\Config\RootPackageConfig;
+use Puli\RepositoryManager\Package\Package;
+use Puli\RepositoryManager\Package\Collection\PackageCollection;
+use Puli\RepositoryManager\Package\RootPackage;
 
 /**
  * @since  1.0
@@ -45,7 +45,7 @@ class PackageCollectionTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\PackageManager\Package\Collection\NoSuchPackageException
+     * @expectedException \Puli\RepositoryManager\Package\Collection\NoSuchPackageException
      */
     public function testGetPackageFailsIfNotFound()
     {

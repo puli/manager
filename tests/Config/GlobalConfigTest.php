@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the Puli PackageManager package.
+ * This file is part of the Puli Repository Manager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,9 +9,9 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\PackageManager\Tests\Config;
+namespace Puli\RepositoryManager\Tests\Config;
 
-use Puli\PackageManager\Config\GlobalConfig;
+use Puli\RepositoryManager\Config\GlobalConfig;
 
 /**
  * @since  1.0
@@ -19,8 +19,8 @@ use Puli\PackageManager\Config\GlobalConfig;
  */
 class GlobalConfigTest extends \PHPUnit_Framework_TestCase
 {
-    const PLUGIN_CLASS = 'Puli\PackageManager\Tests\Config\Fixtures\TestPlugin';
-    const OTHER_PLUGIN_CLASS = 'Puli\PackageManager\Tests\Config\Fixtures\OtherPlugin';
+    const PLUGIN_CLASS = 'Puli\RepositoryManager\Tests\Config\Fixtures\TestPlugin';
+    const OTHER_PLUGIN_CLASS = 'Puli\RepositoryManager\Tests\Config\Fixtures\OtherPlugin';
     /**
      * @var GlobalConfig
      */
@@ -55,7 +55,7 @@ class GlobalConfigTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\PackageManager\InvalidConfigException
+     * @expectedException \Puli\RepositoryManager\InvalidConfigException
      */
     public function testInstallFileMustBeString()
     {
@@ -63,7 +63,7 @@ class GlobalConfigTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\PackageManager\InvalidConfigException
+     * @expectedException \Puli\RepositoryManager\InvalidConfigException
      */
     public function testInstallFileMustNotBeEmpty()
     {
@@ -94,7 +94,7 @@ class GlobalConfigTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\PackageManager\InvalidConfigException
+     * @expectedException \Puli\RepositoryManager\InvalidConfigException
      */
     public function testGeneratedResourceRepositoryMustBeString()
     {
@@ -102,7 +102,7 @@ class GlobalConfigTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\PackageManager\InvalidConfigException
+     * @expectedException \Puli\RepositoryManager\InvalidConfigException
      */
     public function testGeneratedResourceRepositoryMustNotBeEmpty()
     {
@@ -133,7 +133,7 @@ class GlobalConfigTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\PackageManager\InvalidConfigException
+     * @expectedException \Puli\RepositoryManager\InvalidConfigException
      */
     public function testResourceRepositoryCacheMustBeString()
     {
@@ -141,7 +141,7 @@ class GlobalConfigTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\PackageManager\InvalidConfigException
+     * @expectedException \Puli\RepositoryManager\InvalidConfigException
      */
     public function testResourceRepositoryCacheMustNotBeEmpty()
     {
@@ -149,7 +149,7 @@ class GlobalConfigTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\PackageManager\InvalidConfigException
+     * @expectedException \Puli\RepositoryManager\InvalidConfigException
      */
     public function testPluginClassMustBeExistingClass()
     {
@@ -157,7 +157,7 @@ class GlobalConfigTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\PackageManager\InvalidConfigException
+     * @expectedException \Puli\RepositoryManager\InvalidConfigException
      */
     public function testPluginClassMustImplementPluginInterface()
     {
@@ -165,34 +165,34 @@ class GlobalConfigTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\PackageManager\InvalidConfigException
+     * @expectedException \Puli\RepositoryManager\InvalidConfigException
      */
     public function testPluginClassMustHaveNoArgConstructor()
     {
-        $this->config->addPluginClass('Puli\PackageManager\Tests\Config\Fixtures\TestPluginWithoutNoArgConstructor');
+        $this->config->addPluginClass('Puli\RepositoryManager\Tests\Config\Fixtures\TestPluginWithoutNoArgConstructor');
     }
 
     public function testPluginClassMayHaveNoConstructor()
     {
-        $this->config->addPluginClass('Puli\PackageManager\Tests\Config\Fixtures\TestPluginWithoutConstructor');
+        $this->config->addPluginClass('Puli\RepositoryManager\Tests\Config\Fixtures\TestPluginWithoutConstructor');
 
-        $this->assertSame(array('Puli\PackageManager\Tests\Config\Fixtures\TestPluginWithoutConstructor'), $this->config->getPluginClasses());
+        $this->assertSame(array('Puli\RepositoryManager\Tests\Config\Fixtures\TestPluginWithoutConstructor'), $this->config->getPluginClasses());
     }
 
     /**
-     * @expectedException \Puli\PackageManager\InvalidConfigException
+     * @expectedException \Puli\RepositoryManager\InvalidConfigException
      */
     public function testPluginClassMustNotBeInterface()
     {
-        $this->config->addPluginClass('Puli\PackageManager\Tests\Config\Fixtures\TestPluginInterface');
+        $this->config->addPluginClass('Puli\RepositoryManager\Tests\Config\Fixtures\TestPluginInterface');
     }
 
     /**
-     * @expectedException \Puli\PackageManager\InvalidConfigException
+     * @expectedException \Puli\RepositoryManager\InvalidConfigException
      */
     public function testPluginClassMustNotBeTrait()
     {
-        $this->config->addPluginClass('Puli\PackageManager\Tests\Config\Fixtures\TestPluginTrait');
+        $this->config->addPluginClass('Puli\RepositoryManager\Tests\Config\Fixtures\TestPluginTrait');
     }
 
     public function testDuplicatePluginClassesIgnored()

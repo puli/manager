@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the Puli PackageManager package.
+ * This file is part of the Puli Repository Manager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,18 +9,18 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\PackageManager\Tests\Package;
+namespace Puli\RepositoryManager\Tests\Package;
 
-use Puli\PackageManager\Config\GlobalConfig;
-use Puli\PackageManager\Package\Config\PackageConfig;
-use Puli\PackageManager\Package\Config\PackageConfigStorage;
-use Puli\PackageManager\Package\Config\ResourceDescriptor;
-use Puli\PackageManager\Package\Config\RootPackageConfig;
-use Puli\PackageManager\Package\InstallFile\InstallFile;
-use Puli\PackageManager\Package\InstallFile\InstallFileStorage;
-use Puli\PackageManager\Package\InstallFile\PackageDescriptor;
-use Puli\PackageManager\Package\PackageManager;
-use Puli\PackageManager\Tests\Package\Fixtures\TestProjectEnvironment;
+use Puli\RepositoryManager\Config\GlobalConfig;
+use Puli\RepositoryManager\Package\Config\PackageConfig;
+use Puli\RepositoryManager\Package\Config\PackageConfigStorage;
+use Puli\RepositoryManager\Package\Config\ResourceDescriptor;
+use Puli\RepositoryManager\Package\Config\RootPackageConfig;
+use Puli\RepositoryManager\Package\InstallFile\InstallFile;
+use Puli\RepositoryManager\Package\InstallFile\InstallFileStorage;
+use Puli\RepositoryManager\Package\InstallFile\PackageDescriptor;
+use Puli\RepositoryManager\Package\PackageManager;
+use Puli\RepositoryManager\Tests\Package\Fixtures\TestProjectEnvironment;
 use Puli\Repository\ResourceRepositoryInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Filesystem\Filesystem;
@@ -92,7 +92,7 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
     private $dispatcher;
 
     /**
-     * @var \Puli\PackageManager\Tests\Package\Fixtures\TestProjectEnvironment
+     * @var \Puli\RepositoryManager\Tests\Package\Fixtures\TestProjectEnvironment
      */
     private $environment;
 
@@ -113,7 +113,7 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
 
     protected function setUp()
     {
-        while (false === @mkdir($this->tempDir = sys_get_temp_dir().'/puli-manager/PackageManagerTest_temp'.rand(10000, 99999), 0777, true)) {}
+        while (false === @mkdir($this->tempDir = sys_get_temp_dir().'/puli-repo-manager/PackageManagerTest_temp'.rand(10000, 99999), 0777, true)) {}
 
         $this->dispatcher = $this->getMock('Symfony\Component\EventDispatcher\EventDispatcherInterface');
 
@@ -129,11 +129,11 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
         $this->package2Config = new PackageConfig('package2');
         $this->installFile = new InstallFile();
 
-        $this->packageConfigStorage = $this->getMockBuilder('Puli\PackageManager\Package\Config\PackageConfigStorage')
+        $this->packageConfigStorage = $this->getMockBuilder('Puli\RepositoryManager\Package\Config\PackageConfigStorage')
             ->disableOriginalConstructor()
             ->getMock();
 
-        $this->installFileStorage = $this->getMockBuilder('Puli\PackageManager\Package\InstallFile\InstallFileStorage')
+        $this->installFileStorage = $this->getMockBuilder('Puli\RepositoryManager\Package\InstallFile\InstallFileStorage')
             ->disableOriginalConstructor()
             ->getMock();
 
@@ -180,24 +180,24 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
         $packages = $manager->getPackages();
 
         $this->assertCount(3, $packages);
-        $this->assertInstanceOf('Puli\PackageManager\Package\RootPackage', $packages['root']);
+        $this->assertInstanceOf('Puli\RepositoryManager\Package\RootPackage', $packages['root']);
         $this->assertSame('root', $packages['root']->getName());
         $this->assertSame($this->rootDir, $packages['root']->getInstallPath());
         $this->assertSame($this->rootConfig, $packages['root']->getConfig());
 
-        $this->assertInstanceOf('Puli\PackageManager\Package\Package', $packages['package1']);
+        $this->assertInstanceOf('Puli\RepositoryManager\Package\Package', $packages['package1']);
         $this->assertSame('package1', $packages['package1']->getName());
         $this->assertSame($this->package1Dir, $packages['package1']->getInstallPath());
         $this->assertSame($package1Config, $packages['package1']->getConfig());
 
-        $this->assertInstanceOf('Puli\PackageManager\Package\Package', $packages['package2']);
+        $this->assertInstanceOf('Puli\RepositoryManager\Package\Package', $packages['package2']);
         $this->assertSame('package2', $packages['package2']->getName());
         $this->assertSame($this->package2Dir, $packages['package2']->getInstallPath());
         $this->assertSame($package2Config, $packages['package2']->getConfig());
     }
 
     /**
-     * @expectedException \Puli\PackageManager\Package\NameConflictException
+     * @expectedException \Puli\RepositoryManager\Package\NameConflictException
      */
     public function testLoadPackagesFailsIfNameConflict()
     {
@@ -227,7 +227,7 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\PackageManager\FileNotFoundException
+     * @expectedException \Puli\RepositoryManager\FileNotFoundException
      * @expectedExceptionMessage foobar
      */
     public function testLoadPackagesFailsIfPackageDirNotFound()
@@ -246,7 +246,7 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\PackageManager\NoDirectoryException
+     * @expectedException \Puli\RepositoryManager\NoDirectoryException
      * @expectedExceptionMessage /file
      */
     public function testLoadPackagesFailsIfPackageNoDirectory()
@@ -277,7 +277,7 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
 
         $this->installFileStorage->expects($this->once())
             ->method('saveInstallFile')
-            ->with($this->isInstanceOf('Puli\PackageManager\Package\InstallFile\InstallFile'))
+            ->with($this->isInstanceOf('Puli\RepositoryManager\Package\InstallFile\InstallFile'))
             ->will($this->returnCallback(function (InstallFile $installFile) {
                 $descriptors = $installFile->getPackageDescriptors();
 
@@ -306,7 +306,7 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
 
         $this->installFileStorage->expects($this->once())
             ->method('saveInstallFile')
-            ->with($this->isInstanceOf('Puli\PackageManager\Package\InstallFile\InstallFile'))
+            ->with($this->isInstanceOf('Puli\RepositoryManager\Package\InstallFile\InstallFile'))
             ->will($this->returnCallback(function (InstallFile $installFile) {
                 $descriptors = $installFile->getPackageDescriptors();
 
@@ -336,7 +336,7 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\PackageManager\Package\NameConflictException
+     * @expectedException \Puli\RepositoryManager\Package\NameConflictException
      */
     public function testInstallPackageFailsIfNameConflict()
     {
@@ -356,7 +356,7 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\PackageManager\FileNotFoundException
+     * @expectedException \Puli\RepositoryManager\FileNotFoundException
      * @expectedExceptionMessage /foobar
      */
     public function testInstallPackageFailsIfDirectoryNotFound()
@@ -367,7 +367,7 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\PackageManager\NoDirectoryException
+     * @expectedException \Puli\RepositoryManager\NoDirectoryException
      * @expectedExceptionMessage /file
      */
     public function testInstallPackageFailsIfNoDirectory()
@@ -409,21 +409,21 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
 
         $rootPackage = $this->manager->getPackage('root');
 
-        $this->assertInstanceOf('Puli\PackageManager\Package\RootPackage', $rootPackage);
+        $this->assertInstanceOf('Puli\RepositoryManager\Package\RootPackage', $rootPackage);
         $this->assertSame('root', $rootPackage->getName());
         $this->assertSame($this->rootDir, $rootPackage->getInstallPath());
         $this->assertSame($this->rootConfig, $rootPackage->getConfig());
 
         $package1 = $this->manager->getPackage('package1');
 
-        $this->assertInstanceOf('Puli\PackageManager\Package\Package', $package1);
+        $this->assertInstanceOf('Puli\RepositoryManager\Package\Package', $package1);
         $this->assertSame('package1', $package1->getName());
         $this->assertSame($this->package1Dir, $package1->getInstallPath());
         $this->assertSame($this->package1Config, $package1->getConfig());
     }
 
     /**
-     * @expectedException \Puli\PackageManager\Package\Collection\NoSuchPackageException
+     * @expectedException \Puli\RepositoryManager\Package\Collection\NoSuchPackageException
      */
     public function testGetPackageFailsIfNotFound()
     {
@@ -438,7 +438,7 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
 
         $rootPackage = $this->manager->getRootPackage();
 
-        $this->assertInstanceOf('Puli\PackageManager\Package\RootPackage', $rootPackage);
+        $this->assertInstanceOf('Puli\RepositoryManager\Package\RootPackage', $rootPackage);
         $this->assertSame('root', $rootPackage->getName());
         $this->assertSame($this->rootDir, $rootPackage->getInstallPath());
         $this->assertSame($this->rootConfig, $rootPackage->getConfig());

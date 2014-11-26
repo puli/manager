@@ -15,6 +15,6 @@
     "resource-repository": "resource-repository.php",
     "resource-cache": "cache",
     "plugins": [
-        "Puli\\PackageManager\\Tests\\Config\\Fixtures\\TestPlugin"
+        "Puli\\RepositoryManager\\Tests\\Config\\Fixtures\\TestPlugin"
     ]
 }

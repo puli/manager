@@ -9,17 +9,17 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\PackageManager\Tests\Repository;
+namespace Puli\RepositoryManager\Tests\Repository;
 
-use Puli\PackageManager\Config\GlobalConfig;
-use Puli\PackageManager\Package\Collection\PackageCollection;
-use Puli\PackageManager\Package\Config\PackageConfig;
-use Puli\PackageManager\Package\Config\ResourceDescriptor;
-use Puli\PackageManager\Package\Config\RootPackageConfig;
-use Puli\PackageManager\Package\Package;
-use Puli\PackageManager\Package\RootPackage;
-use Puli\PackageManager\Repository\RepositoryManager;
-use Puli\PackageManager\Tests\Package\Fixtures\TestProjectEnvironment;
+use Puli\RepositoryManager\Config\GlobalConfig;
+use Puli\RepositoryManager\Package\Collection\PackageCollection;
+use Puli\RepositoryManager\Package\Config\PackageConfig;
+use Puli\RepositoryManager\Package\Config\ResourceDescriptor;
+use Puli\RepositoryManager\Package\Config\RootPackageConfig;
+use Puli\RepositoryManager\Package\Package;
+use Puli\RepositoryManager\Package\RootPackage;
+use Puli\RepositoryManager\Repository\RepositoryManager;
+use Puli\RepositoryManager\Tests\Package\Fixtures\TestProjectEnvironment;
 use Puli\Repository\ResourceRepositoryInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Filesystem\Filesystem;
@@ -96,7 +96,7 @@ class RepositoryManagerTest extends \PHPUnit_Framework_TestCase
 
     protected function setUp()
     {
-        while (false === @mkdir($this->tempDir = sys_get_temp_dir().'/puli-manager/RepositoryManagerTest_temp'.rand(10000, 99999), 0777, true)) {}
+        while (false === @mkdir($this->tempDir = sys_get_temp_dir().'/puli-repo-manager/RepositoryManagerTest_temp'.rand(10000, 99999), 0777, true)) {}
 
         $this->dispatcher = $this->getMock('Symfony\Component\EventDispatcher\EventDispatcherInterface');
 

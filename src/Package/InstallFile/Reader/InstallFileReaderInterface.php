@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the Puli PackageManager package.
+ * This file is part of the Puli Repository Manager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,11 +9,11 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\PackageManager\Package\InstallFile\Reader;
+namespace Puli\RepositoryManager\Package\InstallFile\Reader;
 
-use Puli\PackageManager\FileNotFoundException;
-use Puli\PackageManager\InvalidConfigException;
-use Puli\PackageManager\Package\InstallFile\InstallFile;
+use Puli\RepositoryManager\FileNotFoundException;
+use Puli\RepositoryManager\InvalidConfigException;
+use Puli\RepositoryManager\Package\InstallFile\InstallFile;
 
 /**
  * Reads an install file.

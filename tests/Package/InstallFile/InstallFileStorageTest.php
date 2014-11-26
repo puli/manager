@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the Puli PackageManager package.
+ * This file is part of the Puli Repository Manager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,13 +9,13 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\PackageManager\Tests\Package\InstallFile;
+namespace Puli\RepositoryManager\Tests\Package\InstallFile;
 
-use Puli\PackageManager\FileNotFoundException;
-use Puli\PackageManager\Package\InstallFile\InstallFile;
-use Puli\PackageManager\Package\InstallFile\InstallFileStorage;
-use Puli\PackageManager\Package\InstallFile\Reader\InstallFileReaderInterface;
-use Puli\PackageManager\Package\InstallFile\Writer\InstallFileWriterInterface;
+use Puli\RepositoryManager\FileNotFoundException;
+use Puli\RepositoryManager\Package\InstallFile\InstallFile;
+use Puli\RepositoryManager\Package\InstallFile\InstallFileStorage;
+use Puli\RepositoryManager\Package\InstallFile\Reader\InstallFileReaderInterface;
+use Puli\RepositoryManager\Package\InstallFile\Writer\InstallFileWriterInterface;
 
 /**
  * @since  1.0
@@ -40,8 +40,8 @@ class InstallFileStorageTest extends \PHPUnit_Framework_TestCase
 
     protected function setUp()
     {
-        $this->reader = $this->getMock('Puli\PackageManager\Package\InstallFile\Reader\InstallFileReaderInterface');
-        $this->writer = $this->getMock('Puli\PackageManager\Package\InstallFile\Writer\InstallFileWriterInterface');
+        $this->reader = $this->getMock('Puli\RepositoryManager\Package\InstallFile\Reader\InstallFileReaderInterface');
+        $this->writer = $this->getMock('Puli\RepositoryManager\Package\InstallFile\Writer\InstallFileWriterInterface');
 
         $this->storage = new InstallFileStorage($this->reader, $this->writer);
     }

@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the Puli PackageManager package.
+ * This file is part of the Puli Repository Manager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,17 +9,17 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\PackageManager\Tests\Package\Config;
+namespace Puli\RepositoryManager\Tests\Package\Config;
 
-use Puli\PackageManager\Config\GlobalConfig;
-use Puli\PackageManager\Event\PackageConfigEvent;
-use Puli\PackageManager\ManagerEvents;
-use Puli\PackageManager\FileNotFoundException;
-use Puli\PackageManager\Package\Config\PackageConfig;
-use Puli\PackageManager\Package\Config\PackageConfigStorage;
-use Puli\PackageManager\Package\Config\Reader\PackageConfigReaderInterface;
-use Puli\PackageManager\Package\Config\RootPackageConfig;
-use Puli\PackageManager\Package\Config\Writer\PackageConfigWriterInterface;
+use Puli\RepositoryManager\Config\GlobalConfig;
+use Puli\RepositoryManager\Event\PackageConfigEvent;
+use Puli\RepositoryManager\ManagerEvents;
+use Puli\RepositoryManager\FileNotFoundException;
+use Puli\RepositoryManager\Package\Config\PackageConfig;
+use Puli\RepositoryManager\Package\Config\PackageConfigStorage;
+use Puli\RepositoryManager\Package\Config\Reader\PackageConfigReaderInterface;
+use Puli\RepositoryManager\Package\Config\RootPackageConfig;
+use Puli\RepositoryManager\Package\Config\Writer\PackageConfigWriterInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
@@ -50,8 +50,8 @@ class PackageConfigStorageTest extends \PHPUnit_Framework_TestCase
 
     protected function setUp()
     {
-        $this->reader = $this->getMock('Puli\PackageManager\Package\Config\Reader\PackageConfigReaderInterface');
-        $this->writer = $this->getMock('Puli\PackageManager\Package\Config\Writer\PackageConfigWriterInterface');
+        $this->reader = $this->getMock('Puli\RepositoryManager\Package\Config\Reader\PackageConfigReaderInterface');
+        $this->writer = $this->getMock('Puli\RepositoryManager\Package\Config\Writer\PackageConfigWriterInterface');
         $this->dispatcher = $this->getMock('Symfony\Component\EventDispatcher\EventDispatcherInterface');
 
         $this->storage = new PackageConfigStorage($this->reader, $this->writer, $this->dispatcher);
@@ -70,7 +70,7 @@ class PackageConfigStorageTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\PackageManager\InvalidConfigException
+     * @expectedException \Puli\RepositoryManager\InvalidConfigException
      */
     public function testLoadPackageConfigFailsIfNoName()
     {
@@ -100,7 +100,7 @@ class PackageConfigStorageTest extends \PHPUnit_Framework_TestCase
 
         $this->dispatcher->expects($this->once())
             ->method('dispatch')
-            ->with(ManagerEvents::LOAD_PACKAGE_CONFIG, $this->isInstanceOf('Puli\PackageManager\Event\PackageConfigEvent'))
+            ->with(ManagerEvents::LOAD_PACKAGE_CONFIG, $this->isInstanceOf('Puli\RepositoryManager\Event\PackageConfigEvent'))
             ->will($this->returnCallback(function ($eventName, PackageConfigEvent $event) use ($config) {
                 \PHPUnit_Framework_Assert::assertSame($config, $event->getPackageConfig());
             }));
@@ -122,7 +122,7 @@ class PackageConfigStorageTest extends \PHPUnit_Framework_TestCase
 
         $this->dispatcher->expects($this->once())
             ->method('dispatch')
-            ->with(ManagerEvents::LOAD_PACKAGE_CONFIG, $this->isInstanceOf('Puli\PackageManager\Event\PackageConfigEvent'))
+            ->with(ManagerEvents::LOAD_PACKAGE_CONFIG, $this->isInstanceOf('Puli\RepositoryManager\Event\PackageConfigEvent'))
             ->will($this->returnCallback(function ($eventName, PackageConfigEvent $event) {
                 $event->getPackageConfig()->setPackageName('package-name');
             }));
@@ -158,7 +158,7 @@ class PackageConfigStorageTest extends \PHPUnit_Framework_TestCase
 
         $this->dispatcher->expects($this->once())
             ->method('dispatch')
-            ->with(ManagerEvents::SAVE_PACKAGE_CONFIG, $this->isInstanceOf('Puli\PackageManager\Event\PackageConfigEvent'))
+            ->with(ManagerEvents::SAVE_PACKAGE_CONFIG, $this->isInstanceOf('Puli\RepositoryManager\Event\PackageConfigEvent'))
             ->will($this->returnCallback(function ($eventName, PackageConfigEvent $event) use ($config) {
                 \PHPUnit_Framework_Assert::assertSame($config, $event->getPackageConfig());
             }));
@@ -184,7 +184,7 @@ class PackageConfigStorageTest extends \PHPUnit_Framework_TestCase
 
         $this->dispatcher->expects($this->once())
             ->method('dispatch')
-            ->with(ManagerEvents::SAVE_PACKAGE_CONFIG, $this->isInstanceOf('Puli\PackageManager\Event\PackageConfigEvent'))
+            ->with(ManagerEvents::SAVE_PACKAGE_CONFIG, $this->isInstanceOf('Puli\RepositoryManager\Event\PackageConfigEvent'))
             ->will($this->returnCallback(function ($eventName, PackageConfigEvent $event) {
                 $event->getPackageConfig()->setPackageName(null);
             }));
@@ -222,7 +222,7 @@ class PackageConfigStorageTest extends \PHPUnit_Framework_TestCase
 
         $this->dispatcher->expects($this->once())
             ->method('dispatch')
-            ->with(ManagerEvents::LOAD_PACKAGE_CONFIG, $this->isInstanceOf('Puli\PackageManager\Event\PackageConfigEvent'))
+            ->with(ManagerEvents::LOAD_PACKAGE_CONFIG, $this->isInstanceOf('Puli\RepositoryManager\Event\PackageConfigEvent'))
             ->will($this->returnCallback(function ($eventName, PackageConfigEvent $event) use ($config) {
                 \PHPUnit_Framework_Assert::assertSame($config, $event->getPackageConfig());
             }));
@@ -258,7 +258,7 @@ class PackageConfigStorageTest extends \PHPUnit_Framework_TestCase
 
         $this->dispatcher->expects($this->once())
             ->method('dispatch')
-            ->with(ManagerEvents::SAVE_PACKAGE_CONFIG, $this->isInstanceOf('Puli\PackageManager\Event\PackageConfigEvent'))
+            ->with(ManagerEvents::SAVE_PACKAGE_CONFIG, $this->isInstanceOf('Puli\RepositoryManager\Event\PackageConfigEvent'))
             ->will($this->returnCallback(function ($eventName, PackageConfigEvent $event) use ($config) {
                 \PHPUnit_Framework_Assert::assertSame($config, $event->getPackageConfig());
             }));
@@ -285,7 +285,7 @@ class PackageConfigStorageTest extends \PHPUnit_Framework_TestCase
 
         $this->dispatcher->expects($this->once())
             ->method('dispatch')
-            ->with(ManagerEvents::SAVE_PACKAGE_CONFIG, $this->isInstanceOf('Puli\PackageManager\Event\PackageConfigEvent'))
+            ->with(ManagerEvents::SAVE_PACKAGE_CONFIG, $this->isInstanceOf('Puli\RepositoryManager\Event\PackageConfigEvent'))
             ->will($this->returnCallback(function ($eventName, PackageConfigEvent $event) {
                 $event->getPackageConfig()->setPackageName(null);
             }));

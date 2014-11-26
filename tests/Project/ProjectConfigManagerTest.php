@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the Puli PackageManager package.
+ * This file is part of the Puli Repository Manager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,14 +9,14 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\PackageManager\Tests\Project;
+namespace Puli\RepositoryManager\Tests\Project;
 
-use Puli\PackageManager\Config\GlobalConfig;
-use Puli\PackageManager\Config\GlobalConfigManager;
-use Puli\PackageManager\Package\Config\PackageConfigStorage;
-use Puli\PackageManager\Package\Config\RootPackageConfig;
-use Puli\PackageManager\Project\ProjectConfigManager;
-use Puli\PackageManager\Tests\Package\Fixtures\TestProjectEnvironment;
+use Puli\RepositoryManager\Config\GlobalConfig;
+use Puli\RepositoryManager\Config\GlobalConfigManager;
+use Puli\RepositoryManager\Package\Config\PackageConfigStorage;
+use Puli\RepositoryManager\Package\Config\RootPackageConfig;
+use Puli\RepositoryManager\Project\ProjectConfigManager;
+use Puli\RepositoryManager\Tests\Package\Fixtures\TestProjectEnvironment;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
@@ -25,9 +25,9 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
  */
 class ProjectConfigManagerTest extends \PHPUnit_Framework_TestCase
 {
-    const PLUGIN_CLASS = 'Puli\PackageManager\Tests\Config\Fixtures\TestPlugin';
+    const PLUGIN_CLASS = 'Puli\RepositoryManager\Tests\Config\Fixtures\TestPlugin';
 
-    const OTHER_PLUGIN_CLASS = 'Puli\PackageManager\Tests\Config\Fixtures\OtherPlugin';
+    const OTHER_PLUGIN_CLASS = 'Puli\RepositoryManager\Tests\Config\Fixtures\OtherPlugin';
 
     /**
      * @var string
@@ -60,17 +60,17 @@ class ProjectConfigManagerTest extends \PHPUnit_Framework_TestCase
     private $packageConfigStorage;
 
     /**
-     * @var \PHPUnit_Framework_MockObject_MockObject|\Puli\PackageManager\Config\GlobalConfigManager
+     * @var \PHPUnit_Framework_MockObject_MockObject|\Puli\RepositoryManager\Config\GlobalConfigManager
      */
     private $globalConfigManager;
 
     /**
-     * @var \Puli\PackageManager\Tests\Package\Fixtures\TestProjectEnvironment
+     * @var \Puli\RepositoryManager\Tests\Package\Fixtures\TestProjectEnvironment
      */
     private $environment;
 
     /**
-     * @var \Puli\PackageManager\Config\\Puli\PackageManager\Package\\Puli\PackageManager\Project\ProjectConfigManager
+     * @var \Puli\RepositoryManager\Config\\Puli\RepositoryManager\Package\\Puli\RepositoryManager\Project\ProjectConfigManager
      */
     private $manager;
 
@@ -82,11 +82,11 @@ class ProjectConfigManagerTest extends \PHPUnit_Framework_TestCase
         $this->globalConfig = new GlobalConfig();
         $this->rootConfig = new RootPackageConfig($this->globalConfig, 'root');
 
-        $this->packageConfigStorage = $this->getMockBuilder('Puli\PackageManager\Package\Config\PackageConfigStorage')
+        $this->packageConfigStorage = $this->getMockBuilder('Puli\RepositoryManager\Package\Config\PackageConfigStorage')
             ->disableOriginalConstructor()
             ->getMock();
 
-        $this->globalConfigManager = $this->getMockBuilder('Puli\PackageManager\Config\GlobalConfigManager')
+        $this->globalConfigManager = $this->getMockBuilder('Puli\RepositoryManager\Config\GlobalConfigManager')
             ->disableOriginalConstructor()
             ->getMock();
 
@@ -117,7 +117,7 @@ class ProjectConfigManagerTest extends \PHPUnit_Framework_TestCase
 
         $this->packageConfigStorage->expects($this->once())
             ->method('savePackageConfig')
-            ->with($this->isInstanceOf('Puli\PackageManager\Package\Config\RootPackageConfig'))
+            ->with($this->isInstanceOf('Puli\RepositoryManager\Package\Config\RootPackageConfig'))
             ->will($this->returnCallback(function (RootPackageConfig $config) {
                 \PHPUnit_Framework_Assert::assertSame(array(self::PLUGIN_CLASS), $config->getPluginClasses(false));
                 \PHPUnit_Framework_Assert::assertSame(array(self::PLUGIN_CLASS), $config->getPluginClasses(true));

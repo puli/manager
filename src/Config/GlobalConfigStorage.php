@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the Puli PackageManager package.
+ * This file is part of the Puli Repository Manager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,13 +9,13 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\PackageManager\Config;
+namespace Puli\RepositoryManager\Config;
 
-use Puli\PackageManager\Config\Reader\GlobalConfigReaderInterface;
-use Puli\PackageManager\Config\Writer\GlobalConfigWriterInterface;
-use Puli\PackageManager\FileNotFoundException;
-use Puli\PackageManager\InvalidConfigException;
-use Puli\PackageManager\IOException;
+use Puli\RepositoryManager\Config\Reader\GlobalConfigReaderInterface;
+use Puli\RepositoryManager\Config\Writer\GlobalConfigWriterInterface;
+use Puli\RepositoryManager\FileNotFoundException;
+use Puli\RepositoryManager\InvalidConfigException;
+use Puli\RepositoryManager\IOException;
 
 /**
  * Loads and saves global configuration.

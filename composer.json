@@ -1,5 +1,5 @@
 {
-    "name": "puli/puli-package-manager",
+    "name": "puli/puli-repository-manager",
     "description": "Generates Puli repositories from configured packages.",
     "license": "MIT",
     "authors": [
@@ -18,12 +18,12 @@
     "minimum-stability": "dev",
     "autoload": {
         "psr-4": {
-            "Puli\\PackageManager\\": "src/"
+            "Puli\\RepositoryManager\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Puli\\PackageManager\\Tests\\": "tests/"
+            "Puli\\RepositoryManager\\Tests\\": "tests/"
         }
     },
     "extra": {

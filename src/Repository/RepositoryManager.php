@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the Puli PackageManager package.
+ * This file is part of the Puli Repository Manager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,12 +9,12 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\PackageManager\Repository;
+namespace Puli\RepositoryManager\Repository;
 
 use Puli\Filesystem\PhpCacheRepository;
-use Puli\PackageManager\Package\Collection\PackageCollection;
-use Puli\PackageManager\Package\Config\RootPackageConfig;
-use Puli\PackageManager\Project\ProjectEnvironment;
+use Puli\RepositoryManager\Package\Collection\PackageCollection;
+use Puli\RepositoryManager\Package\Config\RootPackageConfig;
+use Puli\RepositoryManager\Project\ProjectEnvironment;
 use Puli\Repository\ResourceRepository;
 use Puli\Resource\NoDirectoryException;
 use Puli\Util\Path;
