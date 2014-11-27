@@ -11,17 +11,17 @@
 
 namespace Puli\RepositoryManager\Package;
 
+use Puli\RepositoryManager\Config\Config;
+use Puli\RepositoryManager\Environment\ProjectEnvironment;
 use Puli\RepositoryManager\FileNotFoundException;
 use Puli\RepositoryManager\InvalidConfigException;
 use Puli\RepositoryManager\NoDirectoryException;
 use Puli\RepositoryManager\Package\Collection\NoSuchPackageException;
 use Puli\RepositoryManager\Package\Collection\PackageCollection;
-use Puli\RepositoryManager\Package\Config\PackageConfigStorage;
-use Puli\RepositoryManager\Package\Config\RootPackageConfig;
 use Puli\RepositoryManager\Package\InstallFile\InstallFile;
 use Puli\RepositoryManager\Package\InstallFile\InstallFileStorage;
 use Puli\RepositoryManager\Package\InstallFile\PackageDescriptor;
-use Puli\RepositoryManager\Project\ProjectEnvironment;
+use Puli\RepositoryManager\Package\PackageFile\PackageFileStorage;
 use Webmozart\PathUtil\Path;
 
 /**
@@ -38,11 +38,6 @@ class PackageManager
     private $environment;
 
     /**
-     * @var RootPackageConfig
-     */
-    private $rootPackageConfig;
-
-    /**
      * @var string
      */
     private $rootDir;
@@ -53,9 +48,9 @@ class PackageManager
     private $installFileStorage;
 
     /**
-     * @var PackageConfigStorage
+     * @var PackageFileStorage
      */
-    private $packageConfigStorage;
+    private $packageFileStorage;
 
     /**
      * @var PackageCollection
@@ -70,9 +65,9 @@ class PackageManager
     /**
      * Loads the package repository for a given project.
      *
-     * @param ProjectEnvironment   $environment          The project environment.
-     * @param PackageConfigStorage $packageConfigStorage The package config file storage.
-     * @param InstallFileStorage   $installFileStorage   The install file storage.
+     * @param ProjectEnvironment $environment        The project environment.
+     * @param PackageFileStorage $packageFileStorage The package file storage.
+     * @param InstallFileStorage $installFileStorage The install file storage.
      *
      * @throws FileNotFoundException If the install path of a package not exist.
      * @throws NoDirectoryException If the install path of a package points to a file.
@@ -81,15 +76,14 @@ class PackageManager
      */
     public function __construct(
         ProjectEnvironment $environment,
-        PackageConfigStorage $packageConfigStorage,
+        PackageFileStorage $packageFileStorage,
         InstallFileStorage $installFileStorage
     )
     {
         $this->environment = $environment;
-        $this->rootPackageConfig = $environment->getRootPackageConfig();
         $this->rootDir = $environment->getRootDirectory();
         $this->installFileStorage = $installFileStorage;
-        $this->packageConfigStorage = $packageConfigStorage;
+        $this->packageFileStorage = $packageFileStorage;
         $this->packages = new PackageCollection();
 
         $this->loadInstallFile();
@@ -219,7 +213,7 @@ class PackageManager
      */
     private function loadInstallFile()
     {
-        $path = $this->rootPackageConfig->getInstallFile();
+        $path = $this->environment->getConfig()->get(Config::INSTALL_FILE);
         $path = Path::makeAbsolute($path, $this->rootDir);
 
         $this->installFile = $this->installFileStorage->loadInstallFile($path);
@@ -237,7 +231,7 @@ class PackageManager
      */
     private function loadPackages()
     {
-        $this->packages->add(new RootPackage($this->rootPackageConfig, $this->rootDir));
+        $this->packages->add(new RootPackage($this->environment->getRootPackageFile(), $this->rootDir));
 
         foreach ($this->installFile->getPackageDescriptors() as $packageDefinition) {
             $installPath = Path::makeAbsolute($packageDefinition->getInstallPath(), $this->rootDir);
@@ -276,8 +270,8 @@ class PackageManager
             ));
         }
 
-        $config = $this->packageConfigStorage->loadPackageConfig($installPath.'/puli.json');
-        $packageName = $config->getPackageName();
+        $packageFile = $this->packageFileStorage->loadPackageFile($installPath.'/puli.json');
+        $packageName = $packageFile->getPackageName();
 
         if ($this->packages->contains($packageName)) {
             $conflictingPackage = $this->packages->get($packageName);
@@ -291,6 +285,6 @@ class PackageManager
             ));
         }
 
-        return new Package($config, $installPath);
+        return new Package($packageFile, $installPath);
     }
 }

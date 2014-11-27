@@ -22,10 +22,10 @@ use Puli\RepositoryManager\Package\RootPackage;
 use Puli\Resource\DirectoryResourceInterface;
 
 /**
- * Builds a resource repository from package configurations.
+ * Builds a resource repository from packages.
  *
  * First, load the packages with {@link loadPackages()}. This method will read
- * the package configurations and check for conflicts.
+ * the package files and check for conflicts.
  *
  * Next, pass a manageable resource repository to {@link buildRepository()}.
  * This method adds all loaded resources to the repository.
@@ -66,7 +66,7 @@ class RepositoryBuilder
     private $tags = array();
 
     /**
-     * Loads the resource configuration of all packages in the repository.
+     * Loads the passed packages.
      *
      * This method will check whether the configuration of the different
      * packages contains conflicts. If yes, an exception is thrown.
@@ -95,7 +95,7 @@ class RepositoryBuilder
     }
 
     /**
-     * Adds all loaded resources to the given repository.
+     * Adds all loaded resources to the given resource repository.
      *
      * Call {@link loadPackages()} first, otherwise this method will do nothing.
      *
@@ -123,7 +123,7 @@ class RepositoryBuilder
             $this->processTags($package);
 
             if ($package instanceof RootPackage) {
-                $this->processPackageOrder($package->getConfig()->getPackageOrder());
+                $this->processPackageOrder($package->getPackageFile()->getPackageOrder());
             }
         }
     }
@@ -131,13 +131,13 @@ class RepositoryBuilder
     private function processResources(Package $package)
     {
         $packageName = $package->getName();
-        $config = $package->getConfig();
+        $packageFile = $package->getPackageFile();
 
         if (!isset($this->resources[$packageName])) {
             $this->resources[$packageName] = array();
         }
 
-        foreach ($config->getResourceDescriptors() as $descriptor) {
+        foreach ($packageFile->getResourceDescriptors() as $descriptor) {
             $path = $descriptor->getPuliPath();
             $relativePaths = $descriptor->getLocalPaths();
 
@@ -219,13 +219,13 @@ class RepositoryBuilder
     private function processOverrides(Package $package)
     {
         $packageName = $package->getName();
-        $config = $package->getConfig();
+        $packageFile = $package->getPackageFile();
 
         if (!isset($this->packageOverrides[$packageName])) {
             $this->packageOverrides[$packageName] = array();
         }
 
-        foreach ($config->getOverriddenPackages() as $override) {
+        foreach ($packageFile->getOverriddenPackages() as $override) {
             $this->packageOverrides[$packageName][] = $override;
         }
     }
@@ -247,9 +247,9 @@ class RepositoryBuilder
 
     private function processTags(Package $package)
     {
-        $config = $package->getConfig();
+        $packageFile = $package->getPackageFile();
 
-        foreach ($config->getTagDescriptors() as $descriptor) {
+        foreach ($packageFile->getTagDescriptors() as $descriptor) {
             $selector = $descriptor->getPuliSelector();
 
             if (!isset($this->tags[$selector])) {

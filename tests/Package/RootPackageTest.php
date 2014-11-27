@@ -11,8 +11,7 @@
 
 namespace Puli\RepositoryManager\Tests\Package;
 
-use Puli\RepositoryManager\Config\GlobalConfig;
-use Puli\RepositoryManager\Package\Config\RootPackageConfig;
+use Puli\RepositoryManager\Package\PackageFile\RootPackageFile;
 use Puli\RepositoryManager\Package\RootPackage;
 
 /**
@@ -23,18 +22,16 @@ class RootPackageTest extends \PHPUnit_Framework_TestCase
 {
     public function testPackageName()
     {
-        $globalConfig = new GlobalConfig();
-        $config = new RootPackageConfig($globalConfig, 'name');
-        $package = new RootPackage($config, '/path');
+        $packageFile = new RootPackageFile('name');
+        $package = new RootPackage($packageFile, '/path');
 
         $this->assertSame('name', $package->getName());
     }
 
     public function testPackageNameSetToDefaultIfEmpty()
     {
-        $globalConfig = new GlobalConfig();
-        $config = new RootPackageConfig($globalConfig);
-        $package = new RootPackage($config, '/path');
+        $packageFile = new RootPackageFile();
+        $package = new RootPackage($packageFile, '/path');
 
         $this->assertSame('__root__', $package->getName());
     }

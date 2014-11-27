@@ -1,0 +1,60 @@
+{
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+        "name": {
+            "type": "string"
+        },
+        "resources": {
+            "type": "object",
+            "additionalProperties": {
+                "type": [ "string", "array" ]
+            }
+        },
+        "tags": {
+            "type": "object",
+            "additionalProperties": {
+                "type": [ "string", "array" ]
+            }
+        },
+        "override": {
+            "type": [ "string", "array" ],
+            "items": {
+                "type": "string"
+            }
+        },
+        "package-order": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
+        },
+        "config": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "puli-dir": {
+                    "type": "string"
+                },
+                "install-file": {
+                    "type": "string"
+                },
+                "repo-file": {
+                    "type": "string"
+                },
+                "repo-dump-dir": {
+                    "type": "string"
+                },
+                "repo-dump-file": {
+                    "type": "string"
+                }
+            }
+        },
+        "plugins": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
+        }
+    }
+}

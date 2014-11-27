@@ -1,0 +1,41 @@
+<?php
+
+/*
+ * This file is part of the Symfony package.
+ *
+ * (c) Fabien Potencier <fabien@symfony.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
+namespace Puli\RepositoryManager\Config;
+
+/**
+ * Loads configuration values from environment variables.
+ *
+ * Configuration keys that are not set as environment variables are loaded from
+ * the base configuration passed to the constructor.
+ *
+ * Currently, only the environment variable "PULI_DIR" is supported by this
+ * class.
+ *
+ * @since  1.0
+ * @author Bernhard Schussek <bschussek@gmail.com>
+ */
+class EnvConfig extends Config
+{
+    /**
+     * Creates the configuration.
+     *
+     * @param Config $baseConfig The base configuration to use for unset values.
+     */
+    public function __construct(Config $baseConfig = null)
+    {
+        parent::__construct($baseConfig);
+
+        if (false !== ($puliDir = getenv('PULI_DIR'))) {
+            $this->set(Config::PULI_DIR, $puliDir);
+        }
+    }
+}

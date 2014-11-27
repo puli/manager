@@ -11,7 +11,7 @@
 
 namespace Puli\RepositoryManager\Package;
 
-use Puli\RepositoryManager\Package\Config\PackageConfig;
+use Puli\RepositoryManager\Package\PackageFile\PackageFile;
 
 /**
  * A configured package.
@@ -32,20 +32,20 @@ class Package
     private $installPath;
 
     /**
-     * @var PackageConfig
+     * @var PackageFile
      */
-    private $config;
+    private $packageFile;
 
     /**
      * Creates a new package.
      *
-     * @param PackageConfig $config      The package configuration.
-     * @param string        $installPath The install path of the package.
+     * @param PackageFile $packageFile The package file.
+     * @param string      $installPath The install path of the package.
      */
-    public function __construct(PackageConfig $config, $installPath)
+    public function __construct(PackageFile $packageFile, $installPath)
     {
-        $this->name = $config->getPackageName();
-        $this->config = $config;
+        $this->name = $packageFile->getPackageName();
+        $this->packageFile = $packageFile;
         $this->installPath = $installPath;
     }
 
@@ -70,13 +70,13 @@ class Package
     }
 
     /**
-     * Returns the configuration of the package.
+     * Returns the package file of the package.
      *
-     * @return PackageConfig The package configuration.
+     * @return PackageFile The package file.
      */
-    public function getConfig()
+    public function getPackageFile()
     {
-        return $this->config;
+        return $this->packageFile;
     }
 
     /**

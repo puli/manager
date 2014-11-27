@@ -11,34 +11,34 @@
 
 namespace Puli\RepositoryManager\Tests\Package\Fixtures;
 
-use Puli\RepositoryManager\Config\GlobalConfig;
-use Puli\RepositoryManager\Config\GlobalConfigStorage;
-use Puli\RepositoryManager\Config\GlobalEnvironment;
-use Puli\RepositoryManager\Config\Reader\GlobalConfigReaderInterface;
-use Puli\RepositoryManager\Config\Writer\GlobalConfigWriterInterface;
+use Puli\RepositoryManager\Config\ConfigFile\ConfigFile;
+use Puli\RepositoryManager\Config\ConfigFile\ConfigFileStorage;
+use Puli\RepositoryManager\Config\ConfigFile\Reader\ConfigFileReaderInterface;
+use Puli\RepositoryManager\Config\ConfigFile\Writer\ConfigFileWriterInterface;
+use Puli\RepositoryManager\Environment\GlobalEnvironment;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class TestGlobalEnvironment extends GlobalEnvironment implements GlobalConfigReaderInterface, GlobalConfigWriterInterface
+class TestGlobalEnvironment extends GlobalEnvironment implements ConfigFileReaderInterface, ConfigFileWriterInterface
 {
-    private $globalConfig;
+    private $configFile;
 
-    public function __construct($homeDir, GlobalConfig $globalConfig, EventDispatcherInterface $dispatcher)
+    public function __construct($homeDir, ConfigFile $configFile, EventDispatcherInterface $dispatcher)
     {
-        $this->globalConfig = $globalConfig;
+        $this->configFile = $configFile;
 
-        parent::__construct($homeDir, new GlobalConfigStorage($this, $this), $dispatcher);
+        parent::__construct($homeDir, new ConfigFileStorage($this, $this), $dispatcher);
     }
 
-    public function readGlobalConfig($path)
+    public function readConfigFile($path)
     {
-        return $this->globalConfig;
+        return $this->configFile;
     }
 
-    public function writeGlobalConfig(GlobalConfig $config, $path)
+    public function writeConfigFile(ConfigFile $configFile, $path)
     {
     }
 }

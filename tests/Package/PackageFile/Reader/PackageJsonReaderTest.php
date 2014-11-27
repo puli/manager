@@ -1,0 +1,286 @@
+<?php
+
+/*
+ * This file is part of the Puli Repository Manager package.
+ *
+ * (c) Bernhard Schussek <bschussek@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
+namespace Puli\RepositoryManager\Tests\Package\PackageFile\Reader;
+
+use Puli\RepositoryManager\Config\Config;
+use Puli\RepositoryManager\Package\PackageFile\PackageFile;
+use Puli\RepositoryManager\Package\PackageFile\Reader\PackageJsonReader;
+use Puli\RepositoryManager\Package\PackageFile\ResourceDescriptor;
+use Puli\RepositoryManager\Package\PackageFile\TagDescriptor;
+
+/**
+ * @since  1.0
+ * @author Bernhard Schussek <bschussek@gmail.com>
+ */
+class PackageJsonReaderTest extends \PHPUnit_Framework_TestCase
+{
+    /**
+     * @var Config
+     */
+    private $baseConfig;
+
+    /**
+     * @var PackageJsonReader
+     */
+    private $reader;
+
+    protected function setUp()
+    {
+        $this->baseConfig = new Config();
+        $this->reader = new PackageJsonReader();
+    }
+
+    public function testReadFullPackageFile()
+    {
+        $packageFile = $this->reader->readPackageFile(__DIR__.'/Fixtures/full.json');
+
+        $this->assertInstanceOf('Puli\RepositoryManager\Package\PackageFile\PackageFile', $packageFile);
+        $this->assertNotInstanceOf('Puli\RepositoryManager\Package\PackageFile\RootPackageFile', $packageFile);
+        $this->assertSame(__DIR__.'/Fixtures/full.json', $packageFile->getPath());
+        $this->assertFullConfig($packageFile);
+    }
+
+    public function testReadFullRootPackageFile()
+    {
+        $packageFile = $this->reader->readRootPackageFile(__DIR__.'/Fixtures/full.json', $this->baseConfig);
+
+        $this->assertInstanceOf('Puli\RepositoryManager\Package\PackageFile\RootPackageFile', $packageFile);
+        $this->assertSame(__DIR__.'/Fixtures/full.json', $packageFile->getPath());
+        $this->assertFullConfig($packageFile);
+        $this->assertSame(array('acme/blog-extension1', 'acme/blog-extension2'), $packageFile->getPackageOrder());
+
+        $config = $packageFile->getConfig();
+        $this->assertSame('puli-dir', $config->get(Config::PULI_DIR));
+        $this->assertSame('puli-dir/my-install-file.json', $config->get(Config::INSTALL_FILE));
+        $this->assertSame('puli-dir/my-repository.php', $config->get(Config::REPO_FILE));
+        $this->assertSame('puli-dir/my-repo', $config->get(Config::REPO_DUMP_DIR));
+        $this->assertSame('puli-dir/my-repository-dump.php', $config->get(Config::REPO_DUMP_FILE));
+    }
+
+    public function testReadMinimalPackageFile()
+    {
+        $packageFile = $this->reader->readPackageFile(__DIR__.'/Fixtures/minimal.json');
+
+        $this->assertInstanceOf('Puli\RepositoryManager\Package\PackageFile\PackageFile', $packageFile);
+        $this->assertNotInstanceOf('Puli\RepositoryManager\Package\PackageFile\RootPackageFile', $packageFile);
+        $this->assertMinimalConfig($packageFile);
+    }
+
+    public function testReadMinimalRootPackageFile()
+    {
+        $packageFile = $this->reader->readRootPackageFile(__DIR__.'/Fixtures/minimal.json', $this->baseConfig);
+
+        $this->assertInstanceOf('Puli\RepositoryManager\Package\PackageFile\RootPackageFile', $packageFile);
+        $this->assertMinimalConfig($packageFile);
+        $this->assertSame(array(), $packageFile->getPackageOrder());
+    }
+
+    public function testRootPackageFileInheritsBaseConfig()
+    {
+        $packageFile = $this->reader->readRootPackageFile(__DIR__.'/Fixtures/minimal.json', $this->baseConfig);
+
+        $this->baseConfig->set(Config::PULI_DIR, 'my-puli-dir');
+
+        $this->assertSame('my-puli-dir', $packageFile->getConfig()->get(Config::PULI_DIR));
+    }
+
+    /**
+     * @expectedException \Puli\RepositoryManager\InvalidConfigException
+     * @expectedExceptionMessage extra-prop.json
+     */
+    public function testReadConfigValidatesSchema()
+    {
+        $this->reader->readPackageFile(__DIR__.'/Fixtures/extra-prop.json');
+    }
+
+    /**
+     * @expectedException \Puli\RepositoryManager\InvalidConfigException
+     * @expectedExceptionMessage extra-prop.json
+     */
+    public function testReadRootConfigValidatesSchema()
+    {
+        $this->reader->readRootPackageFile(__DIR__.'/Fixtures/extra-prop.json', $this->baseConfig);
+    }
+
+    /**
+     * @expectedException \Puli\RepositoryManager\FileNotFoundException
+     * @expectedExceptionMessage bogus.json
+     */
+    public function testReadConfigFailsIfNotFound()
+    {
+        $this->reader->readPackageFile('bogus.json');
+    }
+
+    /**
+     * @expectedException \Puli\RepositoryManager\FileNotFoundException
+     * @expectedExceptionMessage bogus.json
+     */
+    public function testReadRootConfigFailsIfNotFound()
+    {
+        $this->reader->readRootPackageFile('bogus.json', $this->baseConfig);
+    }
+
+    /**
+     * @expectedException \Puli\RepositoryManager\InvalidConfigException
+     * @expectedExceptionMessage win-1258.json
+     */
+    public function testReadConfigFailsIfDecodingNotPossible()
+    {
+        $this->reader->readPackageFile(__DIR__.'/Fixtures/win-1258.json');
+    }
+
+    /**
+     * @expectedException \Puli\RepositoryManager\InvalidConfigException
+     * @expectedExceptionMessage win-1258.json
+     */
+    public function testReadRootConfigFailsIfDecodingNotPossible()
+    {
+        $this->reader->readRootPackageFile(__DIR__.'/Fixtures/win-1258.json', $this->baseConfig);
+    }
+
+    ////////////////////////////////////////////////////////////////////////////
+    // Test Schema Validation
+    ////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * @expectedException \Puli\RepositoryManager\InvalidConfigException
+     */
+    public function testNameMustBeString()
+    {
+        $this->reader->readPackageFile(__DIR__.'/Fixtures/name-not-string.json');
+    }
+
+    /**
+     * @expectedException \Puli\RepositoryManager\InvalidConfigException
+     */
+    public function testResourcesMustBeObject()
+    {
+        $this->reader->readPackageFile(__DIR__.'/Fixtures/resources-no-object.json');
+    }
+
+    /**
+     * @expectedException \Puli\RepositoryManager\InvalidConfigException
+     */
+    public function testResourceEntriesMustBeStrings()
+    {
+        $this->markTestSkipped('Not supported by the schema validator.');
+        return;
+
+        // $this->reader->readPackageFile(__DIR__.'/Fixtures/resources-entry-no-string.json');
+    }
+
+    public function testResourceEntriesMayBeArrays()
+    {
+        $this->reader->readPackageFile(__DIR__.'/Fixtures/resources-entry-array.json');
+    }
+
+    /**
+     * @expectedException \Puli\RepositoryManager\InvalidConfigException
+     */
+    public function testResourceEntryNestedEntriesMustBeStrings()
+    {
+        $this->markTestSkipped('Not supported by the schema validator.');
+        return;
+
+//         $this->reader->readPackageFile(__DIR__.'/Fixtures/resources-entry-entry-no-string.json');
+    }
+
+    /**
+     * @expectedException \Puli\RepositoryManager\InvalidConfigException
+     */
+    public function testTagsMustBeObject()
+    {
+        $this->reader->readPackageFile(__DIR__.'/Fixtures/tags-no-object.json');
+    }
+
+    /**
+     * @expectedException \Puli\RepositoryManager\InvalidConfigException
+     */
+    public function testTagEntriesMustBeStrings()
+    {
+        $this->markTestSkipped('Not supported by the schema validator.');
+        return;
+
+        // $this->reader->readPackageFile(__DIR__.'/Fixtures/tags-entry-no-string.json');
+    }
+
+    public function testTagEntriesMayBeArrays()
+    {
+        $this->reader->readPackageFile(__DIR__.'/Fixtures/tags-entry-array.json');
+    }
+
+    /**
+     * @expectedException \Puli\RepositoryManager\InvalidConfigException
+     */
+    public function testTagEntryNestedEntriesMustBeStrings()
+    {
+        $this->markTestSkipped('Not supported by the schema validator.');
+        return;
+
+//         $this->reader->readPackageFile(__DIR__.'/Fixtures/tags-entry-entry-no-string.json');
+    }
+
+    public function testOverrideMayBeArray()
+    {
+        $packageFile = $this->reader->readPackageFile(__DIR__.'/Fixtures/override-array.json');
+
+        $this->assertSame(array('acme/blog-extension1', 'acme/blog-extension2'), $packageFile->getOverriddenPackages());
+    }
+
+    /**
+     * @expectedException \Puli\RepositoryManager\InvalidConfigException
+     */
+    public function testOverrideMustBeStringOrArray()
+    {
+        $this->reader->readPackageFile(__DIR__.'/Fixtures/override-no-string.json');
+    }
+
+    /**
+     * @expectedException \Puli\RepositoryManager\InvalidConfigException
+     */
+    public function testOverrideEntriesMustBeStrings()
+    {
+        $this->reader->readPackageFile(__DIR__.'/Fixtures/override-entry-no-string.json');
+    }
+
+    /**
+     * @expectedException \Puli\RepositoryManager\InvalidConfigException
+     */
+    public function testPackageOrderMustBeArray()
+    {
+        $this->reader->readPackageFile(__DIR__.'/Fixtures/package-order-no-array.json');
+    }
+
+    /**
+     * @expectedException \Puli\RepositoryManager\InvalidConfigException
+     */
+    public function testPackageOrderEntriesMustBeStrings()
+    {
+        $this->reader->readPackageFile(__DIR__.'/Fixtures/package-order-entry-no-string.json');
+    }
+
+    private function assertFullConfig(PackageFile $packageFile)
+    {
+        $this->assertSame('my/application', $packageFile->getPackageName());
+        $this->assertEquals(array(new ResourceDescriptor('/app', array('res'))), $packageFile->getResourceDescriptors());
+        $this->assertEquals(array(new TagDescriptor('/app/config*.yml', array('config'))), $packageFile->getTagDescriptors());
+        $this->assertSame(array('acme/blog'), $packageFile->getOverriddenPackages());
+    }
+
+    private function assertMinimalConfig(PackageFile $packageFile)
+    {
+        $this->assertNull($packageFile->getPackageName());
+        $this->assertSame(array(), $packageFile->getResourceDescriptors());
+        $this->assertSame(array(), $packageFile->getTagDescriptors());
+        $this->assertSame(array(), $packageFile->getOverriddenPackages());
+    }
+}

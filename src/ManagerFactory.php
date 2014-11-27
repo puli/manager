@@ -12,20 +12,21 @@
 namespace Puli\RepositoryManager;
 
 use Puli\Repository\ResourceRepositoryInterface;
-use Puli\RepositoryManager\Config\GlobalConfigManager;
-use Puli\RepositoryManager\Config\GlobalConfigStorage;
-use Puli\RepositoryManager\Config\GlobalEnvironment;
-use Puli\RepositoryManager\Config\Reader\ConfigJsonReader;
-use Puli\RepositoryManager\Config\Writer\ConfigJsonWriter;
-use Puli\RepositoryManager\Package\Config\PackageConfigStorage;
-use Puli\RepositoryManager\Package\Config\Reader\PuliJsonReader;
-use Puli\RepositoryManager\Package\Config\Writer\PuliJsonWriter;
+use Puli\RepositoryManager\Config\Config;
+use Puli\RepositoryManager\Config\ConfigFile\ConfigFileManager;
+use Puli\RepositoryManager\Config\ConfigFile\ConfigFileStorage;
+use Puli\RepositoryManager\Config\ConfigFile\Reader\ConfigJsonReader;
+use Puli\RepositoryManager\Config\ConfigFile\Writer\ConfigJsonWriter;
+use Puli\RepositoryManager\Environment\GlobalEnvironment;
+use Puli\RepositoryManager\Environment\ProjectEnvironment;
 use Puli\RepositoryManager\Package\InstallFile\InstallFileStorage;
-use Puli\RepositoryManager\Package\InstallFile\Reader\PackagesJsonReader;
-use Puli\RepositoryManager\Package\InstallFile\Writer\PackagesJsonWriter;
+use Puli\RepositoryManager\Package\InstallFile\Reader\InstallFileJsonReader;
+use Puli\RepositoryManager\Package\InstallFile\Writer\InstallFileJsonWriter;
+use Puli\RepositoryManager\Package\PackageFile\PackageFileManager;
+use Puli\RepositoryManager\Package\PackageFile\PackageFileStorage;
+use Puli\RepositoryManager\Package\PackageFile\Reader\PackageJsonReader;
+use Puli\RepositoryManager\Package\PackageFile\Writer\PackageJsonWriter;
 use Puli\RepositoryManager\Package\PackageManager;
-use Puli\RepositoryManager\Project\ProjectConfigManager;
-use Puli\RepositoryManager\Project\ProjectEnvironment;
 use Puli\RepositoryManager\Repository\RepositoryManager;
 use Puli\RepositoryManager\Util\System;
 use Symfony\Component\EventDispatcher\EventDispatcher;
@@ -58,16 +59,15 @@ use Webmozart\PathUtil\Path;
  *
  * The factory creates four kinds of managers:
  *
- *  * The "global config manager" allows you to modify entries of the
- *    "config.json" file in the home directory. Global config managers are
- *    created with {@link createGlobalConfigManager()}.
+ *  * The "config file manager" allows you to modify entries of the
+ *    "config.json" file in the home directory. Config file managers are
+ *    created with {@link createConfigFileManager()}.
  *
- *  * The "project config manager" manages modifications to the "puli.json" file
- *    of a Puli project. Use {@link createProjectConfigManager()} to create it.
+ *  * The "package file manager" manages modifications to the "puli.json" file
+ *    of a Puli project. Use {@link createPackageFileManager()} to create it.
  *
- *  * The "package manager" manages the administration of the package
- *    repository of a Puli project. A package manager can be created with
- *    {@link createPackageManager()}.
+ *  * The "package manager" manages the package repository of a Puli project.
+ *    A package manager can be created with {@link createPackageManager()}.
  *
  *  * The "repository manager" manages the resource repository of a Puli
  *    project. It can be created with {@link createRepositoryManager()}.
@@ -104,7 +104,7 @@ class ManagerFactory
 
         return new GlobalEnvironment(
             $homeDir,
-            self::createGlobalConfigStorage(),
+            self::createConfigFileStorage(),
             $dispatcher
         );
     }
@@ -142,45 +142,45 @@ class ManagerFactory
         return new ProjectEnvironment(
             $homeDir,
             $rootDir,
-            self::createGlobalConfigStorage(),
-            self::createPackageConfigStorage($dispatcher),
+            self::createConfigFileStorage(),
+            self::createPackageFileStorage($dispatcher),
             $dispatcher
         );
     }
 
     /**
-     * Creates a global configuration manager.
+     * Creates a configuration file manager.
      *
      * @param GlobalEnvironment $environment The global environment.
      *
-     * @return GlobalConfigManager The created configuration manager.
+     * @return ConfigFileManager The created configuration file manager.
      */
-    public static function createGlobalConfigManager(GlobalEnvironment $environment)
+    public static function createConfigFileManager(GlobalEnvironment $environment)
     {
-        return new GlobalConfigManager(
+        return new ConfigFileManager(
             $environment,
-            self::createGlobalConfigStorage()
+            self::createConfigFileStorage()
         );
     }
 
     /**
-     * Creates a project configuration manager.
+     * Creates a package file manager.
      *
      * @param ProjectEnvironment $environment The project environment.
      *
-     * @return ProjectConfigManager The created configuration manager.
+     * @return PackageFileManager The created package file manager.
      */
-    public static function createProjectConfigManager(ProjectEnvironment $environment)
+    public static function createPackageFileManager(ProjectEnvironment $environment)
     {
-        return new ProjectConfigManager(
+        return new PackageFileManager(
             $environment,
-            self::createPackageConfigStorage($environment->getEventDispatcher()),
-            self::createGlobalConfigManager($environment)
+            self::createPackageFileStorage($environment->getEventDispatcher()),
+            self::createConfigFileManager($environment)
         );
     }
 
     /**
-     * Creates the package manager for a Puli project.
+     * Creates a package manager.
      *
      * @param ProjectEnvironment $environment The project environment.
      *
@@ -190,13 +190,13 @@ class ManagerFactory
     {
         return new PackageManager(
             $environment,
-            self::createPackageConfigStorage($environment->getEventDispatcher()),
+            self::createPackageFileStorage($environment->getEventDispatcher()),
             self::createInstallFileStorage()
         );
     }
 
     /**
-     * Creates the resource repository manager for a Puli project.
+     * Creates a resource repository manager.
      *
      * @param ProjectEnvironment $environment    The project environment.
      * @param PackageManager     $packageManager The package manager. Optional.
@@ -220,7 +220,7 @@ class ManagerFactory
     public static function createRepository(ProjectEnvironment $environment)
     {
         $repoPath = Path::makeAbsolute(
-            $environment->getRootPackageConfig()->getGeneratedResourceRepository(),
+            $environment->getConfig()->get(Config::REPO_FILE),
             $environment->getRootDirectory()
         );
 
@@ -232,9 +232,9 @@ class ManagerFactory
         return include $repoPath;
     }
 
-    private static function createGlobalConfigStorage()
+    private static function createConfigFileStorage()
     {
-        return new GlobalConfigStorage(
+        return new ConfigFileStorage(
             new ConfigJsonReader(),
             new ConfigJsonWriter()
         );
@@ -243,16 +243,16 @@ class ManagerFactory
     private static function createInstallFileStorage()
     {
         return new InstallFileStorage(
-            new PackagesJsonReader(),
-            new PackagesJsonWriter()
+            new InstallFileJsonReader(),
+            new InstallFileJsonWriter()
         );
     }
 
-    private static function createPackageConfigStorage(EventDispatcherInterface $dispatcher)
+    private static function createPackageFileStorage(EventDispatcherInterface $dispatcher)
     {
-        return new PackageConfigStorage(
-            new PuliJsonReader(),
-            new PuliJsonWriter(),
+        return new PackageFileStorage(
+            new PackageJsonReader(),
+            new PackageJsonWriter(),
             $dispatcher
         );
     }

@@ -11,55 +11,56 @@
 
 namespace Puli\RepositoryManager\Tests\Package\Fixtures;
 
-use Puli\RepositoryManager\Config\GlobalConfig;
-use Puli\RepositoryManager\Config\GlobalConfigStorage;
-use Puli\RepositoryManager\Config\Reader\GlobalConfigReaderInterface;
-use Puli\RepositoryManager\Config\Writer\GlobalConfigWriterInterface;
-use Puli\RepositoryManager\Package\Config\PackageConfig;
-use Puli\RepositoryManager\Package\Config\PackageConfigStorage;
-use Puli\RepositoryManager\Package\Config\Reader\PackageConfigReaderInterface;
-use Puli\RepositoryManager\Package\Config\RootPackageConfig;
-use Puli\RepositoryManager\Package\Config\Writer\PackageConfigWriterInterface;
-use Puli\RepositoryManager\Project\ProjectEnvironment;
+use Puli\RepositoryManager\Config\Config;
+use Puli\RepositoryManager\Config\ConfigFile\ConfigFile;
+use Puli\RepositoryManager\Config\ConfigFile\ConfigFileStorage;
+use Puli\RepositoryManager\Config\ConfigFile\Reader\ConfigFileReaderInterface;
+use Puli\RepositoryManager\Config\ConfigFile\Writer\ConfigFileWriterInterface;
+use Puli\RepositoryManager\Environment\ProjectEnvironment;
+use Puli\RepositoryManager\Package\PackageFile\PackageFile;
+use Puli\RepositoryManager\Package\PackageFile\PackageFileStorage;
+use Puli\RepositoryManager\Package\PackageFile\Reader\PackageFileReaderInterface;
+use Puli\RepositoryManager\Package\PackageFile\RootPackageFile;
+use Puli\RepositoryManager\Package\PackageFile\Writer\PackageFileWriterInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class TestProjectEnvironment extends ProjectEnvironment implements GlobalConfigReaderInterface, GlobalConfigWriterInterface, PackageConfigReaderInterface, PackageConfigWriterInterface
+class TestProjectEnvironment extends ProjectEnvironment implements ConfigFileReaderInterface, ConfigFileWriterInterface, PackageFileReaderInterface, PackageFileWriterInterface
 {
-    private $globalConfig;
+    private $configFile;
 
-    private $rootPackageConfig;
+    private $rootPackageFile;
 
-    public function __construct($homeDir, $rootDir, GlobalConfig $globalConfig, RootPackageConfig $rootPackageConfig, EventDispatcherInterface $dispatcher)
+    public function __construct($homeDir, $rootDir, ConfigFile $configFile, RootPackageFile $rootPackageFile, EventDispatcherInterface $dispatcher)
     {
-        $this->globalConfig = $globalConfig;
-        $this->rootPackageConfig = $rootPackageConfig;
+        $this->configFile = $configFile;
+        $this->rootPackageFile = $rootPackageFile;
 
-        parent::__construct($homeDir, $rootDir, new GlobalConfigStorage($this, $this), new PackageConfigStorage($this, $this, $dispatcher), $dispatcher);
+        parent::__construct($homeDir, $rootDir, new ConfigFileStorage($this, $this), new PackageFileStorage($this, $this, $dispatcher), $dispatcher);
     }
 
-    public function readGlobalConfig($path)
+    public function readConfigFile($path)
     {
-        return $this->globalConfig;
+        return $this->configFile;
     }
 
-    public function writeGlobalConfig(GlobalConfig $config, $path)
-    {
-    }
-
-    public function readPackageConfig($path)
+    public function writeConfigFile(ConfigFile $configFile, $path)
     {
     }
 
-    public function readRootPackageConfig($path, GlobalConfig $globalConfig)
+    public function readPackageFile($path)
     {
-        return $this->rootPackageConfig;
     }
 
-    public function writePackageConfig(PackageConfig $config, $path)
+    public function readRootPackageFile($path, Config $baseConfig = null)
+    {
+        return $this->rootPackageFile;
+    }
+
+    public function writePackageFile(PackageFile $packageFile, $path)
     {
     }
 }

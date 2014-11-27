@@ -11,11 +11,10 @@
 
 namespace Puli\RepositoryManager\Tests\Package\Collection;
 
-use Puli\RepositoryManager\Config\GlobalConfig;
 use Puli\RepositoryManager\Package\Collection\PackageCollection;
-use Puli\RepositoryManager\Package\Config\PackageConfig;
-use Puli\RepositoryManager\Package\Config\RootPackageConfig;
 use Puli\RepositoryManager\Package\Package;
+use Puli\RepositoryManager\Package\PackageFile\PackageFile;
+use Puli\RepositoryManager\Package\PackageFile\RootPackageFile;
 use Puli\RepositoryManager\Package\RootPackage;
 
 /**
@@ -36,8 +35,8 @@ class PackageCollectionTest extends \PHPUnit_Framework_TestCase
 
     public function testGetPackage()
     {
-        $config = new PackageConfig('package');
-        $package = new Package($config, '/path');
+        $packageFile = new PackageFile('package');
+        $package = new Package($packageFile, '/path');
 
         $this->collection->add($package);
 
@@ -59,15 +58,14 @@ class PackageCollectionTest extends \PHPUnit_Framework_TestCase
 
     public function testGetRootPackageReturnsAddedRootPackage()
     {
-        $config1 = new PackageConfig('package1');
-        $package1 = new Package($config1, '/path1');
+        $packageFile1 = new PackageFile('package1');
+        $package1 = new Package($packageFile1, '/path1');
 
-        $config2 = new PackageConfig('package2');
-        $package2 = new Package($config2, '/path2');
+        $packageFile2 = new PackageFile('package2');
+        $package2 = new Package($packageFile2, '/path2');
 
-        $globalConfig = new GlobalConfig();
-        $rootConfig = new RootPackageConfig($globalConfig, 'root');
-        $rootPackage = new RootPackage($rootConfig, '/path3');
+        $rootPackageFile = new RootPackageFile('root');
+        $rootPackage = new RootPackage($rootPackageFile, '/path3');
 
         $this->collection->add($package1);
         $this->collection->add($rootPackage);
@@ -78,11 +76,11 @@ class PackageCollectionTest extends \PHPUnit_Framework_TestCase
 
     public function testRemove()
     {
-        $config1 = new PackageConfig('package1');
-        $package1 = new Package($config1, '/path1');
+        $packageFile1 = new PackageFile('package1');
+        $package1 = new Package($packageFile1, '/path1');
 
-        $config2 = new PackageConfig('package2');
-        $package2 = new Package($config2, '/path2');
+        $packageFile2 = new PackageFile('package2');
+        $package2 = new Package($packageFile2, '/path2');
 
         $this->collection->add($package1);
         $this->collection->add($package2);
@@ -102,15 +100,14 @@ class PackageCollectionTest extends \PHPUnit_Framework_TestCase
 
     public function testRemoveRoot()
     {
-        $config1 = new PackageConfig('package1');
-        $package1 = new Package($config1, '/path1');
+        $packageFile1 = new PackageFile('package1');
+        $package1 = new Package($packageFile1, '/path1');
 
-        $config2 = new PackageConfig('package2');
-        $package2 = new Package($config2, '/path2');
+        $packageFile2 = new PackageFile('package2');
+        $package2 = new Package($packageFile2, '/path2');
 
-        $globalConfig = new GlobalConfig();
-        $rootConfig = new RootPackageConfig($globalConfig, 'root');
-        $rootPackage = new RootPackage($rootConfig, '/path3');
+        $rootPackageFile = new RootPackageFile('root');
+        $rootPackage = new RootPackage($rootPackageFile, '/path3');
 
         $this->collection->add($package1);
         $this->collection->add($rootPackage);
@@ -127,15 +124,14 @@ class PackageCollectionTest extends \PHPUnit_Framework_TestCase
 
     public function testIterate()
     {
-        $config1 = new PackageConfig('package1');
-        $package1 = new Package($config1, '/path1');
+        $packageFile1 = new PackageFile('package1');
+        $package1 = new Package($packageFile1, '/path1');
 
-        $config2 = new PackageConfig('package2');
-        $package2 = new Package($config2, '/path2');
+        $packageFile2 = new PackageFile('package2');
+        $package2 = new Package($packageFile2, '/path2');
 
-        $globalConfig = new GlobalConfig();
-        $rootConfig = new RootPackageConfig($globalConfig, 'root');
-        $rootPackage = new RootPackage($rootConfig, '/path3');
+        $rootPackageFile = new RootPackageFile('root');
+        $rootPackage = new RootPackage($rootPackageFile, '/path3');
 
         $this->collection->add($package1);
         $this->collection->add($rootPackage);
@@ -150,15 +146,14 @@ class PackageCollectionTest extends \PHPUnit_Framework_TestCase
 
     public function testToArray()
     {
-        $config1 = new PackageConfig('package1');
-        $package1 = new Package($config1, '/path1');
+        $packageFile1 = new PackageFile('package1');
+        $package1 = new Package($packageFile1, '/path1');
 
-        $config2 = new PackageConfig('package2');
-        $package2 = new Package($config2, '/path2');
+        $packageFile2 = new PackageFile('package2');
+        $package2 = new Package($packageFile2, '/path2');
 
-        $globalConfig = new GlobalConfig();
-        $rootConfig = new RootPackageConfig($globalConfig, 'root');
-        $rootPackage = new RootPackage($rootConfig, '/path3');
+        $rootPackageFile = new RootPackageFile('root');
+        $rootPackage = new RootPackage($rootPackageFile, '/path3');
 
         $this->collection->add($package1);
         $this->collection->add($rootPackage);
@@ -173,15 +168,14 @@ class PackageCollectionTest extends \PHPUnit_Framework_TestCase
 
     public function testArrayAccess()
     {
-        $config1 = new PackageConfig('package1');
-        $package1 = new Package($config1, '/path1');
+        $packageFile1 = new PackageFile('package1');
+        $package1 = new Package($packageFile1, '/path1');
 
-        $config2 = new PackageConfig('package2');
-        $package2 = new Package($config2, '/path2');
+        $packageFile2 = new PackageFile('package2');
+        $package2 = new Package($packageFile2, '/path2');
 
-        $globalConfig = new GlobalConfig();
-        $rootConfig = new RootPackageConfig($globalConfig, 'root');
-        $rootPackage = new RootPackage($rootConfig, '/path3');
+        $rootPackageFile = new RootPackageFile('root');
+        $rootPackage = new RootPackage($rootPackageFile, '/path3');
 
         $this->assertFalse(isset($this->collection['package1']));
         $this->assertFalse(isset($this->collection['package2']));

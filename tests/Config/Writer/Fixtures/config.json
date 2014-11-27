@@ -1,5 +1,0 @@
-{
-    "plugins": [
-        "Puli\\RepositoryManager\\Tests\\Config\\Fixtures\\TestPlugin"
-    ]
-}

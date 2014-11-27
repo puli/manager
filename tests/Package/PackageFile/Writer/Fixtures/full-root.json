@@ -1,0 +1,24 @@
+{
+    "name": "my/application",
+    "resources": {
+        "/app": "res"
+    },
+    "tags": {
+        "/app/config*.yml": "config"
+    },
+    "override": "acme/blog",
+    "package-order": [
+        "acme/blog-extension1",
+        "acme/blog-extension2"
+    ],
+    "config": {
+        "puli-dir": "puli-dir",
+        "install-file": "{$puli-dir}/my-install-file.json",
+        "repo-file": "{$puli-dir}/my-repository.php",
+        "repo-dump-dir": "{$puli-dir}/my-repo",
+        "repo-dump-file": "{$puli-dir}/my-repository-dump.php"
+    },
+    "plugins": [
+        "Puli\\RepositoryManager\\Tests\\Package\\PackageFile\\Fixtures\\TestPlugin"
+    ]
+}

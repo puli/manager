@@ -11,7 +11,7 @@
 
 namespace Puli\RepositoryManager\Package;
 
-use Puli\RepositoryManager\Package\Config\RootPackageConfig;
+use Puli\RepositoryManager\Package\PackageFile\RootPackageFile;
 
 /**
  * The root package.
@@ -24,12 +24,12 @@ class RootPackage extends Package
     /**
      * Creates a new root package.
      *
-     * @param RootPackageConfig $config      The package configuration.
-     * @param string            $installPath The install path of the package.
+     * @param RootPackageFile $packageFile The package file.
+     * @param string          $installPath The install path of the package.
      */
-    public function __construct(RootPackageConfig $config, $installPath)
+    public function __construct(RootPackageFile $packageFile, $installPath)
     {
-        parent::__construct($config, $installPath);
+        parent::__construct($packageFile, $installPath);
 
         if (null === $this->getName()) {
             $this->setName('__root__');
@@ -37,12 +37,12 @@ class RootPackage extends Package
     }
 
     /**
-     * Returns the configuration of the package.
+     * Returns the package file of the package.
      *
-     * @return RootPackageConfig The package configuration.
+     * @return RootPackageFile The package file.
      */
-    public function getConfig()
+    public function getPackageFile()
     {
-        return parent::getConfig();
+        return parent::getPackageFile();
     }
 }

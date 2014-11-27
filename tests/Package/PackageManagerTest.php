@@ -11,13 +11,14 @@
 
 namespace Puli\RepositoryManager\Tests\Package;
 
-use Puli\RepositoryManager\Config\GlobalConfig;
-use Puli\RepositoryManager\Package\Config\PackageConfig;
-use Puli\RepositoryManager\Package\Config\PackageConfigStorage;
-use Puli\RepositoryManager\Package\Config\RootPackageConfig;
+use Puli\RepositoryManager\Config\Config;
+use Puli\RepositoryManager\Config\ConfigFile\ConfigFile;
 use Puli\RepositoryManager\Package\InstallFile\InstallFile;
 use Puli\RepositoryManager\Package\InstallFile\InstallFileStorage;
 use Puli\RepositoryManager\Package\InstallFile\PackageDescriptor;
+use Puli\RepositoryManager\Package\PackageFile\PackageFile;
+use Puli\RepositoryManager\Package\PackageFile\PackageFileStorage;
+use Puli\RepositoryManager\Package\PackageFile\RootPackageFile;
 use Puli\RepositoryManager\Package\PackageManager;
 use Puli\RepositoryManager\Tests\Package\Fixtures\TestProjectEnvironment;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -47,37 +48,37 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
     /**
      * @var string
      */
-    private $package1Dir;
+    private $packageDir1;
 
     /**
      * @var string
      */
-    private $package2Dir;
+    private $packageDir2;
 
     /**
      * @var string
      */
-    private $package3Dir;
+    private $packageDir3;
 
     /**
-     * @var GlobalConfig
+     * @var ConfigFile
      */
-    private $globalConfig;
+    private $configFile;
 
     /**
-     * @var RootPackageConfig
+     * @var RootPackageFile
      */
-    private $rootConfig;
+    private $rootPackageFile;
 
     /**
-     * @var PackageConfig
+     * @var PackageFile
      */
-    private $package1Config;
+    private $packageFile1;
 
     /**
-     * @var PackageConfig
+     * @var PackageFile
      */
-    private $package2Config;
+    private $packageFile2;
 
     /**
      * @var InstallFile
@@ -90,14 +91,14 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
     private $dispatcher;
 
     /**
-     * @var \Puli\RepositoryManager\Tests\Package\Fixtures\TestProjectEnvironment
+     * @var TestProjectEnvironment
      */
     private $environment;
 
     /**
-     * @var \PHPUnit_Framework_MockObject_MockObject|PackageConfigStorage
+     * @var \PHPUnit_Framework_MockObject_MockObject|PackageFileStorage
      */
-    private $packageConfigStorage;
+    private $packageFileStorage;
 
     /**
      * @var \PHPUnit_Framework_MockObject_MockObject|InstallFileStorage
@@ -117,17 +118,17 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
 
         $this->homeDir = __DIR__.'/Fixtures/home';
         $this->rootDir = __DIR__.'/Fixtures/root';
-        $this->package1Dir = __DIR__.'/Fixtures/package1';
-        $this->package2Dir = __DIR__.'/Fixtures/package2';
-        $this->package3Dir = __DIR__.'/Fixtures/package3';
+        $this->packageDir1 = __DIR__.'/Fixtures/package1';
+        $this->packageDir2 = __DIR__.'/Fixtures/package2';
+        $this->packageDir3 = __DIR__.'/Fixtures/package3';
 
-        $this->globalConfig = new GlobalConfig();
-        $this->rootConfig = new RootPackageConfig($this->globalConfig, 'root');
-        $this->package1Config = new PackageConfig('package1');
-        $this->package2Config = new PackageConfig('package2');
+        $this->configFile = new ConfigFile();
+        $this->rootPackageFile = new RootPackageFile('root');
+        $this->packageFile1 = new PackageFile('package1');
+        $this->packageFile2 = new PackageFile('package2');
         $this->installFile = new InstallFile();
 
-        $this->packageConfigStorage = $this->getMockBuilder('Puli\RepositoryManager\Package\Config\PackageConfigStorage')
+        $this->packageFileStorage = $this->getMockBuilder('Puli\RepositoryManager\Package\PackageFile\PackageFileStorage')
             ->disableOriginalConstructor()
             ->getMock();
 
@@ -149,9 +150,10 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
 
     public function testLoadPackages()
     {
-        $this->rootConfig->setInstallFile('repository.json');
-        $package1Config = new PackageConfig('package1');
-        $package2Config = new PackageConfig('package2');
+        $this->environment->getConfig()->set(Config::INSTALL_FILE, 'repository.json');
+
+        $package1Config = new PackageFile('package1');
+        $package2Config = new PackageFile('package2');
 
         $installFile = new InstallFile();
         $installFile->addPackageDescriptor(new PackageDescriptor('../package1'));
@@ -162,16 +164,16 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
             ->with($this->rootDir.'/repository.json')
             ->will($this->returnValue($installFile));
 
-        $this->packageConfigStorage->expects($this->at(0))
-            ->method('loadPackageConfig')
-            ->with($this->package1Dir.'/puli.json')
+        $this->packageFileStorage->expects($this->at(0))
+            ->method('loadPackageFile')
+            ->with($this->packageDir1.'/puli.json')
             ->will($this->returnValue($package1Config));
-        $this->packageConfigStorage->expects($this->at(1))
-            ->method('loadPackageConfig')
-            ->with($this->package2Dir.'/puli.json')
+        $this->packageFileStorage->expects($this->at(1))
+            ->method('loadPackageFile')
+            ->with($this->packageDir2.'/puli.json')
             ->will($this->returnValue($package2Config));
 
-        $manager = new PackageManager($this->environment, $this->packageConfigStorage, $this->installFileStorage);
+        $manager = new PackageManager($this->environment, $this->packageFileStorage, $this->installFileStorage);
 
         $this->assertSame($installFile, $manager->getInstallFile());
 
@@ -181,17 +183,17 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf('Puli\RepositoryManager\Package\RootPackage', $packages['root']);
         $this->assertSame('root', $packages['root']->getName());
         $this->assertSame($this->rootDir, $packages['root']->getInstallPath());
-        $this->assertSame($this->rootConfig, $packages['root']->getConfig());
+        $this->assertSame($this->rootPackageFile, $packages['root']->getPackageFile());
 
         $this->assertInstanceOf('Puli\RepositoryManager\Package\Package', $packages['package1']);
         $this->assertSame('package1', $packages['package1']->getName());
-        $this->assertSame($this->package1Dir, $packages['package1']->getInstallPath());
-        $this->assertSame($package1Config, $packages['package1']->getConfig());
+        $this->assertSame($this->packageDir1, $packages['package1']->getInstallPath());
+        $this->assertSame($package1Config, $packages['package1']->getPackageFile());
 
         $this->assertInstanceOf('Puli\RepositoryManager\Package\Package', $packages['package2']);
         $this->assertSame('package2', $packages['package2']->getName());
-        $this->assertSame($this->package2Dir, $packages['package2']->getInstallPath());
-        $this->assertSame($package2Config, $packages['package2']->getConfig());
+        $this->assertSame($this->packageDir2, $packages['package2']->getInstallPath());
+        $this->assertSame($package2Config, $packages['package2']->getPackageFile());
     }
 
     /**
@@ -199,29 +201,30 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
      */
     public function testLoadPackagesFailsIfNameConflict()
     {
-        $this->rootConfig->setInstallFile('repository.json');
-        $package1Config = new PackageConfig('package1');
-        $package2Config = new PackageConfig('package1');
+        $this->environment->getConfig()->set(Config::INSTALL_FILE, 'repository.json');
+
+        $package1Config = new PackageFile('package1');
+        $package2Config = new PackageFile('package1');
 
         $installFile = new InstallFile();
-        $installFile->addPackageDescriptor(new PackageDescriptor($this->package1Dir));
-        $installFile->addPackageDescriptor(new PackageDescriptor($this->package2Dir));
+        $installFile->addPackageDescriptor(new PackageDescriptor($this->packageDir1));
+        $installFile->addPackageDescriptor(new PackageDescriptor($this->packageDir2));
 
         $this->installFileStorage->expects($this->once())
             ->method('loadInstallFile')
             ->with($this->rootDir.'/repository.json')
             ->will($this->returnValue($installFile));
 
-        $this->packageConfigStorage->expects($this->at(0))
-            ->method('loadPackageConfig')
-            ->with($this->package1Dir.'/puli.json')
+        $this->packageFileStorage->expects($this->at(0))
+            ->method('loadPackageFile')
+            ->with($this->packageDir1.'/puli.json')
             ->will($this->returnValue($package1Config));
-        $this->packageConfigStorage->expects($this->at(1))
-            ->method('loadPackageConfig')
-            ->with($this->package2Dir.'/puli.json')
+        $this->packageFileStorage->expects($this->at(1))
+            ->method('loadPackageFile')
+            ->with($this->packageDir2.'/puli.json')
             ->will($this->returnValue($package2Config));
 
-        new PackageManager($this->environment, $this->packageConfigStorage, $this->installFileStorage);
+        new PackageManager($this->environment, $this->packageFileStorage, $this->installFileStorage);
     }
 
     /**
@@ -230,7 +233,7 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
      */
     public function testLoadPackagesFailsIfPackageDirNotFound()
     {
-        $this->rootConfig->setInstallFile('repository.json');
+        $this->environment->getConfig()->set(Config::INSTALL_FILE, 'repository.json');
 
         $installFile = new InstallFile();
         $installFile->addPackageDescriptor(new PackageDescriptor('foobar'));
@@ -240,7 +243,7 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
             ->with($this->rootDir.'/repository.json')
             ->will($this->returnValue($installFile));
 
-        new PackageManager($this->environment, $this->packageConfigStorage, $this->installFileStorage);
+        new PackageManager($this->environment, $this->packageFileStorage, $this->installFileStorage);
     }
 
     /**
@@ -249,7 +252,7 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
      */
     public function testLoadPackagesFailsIfPackageNoDirectory()
     {
-        $this->rootConfig->setInstallFile('repository.json');
+        $this->environment->getConfig()->set(Config::INSTALL_FILE, 'repository.json');
 
         $installFile = new InstallFile();
         $installFile->addPackageDescriptor(new PackageDescriptor(__DIR__.'/Fixtures/file'));
@@ -259,18 +262,18 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
             ->with($this->rootDir.'/repository.json')
             ->will($this->returnValue($installFile));
 
-        new PackageManager($this->environment, $this->packageConfigStorage, $this->installFileStorage);
+        new PackageManager($this->environment, $this->packageFileStorage, $this->installFileStorage);
     }
 
     public function testInstallPackage()
     {
         $this->initDefaultManager();
 
-        $config = new PackageConfig('package3');
+        $config = new PackageFile('package3');
 
-        $this->packageConfigStorage->expects($this->once())
-            ->method('loadPackageConfig')
-            ->with($this->package3Dir.'/puli.json')
+        $this->packageFileStorage->expects($this->once())
+            ->method('loadPackageFile')
+            ->with($this->packageDir3.'/puli.json')
             ->will($this->returnValue($config));
 
         $this->installFileStorage->expects($this->once())
@@ -280,26 +283,26 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
                 $descriptors = $installFile->getPackageDescriptors();
 
                 \PHPUnit_Framework_Assert::assertCount(3, $descriptors);
-                \PHPUnit_Framework_Assert::assertSame($this->package1Dir, $descriptors[0]->getInstallPath());
+                \PHPUnit_Framework_Assert::assertSame($this->packageDir1, $descriptors[0]->getInstallPath());
                 \PHPUnit_Framework_Assert::assertFalse($descriptors[0]->isNew());
-                \PHPUnit_Framework_Assert::assertSame($this->package2Dir, $descriptors[1]->getInstallPath());
+                \PHPUnit_Framework_Assert::assertSame($this->packageDir2, $descriptors[1]->getInstallPath());
                 \PHPUnit_Framework_Assert::assertFalse($descriptors[1]->isNew());
                 \PHPUnit_Framework_Assert::assertSame('../package3', $descriptors[2]->getInstallPath());
                 \PHPUnit_Framework_Assert::assertTrue($descriptors[2]->isNew());
             }));
 
-        $this->manager->installPackage($this->package3Dir);
+        $this->manager->installPackage($this->packageDir3);
     }
 
     public function testInstallPackageWithRelativePath()
     {
         $this->initDefaultManager();
 
-        $config = new PackageConfig('package3');
+        $config = new PackageFile('package3');
 
-        $this->packageConfigStorage->expects($this->once())
-            ->method('loadPackageConfig')
-            ->with($this->package3Dir.'/puli.json')
+        $this->packageFileStorage->expects($this->once())
+            ->method('loadPackageFile')
+            ->with($this->packageDir3.'/puli.json')
             ->will($this->returnValue($config));
 
         $this->installFileStorage->expects($this->once())
@@ -309,9 +312,9 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
                 $descriptors = $installFile->getPackageDescriptors();
 
                 \PHPUnit_Framework_Assert::assertCount(3, $descriptors);
-                \PHPUnit_Framework_Assert::assertSame($this->package1Dir, $descriptors[0]->getInstallPath());
+                \PHPUnit_Framework_Assert::assertSame($this->packageDir1, $descriptors[0]->getInstallPath());
                 \PHPUnit_Framework_Assert::assertFalse($descriptors[0]->isNew());
-                \PHPUnit_Framework_Assert::assertSame($this->package2Dir, $descriptors[1]->getInstallPath());
+                \PHPUnit_Framework_Assert::assertSame($this->packageDir2, $descriptors[1]->getInstallPath());
                 \PHPUnit_Framework_Assert::assertFalse($descriptors[1]->isNew());
                 \PHPUnit_Framework_Assert::assertSame('../package3', $descriptors[2]->getInstallPath());
                 \PHPUnit_Framework_Assert::assertTrue($descriptors[2]->isNew());
@@ -324,13 +327,13 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
     {
         $this->initDefaultManager();
 
-        $this->packageConfigStorage->expects($this->never())
-            ->method('loadPackageConfig');
+        $this->packageFileStorage->expects($this->never())
+            ->method('loadPackageFile');
 
         $this->installFileStorage->expects($this->never())
             ->method('saveInstallFile');
 
-        $this->manager->installPackage($this->package2Dir);
+        $this->manager->installPackage($this->packageDir2);
     }
 
     /**
@@ -340,17 +343,17 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
     {
         $this->initDefaultManager();
 
-        $config = new PackageConfig('package2');
+        $config = new PackageFile('package2');
 
-        $this->packageConfigStorage->expects($this->at(0))
-            ->method('loadPackageConfig')
-            ->with($this->package3Dir.'/puli.json')
+        $this->packageFileStorage->expects($this->at(0))
+            ->method('loadPackageFile')
+            ->with($this->packageDir3.'/puli.json')
             ->will($this->returnValue($config));
 
         $this->installFileStorage->expects($this->never())
             ->method('saveInstallFile');
 
-        $this->manager->installPackage($this->package3Dir);
+        $this->manager->installPackage($this->packageDir3);
     }
 
     /**
@@ -379,8 +382,8 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
     {
         $this->initDefaultManager();
 
-        $this->assertTrue($this->manager->isPackageInstalled($this->package1Dir));
-        $this->assertFalse($this->manager->isPackageInstalled($this->package3Dir));
+        $this->assertTrue($this->manager->isPackageInstalled($this->packageDir1));
+        $this->assertFalse($this->manager->isPackageInstalled($this->packageDir3));
     }
 
     public function testIsPackageInstalledAcceptsRelativePath()
@@ -410,14 +413,14 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf('Puli\RepositoryManager\Package\RootPackage', $rootPackage);
         $this->assertSame('root', $rootPackage->getName());
         $this->assertSame($this->rootDir, $rootPackage->getInstallPath());
-        $this->assertSame($this->rootConfig, $rootPackage->getConfig());
+        $this->assertSame($this->rootPackageFile, $rootPackage->getPackageFile());
 
         $package1 = $this->manager->getPackage('package1');
 
         $this->assertInstanceOf('Puli\RepositoryManager\Package\Package', $package1);
         $this->assertSame('package1', $package1->getName());
-        $this->assertSame($this->package1Dir, $package1->getInstallPath());
-        $this->assertSame($this->package1Config, $package1->getConfig());
+        $this->assertSame($this->packageDir1, $package1->getInstallPath());
+        $this->assertSame($this->packageFile1, $package1->getPackageFile());
     }
 
     /**
@@ -439,7 +442,7 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf('Puli\RepositoryManager\Package\RootPackage', $rootPackage);
         $this->assertSame('root', $rootPackage->getName());
         $this->assertSame($this->rootDir, $rootPackage->getInstallPath());
-        $this->assertSame($this->rootConfig, $rootPackage->getConfig());
+        $this->assertSame($this->rootPackageFile, $rootPackage->getPackageFile());
     }
 
     private function initEnvironment()
@@ -447,32 +450,33 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
         $this->environment = new TestProjectEnvironment(
             $this->homeDir,
             $this->rootDir,
-            $this->globalConfig,
-            $this->rootConfig,
+            $this->configFile,
+            $this->rootPackageFile,
             $this->dispatcher
         );
     }
 
     private function initDefaultManager()
     {
-        $this->rootConfig->setInstallFile('repository.json');
-        $this->installFile->addPackageDescriptor(new PackageDescriptor($this->package1Dir, false));
-        $this->installFile->addPackageDescriptor(new PackageDescriptor($this->package2Dir, false));
+        $this->environment->getConfig()->set(Config::INSTALL_FILE, 'repository.json');
+
+        $this->installFile->addPackageDescriptor(new PackageDescriptor($this->packageDir1, false));
+        $this->installFile->addPackageDescriptor(new PackageDescriptor($this->packageDir2, false));
 
         $this->installFileStorage->expects($this->once())
             ->method('loadInstallFile')
             ->with($this->rootDir.'/repository.json')
             ->will($this->returnValue($this->installFile));
 
-        $this->packageConfigStorage->expects($this->at(0))
-            ->method('loadPackageConfig')
-            ->with($this->package1Dir.'/puli.json')
-            ->will($this->returnValue($this->package1Config));
-        $this->packageConfigStorage->expects($this->at(1))
-            ->method('loadPackageConfig')
-            ->with($this->package2Dir.'/puli.json')
-            ->will($this->returnValue($this->package2Config));
+        $this->packageFileStorage->expects($this->at(0))
+            ->method('loadPackageFile')
+            ->with($this->packageDir1.'/puli.json')
+            ->will($this->returnValue($this->packageFile1));
+        $this->packageFileStorage->expects($this->at(1))
+            ->method('loadPackageFile')
+            ->with($this->packageDir2.'/puli.json')
+            ->will($this->returnValue($this->packageFile2));
 
-        $this->manager = new PackageManager($this->environment, $this->packageConfigStorage, $this->installFileStorage);
+        $this->manager = new PackageManager($this->environment, $this->packageFileStorage, $this->installFileStorage);
     }
 }

@@ -1,4 +1,6 @@
 {
     "name": "real-root",
-    "package-repository": "packages.json"
+    "config": {
+        "install-file": "packages.json"
+    }
 }

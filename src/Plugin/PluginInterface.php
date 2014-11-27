@@ -11,7 +11,7 @@
 
 namespace Puli\RepositoryManager\Plugin;
 
-use Puli\RepositoryManager\Project\ProjectEnvironment;
+use Puli\RepositoryManager\Environment\ProjectEnvironment;
 
 /**
  * A plugin for the repository manager.

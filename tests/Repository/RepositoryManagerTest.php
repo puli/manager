@@ -12,12 +12,13 @@
 namespace Puli\RepositoryManager\Tests\Repository;
 
 use Puli\Repository\ResourceRepositoryInterface;
-use Puli\RepositoryManager\Config\GlobalConfig;
+use Puli\RepositoryManager\Config\Config;
+use Puli\RepositoryManager\Config\ConfigFile\ConfigFile;
 use Puli\RepositoryManager\Package\Collection\PackageCollection;
-use Puli\RepositoryManager\Package\Config\PackageConfig;
-use Puli\RepositoryManager\Package\Config\ResourceDescriptor;
-use Puli\RepositoryManager\Package\Config\RootPackageConfig;
 use Puli\RepositoryManager\Package\Package;
+use Puli\RepositoryManager\Package\PackageFile\PackageFile;
+use Puli\RepositoryManager\Package\PackageFile\ResourceDescriptor;
+use Puli\RepositoryManager\Package\PackageFile\RootPackageFile;
 use Puli\RepositoryManager\Package\RootPackage;
 use Puli\RepositoryManager\Repository\RepositoryManager;
 use Puli\RepositoryManager\Tests\Package\Fixtures\TestProjectEnvironment;
@@ -53,32 +54,32 @@ class RepositoryManagerTest extends \PHPUnit_Framework_TestCase
     /**
      * @var string
      */
-    private $package1Dir;
+    private $packageDir1;
 
     /**
      * @var string
      */
-    private $package2Dir;
+    private $packageDir2;
 
     /**
-     * @var GlobalConfig
+     * @var ConfigFile
      */
-    private $globalConfig;
+    private $configFile;
 
     /**
-     * @var RootPackageConfig
+     * @var RootPackageFile
      */
-    private $rootConfig;
+    private $rootPackageFile;
 
     /**
-     * @var PackageConfig
+     * @var PackageFile
      */
-    private $package1Config;
+    private $packageFile1;
 
     /**
-     * @var PackageConfig
+     * @var PackageFile
      */
-    private $package2Config;
+    private $packageFile2;
 
     /**
      * @var TestProjectEnvironment
@@ -102,55 +103,55 @@ class RepositoryManagerTest extends \PHPUnit_Framework_TestCase
 
         $this->homeDir = __DIR__.'/Fixtures/home';
         $this->rootDir = __DIR__.'/Fixtures/root';
-        $this->package1Dir = __DIR__.'/Fixtures/package1';
-        $this->package2Dir = __DIR__.'/Fixtures/package2';
+        $this->packageDir1 = __DIR__.'/Fixtures/package1';
+        $this->packageDir2 = __DIR__.'/Fixtures/package2';
 
-        $this->globalConfig = new GlobalConfig();
-        $this->rootConfig = new RootPackageConfig($this->globalConfig, 'root');
-        $this->package1Config = new PackageConfig('package1');
-        $this->package2Config = new PackageConfig('package2');
+        $this->configFile = new ConfigFile();
+        $this->rootPackageFile = new RootPackageFile('root');
+        $this->packageFile1 = new PackageFile('package1');
+        $this->packageFile2 = new PackageFile('package2');
 
         $this->initManager();
     }
 
     public function testDumpRepository()
     {
-        $this->rootConfig->setResourceRepositoryCache($this->tempDir.'/cache');
-        $this->rootConfig->setGeneratedResourceRepository($this->tempDir.'/repository.php');
+        $this->environment->getConfig()->set(Config::REPO_DUMP_DIR, $this->tempDir.'/dump');
+        $this->environment->getConfig()->set(Config::REPO_DUMP_FILE, $this->tempDir.'/repository.php');
 
-        $this->rootConfig->addResourceDescriptor(new ResourceDescriptor('/root', 'resources'));
-        $this->package1Config->addResourceDescriptor(new ResourceDescriptor('/package1', 'resources'));
-        $this->package2Config->addResourceDescriptor(new ResourceDescriptor('/package2', 'resources'));
+        $this->rootPackageFile->addResourceDescriptor(new ResourceDescriptor('/root', 'resources'));
+        $this->packageFile1->addResourceDescriptor(new ResourceDescriptor('/package1', 'resources'));
+        $this->packageFile2->addResourceDescriptor(new ResourceDescriptor('/package2', 'resources'));
 
         $this->manager->dumpRepository();
 
-        $this->assertFileExists($this->tempDir.'/cache');
+        $this->assertFileExists($this->tempDir.'/dump');
         $this->assertFileExists($this->tempDir.'/repository.php');
 
         /** @var ResourceRepositoryInterface $repo */
         $repo = require $this->tempDir.'/repository.php';
 
         $this->assertSame($this->rootDir.'/resources', $repo->get('/root')->getLocalPath());
-        $this->assertSame($this->package1Dir.'/resources', $repo->get('/package1')->getLocalPath());
-        $this->assertSame($this->package2Dir.'/resources', $repo->get('/package2')->getLocalPath());
+        $this->assertSame($this->packageDir1.'/resources', $repo->get('/package1')->getLocalPath());
+        $this->assertSame($this->packageDir2.'/resources', $repo->get('/package2')->getLocalPath());
     }
 
     public function testDumpRepositoryReplacesExistingFiles()
     {
-        $this->rootConfig->setResourceRepositoryCache($this->tempDir.'/cache');
-        $this->rootConfig->setGeneratedResourceRepository($this->tempDir.'/repository.php');
+        $this->environment->getConfig()->set(Config::REPO_DUMP_DIR, $this->tempDir.'/dump');
+        $this->environment->getConfig()->set(Config::REPO_DUMP_FILE, $this->tempDir.'/repository.php');
 
-        mkdir($this->tempDir.'/cache');
-        touch($this->tempDir.'/cache/old');
+        mkdir($this->tempDir.'/dump');
+        touch($this->tempDir.'/dump/old');
         touch($this->tempDir.'/repository.php');
 
-        $this->rootConfig->addResourceDescriptor(new ResourceDescriptor('/root', 'resources'));
+        $this->rootPackageFile->addResourceDescriptor(new ResourceDescriptor('/root', 'resources'));
 
         $this->manager->dumpRepository();
 
-        $this->assertFileExists($this->tempDir.'/cache');
+        $this->assertFileExists($this->tempDir.'/dump');
         $this->assertFileExists($this->tempDir.'/repository.php');
-        $this->assertFileNotExists($this->tempDir.'/cache/old');
+        $this->assertFileNotExists($this->tempDir.'/dump/old');
 
         /** @var ResourceRepositoryInterface $repo */
         $repo = require $this->tempDir.'/repository.php';
@@ -167,14 +168,14 @@ class RepositoryManagerTest extends \PHPUnit_Framework_TestCase
 
         $this->initManager();
 
-        $this->rootConfig->setResourceRepositoryCache('cache-dir/cache');
-        $this->rootConfig->setGeneratedResourceRepository('repo-dir/repository.php');
+        $this->environment->getConfig()->set(Config::REPO_DUMP_DIR, 'dump-dir/dump');
+        $this->environment->getConfig()->set(Config::REPO_DUMP_FILE, 'repo-dir/repository.php');
 
-        $this->rootConfig->addResourceDescriptor(new ResourceDescriptor('/root', 'resources'));
+        $this->rootPackageFile->addResourceDescriptor(new ResourceDescriptor('/root', 'resources'));
 
         $this->manager->dumpRepository();
 
-        $this->assertFileExists($this->tempDir.'/cache-dir/cache');
+        $this->assertFileExists($this->tempDir.'/dump-dir/dump');
         $this->assertFileExists($this->tempDir.'/repo-dir/repository.php');
 
         /** @var ResourceRepositoryInterface $repo */
@@ -185,14 +186,14 @@ class RepositoryManagerTest extends \PHPUnit_Framework_TestCase
 
     public function testDumpRepositoryWithCustomRepositoryPath()
     {
-        $this->rootConfig->setResourceRepositoryCache($this->tempDir.'/cache');
-        $this->rootConfig->setGeneratedResourceRepository($this->tempDir.'/repository.php');
+        $this->environment->getConfig()->set(Config::REPO_DUMP_DIR, $this->tempDir.'/dump');
+        $this->environment->getConfig()->set(Config::REPO_DUMP_FILE, $this->tempDir.'/repository.php');
 
-        $this->rootConfig->addResourceDescriptor(new ResourceDescriptor('/root', 'resources'));
+        $this->rootPackageFile->addResourceDescriptor(new ResourceDescriptor('/root', 'resources'));
 
         $this->manager->dumpRepository($this->tempDir.'/custom-repository.php');
 
-        $this->assertFileExists($this->tempDir.'/cache');
+        $this->assertFileExists($this->tempDir.'/dump');
         $this->assertFileExists($this->tempDir.'/custom-repository.php');
         $this->assertFileNotExists($this->tempDir.'/repository.php');
 
@@ -204,15 +205,15 @@ class RepositoryManagerTest extends \PHPUnit_Framework_TestCase
 
     public function testDumpRepositoryWithCustomCachePath()
     {
-        $this->rootConfig->setResourceRepositoryCache($this->tempDir.'/cache');
-        $this->rootConfig->setGeneratedResourceRepository($this->tempDir.'/repository.php');
+        $this->environment->getConfig()->set(Config::REPO_DUMP_DIR, $this->tempDir.'/dump');
+        $this->environment->getConfig()->set(Config::REPO_DUMP_FILE, $this->tempDir.'/repository.php');
 
-        $this->rootConfig->addResourceDescriptor(new ResourceDescriptor('/root', 'resources'));
+        $this->rootPackageFile->addResourceDescriptor(new ResourceDescriptor('/root', 'resources'));
 
         $this->manager->dumpRepository(null, $this->tempDir.'/custom-cache');
 
         $this->assertFileExists($this->tempDir.'/custom-cache');
-        $this->assertFileNotExists($this->tempDir.'/cache');
+        $this->assertFileNotExists($this->tempDir.'/dump');
 
         /** @var ResourceRepositoryInterface $repo */
         $repo = require $this->tempDir.'/repository.php';
@@ -225,15 +226,15 @@ class RepositoryManagerTest extends \PHPUnit_Framework_TestCase
         $this->environment = new TestProjectEnvironment(
             $this->homeDir,
             $this->rootDir,
-            $this->globalConfig,
-            $this->rootConfig,
+            $this->configFile,
+            $this->rootPackageFile,
             $this->dispatcher
         );
 
         $this->packages = new PackageCollection(array(
-            new RootPackage($this->rootConfig, $this->rootDir),
-            new Package($this->package1Config, $this->package1Dir),
-            new Package($this->package2Config, $this->package2Dir),
+            new RootPackage($this->rootPackageFile, $this->rootDir),
+            new Package($this->packageFile1, $this->packageDir1),
+            new Package($this->packageFile2, $this->packageDir2),
         ));
 
         $this->manager = new RepositoryManager($this->environment, $this->packages);

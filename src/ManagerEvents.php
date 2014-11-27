@@ -20,14 +20,14 @@ namespace Puli\RepositoryManager;
 class ManagerEvents
 {
     /**
-     * Dispatched when a package JSON file was loaded.
+     * Dispatched when a package file is loaded.
      */
-    const LOAD_PACKAGE_CONFIG = 'package-config.load';
+    const LOAD_PACKAGE_FILE = 'package-file.load';
 
     /**
-     * Dispatched when package JSON data was generated.
+     * Dispatched when a package file is saved.
      */
-    const SAVE_PACKAGE_CONFIG = 'package-config.save';
+    const SAVE_PACKAGE_FILE = 'package-file.save';
 
     private final function __construct()
     {

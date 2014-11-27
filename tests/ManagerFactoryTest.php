@@ -56,11 +56,12 @@ class ManagerFactoryTest extends \PHPUnit_Framework_TestCase
     {
         $environment = ManagerFactory::createGlobalEnvironment();
 
-        $this->assertInstanceOf('Puli\RepositoryManager\Config\GlobalEnvironment', $environment);
-        $this->assertInstanceOf('Puli\RepositoryManager\Config\GlobalConfig', $environment->getGlobalConfig());
+        $this->assertInstanceOf('Puli\RepositoryManager\Environment\GlobalEnvironment', $environment);
+        $this->assertInstanceOf('Puli\RepositoryManager\Config\Config', $environment->getConfig());
+        $this->assertInstanceOf('Puli\RepositoryManager\Config\ConfigFile\ConfigFile', $environment->getConfigFile());
         $this->assertInstanceOf('Symfony\Component\EventDispatcher\EventDispatcherInterface', $environment->getEventDispatcher());
         $this->assertSame($this->tempHome, $environment->getHomeDirectory());
-        $this->assertSame($this->tempHome.'/config.json', $environment->getGlobalConfig()->getPath());
+        $this->assertSame($this->tempHome.'/config.json', $environment->getConfigFile()->getPath());
     }
 
     public function testCreateGlobalEnvironmentProtectsHome()
@@ -77,14 +78,15 @@ class ManagerFactoryTest extends \PHPUnit_Framework_TestCase
     {
         $environment = ManagerFactory::createProjectEnvironment($this->tempDir);
 
-        $this->assertInstanceOf('Puli\RepositoryManager\Project\ProjectEnvironment', $environment);
-        $this->assertInstanceOf('Puli\RepositoryManager\Config\GlobalConfig', $environment->getGlobalConfig());
-        $this->assertInstanceOf('Puli\RepositoryManager\Package\Config\RootPackageConfig', $environment->getRootPackageConfig());
+        $this->assertInstanceOf('Puli\RepositoryManager\Environment\ProjectEnvironment', $environment);
+        $this->assertInstanceOf('Puli\RepositoryManager\Config\Config', $environment->getConfig());
+        $this->assertInstanceOf('Puli\RepositoryManager\Config\ConfigFile\ConfigFile', $environment->getConfigFile());
+        $this->assertInstanceOf('Puli\RepositoryManager\Package\PackageFile\RootPackageFile', $environment->getRootPackageFile());
         $this->assertInstanceOf('Symfony\Component\EventDispatcher\EventDispatcherInterface', $environment->getEventDispatcher());
         $this->assertSame($this->tempHome, $environment->getHomeDirectory());
         $this->assertSame($this->tempDir, $environment->getRootDirectory());
-        $this->assertSame($this->tempHome.'/config.json', $environment->getGlobalConfig()->getPath());
-        $this->assertSame($this->tempDir.'/puli.json', $environment->getRootPackageConfig()->getPath());
+        $this->assertSame($this->tempHome.'/config.json', $environment->getConfigFile()->getPath());
+        $this->assertSame($this->tempDir.'/puli.json', $environment->getRootPackageFile()->getPath());
     }
 
     public function testCreateProjectEnvironmentProtectsHome()
@@ -97,30 +99,30 @@ class ManagerFactoryTest extends \PHPUnit_Framework_TestCase
         $this->assertSame('Deny from all', file_get_contents($this->tempHome.'/.htaccess'));
     }
 
-    public function testCreateGlobalConfigManager()
+    public function testCreateConfigFileManager()
     {
         $environment = ManagerFactory::createGlobalEnvironment();
-        $manager = ManagerFactory::createGlobalConfigManager($environment);
+        $manager = ManagerFactory::createConfigFileManager($environment);
 
-        $this->assertInstanceOf('Puli\RepositoryManager\Config\GlobalConfigManager', $manager);
+        $this->assertInstanceOf('Puli\RepositoryManager\Config\ConfigFile\ConfigFileManager', $manager);
         $this->assertSame($environment, $manager->getEnvironment());
     }
 
-    public function testCreateGlobalConfigManagerWithProjectEnvironment()
+    public function testCreateConfigFileManagerWithProjectEnvironment()
     {
         $environment = ManagerFactory::createProjectEnvironment($this->tempDir);
-        $manager = ManagerFactory::createGlobalConfigManager($environment);
+        $manager = ManagerFactory::createConfigFileManager($environment);
 
-        $this->assertInstanceOf('Puli\RepositoryManager\Config\GlobalConfigManager', $manager);
+        $this->assertInstanceOf('Puli\RepositoryManager\Config\ConfigFile\ConfigFileManager', $manager);
         $this->assertSame($environment, $manager->getEnvironment());
     }
 
-    public function testCreateProjectConfigManager()
+    public function testCreatePackageFileManager()
     {
         $environment = ManagerFactory::createProjectEnvironment($this->tempDir);
-        $manager = ManagerFactory::createProjectConfigManager($environment);
+        $manager = ManagerFactory::createPackageFileManager($environment);
 
-        $this->assertInstanceOf('Puli\RepositoryManager\Project\ProjectConfigManager', $manager);
+        $this->assertInstanceOf('Puli\RepositoryManager\Package\PackageFile\PackageFileManager', $manager);
         $this->assertSame($environment, $manager->getEnvironment());
     }
 
