@@ -11,20 +11,20 @@
 
 namespace Puli\RepositoryManager\Tests\Package\InstallFile;
 
-use Puli\RepositoryManager\Package\InstallFile\PackageDescriptor;
+use Puli\RepositoryManager\Package\InstallFile\PackageMetadata;
 
 /**
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class PackageDescriptorTest extends \PHPUnit_Framework_TestCase
+class PackageMetadataTest extends \PHPUnit_Framework_TestCase
 {
     /**
      * @expectedException \InvalidArgumentException
      */
     public function testFailIfInstallPathNotString()
     {
-        new PackageDescriptor(12345);
+        new PackageMetadata(12345);
     }
 
     /**
@@ -32,7 +32,7 @@ class PackageDescriptorTest extends \PHPUnit_Framework_TestCase
      */
     public function testFailIfInstallPathEmpty()
     {
-        new PackageDescriptor('');
+        new PackageMetadata('');
     }
 
     /**
@@ -40,6 +40,8 @@ class PackageDescriptorTest extends \PHPUnit_Framework_TestCase
      */
     public function testFailIfNewNotBoolean()
     {
-        new PackageDescriptor('/path', 12345);
+        $metadata = new PackageMetadata('/path');
+
+        $metadata->setNew(12345);
     }
 }

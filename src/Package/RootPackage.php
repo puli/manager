@@ -11,6 +11,7 @@
 
 namespace Puli\RepositoryManager\Package;
 
+use Puli\RepositoryManager\Package\InstallFile\PackageMetadata;
 use Puli\RepositoryManager\Package\PackageFile\RootPackageFile;
 
 /**
@@ -25,11 +26,12 @@ class RootPackage extends Package
      * Creates a new root package.
      *
      * @param RootPackageFile $packageFile The package file.
-     * @param string          $installPath The install path of the package.
+     * @param string          $installPath The absolute install path.
+     * @param PackageMetadata $metadata    The package metadata.
      */
-    public function __construct(RootPackageFile $packageFile, $installPath)
+    public function __construct(RootPackageFile $packageFile, $installPath, PackageMetadata $metadata = null)
     {
-        parent::__construct($packageFile, $installPath);
+        parent::__construct($packageFile, $installPath, $metadata);
 
         if (null === $this->getName()) {
             $this->setName('__root__');

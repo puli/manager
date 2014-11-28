@@ -14,7 +14,7 @@ namespace Puli\RepositoryManager\Package\InstallFile\Reader;
 use Puli\RepositoryManager\FileNotFoundException;
 use Puli\RepositoryManager\InvalidConfigException;
 use Puli\RepositoryManager\Package\InstallFile\InstallFile;
-use Puli\RepositoryManager\Package\InstallFile\PackageDescriptor;
+use Puli\RepositoryManager\Package\InstallFile\PackageMetadata;
 use Webmozart\Json\DecodingFailedException;
 use Webmozart\Json\JsonDecoder;
 use Webmozart\Json\ValidationFailedException;
@@ -47,10 +47,14 @@ class InstallFileJsonReader implements InstallFileReaderInterface
         $array = $this->decodeFile($path);
 
         foreach ($array as $packageData) {
-            $descriptor = new PackageDescriptor($packageData->installPath);
-            $descriptor->setNew(isset($packageData->new) && $packageData->new);
+            $metadata = new PackageMetadata($packageData->installPath);
+            $metadata->setNew(isset($packageData->new) && $packageData->new);
 
-            $installFile->addPackageDescriptor($descriptor);
+            if (isset($packageData->installer)) {
+                $metadata->setInstaller($packageData->installer);
+            }
+
+            $installFile->addPackageMetadata($metadata);
         }
 
         return $installFile;

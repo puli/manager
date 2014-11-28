@@ -17,7 +17,7 @@ namespace Puli\RepositoryManager\Package\InstallFile;
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class PackageDescriptor
+class PackageMetadata
 {
     /**
      * @var string
@@ -27,20 +27,24 @@ class PackageDescriptor
     /**
      * @var bool
      */
-    private $new;
+    private $new = true;
 
     /**
-     * Creates a new package descriptor.
+     * @var string
+     */
+    private $installer = 'user';
+
+    /**
+     * Creates new package metadata.
      *
      * @param string $installPath The path where the package is installed.
      *                            If a relative path is given, the path is
      *                            assumed to be relative to the install path
      *                            of the root package.
-     * @param bool   $new         Whether the package is new. Optional.
      *
      * @throws \InvalidArgumentException If any of the arguments is invalid.
      */
-    public function __construct($installPath, $new = true)
+    public function __construct($installPath)
     {
         if (!is_string($installPath)) {
             throw new \InvalidArgumentException(sprintf(
@@ -53,15 +57,7 @@ class PackageDescriptor
             throw new \InvalidArgumentException('The passed install path must not be empty.');
         }
 
-        if (!is_bool($new)) {
-            throw new \InvalidArgumentException(sprintf(
-                'The parameter $new must be a bool. Got: %s',
-                is_object($new) ? get_class($new) : gettype($new)
-            ));
-        }
-
         $this->installPath = $installPath;
-        $this->new = $new;
     }
 
     /**
@@ -93,6 +89,33 @@ class PackageDescriptor
      */
     public function setNew($new)
     {
+        if (!is_bool($new)) {
+            throw new \InvalidArgumentException(sprintf(
+                'Expected a Boolean. Got: %s',
+                is_object($new) ? get_class($new) : gettype($new)
+            ));
+        }
+
         $this->new = $new;
+    }
+
+    /**
+     * Returns the installer of the package.
+     *
+     * @return string The package's installer.
+     */
+    public function getInstaller()
+    {
+        return $this->installer;
+    }
+
+    /**
+     * Sets the installer of the package.
+     *
+     * @param string $installer The package's installer.
+     */
+    public function setInstaller($installer)
+    {
+        $this->installer = $installer;
     }
 }

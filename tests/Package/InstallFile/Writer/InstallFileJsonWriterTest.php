@@ -12,7 +12,7 @@
 namespace Puli\RepositoryManager\Tests\Package\InstallFile\Writer;
 
 use Puli\RepositoryManager\Package\InstallFile\InstallFile;
-use Puli\RepositoryManager\Package\InstallFile\PackageDescriptor;
+use Puli\RepositoryManager\Package\InstallFile\PackageMetadata;
 use Puli\RepositoryManager\Package\InstallFile\Writer\InstallFileJsonWriter;
 use Symfony\Component\Filesystem\Filesystem;
 
@@ -47,9 +47,14 @@ class InstallFileJsonWriterTest extends \PHPUnit_Framework_TestCase
 
     public function testWriteConfig()
     {
+        $metadata1 = new PackageMetadata('/path/to/package1');
+        $metadata1->setInstaller('composer');
+        $metadata2 = new PackageMetadata('/path/to/package2');
+        $metadata2->setNew(false);
+
         $config = new InstallFile();
-        $config->addPackageDescriptor(new PackageDescriptor('/path/to/package1', true));
-        $config->addPackageDescriptor(new PackageDescriptor('/path/to/package2', false));
+        $config->addPackageMetadata($metadata1);
+        $config->addPackageMetadata($metadata2);
 
         $this->writer->writeInstallFile($config, $this->tempFile);
 

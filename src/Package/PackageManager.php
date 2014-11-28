@@ -20,7 +20,7 @@ use Puli\RepositoryManager\Package\NoSuchPackageException;
 use Puli\RepositoryManager\Package\Collection\PackageCollection;
 use Puli\RepositoryManager\Package\InstallFile\InstallFile;
 use Puli\RepositoryManager\Package\InstallFile\InstallFileStorage;
-use Puli\RepositoryManager\Package\InstallFile\PackageDescriptor;
+use Puli\RepositoryManager\Package\InstallFile\PackageMetadata;
 use Puli\RepositoryManager\Package\PackageFile\PackageFileStorage;
 use Webmozart\PathUtil\Path;
 
@@ -110,11 +110,12 @@ class PackageManager
         }
 
         // Try to load the package
-        $package = $this->loadPackage($installPath);
+        $relInstallPath = Path::makeRelative($installPath, $this->rootDir);
+        $metadata = new PackageMetadata($relInstallPath);
+        $package = $this->loadPackage($metadata);
 
         // OK, now add it
-        $relInstallPath = Path::makeRelative($installPath, $this->rootDir);
-        $this->installFile->addPackageDescriptor(new PackageDescriptor($relInstallPath));
+        $this->installFile->addPackageMetadata($metadata);
         $this->packages->add($package);
 
         $this->installFileStorage->saveInstallFile($this->installFile);
@@ -155,8 +156,8 @@ class PackageManager
 
         $this->packages->remove($name);
 
-        if ($this->installFile->hasPackageDescriptor($package->getInstallPath())) {
-            $this->installFile->removePackageDescriptor($package->getInstallPath());
+        if ($this->installFile->hasPackageMetadata($package->getInstallPath())) {
+            $this->installFile->removePackageMetadata($package->getInstallPath());
             $this->installFileStorage->saveInstallFile($this->installFile);
         }
     }
@@ -208,6 +209,27 @@ class PackageManager
     }
 
     /**
+     * Returns all packages installed by the given installer.
+     *
+     * @param string $installer The installer name.
+     *
+     * @return PackageCollection The packages.
+     */
+    public function getPackagesByInstaller($installer)
+    {
+        $packages = new PackageCollection();
+
+        foreach ($this->packages as $package) {
+            // Packages (e.g. the root package) may have no metadata
+            if ($package->getMetadata() && $installer === $package->getMetadata()->getInstaller()) {
+                $packages->add($package);
+            }
+        }
+
+        return $packages;
+    }
+
+    /**
      * Returns the manager's environment.
      *
      * @return ProjectEnvironment The project environment.
@@ -252,20 +274,19 @@ class PackageManager
      */
     private function loadPackages()
     {
-        $this->packages->add(new RootPackage($this->environment->getRootPackageFile(), $this->rootDir));
+        $rootPackageFile = $this->environment->getRootPackageFile();
 
-        foreach ($this->installFile->getPackageDescriptors() as $packageDefinition) {
-            $installPath = Path::makeAbsolute($packageDefinition->getInstallPath(), $this->rootDir);
-            $package = $this->loadPackage($installPath);
+        $this->packages->add(new RootPackage($rootPackageFile, $this->rootDir));
 
-            $this->packages->add($package);
+        foreach ($this->installFile->listPackageMetadata() as $metadata) {
+            $this->packages->add($this->loadPackage($metadata));
         }
     }
 
     /**
-     * Loads a package at a given install path.
+     * Loads a package for the given metadata.
      *
-     * @param string $installPath The root directory of the package.
+     * @param PackageMetadata $metadata The package metadata.
      *
      * @return Package The package.
      *
@@ -274,8 +295,10 @@ class PackageManager
      * @throws NameConflictException If the package has the same name as another
      *                               loaded package.
      */
-    private function loadPackage($installPath)
+    private function loadPackage(PackageMetadata $metadata)
     {
+        $installPath = Path::makeAbsolute($metadata->getInstallPath(), $this->rootDir);
+
         if (!file_exists($installPath)) {
             throw new FileNotFoundException(sprintf(
                 'Could not load package: The directory %s does not exist.',
@@ -306,6 +329,6 @@ class PackageManager
             ));
         }
 
-        return new Package($packageFile, $installPath);
+        return new Package($packageFile, $installPath, $metadata);
     }
 }

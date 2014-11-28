@@ -12,7 +12,7 @@
 namespace Puli\RepositoryManager\Tests\Package\InstallFile;
 
 use Puli\RepositoryManager\Package\InstallFile\InstallFile;
-use Puli\RepositoryManager\Package\InstallFile\PackageDescriptor;
+use Puli\RepositoryManager\Package\InstallFile\PackageMetadata;
 
 /**
  * @since  1.0
@@ -55,88 +55,67 @@ class InstallFileTest extends \PHPUnit_Framework_TestCase
         new InstallFile($invalidPath);
     }
 
-    public function testAddPackageDescriptor()
+    public function testAddPackageMetadata()
     {
-        $descriptor1 = new PackageDescriptor('/path/to/package1');
-        $descriptor2 = new PackageDescriptor('/path/to/package2');
+        $metadata1 = new PackageMetadata('/path/to/package1');
+        $metadata2 = new PackageMetadata('/path/to/package2');
 
         $installFile = new InstallFile();
-        $installFile->addPackageDescriptor($descriptor1);
-        $installFile->addPackageDescriptor($descriptor2);
+        $installFile->addPackageMetadata($metadata1);
+        $installFile->addPackageMetadata($metadata2);
 
-        $this->assertSame(array($descriptor1, $descriptor2), $installFile->getPackageDescriptors());
-        $this->assertSame($descriptor1, $installFile->getPackageDescriptor('/path/to/package1'));
-        $this->assertSame($descriptor2, $installFile->getPackageDescriptor('/path/to/package2'));
+        $this->assertSame(array($metadata1, $metadata2), $installFile->listPackageMetadata());
+        $this->assertSame($metadata1, $installFile->getPackageMetadata('/path/to/package1'));
+        $this->assertSame($metadata2, $installFile->getPackageMetadata('/path/to/package2'));
     }
 
-    public function testSetPackageDescriptors()
+    public function testClearPackageMetadata()
     {
-        $descriptor1 = new PackageDescriptor('/path/to/package1');
-        $descriptor2 = new PackageDescriptor('/path/to/package2');
-
         $installFile = new InstallFile();
-        $installFile->setPackageDescriptors(array(
-            $descriptor1,
-            $descriptor2,
-        ));
+        $installFile->addPackageMetadata(new PackageMetadata('/path/to/package1'));
+        $installFile->clearPackageMetadata();
 
-        $this->assertSame(array($descriptor1, $descriptor2), $installFile->getPackageDescriptors());
-        $this->assertSame($descriptor1, $installFile->getPackageDescriptor('/path/to/package1'));
-        $this->assertSame($descriptor2, $installFile->getPackageDescriptor('/path/to/package2'));
-    }
-
-    public function testSetPackageDescriptorsRemovesPreviousDescriptors()
-    {
-        $descriptor1 = new PackageDescriptor('/path/to/package1');
-        $descriptor2 = new PackageDescriptor('/path/to/package2');
-
-        $installFile = new InstallFile();
-        $installFile->addPackageDescriptor($descriptor1);
-        $installFile->setPackageDescriptors(array($descriptor2));
-
-        $this->assertSame(array($descriptor2), $installFile->getPackageDescriptors());
+        $this->assertSame(array(), $installFile->listPackageMetadata());
     }
 
     /**
      * @expectedException \Puli\RepositoryManager\Package\NoSuchPackageException
      * @expectedExceptionMessage /foo/bar
      */
-    public function testGetPackageDescriptorFailsIfNotFound()
+    public function testGetPackageMetadataFailsIfNotFound()
     {
         $installFile = new InstallFile();
-        $installFile->getPackageDescriptor('/foo/bar');
+        $installFile->getPackageMetadata('/foo/bar');
     }
 
-    public function testRemovePackageDescriptor()
+    public function testRemovePackageMetadata()
     {
-        $descriptor1 = new PackageDescriptor('/path/to/package1');
-        $descriptor2 = new PackageDescriptor('/path/to/package2');
+        $metadata1 = new PackageMetadata('/path/to/package1');
+        $metadata2 = new PackageMetadata('/path/to/package2');
 
         $installFile = new InstallFile();
-        $installFile->setPackageDescriptors(array(
-            $descriptor1,
-            $descriptor2,
-        ));
+        $installFile->addPackageMetadata($metadata1);
+        $installFile->addPackageMetadata($metadata2);
 
-        $installFile->removePackageDescriptor('/path/to/package1');
+        $installFile->removePackageMetadata('/path/to/package1');
 
-        $this->assertSame(array($descriptor2), $installFile->getPackageDescriptors());
+        $this->assertSame(array($metadata2), $installFile->listPackageMetadata());
     }
 
     public function testRemoveIgnoresUnknownPaths()
     {
         $installFile = new InstallFile();
-        $installFile->removePackageDescriptor('/foo/bar');
+        $installFile->removePackageMetadata('/foo/bar');
     }
 
-    public function testHasPackageDescriptor()
+    public function testHasPackageMetadata()
     {
         $installFile = new InstallFile();
 
-        $this->assertFalse($installFile->hasPackageDescriptor('/path/to/package'));
+        $this->assertFalse($installFile->hasPackageMetadata('/path/to/package'));
 
-        $installFile->addPackageDescriptor(new PackageDescriptor('/path/to/package'));
+        $installFile->addPackageMetadata(new PackageMetadata('/path/to/package'));
 
-        $this->assertTrue($installFile->hasPackageDescriptor('/path/to/package'));
+        $this->assertTrue($installFile->hasPackageMetadata('/path/to/package'));
     }
 }

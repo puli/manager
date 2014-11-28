@@ -38,12 +38,16 @@ class InstallFileJsonWriter implements InstallFileWriterInterface
     {
         $jsonData = array();
 
-        foreach ($installFile->getPackageDescriptors() as $packageDescriptor) {
+        foreach ($installFile->listPackageMetadata() as $metadata) {
             $package = new \stdClass();
-            $package->installPath = $packageDescriptor->getInstallPath();
+            $package->installPath = $metadata->getInstallPath();
 
-            if ($packageDescriptor->isNew()) {
+            if ($metadata->isNew()) {
                 $package->new = true;
+            }
+
+            if ('user' !== $metadata->getInstaller()) {
+                $package->installer = $metadata->getInstaller();
             }
 
             $jsonData[] = $package;

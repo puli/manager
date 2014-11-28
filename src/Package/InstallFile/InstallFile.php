@@ -14,7 +14,7 @@ namespace Puli\RepositoryManager\Package\InstallFile;
 use Puli\RepositoryManager\Package\NoSuchPackageException;
 
 /**
- * Contains descriptors of the installed packages.
+ * Contains metadata of the installed packages.
  *
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
@@ -27,9 +27,9 @@ class InstallFile
     private $path;
 
     /**
-     * @var PackageDescriptor[]
+     * @var PackageMetadata[]
      */
-    private $packageDescriptors = array();
+    private $metadata = array();
 
     /**
      * Creates a new install file.
@@ -67,80 +67,74 @@ class InstallFile
     }
 
     /**
-     * Returns the package descriptors.
+     * Lists all package metadata.
      *
-     * @return PackageDescriptor[] The package descriptors.
+     * @return PackageMetadata[] The package metadata.
      */
-    public function getPackageDescriptors()
+    public function listPackageMetadata()
     {
         // The install paths as array keys are for internal use only
-        return array_values($this->packageDescriptors);
+        return array_values($this->metadata);
     }
 
     /**
-     * Sets the package descriptors.
-     *
-     * @param PackageDescriptor[] $descriptors The package descriptors.
+     * Clears the package metadata.
      */
-    public function setPackageDescriptors(array $descriptors)
+    public function clearPackageMetadata()
     {
-        $this->packageDescriptors = array();
-
-        foreach ($descriptors as $descriptor) {
-            $this->addPackageDescriptor($descriptor);
-        }
+        $this->metadata = array();
     }
 
     /**
-     * Adds a package descriptor.
+     * Adds package metadata.
      *
-     * @param PackageDescriptor $descriptor The package descriptor.
+     * @param PackageMetadata $metadata The package metadata.
      */
-    public function addPackageDescriptor(PackageDescriptor $descriptor)
+    public function addPackageMetadata(PackageMetadata $metadata)
     {
-        $this->packageDescriptors[$descriptor->getInstallPath()] = $descriptor;
+        $this->metadata[$metadata->getInstallPath()] = $metadata;
     }
 
     /**
-     * Removes the package descriptor with a given install path.
+     * Removes the package metadata with a given install path.
      *
      * @param string $installPath The install path of the package.
      */
-    public function removePackageDescriptor($installPath)
+    public function removePackageMetadata($installPath)
     {
-        unset($this->packageDescriptors[$installPath]);
+        unset($this->metadata[$installPath]);
     }
 
     /**
-     * Returns the package descriptor with a given install path.
+     * Returns the package metadata with a given install path.
      *
      * @param string $installPath The install path of the package.
      *
-     * @return PackageDescriptor The package descriptor.
+     * @return PackageMetadata The package metadata.
      *
      * @throws NoSuchPackageException If no package is installed at that path.
      */
-    public function getPackageDescriptor($installPath)
+    public function getPackageMetadata($installPath)
     {
-        if (!isset($this->packageDescriptors[$installPath])) {
+        if (!isset($this->metadata[$installPath])) {
             throw new NoSuchPackageException(sprintf(
-                'Could not get package descriptor: No package is installed at %s.',
+                'Could not get package metadata: No package is installed at %s.',
                 $installPath
             ));
         }
 
-        return $this->packageDescriptors[$installPath];
+        return $this->metadata[$installPath];
     }
 
     /**
-     * Returns whether a package descriptor with a given install path exists.
+     * Returns whether package metadata with a given install path exists.
      *
      * @param string $installPath The install path of the package.
      *
-     * @return bool Whether a package descriptor with that path exists.
+     * @return bool Whether package metadata with that path exists.
      */
-    public function hasPackageDescriptor($installPath)
+    public function hasPackageMetadata($installPath)
     {
-        return isset($this->packageDescriptors[$installPath]);
+        return isset($this->metadata[$installPath]);
     }
 }

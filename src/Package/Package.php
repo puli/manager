@@ -11,6 +11,7 @@
 
 namespace Puli\RepositoryManager\Package;
 
+use Puli\RepositoryManager\Package\InstallFile\PackageMetadata;
 use Puli\RepositoryManager\Package\PackageFile\PackageFile;
 
 /**
@@ -27,26 +28,38 @@ class Package
     private $name;
 
     /**
-     * @var string
-     */
-    private $installPath;
-
-    /**
      * @var PackageFile
      */
     private $packageFile;
 
     /**
+     * @var string
+     */
+    private $installPath;
+
+    /**
+     * @var PackageMetadata
+     */
+    private $metadata;
+
+    /**
      * Creates a new package.
      *
-     * @param PackageFile $packageFile The package file.
-     * @param string      $installPath The install path of the package.
+     * @param PackageFile     $packageFile The package file.
+     * @param string          $installPath The absolute install path.
+     * @param PackageMetadata $metadata    The package metadata.
      */
-    public function __construct(PackageFile $packageFile, $installPath)
+    public function __construct(PackageFile $packageFile, $installPath, PackageMetadata $metadata = null)
     {
         $this->name = $packageFile->getPackageName();
         $this->packageFile = $packageFile;
+
+        // The path is stored both here and in the metadata. While the metadata
+        // contains the path as it is stored in the install file (i.e. relative
+        // or absolute), the install path of the package is always an absolute
+        // path.
         $this->installPath = $installPath;
+        $this->metadata = $metadata;
     }
 
     /**
@@ -62,7 +75,7 @@ class Package
     /**
      * Returns the path at which the package is installed.
      *
-     * @return string The install path of the package.
+     * @return string The absolute install path of the package.
      */
     public function getInstallPath()
     {
@@ -77,6 +90,16 @@ class Package
     public function getPackageFile()
     {
         return $this->packageFile;
+    }
+
+    /**
+     * Returns the package's metadata.
+     *
+     * @return PackageMetadata The metadata.
+     */
+    public function getMetadata()
+    {
+        return $this->metadata;
     }
 
     /**
