@@ -394,6 +394,56 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($this->manager->isPackageInstalled('../package3'));
     }
 
+    public function testRemovePackage()
+    {
+        $this->initDefaultManager();
+
+        $packageDir = $this->packageDir1;
+
+        $this->installFileStorage->expects($this->once())
+            ->method('saveInstallFile')
+            ->with($this->installFile)
+            ->will($this->returnCallback(function (InstallFile $installFile) use ($packageDir) {
+                \PHPUnit_Framework_Assert::assertFalse($installFile->hasPackageDescriptor($packageDir));
+            }));
+
+        $this->assertTrue($this->installFile->hasPackageDescriptor($packageDir));
+        $this->assertTrue($this->manager->hasPackage('package1'));
+
+        $this->manager->removePackage('package1');
+
+        $this->assertFalse($this->installFile->hasPackageDescriptor($packageDir));
+        $this->assertFalse($this->manager->hasPackage('package1'));
+    }
+
+    public function testRemovePackageIgnoresUnknownName()
+    {
+        $this->initDefaultManager();
+
+        $this->installFileStorage->expects($this->never())
+            ->method('saveInstallFile');
+
+        $this->manager->removePackage('foobar');
+    }
+
+    public function testRemovePackageIgnoresIfNoDescriptorFound()
+    {
+        $this->initDefaultManager();
+
+        $this->installFileStorage->expects($this->never())
+            ->method('saveInstallFile');
+
+        $this->installFile->removePackageDescriptor($this->packageDir1);
+
+        $this->assertFalse($this->installFile->hasPackageDescriptor($this->packageDir1));
+        $this->assertTrue($this->manager->hasPackage('package1'));
+
+        $this->manager->removePackage('package1');
+
+        $this->assertFalse($this->installFile->hasPackageDescriptor($this->packageDir1));
+        $this->assertFalse($this->manager->hasPackage('package1'));
+    }
+
     public function testHasPackage()
     {
         $this->initDefaultManager();
@@ -424,7 +474,7 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\RepositoryManager\Package\Collection\NoSuchPackageException
+     * @expectedException \Puli\RepositoryManager\Package\NoSuchPackageException
      */
     public function testGetPackageFailsIfNotFound()
     {

@@ -44,7 +44,7 @@ class PackageCollectionTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\RepositoryManager\Package\Collection\NoSuchPackageException
+     * @expectedException \Puli\RepositoryManager\Package\NoSuchPackageException
      */
     public function testGetPackageFailsIfNotFound()
     {

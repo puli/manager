@@ -11,6 +11,7 @@
 
 namespace Puli\RepositoryManager\Package\Collection;
 
+use Puli\RepositoryManager\Package\NoSuchPackageException;
 use Puli\RepositoryManager\Package\Package;
 use Puli\RepositoryManager\Package\RootPackage;
 

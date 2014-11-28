@@ -16,7 +16,7 @@ use Puli\RepositoryManager\Environment\ProjectEnvironment;
 use Puli\RepositoryManager\FileNotFoundException;
 use Puli\RepositoryManager\InvalidConfigException;
 use Puli\RepositoryManager\NoDirectoryException;
-use Puli\RepositoryManager\Package\Collection\NoSuchPackageException;
+use Puli\RepositoryManager\Package\NoSuchPackageException;
 use Puli\RepositoryManager\Package\Collection\PackageCollection;
 use Puli\RepositoryManager\Package\InstallFile\InstallFile;
 use Puli\RepositoryManager\Package\InstallFile\InstallFileStorage;
@@ -138,6 +138,27 @@ class PackageManager
         }
 
         return false;
+    }
+
+    /**
+     * Removes the package with the given name.
+     *
+     * @param string $name The package name.
+     */
+    public function removePackage($name)
+    {
+        if (!$this->packages->contains($name)) {
+            return;
+        }
+
+        $package = $this->packages->get($name);
+
+        $this->packages->remove($name);
+
+        if ($this->installFile->hasPackageDescriptor($package->getInstallPath())) {
+            $this->installFile->removePackageDescriptor($package->getInstallPath());
+            $this->installFileStorage->saveInstallFile($this->installFile);
+        }
     }
 
     /**

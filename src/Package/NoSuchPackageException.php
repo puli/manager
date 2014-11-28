@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\RepositoryManager\Package\Collection;
+namespace Puli\RepositoryManager\Package;
 
 /**
  * Thrown when a package was not found.

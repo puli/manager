@@ -11,6 +11,8 @@
 
 namespace Puli\RepositoryManager\Package\InstallFile;
 
+use Puli\RepositoryManager\Package\NoSuchPackageException;
+
 /**
  * Contains descriptors of the installed packages.
  *
@@ -71,7 +73,8 @@ class InstallFile
      */
     public function getPackageDescriptors()
     {
-        return $this->packageDescriptors;
+        // The install paths as array keys are for internal use only
+        return array_values($this->packageDescriptors);
     }
 
     /**
@@ -81,7 +84,11 @@ class InstallFile
      */
     public function setPackageDescriptors(array $descriptors)
     {
-        $this->packageDescriptors = $descriptors;
+        $this->packageDescriptors = array();
+
+        foreach ($descriptors as $descriptor) {
+            $this->addPackageDescriptor($descriptor);
+        }
     }
 
     /**
@@ -91,6 +98,49 @@ class InstallFile
      */
     public function addPackageDescriptor(PackageDescriptor $descriptor)
     {
-        $this->packageDescriptors[] = $descriptor;
+        $this->packageDescriptors[$descriptor->getInstallPath()] = $descriptor;
+    }
+
+    /**
+     * Removes the package descriptor with a given install path.
+     *
+     * @param string $installPath The install path of the package.
+     */
+    public function removePackageDescriptor($installPath)
+    {
+        unset($this->packageDescriptors[$installPath]);
+    }
+
+    /**
+     * Returns the package descriptor with a given install path.
+     *
+     * @param string $installPath The install path of the package.
+     *
+     * @return PackageDescriptor The package descriptor.
+     *
+     * @throws NoSuchPackageException If no package is installed at that path.
+     */
+    public function getPackageDescriptor($installPath)
+    {
+        if (!isset($this->packageDescriptors[$installPath])) {
+            throw new NoSuchPackageException(sprintf(
+                'Could not get package descriptor: No package is installed at %s.',
+                $installPath
+            ));
+        }
+
+        return $this->packageDescriptors[$installPath];
+    }
+
+    /**
+     * Returns whether a package descriptor with a given install path exists.
+     *
+     * @param string $installPath The install path of the package.
+     *
+     * @return bool Whether a package descriptor with that path exists.
+     */
+    public function hasPackageDescriptor($installPath)
+    {
+        return isset($this->packageDescriptors[$installPath]);
     }
 }
