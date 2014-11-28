@@ -35,7 +35,7 @@ class PackageFileManager
     /**
      * @var RootPackageFile
      */
-    private $rootPackageFile;
+    private $packageFile;
 
     /**
      * @var PackageFileStorage
@@ -51,7 +51,7 @@ class PackageFileManager
     public function __construct(ProjectEnvironment $environment, PackageFileStorage $packageFileStorage)
     {
         $this->environment = $environment;
-        $this->rootPackageFile = $environment->getRootPackageFile();
+        $this->packageFile = $environment->getRootPackageFile();
         $this->packageFileStorage = $packageFileStorage;
     }
 
@@ -63,6 +63,16 @@ class PackageFileManager
     public function getEnvironment()
     {
         return $this->environment;
+    }
+
+    /**
+     * Returns the managed package file.
+     *
+     * @return RootPackageFile The managed package file.
+     */
+    public function getPackageFile()
+    {
+        return $this->packageFile;
     }
 
     /**
@@ -79,9 +89,9 @@ class PackageFileManager
      */
     public function setConfigKey($key, $value)
     {
-        $this->rootPackageFile->getConfig()->set($key, $value);
+        $this->packageFile->getConfig()->set($key, $value);
 
-        $this->packageFileStorage->saveRootPackageFile($this->rootPackageFile);
+        $this->packageFileStorage->saveRootPackageFile($this->packageFile);
     }
 
     /**
@@ -97,9 +107,9 @@ class PackageFileManager
      */
     public function setConfigKeys(array $values)
     {
-        $this->rootPackageFile->getConfig()->merge($values);
+        $this->packageFile->getConfig()->merge($values);
 
-        $this->packageFileStorage->saveRootPackageFile($this->rootPackageFile);
+        $this->packageFileStorage->saveRootPackageFile($this->packageFile);
     }
 
     /**
@@ -114,9 +124,9 @@ class PackageFileManager
      */
     public function removeConfigKey($key)
     {
-        $this->rootPackageFile->getConfig()->remove($key);
+        $this->packageFile->getConfig()->remove($key);
 
-        $this->packageFileStorage->saveRootPackageFile($this->rootPackageFile);
+        $this->packageFileStorage->saveRootPackageFile($this->packageFile);
     }
 
     /**
@@ -132,10 +142,10 @@ class PackageFileManager
     public function removeConfigKeys(array $keys)
     {
         foreach ($keys as $key) {
-            $this->rootPackageFile->getConfig()->remove($key);
+            $this->packageFile->getConfig()->remove($key);
         }
 
-        $this->packageFileStorage->saveRootPackageFile($this->rootPackageFile);
+        $this->packageFileStorage->saveRootPackageFile($this->packageFile);
     }
 
     /**
@@ -152,7 +162,7 @@ class PackageFileManager
     public function getConfigKey($key)
     {
         // We're only interested in the value of the file, not in the default
-        return $this->rootPackageFile->getConfig()->getRaw($key, false);
+        return $this->packageFile->getConfig()->getRaw($key, false);
     }
 
     /**
@@ -165,7 +175,7 @@ class PackageFileManager
     public function getConfigKeys()
     {
         // We're only interested in the values of the file, not in the defaults
-        return $this->rootPackageFile->getConfig()->toRawArray(false);
+        return $this->packageFile->getConfig()->toRawArray(false);
     }
 
     /**
@@ -184,14 +194,14 @@ class PackageFileManager
      */
     public function installPluginClass($pluginClass)
     {
-        if ($this->rootPackageFile->hasPluginClass($pluginClass)) {
+        if ($this->packageFile->hasPluginClass($pluginClass)) {
             // Already installed locally
             return;
         }
 
-        $this->rootPackageFile->addPluginClass($pluginClass);
+        $this->packageFile->addPluginClass($pluginClass);
 
-        $this->packageFileStorage->saveRootPackageFile($this->rootPackageFile);
+        $this->packageFileStorage->saveRootPackageFile($this->packageFile);
     }
 
     /**
@@ -211,7 +221,7 @@ class PackageFileManager
      */
     public function isPluginClassInstalled($pluginClass, $includeGlobal = true)
     {
-        return $this->rootPackageFile->hasPluginClass($pluginClass, $includeGlobal);
+        return $this->packageFile->hasPluginClass($pluginClass, $includeGlobal);
     }
 
     /**
@@ -230,6 +240,6 @@ class PackageFileManager
      */
     public function getPluginClasses($includeGlobal = true)
     {
-        return $this->rootPackageFile->getPluginClasses($includeGlobal);
+        return $this->packageFile->getPluginClasses($includeGlobal);
     }
 }
