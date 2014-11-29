@@ -20,6 +20,11 @@ namespace Puli\RepositoryManager\Package\InstallFile;
 class PackageMetadata
 {
     /**
+     * The default installer of packages.
+     */
+    const DEFAULT_INSTALLER = 'User';
+
+    /**
      * @var string
      */
     private $installPath;
@@ -32,7 +37,7 @@ class PackageMetadata
     /**
      * @var string
      */
-    private $installer = 'user';
+    private $installer = self::DEFAULT_INSTALLER;
 
     /**
      * Creates new package metadata.

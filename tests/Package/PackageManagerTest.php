@@ -286,15 +286,15 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
             ->method('saveInstallFile')
             ->with($this->isInstanceOf('Puli\RepositoryManager\Package\InstallFile\InstallFile'))
             ->will($this->returnCallback(function (InstallFile $installFile) {
-                $descriptors = $installFile->listPackageMetadata();
+                $metadata = $installFile->listPackageMetadata();
 
-                \PHPUnit_Framework_Assert::assertCount(3, $descriptors);
-                \PHPUnit_Framework_Assert::assertSame($this->packageDir1, $descriptors[0]->getInstallPath());
-                \PHPUnit_Framework_Assert::assertFalse($descriptors[0]->isNew());
-                \PHPUnit_Framework_Assert::assertSame($this->packageDir2, $descriptors[1]->getInstallPath());
-                \PHPUnit_Framework_Assert::assertFalse($descriptors[1]->isNew());
-                \PHPUnit_Framework_Assert::assertSame('../package3', $descriptors[2]->getInstallPath());
-                \PHPUnit_Framework_Assert::assertTrue($descriptors[2]->isNew());
+                \PHPUnit_Framework_Assert::assertCount(3, $metadata);
+                \PHPUnit_Framework_Assert::assertSame($this->packageDir1, $metadata[0]->getInstallPath());
+                \PHPUnit_Framework_Assert::assertFalse($metadata[0]->isNew());
+                \PHPUnit_Framework_Assert::assertSame($this->packageDir2, $metadata[1]->getInstallPath());
+                \PHPUnit_Framework_Assert::assertFalse($metadata[1]->isNew());
+                \PHPUnit_Framework_Assert::assertSame('../package3', $metadata[2]->getInstallPath());
+                \PHPUnit_Framework_Assert::assertTrue($metadata[2]->isNew());
             }));
 
         $this->manager->installPackage($this->packageDir3);
@@ -315,18 +315,50 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
             ->method('saveInstallFile')
             ->with($this->isInstanceOf('Puli\RepositoryManager\Package\InstallFile\InstallFile'))
             ->will($this->returnCallback(function (InstallFile $installFile) {
-                $descriptors = $installFile->listPackageMetadata();
+                $metadata = $installFile->listPackageMetadata();
 
-                \PHPUnit_Framework_Assert::assertCount(3, $descriptors);
-                \PHPUnit_Framework_Assert::assertSame($this->packageDir1, $descriptors[0]->getInstallPath());
-                \PHPUnit_Framework_Assert::assertFalse($descriptors[0]->isNew());
-                \PHPUnit_Framework_Assert::assertSame($this->packageDir2, $descriptors[1]->getInstallPath());
-                \PHPUnit_Framework_Assert::assertFalse($descriptors[1]->isNew());
-                \PHPUnit_Framework_Assert::assertSame('../package3', $descriptors[2]->getInstallPath());
-                \PHPUnit_Framework_Assert::assertTrue($descriptors[2]->isNew());
+                \PHPUnit_Framework_Assert::assertCount(3, $metadata);
+                \PHPUnit_Framework_Assert::assertSame($this->packageDir1, $metadata[0]->getInstallPath());
+                \PHPUnit_Framework_Assert::assertFalse($metadata[0]->isNew());
+                \PHPUnit_Framework_Assert::assertSame($this->packageDir2, $metadata[1]->getInstallPath());
+                \PHPUnit_Framework_Assert::assertFalse($metadata[1]->isNew());
+                \PHPUnit_Framework_Assert::assertSame('../package3', $metadata[2]->getInstallPath());
+                \PHPUnit_Framework_Assert::assertTrue($metadata[2]->isNew());
             }));
 
         $this->manager->installPackage('../package3');
+    }
+
+    public function testInstallPackageWithCustomInstaller()
+    {
+        $this->initDefaultManager();
+
+        $config = new PackageFile('package3');
+
+        $this->packageFileStorage->expects($this->once())
+            ->method('loadPackageFile')
+            ->with($this->packageDir3.'/puli.json')
+            ->will($this->returnValue($config));
+
+        $this->installFileStorage->expects($this->once())
+            ->method('saveInstallFile')
+            ->with($this->isInstanceOf('Puli\RepositoryManager\Package\InstallFile\InstallFile'))
+            ->will($this->returnCallback(function (InstallFile $installFile) {
+                $metadata = $installFile->listPackageMetadata();
+
+                \PHPUnit_Framework_Assert::assertCount(3, $metadata);
+                \PHPUnit_Framework_Assert::assertSame($this->packageDir1, $metadata[0]->getInstallPath());
+                \PHPUnit_Framework_Assert::assertFalse($metadata[0]->isNew());
+                \PHPUnit_Framework_Assert::assertSame('User', $metadata[0]->getInstaller());
+                \PHPUnit_Framework_Assert::assertSame($this->packageDir2, $metadata[1]->getInstallPath());
+                \PHPUnit_Framework_Assert::assertFalse($metadata[1]->isNew());
+                \PHPUnit_Framework_Assert::assertSame('User', $metadata[1]->getInstaller());
+                \PHPUnit_Framework_Assert::assertSame('../package3', $metadata[2]->getInstallPath());
+                \PHPUnit_Framework_Assert::assertTrue($metadata[2]->isNew());
+                \PHPUnit_Framework_Assert::assertSame('Composer', $metadata[2]->getInstaller());
+            }));
+
+        $this->manager->installPackage($this->packageDir3, 'Composer');
     }
 
     public function testInstallPackageDoesNothingIfAlreadyInstalled()
@@ -501,11 +533,11 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
         $this->initDefaultManager();
 
         $metadata1 = new PackageMetadata($this->packageDir1);
-        $metadata1->setInstaller('composer');
+        $metadata1->setInstaller('Composer');
         $metadata2 = new PackageMetadata($this->packageDir2);
-        $metadata2->setInstaller('user');
+        $metadata2->setInstaller('User');
         $metadata3 = new PackageMetadata($this->packageDir3);
-        $metadata3->setInstaller('composer');
+        $metadata3->setInstaller('Composer');
 
         $this->installFile->addPackageMetadata($metadata1);
         $this->installFile->addPackageMetadata($metadata2);
@@ -513,8 +545,8 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
 
         $this->manager = new PackageManager($this->environment, $this->packageFileStorage, $this->installFileStorage);
 
-        $composerPackages = $this->manager->getPackagesByInstaller('composer');
-        $userPackages = $this->manager->getPackagesByInstaller('user');
+        $composerPackages = $this->manager->getPackagesByInstaller('Composer');
+        $userPackages = $this->manager->getPackagesByInstaller('User');
 
         $this->assertInstanceOf('Puli\RepositoryManager\Package\Collection\PackageCollection', $composerPackages);
         $this->assertCount(2, $composerPackages);

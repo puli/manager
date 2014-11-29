@@ -13,6 +13,7 @@ namespace Puli\RepositoryManager\Package\InstallFile\Writer;
 
 use Puli\RepositoryManager\IOException;
 use Puli\RepositoryManager\Package\InstallFile\InstallFile;
+use Puli\RepositoryManager\Package\InstallFile\PackageMetadata;
 use Symfony\Component\Filesystem\Filesystem;
 use Webmozart\Json\JsonEncoder;
 use Webmozart\PathUtil\Path;
@@ -46,7 +47,7 @@ class InstallFileJsonWriter implements InstallFileWriterInterface
                 $package->new = true;
             }
 
-            if ('user' !== $metadata->getInstaller()) {
+            if (PackageMetadata::DEFAULT_INSTALLER !== $metadata->getInstaller()) {
                 $package->installer = $metadata->getInstaller();
             }
 

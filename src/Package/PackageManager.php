@@ -94,6 +94,7 @@ class PackageManager
      * Installs the package at the given path in the repository.
      *
      * @param string $installPath The path to the package.
+     * @param string $installer   The name of the installer.
      *
      * @throws FileNotFoundException If the package directory does not exist.
      * @throws NoDirectoryException If the package path points to a file.
@@ -101,7 +102,7 @@ class PackageManager
      * @throws NameConflictException If the package has the same name as another
      *                               loaded package.
      */
-    public function installPackage($installPath)
+    public function installPackage($installPath, $installer = PackageMetadata::DEFAULT_INSTALLER)
     {
         $installPath = Path::makeAbsolute($installPath, $this->rootDir);
 
@@ -112,6 +113,7 @@ class PackageManager
         // Try to load the package
         $relInstallPath = Path::makeRelative($installPath, $this->rootDir);
         $metadata = new PackageMetadata($relInstallPath);
+        $metadata->setInstaller($installer);
         $package = $this->loadPackage($metadata);
 
         // OK, now add it
