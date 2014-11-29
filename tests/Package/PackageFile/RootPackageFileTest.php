@@ -87,9 +87,16 @@ class RootPackageFileTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @expectedException \Puli\RepositoryManager\InvalidConfigException
+     * @expectedExceptionMessage trait
      */
     public function testPluginClassMustNotBeTrait()
     {
+        if (version_compare(PHP_VERSION, '5.4.0', '<')) {
+            $this->markTestSkipped('PHP >= 5.4.0 only');
+
+            return;
+        }
+
         $this->packageFile->addPluginClass(__NAMESPACE__.'\Fixtures\TestPluginTrait');
     }
 

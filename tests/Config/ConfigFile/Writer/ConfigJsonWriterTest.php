@@ -59,7 +59,12 @@ class ConfigJsonWriterTest extends \PHPUnit_Framework_TestCase
         $this->writer->writeConfigFile($configFile, $this->tempFile);
 
         $this->assertFileExists($this->tempFile);
-        $this->assertFileEquals(__DIR__.'/Fixtures/config.json', $this->tempFile);
+
+        if (version_compare(PHP_VERSION, '5.4.0', '>=')) {
+            $this->assertFileEquals(__DIR__.'/Fixtures/config.json', $this->tempFile);
+        } else {
+            $this->assertFileEquals(__DIR__.'/Fixtures/config-ugly.json', $this->tempFile);
+        }
     }
 
     public function testWriteEmptyConfig()

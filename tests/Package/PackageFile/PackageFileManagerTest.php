@@ -194,7 +194,7 @@ class PackageFileManagerTest extends \PHPUnit_Framework_TestCase
             ->method('saveRootPackageFile')
             ->with($this->isInstanceOf('Puli\RepositoryManager\Package\PackageFile\RootPackageFile'))
             ->will($this->returnCallback(function (RootPackageFile $packageFile) {
-                \PHPUnit_Framework_Assert::assertSame(array(self::PLUGIN_CLASS), $packageFile->getPluginClasses());
+                \PHPUnit_Framework_Assert::assertSame(array(PackageFileManagerTest::PLUGIN_CLASS), $packageFile->getPluginClasses());
             }));
 
         $this->manager->installPluginClass(self::PLUGIN_CLASS);

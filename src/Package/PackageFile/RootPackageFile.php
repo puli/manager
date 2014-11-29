@@ -175,7 +175,7 @@ class RootPackageFile extends PackageFile
             ));
         }
 
-        if ($reflClass->isTrait()) {
+        if (version_compare(PHP_VERSION, '5.4.0', '>=') && $reflClass->isTrait()) {
             throw new InvalidConfigException(sprintf(
                 'The plugin class %s should be a class, but is a trait.',
                 $pluginClass

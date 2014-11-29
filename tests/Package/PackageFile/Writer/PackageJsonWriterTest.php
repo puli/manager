@@ -60,7 +60,12 @@ class PackageJsonWriterTest extends \PHPUnit_Framework_TestCase
         $this->writer->writePackageFile($packageFile, $this->tempFile);
 
         $this->assertFileExists($this->tempFile);
-        $this->assertFileEquals(__DIR__.'/Fixtures/full.json', $this->tempFile);
+
+        if (version_compare(PHP_VERSION, '5.4.0', '>=')) {
+            $this->assertFileEquals(__DIR__.'/Fixtures/full.json', $this->tempFile);
+        } else {
+            $this->assertFileEquals(__DIR__.'/Fixtures/full-ugly.json', $this->tempFile);
+        }
     }
 
     public function testWriteRootPackageFile()
@@ -84,7 +89,12 @@ class PackageJsonWriterTest extends \PHPUnit_Framework_TestCase
         $this->writer->writePackageFile($packageFile, $this->tempFile);
 
         $this->assertFileExists($this->tempFile);
-        $this->assertFileEquals(__DIR__.'/Fixtures/full-root.json', $this->tempFile);
+
+        if (version_compare(PHP_VERSION, '5.4.0', '>=')) {
+            $this->assertFileEquals(__DIR__.'/Fixtures/full-root.json', $this->tempFile);
+        } else {
+            $this->assertFileEquals(__DIR__.'/Fixtures/full-root-ugly.json', $this->tempFile);
+        }
     }
 
     public function testWriteMinimalRootPackageFile()
@@ -119,7 +129,12 @@ class PackageJsonWriterTest extends \PHPUnit_Framework_TestCase
         $this->writer->writePackageFile($packageFile, $this->tempFile);
 
         $this->assertFileExists($this->tempFile);
-        $this->assertFileEquals(__DIR__.'/Fixtures/multi-resources.json', $this->tempFile);
+
+        if (version_compare(PHP_VERSION, '5.4.0', '>=')) {
+            $this->assertFileEquals(__DIR__.'/Fixtures/multi-resources.json', $this->tempFile);
+        } else {
+            $this->assertFileEquals(__DIR__.'/Fixtures/multi-resources-ugly.json', $this->tempFile);
+        }
     }
 
     public function testWriteTagsWithMultipleTags()
@@ -131,7 +146,12 @@ class PackageJsonWriterTest extends \PHPUnit_Framework_TestCase
         $this->writer->writePackageFile($packageFile, $this->tempFile);
 
         $this->assertFileExists($this->tempFile);
-        $this->assertFileEquals(__DIR__.'/Fixtures/multi-tags.json', $this->tempFile);
+
+        if (version_compare(PHP_VERSION, '5.4.0', '>=')) {
+            $this->assertFileEquals(__DIR__.'/Fixtures/multi-tags.json', $this->tempFile);
+        } else {
+            $this->assertFileEquals(__DIR__.'/Fixtures/multi-tags-ugly.json', $this->tempFile);
+        }
     }
 
     public function testWriteMultipleOverriddenPackages()
@@ -143,7 +163,12 @@ class PackageJsonWriterTest extends \PHPUnit_Framework_TestCase
         $this->writer->writePackageFile($packageFile, $this->tempFile);
 
         $this->assertFileExists($this->tempFile);
-        $this->assertFileEquals(__DIR__.'/Fixtures/multi-overrides.json', $this->tempFile);
+
+        if (version_compare(PHP_VERSION, '5.4.0', '>=')) {
+            $this->assertFileEquals(__DIR__.'/Fixtures/multi-overrides.json', $this->tempFile);
+        } else {
+            $this->assertFileEquals(__DIR__.'/Fixtures/multi-overrides-ugly.json', $this->tempFile);
+        }
     }
 
     public function testCreateMissingDirectoriesOnDemand()
