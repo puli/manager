@@ -43,7 +43,6 @@ class PackageJsonWriter implements PackageFileWriterInterface
     public function writePackageFile(PackageFile $packageFile, $path)
     {
         $jsonData = new \stdClass();
-        $defaultPackageName = null;
 
         $this->addConfig($jsonData, $packageFile);
 

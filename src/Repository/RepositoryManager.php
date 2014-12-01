@@ -63,6 +63,16 @@ class RepositoryManager
     }
 
     /**
+     * Returns the manager's environment.
+     *
+     * @return ProjectEnvironment The project environment.
+     */
+    public function getEnvironment()
+    {
+        return $this->environment;
+    }
+
+    /**
      * Dumps a resource repository.
      *
      * Pass the path where the generated resource repository is placed in the
