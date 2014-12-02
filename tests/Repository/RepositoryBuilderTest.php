@@ -11,7 +11,7 @@
 
 namespace Puli\RepositoryManager\Tests\Repository;
 
-use Puli\Filesystem\Resource\LocalDirectoryResource;
+use Puli\Repository\Filesystem\Resource\LocalDirectoryResource;
 use Puli\Repository\ManageableRepositoryInterface;
 use Puli\RepositoryManager\Package\Collection\PackageCollection;
 use Puli\RepositoryManager\Package\Package;
@@ -142,7 +142,7 @@ class RepositoryBuilderTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\Filesystem\FilesystemException
+     * @expectedException \Puli\Repository\Filesystem\FilesystemException
      */
     public function testFailIfResourceNotFound()
     {

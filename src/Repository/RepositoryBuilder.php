@@ -11,15 +11,15 @@
 
 namespace Puli\RepositoryManager\Repository;
 
-use Puli\Filesystem\Resource\LocalDirectoryResource;
-use Puli\Filesystem\Resource\LocalFileResource;
-use Puli\Filesystem\Resource\LocalResourceInterface;
+use Puli\Repository\Filesystem\Resource\LocalDirectoryResource;
+use Puli\Repository\Filesystem\Resource\LocalFileResource;
+use Puli\Repository\Filesystem\Resource\LocalResourceInterface;
 use Puli\Repository\ManageableRepositoryInterface;
+use Puli\Repository\Resource\DirectoryResourceInterface;
 use Puli\RepositoryManager\Package\Collection\PackageCollection;
 use Puli\RepositoryManager\Package\Graph\PackageNameGraph;
 use Puli\RepositoryManager\Package\Package;
 use Puli\RepositoryManager\Package\RootPackage;
-use Puli\Resource\DirectoryResourceInterface;
 
 /**
  * Builds a resource repository from packages.
