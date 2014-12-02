@@ -62,7 +62,7 @@ All contents of this package are licensed under the [MIT license].
 
 [Puli]: https://github.com/puli/puli
 [Bernhard Schussek]: http://webmozarts.com
-[The Community Contributors]: https://github.com/puli/puli/graphs/contributors
+[The Community Contributors]: https://github.com/puli/puli-repository-manager/graphs/contributors
 [Getting Started]: http://puli.readthedocs.org/en/latest/getting-started.html
 [Puli Documentation]: http://puli.readthedocs.org/en/latest/index.html
 [Puli at a Glance]: http://puli.readthedocs.org/en/latest/at-a-glance.html
