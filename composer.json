@@ -10,8 +10,8 @@
     ],
     "require": {
         "php": ">=5.3.9",
-        "puli/repository": "~1.0@dev",
-        "webmozart/json": "~1.0@dev",
+        "puli/repository": "~1.0",
+        "webmozart/json": "~1.0",
         "webmozart/path-util": "~1.0",
         "symfony/event-dispatcher": "~2.3",
         "symfony/filesystem": "~2.3"
