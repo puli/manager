@@ -16,6 +16,7 @@ use Puli\RepositoryManager\Package\PackageFile\PackageFile;
 use Puli\RepositoryManager\Package\PackageFile\RootPackageFile;
 use Puli\RepositoryManager\Package\PackageFile\Writer\PackageJsonWriter;
 use Puli\RepositoryManager\Package\ResourceMapping;
+use Puli\RepositoryManager\Package\TagDefinition;
 use Puli\RepositoryManager\Package\TagMapping;
 use Puli\RepositoryManager\Tests\JsonWriterTestCase;
 use Symfony\Component\Filesystem\Filesystem;
@@ -56,6 +57,7 @@ class PackageJsonWriterTest extends JsonWriterTestCase
         $packageFile->setPackageName('my/application');
         $packageFile->addResourceMapping(new ResourceMapping('/app', 'res'));
         $packageFile->addTagMapping(new TagMapping('/app/config*.yml', 'config'));
+        $packageFile->addTagDefinition(new TagDefinition('my/application/my-tag', 'Description of my tag.'));
         $packageFile->setOverriddenPackages('acme/blog');
 
         $this->writer->writePackageFile($packageFile, $this->tempFile);
@@ -65,6 +67,19 @@ class PackageJsonWriterTest extends JsonWriterTestCase
         $this->assertJsonFileEquals(__DIR__.'/Fixtures/full.json', $this->tempFile);
     }
 
+    public function testWriteTagDefinitionWithoutDescription()
+    {
+        $baseConfig = new Config();
+        $packageFile = new PackageFile(null, null, $baseConfig);
+        $packageFile->addTagDefinition(new TagDefinition('my/application/my-tag'));
+
+        $this->writer->writePackageFile($packageFile, $this->tempFile);
+
+        $this->assertFileExists($this->tempFile);
+
+        $this->assertJsonFileEquals(__DIR__.'/Fixtures/tag-def-no-description.json', $this->tempFile);
+    }
+
     public function testWriteRootPackageFile()
     {
         $baseConfig = new Config();
@@ -72,6 +87,7 @@ class PackageJsonWriterTest extends JsonWriterTestCase
         $packageFile->setPackageName('my/application');
         $packageFile->addResourceMapping(new ResourceMapping('/app', 'res'));
         $packageFile->addTagMapping(new TagMapping('/app/config*.yml', 'config'));
+        $packageFile->addTagDefinition(new TagDefinition('my/application/my-tag', 'Description of my tag.'));
         $packageFile->setOverriddenPackages('acme/blog');
         $packageFile->setPackageOrder(array('acme/blog-extension1', 'acme/blog-extension2'));
         $packageFile->addPluginClass('Puli\RepositoryManager\Tests\Package\PackageFile\Fixtures\TestPlugin');

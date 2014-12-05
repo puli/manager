@@ -26,14 +26,14 @@ use Puli\RepositoryManager\InvalidConfigException;
 class RootPackageFile extends PackageFile
 {
     /**
-     * @var string[]
-     */
-    private $packageOrder = array();
-
-    /**
      * @var Config
      */
     private $config;
+
+    /**
+     * @var string[]
+     */
+    private $packageOrder = array();
 
     /**
      * @var string[]

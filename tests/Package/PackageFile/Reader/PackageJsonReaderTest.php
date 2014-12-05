@@ -15,6 +15,7 @@ use Puli\RepositoryManager\Config\Config;
 use Puli\RepositoryManager\Package\PackageFile\PackageFile;
 use Puli\RepositoryManager\Package\PackageFile\Reader\PackageJsonReader;
 use Puli\RepositoryManager\Package\ResourceMapping;
+use Puli\RepositoryManager\Package\TagDefinition;
 use Puli\RepositoryManager\Package\TagMapping;
 
 /**
@@ -82,6 +83,14 @@ class PackageJsonReaderTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf('Puli\RepositoryManager\Package\PackageFile\RootPackageFile', $packageFile);
         $this->assertMinimalConfig($packageFile);
         $this->assertSame(array(), $packageFile->getPackageOrder());
+    }
+
+    public function testReadTagDefinitionWithoutDescription()
+    {
+        $packageFile = $this->reader->readPackageFile(__DIR__.'/Fixtures/tag-def-no-description.json', $this->baseConfig);
+
+        $this->assertInstanceOf('Puli\RepositoryManager\Package\PackageFile\PackageFile', $packageFile);
+        $this->assertEquals(array(new TagDefinition('my/application/my-tag')), $packageFile->getTagDefinitions());
     }
 
     public function testRootPackageFileInheritsBaseConfig()
@@ -273,6 +282,7 @@ class PackageJsonReaderTest extends \PHPUnit_Framework_TestCase
         $this->assertSame('my/application', $packageFile->getPackageName());
         $this->assertEquals(array(new ResourceMapping('/app', array('res'))), $packageFile->getResourceMappings());
         $this->assertEquals(array(new TagMapping('/app/config*.yml', array('config'))), $packageFile->getTagMappings());
+        $this->assertEquals(array(new TagDefinition('my/application/my-tag', 'Description of my tag.')), $packageFile->getTagDefinitions());
         $this->assertSame(array('acme/blog'), $packageFile->getOverriddenPackages());
     }
 

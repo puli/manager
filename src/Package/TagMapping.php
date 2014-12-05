@@ -42,17 +42,17 @@ class TagMapping
      *
      * @throws \InvalidArgumentException If any of the arguments is invalid.
      */
-    function __construct($puliSelector, $tags)
+    public function __construct($puliSelector, $tags)
     {
         if (!is_string($puliSelector)) {
             throw new \InvalidArgumentException(sprintf(
-                'The passed Puli selector must be a string. Got: %s',
+                'The Puli selector must be a string. Got: %s',
                 is_object($puliSelector) ? get_class($puliSelector) : gettype($puliSelector)
             ));
         }
 
         if ('' === $puliSelector) {
-            throw new \InvalidArgumentException('The passed Puli selector must not be empty.');
+            throw new \InvalidArgumentException('The Puli selector must not be empty.');
         }
 
         $tags = (array) $tags;
@@ -64,13 +64,13 @@ class TagMapping
         foreach ($tags as $tag) {
             if (!is_string($tag)) {
                 throw new \InvalidArgumentException(sprintf(
-                    'The passed tags must be strings. Got: %s',
+                    'The tags must be strings. Got: %s',
                     is_object($tag) ? get_class($tag) : gettype($tag)
                 ));
             }
 
             if ('' === $tag) {
-                throw new \InvalidArgumentException('The passed tags must not be empty.');
+                throw new \InvalidArgumentException('The tags must not be empty.');
             }
         }
 

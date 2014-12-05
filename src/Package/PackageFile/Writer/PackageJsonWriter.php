@@ -30,6 +30,22 @@ use Webmozart\PathUtil\Path;
 class PackageJsonWriter implements PackageFileWriterInterface
 {
     /**
+     * The default order of the keys in the written package file.
+     *
+     * @var string[]
+     */
+    private static $keyOrder = array(
+        'name',
+        'resources',
+        'tags',
+        'tag-definitions',
+        'override',
+        'package-order',
+        'config',
+        'plugins'
+    );
+
+    /**
      * Writes a JSON package file.
      *
      * The data is validated against the schema `res/schema/package-schema.json`
@@ -42,7 +58,7 @@ class PackageJsonWriter implements PackageFileWriterInterface
      */
     public function writePackageFile(PackageFile $packageFile, $path)
     {
-        $jsonData = new \stdClass();
+        $jsonData = array();
 
         $this->addConfig($jsonData, $packageFile);
 
@@ -50,63 +66,82 @@ class PackageJsonWriter implements PackageFileWriterInterface
             $this->addRootConfig($jsonData, $packageFile);
         }
 
-        $this->encodeFile($path, $jsonData);
+        // Sort according to key order
+        $orderedKeys = array_intersect_key(array_flip(self::$keyOrder), $jsonData);
+        $jsonData = array_replace($orderedKeys, $jsonData);
+
+        $this->encodeFile($path, (object) $jsonData);
     }
 
-    private function addConfig(\stdClass $jsonData, PackageFile $packageFile)
+    private function addConfig(array &$jsonData, PackageFile $packageFile)
     {
         $resourceMappings = $packageFile->getResourceMappings();
         $tagMappings = $packageFile->getTagMappings();
+        $tagDefinitions = $packageFile->getTagDefinitions();
         $overrides = $packageFile->getOverriddenPackages();
 
         if (null !== $packageFile->getPackageName()) {
-            $jsonData->name = $packageFile->getPackageName();
+            $jsonData['name'] = $packageFile->getPackageName();
         }
 
         if (count($resourceMappings) > 0) {
-            $jsonData->resources = new \stdClass();
+            $jsonData['resources'] = new \stdClass();
 
             foreach ($resourceMappings as $mapping) {
                 $puliPath = $mapping->getPuliPath();
                 $localPaths = $mapping->getLocalPaths();
 
-                $jsonData->resources->$puliPath = count($localPaths) > 1 ? $localPaths : reset($localPaths);
+                $jsonData['resources']->$puliPath = count($localPaths) > 1 ? $localPaths : reset($localPaths);
             }
         }
 
         if (count($tagMappings) > 0) {
-            $jsonData->tags = new \stdClass();
+            $jsonData['tags'] = new \stdClass();
 
             foreach ($tagMappings as $mapping) {
                 $puliSelector = $mapping->getPuliSelector();
                 $tags = $mapping->getTags();
 
-                $jsonData->tags->$puliSelector = count($tags) > 1 ? $tags : reset($tags);
+                $jsonData['tags']->$puliSelector = count($tags) > 1 ? $tags : reset($tags);
+            }
+        }
+
+        if (count($tagDefinitions) > 0) {
+            $jsonData['tag-definitions'] = new \stdClass();
+
+            foreach ($tagDefinitions as $tagDefinition) {
+                $definition = new \stdClass();
+
+                if (null !== $tagDefinition->getDescription()) {
+                    $definition->description = $tagDefinition->getDescription();
+                }
+
+                $jsonData['tag-definitions']->{$tagDefinition->getTag()} = $definition;
             }
         }
 
         if (count($overrides) > 0) {
-            $jsonData->override = count($overrides) > 1 ? $overrides : reset($overrides);
+            $jsonData['override'] = count($overrides) > 1 ? $overrides : reset($overrides);
         }
     }
 
-    private function addRootConfig(\stdClass $jsonData, RootPackageFile $packageFile)
+    private function addRootConfig(array &$jsonData, RootPackageFile $packageFile)
     {
         $packageOrder = $packageFile->getPackageOrder();
 
         if (count($packageOrder) > 0) {
-            $jsonData->{'package-order'} = $packageOrder;
+            $jsonData['package-order'] = $packageOrder;
         }
 
         // Pass false to exclude base configuration values
         $configValues = $packageFile->getConfig()->toRawArray(false);
 
         if (count($configValues) > 0) {
-            $jsonData->config = (object) $configValues;
+            $jsonData['config'] = (object) $configValues;
         }
 
         if (array() !== $packageFile->getPluginClasses(false)) {
-            $jsonData->plugins = $packageFile->getPluginClasses();
+            $jsonData['plugins'] = $packageFile->getPluginClasses();
         }
     }
 

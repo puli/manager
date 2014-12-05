@@ -17,6 +17,7 @@ use Puli\RepositoryManager\InvalidConfigException;
 use Puli\RepositoryManager\Package\PackageFile\PackageFile;
 use Puli\RepositoryManager\Package\PackageFile\RootPackageFile;
 use Puli\RepositoryManager\Package\ResourceMapping;
+use Puli\RepositoryManager\Package\TagDefinition;
 use Puli\RepositoryManager\Package\TagMapping;
 use Webmozart\Json\DecodingFailedException;
 use Webmozart\Json\JsonDecoder;
@@ -99,6 +100,12 @@ class PackageJsonReader implements PackageFileReaderInterface
         if (isset($jsonData->tags)) {
             foreach ((array) $jsonData->tags as $selector => $tags) {
                 $packageFile->addTagMapping(new TagMapping($selector, (array) $tags));
+            }
+        }
+
+        if (isset($jsonData->{'tag-definitions'})) {
+            foreach ($jsonData->{'tag-definitions'} as $tag => $data) {
+                $packageFile->addTagDefinition(new TagDefinition($tag, isset($data->description) ? $data->description : null));
             }
         }
 

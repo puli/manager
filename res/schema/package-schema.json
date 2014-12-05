@@ -17,6 +17,17 @@
                 "type": [ "string", "array" ]
             }
         },
+        "tag-definitions": {
+            "type": "object",
+            "additionalProperties": {
+                "type": "object",
+                "properties": {
+                    "description": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
         "override": {
             "type": [ "string", "array" ],
             "items": {

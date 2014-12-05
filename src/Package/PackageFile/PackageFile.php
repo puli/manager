@@ -12,6 +12,7 @@
 namespace Puli\RepositoryManager\Package\PackageFile;
 
 use Puli\RepositoryManager\Package\ResourceMapping;
+use Puli\RepositoryManager\Package\TagDefinition;
 use Puli\RepositoryManager\Package\TagMapping;
 
 /**
@@ -41,6 +42,11 @@ class PackageFile
      * @var TagMapping[]
      */
     private $tagMappings = array();
+
+    /**
+     * @var TagDefinition[]
+     */
+    private $tagDefinitions = array();
 
     /**
      * @var string[]
@@ -176,5 +182,25 @@ class PackageFile
     public function addTagMapping(TagMapping $tagMapping)
     {
         $this->tagMappings[] = $tagMapping;
+    }
+
+    /**
+     * Returns the tag definitions.
+     *
+     * @return TagDefinition[] The tag definitions.
+     */
+    public function getTagDefinitions()
+    {
+        return $this->tagDefinitions;
+    }
+
+    /**
+     * Adds a tag definition.
+     *
+     * @param TagDefinition $tagDefinition The tag definition.
+     */
+    public function addTagDefinition(TagDefinition $tagDefinition)
+    {
+        $this->tagDefinitions[] = $tagDefinition;
     }
 }

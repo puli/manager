@@ -32,25 +32,25 @@ class ResourceMapping
     /**
      * Creates a new resource mapping.
      *
-     * The mapping maps a Puli path to one or more file paths relative to
-     * the root of the package.
+     * The mapping maps a Puli path to one or more file paths relative to the
+     * root of the package.
      *
      * @param string          $puliPath   The Puli path.
      * @param string|string[] $localPaths The local paths.
      *
      * @throws \InvalidArgumentException If any of the arguments is invalid.
      */
-    function __construct($puliPath, $localPaths)
+    public function __construct($puliPath, $localPaths)
     {
         if (!is_string($puliPath)) {
             throw new \InvalidArgumentException(sprintf(
-                'The passed Puli path must be a string. Got: %s',
+                'The Puli path must be a string. Got: %s',
                 is_object($puliPath) ? get_class($puliPath) : gettype($puliPath)
             ));
         }
 
         if ('' === $puliPath) {
-            throw new \InvalidArgumentException('The passed Puli path must not be empty.');
+            throw new \InvalidArgumentException('The Puli path must not be empty.');
         }
 
         $localPaths = (array) $localPaths;
@@ -62,13 +62,13 @@ class ResourceMapping
         foreach ($localPaths as $localPath) {
             if (!is_string($localPath)) {
                 throw new \InvalidArgumentException(sprintf(
-                    'The passed local paths must be strings. Got: %s',
+                    'The local paths must be strings. Got: %s',
                     is_object($localPath) ? get_class($localPath) : gettype($localPath)
                 ));
             }
 
             if ('' === $localPath) {
-                throw new \InvalidArgumentException('The passed local paths must not be empty.');
+                throw new \InvalidArgumentException('The local paths must not be empty.');
             }
         }
 

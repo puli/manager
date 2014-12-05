@@ -22,6 +22,7 @@ Changelog
    `Puli\RepositoryManager\Package` namespace
  * renamed `TagDescriptor` and `ResourceDescriptor` to `TagMapping` and
    `ResourceMapping`
+ * added `TagDefinition`
 
 * 1.0.0-alpha1 (2014-12-03)
 

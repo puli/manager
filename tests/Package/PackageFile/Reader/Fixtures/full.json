@@ -6,6 +6,11 @@
     "tags": {
         "/app/config*.yml": "config"
     },
+    "tag-definitions": {
+        "my/application/my-tag": {
+            "description": "Description of my tag."
+        }
+    },
     "override": "acme/blog",
     "package-order": [ "acme/blog-extension1", "acme/blog-extension2" ],
     "config": {
