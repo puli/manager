@@ -12,7 +12,7 @@
 namespace Puli\RepositoryManager\Tests\Package\InstallFile;
 
 use Puli\RepositoryManager\Package\InstallFile\InstallFile;
-use Puli\RepositoryManager\Package\PackageMetadata;
+use Puli\RepositoryManager\Package\InstallInfo;
 
 /**
  * @since  1.0
@@ -55,67 +55,69 @@ class InstallFileTest extends \PHPUnit_Framework_TestCase
         new InstallFile($invalidPath);
     }
 
-    public function testAddPackageMetadata()
+    public function testAddInstallInfo()
     {
-        $metadata1 = new PackageMetadata('/path/to/package1');
-        $metadata2 = new PackageMetadata('/path/to/package2');
+        $installInfo1 = new InstallInfo('/path/to/package1');
+        $installInfo2 = new InstallInfo('/path/to/package2');
 
         $installFile = new InstallFile();
-        $installFile->addPackageMetadata($metadata1);
-        $installFile->addPackageMetadata($metadata2);
+        $installFile->addInstallInfo($installInfo1);
+        $installFile->addInstallInfo($installInfo2);
 
-        $this->assertSame(array($metadata1, $metadata2), $installFile->listPackageMetadata());
-        $this->assertSame($metadata1, $installFile->getPackageMetadata('/path/to/package1'));
-        $this->assertSame($metadata2, $installFile->getPackageMetadata('/path/to/package2'));
+        $this->assertSame(array($installInfo1, $installInfo2), $installFile->getInstallInfos());
+        $this->assertSame($installInfo1, $installFile->getInstallInfo('/path/to/package1'));
+        $this->assertSame($installInfo2, $installFile->getInstallInfo('/path/to/package2'));
     }
 
-    public function testClearPackageMetadata()
+    public function testSetInstallInfos()
     {
-        $installFile = new InstallFile();
-        $installFile->addPackageMetadata(new PackageMetadata('/path/to/package1'));
-        $installFile->clearPackageMetadata();
+        $installInfo1 = new InstallInfo('/path/to/package1');
+        $installInfo2 = new InstallInfo('/path/to/package2');
 
-        $this->assertSame(array(), $installFile->listPackageMetadata());
+        $installFile = new InstallFile();
+        $installFile->setInstallInfos(array($installInfo1, $installInfo2));
+
+        $this->assertSame(array($installInfo1, $installInfo2), $installFile->getInstallInfos());
     }
 
     /**
      * @expectedException \Puli\RepositoryManager\Package\NoSuchPackageException
      * @expectedExceptionMessage /foo/bar
      */
-    public function testGetPackageMetadataFailsIfNotFound()
+    public function testGetInstallInfosFailsIfNotFound()
     {
         $installFile = new InstallFile();
-        $installFile->getPackageMetadata('/foo/bar');
+        $installFile->getInstallInfo('/foo/bar');
     }
 
-    public function testRemovePackageMetadata()
+    public function testRemoveInstallInfo()
     {
-        $metadata1 = new PackageMetadata('/path/to/package1');
-        $metadata2 = new PackageMetadata('/path/to/package2');
+        $installInfo1 = new InstallInfo('/path/to/package1');
+        $installInfo2 = new InstallInfo('/path/to/package2');
 
         $installFile = new InstallFile();
-        $installFile->addPackageMetadata($metadata1);
-        $installFile->addPackageMetadata($metadata2);
+        $installFile->addInstallInfo($installInfo1);
+        $installFile->addInstallInfo($installInfo2);
 
-        $installFile->removePackageMetadata('/path/to/package1');
+        $installFile->removeInstallInfo('/path/to/package1');
 
-        $this->assertSame(array($metadata2), $installFile->listPackageMetadata());
+        $this->assertSame(array($installInfo2), $installFile->getInstallInfos());
     }
 
-    public function testRemoveIgnoresUnknownPaths()
+    public function testRemoveInstallInfoIgnoresUnknownPaths()
     {
         $installFile = new InstallFile();
-        $installFile->removePackageMetadata('/foo/bar');
+        $installFile->removeInstallInfo('/foo/bar');
     }
 
-    public function testHasPackageMetadata()
+    public function testHasInstallInfo()
     {
         $installFile = new InstallFile();
 
-        $this->assertFalse($installFile->hasPackageMetadata('/path/to/package'));
+        $this->assertFalse($installFile->hasInstallInfo('/path/to/package'));
 
-        $installFile->addPackageMetadata(new PackageMetadata('/path/to/package'));
+        $installFile->addInstallInfo(new InstallInfo('/path/to/package'));
 
-        $this->assertTrue($installFile->hasPackageMetadata('/path/to/package'));
+        $this->assertTrue($installFile->hasInstallInfo('/path/to/package'));
     }
 }

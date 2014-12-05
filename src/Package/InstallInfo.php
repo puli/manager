@@ -12,12 +12,12 @@
 namespace Puli\RepositoryManager\Package;
 
 /**
- * Describes a package in the install file.
+ * Contains information about a package installation.
  *
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class PackageMetadata
+class InstallInfo
 {
     /**
      * The default installer of packages.
@@ -32,7 +32,7 @@ class PackageMetadata
     /**
      * @var string|null
      */
-    private $name;
+    private $packageName;
 
     /**
      * @var string
@@ -40,7 +40,7 @@ class PackageMetadata
     private $installer = self::DEFAULT_INSTALLER;
 
     /**
-     * Creates new package metadata.
+     * Creates a new install info.
      *
      * @param string $installPath The path where the package is installed.
      *                            If a relative path is given, the path is
@@ -83,9 +83,9 @@ class PackageMetadata
      * @return null|string Returns the package name or `null` if the name is
      *                     read from the package's puli.json file.
      */
-    public function getName()
+    public function getPackageName()
     {
-        return $this->name;
+        return $this->packageName;
     }
 
     /**
@@ -96,7 +96,7 @@ class PackageMetadata
      *
      * @throws \InvalidArgumentException If the package name is not a string.
      */
-    public function setName($name)
+    public function setPackageName($name)
     {
         if (!is_string($name) && null !== $name) {
             throw new \InvalidArgumentException(sprintf(
@@ -109,7 +109,7 @@ class PackageMetadata
             throw new \InvalidArgumentException('The package name must not be empty.');
         }
 
-        $this->name = $name;
+        $this->packageName = $name;
     }
 
     /**

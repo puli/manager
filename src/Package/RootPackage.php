@@ -26,11 +26,10 @@ class RootPackage extends Package
      *
      * @param RootPackageFile $packageFile The package file.
      * @param string          $installPath The absolute install path.
-     * @param PackageMetadata $metadata    The package metadata.
      */
-    public function __construct(RootPackageFile $packageFile, $installPath, PackageMetadata $metadata = null)
+    public function __construct(RootPackageFile $packageFile, $installPath)
     {
-        parent::__construct($packageFile, $installPath, $metadata);
+        parent::__construct($packageFile, $installPath);
 
         if (null === $this->getName()) {
             $this->setName('__root__');

@@ -37,33 +37,33 @@ class Package
     private $installPath;
 
     /**
-     * @var PackageMetadata
+     * @var InstallInfo
      */
-    private $metadata;
+    private $installInfo;
 
     /**
      * Creates a new package.
      *
-     * @param PackageFile     $packageFile The package file.
-     * @param string          $installPath The absolute install path.
-     * @param PackageMetadata $metadata    The package metadata.
+     * @param PackageFile $packageFile The package file.
+     * @param string      $installPath The absolute install path.
+     * @param InstallInfo $installInfo The install info of this package.
      */
-    public function __construct(PackageFile $packageFile, $installPath, PackageMetadata $metadata = null)
+    public function __construct(PackageFile $packageFile, $installPath, InstallInfo $installInfo = null)
     {
         // If a package name was set during installation, that name wins over
         // the predefined name in the puli.json file (if any)
-        $this->name = $metadata && null !== $metadata->getName()
-            ? $metadata->getName()
+        $this->name = $installInfo && null !== $installInfo->getPackageName()
+            ? $installInfo->getPackageName()
             : $packageFile->getPackageName();
 
         $this->packageFile = $packageFile;
 
-        // The path is stored both here and in the metadata. While the metadata
-        // contains the path as it is stored in the install file (i.e. relative
-        // or absolute), the install path of the package is always an absolute
-        // path.
+        // The path is stored both here and in the install info. While the
+        // install info contains the path as it is stored in the install file
+        // (i.e. relative or absolute), the install path of the package is
+        // always an absolute path.
         $this->installPath = $installPath;
-        $this->metadata = $metadata;
+        $this->installInfo = $installInfo;
     }
 
     /**
@@ -97,13 +97,13 @@ class Package
     }
 
     /**
-     * Returns the package's metadata.
+     * Returns the package's install info.
      *
-     * @return PackageMetadata The metadata.
+     * @return InstallInfo The install info.
      */
-    public function getMetadata()
+    public function getInstallInfo()
     {
-        return $this->metadata;
+        return $this->installInfo;
     }
 
     /**

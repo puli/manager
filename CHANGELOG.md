@@ -4,10 +4,11 @@ Changelog
 * 1.0.0-alpha2 (@release_date@)
 
  * added `$name` argument to `PackageManager::installPackage()`
- * added `getName()` and `setName()` to `PackageMetadata`
- * removed `setNew()` and `isNew()` from `PackageMetadata`
- * changed `Package` to prefer the name of the metadata over the name set in the
-   package file
+ * renamed `PackageMetadata` to `InstallInfo`
+ * added `getName()` and `setName()` to `InstallInfo`
+ * removed `setNew()` and `isNew()` from `InstallInfo`
+ * changed `Package` to prefer the name of the install info over the name set in
+   the package file
  * `PackageManager` is now responsible for checking whether a package name is 
    set instead of `PackageFileStorage`
  * renamed options under the "config" key of puli.json:
@@ -18,7 +19,7 @@ Changelog
    * `REPO_FILE` => `READ_REPO`
    * `REPO_DUMP_FILE` => `WRITE_REPO`
    * `REPO_DUMP_DIR` => `DUMP_DIR`
- * moved `TagDescriptor`, `ResourceDescriptor` and `PackageMetadata` to
+ * moved `TagDescriptor`, `ResourceDescriptor` and `InstallInfo` to
    `Puli\RepositoryManager\Package` namespace
  * renamed `TagDescriptor` and `ResourceDescriptor` to `TagMapping` and
    `ResourceMapping`

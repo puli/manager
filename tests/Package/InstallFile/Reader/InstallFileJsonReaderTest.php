@@ -12,7 +12,7 @@
 namespace Puli\RepositoryManager\Tests\Package\InstallFile\Reader;
 
 use Puli\RepositoryManager\Package\InstallFile\Reader\InstallFileJsonReader;
-use Puli\RepositoryManager\Package\PackageMetadata;
+use Puli\RepositoryManager\Package\InstallInfo;
 
 /**
  * @since  1.0
@@ -32,16 +32,16 @@ class InstallFileJsonReaderTest extends \PHPUnit_Framework_TestCase
 
     public function testReadConfig()
     {
-        $metadata1 = new PackageMetadata('/path/to/package1');
-        $metadata1->setInstaller('Composer');
-        $metadata2 = new PackageMetadata('/path/to/package2');
-        $metadata2->setName('package2');
+        $installInfo1 = new InstallInfo('/path/to/package1');
+        $installInfo1->setInstaller('Composer');
+        $installInfo2 = new InstallInfo('/path/to/package2');
+        $installInfo2->setPackageName('package2');
 
         $config = $this->reader->readInstallFile(__DIR__.'/Fixtures/config.json');
 
         $this->assertInstanceOf('Puli\RepositoryManager\Package\InstallFile\InstallFile', $config);
         $this->assertSame(__DIR__.'/Fixtures/config.json', $config->getPath());
-        $this->assertEquals(array($metadata1, $metadata2), $config->listPackageMetadata());
+        $this->assertEquals(array($installInfo1, $installInfo2), $config->getInstallInfos());
     }
 
     /**

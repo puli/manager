@@ -11,9 +11,9 @@
 
 namespace Puli\RepositoryManager\Tests\Package;
 
+use Puli\RepositoryManager\Package\InstallInfo;
 use Puli\RepositoryManager\Package\Package;
 use Puli\RepositoryManager\Package\PackageFile\PackageFile;
-use Puli\RepositoryManager\Package\PackageMetadata;
 
 /**
  * @since  1.0
@@ -29,36 +29,36 @@ class PackageTest extends \PHPUnit_Framework_TestCase
         $this->assertSame('name', $package->getName());
     }
 
-    public function testUsePackageNameFromMetadata()
+    public function testUsePackageNameFromInstallInfo()
     {
         $packageFile = new PackageFile();
-        $metadata = new PackageMetadata('/path');
-        $metadata->setName('name');
-        $package = new Package($packageFile, '/path', $metadata);
+        $installInfo = new InstallInfo('/path');
+        $installInfo->setPackageName('name');
+        $package = new Package($packageFile, '/path', $installInfo);
 
         $this->assertSame('name', $package->getName());
     }
 
-    public function testPreferPackageNameFromMetadata()
+    public function testPreferPackageNameFromInstallInfo()
     {
         $packageFile = new PackageFile('package-file');
-        $metadata = new PackageMetadata('/path');
-        $metadata->setName('metadata');
-        $package = new Package($packageFile, '/path', $metadata);
+        $installInfo = new InstallInfo('/path');
+        $installInfo->setPackageName('installInfo');
+        $package = new Package($packageFile, '/path', $installInfo);
 
-        $this->assertSame('metadata', $package->getName());
+        $this->assertSame('installInfo', $package->getName());
     }
 
     public function testNameIsNullIfNoneSet()
     {
         $packageFile = new PackageFile();
-        $metadata = new PackageMetadata('/path');
-        $package = new Package($packageFile, '/path', $metadata);
+        $installInfo = new InstallInfo('/path');
+        $package = new Package($packageFile, '/path', $installInfo);
 
         $this->assertNull($package->getName());
     }
 
-    public function testNameIsNullIfNoneSetAndNoMetadataGiven()
+    public function testNameIsNullIfNoneSetAndNoInstallInfoGiven()
     {
         $packageFile = new PackageFile();
         $package = new Package($packageFile, '/path');

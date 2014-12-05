@@ -102,7 +102,7 @@ class PackageManager
      * @throws NameConflictException If the package has the same name as another
      *                               loaded package.
      */
-    public function installPackage($installPath, $name = null, $installer = PackageMetadata::DEFAULT_INSTALLER)
+    public function installPackage($installPath, $name = null, $installer = InstallInfo::DEFAULT_INSTALLER)
     {
         $installPath = Path::makeAbsolute($installPath, $this->rootDir);
 
@@ -112,13 +112,13 @@ class PackageManager
 
         // Try to load the package
         $relInstallPath = Path::makeRelative($installPath, $this->rootDir);
-        $metadata = new PackageMetadata($relInstallPath);
-        $metadata->setName($name);
-        $metadata->setInstaller($installer);
-        $package = $this->loadPackage($metadata);
+        $installInfo = new InstallInfo($relInstallPath);
+        $installInfo->setPackageName($name);
+        $installInfo->setInstaller($installer);
+        $package = $this->loadPackage($installInfo);
 
         // OK, now add it
-        $this->installFile->addPackageMetadata($metadata);
+        $this->installFile->addInstallInfo($installInfo);
         $this->packages->add($package);
 
         $this->installFileStorage->saveInstallFile($this->installFile);
@@ -159,8 +159,8 @@ class PackageManager
 
         $this->packages->remove($name);
 
-        if ($this->installFile->hasPackageMetadata($package->getInstallPath())) {
-            $this->installFile->removePackageMetadata($package->getInstallPath());
+        if ($this->installFile->hasInstallInfo($package->getInstallPath())) {
+            $this->installFile->removeInstallInfo($package->getInstallPath());
             $this->installFileStorage->saveInstallFile($this->installFile);
         }
     }
@@ -223,8 +223,8 @@ class PackageManager
         $packages = new PackageCollection();
 
         foreach ($this->packages as $package) {
-            // Packages (e.g. the root package) may have no metadata
-            if ($package->getMetadata() && $installer === $package->getMetadata()->getInstaller()) {
+            // The root package has no install info
+            if ($package->getInstallInfo() && $installer === $package->getInstallInfo()->getInstaller()) {
                 $packages->add($package);
             }
         }
@@ -281,15 +281,15 @@ class PackageManager
 
         $this->packages->add(new RootPackage($rootPackageFile, $this->rootDir));
 
-        foreach ($this->installFile->listPackageMetadata() as $metadata) {
-            $this->packages->add($this->loadPackage($metadata));
+        foreach ($this->installFile->getInstallInfos() as $installInfo) {
+            $this->packages->add($this->loadPackage($installInfo));
         }
     }
 
     /**
-     * Loads a package for the given metadata.
+     * Loads a package for the given install info.
      *
-     * @param PackageMetadata $metadata The package metadata.
+     * @param InstallInfo $installInfo The install info.
      *
      * @return Package The package.
      *
@@ -298,9 +298,9 @@ class PackageManager
      * @throws NameConflictException If the package has the same name as another
      *                               loaded package.
      */
-    private function loadPackage(PackageMetadata $metadata)
+    private function loadPackage(InstallInfo $installInfo)
     {
-        $installPath = Path::makeAbsolute($metadata->getInstallPath(), $this->rootDir);
+        $installPath = Path::makeAbsolute($installInfo->getInstallPath(), $this->rootDir);
 
         if (!file_exists($installPath)) {
             throw new FileNotFoundException(sprintf(
@@ -318,7 +318,7 @@ class PackageManager
         }
 
         $packageFile = $this->packageFileStorage->loadPackageFile($installPath.'/puli.json');
-        $package = new Package($packageFile, $installPath, $metadata);
+        $package = new Package($packageFile, $installPath, $installInfo);
 
         if (null === $package->getName()) {
             throw new InvalidConfigException(sprintf(

@@ -15,11 +15,11 @@ use Puli\RepositoryManager\Config\Config;
 use Puli\RepositoryManager\Config\ConfigFile\ConfigFile;
 use Puli\RepositoryManager\Package\InstallFile\InstallFile;
 use Puli\RepositoryManager\Package\InstallFile\InstallFileStorage;
+use Puli\RepositoryManager\Package\InstallInfo;
 use Puli\RepositoryManager\Package\PackageFile\PackageFile;
 use Puli\RepositoryManager\Package\PackageFile\PackageFileStorage;
 use Puli\RepositoryManager\Package\PackageFile\RootPackageFile;
 use Puli\RepositoryManager\Package\PackageManager;
-use Puli\RepositoryManager\Package\PackageMetadata;
 use Puli\RepositoryManager\Tests\Package\Fixtures\TestProjectEnvironment;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Filesystem\Filesystem;
@@ -162,8 +162,8 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
         $packageFile2 = new PackageFile('package2');
 
         $installFile = new InstallFile();
-        $installFile->addPackageMetadata(new PackageMetadata('../package1'));
-        $installFile->addPackageMetadata(new PackageMetadata(realpath($this->rootDir.'/../package2')));
+        $installFile->addInstallInfo(new InstallInfo('../package1'));
+        $installFile->addInstallInfo(new InstallInfo(realpath($this->rootDir.'/../package2')));
 
         $this->installFileStorage->expects($this->once())
             ->method('loadInstallFile')
@@ -208,11 +208,11 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
 
         $packageFile = new PackageFile('package1');
 
-        $metadata = new PackageMetadata('../package1');
-        $metadata->setName('package1-custom');
+        $installInfo = new InstallInfo('../package1');
+        $installInfo->setPackageName('package1-custom');
 
         $installFile = new InstallFile();
-        $installFile->addPackageMetadata($metadata);
+        $installFile->addInstallInfo($installInfo);
 
         $this->installFileStorage->expects($this->once())
             ->method('loadInstallFile')
@@ -252,7 +252,7 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
         $packageFile = new PackageFile();
 
         $installFile = new InstallFile();
-        $installFile->addPackageMetadata(new PackageMetadata($this->packageDir1));
+        $installFile->addInstallInfo(new InstallInfo($this->packageDir1));
 
         $this->installFileStorage->expects($this->once())
             ->method('loadInstallFile')
@@ -278,8 +278,8 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
         $packageFile2 = new PackageFile('package1');
 
         $installFile = new InstallFile();
-        $installFile->addPackageMetadata(new PackageMetadata($this->packageDir1));
-        $installFile->addPackageMetadata(new PackageMetadata($this->packageDir2));
+        $installFile->addInstallInfo(new InstallInfo($this->packageDir1));
+        $installFile->addInstallInfo(new InstallInfo($this->packageDir2));
 
         $this->installFileStorage->expects($this->once())
             ->method('loadInstallFile')
@@ -307,7 +307,7 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
         $this->environment->getConfig()->set(Config::INSTALL_FILE, 'repository.json');
 
         $installFile = new InstallFile();
-        $installFile->addPackageMetadata(new PackageMetadata('foobar'));
+        $installFile->addInstallInfo(new InstallInfo('foobar'));
 
         $this->installFileStorage->expects($this->once())
             ->method('loadInstallFile')
@@ -326,7 +326,7 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
         $this->environment->getConfig()->set(Config::INSTALL_FILE, 'repository.json');
 
         $installFile = new InstallFile();
-        $installFile->addPackageMetadata(new PackageMetadata(__DIR__.'/Fixtures/file'));
+        $installFile->addInstallInfo(new InstallInfo(__DIR__.'/Fixtures/file'));
 
         $this->installFileStorage->expects($this->once())
             ->method('loadInstallFile')
@@ -353,12 +353,12 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
             ->method('saveInstallFile')
             ->with($this->isInstanceOf('Puli\RepositoryManager\Package\InstallFile\InstallFile'))
             ->will($this->returnCallback(function (InstallFile $installFile) use ($packageDir1, $packageDir2) {
-                $metadata = $installFile->listPackageMetadata();
+                $installInfos = $installFile->getInstallInfos();
 
-                \PHPUnit_Framework_Assert::assertCount(3, $metadata);
-                \PHPUnit_Framework_Assert::assertSame($packageDir1, $metadata[0]->getInstallPath());
-                \PHPUnit_Framework_Assert::assertSame($packageDir2, $metadata[1]->getInstallPath());
-                \PHPUnit_Framework_Assert::assertSame('../package3', $metadata[2]->getInstallPath());
+                \PHPUnit_Framework_Assert::assertCount(3, $installInfos);
+                \PHPUnit_Framework_Assert::assertSame($packageDir1, $installInfos[0]->getInstallPath());
+                \PHPUnit_Framework_Assert::assertSame($packageDir2, $installInfos[1]->getInstallPath());
+                \PHPUnit_Framework_Assert::assertSame('../package3', $installInfos[2]->getInstallPath());
             }));
 
         $this->manager->installPackage($this->packageDir3);
@@ -381,12 +381,12 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
             ->method('saveInstallFile')
             ->with($this->isInstanceOf('Puli\RepositoryManager\Package\InstallFile\InstallFile'))
             ->will($this->returnCallback(function (InstallFile $installFile) use ($packageDir1, $packageDir2) {
-                $metadata = $installFile->listPackageMetadata();
+                $installInfos = $installFile->getInstallInfos();
 
-                \PHPUnit_Framework_Assert::assertCount(3, $metadata);
-                \PHPUnit_Framework_Assert::assertSame($packageDir1, $metadata[0]->getInstallPath());
-                \PHPUnit_Framework_Assert::assertSame($packageDir2, $metadata[1]->getInstallPath());
-                \PHPUnit_Framework_Assert::assertSame('../package3', $metadata[2]->getInstallPath());
+                \PHPUnit_Framework_Assert::assertCount(3, $installInfos);
+                \PHPUnit_Framework_Assert::assertSame($packageDir1, $installInfos[0]->getInstallPath());
+                \PHPUnit_Framework_Assert::assertSame($packageDir2, $installInfos[1]->getInstallPath());
+                \PHPUnit_Framework_Assert::assertSame('../package3', $installInfos[2]->getInstallPath());
             }));
 
         $this->manager->installPackage('../package3');
@@ -409,15 +409,15 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
             ->method('saveInstallFile')
             ->with($this->isInstanceOf('Puli\RepositoryManager\Package\InstallFile\InstallFile'))
             ->will($this->returnCallback(function (InstallFile $installFile) use ($packageDir1, $packageDir2) {
-                $metadata = $installFile->listPackageMetadata();
+                $installInfos = $installFile->getInstallInfos();
 
-                \PHPUnit_Framework_Assert::assertCount(3, $metadata);
-                \PHPUnit_Framework_Assert::assertSame($packageDir1, $metadata[0]->getInstallPath());
-                \PHPUnit_Framework_Assert::assertNull($metadata[0]->getName());
-                \PHPUnit_Framework_Assert::assertSame($packageDir2, $metadata[1]->getInstallPath());
-                \PHPUnit_Framework_Assert::assertNull($metadata[1]->getName());
-                \PHPUnit_Framework_Assert::assertSame('../package3', $metadata[2]->getInstallPath());
-                \PHPUnit_Framework_Assert::assertSame('package3-name', $metadata[2]->getName());
+                \PHPUnit_Framework_Assert::assertCount(3, $installInfos);
+                \PHPUnit_Framework_Assert::assertSame($packageDir1, $installInfos[0]->getInstallPath());
+                \PHPUnit_Framework_Assert::assertNull($installInfos[0]->getPackageName());
+                \PHPUnit_Framework_Assert::assertSame($packageDir2, $installInfos[1]->getInstallPath());
+                \PHPUnit_Framework_Assert::assertNull($installInfos[1]->getPackageName());
+                \PHPUnit_Framework_Assert::assertSame('../package3', $installInfos[2]->getInstallPath());
+                \PHPUnit_Framework_Assert::assertSame('package3-name', $installInfos[2]->getPackageName());
             }));
 
         $this->manager->installPackage($this->packageDir3, 'package3-name');
@@ -440,15 +440,15 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
             ->method('saveInstallFile')
             ->with($this->isInstanceOf('Puli\RepositoryManager\Package\InstallFile\InstallFile'))
             ->will($this->returnCallback(function (InstallFile $installFile) use ($packageDir1, $packageDir2) {
-                $metadata = $installFile->listPackageMetadata();
+                $installInfos = $installFile->getInstallInfos();
 
-                \PHPUnit_Framework_Assert::assertCount(3, $metadata);
-                \PHPUnit_Framework_Assert::assertSame($packageDir1, $metadata[0]->getInstallPath());
-                \PHPUnit_Framework_Assert::assertSame('User', $metadata[0]->getInstaller());
-                \PHPUnit_Framework_Assert::assertSame($packageDir2, $metadata[1]->getInstallPath());
-                \PHPUnit_Framework_Assert::assertSame('User', $metadata[1]->getInstaller());
-                \PHPUnit_Framework_Assert::assertSame('../package3', $metadata[2]->getInstallPath());
-                \PHPUnit_Framework_Assert::assertSame('Composer', $metadata[2]->getInstaller());
+                \PHPUnit_Framework_Assert::assertCount(3, $installInfos);
+                \PHPUnit_Framework_Assert::assertSame($packageDir1, $installInfos[0]->getInstallPath());
+                \PHPUnit_Framework_Assert::assertSame('User', $installInfos[0]->getInstaller());
+                \PHPUnit_Framework_Assert::assertSame($packageDir2, $installInfos[1]->getInstallPath());
+                \PHPUnit_Framework_Assert::assertSame('User', $installInfos[1]->getInstaller());
+                \PHPUnit_Framework_Assert::assertSame('../package3', $installInfos[2]->getInstallPath());
+                \PHPUnit_Framework_Assert::assertSame('Composer', $installInfos[2]->getInstaller());
             }));
 
         $this->manager->installPackage($this->packageDir3, null, 'Composer');
@@ -530,15 +530,15 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
             ->method('saveInstallFile')
             ->with($this->installFile)
             ->will($this->returnCallback(function (InstallFile $installFile) use ($packageDir) {
-                \PHPUnit_Framework_Assert::assertFalse($installFile->hasPackageMetadata($packageDir));
+                \PHPUnit_Framework_Assert::assertFalse($installFile->hasInstallInfo($packageDir));
             }));
 
-        $this->assertTrue($this->installFile->hasPackageMetadata($packageDir));
+        $this->assertTrue($this->installFile->hasInstallInfo($packageDir));
         $this->assertTrue($this->manager->hasPackage('package1'));
 
         $this->manager->removePackage('package1');
 
-        $this->assertFalse($this->installFile->hasPackageMetadata($packageDir));
+        $this->assertFalse($this->installFile->hasInstallInfo($packageDir));
         $this->assertFalse($this->manager->hasPackage('package1'));
     }
 
@@ -552,21 +552,21 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
         $this->manager->removePackage('foobar');
     }
 
-    public function testRemovePackageIgnoresIfNoMetadataFound()
+    public function testRemovePackageIgnoresIfNoInstallInfoFound()
     {
         $this->initDefaultManager();
 
         $this->installFileStorage->expects($this->never())
             ->method('saveInstallFile');
 
-        $this->installFile->removePackageMetadata($this->packageDir1);
+        $this->installFile->removeInstallInfo($this->packageDir1);
 
-        $this->assertFalse($this->installFile->hasPackageMetadata($this->packageDir1));
+        $this->assertFalse($this->installFile->hasInstallInfo($this->packageDir1));
         $this->assertTrue($this->manager->hasPackage('package1'));
 
         $this->manager->removePackage('package1');
 
-        $this->assertFalse($this->installFile->hasPackageMetadata($this->packageDir1));
+        $this->assertFalse($this->installFile->hasInstallInfo($this->packageDir1));
         $this->assertFalse($this->manager->hasPackage('package1'));
     }
 
@@ -625,16 +625,16 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
     {
         $this->initDefaultManager();
 
-        $metadata1 = new PackageMetadata($this->packageDir1);
-        $metadata1->setInstaller('Composer');
-        $metadata2 = new PackageMetadata($this->packageDir2);
-        $metadata2->setInstaller('User');
-        $metadata3 = new PackageMetadata($this->packageDir3);
-        $metadata3->setInstaller('Composer');
+        $installInfo1 = new InstallInfo($this->packageDir1);
+        $installInfo1->setInstaller('Composer');
+        $installInfo2 = new InstallInfo($this->packageDir2);
+        $installInfo2->setInstaller('User');
+        $installInfo3 = new InstallInfo($this->packageDir3);
+        $installInfo3->setInstaller('Composer');
 
-        $this->installFile->addPackageMetadata($metadata1);
-        $this->installFile->addPackageMetadata($metadata2);
-        $this->installFile->addPackageMetadata($metadata3);
+        $this->installFile->addInstallInfo($installInfo1);
+        $this->installFile->addInstallInfo($installInfo2);
+        $this->installFile->addInstallInfo($installInfo3);
 
         $this->manager = new PackageManager($this->environment, $this->packageFileStorage, $this->installFileStorage);
 
@@ -645,16 +645,16 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
         $this->assertCount(2, $composerPackages);
         $this->assertInstanceOf('Puli\RepositoryManager\Package\Package', $composerPackages['package1']);
         $this->assertSame('package1', $composerPackages['package1']->getName());
-        $this->assertSame($metadata1, $composerPackages['package1']->getMetadata());
+        $this->assertSame($installInfo1, $composerPackages['package1']->getInstallInfo());
         $this->assertInstanceOf('Puli\RepositoryManager\Package\Package', $composerPackages['package3']);
         $this->assertSame('package3', $composerPackages['package3']->getName());
-        $this->assertSame($metadata3, $composerPackages['package3']->getMetadata());
+        $this->assertSame($installInfo3, $composerPackages['package3']->getInstallInfo());
 
         $this->assertInstanceOf('Puli\RepositoryManager\Package\Collection\PackageCollection', $userPackages);
         $this->assertCount(1, $userPackages);
         $this->assertInstanceOf('Puli\RepositoryManager\Package\Package', $userPackages['package2']);
         $this->assertSame('package2', $userPackages['package2']->getName());
-        $this->assertSame($metadata2, $userPackages['package2']->getMetadata());
+        $this->assertSame($installInfo2, $userPackages['package2']->getInstallInfo());
     }
 
     private function initEnvironment()
@@ -672,11 +672,11 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
     {
         $this->environment->getConfig()->set(Config::INSTALL_FILE, 'repository.json');
 
-        $metadata1 = new PackageMetadata($this->packageDir1);
-        $metadata2 = new PackageMetadata($this->packageDir2);
+        $installInfo1 = new InstallInfo($this->packageDir1);
+        $installInfo2 = new InstallInfo($this->packageDir2);
 
-        $this->installFile->addPackageMetadata($metadata1);
-        $this->installFile->addPackageMetadata($metadata2);
+        $this->installFile->addInstallInfo($installInfo1);
+        $this->installFile->addInstallInfo($installInfo2);
 
         $this->installFileStorage->expects($this->any())
             ->method('loadInstallFile')

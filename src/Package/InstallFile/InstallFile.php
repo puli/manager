@@ -11,11 +11,11 @@
 
 namespace Puli\RepositoryManager\Package\InstallFile;
 
+use Puli\RepositoryManager\Package\InstallInfo;
 use Puli\RepositoryManager\Package\NoSuchPackageException;
-use Puli\RepositoryManager\Package\PackageMetadata;
 
 /**
- * Contains metadata of the installed packages.
+ * Contains information about all installed packages.
  *
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
@@ -28,9 +28,9 @@ class InstallFile
     private $path;
 
     /**
-     * @var PackageMetadata[]
+     * @var InstallInfo[]
      */
-    private $metadata = array();
+    private $installInfos = array();
 
     /**
      * Creates a new install file.
@@ -68,74 +68,80 @@ class InstallFile
     }
 
     /**
-     * Lists all package metadata.
+     * Returns the install infos of all packages.
      *
-     * @return PackageMetadata[] The package metadata.
+     * @return InstallInfo[] The install infos.
      */
-    public function listPackageMetadata()
+    public function getInstallInfos()
     {
         // The install paths as array keys are for internal use only
-        return array_values($this->metadata);
+        return array_values($this->installInfos);
     }
 
     /**
-     * Clears the package metadata.
-     */
-    public function clearPackageMetadata()
-    {
-        $this->metadata = array();
-    }
-
-    /**
-     * Adds package metadata.
+     * Sets the install infos of all installed packages.
      *
-     * @param PackageMetadata $metadata The package metadata.
+     * @param InstallInfo[] The install infos.
      */
-    public function addPackageMetadata(PackageMetadata $metadata)
+    public function setInstallInfos(array $installInfos)
     {
-        $this->metadata[$metadata->getInstallPath()] = $metadata;
+        $this->installInfos = array();
+
+        foreach ($installInfos as $installInfo) {
+            $this->addInstallInfo($installInfo);
+        }
     }
 
     /**
-     * Removes the package metadata with a given install path.
+     * Adds install info for a package.
+     *
+     * @param InstallInfo $installInfo The install info.
+     */
+    public function addInstallInfo(InstallInfo $installInfo)
+    {
+        $this->installInfos[$installInfo->getInstallPath()] = $installInfo;
+    }
+
+    /**
+     * Removes the install info of a package.
      *
      * @param string $installPath The install path of the package.
      */
-    public function removePackageMetadata($installPath)
+    public function removeInstallInfo($installPath)
     {
-        unset($this->metadata[$installPath]);
+        unset($this->installInfos[$installPath]);
     }
 
     /**
-     * Returns the package metadata with a given install path.
+     * Returns the install info of a package.
      *
      * @param string $installPath The install path of the package.
      *
-     * @return PackageMetadata The package metadata.
+     * @return InstallInfo The install info.
      *
      * @throws NoSuchPackageException If no package is installed at that path.
      */
-    public function getPackageMetadata($installPath)
+    public function getInstallInfo($installPath)
     {
-        if (!isset($this->metadata[$installPath])) {
+        if (!isset($this->installInfos[$installPath])) {
             throw new NoSuchPackageException(sprintf(
-                'Could not get package metadata: No package is installed at %s.',
+                'Could not get install info: No package is installed at %s.',
                 $installPath
             ));
         }
 
-        return $this->metadata[$installPath];
+        return $this->installInfos[$installPath];
     }
 
     /**
-     * Returns whether package metadata with a given install path exists.
+     * Returns whether an install info with a given install path exists.
      *
      * @param string $installPath The install path of the package.
      *
-     * @return bool Whether package metadata with that path exists.
+     * @return bool Whether install info with that path exists.
      */
-    public function hasPackageMetadata($installPath)
+    public function hasInstallInfo($installPath)
     {
-        return isset($this->metadata[$installPath]);
+        return isset($this->installInfos[$installPath]);
     }
 }

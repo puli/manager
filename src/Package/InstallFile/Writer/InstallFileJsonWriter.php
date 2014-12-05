@@ -13,7 +13,7 @@ namespace Puli\RepositoryManager\Package\InstallFile\Writer;
 
 use Puli\RepositoryManager\IOException;
 use Puli\RepositoryManager\Package\InstallFile\InstallFile;
-use Puli\RepositoryManager\Package\PackageMetadata;
+use Puli\RepositoryManager\Package\InstallInfo;
 use Symfony\Component\Filesystem\Filesystem;
 use Webmozart\Json\JsonEncoder;
 use Webmozart\PathUtil\Path;
@@ -39,16 +39,16 @@ class InstallFileJsonWriter implements InstallFileWriterInterface
     {
         $jsonData = array();
 
-        foreach ($installFile->listPackageMetadata() as $metadata) {
+        foreach ($installFile->getInstallInfos() as $installInfo) {
             $package = new \stdClass();
-            $package->installPath = $metadata->getInstallPath();
+            $package->installPath = $installInfo->getInstallPath();
 
-            if (null !== $metadata->getName()) {
-                $package->name = $metadata->getName();
+            if (null !== $installInfo->getPackageName()) {
+                $package->name = $installInfo->getPackageName();
             }
 
-            if (PackageMetadata::DEFAULT_INSTALLER !== $metadata->getInstaller()) {
-                $package->installer = $metadata->getInstaller();
+            if (InstallInfo::DEFAULT_INSTALLER !== $installInfo->getInstaller()) {
+                $package->installer = $installInfo->getInstaller();
             }
 
             $jsonData[] = $package;

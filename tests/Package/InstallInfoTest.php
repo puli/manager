@@ -11,20 +11,20 @@
 
 namespace Puli\RepositoryManager\Tests\Package;
 
-use Puli\RepositoryManager\Package\PackageMetadata;
+use Puli\RepositoryManager\Package\InstallInfo;
 
 /**
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class PackageMetadataTest extends \PHPUnit_Framework_TestCase
+class InstallInfoTest extends \PHPUnit_Framework_TestCase
 {
     /**
      * @expectedException \InvalidArgumentException
      */
     public function testFailIfInstallPathNotString()
     {
-        new PackageMetadata(12345);
+        new InstallInfo(12345);
     }
 
     /**
@@ -32,19 +32,19 @@ class PackageMetadataTest extends \PHPUnit_Framework_TestCase
      */
     public function testFailIfInstallPathEmpty()
     {
-        new PackageMetadata('');
+        new InstallInfo('');
     }
 
     public function testSetName()
     {
-        $metadata = new PackageMetadata('/path');
-        $metadata->setName('name');
+        $installInfo = new InstallInfo('/path');
+        $installInfo->setPackageName('name');
 
-        $this->assertSame('name', $metadata->getName());
+        $this->assertSame('name', $installInfo->getPackageName());
 
-        $metadata->setName(null);
+        $installInfo->setPackageName(null);
 
-        $this->assertNull($metadata->getName());
+        $this->assertNull($installInfo->getPackageName());
     }
 
     /**
@@ -52,9 +52,9 @@ class PackageMetadataTest extends \PHPUnit_Framework_TestCase
      */
     public function testFailIfNameNotString()
     {
-        $metadata = new PackageMetadata('/path');
+        $installInfo = new InstallInfo('/path');
 
-        $metadata->setName(12345);
+        $installInfo->setPackageName(12345);
     }
 
     /**
@@ -62,8 +62,8 @@ class PackageMetadataTest extends \PHPUnit_Framework_TestCase
      */
     public function testFailIfNameEmpty()
     {
-        $metadata = new PackageMetadata('/path');
+        $installInfo = new InstallInfo('/path');
 
-        $metadata->setName('');
+        $installInfo->setPackageName('');
     }
 }
