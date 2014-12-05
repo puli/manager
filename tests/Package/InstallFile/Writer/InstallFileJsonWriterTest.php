@@ -14,13 +14,14 @@ namespace Puli\RepositoryManager\Tests\Package\InstallFile\Writer;
 use Puli\RepositoryManager\Package\InstallFile\InstallFile;
 use Puli\RepositoryManager\Package\InstallFile\Writer\InstallFileJsonWriter;
 use Puli\RepositoryManager\Package\PackageMetadata;
+use Puli\RepositoryManager\Tests\JsonWriterTestCase;
 use Symfony\Component\Filesystem\Filesystem;
 
 /**
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class InstallFileJsonWriterTest extends \PHPUnit_Framework_TestCase
+class InstallFileJsonWriterTest extends JsonWriterTestCase
 {
     /**
      * @var InstallFileJsonWriter
@@ -60,11 +61,7 @@ class InstallFileJsonWriterTest extends \PHPUnit_Framework_TestCase
 
         $this->assertFileExists($this->tempFile);
 
-        if (version_compare(PHP_VERSION, '5.4.0', '>=')) {
-            $this->assertFileEquals(__DIR__.'/Fixtures/config.json', $this->tempFile);
-        } else {
-            $this->assertFileEquals(__DIR__.'/Fixtures/config-ugly.json', $this->tempFile);
-        }
+        $this->assertJsonFileEquals(__DIR__.'/Fixtures/config.json', $this->tempFile);
     }
 
     public function testWriteEmptyConfig()
