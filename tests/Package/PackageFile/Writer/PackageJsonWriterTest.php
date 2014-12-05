@@ -15,8 +15,8 @@ use Puli\RepositoryManager\Config\Config;
 use Puli\RepositoryManager\Package\PackageFile\PackageFile;
 use Puli\RepositoryManager\Package\PackageFile\RootPackageFile;
 use Puli\RepositoryManager\Package\PackageFile\Writer\PackageJsonWriter;
-use Puli\RepositoryManager\Package\ResourceDescriptor;
-use Puli\RepositoryManager\Package\TagDescriptor;
+use Puli\RepositoryManager\Package\ResourceMapping;
+use Puli\RepositoryManager\Package\TagMapping;
 use Puli\RepositoryManager\Tests\JsonWriterTestCase;
 use Symfony\Component\Filesystem\Filesystem;
 
@@ -54,8 +54,8 @@ class PackageJsonWriterTest extends JsonWriterTestCase
     {
         $packageFile = new PackageFile();
         $packageFile->setPackageName('my/application');
-        $packageFile->addResourceDescriptor(new ResourceDescriptor('/app', 'res'));
-        $packageFile->addTagDescriptor(new TagDescriptor('/app/config*.yml', 'config'));
+        $packageFile->addResourceMapping(new ResourceMapping('/app', 'res'));
+        $packageFile->addTagMapping(new TagMapping('/app/config*.yml', 'config'));
         $packageFile->setOverriddenPackages('acme/blog');
 
         $this->writer->writePackageFile($packageFile, $this->tempFile);
@@ -70,8 +70,8 @@ class PackageJsonWriterTest extends JsonWriterTestCase
         $baseConfig = new Config();
         $packageFile = new RootPackageFile(null, null, $baseConfig);
         $packageFile->setPackageName('my/application');
-        $packageFile->addResourceDescriptor(new ResourceDescriptor('/app', 'res'));
-        $packageFile->addTagDescriptor(new TagDescriptor('/app/config*.yml', 'config'));
+        $packageFile->addResourceMapping(new ResourceMapping('/app', 'res'));
+        $packageFile->addTagMapping(new TagMapping('/app/config*.yml', 'config'));
         $packageFile->setOverriddenPackages('acme/blog');
         $packageFile->setPackageOrder(array('acme/blog-extension1', 'acme/blog-extension2'));
         $packageFile->addPluginClass('Puli\RepositoryManager\Tests\Package\PackageFile\Fixtures\TestPlugin');
@@ -117,7 +117,7 @@ class PackageJsonWriterTest extends JsonWriterTestCase
     {
         $packageFile = new PackageFile();
         $packageFile->setPackageName('my/application');
-        $packageFile->addResourceDescriptor(new ResourceDescriptor('/app', array('res', 'assets')));
+        $packageFile->addResourceMapping(new ResourceMapping('/app', array('res', 'assets')));
 
         $this->writer->writePackageFile($packageFile, $this->tempFile);
 
@@ -130,7 +130,7 @@ class PackageJsonWriterTest extends JsonWriterTestCase
     {
         $packageFile = new PackageFile();
         $packageFile->setPackageName('my/application');
-        $packageFile->addTagDescriptor(new TagDescriptor('/app/config*.yml', array('yaml', 'config')));
+        $packageFile->addTagMapping(new TagMapping('/app/config*.yml', array('yaml', 'config')));
 
         $this->writer->writePackageFile($packageFile, $this->tempFile);
 

@@ -552,7 +552,7 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
         $this->manager->removePackage('foobar');
     }
 
-    public function testRemovePackageIgnoresIfNoDescriptorFound()
+    public function testRemovePackageIgnoresIfNoMetadataFound()
     {
         $this->initDefaultManager();
 

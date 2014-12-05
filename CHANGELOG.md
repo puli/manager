@@ -20,6 +20,8 @@ Changelog
    * `REPO_DUMP_DIR` => `DUMP_DIR`
  * moved `TagDescriptor`, `ResourceDescriptor` and `PackageMetadata` to
    `Puli\RepositoryManager\Package` namespace
+ * renamed `TagDescriptor` and `ResourceDescriptor` to `TagMapping` and
+   `ResourceMapping`
 
 * 1.0.0-alpha1 (2014-12-03)
 

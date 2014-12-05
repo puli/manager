@@ -16,8 +16,8 @@ use Puli\RepositoryManager\FileNotFoundException;
 use Puli\RepositoryManager\InvalidConfigException;
 use Puli\RepositoryManager\Package\PackageFile\PackageFile;
 use Puli\RepositoryManager\Package\PackageFile\RootPackageFile;
-use Puli\RepositoryManager\Package\ResourceDescriptor;
-use Puli\RepositoryManager\Package\TagDescriptor;
+use Puli\RepositoryManager\Package\ResourceMapping;
+use Puli\RepositoryManager\Package\TagMapping;
 use Webmozart\Json\DecodingFailedException;
 use Webmozart\Json\JsonDecoder;
 use Webmozart\Json\ValidationFailedException;
@@ -92,13 +92,13 @@ class PackageJsonReader implements PackageFileReaderInterface
 
         if (isset($jsonData->resources)) {
             foreach ($jsonData->resources as $path => $relativePaths) {
-                $packageFile->addResourceDescriptor(new ResourceDescriptor($path, (array) $relativePaths));
+                $packageFile->addResourceMapping(new ResourceMapping($path, (array) $relativePaths));
             }
         }
 
         if (isset($jsonData->tags)) {
             foreach ((array) $jsonData->tags as $selector => $tags) {
-                $packageFile->addTagDescriptor(new TagDescriptor($selector, (array) $tags));
+                $packageFile->addTagMapping(new TagMapping($selector, (array) $tags));
             }
         }
 

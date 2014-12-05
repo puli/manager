@@ -12,7 +12,7 @@
 namespace Puli\RepositoryManager\Repository;
 
 /**
- * Thrown when a resource descriptor is invalid.
+ * Thrown when a resource mapping is invalid.
  *
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>

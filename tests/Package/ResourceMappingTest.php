@@ -11,67 +11,67 @@
 
 namespace Puli\RepositoryManager\Tests\Package;
 
-use Puli\RepositoryManager\Package\TagDescriptor;
+use Puli\RepositoryManager\Package\ResourceMapping;
 
 /**
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class TagDescriptorTest extends \PHPUnit_Framework_TestCase
+class ResourceMappingTest extends \PHPUnit_Framework_TestCase
 {
     /**
      * @expectedException \InvalidArgumentException
      */
-    public function testFailIfPuliSelectorNotString()
+    public function testFailIfPuliPathNotString()
     {
-        new TagDescriptor(12345, 'resources');
+        new ResourceMapping(12345, 'resources');
     }
 
     /**
      * @expectedException \InvalidArgumentException
      */
-    public function testFailIfPuliSelectorEmpty()
+    public function testFailIfPuliPathEmpty()
     {
-        new TagDescriptor('', 'resources');
+        new ResourceMapping('', 'resources');
     }
 
     /**
      * @expectedException \InvalidArgumentException
      */
-    public function testFailIfTagsNotStringOrArray()
+    public function testFailIfLocalPathsNotStringOrArray()
     {
-        new TagDescriptor('/path', 12345);
+        new ResourceMapping('/path', 12345);
     }
 
     /**
      * @expectedException \InvalidArgumentException
      */
-    public function testFailIfTagsEmptyString()
+    public function testFailIfLocalPathsEmptyString()
     {
-        new TagDescriptor('/path', '');
+        new ResourceMapping('/path', '');
     }
 
     /**
      * @expectedException \InvalidArgumentException
      */
-    public function testFailIfTagsNotStringArray()
+    public function testFailIfLocalPathsNotStringArray()
     {
-        new TagDescriptor('/path', array(12345));
+        new ResourceMapping('/path', array(12345));
     }
 
     /**
      * @expectedException \InvalidArgumentException
      */
-    public function testFailIfTagsContainEmptyString()
+    public function testFailIfLocalPathsContainEmptyString()
     {
-        new TagDescriptor('/path', array(''));
+        new ResourceMapping('/path', array(''));
     }
 
     /**
      * @expectedException \InvalidArgumentException
      */
-    public function testFailIfNoTags()
+    public function testFailIfNoLocalPaths()
     {
-        new TagDescriptor('/path', array());
+        new ResourceMapping('/path', array());
     }
 }

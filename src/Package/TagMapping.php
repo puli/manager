@@ -12,12 +12,12 @@
 namespace Puli\RepositoryManager\Package;
 
 /**
- * Describes a tag mapping in the package file.
+ * Maps a Puli selector to one or more tags.
  *
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class TagDescriptor
+class TagMapping
 {
     /**
      * @var string
@@ -30,9 +30,9 @@ class TagDescriptor
     private $tags = array();
 
     /**
-     * Creates a new tag descriptor.
+     * Creates a new tag mapping.
      *
-     * The descriptor maps a Puli selector to one or more tags. The Puli
+     * The mapping maps a Puli selector to one or more tags. The Puli
      * selector can be a Puli path or a pattern containing wildcards.
      *
      * @param string          $puliSelector   The Puli path. Must be a non-empty

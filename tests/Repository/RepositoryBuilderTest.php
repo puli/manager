@@ -17,9 +17,9 @@ use Puli\RepositoryManager\Package\Collection\PackageCollection;
 use Puli\RepositoryManager\Package\Package;
 use Puli\RepositoryManager\Package\PackageFile\PackageFile;
 use Puli\RepositoryManager\Package\PackageFile\RootPackageFile;
-use Puli\RepositoryManager\Package\ResourceDescriptor;
+use Puli\RepositoryManager\Package\ResourceMapping;
 use Puli\RepositoryManager\Package\RootPackage;
-use Puli\RepositoryManager\Package\TagDescriptor;
+use Puli\RepositoryManager\Package\TagMapping;
 use Puli\RepositoryManager\Repository\RepositoryBuilder;
 
 /**
@@ -75,8 +75,8 @@ class RepositoryBuilderTest extends \PHPUnit_Framework_TestCase
     public function testAddResources()
     {
         $packageFile = new PackageFile('package');
-        $packageFile->addResourceDescriptor(new ResourceDescriptor('/package', 'resources'));
-        $packageFile->addResourceDescriptor(new ResourceDescriptor('/package/css', 'assets/css'));
+        $packageFile->addResourceMapping(new ResourceMapping('/package', 'resources'));
+        $packageFile->addResourceMapping(new ResourceMapping('/package/css', 'assets/css'));
 
         $this->packageCollection->add(new Package($packageFile, $this->package1Root));
 
@@ -95,7 +95,7 @@ class RepositoryBuilderTest extends \PHPUnit_Framework_TestCase
     public function testAddResourcesFromOtherPackagesInstallPath()
     {
         $packageFile1 = new PackageFile('package1');
-        $packageFile1->addResourceDescriptor(new ResourceDescriptor('/package', '@package2:resources'));
+        $packageFile1->addResourceMapping(new ResourceMapping('/package', '@package2:resources'));
 
         $packageFile2 = new PackageFile('package2');
 
@@ -116,7 +116,7 @@ class RepositoryBuilderTest extends \PHPUnit_Framework_TestCase
     public function testFailIfReferencedPackageCouldNotBeFound()
     {
         $packageFile = new PackageFile('package1');
-        $packageFile->addResourceDescriptor(new ResourceDescriptor('/package', '@package2:resources'));
+        $packageFile->addResourceMapping(new ResourceMapping('/package', '@package2:resources'));
 
         $this->packageCollection->add(new Package($packageFile, $this->package1Root));
 
@@ -130,7 +130,7 @@ class RepositoryBuilderTest extends \PHPUnit_Framework_TestCase
     public function testDoNotFailIfReferencedOptionalPackageCouldNotBeFound()
     {
         $packageFile = new PackageFile('package1');
-        $packageFile->addResourceDescriptor(new ResourceDescriptor('/package', '@?package2:resources'));
+        $packageFile->addResourceMapping(new ResourceMapping('/package', '@?package2:resources'));
 
         $this->packageCollection->add(new Package($packageFile, $this->package1Root));
 
@@ -147,7 +147,7 @@ class RepositoryBuilderTest extends \PHPUnit_Framework_TestCase
     public function testFailIfResourceNotFound()
     {
         $packageFile = new PackageFile('package1');
-        $packageFile->addResourceDescriptor(new ResourceDescriptor('/package', 'foobar'));
+        $packageFile->addResourceMapping(new ResourceMapping('/package', 'foobar'));
 
         $this->packageCollection->add(new Package($packageFile, $this->package1Root));
 
@@ -157,8 +157,8 @@ class RepositoryBuilderTest extends \PHPUnit_Framework_TestCase
     public function testIgnoreResourceOrder()
     {
         $packageFile = new PackageFile('package');
-        $packageFile->addResourceDescriptor(new ResourceDescriptor('/package/css', 'assets/css'));
-        $packageFile->addResourceDescriptor(new ResourceDescriptor('/package', 'resources'));
+        $packageFile->addResourceMapping(new ResourceMapping('/package/css', 'assets/css'));
+        $packageFile->addResourceMapping(new ResourceMapping('/package', 'resources'));
 
         $this->packageCollection->add(new Package($packageFile, $this->package1Root));
 
@@ -177,7 +177,7 @@ class RepositoryBuilderTest extends \PHPUnit_Framework_TestCase
     public function testExportResourceWithMultipleLocalPaths()
     {
         $packageFile = new PackageFile('package');
-        $packageFile->addResourceDescriptor(new ResourceDescriptor('/package', array('resources', 'assets')));
+        $packageFile->addResourceMapping(new ResourceMapping('/package', array('resources', 'assets')));
 
         $this->packageCollection->add(new Package($packageFile, $this->package1Root));
 
@@ -196,12 +196,12 @@ class RepositoryBuilderTest extends \PHPUnit_Framework_TestCase
     public function testOverrideExistingPackage()
     {
         $overridden = new PackageFile('package1');
-        $overridden->addResourceDescriptor(new ResourceDescriptor('/package1', 'resources'));
-        $overridden->addResourceDescriptor(new ResourceDescriptor('/package1/css', 'assets/css'));
+        $overridden->addResourceMapping(new ResourceMapping('/package1', 'resources'));
+        $overridden->addResourceMapping(new ResourceMapping('/package1/css', 'assets/css'));
 
         $overrider = new PackageFile('package2');
-        $overrider->addResourceDescriptor(new ResourceDescriptor('/package1', 'override'));
-        $overrider->addResourceDescriptor(new ResourceDescriptor('/package1/css', 'css-override'));
+        $overrider->addResourceMapping(new ResourceMapping('/package1', 'override'));
+        $overrider->addResourceMapping(new ResourceMapping('/package1/css', 'css-override'));
         $overrider->setOverriddenPackages('package1');
 
         // Add overridden package first
@@ -231,12 +231,12 @@ class RepositoryBuilderTest extends \PHPUnit_Framework_TestCase
     public function testOverrideFuturePackage()
     {
         $overridden = new PackageFile('package1');
-        $overridden->addResourceDescriptor(new ResourceDescriptor('/package1', 'resources'));
-        $overridden->addResourceDescriptor(new ResourceDescriptor('/package1/css', 'assets/css'));
+        $overridden->addResourceMapping(new ResourceMapping('/package1', 'resources'));
+        $overridden->addResourceMapping(new ResourceMapping('/package1/css', 'assets/css'));
 
         $overrider = new PackageFile('package2');
-        $overrider->addResourceDescriptor(new ResourceDescriptor('/package1', 'override'));
-        $overrider->addResourceDescriptor(new ResourceDescriptor('/package1/css', 'css-override'));
+        $overrider->addResourceMapping(new ResourceMapping('/package1', 'override'));
+        $overrider->addResourceMapping(new ResourceMapping('/package1/css', 'css-override'));
         $overrider->setOverriddenPackages('package1');
 
         // Add overriding package first
@@ -266,14 +266,14 @@ class RepositoryBuilderTest extends \PHPUnit_Framework_TestCase
     public function testOverrideChain()
     {
         $packageFile1 = new PackageFile('package1');
-        $packageFile1->addResourceDescriptor(new ResourceDescriptor('/package1', 'resources'));
+        $packageFile1->addResourceMapping(new ResourceMapping('/package1', 'resources'));
 
         $packageFile2 = new PackageFile('package2');
-        $packageFile2->addResourceDescriptor(new ResourceDescriptor('/package1', 'override'));
+        $packageFile2->addResourceMapping(new ResourceMapping('/package1', 'override'));
         $packageFile2->setOverriddenPackages('package1');
 
         $packageFile3 = new PackageFile('package3');
-        $packageFile3->addResourceDescriptor(new ResourceDescriptor('/package1', 'override2'));
+        $packageFile3->addResourceMapping(new ResourceMapping('/package1', 'override2'));
         $packageFile3->setOverriddenPackages('package2');
 
         $this->packageCollection->add(new Package($packageFile1, $this->package1Root));
@@ -299,14 +299,14 @@ class RepositoryBuilderTest extends \PHPUnit_Framework_TestCase
     public function testOverrideMultiplePackages()
     {
         $packageFile1 = new PackageFile('package1');
-        $packageFile1->addResourceDescriptor(new ResourceDescriptor('/package1', 'resources'));
+        $packageFile1->addResourceMapping(new ResourceMapping('/package1', 'resources'));
 
         $packageFile2 = new PackageFile('package2');
-        $packageFile2->addResourceDescriptor(new ResourceDescriptor('/package2', 'resources'));
+        $packageFile2->addResourceMapping(new ResourceMapping('/package2', 'resources'));
 
         $packageFile3 = new PackageFile('package3');
-        $packageFile3->addResourceDescriptor(new ResourceDescriptor('/package1', 'override1'));
-        $packageFile3->addResourceDescriptor(new ResourceDescriptor('/package2', 'override2'));
+        $packageFile3->addResourceMapping(new ResourceMapping('/package1', 'override1'));
+        $packageFile3->addResourceMapping(new ResourceMapping('/package2', 'override2'));
         $packageFile3->setOverriddenPackages(array('package1', 'package2'));
 
         $this->packageCollection->add(new Package($packageFile1, $this->package1Root));
@@ -336,7 +336,7 @@ class RepositoryBuilderTest extends \PHPUnit_Framework_TestCase
     public function testOverrideIgnoredIfPackageNotFound()
     {
         $packageFile = new PackageFile('package');
-        $packageFile->addResourceDescriptor(new ResourceDescriptor('/package', 'resources'));
+        $packageFile->addResourceMapping(new ResourceMapping('/package', 'resources'));
         $packageFile->setOverriddenPackages('foobar');
 
         $this->packageCollection->add(new Package($packageFile, $this->package1Root));
@@ -352,10 +352,10 @@ class RepositoryBuilderTest extends \PHPUnit_Framework_TestCase
     public function testOverrideWithMultipleDirectories()
     {
         $overridden = new PackageFile('package1');
-        $overridden->addResourceDescriptor(new ResourceDescriptor('/package1', 'resources'));
+        $overridden->addResourceMapping(new ResourceMapping('/package1', 'resources'));
 
         $overrider = new PackageFile('package2');
-        $overrider->addResourceDescriptor(new ResourceDescriptor('/package1', array('override', 'css-override')));
+        $overrider->addResourceMapping(new ResourceMapping('/package1', array('override', 'css-override')));
         $overrider->setOverriddenPackages('package1');
 
         $this->packageCollection->add(new Package($overridden, $this->package1Root));
@@ -383,10 +383,10 @@ class RepositoryBuilderTest extends \PHPUnit_Framework_TestCase
     public function testConflictIfSamePathsButNoOverrideStatement()
     {
         $packageFile1 = new PackageFile('package1');
-        $packageFile1->addResourceDescriptor(new ResourceDescriptor('/path', 'resources'));
+        $packageFile1->addResourceMapping(new ResourceMapping('/path', 'resources'));
 
         $packageFile2 = new PackageFile('package2');
-        $packageFile2->addResourceDescriptor(new ResourceDescriptor('/path', 'resources'));
+        $packageFile2->addResourceMapping(new ResourceMapping('/path', 'resources'));
 
         $this->packageCollection->add(new Package($packageFile1, $this->package1Root));
         $this->packageCollection->add(new Package($packageFile2, $this->package2Root));
@@ -404,10 +404,10 @@ class RepositoryBuilderTest extends \PHPUnit_Framework_TestCase
     public function testConflictIfExistingSubPathAndNoOverrideStatement()
     {
         $packageFile1 = new PackageFile('package1');
-        $packageFile1->addResourceDescriptor(new ResourceDescriptor('/path', 'resources'));
+        $packageFile1->addResourceMapping(new ResourceMapping('/path', 'resources'));
 
         $packageFile2 = new PackageFile('package2');
-        $packageFile2->addResourceDescriptor(new ResourceDescriptor('/path/config', 'override'));
+        $packageFile2->addResourceMapping(new ResourceMapping('/path/config', 'override'));
 
         $this->packageCollection->add(new Package($packageFile1, $this->package1Root));
         $this->packageCollection->add(new Package($packageFile2, $this->package2Root));
@@ -422,10 +422,10 @@ class RepositoryBuilderTest extends \PHPUnit_Framework_TestCase
     public function testNoConflictIfNewSubPathAndNoOverrideStatement()
     {
         $packageFile1 = new PackageFile('package1');
-        $packageFile1->addResourceDescriptor(new ResourceDescriptor('/path', 'resources'));
+        $packageFile1->addResourceMapping(new ResourceMapping('/path', 'resources'));
 
         $packageFile2 = new PackageFile('package2');
-        $packageFile2->addResourceDescriptor(new ResourceDescriptor('/path/new', 'override'));
+        $packageFile2->addResourceMapping(new ResourceMapping('/path/new', 'override'));
 
         $this->packageCollection->add(new Package($packageFile1, $this->package1Root));
         $this->packageCollection->add(new Package($packageFile2, $this->package2Root));
@@ -445,10 +445,10 @@ class RepositoryBuilderTest extends \PHPUnit_Framework_TestCase
     public function testDefinePackageOrderOnRootPackage()
     {
         $packageFile1 = new PackageFile('package1');
-        $packageFile1->addResourceDescriptor(new ResourceDescriptor('/path', 'resources'));
+        $packageFile1->addResourceMapping(new ResourceMapping('/path', 'resources'));
 
         $packageFile2 = new PackageFile('package2');
-        $packageFile2->addResourceDescriptor(new ResourceDescriptor('/path', 'override'));
+        $packageFile2->addResourceMapping(new ResourceMapping('/path', 'override'));
 
         $rootConfig = new RootPackageFile('root');
         $rootConfig->setPackageOrder(array('package1', 'package2'));
@@ -475,10 +475,10 @@ class RepositoryBuilderTest extends \PHPUnit_Framework_TestCase
     public function testPackageOrderInNonRootPackageIsIgnored()
     {
         $packageFile1 = new PackageFile('package1');
-        $packageFile1->addResourceDescriptor(new ResourceDescriptor('/path', 'resources'));
+        $packageFile1->addResourceMapping(new ResourceMapping('/path', 'resources'));
 
         $packageFile2 = new PackageFile('package2');
-        $packageFile2->addResourceDescriptor(new ResourceDescriptor('/path', 'override'));
+        $packageFile2->addResourceMapping(new ResourceMapping('/path', 'override'));
 
         $pseudoRootConfig = new RootPackageFile('root');
         $pseudoRootConfig->setPackageOrder(array('package1', 'package2'));
@@ -497,8 +497,8 @@ class RepositoryBuilderTest extends \PHPUnit_Framework_TestCase
     public function testTagResources()
     {
         $packageFile = new PackageFile('package1');
-        $packageFile->addResourceDescriptor(new ResourceDescriptor('/package', 'resources'));
-        $packageFile->addTagDescriptor(new TagDescriptor('/package', 'tag'));
+        $packageFile->addResourceMapping(new ResourceMapping('/package', 'resources'));
+        $packageFile->addTagMapping(new TagMapping('/package', 'tag'));
 
         $this->packageCollection->add(new Package($packageFile, $this->package1Root));
 
@@ -517,10 +517,10 @@ class RepositoryBuilderTest extends \PHPUnit_Framework_TestCase
     public function testTagResourcesFromExistingOtherPackage()
     {
         $packageFile1 = new PackageFile('package1');
-        $packageFile1->addResourceDescriptor(new ResourceDescriptor('/package1', 'resources'));
+        $packageFile1->addResourceMapping(new ResourceMapping('/package1', 'resources'));
 
         $packageFile2 = new PackageFile('package2');
-        $packageFile2->addTagDescriptor(new TagDescriptor('/package1', 'tag'));
+        $packageFile2->addTagMapping(new TagMapping('/package1', 'tag'));
 
         $this->packageCollection->add(new Package($packageFile1, $this->package1Root));
         $this->packageCollection->add(new Package($packageFile2, $this->package2Root));
@@ -540,10 +540,10 @@ class RepositoryBuilderTest extends \PHPUnit_Framework_TestCase
     public function testTagResourcesFromFutureOtherPackage()
     {
         $packageFile1 = new PackageFile('package1');
-        $packageFile1->addTagDescriptor(new TagDescriptor('/package2', 'tag'));
+        $packageFile1->addTagMapping(new TagMapping('/package2', 'tag'));
 
         $packageFile2 = new PackageFile('package2');
-        $packageFile2->addResourceDescriptor(new ResourceDescriptor('/package2', 'resources'));
+        $packageFile2->addResourceMapping(new ResourceMapping('/package2', 'resources'));
 
         $this->packageCollection->add(new Package($packageFile1, $this->package1Root));
         $this->packageCollection->add(new Package($packageFile2, $this->package2Root));
@@ -563,11 +563,11 @@ class RepositoryBuilderTest extends \PHPUnit_Framework_TestCase
     public function testTagInTwoPackages()
     {
         $packageFile1 = new PackageFile('package1');
-        $packageFile1->addResourceDescriptor(new ResourceDescriptor('/package1', 'resources'));
-        $packageFile1->addTagDescriptor(new TagDescriptor('/package1', 'tag1'));
+        $packageFile1->addResourceMapping(new ResourceMapping('/package1', 'resources'));
+        $packageFile1->addTagMapping(new TagMapping('/package1', 'tag1'));
 
         $packageFile2 = new PackageFile('package2');
-        $packageFile2->addTagDescriptor(new TagDescriptor('/package1', 'tag2'));
+        $packageFile2->addTagMapping(new TagMapping('/package1', 'tag2'));
 
         $this->packageCollection->add(new Package($packageFile1, $this->package1Root));
         $this->packageCollection->add(new Package($packageFile2, $this->package2Root));
@@ -591,11 +591,11 @@ class RepositoryBuilderTest extends \PHPUnit_Framework_TestCase
     public function testDuplicateTags()
     {
         $packageFile1 = new PackageFile('package1');
-        $packageFile1->addResourceDescriptor(new ResourceDescriptor('/package1', 'resources'));
-        $packageFile1->addTagDescriptor(new TagDescriptor('/package1', 'tag'));
+        $packageFile1->addResourceMapping(new ResourceMapping('/package1', 'resources'));
+        $packageFile1->addTagMapping(new TagMapping('/package1', 'tag'));
 
         $packageFile2 = new PackageFile('package2');
-        $packageFile2->addTagDescriptor(new TagDescriptor('/package1', 'tag'));
+        $packageFile2->addTagMapping(new TagMapping('/package1', 'tag'));
 
         $this->packageCollection->add(new Package($packageFile1, $this->package1Root));
         $this->packageCollection->add(new Package($packageFile2, $this->package2Root));
@@ -615,8 +615,8 @@ class RepositoryBuilderTest extends \PHPUnit_Framework_TestCase
     public function testMultipleTags()
     {
         $packageFile = new PackageFile('package1');
-        $packageFile->addResourceDescriptor(new ResourceDescriptor('/package1', 'resources'));
-        $packageFile->addTagDescriptor(new TagDescriptor('/package1', array('tag1', 'tag2')));
+        $packageFile->addResourceMapping(new ResourceMapping('/package1', 'resources'));
+        $packageFile->addTagMapping(new TagMapping('/package1', array('tag1', 'tag2')));
 
         $this->packageCollection->add(new Package($packageFile, $this->package1Root));
 

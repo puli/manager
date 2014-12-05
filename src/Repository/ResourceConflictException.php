@@ -12,7 +12,7 @@
 namespace Puli\RepositoryManager\Repository;
 
 /**
- * Thrown when two packages have conflicting resource descriptors.
+ * Thrown when two packages have conflicting resource mappings.
  *
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>

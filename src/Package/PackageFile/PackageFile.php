@@ -11,8 +11,8 @@
 
 namespace Puli\RepositoryManager\Package\PackageFile;
 
-use Puli\RepositoryManager\Package\ResourceDescriptor;
-use Puli\RepositoryManager\Package\TagDescriptor;
+use Puli\RepositoryManager\Package\ResourceMapping;
+use Puli\RepositoryManager\Package\TagMapping;
 
 /**
  * Stores the configuration of a package.
@@ -33,14 +33,14 @@ class PackageFile
     private $path;
 
     /**
-     * @var string[]
+     * @var ResourceMapping[]
      */
-    private $resourceDescriptors = array();
+    private $resourceMappings = array();
 
     /**
-     * @var string[]
+     * @var TagMapping[]
      */
-    private $tagDescriptors = array();
+    private $tagMappings = array();
 
     /**
      * @var string[]
@@ -139,42 +139,42 @@ class PackageFile
     }
 
     /**
-     * Returns the resource descriptors.
+     * Returns the resource mappings.
      *
-     * @return ResourceDescriptor[] The resource descriptor.
+     * @return ResourceMapping[] The resource mappings.
      */
-    public function getResourceDescriptors()
+    public function getResourceMappings()
     {
-        return $this->resourceDescriptors;
+        return $this->resourceMappings;
     }
 
     /**
-     * Adds a resource descriptor.
+     * Adds a resource mapping.
      *
-     * @param ResourceDescriptor $resourceDescriptor The resource descriptor.
+     * @param ResourceMapping $resourceMapping The resource mapping.
      */
-    public function addResourceDescriptor(ResourceDescriptor $resourceDescriptor)
+    public function addResourceMapping(ResourceMapping $resourceMapping)
     {
-        $this->resourceDescriptors[] = $resourceDescriptor;
+        $this->resourceMappings[] = $resourceMapping;
     }
 
     /**
-     * Returns the tag descriptors.
+     * Returns the tag mappings.
      *
-     * @return TagDescriptor[] The tag descriptors.
+     * @return TagMapping[] The tag mappings.
      */
-    public function getTagDescriptors()
+    public function getTagMappings()
     {
-        return $this->tagDescriptors;
+        return $this->tagMappings;
     }
 
     /**
-     * Adds a tag descriptor.
+     * Adds a tag mapping.
      *
-     * @param TagDescriptor $tagDescriptor The tag descriptor.
+     * @param TagMapping $tagMapping The tag mapping.
      */
-    public function addTagDescriptor(TagDescriptor $tagDescriptor)
+    public function addTagMapping(TagMapping $tagMapping)
     {
-        $this->tagDescriptors[] = $tagDescriptor;
+        $this->tagMappings[] = $tagMapping;
     }
 }

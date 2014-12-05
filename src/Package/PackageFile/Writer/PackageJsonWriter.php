@@ -55,31 +55,31 @@ class PackageJsonWriter implements PackageFileWriterInterface
 
     private function addConfig(\stdClass $jsonData, PackageFile $packageFile)
     {
-        $resourceDescriptors = $packageFile->getResourceDescriptors();
-        $tagDescriptors = $packageFile->getTagDescriptors();
+        $resourceMappings = $packageFile->getResourceMappings();
+        $tagMappings = $packageFile->getTagMappings();
         $overrides = $packageFile->getOverriddenPackages();
 
         if (null !== $packageFile->getPackageName()) {
             $jsonData->name = $packageFile->getPackageName();
         }
 
-        if (count($resourceDescriptors) > 0) {
+        if (count($resourceMappings) > 0) {
             $jsonData->resources = new \stdClass();
 
-            foreach ($resourceDescriptors as $descriptor) {
-                $puliPath = $descriptor->getPuliPath();
-                $localPaths = $descriptor->getLocalPaths();
+            foreach ($resourceMappings as $mapping) {
+                $puliPath = $mapping->getPuliPath();
+                $localPaths = $mapping->getLocalPaths();
 
                 $jsonData->resources->$puliPath = count($localPaths) > 1 ? $localPaths : reset($localPaths);
             }
         }
 
-        if (count($tagDescriptors) > 0) {
+        if (count($tagMappings) > 0) {
             $jsonData->tags = new \stdClass();
 
-            foreach ($tagDescriptors as $descriptor) {
-                $puliSelector = $descriptor->getPuliSelector();
-                $tags = $descriptor->getTags();
+            foreach ($tagMappings as $mapping) {
+                $puliSelector = $mapping->getPuliSelector();
+                $tags = $mapping->getTags();
 
                 $jsonData->tags->$puliSelector = count($tags) > 1 ? $tags : reset($tags);
             }

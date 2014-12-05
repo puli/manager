@@ -137,9 +137,9 @@ class RepositoryBuilder
             $this->resources[$packageName] = array();
         }
 
-        foreach ($packageFile->getResourceDescriptors() as $descriptor) {
-            $path = $descriptor->getPuliPath();
-            $relativePaths = $descriptor->getLocalPaths();
+        foreach ($packageFile->getResourceMappings() as $mapping) {
+            $path = $mapping->getPuliPath();
+            $relativePaths = $mapping->getLocalPaths();
 
             if (!isset($this->resources[$packageName][$path])) {
                 $this->resources[$packageName][$path] = array();
@@ -249,14 +249,14 @@ class RepositoryBuilder
     {
         $packageFile = $package->getPackageFile();
 
-        foreach ($packageFile->getTagDescriptors() as $descriptor) {
-            $selector = $descriptor->getPuliSelector();
+        foreach ($packageFile->getTagMappings() as $mapping) {
+            $selector = $mapping->getPuliSelector();
 
             if (!isset($this->tags[$selector])) {
                 $this->tags[$selector] = array();
             }
 
-            foreach ($descriptor->getTags() as $tag) {
+            foreach ($mapping->getTags() as $tag) {
                 // Store tags as keys to prevent duplicates
                 $this->tags[$selector][$tag] = true;
             }

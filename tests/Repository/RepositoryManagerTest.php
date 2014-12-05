@@ -18,7 +18,7 @@ use Puli\RepositoryManager\Package\Collection\PackageCollection;
 use Puli\RepositoryManager\Package\Package;
 use Puli\RepositoryManager\Package\PackageFile\PackageFile;
 use Puli\RepositoryManager\Package\PackageFile\RootPackageFile;
-use Puli\RepositoryManager\Package\ResourceDescriptor;
+use Puli\RepositoryManager\Package\ResourceMapping;
 use Puli\RepositoryManager\Package\RootPackage;
 use Puli\RepositoryManager\Repository\RepositoryManager;
 use Puli\RepositoryManager\Tests\Package\Fixtures\TestProjectEnvironment;
@@ -119,9 +119,9 @@ class RepositoryManagerTest extends \PHPUnit_Framework_TestCase
         $this->environment->getConfig()->set(Config::DUMP_DIR, $this->tempDir.'/dump');
         $this->environment->getConfig()->set(Config::WRITE_REPO, $this->tempDir.'/repository.php');
 
-        $this->rootPackageFile->addResourceDescriptor(new ResourceDescriptor('/root', 'resources'));
-        $this->packageFile1->addResourceDescriptor(new ResourceDescriptor('/package1', 'resources'));
-        $this->packageFile2->addResourceDescriptor(new ResourceDescriptor('/package2', 'resources'));
+        $this->rootPackageFile->addResourceMapping(new ResourceMapping('/root', 'resources'));
+        $this->packageFile1->addResourceMapping(new ResourceMapping('/package1', 'resources'));
+        $this->packageFile2->addResourceMapping(new ResourceMapping('/package2', 'resources'));
 
         $this->manager->dumpRepository();
 
@@ -145,7 +145,7 @@ class RepositoryManagerTest extends \PHPUnit_Framework_TestCase
         touch($this->tempDir.'/dump/old');
         touch($this->tempDir.'/repository.php');
 
-        $this->rootPackageFile->addResourceDescriptor(new ResourceDescriptor('/root', 'resources'));
+        $this->rootPackageFile->addResourceMapping(new ResourceMapping('/root', 'resources'));
 
         $this->manager->dumpRepository();
 
@@ -171,7 +171,7 @@ class RepositoryManagerTest extends \PHPUnit_Framework_TestCase
         $this->environment->getConfig()->set(Config::DUMP_DIR, 'dump-dir/dump');
         $this->environment->getConfig()->set(Config::WRITE_REPO, 'repo-dir/repository.php');
 
-        $this->rootPackageFile->addResourceDescriptor(new ResourceDescriptor('/root', 'resources'));
+        $this->rootPackageFile->addResourceMapping(new ResourceMapping('/root', 'resources'));
 
         $this->manager->dumpRepository();
 
@@ -189,7 +189,7 @@ class RepositoryManagerTest extends \PHPUnit_Framework_TestCase
         $this->environment->getConfig()->set(Config::DUMP_DIR, $this->tempDir.'/dump');
         $this->environment->getConfig()->set(Config::WRITE_REPO, $this->tempDir.'/repository.php');
 
-        $this->rootPackageFile->addResourceDescriptor(new ResourceDescriptor('/root', 'resources'));
+        $this->rootPackageFile->addResourceMapping(new ResourceMapping('/root', 'resources'));
 
         $this->manager->dumpRepository($this->tempDir.'/custom-repository.php');
 
@@ -208,7 +208,7 @@ class RepositoryManagerTest extends \PHPUnit_Framework_TestCase
         $this->environment->getConfig()->set(Config::DUMP_DIR, $this->tempDir.'/dump');
         $this->environment->getConfig()->set(Config::WRITE_REPO, $this->tempDir.'/repository.php');
 
-        $this->rootPackageFile->addResourceDescriptor(new ResourceDescriptor('/root', 'resources'));
+        $this->rootPackageFile->addResourceMapping(new ResourceMapping('/root', 'resources'));
 
         $this->manager->dumpRepository(null, $this->tempDir.'/custom-cache');
 

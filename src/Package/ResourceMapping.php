@@ -12,12 +12,12 @@
 namespace Puli\RepositoryManager\Package;
 
 /**
- * Describes a resource mapping in the package file.
+ * Maps a Puli path to one or more local paths.
  *
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class ResourceDescriptor
+class ResourceMapping
 {
     /**
      * @var string
@@ -30,9 +30,9 @@ class ResourceDescriptor
     private $localPaths = array();
 
     /**
-     * Creates a new resource descriptor.
+     * Creates a new resource mapping.
      *
-     * The descriptor maps a Puli path to one or more file paths relative to
+     * The mapping maps a Puli path to one or more file paths relative to
      * the root of the package.
      *
      * @param string          $puliPath   The Puli path.
