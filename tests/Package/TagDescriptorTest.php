@@ -9,9 +9,9 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\RepositoryManager\Tests\Package\PackageFile;
+namespace Puli\RepositoryManager\Tests\Package;
 
-use Puli\RepositoryManager\Package\PackageFile\TagDescriptor;
+use Puli\RepositoryManager\Package\TagDescriptor;
 
 /**
  * @since  1.0

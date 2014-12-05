@@ -12,6 +12,7 @@
 namespace Puli\RepositoryManager\Package\InstallFile;
 
 use Puli\RepositoryManager\Package\NoSuchPackageException;
+use Puli\RepositoryManager\Package\PackageMetadata;
 
 /**
  * Contains metadata of the installed packages.

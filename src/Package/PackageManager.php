@@ -16,11 +16,9 @@ use Puli\RepositoryManager\Environment\ProjectEnvironment;
 use Puli\RepositoryManager\FileNotFoundException;
 use Puli\RepositoryManager\InvalidConfigException;
 use Puli\RepositoryManager\NoDirectoryException;
-use Puli\RepositoryManager\Package\NoSuchPackageException;
 use Puli\RepositoryManager\Package\Collection\PackageCollection;
 use Puli\RepositoryManager\Package\InstallFile\InstallFile;
 use Puli\RepositoryManager\Package\InstallFile\InstallFileStorage;
-use Puli\RepositoryManager\Package\InstallFile\PackageMetadata;
 use Puli\RepositoryManager\Package\PackageFile\PackageFileStorage;
 use Webmozart\PathUtil\Path;
 

@@ -11,6 +11,9 @@
 
 namespace Puli\RepositoryManager\Package\PackageFile;
 
+use Puli\RepositoryManager\Package\ResourceDescriptor;
+use Puli\RepositoryManager\Package\TagDescriptor;
+
 /**
  * Stores the configuration of a package.
  *

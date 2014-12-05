@@ -11,9 +11,9 @@
 
 namespace Puli\RepositoryManager\Tests\Package;
 
-use Puli\RepositoryManager\Package\InstallFile\PackageMetadata;
 use Puli\RepositoryManager\Package\Package;
 use Puli\RepositoryManager\Package\PackageFile\PackageFile;
+use Puli\RepositoryManager\Package\PackageMetadata;
 
 /**
  * @since  1.0

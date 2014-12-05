@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\RepositoryManager\Package\PackageFile;
+namespace Puli\RepositoryManager\Package;
 
 /**
  * Describes a resource mapping in the package file.

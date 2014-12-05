@@ -14,7 +14,7 @@ namespace Puli\RepositoryManager\Package\InstallFile\Reader;
 use Puli\RepositoryManager\FileNotFoundException;
 use Puli\RepositoryManager\InvalidConfigException;
 use Puli\RepositoryManager\Package\InstallFile\InstallFile;
-use Puli\RepositoryManager\Package\InstallFile\PackageMetadata;
+use Puli\RepositoryManager\Package\PackageMetadata;
 use Webmozart\Json\DecodingFailedException;
 use Webmozart\Json\JsonDecoder;
 use Webmozart\Json\ValidationFailedException;

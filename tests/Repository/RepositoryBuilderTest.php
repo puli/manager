@@ -16,10 +16,10 @@ use Puli\Repository\ManageableRepositoryInterface;
 use Puli\RepositoryManager\Package\Collection\PackageCollection;
 use Puli\RepositoryManager\Package\Package;
 use Puli\RepositoryManager\Package\PackageFile\PackageFile;
-use Puli\RepositoryManager\Package\PackageFile\ResourceDescriptor;
 use Puli\RepositoryManager\Package\PackageFile\RootPackageFile;
-use Puli\RepositoryManager\Package\PackageFile\TagDescriptor;
+use Puli\RepositoryManager\Package\ResourceDescriptor;
 use Puli\RepositoryManager\Package\RootPackage;
+use Puli\RepositoryManager\Package\TagDescriptor;
 use Puli\RepositoryManager\Repository\RepositoryBuilder;
 
 /**

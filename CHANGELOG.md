@@ -18,6 +18,8 @@ Changelog
    * `REPO_FILE` => `READ_REPO`
    * `REPO_DUMP_FILE` => `WRITE_REPO`
    * `REPO_DUMP_DIR` => `DUMP_DIR`
+ * moved `TagDescriptor`, `ResourceDescriptor` and `PackageMetadata` to
+   `Puli\RepositoryManager\Package` namespace
 
 * 1.0.0-alpha1 (2014-12-03)
 

@@ -12,7 +12,7 @@
 namespace Puli\RepositoryManager\Tests\Package\InstallFile;
 
 use Puli\RepositoryManager\Package\InstallFile\InstallFile;
-use Puli\RepositoryManager\Package\InstallFile\PackageMetadata;
+use Puli\RepositoryManager\Package\PackageMetadata;
 
 /**
  * @since  1.0

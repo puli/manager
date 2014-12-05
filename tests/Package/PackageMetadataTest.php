@@ -9,9 +9,9 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\RepositoryManager\Tests\Package\InstallFile;
+namespace Puli\RepositoryManager\Tests\Package;
 
-use Puli\RepositoryManager\Package\InstallFile\PackageMetadata;
+use Puli\RepositoryManager\Package\PackageMetadata;
 
 /**
  * @since  1.0

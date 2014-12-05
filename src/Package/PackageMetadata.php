@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\RepositoryManager\Package\InstallFile;
+namespace Puli\RepositoryManager\Package;
 
 /**
  * Describes a package in the install file.

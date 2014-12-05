@@ -12,8 +12,8 @@
 namespace Puli\RepositoryManager\Tests\Package\InstallFile\Writer;
 
 use Puli\RepositoryManager\Package\InstallFile\InstallFile;
-use Puli\RepositoryManager\Package\InstallFile\PackageMetadata;
 use Puli\RepositoryManager\Package\InstallFile\Writer\InstallFileJsonWriter;
+use Puli\RepositoryManager\Package\PackageMetadata;
 use Symfony\Component\Filesystem\Filesystem;
 
 /**

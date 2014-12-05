@@ -9,9 +9,9 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\RepositoryManager\Tests\Package\PackageFile;
+namespace Puli\RepositoryManager\Tests\Package;
 
-use Puli\RepositoryManager\Package\PackageFile\ResourceDescriptor;
+use Puli\RepositoryManager\Package\ResourceDescriptor;
 
 /**
  * @since  1.0

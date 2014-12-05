@@ -11,8 +11,8 @@
 
 namespace Puli\RepositoryManager\Tests\Package\InstallFile\Reader;
 
-use Puli\RepositoryManager\Package\InstallFile\PackageMetadata;
 use Puli\RepositoryManager\Package\InstallFile\Reader\InstallFileJsonReader;
+use Puli\RepositoryManager\Package\PackageMetadata;
 
 /**
  * @since  1.0

@@ -13,10 +13,10 @@ namespace Puli\RepositoryManager\Tests\Package\PackageFile\Writer;
 
 use Puli\RepositoryManager\Config\Config;
 use Puli\RepositoryManager\Package\PackageFile\PackageFile;
-use Puli\RepositoryManager\Package\PackageFile\ResourceDescriptor;
 use Puli\RepositoryManager\Package\PackageFile\RootPackageFile;
-use Puli\RepositoryManager\Package\PackageFile\TagDescriptor;
 use Puli\RepositoryManager\Package\PackageFile\Writer\PackageJsonWriter;
+use Puli\RepositoryManager\Package\ResourceDescriptor;
+use Puli\RepositoryManager\Package\TagDescriptor;
 use Symfony\Component\Filesystem\Filesystem;
 
 /**

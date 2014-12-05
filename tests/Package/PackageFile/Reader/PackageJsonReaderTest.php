@@ -14,8 +14,8 @@ namespace Puli\RepositoryManager\Tests\Package\PackageFile\Reader;
 use Puli\RepositoryManager\Config\Config;
 use Puli\RepositoryManager\Package\PackageFile\PackageFile;
 use Puli\RepositoryManager\Package\PackageFile\Reader\PackageJsonReader;
-use Puli\RepositoryManager\Package\PackageFile\ResourceDescriptor;
-use Puli\RepositoryManager\Package\PackageFile\TagDescriptor;
+use Puli\RepositoryManager\Package\ResourceDescriptor;
+use Puli\RepositoryManager\Package\TagDescriptor;
 
 /**
  * @since  1.0
