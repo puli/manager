@@ -12,6 +12,7 @@
 namespace Puli\RepositoryManager\Tests\Package\PackageFile\Reader;
 
 use Puli\RepositoryManager\Config\Config;
+use Puli\RepositoryManager\Package\InstallInfo;
 use Puli\RepositoryManager\Package\PackageFile\PackageFile;
 use Puli\RepositoryManager\Package\PackageFile\Reader\PackageJsonReader;
 use Puli\RepositoryManager\Package\ResourceMapping;
@@ -54,10 +55,15 @@ class PackageJsonReaderTest extends \PHPUnit_Framework_TestCase
     {
         $packageFile = $this->reader->readRootPackageFile(__DIR__.'/Fixtures/full.json', $this->baseConfig);
 
+        $installInfo1 = new InstallInfo('package1', '/path/to/package1');
+        $installInfo1->setInstaller('Composer');
+        $installInfo2 = new InstallInfo('package2', '/path/to/package2');
+
         $this->assertInstanceOf('Puli\RepositoryManager\Package\PackageFile\RootPackageFile', $packageFile);
         $this->assertSame(__DIR__.'/Fixtures/full.json', $packageFile->getPath());
         $this->assertFullConfig($packageFile);
         $this->assertSame(array('acme/blog-extension1', 'acme/blog-extension2'), $packageFile->getPackageOrder());
+        $this->assertEquals(array($installInfo1, $installInfo2), $packageFile->getInstallInfos());
 
         $config = $packageFile->getConfig();
         $this->assertSame('puli-dir', $config->get(Config::PULI_DIR));

@@ -2,5 +2,13 @@
     "name": "real-root",
     "config": {
         "install-file": "packages.json"
+    },
+    "packages": {
+        "package1": {
+            "installPath": "package1"
+        },
+        "package2": {
+            "installPath": "package2"
+        }
     }
 }

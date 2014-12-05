@@ -66,19 +66,19 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
     {
         $config = new Config();
         $config->set(Config::PULI_DIR, 'my-puli-dir');
-        $config->set(Config::INSTALL_FILE, '{$puli-dir}/my-install-file.json');
+        $config->set(Config::READ_REPO, '{$puli-dir}/resource-repository.php');
 
-        $this->assertSame('my-puli-dir/my-install-file.json', $config->get(Config::INSTALL_FILE));
+        $this->assertSame('my-puli-dir/resource-repository.php', $config->get(Config::READ_REPO));
     }
 
     public function testGetReplacesPlaceholderDefinedInDefaultConfig()
     {
         $default = new Config();
-        $default->set(Config::INSTALL_FILE, '{$puli-dir}/my-install-file.json');
+        $default->set(Config::READ_REPO, '{$puli-dir}/resource-repository.php');
         $config = new Config($default);
         $config->set(Config::PULI_DIR, 'my-puli-dir');
 
-        $this->assertSame('my-puli-dir/my-install-file.json', $config->get(Config::INSTALL_FILE));
+        $this->assertSame('my-puli-dir/resource-repository.php', $config->get(Config::READ_REPO));
     }
 
     public function testGetReplacesPlaceholderSetInDefaultConfig()
@@ -86,9 +86,9 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
         $default = new Config();
         $default->set(Config::PULI_DIR, 'my-puli-dir');
         $config = new Config($default);
-        $config->set(Config::INSTALL_FILE, '{$puli-dir}/my-install-file.json');
+        $config->set(Config::READ_REPO, '{$puli-dir}/resource-repository.php');
 
-        $this->assertSame('my-puli-dir/my-install-file.json', $config->get(Config::INSTALL_FILE));
+        $this->assertSame('my-puli-dir/resource-repository.php', $config->get(Config::READ_REPO));
     }
 
     public function testGetDoesNotUseDefaultPlaceholderIfFallbackDisabled()
@@ -96,9 +96,9 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
         $default = new Config();
         $default->set(Config::PULI_DIR, 'my-puli-dir');
         $config = new Config($default);
-        $config->set(Config::INSTALL_FILE, '{$puli-dir}/my-install-file.json');
+        $config->set(Config::READ_REPO, '{$puli-dir}/resource-repository.php');
 
-        $this->assertSame('/my-install-file.json', $config->get(Config::INSTALL_FILE, false));
+        $this->assertSame('/resource-repository.php', $config->get(Config::READ_REPO, false));
     }
 
     /**
@@ -140,9 +140,9 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
     {
         $config = new Config();
         $config->set(Config::PULI_DIR, 'my-puli-dir');
-        $config->set(Config::INSTALL_FILE, '{$puli-dir}/my-install-file.json');
+        $config->set(Config::READ_REPO, '{$puli-dir}/resource-repository.php');
 
-        $this->assertSame('{$puli-dir}/my-install-file.json', $config->getRaw(Config::INSTALL_FILE));
+        $this->assertSame('{$puli-dir}/resource-repository.php', $config->getRaw(Config::READ_REPO));
     }
 
     /**
@@ -198,14 +198,14 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
     public function testMerge()
     {
         $config = new Config();
-        $config->set(Config::INSTALL_FILE, 'install-file.json');
+        $config->set(Config::PULI_DIR, 'puli-dir');
         $config->set(Config::DUMP_DIR, 'repo');
         $config->merge(array(
             Config::DUMP_DIR => 'other-repo',
             Config::READ_REPO => 'repo-file.php',
         ));
 
-        $this->assertSame('install-file.json', $config->get(Config::INSTALL_FILE));
+        $this->assertSame('puli-dir', $config->get(Config::PULI_DIR));
         $this->assertSame('other-repo', $config->get(Config::DUMP_DIR));
         $this->assertSame('repo-file.php', $config->get(Config::READ_REPO));
     }
@@ -213,11 +213,11 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
     public function testRemove()
     {
         $config = new Config();
-        $config->set(Config::INSTALL_FILE, 'install-file.json');
+        $config->set(Config::READ_REPO, 'resource-repository.php');
         $config->set(Config::DUMP_DIR, 'repo');
         $config->remove(Config::DUMP_DIR);
 
-        $this->assertSame('install-file.json', $config->get(Config::INSTALL_FILE));
+        $this->assertSame('resource-repository.php', $config->get(Config::READ_REPO));
         $this->assertNull($config->get(Config::DUMP_DIR));
     }
 
@@ -236,11 +236,11 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
         $default = new Config();
         $default->set(Config::DUMP_DIR, 'fallback');
         $config = new Config($default);
-        $config->set(Config::INSTALL_FILE, 'install-file.json');
+        $config->set(Config::READ_REPO, 'resource-repository.php');
         $config->set(Config::DUMP_DIR, 'repo');
         $config->remove(Config::DUMP_DIR);
 
-        $this->assertSame('install-file.json', $config->get(Config::INSTALL_FILE));
+        $this->assertSame('resource-repository.php', $config->get(Config::READ_REPO));
         $this->assertSame('fallback', $config->get(Config::DUMP_DIR));
     }
 
@@ -248,23 +248,23 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
     {
         $config = new Config();
         $config->set(Config::PULI_DIR, 'my-puli-dir');
-        $config->set(Config::INSTALL_FILE, '{$puli-dir}/my-install-file.json');
+        $config->set(Config::READ_REPO, '{$puli-dir}/resource-repository.php');
 
         $this->assertSame(array(
             Config::PULI_DIR => 'my-puli-dir',
-            Config::INSTALL_FILE => 'my-puli-dir/my-install-file.json',
+            Config::READ_REPO => 'my-puli-dir/resource-repository.php',
         ), $config->toArray());
     }
 
     public function testToArrayWithFallback()
     {
         $default = new Config();
-        $default->set(Config::INSTALL_FILE, '{$puli-dir}/my-install-file.json');
+        $default->set(Config::READ_REPO, '{$puli-dir}/resource-repository.php');
         $config = new Config($default);
         $config->set(Config::PULI_DIR, 'my-puli-dir');
 
         $this->assertSame(array(
-            Config::INSTALL_FILE => 'my-puli-dir/my-install-file.json',
+            Config::READ_REPO => 'my-puli-dir/resource-repository.php',
             Config::PULI_DIR => 'my-puli-dir',
         ), $config->toArray());
     }
@@ -272,7 +272,7 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
     public function testToArrayWithoutFallback()
     {
         $default = new Config();
-        $default->set(Config::INSTALL_FILE, '{$puli-dir}/my-install-file.json');
+        $default->set(Config::READ_REPO, '{$puli-dir}/resource-repository.php');
         $config = new Config($default);
         $config->set(Config::PULI_DIR, 'my-puli-dir');
 
@@ -286,10 +286,10 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
         $default = new Config();
         $default->set(Config::PULI_DIR, 'my-puli-dir');
         $config = new Config($default);
-        $config->set(Config::INSTALL_FILE, '{$puli-dir}/my-install-file.json');
+        $config->set(Config::READ_REPO, '{$puli-dir}/resource-repository.php');
 
         $this->assertSame(array(
-            Config::INSTALL_FILE => '/my-install-file.json',
+            Config::READ_REPO => '/resource-repository.php',
         ), $config->toArray(false));
     }
 
@@ -297,23 +297,23 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
     {
         $config = new Config();
         $config->set(Config::PULI_DIR, 'my-puli-dir');
-        $config->set(Config::INSTALL_FILE, '{$puli-dir}/my-install-file.json');
+        $config->set(Config::READ_REPO, '{$puli-dir}/resource-repository.php');
 
         $this->assertSame(array(
             Config::PULI_DIR => 'my-puli-dir',
-            Config::INSTALL_FILE => '{$puli-dir}/my-install-file.json',
+            Config::READ_REPO => '{$puli-dir}/resource-repository.php',
         ), $config->toRawArray());
     }
 
     public function testToRawArrayWithFallback()
     {
         $default = new Config();
-        $default->set(Config::INSTALL_FILE, '{$puli-dir}/my-install-file.json');
+        $default->set(Config::READ_REPO, '{$puli-dir}/resource-repository.php');
         $config = new Config($default);
         $config->set(Config::PULI_DIR, 'my-puli-dir');
 
         $this->assertSame(array(
-            Config::INSTALL_FILE => '{$puli-dir}/my-install-file.json',
+            Config::READ_REPO => '{$puli-dir}/resource-repository.php',
             Config::PULI_DIR => 'my-puli-dir',
         ), $config->toRawArray());
     }
@@ -321,7 +321,7 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
     public function testToRawArrayWithoutFallback()
     {
         $default = new Config();
-        $default->set(Config::INSTALL_FILE, '{$puli-dir}/my-install-file.json');
+        $default->set(Config::READ_REPO, '{$puli-dir}/resource-repository.php');
         $config = new Config($default);
         $config->set(Config::PULI_DIR, 'my-puli-dir');
 
@@ -334,7 +334,6 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
     {
         return array(
             array(Config::PULI_DIR),
-            array(Config::INSTALL_FILE),
             array(Config::DUMP_DIR),
             array(Config::WRITE_REPO),
             array(Config::READ_REPO),
@@ -345,7 +344,6 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
     {
         return array(
             array(Config::PULI_DIR),
-            array(Config::INSTALL_FILE),
             array(Config::DUMP_DIR),
             array(Config::WRITE_REPO),
             array(Config::READ_REPO),

@@ -14,6 +14,7 @@ namespace Puli\RepositoryManager\Package\PackageFile\Reader;
 use Puli\RepositoryManager\Config\Config;
 use Puli\RepositoryManager\FileNotFoundException;
 use Puli\RepositoryManager\InvalidConfigException;
+use Puli\RepositoryManager\Package\InstallInfo;
 use Puli\RepositoryManager\Package\PackageFile\PackageFile;
 use Puli\RepositoryManager\Package\PackageFile\RootPackageFile;
 use Puli\RepositoryManager\Package\ResourceMapping;
@@ -129,6 +130,18 @@ class PackageJsonReader implements PackageFileReaderInterface
 
             foreach ($jsonData->config as $key => $value) {
                 $config->set($key, $value);
+            }
+        }
+
+        if (isset($jsonData->packages)) {
+            foreach ($jsonData->packages as $packageName => $packageData) {
+                $installInfo = new InstallInfo($packageName, $packageData->installPath);
+
+                if (isset($packageData->installer)) {
+                    $installInfo->setInstaller($packageData->installer);
+                }
+
+                $packageFile->addInstallInfo($installInfo);
             }
         }
     }

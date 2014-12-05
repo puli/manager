@@ -12,6 +12,7 @@
 namespace Puli\RepositoryManager\Tests\Package\PackageFile\Writer;
 
 use Puli\RepositoryManager\Config\Config;
+use Puli\RepositoryManager\Package\InstallInfo;
 use Puli\RepositoryManager\Package\PackageFile\PackageFile;
 use Puli\RepositoryManager\Package\PackageFile\RootPackageFile;
 use Puli\RepositoryManager\Package\PackageFile\Writer\PackageJsonWriter;
@@ -82,6 +83,10 @@ class PackageJsonWriterTest extends JsonWriterTestCase
 
     public function testWriteRootPackageFile()
     {
+        $installInfo1 = new InstallInfo('package1', '/path/to/package1');
+        $installInfo1->setInstaller('Composer');
+        $installInfo2 = new InstallInfo('package2', '/path/to/package2');
+
         $baseConfig = new Config();
         $packageFile = new RootPackageFile(null, null, $baseConfig);
         $packageFile->setPackageName('my/application');
@@ -98,6 +103,8 @@ class PackageJsonWriterTest extends JsonWriterTestCase
             Config::READ_REPO => '{$puli-dir}/my-repository.php',
             Config::WRITE_REPO => '{$puli-dir}/my-repository-dump.php',
         ));
+        $packageFile->addInstallInfo($installInfo1);
+        $packageFile->addInstallInfo($installInfo2);
 
         $this->writer->writePackageFile($packageFile, $this->tempFile);
 

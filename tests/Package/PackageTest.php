@@ -32,8 +32,7 @@ class PackageTest extends \PHPUnit_Framework_TestCase
     public function testUsePackageNameFromInstallInfo()
     {
         $packageFile = new PackageFile();
-        $installInfo = new InstallInfo('/path');
-        $installInfo->setPackageName('name');
+        $installInfo = new InstallInfo('name', '/path');
         $package = new Package($packageFile, '/path', $installInfo);
 
         $this->assertSame('name', $package->getName());
@@ -42,20 +41,10 @@ class PackageTest extends \PHPUnit_Framework_TestCase
     public function testPreferPackageNameFromInstallInfo()
     {
         $packageFile = new PackageFile('package-file');
-        $installInfo = new InstallInfo('/path');
-        $installInfo->setPackageName('installInfo');
+        $installInfo = new InstallInfo('install-info', '/path');
         $package = new Package($packageFile, '/path', $installInfo);
 
-        $this->assertSame('installInfo', $package->getName());
-    }
-
-    public function testNameIsNullIfNoneSet()
-    {
-        $packageFile = new PackageFile();
-        $installInfo = new InstallInfo('/path');
-        $package = new Package($packageFile, '/path', $installInfo);
-
-        $this->assertNull($package->getName());
+        $this->assertSame('install-info', $package->getName());
     }
 
     public function testNameIsNullIfNoneSetAndNoInstallInfoGiven()

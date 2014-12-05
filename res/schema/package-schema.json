@@ -66,6 +66,22 @@
             "items": {
                 "type": "string"
             }
+        },
+        "packages": {
+            "type": "object",
+            "additionalProperties": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                    "installPath": {
+                        "type": "string",
+                        "required": true
+                    },
+                    "installer": {
+                        "type": "string"
+                    }
+                }
+            }
         }
     }
 }

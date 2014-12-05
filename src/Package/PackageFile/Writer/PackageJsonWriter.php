@@ -12,6 +12,7 @@
 namespace Puli\RepositoryManager\Package\PackageFile\Writer;
 
 use Puli\RepositoryManager\IOException;
+use Puli\RepositoryManager\Package\InstallInfo;
 use Puli\RepositoryManager\Package\PackageFile\PackageFile;
 use Puli\RepositoryManager\Package\PackageFile\RootPackageFile;
 use Symfony\Component\Filesystem\Filesystem;
@@ -128,13 +129,14 @@ class PackageJsonWriter implements PackageFileWriterInterface
     private function addRootConfig(array &$jsonData, RootPackageFile $packageFile)
     {
         $packageOrder = $packageFile->getPackageOrder();
+        $installInfos = $packageFile->getInstallInfos();
+
+        // Pass false to exclude base configuration values
+        $configValues = $packageFile->getConfig()->toRawArray(false);
 
         if (count($packageOrder) > 0) {
             $jsonData['package-order'] = $packageOrder;
         }
-
-        // Pass false to exclude base configuration values
-        $configValues = $packageFile->getConfig()->toRawArray(false);
 
         if (count($configValues) > 0) {
             $jsonData['config'] = (object) $configValues;
@@ -142,6 +144,21 @@ class PackageJsonWriter implements PackageFileWriterInterface
 
         if (array() !== $packageFile->getPluginClasses(false)) {
             $jsonData['plugins'] = $packageFile->getPluginClasses();
+        }
+
+        if (count($installInfos) > 0) {
+            $jsonData['packages'] = new \stdClass();
+
+            foreach ($installInfos as $installInfo) {
+                $installData = new \stdClass();
+                $installData->installPath = $installInfo->getInstallPath();
+
+                if (InstallInfo::DEFAULT_INSTALLER !== $installInfo->getInstaller()) {
+                    $installData->installer = $installInfo->getInstaller();
+                }
+
+                $jsonData['packages']->{$installInfo->getPackageName()} = $installData;
+            }
         }
     }
 

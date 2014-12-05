@@ -24,6 +24,7 @@ Changelog
  * renamed `TagDescriptor` and `ResourceDescriptor` to `TagMapping` and
    `ResourceMapping`
  * added `TagDefinition`
+ * merged `InstallFile` into `RootPackageFile`
 
 * 1.0.0-alpha1 (2014-12-03)
 

@@ -11,14 +11,12 @@
 
 namespace Puli\RepositoryManager\Package;
 
-use Puli\RepositoryManager\Config\Config;
 use Puli\RepositoryManager\Environment\ProjectEnvironment;
 use Puli\RepositoryManager\FileNotFoundException;
 use Puli\RepositoryManager\InvalidConfigException;
 use Puli\RepositoryManager\NoDirectoryException;
 use Puli\RepositoryManager\Package\Collection\PackageCollection;
-use Puli\RepositoryManager\Package\InstallFile\InstallFile;
-use Puli\RepositoryManager\Package\InstallFile\InstallFileStorage;
+use Puli\RepositoryManager\Package\PackageFile\PackageFile;
 use Puli\RepositoryManager\Package\PackageFile\PackageFileStorage;
 use Webmozart\PathUtil\Path;
 
@@ -41,11 +39,6 @@ class PackageManager
     private $rootDir;
 
     /**
-     * @var InstallFileStorage
-     */
-    private $installFileStorage;
-
-    /**
      * @var PackageFileStorage
      */
     private $packageFileStorage;
@@ -56,16 +49,10 @@ class PackageManager
     private $packages;
 
     /**
-     * @var InstallFile
-     */
-    private $installFile;
-
-    /**
      * Loads the package repository for a given project.
      *
      * @param ProjectEnvironment $environment        The project environment.
      * @param PackageFileStorage $packageFileStorage The package file storage.
-     * @param InstallFileStorage $installFileStorage The install file storage.
      *
      * @throws FileNotFoundException If the install path of a package not exist.
      * @throws NoDirectoryException If the install path of a package points to a file.
@@ -74,17 +61,14 @@ class PackageManager
      */
     public function __construct(
         ProjectEnvironment $environment,
-        PackageFileStorage $packageFileStorage,
-        InstallFileStorage $installFileStorage
+        PackageFileStorage $packageFileStorage
     )
     {
         $this->environment = $environment;
         $this->rootDir = $environment->getRootDirectory();
-        $this->installFileStorage = $installFileStorage;
         $this->packageFileStorage = $packageFileStorage;
         $this->packages = new PackageCollection();
 
-        $this->loadInstallFile();
         $this->loadPackages();
     }
 
@@ -104,24 +88,39 @@ class PackageManager
      */
     public function installPackage($installPath, $name = null, $installer = InstallInfo::DEFAULT_INSTALLER)
     {
+        $rootPackageFile = $this->environment->getRootPackageFile();
         $installPath = Path::makeAbsolute($installPath, $this->rootDir);
 
         if ($this->isPackageInstalled($installPath)) {
             return;
         }
 
-        // Try to load the package
+        if (null === $name) {
+            // Read the name from the package file
+            $packageFile = $this->loadPackageFile($installPath);
+            $name = $packageFile->getPackageName();
+        }
+
+        if (null === $name) {
+            throw new InvalidConfigException(sprintf(
+                'Could not find a name for the package at %s. The name should '.
+                'either be passed to the installer or be set in the "name" '.
+                'property of %s.',
+                $installPath,
+                $installPath.'/puli.json'
+            ));
+        }
+
         $relInstallPath = Path::makeRelative($installPath, $this->rootDir);
-        $installInfo = new InstallInfo($relInstallPath);
-        $installInfo->setPackageName($name);
+        $installInfo = new InstallInfo($name, $relInstallPath);
         $installInfo->setInstaller($installer);
         $package = $this->loadPackage($installInfo);
 
         // OK, now add it
-        $this->installFile->addInstallInfo($installInfo);
+        $rootPackageFile->addInstallInfo($installInfo);
         $this->packages->add($package);
 
-        $this->installFileStorage->saveInstallFile($this->installFile);
+        $this->packageFileStorage->saveRootPackageFile($rootPackageFile);
     }
 
     /**
@@ -155,13 +154,13 @@ class PackageManager
             return;
         }
 
-        $package = $this->packages->get($name);
+        $rootPackageFile = $this->environment->getRootPackageFile();
 
         $this->packages->remove($name);
 
-        if ($this->installFile->hasInstallInfo($package->getInstallPath())) {
-            $this->installFile->removeInstallInfo($package->getInstallPath());
-            $this->installFileStorage->saveInstallFile($this->installFile);
+        if ($rootPackageFile->hasInstallInfo($name)) {
+            $rootPackageFile->removeInstallInfo($name);
+            $this->packageFileStorage->saveRootPackageFile($rootPackageFile);
         }
     }
 
@@ -243,29 +242,6 @@ class PackageManager
     }
 
     /**
-     * Returns the managed install file.
-     *
-     * @return InstallFile The install file.
-     */
-    public function getInstallFile()
-    {
-        return $this->installFile;
-    }
-
-    /**
-     * Loads the install file into memory.
-     *
-     * @throws InvalidConfigException If the file contains invalid configuration.
-     */
-    private function loadInstallFile()
-    {
-        $path = $this->environment->getConfig()->get(Config::INSTALL_FILE);
-        $path = Path::makeAbsolute($path, $this->rootDir);
-
-        $this->installFile = $this->installFileStorage->loadInstallFile($path);
-    }
-
-    /**
      * Loads all packages referenced by the install file.
      *
      * @throws FileNotFoundException If the install path of a package not exist.
@@ -281,7 +257,7 @@ class PackageManager
 
         $this->packages->add(new RootPackage($rootPackageFile, $this->rootDir));
 
-        foreach ($this->installFile->getInstallInfos() as $installInfo) {
+        foreach ($rootPackageFile->getInstallInfos() as $installInfo) {
             $this->packages->add($this->loadPackage($installInfo));
         }
     }
@@ -301,34 +277,8 @@ class PackageManager
     private function loadPackage(InstallInfo $installInfo)
     {
         $installPath = Path::makeAbsolute($installInfo->getInstallPath(), $this->rootDir);
-
-        if (!file_exists($installPath)) {
-            throw new FileNotFoundException(sprintf(
-                'Could not load package: The directory %s does not exist.',
-                $installPath
-            ));
-        }
-
-        if (!is_dir($installPath)) {
-            throw new NoDirectoryException(sprintf(
-                'Could not install package: The path %s is a file. '.
-                'Expected a directory.',
-                $installPath
-            ));
-        }
-
-        $packageFile = $this->packageFileStorage->loadPackageFile($installPath.'/puli.json');
+        $packageFile = $this->loadPackageFile($installPath);
         $package = new Package($packageFile, $installPath, $installInfo);
-
-        if (null === $package->getName()) {
-            throw new InvalidConfigException(sprintf(
-                'Could not find a name for the package at %s. The name should '.
-                'either be set during installation or in the "name" property '.
-                'in %s.',
-                $installPath,
-                $installPath.'/puli.json'
-            ));
-        }
 
         if ($this->packages->contains($package->getName())) {
             $conflictingPackage = $this->packages->get($package->getName());
@@ -343,5 +293,35 @@ class PackageManager
         }
 
         return $package;
+    }
+
+    /**
+     * Loads the package file for the package at the given install path.
+     *
+     * @param string $installPath The absolute install path of the package
+     *
+     * @return PackageFile The loaded package file.
+     *
+     * @throws FileNotFoundException If the install path does not exist.
+     * @throws NoDirectoryException If the install path points to a file.
+     */
+    private function loadPackageFile($installPath)
+    {
+        if (!file_exists($installPath)) {
+            throw new FileNotFoundException(sprintf(
+                'Could not load package: The directory %s does not exist.',
+                $installPath
+            ));
+        }
+
+        if (!is_dir($installPath)) {
+            throw new NoDirectoryException(sprintf(
+                'Could not load package: The path %s is a file. Expected a '.
+                'directory.',
+                $installPath
+            ));
+        }
+
+        return $this->packageFileStorage->loadPackageFile($installPath.'/puli.json');
     }
 }

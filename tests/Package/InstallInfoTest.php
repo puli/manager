@@ -19,12 +19,21 @@ use Puli\RepositoryManager\Package\InstallInfo;
  */
 class InstallInfoTest extends \PHPUnit_Framework_TestCase
 {
+    public function testCreate()
+    {
+        $installInfo = new InstallInfo('package', '/path');
+        $installInfo->setInstaller('Composer');
+
+        $this->assertSame('package', $installInfo->getPackageName());
+        $this->assertSame('/path', $installInfo->getInstallPath());
+        $this->assertSame('Composer', $installInfo->getInstaller());
+    }
     /**
      * @expectedException \InvalidArgumentException
      */
     public function testFailIfInstallPathNotString()
     {
-        new InstallInfo(12345);
+        new InstallInfo('package', 12345);
     }
 
     /**
@@ -32,19 +41,7 @@ class InstallInfoTest extends \PHPUnit_Framework_TestCase
      */
     public function testFailIfInstallPathEmpty()
     {
-        new InstallInfo('');
-    }
-
-    public function testSetName()
-    {
-        $installInfo = new InstallInfo('/path');
-        $installInfo->setPackageName('name');
-
-        $this->assertSame('name', $installInfo->getPackageName());
-
-        $installInfo->setPackageName(null);
-
-        $this->assertNull($installInfo->getPackageName());
+        new InstallInfo('package', '');
     }
 
     /**
@@ -52,9 +49,7 @@ class InstallInfoTest extends \PHPUnit_Framework_TestCase
      */
     public function testFailIfNameNotString()
     {
-        $installInfo = new InstallInfo('/path');
-
-        $installInfo->setPackageName(12345);
+        new InstallInfo(12345, '/path');
     }
 
     /**
@@ -62,8 +57,6 @@ class InstallInfoTest extends \PHPUnit_Framework_TestCase
      */
     public function testFailIfNameEmpty()
     {
-        $installInfo = new InstallInfo('/path');
-
-        $installInfo->setPackageName('');
+        new InstallInfo('', '/path');
     }
 }

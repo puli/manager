@@ -13,6 +13,8 @@ namespace Puli\RepositoryManager\Package\PackageFile;
 
 use Puli\RepositoryManager\Config\Config;
 use Puli\RepositoryManager\InvalidConfigException;
+use Puli\RepositoryManager\Package\InstallInfo;
+use Puli\RepositoryManager\Package\NoSuchPackageException;
 
 /**
  * The package file of the root package.
@@ -34,6 +36,11 @@ class RootPackageFile extends PackageFile
      * @var string[]
      */
     private $packageOrder = array();
+
+    /**
+     * @var InstallInfo[]
+     */
+    private $installInfos = array();
 
     /**
      * @var string[]
@@ -94,6 +101,84 @@ class RootPackageFile extends PackageFile
     public function setPackageOrder(array $packageOrder)
     {
         $this->packageOrder = $packageOrder;
+    }
+
+    /**
+     * Returns the install infos of all installed packages.
+     *
+     * @return InstallInfo[] The install infos.
+     */
+    public function getInstallInfos()
+    {
+        // The package names as array keys are for internal use only
+        return array_values($this->installInfos);
+    }
+
+    /**
+     * Sets the install infos of all installed packages.
+     *
+     * @param InstallInfo[] The install infos.
+     */
+    public function setInstallInfos(array $installInfos)
+    {
+        $this->installInfos = array();
+
+        foreach ($installInfos as $installInfo) {
+            $this->addInstallInfo($installInfo);
+        }
+    }
+
+    /**
+     * Adds install info for an installed package.
+     *
+     * @param InstallInfo $installInfo The install info.
+     */
+    public function addInstallInfo(InstallInfo $installInfo)
+    {
+        $this->installInfos[$installInfo->getPackageName()] = $installInfo;
+    }
+
+    /**
+     * Removes the install info of an installed package.
+     *
+     * @param string $packageName The package name.
+     */
+    public function removeInstallInfo($packageName)
+    {
+        unset($this->installInfos[$packageName]);
+    }
+
+    /**
+     * Returns the install info of an installed package.
+     *
+     * @param string $packageName The package name.
+     *
+     * @return InstallInfo The install info.
+     *
+     * @throws NoSuchPackageException If no package is installed with that name.
+     */
+    public function getInstallInfo($packageName)
+    {
+        if (!isset($this->installInfos[$packageName])) {
+            throw new NoSuchPackageException(sprintf(
+                'Could not get install info: The package "%s" is not installed.',
+                $packageName
+            ));
+        }
+
+        return $this->installInfos[$packageName];
+    }
+
+    /**
+     * Returns whether an install info with a given name exists.
+     *
+     * @param string $packageName The name of the package.
+     *
+     * @return bool Whether install info with that name exists.
+     */
+    public function hasInstallInfo($packageName)
+    {
+        return isset($this->installInfos[$packageName]);
     }
 
     /**

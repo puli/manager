@@ -12,6 +12,7 @@
 namespace Puli\RepositoryManager\Tests\Package\PackageFile;
 
 use Puli\RepositoryManager\Config\Config;
+use Puli\RepositoryManager\Package\InstallInfo;
 use Puli\RepositoryManager\Package\PackageFile\RootPackageFile;
 
 /**
@@ -179,5 +180,70 @@ class RootPackageFileTest extends \PHPUnit_Framework_TestCase
         $this->packageFile->addPluginClass(self::PLUGIN_CLASS);
 
         $this->assertTrue($this->packageFile->hasPluginClass('\\'.self::PLUGIN_CLASS));
+    }
+
+    public function testAddInstallInfo()
+    {
+        $installInfo1 = new InstallInfo('package1', '/path/to/package1');
+        $installInfo2 = new InstallInfo('package2', '/path/to/package2');
+
+        $this->packageFile->addInstallInfo($installInfo1);
+        $this->packageFile->addInstallInfo($installInfo2);
+
+        $this->assertSame(array($installInfo1, $installInfo2), $this->packageFile->getInstallInfos());
+        $this->assertSame($installInfo1, $this->packageFile->getInstallInfo('package1'));
+        $this->assertSame($installInfo2, $this->packageFile->getInstallInfo('package2'));
+    }
+
+    public function testSetInstallInfos()
+    {
+        $installInfo1 = new InstallInfo('package1', '/path/to/package1');
+        $installInfo2 = new InstallInfo('package2', '/path/to/package2');
+
+        $this->packageFile->setInstallInfos(array($installInfo1, $installInfo2));
+
+        $this->assertSame(array($installInfo1, $installInfo2), $this->packageFile->getInstallInfos());
+    }
+
+    /**
+     * @expectedException \Puli\RepositoryManager\Package\NoSuchPackageException
+     * @expectedExceptionMessage /foo/bar
+     */
+    public function testGetInstallInfosFailsIfNotFound()
+    {
+        $this->packageFile->getInstallInfo('/foo/bar');
+    }
+
+    public function testRemoveInstallInfo()
+    {
+        $installInfo1 = new InstallInfo('package1', '/path/to/package1');
+        $installInfo2 = new InstallInfo('package2', '/path/to/package2');
+
+        $this->packageFile->addInstallInfo($installInfo1);
+        $this->packageFile->addInstallInfo($installInfo2);
+
+        $this->packageFile->removeInstallInfo('package1');
+
+        $this->assertSame(array($installInfo2), $this->packageFile->getInstallInfos());
+    }
+
+    public function testRemoveInstallInfoIgnoresUnknownPackageName()
+    {
+        $installInfo1 = new InstallInfo('package1', '/path/to/package1');
+
+        $this->packageFile->addInstallInfo($installInfo1);
+
+        $this->packageFile->removeInstallInfo('foobar');
+
+        $this->assertSame(array($installInfo1), $this->packageFile->getInstallInfos());
+    }
+
+    public function testHasInstallInfo()
+    {
+        $this->assertFalse($this->packageFile->hasInstallInfo('package'));
+
+        $this->packageFile->addInstallInfo(new InstallInfo('package', '/path/to/package'));
+
+        $this->assertTrue($this->packageFile->hasInstallInfo('package'));
     }
 }

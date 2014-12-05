@@ -25,5 +25,14 @@
     },
     "plugins": [
         "Puli\\RepositoryManager\\Tests\\Package\\PackageFile\\Fixtures\\TestPlugin"
-    ]
+    ],
+    "packages": {
+        "package1": {
+            "installPath": "/path/to/package1",
+            "installer": "Composer"
+        },
+        "package2": {
+            "installPath": "/path/to/package2"
+        }
+    }
 }

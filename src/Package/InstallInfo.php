@@ -42,6 +42,7 @@ class InstallInfo
     /**
      * Creates a new install info.
      *
+     * @param string $packageName The package name. Must be a non-empty string.
      * @param string $installPath The path where the package is installed.
      *                            If a relative path is given, the path is
      *                            assumed to be relative to the install path
@@ -49,8 +50,19 @@ class InstallInfo
      *
      * @throws \InvalidArgumentException If any of the arguments is invalid.
      */
-    public function __construct($installPath)
+    public function __construct($packageName, $installPath)
     {
+        if (!is_string($packageName)) {
+            throw new \InvalidArgumentException(sprintf(
+                'The package name must be a string. Got: %s',
+                is_object($packageName) ? get_class($packageName) : gettype($packageName)
+            ));
+        }
+
+        if ('' === $packageName) {
+            throw new \InvalidArgumentException('The package name must not be empty.');
+        }
+
         if (!is_string($installPath)) {
             throw new \InvalidArgumentException(sprintf(
                 'The package install path must be a string. Got: %s',
@@ -62,6 +74,7 @@ class InstallInfo
             throw new \InvalidArgumentException('The package install path must not be empty.');
         }
 
+        $this->packageName = $packageName;
         $this->installPath = $installPath;
     }
 
@@ -86,30 +99,6 @@ class InstallInfo
     public function getPackageName()
     {
         return $this->packageName;
-    }
-
-    /**
-     * Sets the package name.
-     *
-     * @param null|string $name The package name or `null` if the name should
-     *                          be read from the package's puli.json file.
-     *
-     * @throws \InvalidArgumentException If the package name is not a string.
-     */
-    public function setPackageName($name)
-    {
-        if (!is_string($name) && null !== $name) {
-            throw new \InvalidArgumentException(sprintf(
-                'The package name must be a string or null. Got: %s',
-                is_object($name) ? get_class($name) : gettype($name)
-            ));
-        }
-
-        if ('' === $name) {
-            throw new \InvalidArgumentException('The package name must not be empty.');
-        }
-
-        $this->packageName = $name;
     }
 
     /**

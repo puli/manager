@@ -19,9 +19,6 @@ use Puli\RepositoryManager\Config\ConfigFile\Reader\ConfigJsonReader;
 use Puli\RepositoryManager\Config\ConfigFile\Writer\ConfigJsonWriter;
 use Puli\RepositoryManager\Environment\GlobalEnvironment;
 use Puli\RepositoryManager\Environment\ProjectEnvironment;
-use Puli\RepositoryManager\Package\InstallFile\InstallFileStorage;
-use Puli\RepositoryManager\Package\InstallFile\Reader\InstallFileJsonReader;
-use Puli\RepositoryManager\Package\InstallFile\Writer\InstallFileJsonWriter;
 use Puli\RepositoryManager\Package\PackageFile\PackageFileManager;
 use Puli\RepositoryManager\Package\PackageFile\PackageFileStorage;
 use Puli\RepositoryManager\Package\PackageFile\Reader\PackageJsonReader;
@@ -190,8 +187,7 @@ class ManagerFactory
     {
         return new PackageManager(
             $environment,
-            self::createPackageFileStorage($environment->getEventDispatcher()),
-            self::createInstallFileStorage()
+            self::createPackageFileStorage($environment->getEventDispatcher())
         );
     }
 
@@ -237,14 +233,6 @@ class ManagerFactory
         return new ConfigFileStorage(
             new ConfigJsonReader(),
             new ConfigJsonWriter()
-        );
-    }
-
-    private static function createInstallFileStorage()
-    {
-        return new InstallFileStorage(
-            new InstallFileJsonReader(),
-            new InstallFileJsonWriter()
         );
     }
 
