@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the Puli Repository Manager package.
+ * This file is part of the puli/repository-manager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
