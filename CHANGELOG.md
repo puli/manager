@@ -8,6 +8,8 @@ Changelog
  * removed `setNew()` and `isNew()` from `PackageMetadata`
  * changed `Package` to prefer the name of the metadata over the name set in the
    package file
+ * `PackageManager` is now responsible for checking whether a package name is 
+   set instead of `PackageFileStorage`
 
 * 1.0.0-alpha1 (2014-12-03)
 

@@ -243,6 +243,31 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
+     * @expectedException \Puli\RepositoryManager\InvalidConfigException
+     */
+    public function testLoadPackagesFailsIfNoNameFound()
+    {
+        $this->environment->getConfig()->set(Config::INSTALL_FILE, 'repository.json');
+
+        $packageFile = new PackageFile();
+
+        $installFile = new InstallFile();
+        $installFile->addPackageMetadata(new PackageMetadata($this->packageDir1));
+
+        $this->installFileStorage->expects($this->once())
+            ->method('loadInstallFile')
+            ->with($this->rootDir.'/repository.json')
+            ->will($this->returnValue($installFile));
+
+        $this->packageFileStorage->expects($this->at(0))
+            ->method('loadPackageFile')
+            ->with($this->packageDir1.'/puli.json')
+            ->will($this->returnValue($packageFile));
+
+        new PackageManager($this->environment, $this->packageFileStorage, $this->installFileStorage);
+    }
+
+    /**
      * @expectedException \Puli\RepositoryManager\Package\NameConflictException
      */
     public function testLoadPackagesFailsIfNameConflict()

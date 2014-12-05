@@ -322,6 +322,16 @@ class PackageManager
         $packageFile = $this->packageFileStorage->loadPackageFile($installPath.'/puli.json');
         $package = new Package($packageFile, $installPath, $metadata);
 
+        if (null === $package->getName()) {
+            throw new InvalidConfigException(sprintf(
+                'Could not find a name for the package at %s. The name should '.
+                'either be set during installation or in the "name" property '.
+                'in %s.',
+                $installPath,
+                $installPath.'/puli.json'
+            ));
+        }
+
         if ($this->packages->contains($package->getName())) {
             $conflictingPackage = $this->packages->get($package->getName());
 

@@ -69,21 +69,6 @@ class PackageFileStorageTest extends \PHPUnit_Framework_TestCase
         $this->assertSame($packageFile, $this->storage->loadPackageFile('/path'));
     }
 
-    /**
-     * @expectedException \Puli\RepositoryManager\InvalidConfigException
-     */
-    public function testLoadPackageFileFailsIfNoName()
-    {
-        $packageFile = new PackageFile();
-
-        $this->reader->expects($this->once())
-            ->method('readPackageFile')
-            ->with('/path')
-            ->will($this->returnValue($packageFile));
-
-        $this->storage->loadPackageFile('/path');
-    }
-
     public function testLoadPackageFileDispatchesEvent()
     {
         $packageFile = new PackageFile('package-name');

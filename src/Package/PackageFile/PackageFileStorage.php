@@ -99,20 +99,6 @@ class PackageFileStorage
             $this->dispatcher->dispatch(ManagerEvents::LOAD_PACKAGE_FILE, $event);
         }
 
-        if (null === $packageFile->getPackageName()) {
-            if (isset($e)) {
-                throw new InvalidConfigException(sprintf(
-                    'The file %s is missing.',
-                    $packageFile->getPath()
-                ), $e->getCode(), $e);
-            }
-
-            throw new InvalidConfigException(sprintf(
-                'The "name" key is missing in %s.',
-                $packageFile->getPath()
-            ));
-        }
-
         return $packageFile;
     }
 
