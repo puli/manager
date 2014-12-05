@@ -43,8 +43,8 @@ class InstallFileJsonWriter implements InstallFileWriterInterface
             $package = new \stdClass();
             $package->installPath = $metadata->getInstallPath();
 
-            if ($metadata->isNew()) {
-                $package->new = true;
+            if (null !== $metadata->getName()) {
+                $package->name = $metadata->getName();
             }
 
             if (PackageMetadata::DEFAULT_INSTALLER !== $metadata->getInstaller()) {

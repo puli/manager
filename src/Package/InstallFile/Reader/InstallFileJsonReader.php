@@ -48,7 +48,10 @@ class InstallFileJsonReader implements InstallFileReaderInterface
 
         foreach ($array as $packageData) {
             $metadata = new PackageMetadata($packageData->installPath);
-            $metadata->setNew(isset($packageData->new) && $packageData->new);
+
+            if (isset($packageData->name)) {
+                $metadata->setName($packageData->name);
+            }
 
             if (isset($packageData->installer)) {
                 $metadata->setInstaller($packageData->installer);

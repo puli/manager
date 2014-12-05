@@ -30,9 +30,9 @@ class PackageMetadata
     private $installPath;
 
     /**
-     * @var bool
+     * @var string|null
      */
-    private $new = true;
+    private $name;
 
     /**
      * @var string
@@ -53,13 +53,13 @@ class PackageMetadata
     {
         if (!is_string($installPath)) {
             throw new \InvalidArgumentException(sprintf(
-                'The passed install path must be a string. Got: %s',
+                'The package install path must be a string. Got: %s',
                 is_object($installPath) ? get_class($installPath) : gettype($installPath)
             ));
         }
 
         if ('' === $installPath) {
-            throw new \InvalidArgumentException('The passed install path must not be empty.');
+            throw new \InvalidArgumentException('The package install path must not be empty.');
         }
 
         $this->installPath = $installPath;
@@ -78,30 +78,38 @@ class PackageMetadata
     }
 
     /**
-     * Returns whether the package is new.
+     * Returns the package name.
      *
-     * @return bool Whether the package is new.
+     * @return null|string Returns the package name or `null` if the name is
+     *                     read from the package's puli.json file.
      */
-    public function isNew()
+    public function getName()
     {
-        return $this->new;
+        return $this->name;
     }
 
     /**
-     * Sets whether the package is new.
+     * Sets the package name.
      *
-     * @param bool $new Whether the package is new.
+     * @param null|string $name The package name or `null` if the name should
+     *                          be read from the package's puli.json file.
+     *
+     * @throws \InvalidArgumentException If the package name is not a string.
      */
-    public function setNew($new)
+    public function setName($name)
     {
-        if (!is_bool($new)) {
+        if (!is_string($name) && null !== $name) {
             throw new \InvalidArgumentException(sprintf(
-                'Expected a Boolean. Got: %s',
-                is_object($new) ? get_class($new) : gettype($new)
+                'The package name must be a string or null. Got: %s',
+                is_object($name) ? get_class($name) : gettype($name)
             ));
         }
 
-        $this->new = $new;
+        if ('' === $name) {
+            throw new \InvalidArgumentException('The package name must not be empty.');
+        }
+
+        $this->name = $name;
     }
 
     /**

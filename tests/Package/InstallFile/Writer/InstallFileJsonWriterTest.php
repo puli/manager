@@ -48,9 +48,9 @@ class InstallFileJsonWriterTest extends \PHPUnit_Framework_TestCase
     public function testWriteConfig()
     {
         $metadata1 = new PackageMetadata('/path/to/package1');
-        $metadata1->setInstaller('composer');
+        $metadata1->setInstaller('Composer');
         $metadata2 = new PackageMetadata('/path/to/package2');
-        $metadata2->setNew(false);
+        $metadata2->setName('package2');
 
         $config = new InstallFile();
         $config->addPackageMetadata($metadata1);

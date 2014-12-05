@@ -93,8 +93,10 @@ class PackageManager
     /**
      * Installs the package at the given path in the repository.
      *
-     * @param string $installPath The path to the package.
-     * @param string $installer   The name of the installer.
+     * @param string      $installPath The path to the package.
+     * @param string|null $name        The package name or `null` if the name
+     *                                 should be read from the package's puli.json.
+     * @param string      $installer   The name of the installer.
      *
      * @throws FileNotFoundException If the package directory does not exist.
      * @throws NoDirectoryException If the package path points to a file.
@@ -102,7 +104,7 @@ class PackageManager
      * @throws NameConflictException If the package has the same name as another
      *                               loaded package.
      */
-    public function installPackage($installPath, $installer = PackageMetadata::DEFAULT_INSTALLER)
+    public function installPackage($installPath, $name = null, $installer = PackageMetadata::DEFAULT_INSTALLER)
     {
         $installPath = Path::makeAbsolute($installPath, $this->rootDir);
 
@@ -113,6 +115,7 @@ class PackageManager
         // Try to load the package
         $relInstallPath = Path::makeRelative($installPath, $this->rootDir);
         $metadata = new PackageMetadata($relInstallPath);
+        $metadata->setName($name);
         $metadata->setInstaller($installer);
         $package = $this->loadPackage($metadata);
 
@@ -317,20 +320,20 @@ class PackageManager
         }
 
         $packageFile = $this->packageFileStorage->loadPackageFile($installPath.'/puli.json');
-        $packageName = $packageFile->getPackageName();
+        $package = new Package($packageFile, $installPath, $metadata);
 
-        if ($this->packages->contains($packageName)) {
-            $conflictingPackage = $this->packages->get($packageName);
+        if ($this->packages->contains($package->getName())) {
+            $conflictingPackage = $this->packages->get($package->getName());
 
             throw new NameConflictException(sprintf(
                 'Cannot load package "%s" at %s: The package at %s has the '.
                 'same name.',
-                $packageName,
+                $package->getName(),
                 $installPath,
                 $conflictingPackage->getInstallPath()
             ));
         }
 
-        return new Package($packageFile, $installPath, $metadata);
+        return $package;
     }
 }

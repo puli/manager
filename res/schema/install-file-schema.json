@@ -8,8 +8,8 @@
                 "type": "string",
                 "required": true
             },
-            "new": {
-                "type": "boolean"
+            "name": {
+                "type": "string"
             },
             "installer": {
                 "type": "string"

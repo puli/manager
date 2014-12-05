@@ -35,13 +35,35 @@ class PackageMetadataTest extends \PHPUnit_Framework_TestCase
         new PackageMetadata('');
     }
 
+    public function testSetName()
+    {
+        $metadata = new PackageMetadata('/path');
+        $metadata->setName('name');
+
+        $this->assertSame('name', $metadata->getName());
+
+        $metadata->setName(null);
+
+        $this->assertNull($metadata->getName());
+    }
+
     /**
      * @expectedException \InvalidArgumentException
      */
-    public function testFailIfNewNotBoolean()
+    public function testFailIfNameNotString()
     {
         $metadata = new PackageMetadata('/path');
 
-        $metadata->setNew(12345);
+        $metadata->setName(12345);
+    }
+
+    /**
+     * @expectedException \InvalidArgumentException
+     */
+    public function testFailIfNameEmpty()
+    {
+        $metadata = new PackageMetadata('/path');
+
+        $metadata->setName('');
     }
 }

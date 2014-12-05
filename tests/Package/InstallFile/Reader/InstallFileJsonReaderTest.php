@@ -33,9 +33,9 @@ class InstallFileJsonReaderTest extends \PHPUnit_Framework_TestCase
     public function testReadConfig()
     {
         $metadata1 = new PackageMetadata('/path/to/package1');
-        $metadata1->setInstaller('composer');
+        $metadata1->setInstaller('Composer');
         $metadata2 = new PackageMetadata('/path/to/package2');
-        $metadata2->setNew(false);
+        $metadata2->setName('package2');
 
         $config = $this->reader->readInstallFile(__DIR__.'/Fixtures/config.json');
 

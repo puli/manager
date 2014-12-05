@@ -51,7 +51,12 @@ class Package
      */
     public function __construct(PackageFile $packageFile, $installPath, PackageMetadata $metadata = null)
     {
-        $this->name = $packageFile->getPackageName();
+        // If a package name was set during installation, that name wins over
+        // the predefined name in the puli.json file (if any)
+        $this->name = $metadata && null !== $metadata->getName()
+            ? $metadata->getName()
+            : $packageFile->getPackageName();
+
         $this->packageFile = $packageFile;
 
         // The path is stored both here and in the metadata. While the metadata
