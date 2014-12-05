@@ -153,7 +153,8 @@ class PackageJsonWriterTest extends JsonWriterTestCase
     {
         $packageFile = new PackageFile();
         $packageFile->setPackageName('my/application');
-        $packageFile->addTagMapping(new TagMapping('/app/config*.yml', array('yaml', 'config')));
+        $packageFile->addTagMapping(new TagMapping('/app/config*.yml', 'yaml'));
+        $packageFile->addTagMapping(new TagMapping('/app/config*.yml', 'config'));
 
         $this->writer->writePackageFile($packageFile, $this->tempFile);
 

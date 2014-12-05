@@ -98,11 +98,19 @@ class PackageJsonWriter implements PackageFileWriterInterface
 
         if (count($tagMappings) > 0) {
             $jsonData['tags'] = new \stdClass();
+            $tagsBySelector = array();
 
             foreach ($tagMappings as $mapping) {
                 $puliSelector = $mapping->getPuliSelector();
-                $tags = $mapping->getTags();
 
+                if (!isset($tagsBySelector[$puliSelector])) {
+                    $tagsBySelector[$puliSelector] = array();
+                }
+
+                $tagsBySelector[$puliSelector][] = $mapping->getTag();
+            }
+
+            foreach ($tagsBySelector as $puliSelector => $tags) {
                 $jsonData['tags']->$puliSelector = count($tags) > 1 ? $tags : reset($tags);
             }
         }

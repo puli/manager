@@ -616,7 +616,8 @@ class RepositoryBuilderTest extends \PHPUnit_Framework_TestCase
     {
         $packageFile = new PackageFile('package1');
         $packageFile->addResourceMapping(new ResourceMapping('/package1', 'resources'));
-        $packageFile->addTagMapping(new TagMapping('/package1', array('tag1', 'tag2')));
+        $packageFile->addTagMapping(new TagMapping('/package1', 'tag1'));
+        $packageFile->addTagMapping(new TagMapping('/package1', 'tag2'));
 
         $this->packageCollection->add(new Package($packageFile, $this->package1Root));
 

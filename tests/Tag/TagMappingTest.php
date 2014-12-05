@@ -38,7 +38,7 @@ class TagMappingTest extends \PHPUnit_Framework_TestCase
     /**
      * @expectedException \InvalidArgumentException
      */
-    public function testFailIfTagsNotStringOrArray()
+    public function testFailIfTagNotString()
     {
         new TagMapping('/path', 12345);
     }
@@ -46,32 +46,8 @@ class TagMappingTest extends \PHPUnit_Framework_TestCase
     /**
      * @expectedException \InvalidArgumentException
      */
-    public function testFailIfTagsEmptyString()
+    public function testFailIfTagEmptyString()
     {
         new TagMapping('/path', '');
-    }
-
-    /**
-     * @expectedException \InvalidArgumentException
-     */
-    public function testFailIfTagsNotStringArray()
-    {
-        new TagMapping('/path', array(12345));
-    }
-
-    /**
-     * @expectedException \InvalidArgumentException
-     */
-    public function testFailIfTagsContainEmptyString()
-    {
-        new TagMapping('/path', array(''));
-    }
-
-    /**
-     * @expectedException \InvalidArgumentException
-     */
-    public function testFailIfNoTags()
-    {
-        new TagMapping('/path', array());
     }
 }

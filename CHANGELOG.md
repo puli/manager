@@ -26,6 +26,7 @@ Changelog
  * moved `TagMapping` to `Puli\RepositoryManager\Tag` namespace
  * added `TagDefinition`
  * merged `InstallFile` into `RootPackageFile`
+ * `TagMapping` now stores one single tag only
 
 * 1.0.0-alpha1 (2014-12-03)
 

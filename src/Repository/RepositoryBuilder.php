@@ -256,10 +256,8 @@ class RepositoryBuilder
                 $this->tags[$selector] = array();
             }
 
-            foreach ($mapping->getTags() as $tag) {
-                // Store tags as keys to prevent duplicates
-                $this->tags[$selector][$tag] = true;
-            }
+            // Store tags as keys to prevent duplicates
+            $this->tags[$selector][$mapping->getTag()] = true;
         }
     }
 

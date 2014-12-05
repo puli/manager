@@ -287,7 +287,7 @@ class PackageJsonReaderTest extends \PHPUnit_Framework_TestCase
     {
         $this->assertSame('my/application', $packageFile->getPackageName());
         $this->assertEquals(array(new ResourceMapping('/app', array('res'))), $packageFile->getResourceMappings());
-        $this->assertEquals(array(new TagMapping('/app/config*.yml', array('config'))), $packageFile->getTagMappings());
+        $this->assertEquals(array(new TagMapping('/app/config*.yml', 'config')), $packageFile->getTagMappings());
         $this->assertEquals(array(new TagDefinition('my/application/my-tag', 'Description of my tag.')), $packageFile->getTagDefinitions());
         $this->assertSame(array('acme/blog'), $packageFile->getOverriddenPackages());
     }

@@ -100,7 +100,9 @@ class PackageJsonReader implements PackageFileReaderInterface
 
         if (isset($jsonData->tags)) {
             foreach ((array) $jsonData->tags as $selector => $tags) {
-                $packageFile->addTagMapping(new TagMapping($selector, (array) $tags));
+                foreach ((array) $tags as $tag) {
+                    $packageFile->addTagMapping(new TagMapping($selector, $tag));
+                }
             }
         }
 

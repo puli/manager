@@ -12,7 +12,7 @@
 namespace Puli\RepositoryManager\Tag;
 
 /**
- * Maps a Puli selector to one or more tags.
+ * Maps a Puli selector to a tag.
  *
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
@@ -25,9 +25,9 @@ class TagMapping
     private $puliSelector;
 
     /**
-     * @var string[]
+     * @var string
      */
-    private $tags = array();
+    private $tag;
 
     /**
      * Creates a new tag mapping.
@@ -35,14 +35,12 @@ class TagMapping
      * The mapping maps a Puli selector to one or more tags. The Puli
      * selector can be a Puli path or a pattern containing wildcards.
      *
-     * @param string          $puliSelector   The Puli path. Must be a non-empty
-     *                                        string.
-     * @param string|string[] $tags           The local paths. Must be one or
-     *                                        more non-empty strings.
+     * @param string $puliSelector The Puli selector. Must be a non-empty string.
+     * @param string $tag          The tag.
      *
      * @throws \InvalidArgumentException If any of the arguments is invalid.
      */
-    public function __construct($puliSelector, $tags)
+    public function __construct($puliSelector, $tag)
     {
         if (!is_string($puliSelector)) {
             throw new \InvalidArgumentException(sprintf(
@@ -55,27 +53,19 @@ class TagMapping
             throw new \InvalidArgumentException('The Puli selector must not be empty.');
         }
 
-        $tags = (array) $tags;
-
-        if (0 === count($tags)) {
-            throw new \InvalidArgumentException('At least one tag must be passed.');
+        if (!is_string($tag)) {
+            throw new \InvalidArgumentException(sprintf(
+                'The tag must be a string. Got: %s',
+                is_object($tag) ? get_class($tag) : gettype($tag)
+            ));
         }
 
-        foreach ($tags as $tag) {
-            if (!is_string($tag)) {
-                throw new \InvalidArgumentException(sprintf(
-                    'The tags must be strings. Got: %s',
-                    is_object($tag) ? get_class($tag) : gettype($tag)
-                ));
-            }
-
-            if ('' === $tag) {
-                throw new \InvalidArgumentException('The tags must not be empty.');
-            }
+        if ('' === $tag) {
+            throw new \InvalidArgumentException('The tag must not be empty.');
         }
 
         $this->puliSelector = $puliSelector;
-        $this->tags = $tags;
+        $this->tag = $tag;
     }
 
     /**
@@ -91,12 +81,12 @@ class TagMapping
     }
 
     /**
-     * Returns the tags.
+     * Returns the tag.
      *
-     * @return string[] The tags.
+     * @return string The tag.
      */
-    public function getTags()
+    public function getTag()
     {
-        return $this->tags;
+        return $this->tag;
     }
 }
