@@ -108,10 +108,10 @@ class RepositoryManager
     {
         $repo = new ResourceRepository();
         $builder = new RepositoryBuilder();
-        $dumpFile = $dumpFile ?: $this->config->get(Config::REPO_DUMP_FILE);
+        $dumpFile = $dumpFile ?: $this->config->get(Config::WRITE_REPO);
         $dumpFile = Path::makeAbsolute($dumpFile, $this->rootDir);
         $dumpFileDir = Path::getDirectory($dumpFile);
-        $dumpDir = $dumpDir ?: $this->config->get(Config::REPO_DUMP_DIR);
+        $dumpDir = $dumpDir ?: $this->config->get(Config::DUMP_DIR);
         $dumpDir = Path::makeAbsolute($dumpDir, $this->rootDir);
         $relPathToDumpDir = Path::makeRelative($dumpDir, Path::getDirectory($dumpFile));
 

@@ -39,13 +39,13 @@
                 "install-file": {
                     "type": "string"
                 },
-                "repo-file": {
+                "dump-dir": {
                     "type": "string"
                 },
-                "repo-dump-dir": {
+                "write-repo": {
                     "type": "string"
                 },
-                "repo-dump-file": {
+                "read-repo": {
                     "type": "string"
                 }
             }

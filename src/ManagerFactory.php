@@ -220,7 +220,7 @@ class ManagerFactory
     public static function createRepository(ProjectEnvironment $environment)
     {
         $repoPath = Path::makeAbsolute(
-            $environment->getConfig()->get(Config::REPO_FILE),
+            $environment->getConfig()->get(Config::READ_REPO),
             $environment->getRootDirectory()
         );
 

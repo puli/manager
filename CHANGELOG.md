@@ -10,6 +10,14 @@ Changelog
    package file
  * `PackageManager` is now responsible for checking whether a package name is 
    set instead of `PackageFileStorage`
+ * renamed options under the "config" key of puli.json:
+   * `repo-file` => `read-repo`
+   * `repo-dump-file` => `write-repo`
+   * `repo-dump-dir` => `dump-dir`
+ * renamed constants in `Config`:
+   * `REPO_FILE` => `READ_REPO`
+   * `REPO_DUMP_FILE` => `WRITE_REPO`
+   * `REPO_DUMP_DIR` => `DUMP_DIR`
 
 * 1.0.0-alpha1 (2014-12-03)
 

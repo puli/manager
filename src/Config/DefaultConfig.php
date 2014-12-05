@@ -27,9 +27,9 @@ class DefaultConfig extends Config
         parent::__construct(null, array(
             self::PULI_DIR => '.puli',
             self::INSTALL_FILE => '{$puli-dir}/install-file.json',
-            self::REPO_DUMP_DIR => '{$puli-dir}/repo',
-            self::REPO_DUMP_FILE => '{$puli-dir}/resource-repository.php',
-            self::REPO_FILE => '{$repo-dump-file}',
+            self::DUMP_DIR => '{$puli-dir}/dump',
+            self::WRITE_REPO => '{$puli-dir}/resource-repository.php',
+            self::READ_REPO => '{$write-repo}',
         ));
     }
 }

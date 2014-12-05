@@ -116,8 +116,8 @@ class RepositoryManagerTest extends \PHPUnit_Framework_TestCase
 
     public function testDumpRepository()
     {
-        $this->environment->getConfig()->set(Config::REPO_DUMP_DIR, $this->tempDir.'/dump');
-        $this->environment->getConfig()->set(Config::REPO_DUMP_FILE, $this->tempDir.'/repository.php');
+        $this->environment->getConfig()->set(Config::DUMP_DIR, $this->tempDir.'/dump');
+        $this->environment->getConfig()->set(Config::WRITE_REPO, $this->tempDir.'/repository.php');
 
         $this->rootPackageFile->addResourceDescriptor(new ResourceDescriptor('/root', 'resources'));
         $this->packageFile1->addResourceDescriptor(new ResourceDescriptor('/package1', 'resources'));
@@ -138,8 +138,8 @@ class RepositoryManagerTest extends \PHPUnit_Framework_TestCase
 
     public function testDumpRepositoryReplacesExistingFiles()
     {
-        $this->environment->getConfig()->set(Config::REPO_DUMP_DIR, $this->tempDir.'/dump');
-        $this->environment->getConfig()->set(Config::REPO_DUMP_FILE, $this->tempDir.'/repository.php');
+        $this->environment->getConfig()->set(Config::DUMP_DIR, $this->tempDir.'/dump');
+        $this->environment->getConfig()->set(Config::WRITE_REPO, $this->tempDir.'/repository.php');
 
         mkdir($this->tempDir.'/dump');
         touch($this->tempDir.'/dump/old');
@@ -168,8 +168,8 @@ class RepositoryManagerTest extends \PHPUnit_Framework_TestCase
 
         $this->initManager();
 
-        $this->environment->getConfig()->set(Config::REPO_DUMP_DIR, 'dump-dir/dump');
-        $this->environment->getConfig()->set(Config::REPO_DUMP_FILE, 'repo-dir/repository.php');
+        $this->environment->getConfig()->set(Config::DUMP_DIR, 'dump-dir/dump');
+        $this->environment->getConfig()->set(Config::WRITE_REPO, 'repo-dir/repository.php');
 
         $this->rootPackageFile->addResourceDescriptor(new ResourceDescriptor('/root', 'resources'));
 
@@ -186,8 +186,8 @@ class RepositoryManagerTest extends \PHPUnit_Framework_TestCase
 
     public function testDumpRepositoryWithCustomRepositoryPath()
     {
-        $this->environment->getConfig()->set(Config::REPO_DUMP_DIR, $this->tempDir.'/dump');
-        $this->environment->getConfig()->set(Config::REPO_DUMP_FILE, $this->tempDir.'/repository.php');
+        $this->environment->getConfig()->set(Config::DUMP_DIR, $this->tempDir.'/dump');
+        $this->environment->getConfig()->set(Config::WRITE_REPO, $this->tempDir.'/repository.php');
 
         $this->rootPackageFile->addResourceDescriptor(new ResourceDescriptor('/root', 'resources'));
 
@@ -205,8 +205,8 @@ class RepositoryManagerTest extends \PHPUnit_Framework_TestCase
 
     public function testDumpRepositoryWithCustomCachePath()
     {
-        $this->environment->getConfig()->set(Config::REPO_DUMP_DIR, $this->tempDir.'/dump');
-        $this->environment->getConfig()->set(Config::REPO_DUMP_FILE, $this->tempDir.'/repository.php');
+        $this->environment->getConfig()->set(Config::DUMP_DIR, $this->tempDir.'/dump');
+        $this->environment->getConfig()->set(Config::WRITE_REPO, $this->tempDir.'/repository.php');
 
         $this->rootPackageFile->addResourceDescriptor(new ResourceDescriptor('/root', 'resources'));
 

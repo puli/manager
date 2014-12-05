@@ -76,11 +76,11 @@ class Config
 
     const INSTALL_FILE = 'install-file';
 
-    const REPO_DUMP_DIR = 'repo-dump-dir';
+    const DUMP_DIR = 'dump-dir';
 
-    const REPO_DUMP_FILE = 'repo-dump-file';
+    const WRITE_REPO = 'write-repo';
 
-    const REPO_FILE = 'repo-file';
+    const READ_REPO = 'read-repo';
 
     /**
      * The accepted config keys.
@@ -90,9 +90,9 @@ class Config
     private static $keys = array(
         self::PULI_DIR => true,
         self::INSTALL_FILE => true,
-        self::REPO_DUMP_DIR => true,
-        self::REPO_DUMP_FILE => true,
-        self::REPO_FILE => true,
+        self::DUMP_DIR => true,
+        self::WRITE_REPO => true,
+        self::READ_REPO => true,
     );
 
     /**
@@ -299,9 +299,9 @@ class Config
         switch ($key) {
             case self::PULI_DIR:
             case self::INSTALL_FILE:
-            case self::REPO_DUMP_DIR:
-            case self::REPO_DUMP_FILE:
-            case self::REPO_FILE:
+            case self::DUMP_DIR:
+            case self::WRITE_REPO:
+            case self::READ_REPO:
                 $this->validateNotNull($key, $value);
                 $this->validateNonEmptyString($key, $value);
                 break;

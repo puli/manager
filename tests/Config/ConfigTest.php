@@ -199,26 +199,26 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
     {
         $config = new Config();
         $config->set(Config::INSTALL_FILE, 'install-file.json');
-        $config->set(Config::REPO_DUMP_DIR, 'repo');
+        $config->set(Config::DUMP_DIR, 'repo');
         $config->merge(array(
-            Config::REPO_DUMP_DIR => 'other-repo',
-            Config::REPO_FILE => 'repo-file.php',
+            Config::DUMP_DIR => 'other-repo',
+            Config::READ_REPO => 'repo-file.php',
         ));
 
         $this->assertSame('install-file.json', $config->get(Config::INSTALL_FILE));
-        $this->assertSame('other-repo', $config->get(Config::REPO_DUMP_DIR));
-        $this->assertSame('repo-file.php', $config->get(Config::REPO_FILE));
+        $this->assertSame('other-repo', $config->get(Config::DUMP_DIR));
+        $this->assertSame('repo-file.php', $config->get(Config::READ_REPO));
     }
 
     public function testRemove()
     {
         $config = new Config();
         $config->set(Config::INSTALL_FILE, 'install-file.json');
-        $config->set(Config::REPO_DUMP_DIR, 'repo');
-        $config->remove(Config::REPO_DUMP_DIR);
+        $config->set(Config::DUMP_DIR, 'repo');
+        $config->remove(Config::DUMP_DIR);
 
         $this->assertSame('install-file.json', $config->get(Config::INSTALL_FILE));
-        $this->assertNull($config->get(Config::REPO_DUMP_DIR));
+        $this->assertNull($config->get(Config::DUMP_DIR));
     }
 
     /**
@@ -234,14 +234,14 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
     public function testGetReturnsFallbackAfterRemove()
     {
         $default = new Config();
-        $default->set(Config::REPO_DUMP_DIR, 'fallback');
+        $default->set(Config::DUMP_DIR, 'fallback');
         $config = new Config($default);
         $config->set(Config::INSTALL_FILE, 'install-file.json');
-        $config->set(Config::REPO_DUMP_DIR, 'repo');
-        $config->remove(Config::REPO_DUMP_DIR);
+        $config->set(Config::DUMP_DIR, 'repo');
+        $config->remove(Config::DUMP_DIR);
 
         $this->assertSame('install-file.json', $config->get(Config::INSTALL_FILE));
-        $this->assertSame('fallback', $config->get(Config::REPO_DUMP_DIR));
+        $this->assertSame('fallback', $config->get(Config::DUMP_DIR));
     }
 
     public function testToArray()
@@ -335,9 +335,9 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
         return array(
             array(Config::PULI_DIR),
             array(Config::INSTALL_FILE),
-            array(Config::REPO_DUMP_DIR),
-            array(Config::REPO_DUMP_FILE),
-            array(Config::REPO_FILE),
+            array(Config::DUMP_DIR),
+            array(Config::WRITE_REPO),
+            array(Config::READ_REPO),
         );
     }
 
@@ -346,9 +346,9 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
         return array(
             array(Config::PULI_DIR),
             array(Config::INSTALL_FILE),
-            array(Config::REPO_DUMP_DIR),
-            array(Config::REPO_DUMP_FILE),
-            array(Config::REPO_FILE),
+            array(Config::DUMP_DIR),
+            array(Config::WRITE_REPO),
+            array(Config::READ_REPO),
         );
     }
 }

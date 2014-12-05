@@ -81,9 +81,9 @@ class PackageJsonWriterTest extends \PHPUnit_Framework_TestCase
         $packageFile->getConfig()->merge(array(
             Config::PULI_DIR => 'puli-dir',
             Config::INSTALL_FILE => '{$puli-dir}/my-install-file.json',
-            Config::REPO_FILE => '{$puli-dir}/my-repository.php',
-            Config::REPO_DUMP_DIR => '{$puli-dir}/my-repo',
-            Config::REPO_DUMP_FILE => '{$puli-dir}/my-repository-dump.php',
+            Config::DUMP_DIR => '{$puli-dir}/my-repo',
+            Config::READ_REPO => '{$puli-dir}/my-repository.php',
+            Config::WRITE_REPO => '{$puli-dir}/my-repository-dump.php',
         ));
 
         $this->writer->writePackageFile($packageFile, $this->tempFile);
