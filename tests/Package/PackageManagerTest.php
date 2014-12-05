@@ -363,6 +363,21 @@ class PackageManagerTest extends ManagerTestCase
         $this->manager->installPackage(__DIR__.'/Fixtures/file');
     }
 
+    /**
+     * @expectedException \Puli\RepositoryManager\InvalidConfigException
+     */
+    public function testInstallPackageFailsIfNoNameFound()
+    {
+        $this->initDefaultManager();
+
+        $this->packageFile3->setPackageName(null);
+
+        $this->packageFileStorage->expects($this->never())
+            ->method('saveRootPackageFile');
+
+        $this->manager->installPackage($this->packageDir3);
+    }
+
     public function testIsPackageInstalled()
     {
         $this->initDefaultManager();

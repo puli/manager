@@ -5,7 +5,7 @@ Changelog
 
  * added `$name` argument to `PackageManager::installPackage()`
  * renamed `PackageMetadata` to `InstallInfo`
- * added `getName()` and `setName()` to `InstallInfo`
+ * added `$name` argument to constructor of `InstallInfo`
  * removed `setNew()` and `isNew()` from `InstallInfo`
  * changed `Package` to prefer the name of the install info over the name set in
    the package file
