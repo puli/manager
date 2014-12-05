@@ -19,8 +19,8 @@ use Puli\RepositoryManager\Package\PackageFile\PackageFile;
 use Puli\RepositoryManager\Package\PackageFile\RootPackageFile;
 use Puli\RepositoryManager\Package\ResourceMapping;
 use Puli\RepositoryManager\Package\RootPackage;
-use Puli\RepositoryManager\Package\TagMapping;
 use Puli\RepositoryManager\Repository\RepositoryBuilder;
+use Puli\RepositoryManager\Tag\TagMapping;
 
 /**
  * @since  1.0

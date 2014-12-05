@@ -9,9 +9,9 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\RepositoryManager\Tests\Package;
+namespace Puli\RepositoryManager\Tests\Tag;
 
-use Puli\RepositoryManager\Package\TagMapping;
+use Puli\RepositoryManager\Tag\TagMapping;
 
 /**
  * @since  1.0

@@ -12,8 +12,8 @@
 namespace Puli\RepositoryManager\Package\PackageFile;
 
 use Puli\RepositoryManager\Package\ResourceMapping;
-use Puli\RepositoryManager\Package\TagDefinition;
-use Puli\RepositoryManager\Package\TagMapping;
+use Puli\RepositoryManager\Tag\TagDefinition;
+use Puli\RepositoryManager\Tag\TagMapping;
 
 /**
  * Stores the configuration of a package.

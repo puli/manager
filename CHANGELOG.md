@@ -23,6 +23,7 @@ Changelog
    `Puli\RepositoryManager\Package` namespace
  * renamed `TagDescriptor` and `ResourceDescriptor` to `TagMapping` and
    `ResourceMapping`
+ * moved `TagMapping` to `Puli\RepositoryManager\Tag` namespace
  * added `TagDefinition`
  * merged `InstallFile` into `RootPackageFile`
 

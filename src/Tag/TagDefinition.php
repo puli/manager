@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\RepositoryManager\Package;
+namespace Puli\RepositoryManager\Tag;
 
 /**
  * Defines a tag.

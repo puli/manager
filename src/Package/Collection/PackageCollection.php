@@ -114,6 +114,16 @@ class PackageCollection implements \IteratorAggregate, \Countable, \ArrayAccess
     }
 
     /**
+     * Returns the names of all packages.
+     *
+     * @return string[] The package names.
+     */
+    public function getPackageNames()
+    {
+        return array_keys($this->packages);
+    }
+
+    /**
      * Returns the packages in the collection.
      *
      * @return Package[] The packages in the collection.

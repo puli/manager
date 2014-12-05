@@ -16,8 +16,8 @@ use Puli\RepositoryManager\Package\InstallInfo;
 use Puli\RepositoryManager\Package\PackageFile\PackageFile;
 use Puli\RepositoryManager\Package\PackageFile\Reader\PackageJsonReader;
 use Puli\RepositoryManager\Package\ResourceMapping;
-use Puli\RepositoryManager\Package\TagDefinition;
-use Puli\RepositoryManager\Package\TagMapping;
+use Puli\RepositoryManager\Tag\TagDefinition;
+use Puli\RepositoryManager\Tag\TagMapping;
 
 /**
  * @since  1.0
