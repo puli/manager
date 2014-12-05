@@ -12,36 +12,24 @@
 namespace Puli\RepositoryManager\Tests\Package;
 
 use Puli\RepositoryManager\Config\Config;
-use Puli\RepositoryManager\Config\ConfigFile\ConfigFile;
 use Puli\RepositoryManager\Package\InstallInfo;
 use Puli\RepositoryManager\Package\PackageFile\PackageFile;
 use Puli\RepositoryManager\Package\PackageFile\PackageFileStorage;
 use Puli\RepositoryManager\Package\PackageFile\RootPackageFile;
 use Puli\RepositoryManager\Package\PackageManager;
-use Puli\RepositoryManager\Tests\Package\Fixtures\TestProjectEnvironment;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Puli\RepositoryManager\Tests\ManagerTestCase;
 use Symfony\Component\Filesystem\Filesystem;
 
 /**
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class PackageManagerTest extends \PHPUnit_Framework_TestCase
+class PackageManagerTest extends ManagerTestCase
 {
     /**
      * @var string
      */
     private $tempDir;
-
-    /**
-     * @var string
-     */
-    private $homeDir;
-
-    /**
-     * @var string
-     */
-    private $rootDir;
 
     /**
      * @var string
@@ -59,16 +47,6 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
     private $packageDir3;
 
     /**
-     * @var ConfigFile
-     */
-    private $configFile;
-
-    /**
-     * @var RootPackageFile
-     */
-    private $rootPackageFile;
-
-    /**
      * @var PackageFile
      */
     private $packageFile1;
@@ -84,16 +62,6 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
     private $packageFile3;
 
     /**
-     * @var \PHPUnit_Framework_MockObject_MockObject|EventDispatcherInterface
-     */
-    private $dispatcher;
-
-    /**
-     * @var TestProjectEnvironment
-     */
-    private $environment;
-
-    /**
      * @var \PHPUnit_Framework_MockObject_MockObject|PackageFileStorage
      */
     private $packageFileStorage;
@@ -107,16 +75,10 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
     {
         while (false === @mkdir($this->tempDir = sys_get_temp_dir().'/puli-repo-manager/PackageManagerTest_temp'.rand(10000, 99999), 0777, true)) {}
 
-        $this->dispatcher = $this->getMock('Symfony\Component\EventDispatcher\EventDispatcherInterface');
-
-        $this->homeDir = __DIR__.'/Fixtures/home';
-        $this->rootDir = __DIR__.'/Fixtures/root';
         $this->packageDir1 = __DIR__.'/Fixtures/package1';
         $this->packageDir2 = __DIR__.'/Fixtures/package2';
         $this->packageDir3 = __DIR__.'/Fixtures/package3';
 
-        $this->configFile = new ConfigFile();
-        $this->rootPackageFile = new RootPackageFile('root');
         $this->packageFile1 = new PackageFile('package1');
         $this->packageFile2 = new PackageFile('package2');
         $this->packageFile3 = new PackageFile('package3');
@@ -125,7 +87,7 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
             ->disableOriginalConstructor()
             ->getMock();
 
-        $this->initEnvironment();
+        $this->initEnvironment(__DIR__.'/Fixtures/home', __DIR__.'/Fixtures/root');
     }
 
     protected function tearDown()
@@ -552,17 +514,6 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf('Puli\RepositoryManager\Package\Package', $userPackages['package2']);
         $this->assertSame('package2', $userPackages['package2']->getName());
         $this->assertSame($installInfo2, $userPackages['package2']->getInstallInfo());
-    }
-
-    private function initEnvironment()
-    {
-        $this->environment = new TestProjectEnvironment(
-            $this->homeDir,
-            $this->rootDir,
-            $this->configFile,
-            $this->rootPackageFile,
-            $this->dispatcher
-        );
     }
 
     private function initDefaultManager()

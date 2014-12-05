@@ -12,57 +12,25 @@
 namespace Puli\RepositoryManager\Tests\Package\PackageFile;
 
 use Puli\RepositoryManager\Config\Config;
-use Puli\RepositoryManager\Config\ConfigFile\ConfigFile;
 use Puli\RepositoryManager\Package\PackageFile\PackageFileManager;
 use Puli\RepositoryManager\Package\PackageFile\PackageFileStorage;
 use Puli\RepositoryManager\Package\PackageFile\RootPackageFile;
-use Puli\RepositoryManager\Tests\Package\Fixtures\TestProjectEnvironment;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Puli\RepositoryManager\Tests\ManagerTestCase;
 
 /**
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class PackageFileManagerTest extends \PHPUnit_Framework_TestCase
+class PackageFileManagerTest extends ManagerTestCase
 {
     const PLUGIN_CLASS = 'Puli\RepositoryManager\Tests\Package\PackageFile\Fixtures\TestPlugin';
 
     const OTHER_PLUGIN_CLASS = 'Puli\RepositoryManager\Tests\Config\Fixtures\OtherPlugin';
 
     /**
-     * @var string
-     */
-    private $homeDir;
-
-    /**
-     * @var string
-     */
-    private $rootDir;
-
-    /**
-     * @var Config
-     */
-    private $configFile;
-
-    /**
-     * @var RootPackageFile
-     */
-    private $rootPackageFile;
-
-    /**
-     * @var \PHPUnit_Framework_MockObject_MockObject|EventDispatcherInterface
-     */
-    private $dispatcher;
-
-    /**
      * @var \PHPUnit_Framework_MockObject_MockObject|PackageFileStorage
      */
     private $packageFileStorage;
-
-    /**
-     * @var TestProjectEnvironment
-     */
-    private $environment;
 
     /**
      * @var PackageFileManager
@@ -71,23 +39,11 @@ class PackageFileManagerTest extends \PHPUnit_Framework_TestCase
 
     protected function setUp()
     {
-        $this->dispatcher = $this->getMock('Symfony\Component\EventDispatcher\EventDispatcherInterface');
-        $this->homeDir = __DIR__.'/Fixtures/home';
-        $this->rootDir = __DIR__.'/Fixtures/root';
-        $this->configFile = new ConfigFile();
-        $this->rootPackageFile = new RootPackageFile('root');
-
         $this->packageFileStorage = $this->getMockBuilder('Puli\RepositoryManager\Package\PackageFile\PackageFileStorage')
             ->disableOriginalConstructor()
             ->getMock();
 
-        $this->environment = new TestProjectEnvironment(
-            $this->homeDir,
-            $this->rootDir,
-            $this->configFile,
-            $this->rootPackageFile,
-            $this->dispatcher
-        );
+        $this->initEnvironment(__DIR__.'/Fixtures/home', __DIR__.'/Fixtures/root');
 
         $this->manager = new PackageFileManager($this->environment, $this->packageFileStorage);
     }
