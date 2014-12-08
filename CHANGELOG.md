@@ -27,6 +27,8 @@ Changelog
  * added `TagDefinition`
  * merged `InstallFile` into `RootPackageFile`
  * `TagMapping` now stores one single tag only
+ * added enabled/disabled tag mappings to `InstallInfo`
+ * added `TagManager`
 
 * 1.0.0-alpha1 (2014-12-03)
 

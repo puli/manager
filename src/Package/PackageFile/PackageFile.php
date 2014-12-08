@@ -171,17 +171,49 @@ class PackageFile
      */
     public function getTagMappings()
     {
-        return $this->tagMappings;
+        return array_values($this->tagMappings);
     }
 
     /**
      * Adds a tag mapping.
      *
-     * @param TagMapping $tagMapping The tag mapping.
+     * @param TagMapping $tagMapping The tag mapping to add.
      */
     public function addTagMapping(TagMapping $tagMapping)
     {
         $this->tagMappings[] = $tagMapping;
+    }
+
+    /**
+     * Removes a tag mapping.
+     *
+     * @param TagMapping $tagMapping The tag mapping to remove.
+     */
+    public function removeTagMapping(TagMapping $tagMapping)
+    {
+        if (false !== ($key = array_search($tagMapping, $this->tagMappings))) {
+            unset($this->tagMappings[$key]);
+        }
+    }
+
+    /**
+     * Removes all tag mappings.
+     */
+    public function clearTagMappings()
+    {
+        $this->tagMappings = array();
+    }
+
+    /**
+     * Returns whether the tag mapping exists in this file.
+     *
+     * @param TagMapping $tagMapping The tag mapping.
+     *
+     * @return bool Whether the file contains the tag mapping.
+     */
+    public function hasTagMapping(TagMapping $tagMapping)
+    {
+        return in_array($tagMapping, $this->tagMappings);
     }
 
     /**
@@ -191,7 +223,8 @@ class PackageFile
      */
     public function getTagDefinitions()
     {
-        return $this->tagDefinitions;
+        // Tags as keys are for internal use only
+        return array_values($this->tagDefinitions);
     }
 
     /**
@@ -201,6 +234,36 @@ class PackageFile
      */
     public function addTagDefinition(TagDefinition $tagDefinition)
     {
-        $this->tagDefinitions[] = $tagDefinition;
+        $this->tagDefinitions[$tagDefinition->getTag()] = $tagDefinition;
+    }
+
+    /**
+     * Removes a tag definition.
+     *
+     * @param string $tag The tag.
+     */
+    public function removeTagDefinition($tag)
+    {
+        unset($this->tagDefinitions[$tag]);
+    }
+
+    /**
+     * Removes all tag definitions.
+     */
+    public function clearTagDefinitions()
+    {
+        $this->tagDefinitions = array();
+    }
+
+    /**
+     * Returns whether a tag is defined in this file.
+     *
+     * @param string $tag The tag.
+     *
+     * @return bool Whether the tag is defined in the file.
+     */
+    public function hasTagDefinition($tag)
+    {
+        return isset($this->tagDefinitions[$tag]);
     }
 }

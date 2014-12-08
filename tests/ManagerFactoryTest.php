@@ -142,6 +142,23 @@ class ManagerFactoryTest extends \PHPUnit_Framework_TestCase
         $this->assertSame('package2', $packages['package2']->getName());
     }
 
+    public function testCreateTagManager()
+    {
+        $environment = ManagerFactory::createProjectEnvironment($this->tempDir);
+        $manager = ManagerFactory::createTagManager($environment);
+
+        $this->assertInstanceOf('Puli\RepositoryManager\Tag\TagManager', $manager);
+    }
+
+    public function testCreateTagManagerWithPackageManager()
+    {
+        $environment = ManagerFactory::createProjectEnvironment($this->tempDir);
+        $packageManager = ManagerFactory::createPackageManager($environment);
+        $manager = ManagerFactory::createTagManager($environment, $packageManager);
+
+        $this->assertInstanceOf('Puli\RepositoryManager\Tag\TagManager', $manager);
+    }
+
     public function testCreateRepositoryManager()
     {
         $environment = ManagerFactory::createProjectEnvironment($this->tempDir);
