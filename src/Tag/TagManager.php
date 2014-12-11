@@ -11,7 +11,7 @@
 
 namespace Puli\RepositoryManager\Tag;
 
-use Puli\Repository\Util\Selector;
+use Puli\Repository\Selector\Selector;
 use Puli\RepositoryManager\Environment\ProjectEnvironment;
 use Puli\RepositoryManager\Package\Collection\PackageCollection;
 use Puli\RepositoryManager\Package\NoSuchPackageException;
