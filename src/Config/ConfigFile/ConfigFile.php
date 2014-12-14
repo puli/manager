@@ -35,13 +35,15 @@ class ConfigFile
     /**
      * Creates a new configuration file.
      *
-     * @param string|null $path The path where the configuration file is stored
-     *                          or `null` if this configuration is not stored on
-     *                          the file system.
+     * @param string|null $path  The path where the configuration file is stored
+     *                           or `null` if this configuration is not stored
+     *                           on the file system.
+     * @param Config $baseConfig The configuration that the configuration will
+     *                           inherit its values from.
      *
      * @throws \InvalidArgumentException If the path is not a string or empty.
      */
-    public function __construct($path = null)
+    public function __construct($path = null, Config $baseConfig = null)
     {
         if (!is_string($path) && null !== $path) {
             throw new \InvalidArgumentException(sprintf(
@@ -56,7 +58,7 @@ class ConfigFile
         }
 
         // Inherit from default configuration
-        $this->config = new Config(new DefaultConfig());
+        $this->config = new Config($baseConfig);
         $this->path = $path;
     }
 

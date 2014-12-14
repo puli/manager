@@ -42,7 +42,7 @@ class TestProjectEnvironment extends ProjectEnvironment implements ConfigFileRea
         parent::__construct($homeDir, $rootDir, new ConfigFileStorage($this, $this), new PackageFileStorage($this, $this, $dispatcher), $dispatcher);
     }
 
-    public function readConfigFile($path)
+    public function readConfigFile($path, Config $baseConfig = null)
     {
         return $this->configFile;
     }

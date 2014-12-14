@@ -11,6 +11,7 @@
 
 namespace Puli\RepositoryManager\Config\ConfigFile\Reader;
 
+use Puli\RepositoryManager\Config\Config;
 use Puli\RepositoryManager\Config\ConfigFile\ConfigFile;
 use Puli\RepositoryManager\FileNotFoundException;
 use Puli\RepositoryManager\InvalidConfigException;
@@ -35,16 +36,18 @@ class ConfigJsonReader implements ConfigFileReaderInterface
      * The data in the JSON file is validated against the schema
      * `res/schema/config-schema.json`.
      *
-     * @param string $path The path to the JSON file.
+     * @param string $path       The path to the JSON file.
+     * @param Config $baseConfig The configuration that the loaded configuration
+     *                           will inherit its values from.
      *
      * @return ConfigFile The configuration file.
      *
      * @throws FileNotFoundException If the JSON file was not found.
      * @throws InvalidConfigException If the JSON file is invalid.
      */
-    public function readConfigFile($path)
+    public function readConfigFile($path, Config $baseConfig = null)
     {
-        $configFile = new ConfigFile($path);
+        $configFile = new ConfigFile($path, $baseConfig);
         $config = $configFile->getConfig();
 
         $jsonData = $this->decodeFile($path);

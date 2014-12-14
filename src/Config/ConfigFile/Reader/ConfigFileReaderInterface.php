@@ -11,6 +11,7 @@
 
 namespace Puli\RepositoryManager\Config\ConfigFile\Reader;
 
+use Puli\RepositoryManager\Config\Config;
 use Puli\RepositoryManager\Config\ConfigFile\ConfigFile;
 use Puli\RepositoryManager\FileNotFoundException;
 use Puli\RepositoryManager\InvalidConfigException;
@@ -26,12 +27,14 @@ interface ConfigFileReaderInterface
     /**
      * Reads a configuration file.
      *
-     * @param string $path The file path to read.
+     * @param string $path       The file path to read.
+     * @param Config $baseConfig The configuration that the loaded configuration
+     *                           will inherit its values from.
      *
      * @return ConfigFile The configuration file.
      *
      * @throws FileNotFoundException If the file was not found.
      * @throws InvalidConfigException If the file contains invalid configuration.
      */
-    public function readConfigFile($path);
+    public function readConfigFile($path, Config $baseConfig = null);
 }

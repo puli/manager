@@ -11,6 +11,7 @@
 
 namespace Puli\RepositoryManager\Tests\Config\ConfigFile;
 
+use Puli\RepositoryManager\Config\Config;
 use Puli\RepositoryManager\Config\ConfigFile\ConfigFile;
 use Puli\RepositoryManager\Config\ConfigFile\ConfigFileStorage;
 use Puli\RepositoryManager\Config\ConfigFile\Reader\ConfigFileReaderInterface;
@@ -58,6 +59,19 @@ class ConfigFileStorageTest extends \PHPUnit_Framework_TestCase
         $this->assertSame($configFile, $this->storage->loadConfigFile('/path'));
     }
 
+    public function testLoadConfigFileWithBaseConfig()
+    {
+        $baseConfig = new Config();
+        $configFile = new ConfigFile();
+
+        $this->reader->expects($this->once())
+            ->method('readConfigFile')
+            ->with('/path', $baseConfig)
+            ->will($this->returnValue($configFile));
+
+        $this->assertSame($configFile, $this->storage->loadConfigFile('/path', $baseConfig));
+    }
+
     public function testLoadConfigFileCreatesNewIfNotFound()
     {
         $this->reader->expects($this->once())
@@ -66,6 +80,18 @@ class ConfigFileStorageTest extends \PHPUnit_Framework_TestCase
             ->will($this->throwException(new FileNotFoundException()));
 
         $this->assertEquals(new ConfigFile('/path'), $this->storage->loadConfigFile('/path'));
+    }
+
+    public function testLoadConfigFileWithBaseConfigCreatesNewIfNotFound()
+    {
+        $baseConfig = new Config();
+
+        $this->reader->expects($this->once())
+            ->method('readConfigFile')
+            ->with('/path', $baseConfig)
+            ->will($this->throwException(new FileNotFoundException()));
+
+        $this->assertEquals(new ConfigFile('/path', $baseConfig), $this->storage->loadConfigFile('/path', $baseConfig));
     }
 
     public function testSaveConfigFile()

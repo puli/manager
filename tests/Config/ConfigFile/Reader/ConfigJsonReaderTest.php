@@ -53,11 +53,25 @@ class ConfigJsonReaderTest extends \PHPUnit_Framework_TestCase
 
         // default values
         $config = $configFile->getConfig();
-        $this->assertSame('.puli', $config->get(Config::PULI_DIR));
-        $this->assertSame('.puli/install-file.json', $config->get(Config::INSTALL_FILE));
-        $this->assertSame('.puli/resource-repository.php', $config->get(Config::READ_REPO));
-        $this->assertSame('.puli/dump', $config->get(Config::DUMP_DIR));
-        $this->assertSame('.puli/resource-repository.php', $config->get(Config::WRITE_REPO));
+        $this->assertNull($config->get(Config::PULI_DIR));
+        $this->assertNull($config->get(Config::INSTALL_FILE));
+        $this->assertNull($config->get(Config::READ_REPO));
+        $this->assertNull($config->get(Config::DUMP_DIR));
+        $this->assertNull($config->get(Config::WRITE_REPO));
+    }
+
+    public function testReadMinimalConfigFileWithBaseConfig()
+    {
+        $baseConfig = new Config();
+        $configFile = $this->reader->readConfigFile(__DIR__.'/Fixtures/minimal.json', $baseConfig);
+        $config = $configFile->getConfig();
+
+        $this->assertNotSame($baseConfig, $config);
+
+        $baseConfig->set(Config::PULI_DIR, 'my-puli-dir');
+
+        $this->assertSame('my-puli-dir', $config->get(Config::PULI_DIR));
+        $this->assertNull($config->get(Config::PULI_DIR, false));
     }
 
     /**

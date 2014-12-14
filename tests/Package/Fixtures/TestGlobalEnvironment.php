@@ -11,6 +11,7 @@
 
 namespace Puli\RepositoryManager\Tests\Package\Fixtures;
 
+use Puli\RepositoryManager\Config\Config;
 use Puli\RepositoryManager\Config\ConfigFile\ConfigFile;
 use Puli\RepositoryManager\Config\ConfigFile\ConfigFileStorage;
 use Puli\RepositoryManager\Config\ConfigFile\Reader\ConfigFileReaderInterface;
@@ -33,7 +34,7 @@ class TestGlobalEnvironment extends GlobalEnvironment implements ConfigFileReade
         parent::__construct($homeDir, new ConfigFileStorage($this, $this), $dispatcher);
     }
 
-    public function readConfigFile($path)
+    public function readConfigFile($path, Config $baseConfig = null)
     {
         return $this->configFile;
     }

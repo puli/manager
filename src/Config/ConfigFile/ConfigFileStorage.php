@@ -11,6 +11,7 @@
 
 namespace Puli\RepositoryManager\Config\ConfigFile;
 
+use Puli\RepositoryManager\Config\Config;
 use Puli\RepositoryManager\Config\ConfigFile\Reader\ConfigFileReaderInterface;
 use Puli\RepositoryManager\Config\ConfigFile\Writer\ConfigFileWriterInterface;
 use Puli\RepositoryManager\FileNotFoundException;
@@ -57,19 +58,21 @@ class ConfigFileStorage
      *
      * If the path does not exist, an empty configuration file is returned.
      *
-     * @param string $path The path to the configuration file.
+     * @param string $path       The path to the configuration file.
+     * @param Config $baseConfig The configuration that the loaded configuration
+     *                           will inherit its values from.
      *
      * @return ConfigFile The loaded configuration file.
      *
      * @throws InvalidConfigException If the file contains invalid configuration.
      */
-    public function loadConfigFile($path)
+    public function loadConfigFile($path, Config $baseConfig = null)
     {
         try {
             // Don't use file_exists() to decouple from the file system
-            return $this->reader->readConfigFile($path);
+            return $this->reader->readConfigFile($path, $baseConfig);
         } catch (FileNotFoundException $e) {
-            return new ConfigFile($path);
+            return new ConfigFile($path, $baseConfig);
         }
     }
 

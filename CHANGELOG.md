@@ -29,6 +29,8 @@ Changelog
  * `TagMapping` now stores one single tag only
  * added enabled/disabled tag mappings to `InstallInfo`
  * added `TagManager`
+ * added optional `$baseConfig` argument to `ConfigFileStorage::loadConfigFile()` 
+   and `ConfigFileReaderInterface::readConfigFile()`
 
 * 1.0.0-alpha1 (2014-12-03)
 

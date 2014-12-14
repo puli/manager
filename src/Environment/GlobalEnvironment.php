@@ -14,6 +14,7 @@ namespace Puli\RepositoryManager\Environment;
 use Puli\RepositoryManager\Config\Config;
 use Puli\RepositoryManager\Config\ConfigFile\ConfigFile;
 use Puli\RepositoryManager\Config\ConfigFile\ConfigFileStorage;
+use Puli\RepositoryManager\Config\DefaultConfig;
 use Puli\RepositoryManager\Config\EnvConfig;
 use Puli\RepositoryManager\FileNotFoundException;
 use Puli\RepositoryManager\NoDirectoryException;
@@ -86,7 +87,10 @@ class GlobalEnvironment
         }
 
         $this->homeDir = $homeDir;
-        $this->configFile = $configFileStorage->loadConfigFile($homeDir.'/config.json');
+        $this->configFile = $configFileStorage->loadConfigFile(
+            $homeDir.'/config.json',
+            new DefaultConfig()
+        );
         $this->config = new EnvConfig($this->configFile->getConfig());
         $this->dispatcher = $dispatcher;
     }
