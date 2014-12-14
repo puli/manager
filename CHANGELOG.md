@@ -31,6 +31,8 @@ Changelog
  * added `TagManager`
  * added optional `$baseConfig` argument to `ConfigFileStorage::loadConfigFile()` 
    and `ConfigFileReaderInterface::readConfigFile()`
+ * removed `Config::INSTALL_FILE` and the "install-file" configuration in
+   puli.json and config.json
 
 * 1.0.0-alpha1 (2014-12-03)
 

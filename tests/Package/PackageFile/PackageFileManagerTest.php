@@ -71,12 +71,12 @@ class PackageFileManagerTest extends ManagerTestCase
                 $config = $packageFile->getConfig();
 
                 \PHPUnit_Framework_Assert::assertSame('my-puli-dir', $config->get(Config::PULI_DIR));
-                \PHPUnit_Framework_Assert::assertSame('my-puli-dir/my-install-file.json', $config->get(Config::INSTALL_FILE));
+                \PHPUnit_Framework_Assert::assertSame('my-puli-dir/my-my-dump', $config->get(Config::DUMP_DIR));
             }));
 
         $this->manager->setConfigKeys(array(
             Config::PULI_DIR => 'my-puli-dir',
-            Config::INSTALL_FILE => '{$puli-dir}/my-install-file.json',
+            Config::DUMP_DIR => '{$puli-dir}/my-my-dump',
         ));
     }
 
@@ -92,26 +92,26 @@ class PackageFileManagerTest extends ManagerTestCase
     public function testGetConfigKeyReturnsRawValue()
     {
         $this->rootPackageFile->getConfig()->set(Config::PULI_DIR, 'my-puli-dir');
-        $this->rootPackageFile->getConfig()->set(Config::INSTALL_FILE, '{$puli-dir}/install-file.json');
+        $this->rootPackageFile->getConfig()->set(Config::DUMP_DIR, '{$puli-dir}/my-dump');
 
-        $this->assertSame('{$puli-dir}/install-file.json', $this->manager->getConfigKey(Config::INSTALL_FILE));
+        $this->assertSame('{$puli-dir}/my-dump', $this->manager->getConfigKey(Config::DUMP_DIR));
     }
 
     public function testGetConfigKeys()
     {
         $this->rootPackageFile->getConfig()->set(Config::PULI_DIR, 'my-puli-dir');
-        $this->rootPackageFile->getConfig()->set(Config::INSTALL_FILE, '{$puli-dir}/install-file.json');
+        $this->rootPackageFile->getConfig()->set(Config::DUMP_DIR, '{$puli-dir}/my-dump');
 
         $this->assertSame(array(
             Config::PULI_DIR => 'my-puli-dir',
-            Config::INSTALL_FILE => '{$puli-dir}/install-file.json',
+            Config::DUMP_DIR => '{$puli-dir}/my-dump',
         ), $this->manager->getConfigKeys());
     }
 
     public function testRemoveConfigKey()
     {
         $this->rootPackageFile->getConfig()->set(Config::PULI_DIR, 'my-puli-dir');
-        $this->rootPackageFile->getConfig()->set(Config::INSTALL_FILE, 'install-file.json');
+        $this->rootPackageFile->getConfig()->set(Config::DUMP_DIR, 'my-dump');
 
         $this->packageFileStorage->expects($this->once())
             ->method('saveRootPackageFile')
@@ -120,7 +120,7 @@ class PackageFileManagerTest extends ManagerTestCase
                 $config = $packageFile->getConfig();
 
                 \PHPUnit_Framework_Assert::assertNull($config->get(Config::PULI_DIR, false));
-                \PHPUnit_Framework_Assert::assertSame('install-file.json', $config->get(Config::INSTALL_FILE, false));
+                \PHPUnit_Framework_Assert::assertSame('my-dump', $config->get(Config::DUMP_DIR, false));
             }));
 
         $this->manager->removeConfigKey(Config::PULI_DIR);
@@ -129,7 +129,7 @@ class PackageFileManagerTest extends ManagerTestCase
     public function testRemoveConfigKeys()
     {
         $this->rootPackageFile->getConfig()->set(Config::PULI_DIR, 'my-puli-dir');
-        $this->rootPackageFile->getConfig()->set(Config::INSTALL_FILE, 'install-file.json');
+        $this->rootPackageFile->getConfig()->set(Config::DUMP_DIR, 'my-dump');
 
         $this->packageFileStorage->expects($this->once())
             ->method('saveRootPackageFile')
@@ -138,10 +138,10 @@ class PackageFileManagerTest extends ManagerTestCase
                 $config = $packageFile->getConfig();
 
                 \PHPUnit_Framework_Assert::assertNull($config->get(Config::PULI_DIR, false));
-                \PHPUnit_Framework_Assert::assertNull($config->get(Config::INSTALL_FILE, false));
+                \PHPUnit_Framework_Assert::assertNull($config->get(Config::DUMP_DIR, false));
             }));
 
-        $this->manager->removeConfigKeys(array(Config::PULI_DIR, Config::INSTALL_FILE));
+        $this->manager->removeConfigKeys(array(Config::PULI_DIR, Config::DUMP_DIR));
     }
 
     public function testInstallPlugin()

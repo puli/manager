@@ -101,8 +101,6 @@ class PackageManagerTest extends ManagerTestCase
 
     public function testLoadPackages()
     {
-        $this->environment->getConfig()->set(Config::INSTALL_FILE, 'repository.json');
-
         $packageFile1 = new PackageFile();
         $packageFile2 = new PackageFile();
 
@@ -141,8 +139,6 @@ class PackageManagerTest extends ManagerTestCase
 
     public function testLoadPackagesPrefersNameGivenDuringInstall()
     {
-        $this->environment->getConfig()->set(Config::INSTALL_FILE, 'repository.json');
-
         $packageFile = new PackageFile('package1');
         $installInfo = new InstallInfo('package1-custom', '../package1');
 
@@ -175,8 +171,6 @@ class PackageManagerTest extends ManagerTestCase
      */
     public function testLoadPackagesFailsIfPackageDirNotFound()
     {
-        $this->environment->getConfig()->set(Config::INSTALL_FILE, 'repository.json');
-
         $this->rootPackageFile->addInstallInfo(new InstallInfo('package', 'foobar'));
 
         new PackageManager($this->environment, $this->packageFileStorage);
@@ -188,8 +182,6 @@ class PackageManagerTest extends ManagerTestCase
      */
     public function testLoadPackagesFailsIfPackageNoDirectory()
     {
-        $this->environment->getConfig()->set(Config::INSTALL_FILE, 'repository.json');
-
         $this->rootPackageFile->addInstallInfo(new InstallInfo('package', __DIR__.'/Fixtures/file'));
 
         new PackageManager($this->environment, $this->packageFileStorage);
@@ -533,8 +525,6 @@ class PackageManagerTest extends ManagerTestCase
 
     private function initDefaultManager()
     {
-        $this->environment->getConfig()->set(Config::INSTALL_FILE, 'repository.json');
-
         $installInfo1 = new InstallInfo('package1', $this->packageDir1);
         $installInfo2 = new InstallInfo('package2', $this->packageDir2);
 

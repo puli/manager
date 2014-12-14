@@ -98,7 +98,6 @@ class PackageJsonWriterTest extends JsonWriterTestCase
         $packageFile->addPluginClass('Puli\RepositoryManager\Tests\Package\PackageFile\Fixtures\TestPlugin');
         $packageFile->getConfig()->merge(array(
             Config::PULI_DIR => 'puli-dir',
-            Config::INSTALL_FILE => '{$puli-dir}/my-install-file.json',
             Config::DUMP_DIR => '{$puli-dir}/my-repo',
             Config::READ_REPO => '{$puli-dir}/my-repository.php',
             Config::WRITE_REPO => '{$puli-dir}/my-repository-dump.php',

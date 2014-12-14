@@ -74,8 +74,6 @@ class Config
 {
     const PULI_DIR = 'puli-dir';
 
-    const INSTALL_FILE = 'install-file';
-
     const DUMP_DIR = 'dump-dir';
 
     const WRITE_REPO = 'write-repo';
@@ -89,7 +87,6 @@ class Config
      */
     private static $keys = array(
         self::PULI_DIR => true,
-        self::INSTALL_FILE => true,
         self::DUMP_DIR => true,
         self::WRITE_REPO => true,
         self::READ_REPO => true,
@@ -298,7 +295,6 @@ class Config
     {
         switch ($key) {
             case self::PULI_DIR:
-            case self::INSTALL_FILE:
             case self::DUMP_DIR:
             case self::WRITE_REPO:
             case self::READ_REPO:

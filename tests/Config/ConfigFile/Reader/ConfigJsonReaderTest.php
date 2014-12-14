@@ -39,7 +39,6 @@ class ConfigJsonReaderTest extends \PHPUnit_Framework_TestCase
 
         $config = $configFile->getConfig();
         $this->assertSame('puli-dir', $config->get(Config::PULI_DIR));
-        $this->assertSame('puli-dir/my-install-file.json', $config->get(Config::INSTALL_FILE));
         $this->assertSame('puli-dir/my-repository.php', $config->get(Config::READ_REPO));
         $this->assertSame('puli-dir/my-repo', $config->get(Config::DUMP_DIR));
         $this->assertSame('puli-dir/my-repository-dump.php', $config->get(Config::WRITE_REPO));
@@ -54,7 +53,6 @@ class ConfigJsonReaderTest extends \PHPUnit_Framework_TestCase
         // default values
         $config = $configFile->getConfig();
         $this->assertNull($config->get(Config::PULI_DIR));
-        $this->assertNull($config->get(Config::INSTALL_FILE));
         $this->assertNull($config->get(Config::READ_REPO));
         $this->assertNull($config->get(Config::DUMP_DIR));
         $this->assertNull($config->get(Config::WRITE_REPO));

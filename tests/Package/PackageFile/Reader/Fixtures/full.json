@@ -15,7 +15,6 @@
     "package-order": [ "acme/blog-extension1", "acme/blog-extension2" ],
     "config": {
         "puli-dir": "puli-dir",
-        "install-file": "{$puli-dir}/my-install-file.json",
         "dump-dir": "{$puli-dir}/my-repo",
         "read-repo": "{$puli-dir}/my-repository.php",
         "write-repo": "{$puli-dir}/my-repository-dump.php"

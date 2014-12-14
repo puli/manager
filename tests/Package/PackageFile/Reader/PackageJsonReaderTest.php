@@ -67,7 +67,6 @@ class PackageJsonReaderTest extends \PHPUnit_Framework_TestCase
 
         $config = $packageFile->getConfig();
         $this->assertSame('puli-dir', $config->get(Config::PULI_DIR));
-        $this->assertSame('puli-dir/my-install-file.json', $config->get(Config::INSTALL_FILE));
         $this->assertSame('puli-dir/my-repository.php', $config->get(Config::READ_REPO));
         $this->assertSame('puli-dir/my-repo', $config->get(Config::DUMP_DIR));
         $this->assertSame('puli-dir/my-repository-dump.php', $config->get(Config::WRITE_REPO));
