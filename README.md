@@ -1,12 +1,12 @@
 Puli Repository Manager
 =======================
 
-[![Build Status](https://travis-ci.org/puli/repository-manager.png?branch=master)](https://travis-ci.org/puli/repository-manager)
+[![Build Status](https://travis-ci.org/puli/repository-manager.svg?branch=master)](https://travis-ci.org/puli/repository-manager)
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/puli/repository-manager/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/puli/repository-manager/?branch=master)
 [![SensioLabsInsight](https://insight.sensiolabs.com/projects/6505ed38-0d0f-4c8d-ac85-f343f8e135a9/mini.png)](https://insight.sensiolabs.com/projects/6505ed38-0d0f-4c8d-ac85-f343f8e135a9)
-[![Latest Stable Version](https://poser.pugx.org/puli/repository-manager/v/stable.png)](https://packagist.org/packages/puli/repository-manager)
-[![Total Downloads](https://poser.pugx.org/puli/repository-manager/downloads.png)](https://packagist.org/packages/puli/repository-manager)
-[![Dependency Status](https://www.versioneye.com/php/puli:repository-manager/1.0.0/badge.png)](https://www.versioneye.com/php/puli:repository-manager/1.0.0)
+[![Latest Stable Version](https://poser.pugx.org/puli/repository-manager/v/stable.svg)](https://packagist.org/packages/puli/repository-manager)
+[![Total Downloads](https://poser.pugx.org/puli/repository-manager/downloads.svg)](https://packagist.org/packages/puli/repository-manager)
+[![Dependency Status](https://www.versioneye.com/php/puli:repository-manager/1.0.0/badge.svg)](https://www.versioneye.com/php/puli:repository-manager/1.0.0)
 
 Latest release: [1.0.0-alpha1](https://packagist.org/packages/puli/repository-manager#1.0.0-alpha1)
 
