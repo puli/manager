@@ -28,7 +28,7 @@ use Webmozart\Json\ValidationFailedException;
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class ConfigJsonReader implements ConfigFileReaderInterface
+class ConfigJsonReader implements ConfigFileReader
 {
     /**
      * Reads a JSON configuration file.

@@ -12,13 +12,13 @@
 namespace Puli\RepositoryManager\Tests\Package\PackageFile\Fixtures;
 
 use Puli\RepositoryManager\Environment\ProjectEnvironment;
-use Puli\RepositoryManager\Plugin\PluginInterface;
+use Puli\RepositoryManager\Plugin\ManagerPlugin;
 
 /**
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class OtherPlugin implements PluginInterface
+class OtherPlugin implements ManagerPlugin
 {
     public function activate(ProjectEnvironment $environment)
     {

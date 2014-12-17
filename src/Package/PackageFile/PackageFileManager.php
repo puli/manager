@@ -182,14 +182,13 @@ class PackageFileManager
      * Installs a plugin class.
      *
      * The plugin class must be passed as fully-qualified name of a class that
-     * implements {@link \Puli\RepositoryManager\Plugin\PluginInterface}. Plugin
-     * constructors must not have mandatory parameters.
+     * implements {@link ManagerPlugin}. Plugin constructors must not have
+     * mandatory parameters.
      *
      * @param string $pluginClass The fully qualified plugin class name.
      *
      * @throws InvalidConfigException If a class is not found, is not a class,
-     *                                does not implement
-     *                                {@link \Puli\RepositoryManager\Plugin\PluginInterface}
+     *                                does not implement {@link ManagerPlugin}
      *                                or has required constructor parameters.
      */
     public function installPluginClass($pluginClass)

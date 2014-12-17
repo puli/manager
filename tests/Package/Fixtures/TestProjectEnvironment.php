@@ -14,21 +14,21 @@ namespace Puli\RepositoryManager\Tests\Package\Fixtures;
 use Puli\RepositoryManager\Config\Config;
 use Puli\RepositoryManager\Config\ConfigFile\ConfigFile;
 use Puli\RepositoryManager\Config\ConfigFile\ConfigFileStorage;
-use Puli\RepositoryManager\Config\ConfigFile\Reader\ConfigFileReaderInterface;
-use Puli\RepositoryManager\Config\ConfigFile\Writer\ConfigFileWriterInterface;
+use Puli\RepositoryManager\Config\ConfigFile\Reader\ConfigFileReader;
+use Puli\RepositoryManager\Config\ConfigFile\Writer\ConfigFileWriter;
 use Puli\RepositoryManager\Environment\ProjectEnvironment;
 use Puli\RepositoryManager\Package\PackageFile\PackageFile;
 use Puli\RepositoryManager\Package\PackageFile\PackageFileStorage;
-use Puli\RepositoryManager\Package\PackageFile\Reader\PackageFileReaderInterface;
+use Puli\RepositoryManager\Package\PackageFile\Reader\PackageFileReader;
 use Puli\RepositoryManager\Package\PackageFile\RootPackageFile;
-use Puli\RepositoryManager\Package\PackageFile\Writer\PackageFileWriterInterface;
+use Puli\RepositoryManager\Package\PackageFile\Writer\PackageFileWriter;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class TestProjectEnvironment extends ProjectEnvironment implements ConfigFileReaderInterface, ConfigFileWriterInterface, PackageFileReaderInterface, PackageFileWriterInterface
+class TestProjectEnvironment extends ProjectEnvironment implements ConfigFileReader, ConfigFileWriter, PackageFileReader, PackageFileWriter
 {
     private $configFile;
 

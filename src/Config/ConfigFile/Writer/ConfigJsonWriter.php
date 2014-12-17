@@ -27,7 +27,7 @@ use Webmozart\PathUtil\Path;
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class ConfigJsonWriter implements ConfigFileWriterInterface
+class ConfigJsonWriter implements ConfigFileWriter
 {
     /**
      * Writes a JSON configuration file.

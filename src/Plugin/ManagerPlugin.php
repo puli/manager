@@ -19,7 +19,7 @@ use Puli\RepositoryManager\Environment\ProjectEnvironment;
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-interface PluginInterface
+interface ManagerPlugin
 {
     /**
      * Activates the plugin.

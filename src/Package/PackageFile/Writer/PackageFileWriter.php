@@ -20,7 +20,7 @@ use Puli\RepositoryManager\Package\PackageFile\PackageFile;
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-interface PackageFileWriterInterface
+interface PackageFileWriter
 {
     /**
      * Writes a package file.

@@ -17,9 +17,9 @@ use Puli\RepositoryManager\FileNotFoundException;
 use Puli\RepositoryManager\ManagerEvents;
 use Puli\RepositoryManager\Package\PackageFile\PackageFile;
 use Puli\RepositoryManager\Package\PackageFile\PackageFileStorage;
-use Puli\RepositoryManager\Package\PackageFile\Reader\PackageFileReaderInterface;
+use Puli\RepositoryManager\Package\PackageFile\Reader\PackageFileReader;
 use Puli\RepositoryManager\Package\PackageFile\RootPackageFile;
-use Puli\RepositoryManager\Package\PackageFile\Writer\PackageFileWriterInterface;
+use Puli\RepositoryManager\Package\PackageFile\Writer\PackageFileWriter;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
@@ -34,12 +34,12 @@ class PackageFileStorageTest extends \PHPUnit_Framework_TestCase
     private $storage;
 
     /**
-     * @var \PHPUnit_Framework_MockObject_MockObject|PackageFileReaderInterface
+     * @var \PHPUnit_Framework_MockObject_MockObject|PackageFileReader
      */
     private $reader;
 
     /**
-     * @var \PHPUnit_Framework_MockObject_MockObject|PackageFileWriterInterface
+     * @var \PHPUnit_Framework_MockObject_MockObject|PackageFileWriter
      */
     private $writer;
 
@@ -50,8 +50,8 @@ class PackageFileStorageTest extends \PHPUnit_Framework_TestCase
 
     protected function setUp()
     {
-        $this->reader = $this->getMock('Puli\RepositoryManager\Package\PackageFile\Reader\PackageFileReaderInterface');
-        $this->writer = $this->getMock('Puli\RepositoryManager\Package\PackageFile\Writer\PackageFileWriterInterface');
+        $this->reader = $this->getMock('Puli\RepositoryManager\Package\PackageFile\Reader\PackageFileReader');
+        $this->writer = $this->getMock('Puli\RepositoryManager\Package\PackageFile\Writer\PackageFileWriter');
         $this->dispatcher = $this->getMock('Symfony\Component\EventDispatcher\EventDispatcherInterface');
 
         $this->storage = new PackageFileStorage($this->reader, $this->writer, $this->dispatcher);

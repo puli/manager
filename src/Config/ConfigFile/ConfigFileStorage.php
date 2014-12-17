@@ -12,8 +12,8 @@
 namespace Puli\RepositoryManager\Config\ConfigFile;
 
 use Puli\RepositoryManager\Config\Config;
-use Puli\RepositoryManager\Config\ConfigFile\Reader\ConfigFileReaderInterface;
-use Puli\RepositoryManager\Config\ConfigFile\Writer\ConfigFileWriterInterface;
+use Puli\RepositoryManager\Config\ConfigFile\Reader\ConfigFileReader;
+use Puli\RepositoryManager\Config\ConfigFile\Writer\ConfigFileWriter;
 use Puli\RepositoryManager\FileNotFoundException;
 use Puli\RepositoryManager\InvalidConfigException;
 use Puli\RepositoryManager\IOException;
@@ -21,10 +21,10 @@ use Puli\RepositoryManager\IOException;
 /**
  * Loads and saves configuration files.
  *
- * This class adds a layer on top of {@link ConfigFileReaderInterface} and
- * {@link ConfigFileWriterInterface}. Any logic that is related to the loading
- * and saving of configuration files, but not directly related to the
- * reading/writing of a specific file format, is executed by this class.
+ * This class adds a layer on top of {@link ConfigFileReader} and
+ * {@link ConfigFileWriter}. Any logic that is related to the loading and saving
+ * of configuration files, but not directly related to the reading/writing of a
+ * specific file format, is executed by this class.
  *
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
@@ -32,22 +32,22 @@ use Puli\RepositoryManager\IOException;
 class ConfigFileStorage
 {
     /**
-     * @var ConfigFileReaderInterface
+     * @var ConfigFileReader
      */
     private $reader;
 
     /**
-     * @var ConfigFileWriterInterface
+     * @var ConfigFileWriter
      */
     private $writer;
 
     /**
      * Creates a new configuration file storage.
      *
-     * @param ConfigFileReaderInterface $reader The configuration file reader.
-     * @param ConfigFileWriterInterface $writer The configuration file writer.
+     * @param ConfigFileReader $reader The configuration file reader.
+     * @param ConfigFileWriter $writer The configuration file writer.
      */
-    public function __construct(ConfigFileReaderInterface $reader, ConfigFileWriterInterface $writer)
+    public function __construct(ConfigFileReader $reader, ConfigFileWriter $writer)
     {
         $this->reader = $reader;
         $this->writer = $writer;

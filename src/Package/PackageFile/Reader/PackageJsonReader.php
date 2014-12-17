@@ -33,7 +33,7 @@ use Webmozart\Json\ValidationFailedException;
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class PackageJsonReader implements PackageFileReaderInterface
+class PackageJsonReader implements PackageFileReader
 {
     /**
      * Reads a JSON package file.

@@ -19,7 +19,7 @@ use Puli\RepositoryManager\Config\ConfigFile\ConfigFile;
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-interface ConfigFileWriterInterface
+interface ConfigFileWriter
 {
     /**
      * Writes a configuration file.

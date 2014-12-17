@@ -17,16 +17,16 @@ use Puli\RepositoryManager\FileNotFoundException;
 use Puli\RepositoryManager\InvalidConfigException;
 use Puli\RepositoryManager\IOException;
 use Puli\RepositoryManager\ManagerEvents;
-use Puli\RepositoryManager\Package\PackageFile\Reader\PackageFileReaderInterface;
-use Puli\RepositoryManager\Package\PackageFile\Writer\PackageFileWriterInterface;
+use Puli\RepositoryManager\Package\PackageFile\Reader\PackageFileReader;
+use Puli\RepositoryManager\Package\PackageFile\Writer\PackageFileWriter;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
  * Loads and saves package files.
  *
- * This class adds a layer on top of {@link PackageFileReaderInterface} and
- * {@link PackageFileWriterInterface}. Any logic that is related to the
- * loading and saving of package configuration, but not directly related to the
+ * This class adds a layer on top of {@link PackageFileReader} and
+ * {@link PackageFileWriter}. Any logic that is related to the loading and
+ * saving of package configuration, but not directly related to the
  * reading/writing of a specific file format, is executed by this class.
  *
  * The events {@link ManagerEvents::LOAD_PACKAGE_FILE} and
@@ -39,12 +39,12 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 class PackageFileStorage
 {
     /**
-     * @var PackageFileReaderInterface
+     * @var PackageFileReader
      */
     private $reader;
 
     /**
-     * @var PackageFileWriterInterface
+     * @var PackageFileWriter
      */
     private $writer;
 
@@ -56,11 +56,11 @@ class PackageFileStorage
     /**
      * Creates a new storage.
      *
-     * @param PackageFileReaderInterface $reader     The package file reader.
-     * @param PackageFileWriterInterface $writer     The package file writer.
+     * @param PackageFileReader $reader     The package file reader.
+     * @param PackageFileWriter $writer     The package file writer.
      * @param EventDispatcherInterface   $dispatcher The event dispatcher to use.
      */
-    public function __construct(PackageFileReaderInterface $reader, PackageFileWriterInterface $writer, EventDispatcherInterface $dispatcher)
+    public function __construct(PackageFileReader $reader, PackageFileWriter $writer, EventDispatcherInterface $dispatcher)
     {
         $this->reader = $reader;
         $this->writer = $writer;

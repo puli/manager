@@ -23,7 +23,7 @@ use Puli\RepositoryManager\Package\PackageFile\RootPackageFile;
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-interface PackageFileReaderInterface
+interface PackageFileReader
 {
     /**
      * Reads a package file.

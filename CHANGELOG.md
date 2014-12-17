@@ -33,6 +33,8 @@ Changelog
    and `ConfigFileReaderInterface::readConfigFile()`
  * removed `Config::INSTALL_FILE` and the "install-file" configuration in
    puli.json and config.json
+ * renamed `PluginInterface` to `ManagerPlugin`
+ * removed `Interface` suffixes of all interfaces
 
 * 1.0.0-alpha1 (2014-12-03)
 

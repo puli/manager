@@ -14,8 +14,8 @@ namespace Puli\RepositoryManager\Tests\Config\ConfigFile;
 use Puli\RepositoryManager\Config\Config;
 use Puli\RepositoryManager\Config\ConfigFile\ConfigFile;
 use Puli\RepositoryManager\Config\ConfigFile\ConfigFileStorage;
-use Puli\RepositoryManager\Config\ConfigFile\Reader\ConfigFileReaderInterface;
-use Puli\RepositoryManager\Config\ConfigFile\Writer\ConfigFileWriterInterface;
+use Puli\RepositoryManager\Config\ConfigFile\Reader\ConfigFileReader;
+use Puli\RepositoryManager\Config\ConfigFile\Writer\ConfigFileWriter;
 use Puli\RepositoryManager\FileNotFoundException;
 
 /**
@@ -30,19 +30,19 @@ class ConfigFileStorageTest extends \PHPUnit_Framework_TestCase
     private $storage;
 
     /**
-     * @var \PHPUnit_Framework_MockObject_MockObject|ConfigFileReaderInterface
+     * @var \PHPUnit_Framework_MockObject_MockObject|ConfigFileReader
      */
     private $reader;
 
     /**
-     * @var \PHPUnit_Framework_MockObject_MockObject|ConfigFileWriterInterface
+     * @var \PHPUnit_Framework_MockObject_MockObject|ConfigFileWriter
      */
     private $writer;
 
     protected function setUp()
     {
-        $this->reader = $this->getMock('Puli\RepositoryManager\Config\ConfigFile\Reader\ConfigFileReaderInterface');
-        $this->writer = $this->getMock('Puli\RepositoryManager\Config\ConfigFile\Writer\ConfigFileWriterInterface');
+        $this->reader = $this->getMock('Puli\RepositoryManager\Config\ConfigFile\Reader\ConfigFileReader');
+        $this->writer = $this->getMock('Puli\RepositoryManager\Config\ConfigFile\Writer\ConfigFileWriter');
 
         $this->storage = new ConfigFileStorage($this->reader, $this->writer);
     }

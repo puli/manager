@@ -17,7 +17,7 @@ use Puli\RepositoryManager\FileNotFoundException;
 use Puli\RepositoryManager\NoDirectoryException;
 use Puli\RepositoryManager\Package\PackageFile\PackageFileStorage;
 use Puli\RepositoryManager\Package\PackageFile\RootPackageFile;
-use Puli\RepositoryManager\Plugin\PluginInterface;
+use Puli\RepositoryManager\Plugin\ManagerPlugin;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
@@ -94,7 +94,7 @@ class ProjectEnvironment extends GlobalEnvironment
         $this->setConfig(new EnvConfig($this->rootPackageFile->getConfig()));
 
         foreach ($this->rootPackageFile->getPluginClasses() as $pluginClass) {
-            /** @var PluginInterface $plugin */
+            /** @var ManagerPlugin $plugin */
             $plugin = new $pluginClass();
             $plugin->activate($this, $this->getEventDispatcher());
         }
