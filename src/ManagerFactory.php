@@ -11,6 +11,7 @@
 
 namespace Puli\RepositoryManager;
 
+use Puli\Repository\ResourceRepository;
 use Puli\Repository\ResourceRepositoryInterface;
 use Puli\RepositoryManager\Config\Config;
 use Puli\RepositoryManager\Config\ConfigFile\ConfigFileManager;
@@ -96,9 +97,8 @@ class ManagerFactory
     public static function createGlobalEnvironment()
     {
         $dispatcher = new EventDispatcher();
-        $homeDir = System::parseHomeDirectory();
 
-        System::denyWebAccess($homeDir);
+        $homeDir = self::parseHomeDirectory();
 
         return new GlobalEnvironment(
             $homeDir,
@@ -133,9 +133,8 @@ class ManagerFactory
     public static function createProjectEnvironment($rootDir)
     {
         $dispatcher = new EventDispatcher();
-        $homeDir = System::parseHomeDirectory();
 
-        System::denyWebAccess($homeDir);
+        $homeDir = self::parseHomeDirectory();
 
         return new ProjectEnvironment(
             $homeDir,
@@ -231,7 +230,7 @@ class ManagerFactory
      *
      * @param ProjectEnvironment $environment The project environment.
      *
-     * @return ResourceRepositoryInterface The resource repository.
+     * @return ResourceRepository The resource repository.
      */
     public static function createRepository(ProjectEnvironment $environment)
     {
@@ -263,6 +262,22 @@ class ManagerFactory
             new PackageJsonWriter(),
             $dispatcher
         );
+    }
+
+    private static function parseHomeDirectory()
+    {
+        try {
+            $homeDir = System::parseHomeDirectory();
+
+            System::denyWebAccess($homeDir);
+
+            return $homeDir;
+        } catch (InvalidConfigException $e) {
+            // Environment variable was not found -> no home directory
+            // This happens often on web servers where the home directory is
+            // not set manually
+            return null;
+        }
     }
 
     private function __construct() {}

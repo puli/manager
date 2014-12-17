@@ -35,6 +35,7 @@ Changelog
    puli.json and config.json
  * renamed `PluginInterface` to `ManagerPlugin`
  * removed `Interface` suffixes of all interfaces
+ * made the HOME/PULI_HOME/APPDATA environment variables optional
 
 * 1.0.0-alpha1 (2014-12-03)
 

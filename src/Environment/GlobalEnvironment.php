@@ -35,7 +35,7 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 class GlobalEnvironment
 {
     /**
-     * @var string
+     * @var string|null
      */
     private $homeDir;
 
@@ -45,7 +45,7 @@ class GlobalEnvironment
     private $config;
 
     /**
-     * @var ConfigFile
+     * @var ConfigFile|null
      */
     private $configFile;
 
@@ -61,7 +61,7 @@ class GlobalEnvironment
      * If that file exists, it is loaded into memory. Use {@link getConfig()} to
      * access the global configuration.
      *
-     * @param string                   $homeDir           The path to Puli's home directory.
+     * @param string|null              $homeDir           The path to Puli's home directory.
      * @param ConfigFileStorage        $configFileStorage The global configuration storage.
      * @param EventDispatcherInterface $dispatcher        The event dispatcher.
      *
@@ -70,35 +70,47 @@ class GlobalEnvironment
      */
     public function __construct($homeDir, ConfigFileStorage $configFileStorage, EventDispatcherInterface $dispatcher)
     {
-        if (!file_exists($homeDir)) {
-            throw new FileNotFoundException(sprintf(
-                'Could not load Puli environment: The home directory %s does '.
-                'not exist.',
-                $homeDir
-            ));
+        if (null !== $homeDir) {
+            // If a home directory is set, check it for a global config.json file
+            if (!file_exists($homeDir)) {
+                throw new FileNotFoundException(sprintf(
+                    'Could not load Puli environment: The home directory %s '.
+                    'does not exist.',
+                    $homeDir
+                ));
+            }
+
+            if (!is_dir($homeDir)) {
+                throw new NoDirectoryException(sprintf(
+                    'Could not load Puli environment: The home directory %s is '.
+                    'a file. Expected a directory.',
+                    $homeDir
+                ));
+            }
+
+            $this->homeDir = $homeDir;
+            $this->configFile = $configFileStorage->loadConfigFile(
+                $homeDir.'/config.json',
+                new DefaultConfig()
+            );
+            $this->config = new EnvConfig($this->configFile->getConfig());
+        } else {
+            // No home directory: use default config with environment variables
+            $this->config = new EnvConfig(new DefaultConfig());
         }
 
-        if (!is_dir($homeDir)) {
-            throw new NoDirectoryException(sprintf(
-                'Could not load Puli environment: The home directory %s is a '.
-                'file. Expected a directory.',
-                $homeDir
-            ));
-        }
-
-        $this->homeDir = $homeDir;
-        $this->configFile = $configFileStorage->loadConfigFile(
-            $homeDir.'/config.json',
-            new DefaultConfig()
-        );
-        $this->config = new EnvConfig($this->configFile->getConfig());
         $this->dispatcher = $dispatcher;
     }
 
     /**
      * Returns the path to the home directory.
      *
-     * @return string The path to the home directory.
+     * This method return `null` if no home directory has been set, which
+     * happens frequently on web servers. See
+     * {@link System::parseHomeDirectory()} for more information.
+     *
+     * @return string|null The path to the home directory or `null` if none is
+     *                     available.
      */
     public function getHomeDirectory()
     {
@@ -118,7 +130,8 @@ class GlobalEnvironment
     /**
      * Returns the configuration file in the home directory.
      *
-     * @return ConfigFile The configuration file.
+     * @return ConfigFile|null The configuration file or `null` if no home
+     *                         directory was found.
      */
     public function getConfigFile()
     {

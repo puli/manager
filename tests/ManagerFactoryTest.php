@@ -41,6 +41,9 @@ class ManagerFactoryTest extends PHPUnit_Framework_TestCase
         $filesystem->mirror(__DIR__.'/Fixtures/home', $this->tempHome);
 
         putenv('PULI_HOME='.$this->tempHome);
+
+        // Make sure "HOME" is not set
+        putenv('HOME');
     }
 
     protected function tearDown()
@@ -75,6 +78,20 @@ class ManagerFactoryTest extends PHPUnit_Framework_TestCase
         $this->assertSame('Deny from all', file_get_contents($this->tempHome.'/.htaccess'));
     }
 
+    public function testCreateGlobalEnvironmentWithoutHome()
+    {
+        // Unset env variable
+        putenv('PULI_HOME');
+
+        $environment = ManagerFactory::createGlobalEnvironment();
+
+        $this->assertInstanceOf('Puli\RepositoryManager\Environment\GlobalEnvironment', $environment);
+        $this->assertInstanceOf('Puli\RepositoryManager\Config\Config', $environment->getConfig());
+        $this->assertNull($environment->getConfigFile());
+        $this->assertInstanceOf('Symfony\Component\EventDispatcher\EventDispatcherInterface', $environment->getEventDispatcher());
+        $this->assertNull($environment->getHomeDirectory());
+    }
+
     public function testCreateProjectEnvironment()
     {
         $environment = ManagerFactory::createProjectEnvironment($this->tempDir);
@@ -98,6 +115,23 @@ class ManagerFactoryTest extends PHPUnit_Framework_TestCase
 
         $this->assertFileExists($this->tempHome.'/.htaccess');
         $this->assertSame('Deny from all', file_get_contents($this->tempHome.'/.htaccess'));
+    }
+
+    public function testCreateProjectEnvironmentWithoutHome()
+    {
+        // Unset env variable
+        putenv('PULI_HOME');
+
+        $environment = ManagerFactory::createProjectEnvironment($this->tempDir);
+
+        $this->assertInstanceOf('Puli\RepositoryManager\Environment\ProjectEnvironment', $environment);
+        $this->assertInstanceOf('Puli\RepositoryManager\Config\Config', $environment->getConfig());
+        $this->assertNull($environment->getConfigFile());
+        $this->assertInstanceOf('Puli\RepositoryManager\Package\PackageFile\RootPackageFile', $environment->getRootPackageFile());
+        $this->assertInstanceOf('Symfony\Component\EventDispatcher\EventDispatcherInterface', $environment->getEventDispatcher());
+        $this->assertNull($environment->getHomeDirectory());
+        $this->assertSame($this->tempDir, $environment->getRootDirectory());
+        $this->assertSame($this->tempDir.'/puli.json', $environment->getRootPackageFile()->getPath());
     }
 
     public function testCreateConfigFileManager()

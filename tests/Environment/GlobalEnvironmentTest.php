@@ -13,6 +13,7 @@ namespace Puli\RepositoryManager\Tests\Environment;
 
 use PHPUnit_Framework_MockObject_MockObject;
 use PHPUnit_Framework_TestCase;
+use Puli\RepositoryManager\Config\Config;
 use Puli\RepositoryManager\Config\ConfigFile\ConfigFile;
 use Puli\RepositoryManager\Config\ConfigFile\ConfigFileStorage;
 use Puli\RepositoryManager\Environment\GlobalEnvironment;
@@ -50,12 +51,12 @@ class GlobalEnvironmentTest extends PHPUnit_Framework_TestCase
 
     public function testCreate()
     {
-        $configFile = new ConfigFile();
-
         $this->configFileStorage->expects($this->once())
             ->method('loadConfigFile')
             ->with($this->homeDir.'/config.json')
-            ->will($this->returnValue($configFile));
+            ->will($this->returnCallback(function ($path, Config $baseConfig = null) {
+                return new ConfigFile($path, $baseConfig);
+            }));
 
         $environment = new GlobalEnvironment(
             $this->homeDir,
@@ -65,8 +66,31 @@ class GlobalEnvironmentTest extends PHPUnit_Framework_TestCase
 
         $this->assertSame($this->homeDir, $environment->getHomeDirectory());
         $this->assertInstanceOf('Puli\RepositoryManager\Config\EnvConfig', $environment->getConfig());
-        $this->assertSame($configFile, $environment->getConfigFile());
+        $this->assertInstanceOf('Puli\RepositoryManager\Config\ConfigFile\ConfigFile', $environment->getConfigFile());
         $this->assertSame($this->dispatcher, $environment->getEventDispatcher());
+
+        // should be loaded from DefaultConfig
+        $this->assertSame('.puli', $environment->getConfig()->get(Config::PULI_DIR));
+    }
+
+    public function testCreateWithoutHomeDir()
+    {
+        $this->configFileStorage->expects($this->never())
+            ->method('loadConfigFile');
+
+        $environment = new GlobalEnvironment(
+            null,
+            $this->configFileStorage,
+            $this->dispatcher
+        );
+
+        $this->assertNull($environment->getHomeDirectory());
+        $this->assertInstanceOf('Puli\RepositoryManager\Config\EnvConfig', $environment->getConfig());
+        $this->assertNull($environment->getConfigFile());
+        $this->assertSame($this->dispatcher, $environment->getEventDispatcher());
+
+        // should be loaded from DefaultConfig
+        $this->assertSame('.puli', $environment->getConfig()->get(Config::PULI_DIR));
     }
 
     /**

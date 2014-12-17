@@ -12,6 +12,7 @@
 namespace Puli\RepositoryManager\Environment;
 
 use Puli\RepositoryManager\Config\ConfigFile\ConfigFileStorage;
+use Puli\RepositoryManager\Config\DefaultConfig;
 use Puli\RepositoryManager\Config\EnvConfig;
 use Puli\RepositoryManager\FileNotFoundException;
 use Puli\RepositoryManager\NoDirectoryException;
@@ -84,10 +85,13 @@ class ProjectEnvironment extends GlobalEnvironment
 
         parent::__construct($homeDir, $configFileStorage, $dispatcher);
 
+        // Get the global config.json, if any
+        $configFile = $this->getConfigFile();
+
         $this->rootDir = $rootDir;
         $this->rootPackageFile = $packageFileStorage->loadRootPackageFile(
             $rootDir.'/puli.json',
-            $this->getConfigFile()->getConfig()
+            $configFile ? $configFile->getConfig() : new DefaultConfig()
         );
 
         // Override the configuration with the one from the root package

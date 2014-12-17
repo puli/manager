@@ -13,6 +13,7 @@ namespace Puli\RepositoryManager\Tests\Environment;
 
 use PHPUnit_Framework_MockObject_MockObject;
 use PHPUnit_Framework_TestCase;
+use Puli\RepositoryManager\Config\Config;
 use Puli\RepositoryManager\Config\ConfigFile\ConfigFile;
 use Puli\RepositoryManager\Config\ConfigFile\ConfigFileStorage;
 use Puli\RepositoryManager\Environment\ProjectEnvironment;
@@ -67,18 +68,19 @@ class ProjectEnvironmentTest extends PHPUnit_Framework_TestCase
 
     public function testCreate()
     {
-        $configFile = new ConfigFile();
-        $rootPackageFile = new RootPackageFile();
-
         $this->configFileStorage->expects($this->once())
             ->method('loadConfigFile')
             ->with($this->homeDir.'/config.json')
-            ->will($this->returnValue($configFile));
+            ->will($this->returnCallback(function ($path, Config $baseConfig = null) {
+                return new ConfigFile($path, $baseConfig);
+            }));
 
         $this->packageFileStorage->expects($this->once())
             ->method('loadRootPackageFile')
             ->with($this->rootDir.'/puli.json')
-            ->will($this->returnValue($rootPackageFile));
+            ->will($this->returnCallback(function ($path, Config $baseConfig = null) {
+                return new RootPackageFile('root', $path, $baseConfig);
+            }));
 
         $environment = new ProjectEnvironment(
             $this->homeDir,
@@ -91,9 +93,43 @@ class ProjectEnvironmentTest extends PHPUnit_Framework_TestCase
         $this->assertSame($this->homeDir, $environment->getHomeDirectory());
         $this->assertSame($this->rootDir, $environment->getRootDirectory());
         $this->assertInstanceOf('Puli\RepositoryManager\Config\EnvConfig', $environment->getConfig());
-        $this->assertSame($configFile, $environment->getConfigFile());
-        $this->assertSame($rootPackageFile, $environment->getRootPackageFile());
+        $this->assertInstanceOf('Puli\RepositoryManager\Config\ConfigFile\ConfigFile', $environment->getConfigFile());
+        $this->assertInstanceOf('Puli\RepositoryManager\Package\PackageFile\RootPackageFile', $environment->getRootPackageFile());
         $this->assertSame($this->dispatcher, $environment->getEventDispatcher());
+
+        // should be loaded from DefaultConfig
+        $this->assertSame('.puli', $environment->getConfig()->get(Config::PULI_DIR));
+    }
+
+    public function testCreateWithoutHomeDir()
+    {
+        $this->configFileStorage->expects($this->never())
+            ->method('loadConfigFile');
+
+        $this->packageFileStorage->expects($this->once())
+            ->method('loadRootPackageFile')
+            ->with($this->rootDir.'/puli.json')
+            ->will($this->returnCallback(function ($path, Config $baseConfig = null) {
+                return new RootPackageFile('root', $path, $baseConfig);
+            }));
+
+        $environment = new ProjectEnvironment(
+            null,
+            $this->rootDir,
+            $this->configFileStorage,
+            $this->packageFileStorage,
+            $this->dispatcher
+        );
+
+        $this->assertNull($environment->getHomeDirectory());
+        $this->assertSame($this->rootDir, $environment->getRootDirectory());
+        $this->assertInstanceOf('Puli\RepositoryManager\Config\EnvConfig', $environment->getConfig());
+        $this->assertNull($environment->getConfigFile());
+        $this->assertInstanceOf('Puli\RepositoryManager\Package\PackageFile\RootPackageFile', $environment->getRootPackageFile());
+        $this->assertSame($this->dispatcher, $environment->getEventDispatcher());
+
+        // should be loaded from DefaultConfig
+        $this->assertSame('.puli', $environment->getConfig()->get(Config::PULI_DIR));
     }
 
     /**
