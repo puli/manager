@@ -11,12 +11,14 @@
 
 namespace Puli\RepositoryManager;
 
+use RuntimeException;
+
 /**
  * Thrown when a path refers to a file instead of a directory.
  *
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class NoDirectoryException extends \Exception
+class NoDirectoryException extends RuntimeException
 {
 }

@@ -11,6 +11,8 @@
 
 namespace Puli\RepositoryManager\Tests\Package\PackageFile;
 
+use PHPUnit_Framework_Assert;
+use PHPUnit_Framework_MockObject_MockObject;
 use Puli\RepositoryManager\Config\Config;
 use Puli\RepositoryManager\Package\PackageFile\PackageFileManager;
 use Puli\RepositoryManager\Package\PackageFile\PackageFileStorage;
@@ -28,7 +30,7 @@ class PackageFileManagerTest extends ManagerTestCase
     const OTHER_PLUGIN_CLASS = 'Puli\RepositoryManager\Tests\Config\Fixtures\OtherPlugin';
 
     /**
-     * @var \PHPUnit_Framework_MockObject_MockObject|PackageFileStorage
+     * @var PHPUnit_Framework_MockObject_MockObject|PackageFileStorage
      */
     private $packageFileStorage;
 
@@ -56,7 +58,7 @@ class PackageFileManagerTest extends ManagerTestCase
             ->will($this->returnCallback(function (RootPackageFile $packageFile) {
                 $config = $packageFile->getConfig();
 
-                \PHPUnit_Framework_Assert::assertSame('my-puli-dir', $config->get(Config::PULI_DIR));
+                PHPUnit_Framework_Assert::assertSame('my-puli-dir', $config->get(Config::PULI_DIR));
             }));
 
         $this->manager->setConfigKey(Config::PULI_DIR, 'my-puli-dir');
@@ -70,8 +72,8 @@ class PackageFileManagerTest extends ManagerTestCase
             ->will($this->returnCallback(function (RootPackageFile $packageFile) {
                 $config = $packageFile->getConfig();
 
-                \PHPUnit_Framework_Assert::assertSame('my-puli-dir', $config->get(Config::PULI_DIR));
-                \PHPUnit_Framework_Assert::assertSame('my-puli-dir/my-my-dump', $config->get(Config::DUMP_DIR));
+                PHPUnit_Framework_Assert::assertSame('my-puli-dir', $config->get(Config::PULI_DIR));
+                PHPUnit_Framework_Assert::assertSame('my-puli-dir/my-my-dump', $config->get(Config::DUMP_DIR));
             }));
 
         $this->manager->setConfigKeys(array(
@@ -119,8 +121,8 @@ class PackageFileManagerTest extends ManagerTestCase
             ->will($this->returnCallback(function (RootPackageFile $packageFile) {
                 $config = $packageFile->getConfig();
 
-                \PHPUnit_Framework_Assert::assertNull($config->get(Config::PULI_DIR, false));
-                \PHPUnit_Framework_Assert::assertSame('my-dump', $config->get(Config::DUMP_DIR, false));
+                PHPUnit_Framework_Assert::assertNull($config->get(Config::PULI_DIR, false));
+                PHPUnit_Framework_Assert::assertSame('my-dump', $config->get(Config::DUMP_DIR, false));
             }));
 
         $this->manager->removeConfigKey(Config::PULI_DIR);
@@ -137,8 +139,8 @@ class PackageFileManagerTest extends ManagerTestCase
             ->will($this->returnCallback(function (RootPackageFile $packageFile) {
                 $config = $packageFile->getConfig();
 
-                \PHPUnit_Framework_Assert::assertNull($config->get(Config::PULI_DIR, false));
-                \PHPUnit_Framework_Assert::assertNull($config->get(Config::DUMP_DIR, false));
+                PHPUnit_Framework_Assert::assertNull($config->get(Config::PULI_DIR, false));
+                PHPUnit_Framework_Assert::assertNull($config->get(Config::DUMP_DIR, false));
             }));
 
         $this->manager->removeConfigKeys(array(Config::PULI_DIR, Config::DUMP_DIR));
@@ -150,7 +152,7 @@ class PackageFileManagerTest extends ManagerTestCase
             ->method('saveRootPackageFile')
             ->with($this->isInstanceOf('Puli\RepositoryManager\Package\PackageFile\RootPackageFile'))
             ->will($this->returnCallback(function (RootPackageFile $packageFile) {
-                \PHPUnit_Framework_Assert::assertSame(array(PackageFileManagerTest::PLUGIN_CLASS), $packageFile->getPluginClasses());
+                PHPUnit_Framework_Assert::assertSame(array(PackageFileManagerTest::PLUGIN_CLASS), $packageFile->getPluginClasses());
             }));
 
         $this->manager->installPluginClass(self::PLUGIN_CLASS);

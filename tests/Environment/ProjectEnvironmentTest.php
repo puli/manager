@@ -11,6 +11,8 @@
 
 namespace Puli\RepositoryManager\Tests\Environment;
 
+use PHPUnit_Framework_MockObject_MockObject;
+use PHPUnit_Framework_TestCase;
 use Puli\RepositoryManager\Config\ConfigFile\ConfigFile;
 use Puli\RepositoryManager\Config\ConfigFile\ConfigFileStorage;
 use Puli\RepositoryManager\Environment\ProjectEnvironment;
@@ -23,7 +25,7 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class ProjectEnvironmentTest extends \PHPUnit_Framework_TestCase
+class ProjectEnvironmentTest extends PHPUnit_Framework_TestCase
 {
     /**
      * @var string
@@ -36,17 +38,17 @@ class ProjectEnvironmentTest extends \PHPUnit_Framework_TestCase
     private $rootDir;
 
     /**
-     * @var \PHPUnit_Framework_MockObject_MockObject|ConfigFileStorage
+     * @var PHPUnit_Framework_MockObject_MockObject|ConfigFileStorage
      */
     private $configFileStorage;
 
     /**
-     * @var \PHPUnit_Framework_MockObject_MockObject|PackageFileStorage
+     * @var PHPUnit_Framework_MockObject_MockObject|PackageFileStorage
      */
     private $packageFileStorage;
 
     /**
-     * @var \PHPUnit_Framework_MockObject_MockObject|EventDispatcherInterface
+     * @var PHPUnit_Framework_MockObject_MockObject|EventDispatcherInterface
      */
     private $dispatcher;
 

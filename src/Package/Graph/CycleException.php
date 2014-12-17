@@ -11,13 +11,15 @@
 
 namespace Puli\RepositoryManager\Package\Graph;
 
+use RuntimeException;
+
 /**
  * Thrown when a cyclic dependency is detected in the package graph.
  *
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class CycleException extends \RuntimeException
+class CycleException extends RuntimeException
 {
 
 }

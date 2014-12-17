@@ -11,12 +11,14 @@
 
 namespace Puli\RepositoryManager\Tag;
 
+use RuntimeException;
+
 /**
  * Thrown when a duplicate tag definition was detected.
  *
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class DuplicateTagException extends \RuntimeException
+class DuplicateTagException extends RuntimeException
 {
 }

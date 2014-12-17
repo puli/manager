@@ -11,6 +11,10 @@
 
 namespace Puli\RepositoryManager\Package\Collection;
 
+use ArrayAccess;
+use ArrayIterator;
+use Countable;
+use IteratorAggregate;
 use Puli\RepositoryManager\Package\NoSuchPackageException;
 use Puli\RepositoryManager\Package\Package;
 use Puli\RepositoryManager\Package\RootPackage;
@@ -21,7 +25,7 @@ use Puli\RepositoryManager\Package\RootPackage;
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class PackageCollection implements \IteratorAggregate, \Countable, \ArrayAccess
+class PackageCollection implements IteratorAggregate, Countable, ArrayAccess
 {
     /**
      * @var RootPackage
@@ -138,7 +142,7 @@ class PackageCollection implements \IteratorAggregate, \Countable, \ArrayAccess
      */
     public function getIterator()
     {
-        return new \ArrayIterator($this->packages);
+        return new ArrayIterator($this->packages);
     }
 
     /**

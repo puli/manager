@@ -11,12 +11,14 @@
 
 namespace Puli\RepositoryManager\Repository;
 
+use RuntimeException;
+
 /**
  * Thrown when two packages have conflicting resource mappings.
  *
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class ResourceConflictException extends \Exception
+class ResourceConflictException extends RuntimeException
 {
 }

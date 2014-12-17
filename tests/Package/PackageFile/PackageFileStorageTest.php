@@ -11,6 +11,9 @@
 
 namespace Puli\RepositoryManager\Tests\Package\PackageFile;
 
+use PHPUnit_Framework_Assert;
+use PHPUnit_Framework_MockObject_MockObject;
+use PHPUnit_Framework_TestCase;
 use Puli\RepositoryManager\Config\Config;
 use Puli\RepositoryManager\Event\PackageFileEvent;
 use Puli\RepositoryManager\FileNotFoundException;
@@ -26,7 +29,7 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class PackageFileStorageTest extends \PHPUnit_Framework_TestCase
+class PackageFileStorageTest extends PHPUnit_Framework_TestCase
 {
     /**
      * @var PackageFileStorage
@@ -34,17 +37,17 @@ class PackageFileStorageTest extends \PHPUnit_Framework_TestCase
     private $storage;
 
     /**
-     * @var \PHPUnit_Framework_MockObject_MockObject|PackageFileReader
+     * @var PHPUnit_Framework_MockObject_MockObject|PackageFileReader
      */
     private $reader;
 
     /**
-     * @var \PHPUnit_Framework_MockObject_MockObject|PackageFileWriter
+     * @var PHPUnit_Framework_MockObject_MockObject|PackageFileWriter
      */
     private $writer;
 
     /**
-     * @var \PHPUnit_Framework_MockObject_MockObject|EventDispatcherInterface
+     * @var PHPUnit_Framework_MockObject_MockObject|EventDispatcherInterface
      */
     private $dispatcher;
 
@@ -87,7 +90,7 @@ class PackageFileStorageTest extends \PHPUnit_Framework_TestCase
             ->method('dispatch')
             ->with(ManagerEvents::LOAD_PACKAGE_FILE, $this->isInstanceOf('Puli\RepositoryManager\Event\PackageFileEvent'))
             ->will($this->returnCallback(function ($eventName, PackageFileEvent $event) use ($packageFile) {
-                \PHPUnit_Framework_Assert::assertSame($packageFile, $event->getPackageFile());
+                PHPUnit_Framework_Assert::assertSame($packageFile, $event->getPackageFile());
             }));
 
         $this->assertSame($packageFile, $this->storage->loadPackageFile('/path'));
@@ -145,7 +148,7 @@ class PackageFileStorageTest extends \PHPUnit_Framework_TestCase
             ->method('dispatch')
             ->with(ManagerEvents::SAVE_PACKAGE_FILE, $this->isInstanceOf('Puli\RepositoryManager\Event\PackageFileEvent'))
             ->will($this->returnCallback(function ($eventName, PackageFileEvent $event) use ($packageFile) {
-                \PHPUnit_Framework_Assert::assertSame($packageFile, $event->getPackageFile());
+                PHPUnit_Framework_Assert::assertSame($packageFile, $event->getPackageFile());
             }));
 
         $this->storage->savePackageFile($packageFile);
@@ -159,7 +162,7 @@ class PackageFileStorageTest extends \PHPUnit_Framework_TestCase
             ->method('writePackageFile')
             ->with($packageFile, '/path')
             ->will($this->returnValue(function (PackageFile $packageFile) {
-                \PHPUnit_Framework_Assert::assertNull($packageFile->getPackageName());
+                PHPUnit_Framework_Assert::assertNull($packageFile->getPackageName());
             }));
 
         $this->dispatcher->expects($this->once())
@@ -209,7 +212,7 @@ class PackageFileStorageTest extends \PHPUnit_Framework_TestCase
             ->method('dispatch')
             ->with(ManagerEvents::LOAD_PACKAGE_FILE, $this->isInstanceOf('Puli\RepositoryManager\Event\PackageFileEvent'))
             ->will($this->returnCallback(function ($eventName, PackageFileEvent $event) use ($packageFile) {
-                \PHPUnit_Framework_Assert::assertSame($packageFile, $event->getPackageFile());
+                PHPUnit_Framework_Assert::assertSame($packageFile, $event->getPackageFile());
             }));
 
         $this->assertSame($packageFile, $this->storage->loadRootPackageFile('/path', $baseConfig));
@@ -246,7 +249,7 @@ class PackageFileStorageTest extends \PHPUnit_Framework_TestCase
             ->method('dispatch')
             ->with(ManagerEvents::SAVE_PACKAGE_FILE, $this->isInstanceOf('Puli\RepositoryManager\Event\PackageFileEvent'))
             ->will($this->returnCallback(function ($eventName, PackageFileEvent $event) use ($packageFile) {
-                \PHPUnit_Framework_Assert::assertSame($packageFile, $event->getPackageFile());
+                PHPUnit_Framework_Assert::assertSame($packageFile, $event->getPackageFile());
             }));
 
         $this->storage->saveRootPackageFile($packageFile);
@@ -262,7 +265,7 @@ class PackageFileStorageTest extends \PHPUnit_Framework_TestCase
             ->method('writePackageFile')
             ->with($packageFile, '/path')
             ->will($this->returnValue(function (RootPackageFile $packageFile) {
-                \PHPUnit_Framework_Assert::assertNull($packageFile->getPackageName());
+                PHPUnit_Framework_Assert::assertNull($packageFile->getPackageName());
             }));
 
         $this->dispatcher->expects($this->once())

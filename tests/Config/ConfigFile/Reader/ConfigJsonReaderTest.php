@@ -11,6 +11,7 @@
 
 namespace Puli\RepositoryManager\Tests\Config\ConfigFile\Reader;
 
+use PHPUnit_Framework_TestCase;
 use Puli\RepositoryManager\Config\Config;
 use Puli\RepositoryManager\Config\ConfigFile\Reader\ConfigJsonReader;
 
@@ -18,7 +19,7 @@ use Puli\RepositoryManager\Config\ConfigFile\Reader\ConfigJsonReader;
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class ConfigJsonReaderTest extends \PHPUnit_Framework_TestCase
+class ConfigJsonReaderTest extends PHPUnit_Framework_TestCase
 {
     /**
      * @var ConfigJsonReader

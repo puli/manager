@@ -11,6 +11,7 @@
 
 namespace Puli\RepositoryManager\Tests\Package\PackageFile\Reader;
 
+use PHPUnit_Framework_TestCase;
 use Puli\RepositoryManager\Config\Config;
 use Puli\RepositoryManager\Package\InstallInfo;
 use Puli\RepositoryManager\Package\PackageFile\PackageFile;
@@ -23,7 +24,7 @@ use Puli\RepositoryManager\Tag\TagMapping;
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class PackageJsonReaderTest extends \PHPUnit_Framework_TestCase
+class PackageJsonReaderTest extends PHPUnit_Framework_TestCase
 {
     /**
      * @var Config

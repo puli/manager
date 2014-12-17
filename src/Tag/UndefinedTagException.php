@@ -11,12 +11,14 @@
 
 namespace Puli\RepositoryManager\Tag;
 
+use RuntimeException;
+
 /**
  * Thrown when a tag was not defined.
  *
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class UndefinedTagException extends \RuntimeException
+class UndefinedTagException extends RuntimeException
 {
 }

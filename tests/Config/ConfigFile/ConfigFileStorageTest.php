@@ -11,6 +11,8 @@
 
 namespace Puli\RepositoryManager\Tests\Config\ConfigFile;
 
+use PHPUnit_Framework_MockObject_MockObject;
+use PHPUnit_Framework_TestCase;
 use Puli\RepositoryManager\Config\Config;
 use Puli\RepositoryManager\Config\ConfigFile\ConfigFile;
 use Puli\RepositoryManager\Config\ConfigFile\ConfigFileStorage;
@@ -22,7 +24,7 @@ use Puli\RepositoryManager\FileNotFoundException;
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class ConfigFileStorageTest extends \PHPUnit_Framework_TestCase
+class ConfigFileStorageTest extends PHPUnit_Framework_TestCase
 {
     /**
      * @var ConfigFileStorage
@@ -30,12 +32,12 @@ class ConfigFileStorageTest extends \PHPUnit_Framework_TestCase
     private $storage;
 
     /**
-     * @var \PHPUnit_Framework_MockObject_MockObject|ConfigFileReader
+     * @var PHPUnit_Framework_MockObject_MockObject|ConfigFileReader
      */
     private $reader;
 
     /**
-     * @var \PHPUnit_Framework_MockObject_MockObject|ConfigFileWriter
+     * @var PHPUnit_Framework_MockObject_MockObject|ConfigFileWriter
      */
     private $writer;
 

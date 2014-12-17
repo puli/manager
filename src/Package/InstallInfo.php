@@ -11,6 +11,7 @@
 
 namespace Puli\RepositoryManager\Package;
 
+use InvalidArgumentException;
 use Puli\RepositoryManager\Tag\TagMapping;
 
 /**
@@ -60,30 +61,30 @@ class InstallInfo
      *                            assumed to be relative to the install path
      *                            of the root package.
      *
-     * @throws \InvalidArgumentException If any of the arguments is invalid.
+     * @throws InvalidArgumentException If any of the arguments is invalid.
      */
     public function __construct($packageName, $installPath)
     {
         if (!is_string($packageName)) {
-            throw new \InvalidArgumentException(sprintf(
+            throw new InvalidArgumentException(sprintf(
                 'The package name must be a string. Got: %s',
                 is_object($packageName) ? get_class($packageName) : gettype($packageName)
             ));
         }
 
         if ('' === $packageName) {
-            throw new \InvalidArgumentException('The package name must not be empty.');
+            throw new InvalidArgumentException('The package name must not be empty.');
         }
 
         if (!is_string($installPath)) {
-            throw new \InvalidArgumentException(sprintf(
+            throw new InvalidArgumentException(sprintf(
                 'The package install path must be a string. Got: %s',
                 is_object($installPath) ? get_class($installPath) : gettype($installPath)
             ));
         }
 
         if ('' === $installPath) {
-            throw new \InvalidArgumentException('The package install path must not be empty.');
+            throw new InvalidArgumentException('The package install path must not be empty.');
         }
 
         $this->packageName = $packageName;

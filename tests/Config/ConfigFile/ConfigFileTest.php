@@ -11,6 +11,7 @@
 
 namespace Puli\RepositoryManager\Tests\Config\ConfigFile;
 
+use PHPUnit_Framework_TestCase;
 use Puli\RepositoryManager\Config\Config;
 use Puli\RepositoryManager\Config\ConfigFile\ConfigFile;
 
@@ -18,7 +19,7 @@ use Puli\RepositoryManager\Config\ConfigFile\ConfigFile;
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class ConfigFileTest extends \PHPUnit_Framework_TestCase
+class ConfigFileTest extends PHPUnit_Framework_TestCase
 {
     public function provideValidPaths()
     {

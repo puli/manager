@@ -11,13 +11,14 @@
 
 namespace Puli\RepositoryManager\Tests\Tag;
 
+use PHPUnit_Framework_TestCase;
 use Puli\RepositoryManager\Tag\TagMapping;
 
 /**
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class TagMappingTest extends \PHPUnit_Framework_TestCase
+class TagMappingTest extends PHPUnit_Framework_TestCase
 {
     /**
      * @expectedException \InvalidArgumentException

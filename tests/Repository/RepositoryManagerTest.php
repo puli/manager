@@ -11,7 +11,7 @@
 
 namespace Puli\RepositoryManager\Tests\Repository;
 
-use Puli\Repository\ResourceRepositoryInterface;
+use Puli\Repository\ResourceRepository;
 use Puli\RepositoryManager\Config\Config;
 use Puli\RepositoryManager\Package\Collection\PackageCollection;
 use Puli\RepositoryManager\Package\Package;
@@ -90,7 +90,7 @@ class RepositoryManagerTest extends ManagerTestCase
         $this->assertFileExists($this->tempDir.'/dump');
         $this->assertFileExists($this->tempDir.'/repository.php');
 
-        /** @var ResourceRepositoryInterface $repo */
+        /** @var ResourceRepository $repo */
         $repo = require $this->tempDir.'/repository.php';
 
         $this->assertSame($this->rootDir.'/resources', $repo->get('/root')->getLocalPath());
@@ -115,7 +115,7 @@ class RepositoryManagerTest extends ManagerTestCase
         $this->assertFileExists($this->tempDir.'/repository.php');
         $this->assertFileNotExists($this->tempDir.'/dump/old');
 
-        /** @var ResourceRepositoryInterface $repo */
+        /** @var ResourceRepository $repo */
         $repo = require $this->tempDir.'/repository.php';
 
         $this->assertSame($this->rootDir.'/resources', $repo->get('/root')->getLocalPath());
@@ -139,7 +139,7 @@ class RepositoryManagerTest extends ManagerTestCase
         $this->assertFileExists($this->tempDir.'/dump-dir/dump');
         $this->assertFileExists($this->tempDir.'/repo-dir/repository.php');
 
-        /** @var ResourceRepositoryInterface $repo */
+        /** @var ResourceRepository $repo */
         $repo = require $this->tempDir.'/repo-dir/repository.php';
 
         $this->assertSame($this->tempDir.'/resources', $repo->get('/root')->getLocalPath());
@@ -158,7 +158,7 @@ class RepositoryManagerTest extends ManagerTestCase
         $this->assertFileExists($this->tempDir.'/custom-repository.php');
         $this->assertFileNotExists($this->tempDir.'/repository.php');
 
-        /** @var ResourceRepositoryInterface $repo */
+        /** @var ResourceRepository $repo */
         $repo = require $this->tempDir.'/custom-repository.php';
 
         $this->assertSame($this->rootDir.'/resources', $repo->get('/root')->getLocalPath());
@@ -176,7 +176,7 @@ class RepositoryManagerTest extends ManagerTestCase
         $this->assertFileExists($this->tempDir.'/custom-cache');
         $this->assertFileNotExists($this->tempDir.'/dump');
 
-        /** @var ResourceRepositoryInterface $repo */
+        /** @var ResourceRepository $repo */
         $repo = require $this->tempDir.'/repository.php';
 
         $this->assertSame($this->rootDir.'/resources', $repo->get('/root')->getLocalPath());

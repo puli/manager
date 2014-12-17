@@ -11,7 +11,8 @@
 
 namespace Puli\RepositoryManager\Tests\Package;
 
-use Puli\RepositoryManager\Config\Config;
+use PHPUnit_Framework_Assert;
+use PHPUnit_Framework_MockObject_MockObject;
 use Puli\RepositoryManager\Package\InstallInfo;
 use Puli\RepositoryManager\Package\PackageFile\PackageFile;
 use Puli\RepositoryManager\Package\PackageFile\PackageFileStorage;
@@ -62,7 +63,7 @@ class PackageManagerTest extends ManagerTestCase
     private $packageFile3;
 
     /**
-     * @var \PHPUnit_Framework_MockObject_MockObject|PackageFileStorage
+     * @var PHPUnit_Framework_MockObject_MockObject|PackageFileStorage
      */
     private $packageFileStorage;
 
@@ -206,10 +207,10 @@ class PackageManagerTest extends ManagerTestCase
             ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) use ($packageDir1, $packageDir2) {
                 $installInfos = $rootPackageFile->getInstallInfos();
 
-                \PHPUnit_Framework_Assert::assertCount(3, $installInfos);
-                \PHPUnit_Framework_Assert::assertSame($packageDir1, $installInfos[0]->getInstallPath());
-                \PHPUnit_Framework_Assert::assertSame($packageDir2, $installInfos[1]->getInstallPath());
-                \PHPUnit_Framework_Assert::assertSame('../package3', $installInfos[2]->getInstallPath());
+                PHPUnit_Framework_Assert::assertCount(3, $installInfos);
+                PHPUnit_Framework_Assert::assertSame($packageDir1, $installInfos[0]->getInstallPath());
+                PHPUnit_Framework_Assert::assertSame($packageDir2, $installInfos[1]->getInstallPath());
+                PHPUnit_Framework_Assert::assertSame('../package3', $installInfos[2]->getInstallPath());
             }));
 
         $this->manager->installPackage($this->packageDir3);
@@ -234,10 +235,10 @@ class PackageManagerTest extends ManagerTestCase
             ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) use ($packageDir1, $packageDir2) {
                 $installInfos = $rootPackageFile->getInstallInfos();
 
-                \PHPUnit_Framework_Assert::assertCount(3, $installInfos);
-                \PHPUnit_Framework_Assert::assertSame($packageDir1, $installInfos[0]->getInstallPath());
-                \PHPUnit_Framework_Assert::assertSame($packageDir2, $installInfos[1]->getInstallPath());
-                \PHPUnit_Framework_Assert::assertSame('../package3', $installInfos[2]->getInstallPath());
+                PHPUnit_Framework_Assert::assertCount(3, $installInfos);
+                PHPUnit_Framework_Assert::assertSame($packageDir1, $installInfos[0]->getInstallPath());
+                PHPUnit_Framework_Assert::assertSame($packageDir2, $installInfos[1]->getInstallPath());
+                PHPUnit_Framework_Assert::assertSame('../package3', $installInfos[2]->getInstallPath());
             }));
 
         $this->manager->installPackage('../package3');
@@ -262,13 +263,13 @@ class PackageManagerTest extends ManagerTestCase
             ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) use ($packageDir1, $packageDir2) {
                 $installInfos = $rootPackageFile->getInstallInfos();
 
-                \PHPUnit_Framework_Assert::assertCount(3, $installInfos);
-                \PHPUnit_Framework_Assert::assertSame($packageDir1, $installInfos[0]->getInstallPath());
-                \PHPUnit_Framework_Assert::assertSame('package1', $installInfos[0]->getPackageName());
-                \PHPUnit_Framework_Assert::assertSame($packageDir2, $installInfos[1]->getInstallPath());
-                \PHPUnit_Framework_Assert::assertSame('package2', $installInfos[1]->getPackageName());
-                \PHPUnit_Framework_Assert::assertSame('../package3', $installInfos[2]->getInstallPath());
-                \PHPUnit_Framework_Assert::assertSame('package3-custom', $installInfos[2]->getPackageName());
+                PHPUnit_Framework_Assert::assertCount(3, $installInfos);
+                PHPUnit_Framework_Assert::assertSame($packageDir1, $installInfos[0]->getInstallPath());
+                PHPUnit_Framework_Assert::assertSame('package1', $installInfos[0]->getPackageName());
+                PHPUnit_Framework_Assert::assertSame($packageDir2, $installInfos[1]->getInstallPath());
+                PHPUnit_Framework_Assert::assertSame('package2', $installInfos[1]->getPackageName());
+                PHPUnit_Framework_Assert::assertSame('../package3', $installInfos[2]->getInstallPath());
+                PHPUnit_Framework_Assert::assertSame('package3-custom', $installInfos[2]->getPackageName());
             }));
 
         $this->manager->installPackage($this->packageDir3, 'package3-custom');
@@ -293,13 +294,13 @@ class PackageManagerTest extends ManagerTestCase
             ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) use ($packageDir1, $packageDir2) {
                 $installInfos = $rootPackageFile->getInstallInfos();
 
-                \PHPUnit_Framework_Assert::assertCount(3, $installInfos);
-                \PHPUnit_Framework_Assert::assertSame($packageDir1, $installInfos[0]->getInstallPath());
-                \PHPUnit_Framework_Assert::assertSame('User', $installInfos[0]->getInstaller());
-                \PHPUnit_Framework_Assert::assertSame($packageDir2, $installInfos[1]->getInstallPath());
-                \PHPUnit_Framework_Assert::assertSame('User', $installInfos[1]->getInstaller());
-                \PHPUnit_Framework_Assert::assertSame('../package3', $installInfos[2]->getInstallPath());
-                \PHPUnit_Framework_Assert::assertSame('Composer', $installInfos[2]->getInstaller());
+                PHPUnit_Framework_Assert::assertCount(3, $installInfos);
+                PHPUnit_Framework_Assert::assertSame($packageDir1, $installInfos[0]->getInstallPath());
+                PHPUnit_Framework_Assert::assertSame('User', $installInfos[0]->getInstaller());
+                PHPUnit_Framework_Assert::assertSame($packageDir2, $installInfos[1]->getInstallPath());
+                PHPUnit_Framework_Assert::assertSame('User', $installInfos[1]->getInstaller());
+                PHPUnit_Framework_Assert::assertSame('../package3', $installInfos[2]->getInstallPath());
+                PHPUnit_Framework_Assert::assertSame('Composer', $installInfos[2]->getInstaller());
             }));
 
         $this->manager->installPackage($this->packageDir3, null, 'Composer');
@@ -396,7 +397,7 @@ class PackageManagerTest extends ManagerTestCase
             ->method('saveRootPackageFile')
             ->with($this->rootPackageFile)
             ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) use ($packageDir) {
-                \PHPUnit_Framework_Assert::assertFalse($rootPackageFile->hasInstallInfo($packageDir));
+                PHPUnit_Framework_Assert::assertFalse($rootPackageFile->hasInstallInfo($packageDir));
             }));
 
         $this->assertTrue($this->rootPackageFile->hasInstallInfo('package1'));

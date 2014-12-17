@@ -11,8 +11,8 @@
 
 namespace Puli\RepositoryManager\Config\ConfigFile;
 
+use InvalidArgumentException;
 use Puli\RepositoryManager\Config\Config;
-use Puli\RepositoryManager\Config\DefaultConfig;
 
 /**
  * A file storing configuration.
@@ -41,12 +41,12 @@ class ConfigFile
      * @param Config $baseConfig The configuration that the configuration will
      *                           inherit its values from.
      *
-     * @throws \InvalidArgumentException If the path is not a string or empty.
+     * @throws InvalidArgumentException If the path is not a string or empty.
      */
     public function __construct($path = null, Config $baseConfig = null)
     {
         if (!is_string($path) && null !== $path) {
-            throw new \InvalidArgumentException(sprintf(
+            throw new InvalidArgumentException(sprintf(
                 'The path to the configuration file should be a string '.
                 'or null. Got: %s',
                 is_object($path) ? get_class($path) : gettype($path)
@@ -54,7 +54,7 @@ class ConfigFile
         }
 
         if ('' === $path) {
-            throw new \InvalidArgumentException('The path to the configuration file should not be empty.');
+            throw new InvalidArgumentException('The path to the configuration file should not be empty.');
         }
 
         // Inherit from default configuration

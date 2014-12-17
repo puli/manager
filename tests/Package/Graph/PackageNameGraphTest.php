@@ -11,13 +11,14 @@
 
 namespace Puli\RepositoryManager\Tests\Package\Graph;
 
+use PHPUnit_Framework_TestCase;
 use Puli\RepositoryManager\Package\Graph\PackageNameGraph;
 
 /**
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class PackageNameGraphTest extends \PHPUnit_Framework_TestCase
+class PackageNameGraphTest extends PHPUnit_Framework_TestCase
 {
     /**
      * @var PackageNameGraph

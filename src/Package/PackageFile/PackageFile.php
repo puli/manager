@@ -11,6 +11,7 @@
 
 namespace Puli\RepositoryManager\Package\PackageFile;
 
+use InvalidArgumentException;
 use Puli\RepositoryManager\Package\ResourceMapping;
 use Puli\RepositoryManager\Tag\TagDefinition;
 use Puli\RepositoryManager\Tag\TagMapping;
@@ -61,19 +62,19 @@ class PackageFile
      *                                 `null` if this configuration is not
      *                                 stored on the file system.
      *
-     * @throws \InvalidArgumentException If the name/path is not a string or empty.
+     * @throws InvalidArgumentException If the name/path is not a string or empty.
      */
     public function __construct($packageName = null, $path = null)
     {
         if (!is_string($path) && null !== $path) {
-            throw new \InvalidArgumentException(sprintf(
+            throw new InvalidArgumentException(sprintf(
                 'The path to the package file should be a string or null. Got: %s',
                 is_object($path) ? get_class($path) : gettype($path)
             ));
         }
 
         if ('' === $path) {
-            throw new \InvalidArgumentException('The path to the package file should not be empty.');
+            throw new InvalidArgumentException('The path to the package file should not be empty.');
         }
 
         $this->path = $path;
@@ -95,19 +96,19 @@ class PackageFile
      *
      * @param string|null $packageName The package name or `null` to unset.
      *
-     * @throws \InvalidArgumentException If the name is not a string or empty.
+     * @throws InvalidArgumentException If the name is not a string or empty.
      */
     public function setPackageName($packageName)
     {
         if (!is_string($packageName) && null !== $packageName) {
-            throw new \InvalidArgumentException(sprintf(
+            throw new InvalidArgumentException(sprintf(
                 'The package name should be a string or null. Got: %s',
                 is_object($packageName) ? get_class($packageName) : gettype($packageName)
             ));
         }
 
         if ('' === $packageName) {
-            throw new \InvalidArgumentException('The package name should not be empty.');
+            throw new InvalidArgumentException('The package name should not be empty.');
         }
 
         $this->packageName = $packageName;

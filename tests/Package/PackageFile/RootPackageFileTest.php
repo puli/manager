@@ -11,6 +11,7 @@
 
 namespace Puli\RepositoryManager\Tests\Package\PackageFile;
 
+use PHPUnit_Framework_TestCase;
 use Puli\RepositoryManager\Config\Config;
 use Puli\RepositoryManager\Package\InstallInfo;
 use Puli\RepositoryManager\Package\PackageFile\RootPackageFile;
@@ -19,7 +20,7 @@ use Puli\RepositoryManager\Package\PackageFile\RootPackageFile;
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class RootPackageFileTest extends \PHPUnit_Framework_TestCase
+class RootPackageFileTest extends PHPUnit_Framework_TestCase
 {
     const PLUGIN_CLASS = 'Puli\RepositoryManager\Tests\Package\PackageFile\Fixtures\TestPlugin';
 

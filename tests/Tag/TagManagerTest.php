@@ -11,6 +11,8 @@
 
 namespace Puli\RepositoryManager\Tests\Tag;
 
+use PHPUnit_Framework_Assert;
+use PHPUnit_Framework_MockObject_MockObject;
 use Puli\RepositoryManager\Package\Collection\PackageCollection;
 use Puli\RepositoryManager\Package\InstallInfo;
 use Puli\RepositoryManager\Package\Package;
@@ -85,7 +87,7 @@ class TagManagerTest extends ManagerTestCase
     private $installInfo3;
 
     /**
-     * @var \PHPUnit_Framework_MockObject_MockObject|PackageFileStorage
+     * @var PHPUnit_Framework_MockObject_MockObject|PackageFileStorage
      */
     private $packageFileStorage;
 
@@ -208,9 +210,9 @@ class TagManagerTest extends ManagerTestCase
             ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) use ($mapping1, $mapping2) {
                 $tagMappings = $rootPackageFile->getTagMappings();
 
-                \PHPUnit_Framework_Assert::assertCount(2, $tagMappings);
-                \PHPUnit_Framework_Assert::assertSame($mapping1, $tagMappings[0]);
-                \PHPUnit_Framework_Assert::assertSame($mapping2, $tagMappings[1]);
+                PHPUnit_Framework_Assert::assertCount(2, $tagMappings);
+                PHPUnit_Framework_Assert::assertSame($mapping1, $tagMappings[0]);
+                PHPUnit_Framework_Assert::assertSame($mapping2, $tagMappings[1]);
             }));
 
         $this->manager->addRootTagMapping($mapping2);
@@ -263,8 +265,8 @@ class TagManagerTest extends ManagerTestCase
             ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) use ($mapping2) {
                 $tagMappings = $rootPackageFile->getTagMappings();
 
-                \PHPUnit_Framework_Assert::assertCount(1, $tagMappings);
-                \PHPUnit_Framework_Assert::assertSame($mapping2, $tagMappings[0]);
+                PHPUnit_Framework_Assert::assertCount(1, $tagMappings);
+                PHPUnit_Framework_Assert::assertSame($mapping2, $tagMappings[0]);
             }));
 
         $this->manager->removeRootTagMapping($mapping1);
@@ -297,8 +299,8 @@ class TagManagerTest extends ManagerTestCase
             ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) use ($mapping) {
                 $tagMappings = $rootPackageFile->getTagMappings();
 
-                \PHPUnit_Framework_Assert::assertCount(1, $tagMappings);
-                \PHPUnit_Framework_Assert::assertSame($mapping, $tagMappings[0]);
+                PHPUnit_Framework_Assert::assertCount(1, $tagMappings);
+                PHPUnit_Framework_Assert::assertSame($mapping, $tagMappings[0]);
             }));
 
         $this->manager->removeUndefinedRootTagMappings();
@@ -334,7 +336,7 @@ class TagManagerTest extends ManagerTestCase
             ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) use ($mapping2) {
                 $tagMappings = $rootPackageFile->getTagMappings();
 
-                \PHPUnit_Framework_Assert::assertCount(0, $tagMappings);
+                PHPUnit_Framework_Assert::assertCount(0, $tagMappings);
             }));
 
         $this->manager->clearRootTagMappings();
@@ -517,9 +519,9 @@ class TagManagerTest extends ManagerTestCase
                 $installInfo = $rootPackageFile->getInstallInfo('package1');
                 $tagMappings = $installInfo->getEnabledTagMappings();
 
-                \PHPUnit_Framework_Assert::assertCount(2, $tagMappings);
-                \PHPUnit_Framework_Assert::assertSame($mapping1, $tagMappings[0]);
-                \PHPUnit_Framework_Assert::assertSame($mapping2, $tagMappings[1]);
+                PHPUnit_Framework_Assert::assertCount(2, $tagMappings);
+                PHPUnit_Framework_Assert::assertSame($mapping1, $tagMappings[0]);
+                PHPUnit_Framework_Assert::assertSame($mapping2, $tagMappings[1]);
             }));
 
         $this->manager->enablePackageTagMapping('package1', $mapping2);
@@ -560,9 +562,9 @@ class TagManagerTest extends ManagerTestCase
                 $installInfo = $rootPackageFile->getInstallInfo('package1');
                 $tagMappings = $installInfo->getDisabledTagMappings();
 
-                \PHPUnit_Framework_Assert::assertCount(2, $tagMappings);
-                \PHPUnit_Framework_Assert::assertSame($mapping1, $tagMappings[0]);
-                \PHPUnit_Framework_Assert::assertSame($mapping2, $tagMappings[1]);
+                PHPUnit_Framework_Assert::assertCount(2, $tagMappings);
+                PHPUnit_Framework_Assert::assertSame($mapping1, $tagMappings[0]);
+                PHPUnit_Framework_Assert::assertSame($mapping2, $tagMappings[1]);
             }));
 
         $this->manager->disablePackageTagMapping('package1', $mapping2);
@@ -604,11 +606,11 @@ class TagManagerTest extends ManagerTestCase
                 $tagMappings1 = $installInfo1->getEnabledTagMappings();
                 $tagMappings2 = $installInfo2->getDisabledTagMappings();
 
-                \PHPUnit_Framework_Assert::assertCount(1, $tagMappings1);
-                \PHPUnit_Framework_Assert::assertSame($mapping1, $tagMappings1[0]);
+                PHPUnit_Framework_Assert::assertCount(1, $tagMappings1);
+                PHPUnit_Framework_Assert::assertSame($mapping1, $tagMappings1[0]);
 
-                \PHPUnit_Framework_Assert::assertCount(1, $tagMappings2);
-                \PHPUnit_Framework_Assert::assertSame($mapping2, $tagMappings2[0]);
+                PHPUnit_Framework_Assert::assertCount(1, $tagMappings2);
+                PHPUnit_Framework_Assert::assertSame($mapping2, $tagMappings2[0]);
             }));
 
         $this->manager->removeUndefinedPackageTagMappings();
@@ -634,12 +636,12 @@ class TagManagerTest extends ManagerTestCase
                 $tagMappings1 = $installInfo1->getEnabledTagMappings();
                 $tagMappings2 = $installInfo2->getDisabledTagMappings();
 
-                \PHPUnit_Framework_Assert::assertCount(2, $tagMappings1);
-                \PHPUnit_Framework_Assert::assertSame($mapping1, $tagMappings1[0]);
-                \PHPUnit_Framework_Assert::assertSame($undefined1, $tagMappings1[1]);
+                PHPUnit_Framework_Assert::assertCount(2, $tagMappings1);
+                PHPUnit_Framework_Assert::assertSame($mapping1, $tagMappings1[0]);
+                PHPUnit_Framework_Assert::assertSame($undefined1, $tagMappings1[1]);
 
-                \PHPUnit_Framework_Assert::assertCount(1, $tagMappings2);
-                \PHPUnit_Framework_Assert::assertSame($mapping2, $tagMappings2[0]);
+                PHPUnit_Framework_Assert::assertCount(1, $tagMappings2);
+                PHPUnit_Framework_Assert::assertSame($mapping2, $tagMappings2[0]);
             }));
 
         $this->manager->removeUndefinedPackageTagMappings('package2');
@@ -669,15 +671,15 @@ class TagManagerTest extends ManagerTestCase
                 $tagMappings2 = $installInfo2->getDisabledTagMappings();
                 $tagMappings3 = $installInfo3->getEnabledTagMappings();
 
-                \PHPUnit_Framework_Assert::assertCount(1, $tagMappings1);
-                \PHPUnit_Framework_Assert::assertSame($mapping1, $tagMappings1[0]);
+                PHPUnit_Framework_Assert::assertCount(1, $tagMappings1);
+                PHPUnit_Framework_Assert::assertSame($mapping1, $tagMappings1[0]);
 
-                \PHPUnit_Framework_Assert::assertCount(1, $tagMappings2);
-                \PHPUnit_Framework_Assert::assertSame($mapping2, $tagMappings2[0]);
+                PHPUnit_Framework_Assert::assertCount(1, $tagMappings2);
+                PHPUnit_Framework_Assert::assertSame($mapping2, $tagMappings2[0]);
 
-                \PHPUnit_Framework_Assert::assertCount(2, $tagMappings3);
-                \PHPUnit_Framework_Assert::assertSame($mapping3, $tagMappings3[0]);
-                \PHPUnit_Framework_Assert::assertSame($undefined3, $tagMappings3[1]);
+                PHPUnit_Framework_Assert::assertCount(2, $tagMappings3);
+                PHPUnit_Framework_Assert::assertSame($mapping3, $tagMappings3[0]);
+                PHPUnit_Framework_Assert::assertSame($undefined3, $tagMappings3[1]);
             }));
 
         $this->manager->removeUndefinedPackageTagMappings(array('package1', 'package2'));
@@ -846,9 +848,9 @@ class TagManagerTest extends ManagerTestCase
             ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) use ($definition1, $definition2) {
                 $definitions = $rootPackageFile->getTagDefinitions();
 
-                \PHPUnit_Framework_Assert::assertCount(2, $definitions);
-                \PHPUnit_Framework_Assert::assertSame($definition1, $definitions[0]);
-                \PHPUnit_Framework_Assert::assertSame($definition2, $definitions[1]);
+                PHPUnit_Framework_Assert::assertCount(2, $definitions);
+                PHPUnit_Framework_Assert::assertSame($definition1, $definitions[0]);
+                PHPUnit_Framework_Assert::assertSame($definition2, $definitions[1]);
             }));
 
         $this->assertFalse($this->manager->isTagDefined('tag2'));
@@ -904,8 +906,8 @@ class TagManagerTest extends ManagerTestCase
             ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) use ($definition2) {
                 $definitions = $rootPackageFile->getTagDefinitions();
 
-                \PHPUnit_Framework_Assert::assertCount(1, $definitions);
-                \PHPUnit_Framework_Assert::assertSame($definition2, $definitions[0]);
+                PHPUnit_Framework_Assert::assertCount(1, $definitions);
+                PHPUnit_Framework_Assert::assertSame($definition2, $definitions[0]);
             }));
 
         $this->assertTrue($this->manager->isTagDefined('tag1'));
@@ -953,7 +955,7 @@ class TagManagerTest extends ManagerTestCase
             ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) {
                 $definitions = $rootPackageFile->getTagDefinitions();
 
-                \PHPUnit_Framework_Assert::assertCount(0, $definitions);
+                PHPUnit_Framework_Assert::assertCount(0, $definitions);
             }));
 
         $this->assertTrue($this->manager->isTagDefined('tag1'));

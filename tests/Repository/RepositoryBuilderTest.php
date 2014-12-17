@@ -11,6 +11,8 @@
 
 namespace Puli\RepositoryManager\Tests\Repository;
 
+use PHPUnit_Framework_MockObject_MockObject;
+use PHPUnit_Framework_TestCase;
 use Puli\Repository\Filesystem\Resource\LocalDirectoryResource;
 use Puli\Repository\ManageableRepository;
 use Puli\RepositoryManager\Package\Collection\PackageCollection;
@@ -25,7 +27,7 @@ use Puli\RepositoryManager\Repository\RepositoryBuilder;
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class RepositoryBuilderTest extends \PHPUnit_Framework_TestCase
+class RepositoryBuilderTest extends PHPUnit_Framework_TestCase
 {
     /**
      * @var PackageCollection
@@ -33,7 +35,7 @@ class RepositoryBuilderTest extends \PHPUnit_Framework_TestCase
     private $packageCollection;
 
     /**
-     * @var \PHPUnit_Framework_MockObject_MockObject|ManageableRepository
+     * @var PHPUnit_Framework_MockObject_MockObject|ManageableRepository
      */
     private $repo;
 

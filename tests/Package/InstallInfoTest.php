@@ -11,6 +11,7 @@
 
 namespace Puli\RepositoryManager\Tests\Package;
 
+use PHPUnit_Framework_TestCase;
 use Puli\RepositoryManager\Package\InstallInfo;
 use Puli\RepositoryManager\Tag\TagMapping;
 
@@ -18,7 +19,7 @@ use Puli\RepositoryManager\Tag\TagMapping;
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class InstallInfoTest extends \PHPUnit_Framework_TestCase
+class InstallInfoTest extends PHPUnit_Framework_TestCase
 {
     public function testCreate()
     {

@@ -11,13 +11,14 @@
 
 namespace Puli\RepositoryManager\Tests\Package\PackageFile;
 
+use PHPUnit_Framework_TestCase;
 use Puli\RepositoryManager\Package\PackageFile\PackageFile;
 
 /**
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class PackageFileTest extends \PHPUnit_Framework_TestCase
+class PackageFileTest extends PHPUnit_Framework_TestCase
 {
     public function provideValidPaths()
     {

@@ -11,12 +11,14 @@
 
 namespace Puli\RepositoryManager\Tag;
 
+use RuntimeException;
+
 /**
  * Thrown when a tag mapping was not found.
  *
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class NoSuchTagMappingException extends \RuntimeException
+class NoSuchTagMappingException extends RuntimeException
 {
 }

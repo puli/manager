@@ -15,6 +15,8 @@ use Puli\RepositoryManager\Config\Config;
 use Puli\RepositoryManager\InvalidConfigException;
 use Puli\RepositoryManager\Package\InstallInfo;
 use Puli\RepositoryManager\Package\NoSuchPackageException;
+use ReflectionClass;
+use ReflectionException;
 
 /**
  * The package file of the root package.
@@ -197,7 +199,7 @@ class RootPackageFile extends PackageFile
      * Sets the plugin classes.
      *
      * The plugin classes must be fully-qualified class names that implement
-     * {@link \Puli\RepositoryManager\Plugin\ManagerPlugin}. If a class is not
+     * {@link Puli\RepositoryManager\Plugin\ManagerPlugin}. If a class is not
      * found or does not implement that interface, an exception is thrown.
      *
      * The plugin classes must not have required parameters in their constructor
@@ -243,8 +245,8 @@ class RootPackageFile extends PackageFile
     public function addPluginClass($pluginClass)
     {
         try {
-            $reflClass = new \ReflectionClass($pluginClass);
-        } catch (\ReflectionException $e) {
+            $reflClass = new ReflectionClass($pluginClass);
+        } catch (ReflectionException $e) {
             throw new InvalidConfigException(sprintf(
                 'The plugin class %s does not exist.',
                 $pluginClass

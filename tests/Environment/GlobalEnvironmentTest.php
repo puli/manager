@@ -11,6 +11,8 @@
 
 namespace Puli\RepositoryManager\Tests\Environment;
 
+use PHPUnit_Framework_MockObject_MockObject;
+use PHPUnit_Framework_TestCase;
 use Puli\RepositoryManager\Config\ConfigFile\ConfigFile;
 use Puli\RepositoryManager\Config\ConfigFile\ConfigFileStorage;
 use Puli\RepositoryManager\Environment\GlobalEnvironment;
@@ -20,7 +22,7 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class GlobalEnvironmentTest extends \PHPUnit_Framework_TestCase
+class GlobalEnvironmentTest extends PHPUnit_Framework_TestCase
 {
     /**
      * @var string
@@ -28,12 +30,12 @@ class GlobalEnvironmentTest extends \PHPUnit_Framework_TestCase
     private $homeDir;
 
     /**
-     * @var \PHPUnit_Framework_MockObject_MockObject|ConfigFileStorage
+     * @var PHPUnit_Framework_MockObject_MockObject|ConfigFileStorage
      */
     private $configFileStorage;
 
     /**
-     * @var \PHPUnit_Framework_MockObject_MockObject|EventDispatcherInterface
+     * @var PHPUnit_Framework_MockObject_MockObject|EventDispatcherInterface
      */
     private $dispatcher;
 

@@ -11,12 +11,14 @@
 
 namespace Puli\RepositoryManager;
 
+use RuntimeException;
+
 /**
  * Thrown when file operations fail.
  *
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class IOException extends \RuntimeException
+class IOException extends RuntimeException
 {
 }

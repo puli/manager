@@ -11,6 +11,7 @@
 
 namespace Puli\RepositoryManager\Tests;
 
+use PHPUnit_Framework_TestCase;
 use Puli\RepositoryManager\ManagerFactory;
 use Symfony\Component\Filesystem\Filesystem;
 
@@ -18,7 +19,7 @@ use Symfony\Component\Filesystem\Filesystem;
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class ManagerFactoryTest extends \PHPUnit_Framework_TestCase
+class ManagerFactoryTest extends PHPUnit_Framework_TestCase
 {
     /**
      * @var string

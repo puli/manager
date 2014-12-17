@@ -11,12 +11,14 @@
 
 namespace Puli\RepositoryManager\Config;
 
+use RuntimeException;
+
 /**
  * Thrown when a configuration key does not exist.
  *
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class NoSuchConfigKeyException extends \RuntimeException
+class NoSuchConfigKeyException extends RuntimeException
 {
 }

@@ -11,6 +11,7 @@
 
 namespace Puli\RepositoryManager\Tests\Config;
 
+use PHPUnit_Framework_TestCase;
 use Puli\RepositoryManager\Config\Config;
 use Puli\RepositoryManager\Config\EnvConfig;
 
@@ -18,7 +19,7 @@ use Puli\RepositoryManager\Config\EnvConfig;
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class EnvConfigTest extends \PHPUnit_Framework_TestCase
+class EnvConfigTest extends PHPUnit_Framework_TestCase
 {
     protected function tearDown()
     {

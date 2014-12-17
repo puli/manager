@@ -11,6 +11,8 @@
 
 namespace Puli\RepositoryManager\Tests;
 
+use PHPUnit_Framework_MockObject_MockObject;
+use PHPUnit_Framework_TestCase;
 use Puli\RepositoryManager\Config\ConfigFile\ConfigFile;
 use Puli\RepositoryManager\Package\PackageFile\RootPackageFile;
 use Puli\RepositoryManager\Tests\Package\Fixtures\TestProjectEnvironment;
@@ -20,7 +22,7 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-abstract class ManagerTestCase extends \PHPUnit_Framework_TestCase
+abstract class ManagerTestCase extends PHPUnit_Framework_TestCase
 {
     /**
      * @var string
@@ -43,7 +45,7 @@ abstract class ManagerTestCase extends \PHPUnit_Framework_TestCase
     protected $rootPackageFile;
 
     /**
-     * @var \PHPUnit_Framework_MockObject_MockObject|EventDispatcherInterface
+     * @var PHPUnit_Framework_MockObject_MockObject|EventDispatcherInterface
      */
     protected $dispatcher;
 

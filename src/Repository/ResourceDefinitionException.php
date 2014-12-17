@@ -11,12 +11,14 @@
 
 namespace Puli\RepositoryManager\Repository;
 
+use RuntimeException;
+
 /**
  * Thrown when a resource mapping is invalid.
  *
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class ResourceDefinitionException extends \Exception
+class ResourceDefinitionException extends RuntimeException
 {
 }

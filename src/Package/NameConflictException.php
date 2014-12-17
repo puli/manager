@@ -11,12 +11,14 @@
 
 namespace Puli\RepositoryManager\Package;
 
+use RuntimeException;
+
 /**
  * Thrown when two packages have the same name.
  *
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class NameConflictException extends \Exception
+class NameConflictException extends RuntimeException
 {
 }

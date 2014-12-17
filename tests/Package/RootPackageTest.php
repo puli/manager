@@ -11,6 +11,7 @@
 
 namespace Puli\RepositoryManager\Tests\Package;
 
+use PHPUnit_Framework_TestCase;
 use Puli\RepositoryManager\Package\PackageFile\RootPackageFile;
 use Puli\RepositoryManager\Package\RootPackage;
 
@@ -18,7 +19,7 @@ use Puli\RepositoryManager\Package\RootPackage;
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class RootPackageTest extends \PHPUnit_Framework_TestCase
+class RootPackageTest extends PHPUnit_Framework_TestCase
 {
     public function testPackageName()
     {

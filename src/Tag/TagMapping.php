@@ -11,6 +11,8 @@
 
 namespace Puli\RepositoryManager\Tag;
 
+use InvalidArgumentException;
+
 /**
  * Maps a Puli selector to a tag.
  *
@@ -38,30 +40,30 @@ class TagMapping
      * @param string $puliSelector The Puli selector. Must be a non-empty string.
      * @param string $tag          The tag.
      *
-     * @throws \InvalidArgumentException If any of the arguments is invalid.
+     * @throws InvalidArgumentException If any of the arguments is invalid.
      */
     public function __construct($puliSelector, $tag)
     {
         if (!is_string($puliSelector)) {
-            throw new \InvalidArgumentException(sprintf(
+            throw new InvalidArgumentException(sprintf(
                 'The Puli selector must be a string. Got: %s',
                 is_object($puliSelector) ? get_class($puliSelector) : gettype($puliSelector)
             ));
         }
 
         if ('' === $puliSelector) {
-            throw new \InvalidArgumentException('The Puli selector must not be empty.');
+            throw new InvalidArgumentException('The Puli selector must not be empty.');
         }
 
         if (!is_string($tag)) {
-            throw new \InvalidArgumentException(sprintf(
+            throw new InvalidArgumentException(sprintf(
                 'The tag must be a string. Got: %s',
                 is_object($tag) ? get_class($tag) : gettype($tag)
             ));
         }
 
         if ('' === $tag) {
-            throw new \InvalidArgumentException('The tag must not be empty.');
+            throw new InvalidArgumentException('The tag must not be empty.');
         }
 
         $this->puliSelector = $puliSelector;
