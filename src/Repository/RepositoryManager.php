@@ -12,10 +12,10 @@
 namespace Puli\RepositoryManager\Repository;
 
 use Puli\Repository\Filesystem\PhpCacheRepository;
-use Puli\Repository\Resource\NoDirectoryException;
-use Puli\Repository\ResourceRepository;
+use Puli\Repository\InMemoryRepository;
 use Puli\RepositoryManager\Config\Config;
 use Puli\RepositoryManager\Environment\ProjectEnvironment;
+use Puli\RepositoryManager\NoDirectoryException;
 use Puli\RepositoryManager\Package\Collection\PackageCollection;
 use Symfony\Component\Filesystem\Filesystem;
 use Webmozart\PathUtil\Path;
@@ -106,7 +106,7 @@ class RepositoryManager
      */
     public function dumpRepository($dumpFile = null, $dumpDir = null)
     {
-        $repo = new ResourceRepository();
+        $repo = new InMemoryRepository();
         $builder = new RepositoryBuilder();
         $dumpFile = $dumpFile ?: $this->config->get(Config::WRITE_REPO);
         $dumpFile = Path::makeAbsolute($dumpFile, $this->rootDir);

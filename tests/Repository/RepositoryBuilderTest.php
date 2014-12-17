@@ -12,7 +12,7 @@
 namespace Puli\RepositoryManager\Tests\Repository;
 
 use Puli\Repository\Filesystem\Resource\LocalDirectoryResource;
-use Puli\Repository\ManageableRepositoryInterface;
+use Puli\Repository\ManageableRepository;
 use Puli\RepositoryManager\Package\Collection\PackageCollection;
 use Puli\RepositoryManager\Package\Package;
 use Puli\RepositoryManager\Package\PackageFile\PackageFile;
@@ -20,7 +20,6 @@ use Puli\RepositoryManager\Package\PackageFile\RootPackageFile;
 use Puli\RepositoryManager\Package\ResourceMapping;
 use Puli\RepositoryManager\Package\RootPackage;
 use Puli\RepositoryManager\Repository\RepositoryBuilder;
-use Puli\RepositoryManager\Tag\TagMapping;
 
 /**
  * @since  1.0
@@ -34,7 +33,7 @@ class RepositoryBuilderTest extends \PHPUnit_Framework_TestCase
     private $packageCollection;
 
     /**
-     * @var \PHPUnit_Framework_MockObject_MockObject|ManageableRepositoryInterface
+     * @var \PHPUnit_Framework_MockObject_MockObject|ManageableRepository
      */
     private $repo;
 
@@ -52,7 +51,7 @@ class RepositoryBuilderTest extends \PHPUnit_Framework_TestCase
     protected function setUp()
     {
         $this->packageCollection = new PackageCollection();
-        $this->repo = $this->getMock('Puli\Repository\ManageableRepositoryInterface');
+        $this->repo = $this->getMock('Puli\Repository\ManageableRepository');
         $this->builder = new RepositoryBuilder();
         $this->package1Root = __DIR__.'/Fixtures/package1';
         $this->package2Root = __DIR__.'/Fixtures/package2';
@@ -494,155 +493,10 @@ class RepositoryBuilderTest extends \PHPUnit_Framework_TestCase
         $this->builder->buildRepository($this->repo);
     }
 
-    public function testTagResources()
-    {
-        $packageFile = new PackageFile('package1');
-        $packageFile->addResourceMapping(new ResourceMapping('/package', 'resources'));
-        $packageFile->addTagMapping(new TagMapping('/package', 'tag'));
-
-        $this->packageCollection->add(new Package($packageFile, $this->package1Root));
-
-        $this->repo->expects($this->at(0))
-            ->method('add')
-            ->with('/package', new LocalDirectoryResource($this->package1Root.'/resources'));
-
-        $this->repo->expects($this->at(1))
-            ->method('tag')
-            ->with('/package', 'tag');
-
-        $this->builder->loadPackages($this->packageCollection);
-        $this->builder->buildRepository($this->repo);
-    }
-
-    public function testTagResourcesFromExistingOtherPackage()
-    {
-        $packageFile1 = new PackageFile('package1');
-        $packageFile1->addResourceMapping(new ResourceMapping('/package1', 'resources'));
-
-        $packageFile2 = new PackageFile('package2');
-        $packageFile2->addTagMapping(new TagMapping('/package1', 'tag'));
-
-        $this->packageCollection->add(new Package($packageFile1, $this->package1Root));
-        $this->packageCollection->add(new Package($packageFile2, $this->package2Root));
-
-        $this->repo->expects($this->at(0))
-            ->method('add')
-            ->with('/package1', new LocalDirectoryResource($this->package1Root.'/resources'));
-
-        $this->repo->expects($this->at(1))
-            ->method('tag')
-            ->with('/package1', 'tag');
-
-        $this->builder->loadPackages($this->packageCollection);
-        $this->builder->buildRepository($this->repo);
-    }
-
-    public function testTagResourcesFromFutureOtherPackage()
-    {
-        $packageFile1 = new PackageFile('package1');
-        $packageFile1->addTagMapping(new TagMapping('/package2', 'tag'));
-
-        $packageFile2 = new PackageFile('package2');
-        $packageFile2->addResourceMapping(new ResourceMapping('/package2', 'resources'));
-
-        $this->packageCollection->add(new Package($packageFile1, $this->package1Root));
-        $this->packageCollection->add(new Package($packageFile2, $this->package2Root));
-
-        $this->repo->expects($this->at(0))
-            ->method('add')
-            ->with('/package2', new LocalDirectoryResource($this->package2Root.'/resources'));
-
-        $this->repo->expects($this->at(1))
-            ->method('tag')
-            ->with('/package2', 'tag');
-
-        $this->builder->loadPackages($this->packageCollection);
-        $this->builder->buildRepository($this->repo);
-    }
-
-    public function testTagInTwoPackages()
-    {
-        $packageFile1 = new PackageFile('package1');
-        $packageFile1->addResourceMapping(new ResourceMapping('/package1', 'resources'));
-        $packageFile1->addTagMapping(new TagMapping('/package1', 'tag1'));
-
-        $packageFile2 = new PackageFile('package2');
-        $packageFile2->addTagMapping(new TagMapping('/package1', 'tag2'));
-
-        $this->packageCollection->add(new Package($packageFile1, $this->package1Root));
-        $this->packageCollection->add(new Package($packageFile2, $this->package2Root));
-
-        $this->repo->expects($this->at(0))
-            ->method('add')
-            ->with('/package1', new LocalDirectoryResource($this->package1Root.'/resources'));
-
-        $this->repo->expects($this->at(1))
-            ->method('tag')
-            ->with('/package1', 'tag1');
-
-        $this->repo->expects($this->at(2))
-            ->method('tag')
-            ->with('/package1', 'tag2');
-
-        $this->builder->loadPackages($this->packageCollection);
-        $this->builder->buildRepository($this->repo);
-    }
-
-    public function testDuplicateTags()
-    {
-        $packageFile1 = new PackageFile('package1');
-        $packageFile1->addResourceMapping(new ResourceMapping('/package1', 'resources'));
-        $packageFile1->addTagMapping(new TagMapping('/package1', 'tag'));
-
-        $packageFile2 = new PackageFile('package2');
-        $packageFile2->addTagMapping(new TagMapping('/package1', 'tag'));
-
-        $this->packageCollection->add(new Package($packageFile1, $this->package1Root));
-        $this->packageCollection->add(new Package($packageFile2, $this->package2Root));
-
-        $this->repo->expects($this->at(0))
-            ->method('add')
-            ->with('/package1', new LocalDirectoryResource($this->package1Root.'/resources'));
-
-        $this->repo->expects($this->at(1))
-            ->method('tag')
-            ->with('/package1', 'tag');
-
-        $this->builder->loadPackages($this->packageCollection);
-        $this->builder->buildRepository($this->repo);
-    }
-
-    public function testMultipleTags()
-    {
-        $packageFile = new PackageFile('package1');
-        $packageFile->addResourceMapping(new ResourceMapping('/package1', 'resources'));
-        $packageFile->addTagMapping(new TagMapping('/package1', 'tag1'));
-        $packageFile->addTagMapping(new TagMapping('/package1', 'tag2'));
-
-        $this->packageCollection->add(new Package($packageFile, $this->package1Root));
-
-        $this->repo->expects($this->at(0))
-            ->method('add')
-            ->with('/package1', new LocalDirectoryResource($this->package1Root.'/resources'));
-
-        $this->repo->expects($this->at(1))
-            ->method('tag')
-            ->with('/package1', 'tag1');
-
-        $this->repo->expects($this->at(2))
-            ->method('tag')
-            ->with('/package1', 'tag2');
-
-        $this->builder->loadPackages($this->packageCollection);
-        $this->builder->buildRepository($this->repo);
-    }
-
     public function testBuildRepositoryDoesNothingIfNotLoaded()
     {
         $this->repo->expects($this->never())
             ->method('add');
-        $this->repo->expects($this->never())
-            ->method('tag');
 
         $this->builder->buildRepository($this->repo);
     }

@@ -13,9 +13,9 @@ namespace Puli\RepositoryManager\Repository;
 
 use Puli\Repository\Filesystem\Resource\LocalDirectoryResource;
 use Puli\Repository\Filesystem\Resource\LocalFileResource;
-use Puli\Repository\Filesystem\Resource\LocalResourceInterface;
-use Puli\Repository\ManageableRepositoryInterface;
-use Puli\Repository\Resource\DirectoryResourceInterface;
+use Puli\Repository\Filesystem\Resource\LocalResource;
+use Puli\Repository\ManageableRepository;
+use Puli\Repository\Resource\DirectoryResource;
 use Puli\RepositoryManager\Package\Collection\PackageCollection;
 use Puli\RepositoryManager\Package\Graph\PackageNameGraph;
 use Puli\RepositoryManager\Package\Package;
@@ -61,11 +61,6 @@ class RepositoryBuilder
     private $knownPaths = array();
 
     /**
-     * @var array[]
-     */
-    private $tags = array();
-
-    /**
      * Loads the passed packages.
      *
      * This method will check whether the configuration of the different
@@ -87,7 +82,6 @@ class RepositoryBuilder
         $this->packageOverrides = array();
         $this->resources = array();
         $this->knownPaths = array();
-        $this->tags = array();
 
         $this->loadPackageConfiguration();
         $this->buildPackageGraph();
@@ -99,10 +93,10 @@ class RepositoryBuilder
      *
      * Call {@link loadPackages()} first, otherwise this method will do nothing.
      *
-     * @param ManageableRepositoryInterface $repo The repository that the
+     * @param ManageableRepository $repo The repository that the
      *                                            loaded resources are added to.
      */
-    public function buildRepository(ManageableRepositoryInterface $repo)
+    public function buildRepository(ManageableRepository $repo)
     {
         if (null === $this->packageGraph) {
             // Not loaded
@@ -110,7 +104,6 @@ class RepositoryBuilder
         }
 
         $this->addResources($repo);
-        $this->tagResources($repo);
     }
 
     private function loadPackageConfiguration()
@@ -120,7 +113,6 @@ class RepositoryBuilder
 
             $this->processResources($package);
             $this->processOverrides($package);
-            $this->processTags($package);
 
             if ($package instanceof RootPackage) {
                 $this->processPackageOrder($package->getPackageFile()->getPackageOrder());
@@ -199,7 +191,7 @@ class RepositoryBuilder
         }
     }
 
-    private function prepareConflictDetection($path, LocalResourceInterface $resource, $currentPackageName)
+    private function prepareConflictDetection($path, LocalResource $resource, $currentPackageName)
     {
         if (!isset($this->knownPaths[$path])) {
             $this->knownPaths[$path] = array();
@@ -208,7 +200,7 @@ class RepositoryBuilder
         $this->knownPaths[$path][$currentPackageName] = true;
 
         // Detect conflicts in sub-directories
-        if ($resource instanceof DirectoryResourceInterface) {
+        if ($resource instanceof DirectoryResource) {
             $basePath = rtrim($path, '/').'/';
             foreach ($resource->listEntries() as $entry) {
                 $this->prepareConflictDetection($basePath.basename($entry->getLocalPath()), $entry, $currentPackageName);
@@ -242,22 +234,6 @@ class RepositoryBuilder
             }
 
             $this->packageOverrides[$packageOrder[$i]][] = $packageOrder[$i - 1];
-        }
-    }
-
-    private function processTags(Package $package)
-    {
-        $packageFile = $package->getPackageFile();
-
-        foreach ($packageFile->getTagMappings() as $mapping) {
-            $selector = $mapping->getPuliSelector();
-
-            if (!isset($this->tags[$selector])) {
-                $this->tags[$selector] = array();
-            }
-
-            // Store tags as keys to prevent duplicates
-            $this->tags[$selector][$mapping->getTag()] = true;
         }
     }
 
@@ -312,7 +288,7 @@ class RepositoryBuilder
         }
     }
 
-    private function addResources(ManageableRepositoryInterface $repo)
+    private function addResources(ManageableRepository $repo)
     {
         $packageOrder = $this->packageGraph->getSortedPackageNames();
 
@@ -325,15 +301,6 @@ class RepositoryBuilder
                 foreach ($resources as $resource) {
                     $repo->add($path, $resource);
                 }
-            }
-        }
-    }
-
-    private function tagResources(ManageableRepositoryInterface $repo)
-    {
-        foreach ($this->tags as $path => $tags) {
-            foreach ($tags as $tag => $_) {
-                $repo->tag($path, $tag);
             }
         }
     }

@@ -181,7 +181,7 @@ class ManagerFactoryTest extends \PHPUnit_Framework_TestCase
         $environment = ManagerFactory::createProjectEnvironment($this->tempDir);
         $repo = ManagerFactory::createRepository($environment);
 
-        $this->assertInstanceOf('Puli\Repository\ResourceRepositoryInterface', $repo);
+        $this->assertInstanceOf('Puli\Repository\ResourceRepository', $repo);
     }
 
     public function testCreateResourceRepositoryIfAlreadyGenerated()
@@ -191,6 +191,6 @@ class ManagerFactoryTest extends \PHPUnit_Framework_TestCase
         $manager->dumpRepository();
         $repo = ManagerFactory::createRepository($environment);
 
-        $this->assertInstanceOf('Puli\Repository\ResourceRepositoryInterface', $repo);
+        $this->assertInstanceOf('Puli\Repository\ResourceRepository', $repo);
     }
 }
