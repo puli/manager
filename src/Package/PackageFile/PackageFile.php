@@ -11,6 +11,7 @@
 
 namespace Puli\RepositoryManager\Package\PackageFile;
 
+use Assert\Assertion;
 use InvalidArgumentException;
 use Puli\RepositoryManager\Package\ResourceMapping;
 use Puli\RepositoryManager\Tag\TagDefinition;
@@ -66,16 +67,8 @@ class PackageFile
      */
     public function __construct($packageName = null, $path = null)
     {
-        if (!is_string($path) && null !== $path) {
-            throw new InvalidArgumentException(sprintf(
-                'The path to the package file should be a string or null. Got: %s',
-                is_object($path) ? get_class($path) : gettype($path)
-            ));
-        }
-
-        if ('' === $path) {
-            throw new InvalidArgumentException('The path to the package file should not be empty.');
-        }
+        Assertion::nullOrString($path, 'The path to the package file should be a string or null. Got: %2$s');
+        Assertion::nullOrNotEmpty($path, 'The path to the package file should not be empty.');
 
         $this->path = $path;
         $this->setPackageName($packageName);
@@ -100,16 +93,8 @@ class PackageFile
      */
     public function setPackageName($packageName)
     {
-        if (!is_string($packageName) && null !== $packageName) {
-            throw new InvalidArgumentException(sprintf(
-                'The package name should be a string or null. Got: %s',
-                is_object($packageName) ? get_class($packageName) : gettype($packageName)
-            ));
-        }
-
-        if ('' === $packageName) {
-            throw new InvalidArgumentException('The package name should not be empty.');
-        }
+        Assertion::nullOrString($packageName, 'The package name should be a string or null. Got: %2$s');
+        Assertion::nullOrNotEmpty($packageName, 'The package name should not be empty.');
 
         $this->packageName = $packageName;
     }

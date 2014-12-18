@@ -11,6 +11,7 @@
 
 namespace Puli\RepositoryManager\Tag;
 
+use Assert\Assertion;
 use InvalidArgumentException;
 
 /**
@@ -44,27 +45,10 @@ class TagMapping
      */
     public function __construct($puliSelector, $tag)
     {
-        if (!is_string($puliSelector)) {
-            throw new InvalidArgumentException(sprintf(
-                'The Puli selector must be a string. Got: %s',
-                is_object($puliSelector) ? get_class($puliSelector) : gettype($puliSelector)
-            ));
-        }
-
-        if ('' === $puliSelector) {
-            throw new InvalidArgumentException('The Puli selector must not be empty.');
-        }
-
-        if (!is_string($tag)) {
-            throw new InvalidArgumentException(sprintf(
-                'The tag must be a string. Got: %s',
-                is_object($tag) ? get_class($tag) : gettype($tag)
-            ));
-        }
-
-        if ('' === $tag) {
-            throw new InvalidArgumentException('The tag must not be empty.');
-        }
+        Assertion::string($puliSelector, 'The puli selector must be a string. Got: %2$s');
+        Assertion::notEmpty($puliSelector, 'The puli selector must not be empty');
+        Assertion::string($tag, 'The tag must be a string. Got: %2$s');
+        Assertion::notEmpty($tag, 'The tag must not be empty');
 
         $this->puliSelector = $puliSelector;
         $this->tag = $tag;

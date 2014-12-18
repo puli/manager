@@ -11,6 +11,7 @@
 
 namespace Puli\RepositoryManager\Package;
 
+use Assert\Assertion;
 use InvalidArgumentException;
 
 /**
@@ -44,35 +45,14 @@ class ResourceMapping
      */
     public function __construct($puliPath, $localPaths)
     {
-        if (!is_string($puliPath)) {
-            throw new InvalidArgumentException(sprintf(
-                'The Puli path must be a string. Got: %s',
-                is_object($puliPath) ? get_class($puliPath) : gettype($puliPath)
-            ));
-        }
-
-        if ('' === $puliPath) {
-            throw new InvalidArgumentException('The Puli path must not be empty.');
-        }
+        Assertion::string($puliPath, 'The puli path must be a string. Got: %2$s');
+        Assertion::notEmpty($puliPath, 'The puli path must not be empty');
 
         $localPaths = (array) $localPaths;
 
-        if (0 === count($localPaths)) {
-            throw new InvalidArgumentException('At least one local path must be passed.');
-        }
-
-        foreach ($localPaths as $localPath) {
-            if (!is_string($localPath)) {
-                throw new InvalidArgumentException(sprintf(
-                    'The local paths must be strings. Got: %s',
-                    is_object($localPath) ? get_class($localPath) : gettype($localPath)
-                ));
-            }
-
-            if ('' === $localPath) {
-                throw new InvalidArgumentException('The local paths must not be empty.');
-            }
-        }
+        Assertion::notEmpty($localPaths, 'At least one local path must be passed.');
+        Assertion::allString($localPaths, 'The local paths must be strings. Got: %2$s');
+        Assertion::allNotEmpty($localPaths, 'The local paths must not be empty.');
 
         $this->puliPath = $puliPath;
         $this->localPaths = $localPaths;

@@ -11,7 +11,7 @@
 
 namespace Puli\RepositoryManager\Package\Graph;
 
-use InvalidArgumentException;
+use RuntimeException;
 
 /**
  * A directed, acyclic graph of package names.
@@ -85,12 +85,12 @@ class PackageNameGraph
      *
      * @param string $packageName The package name.
      *
-     * @throws InvalidArgumentException If the package name already exists.
+     * @throws RuntimeException If the package name already exists.
      */
     public function addPackageName($packageName)
     {
         if (isset($this->packageNames[$packageName])) {
-            throw new InvalidArgumentException(sprintf(
+            throw new RuntimeException(sprintf(
                 'The package "%s" was added to the graph twice.',
                 $packageName
             ));
@@ -118,23 +118,22 @@ class PackageNameGraph
      * @param string $from The start package name.
      * @param string $to   The end package name.
      *
-     * @throws InvalidArgumentException If any of the packages does not exist
-     *                                   in the graph. Each package must have
-     *                                   been added first.
+     * @throws RuntimeException If any of the packages does not exist in the
+     *                          graph. Each package must have been added first.
      *
      * @throws CycleException If adding the edge would create a cycle.
      */
     public function addEdge($from, $to)
     {
         if (!isset($this->packageNames[$from])) {
-            throw new InvalidArgumentException(sprintf(
+            throw new RuntimeException(sprintf(
                 'The package "%s" does not exist in the graph.',
                 $from
             ));
         }
 
         if (!isset($this->packageNames[$to])) {
-            throw new InvalidArgumentException(sprintf(
+            throw new RuntimeException(sprintf(
                 'The package "%s" does not exist in the graph.',
                 $to
             ));
@@ -238,8 +237,8 @@ class PackageNameGraph
      *
      * @return string[] The sorted package names.
      *
-     * @throws InvalidArgumentException If any of the passed package names does
-     *                                   not exist in the graph.
+     * @throws RuntimeException If any of the passed package names does not
+     *                          exist in the graph.
      */
     public function getSortedPackageNames(array $namesToSort = array())
     {
@@ -248,7 +247,7 @@ class PackageNameGraph
 
             foreach ($namesToSort as $package => $_) {
                 if (!isset($this->packageNames[$package])) {
-                    throw new InvalidArgumentException(sprintf(
+                    throw new RuntimeException(sprintf(
                         'The package "%s" does not exist in the graph.',
                         $package
                     ));

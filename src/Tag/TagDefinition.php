@@ -11,6 +11,7 @@
 
 namespace Puli\RepositoryManager\Tag;
 
+use Assert\Assertion;
 use InvalidArgumentException;
 
 /**
@@ -44,27 +45,10 @@ class TagDefinition
      */
     public function __construct($tag, $description = null)
     {
-        if (!is_string($tag)) {
-            throw new InvalidArgumentException(sprintf(
-                'The tag name must be a string. Got: %s',
-                is_object($tag) ? get_class($tag) : gettype($tag)
-            ));
-        }
-
-        if ('' === $tag) {
-            throw new InvalidArgumentException('The tag name must not be empty.');
-        }
-
-        if (!is_string($description) && $description !== null) {
-            throw new InvalidArgumentException(sprintf(
-                'The tag description must be a string or null. Got: %s',
-                is_object($description) ? get_class($description) : gettype($description)
-            ));
-        }
-
-        if ('' === $description) {
-            throw new InvalidArgumentException('The tag description must not be empty.');
-        }
+        Assertion::string($tag, 'The tag name must be a string. Got: %2$s');
+        Assertion::notEmpty($tag, 'The tag name must not be empty.');
+        Assertion::nullOrString($description, 'The tag description must be a string or null. Got: %2$s');
+        Assertion::nullOrNotEmpty($description, 'The tag description must not be empty.');
 
         $this->tag = $tag;
         $this->description = $description;

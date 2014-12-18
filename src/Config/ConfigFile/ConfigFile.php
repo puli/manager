@@ -11,6 +11,7 @@
 
 namespace Puli\RepositoryManager\Config\ConfigFile;
 
+use Assert\Assertion;
 use InvalidArgumentException;
 use Puli\RepositoryManager\Config\Config;
 
@@ -45,17 +46,8 @@ class ConfigFile
      */
     public function __construct($path = null, Config $baseConfig = null)
     {
-        if (!is_string($path) && null !== $path) {
-            throw new InvalidArgumentException(sprintf(
-                'The path to the configuration file should be a string '.
-                'or null. Got: %s',
-                is_object($path) ? get_class($path) : gettype($path)
-            ));
-        }
-
-        if ('' === $path) {
-            throw new InvalidArgumentException('The path to the configuration file should not be empty.');
-        }
+        Assertion::nullOrString($path, 'The path to the configuration file should be a string or null. Got: %2$s');
+        Assertion::nullOrNotEmpty($path, 'The path to the configuration file should not be empty.');
 
         // Inherit from default configuration
         $this->config = new Config($baseConfig);

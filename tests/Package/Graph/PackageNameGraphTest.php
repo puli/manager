@@ -101,7 +101,7 @@ class PackageNameGraphTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \InvalidArgumentException
+     * @expectedException \RuntimeException
      */
     public function testAddPackageFailsIfAlreadyDefined()
     {
@@ -110,7 +110,7 @@ class PackageNameGraphTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \InvalidArgumentException
+     * @expectedException \RuntimeException
      */
     public function testAddEdgeFailsIfLeftPackageDoesNotExist()
     {
@@ -119,7 +119,7 @@ class PackageNameGraphTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \InvalidArgumentException
+     * @expectedException \RuntimeException
      */
     public function testAddEdgeFailsIfRightPackageDoesNotExist()
     {
@@ -153,7 +153,7 @@ class PackageNameGraphTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \InvalidArgumentException
+     * @expectedException \RuntimeException
      */
     public function testGetSortedPackagesExpectsValidPackages()
     {

@@ -8,6 +8,12 @@
             "email": "bschussek@gmail.com"
         }
     ],
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/webmozart/assert"
+        }
+    ],
     "require": {
         "php": ">=5.3.9",
         "puli/repository": "~1.0",
@@ -15,7 +21,8 @@
         "webmozart/json": "~1.0",
         "webmozart/path-util": "~1.0",
         "symfony/event-dispatcher": "~2.3",
-        "symfony/filesystem": "~2.3"
+        "symfony/filesystem": "~2.3",
+        "beberlei/assert": "dev-master"
     },
     "minimum-stability": "dev",
     "autoload": {
