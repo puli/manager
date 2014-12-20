@@ -1,6 +1,7 @@
 {
     "name": "puli/repository-manager",
     "description": "Generates Puli repositories from configured packages.",
+    "homepage": "http://puli.io",
     "license": "MIT",
     "authors": [
         {
