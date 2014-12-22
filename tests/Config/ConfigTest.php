@@ -37,9 +37,9 @@ class ConfigTest extends PHPUnit_Framework_TestCase
 
     public function testGetWithFallback()
     {
-        $default = new Config();
-        $default->set(Config::PULI_DIR, 'fallback');
-        $config = new Config($default);
+        $baseConfig = new Config();
+        $baseConfig->set(Config::PULI_DIR, 'fallback');
+        $config = new Config($baseConfig);
         $config->set(Config::PULI_DIR, 'my-puli-dir');
 
         $this->assertSame('my-puli-dir', $config->get(Config::PULI_DIR));
@@ -47,20 +47,20 @@ class ConfigTest extends PHPUnit_Framework_TestCase
 
     public function testGetReturnsFallbackIfSet()
     {
-        $default = new Config();
-        $default->set(Config::PULI_DIR, 'my-puli-dir');
-        $config = new Config($default);
+        $baseConfig = new Config();
+        $baseConfig->set(Config::PULI_DIR, 'my-puli-dir');
+        $config = new Config($baseConfig);
 
         $this->assertSame('my-puli-dir', $config->get(Config::PULI_DIR));
     }
 
     public function testGetDoesNotReturnFallbackIfDisabled()
     {
-        $default = new Config();
-        $default->set(Config::PULI_DIR, 'my-puli-dir');
-        $config = new Config($default);
+        $baseConfig = new Config();
+        $baseConfig->set(Config::PULI_DIR, 'my-puli-dir');
+        $config = new Config($baseConfig);
 
-        $this->assertNull($config->get(Config::PULI_DIR, false));
+        $this->assertNull($config->get(Config::PULI_DIR, null, false));
     }
 
     public function testGetReplacesPlaceholder()
@@ -74,9 +74,9 @@ class ConfigTest extends PHPUnit_Framework_TestCase
 
     public function testGetReplacesPlaceholderDefinedInDefaultConfig()
     {
-        $default = new Config();
-        $default->set(Config::READ_REPO, '{$puli-dir}/resource-repository.php');
-        $config = new Config($default);
+        $baseConfig = new Config();
+        $baseConfig->set(Config::READ_REPO, '{$puli-dir}/resource-repository.php');
+        $config = new Config($baseConfig);
         $config->set(Config::PULI_DIR, 'my-puli-dir');
 
         $this->assertSame('my-puli-dir/resource-repository.php', $config->get(Config::READ_REPO));
@@ -84,9 +84,9 @@ class ConfigTest extends PHPUnit_Framework_TestCase
 
     public function testGetReplacesPlaceholderSetInDefaultConfig()
     {
-        $default = new Config();
-        $default->set(Config::PULI_DIR, 'my-puli-dir');
-        $config = new Config($default);
+        $baseConfig = new Config();
+        $baseConfig->set(Config::PULI_DIR, 'my-puli-dir');
+        $config = new Config($baseConfig);
         $config->set(Config::READ_REPO, '{$puli-dir}/resource-repository.php');
 
         $this->assertSame('my-puli-dir/resource-repository.php', $config->get(Config::READ_REPO));
@@ -94,12 +94,12 @@ class ConfigTest extends PHPUnit_Framework_TestCase
 
     public function testGetDoesNotUseDefaultPlaceholderIfFallbackDisabled()
     {
-        $default = new Config();
-        $default->set(Config::PULI_DIR, 'my-puli-dir');
-        $config = new Config($default);
+        $baseConfig = new Config();
+        $baseConfig->set(Config::PULI_DIR, 'my-puli-dir');
+        $config = new Config($baseConfig);
         $config->set(Config::READ_REPO, '{$puli-dir}/resource-repository.php');
 
-        $this->assertSame('/resource-repository.php', $config->get(Config::READ_REPO, false));
+        $this->assertSame('/resource-repository.php', $config->get(Config::READ_REPO, null, false));
     }
 
     /**
@@ -119,22 +119,37 @@ class ConfigTest extends PHPUnit_Framework_TestCase
         $this->assertNull($config->getRaw(Config::PULI_DIR));
     }
 
+    public function testGetRawWithCustomDefault()
+    {
+        $config = new Config();
+
+        $this->assertSame('my-default', $config->getRaw(Config::PULI_DIR, 'my-default'));
+    }
+
     public function testGetRawReturnsFallbackIfSet()
     {
-        $default = new Config();
-        $default->set(Config::PULI_DIR, 'my-puli-dir');
-        $config = new Config($default);
+        $baseConfig = new Config();
+        $baseConfig->set(Config::PULI_DIR, 'my-puli-dir');
+        $config = new Config($baseConfig);
 
         $this->assertSame('my-puli-dir', $config->getRaw(Config::PULI_DIR));
     }
 
+    public function testGetRawPassesCustomDefaultToFallbackConfig()
+    {
+        $baseConfig = new Config();
+        $config = new Config($baseConfig);
+
+        $this->assertSame('my-default', $config->getRaw(Config::PULI_DIR, 'my-default'));
+    }
+
     public function testGetRawDoesNotReturnFallbackIfDisabled()
     {
-        $default = new Config();
-        $default->set(Config::PULI_DIR, 'my-puli-dir');
-        $config = new Config($default);
+        $baseConfig = new Config();
+        $baseConfig->set(Config::PULI_DIR, 'my-puli-dir');
+        $config = new Config($baseConfig);
 
-        $this->assertNull($config->getRaw(Config::PULI_DIR, false));
+        $this->assertNull($config->getRaw(Config::PULI_DIR, null, false));
     }
 
     public function testGetRawDoesNotReplacePlaceholder()
@@ -234,9 +249,9 @@ class ConfigTest extends PHPUnit_Framework_TestCase
 
     public function testGetReturnsFallbackAfterRemove()
     {
-        $default = new Config();
-        $default->set(Config::DUMP_DIR, 'fallback');
-        $config = new Config($default);
+        $baseConfig = new Config();
+        $baseConfig->set(Config::DUMP_DIR, 'fallback');
+        $config = new Config($baseConfig);
         $config->set(Config::READ_REPO, 'resource-repository.php');
         $config->set(Config::DUMP_DIR, 'repo');
         $config->remove(Config::DUMP_DIR);
@@ -259,9 +274,9 @@ class ConfigTest extends PHPUnit_Framework_TestCase
 
     public function testToArrayWithFallback()
     {
-        $default = new Config();
-        $default->set(Config::READ_REPO, '{$puli-dir}/resource-repository.php');
-        $config = new Config($default);
+        $baseConfig = new Config();
+        $baseConfig->set(Config::READ_REPO, '{$puli-dir}/resource-repository.php');
+        $config = new Config($baseConfig);
         $config->set(Config::PULI_DIR, 'my-puli-dir');
 
         $this->assertSame(array(
@@ -272,9 +287,9 @@ class ConfigTest extends PHPUnit_Framework_TestCase
 
     public function testToArrayWithoutFallback()
     {
-        $default = new Config();
-        $default->set(Config::READ_REPO, '{$puli-dir}/resource-repository.php');
-        $config = new Config($default);
+        $baseConfig = new Config();
+        $baseConfig->set(Config::READ_REPO, '{$puli-dir}/resource-repository.php');
+        $config = new Config($baseConfig);
         $config->set(Config::PULI_DIR, 'my-puli-dir');
 
         $this->assertSame(array(
@@ -284,9 +299,9 @@ class ConfigTest extends PHPUnit_Framework_TestCase
 
     public function testToArrayWithoutFallbackDoesNotUsePlaceholdersFromDefaultConfig()
     {
-        $default = new Config();
-        $default->set(Config::PULI_DIR, 'my-puli-dir');
-        $config = new Config($default);
+        $baseConfig = new Config();
+        $baseConfig->set(Config::PULI_DIR, 'my-puli-dir');
+        $config = new Config($baseConfig);
         $config->set(Config::READ_REPO, '{$puli-dir}/resource-repository.php');
 
         $this->assertSame(array(
@@ -308,9 +323,9 @@ class ConfigTest extends PHPUnit_Framework_TestCase
 
     public function testToRawArrayWithFallback()
     {
-        $default = new Config();
-        $default->set(Config::READ_REPO, '{$puli-dir}/resource-repository.php');
-        $config = new Config($default);
+        $baseConfig = new Config();
+        $baseConfig->set(Config::READ_REPO, '{$puli-dir}/resource-repository.php');
+        $config = new Config($baseConfig);
         $config->set(Config::PULI_DIR, 'my-puli-dir');
 
         $this->assertSame(array(
@@ -321,9 +336,9 @@ class ConfigTest extends PHPUnit_Framework_TestCase
 
     public function testToRawArrayWithoutFallback()
     {
-        $default = new Config();
-        $default->set(Config::READ_REPO, '{$puli-dir}/resource-repository.php');
-        $config = new Config($default);
+        $baseConfig = new Config();
+        $baseConfig->set(Config::READ_REPO, '{$puli-dir}/resource-repository.php');
+        $config = new Config($baseConfig);
         $config->set(Config::PULI_DIR, 'my-puli-dir');
 
         $this->assertSame(array(

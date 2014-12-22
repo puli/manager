@@ -117,6 +117,11 @@ class ConfigFileManagerTest extends PHPUnit_Framework_TestCase
         $this->assertSame('my-puli-dir', $this->manager->getConfigKey(Config::PULI_DIR));
     }
 
+    public function testGetConfigKeyWithDefault()
+    {
+        $this->assertSame('my-puli-dir', $this->manager->getConfigKey(Config::PULI_DIR, 'my-puli-dir'));
+    }
+
     public function testGetConfigKeyReturnsRawValue()
     {
         $this->configFile->getConfig()->set(Config::PULI_DIR, 'my-puli-dir');
@@ -147,8 +152,8 @@ class ConfigFileManagerTest extends PHPUnit_Framework_TestCase
             ->will($this->returnCallback(function (ConfigFile $configFile) {
                 $config = $configFile->getConfig();
 
-                PHPUnit_Framework_Assert::assertNull($config->get(Config::PULI_DIR, false));
-                PHPUnit_Framework_Assert::assertSame('my-dump', $config->get(Config::DUMP_DIR, false));
+                PHPUnit_Framework_Assert::assertNull($config->get(Config::PULI_DIR, null, false));
+                PHPUnit_Framework_Assert::assertSame('my-dump', $config->get(Config::DUMP_DIR, null, false));
             }));
 
         $this->manager->removeConfigKey(Config::PULI_DIR);
@@ -165,8 +170,8 @@ class ConfigFileManagerTest extends PHPUnit_Framework_TestCase
             ->will($this->returnCallback(function (ConfigFile $configFile) {
                 $config = $configFile->getConfig();
 
-                PHPUnit_Framework_Assert::assertNull($config->get(Config::PULI_DIR, false));
-                PHPUnit_Framework_Assert::assertNull($config->get(Config::DUMP_DIR, false));
+                PHPUnit_Framework_Assert::assertNull($config->get(Config::PULI_DIR, null, false));
+                PHPUnit_Framework_Assert::assertNull($config->get(Config::DUMP_DIR, null, false));
             }));
 
         $this->manager->removeConfigKeys(array(Config::PULI_DIR, Config::DUMP_DIR));

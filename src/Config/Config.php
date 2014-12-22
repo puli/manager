@@ -27,7 +27,16 @@ use Puli\RepositoryManager\InvalidConfigException;
  * // => .puli
  * ```
  *
- * A configuration may inherit default values from another configuration:
+ * You can customize the value returned by {@link get()} if a key is not set
+ * by passing that value in the second parameter:
+ *
+ * ```php
+ * $config = new Config();
+ *
+ * echo $config->get(Config::PULI_DIR, '.puli');
+ * ```
+ *
+ * A configuration may also inherit default values from another configuration:
  *
  * ```php
  * $defaultConfig = new Config();
@@ -48,7 +57,7 @@ use Puli\RepositoryManager\InvalidConfigException;
  *
  * $config = new Config($defaultConfig);
  *
- * $config->get(Config::PULI_DIR, false);
+ * $config->get(Config::PULI_DIR, null, false);
  * // => null
  * ```
  *
@@ -123,17 +132,25 @@ class Config
     /**
      * Returns the value of a configuration key.
      *
+     * If fallback is enabled, the value of the base configuration is returned
+     * if the key was not set.
+     *
+     * You can also pass a default value in the second parameter. This default
+     * value is returned if the configuration key was neither found in this nor
+     * in its fallback configuration.
+     *
      * @param string $key      The configuration key.
-     * @param bool   $fallback Whether to fall back to the default value if the
-     *                         key was not set.
+     * @param mixed  $default  The value to return if the key was not set.
+     * @param bool   $fallback Whether to return the value of the base
+     *                         configuration if the key was not set.
      *
      * @return mixed The value of the configuration key.
      *
      * @throws NoSuchConfigKeyException If the configuration key is invalid.
      */
-    public function get($key, $fallback = true)
+    public function get($key, $default = null, $fallback = true)
     {
-        return $this->replacePlaceholders($this->getRaw($key, $fallback), $fallback);
+        return $this->replacePlaceholders($this->getRaw($key, $default, $fallback), $fallback);
     }
 
     /**
@@ -154,14 +171,15 @@ class Config
      * ```
      *
      * @param string $key      The configuration key.
-     * @param bool   $fallback Whether to fall back to the default value if the
-     *                         key was not set.
+     * @param mixed  $default  The value to return if the key was not set.
+     * @param bool   $fallback Whether to return the value of the base
+     *                         configuration if the key was not set.
      *
      * @return mixed The value of the configuration key.
      *
      * @throws NoSuchConfigKeyException If the configuration key is invalid.
      */
-    public function getRaw($key, $fallback = true)
+    public function getRaw($key, $default = null, $fallback = true)
     {
         if (!isset(self::$keys[$key])) {
             throw new NoSuchConfigKeyException(sprintf(
@@ -171,10 +189,10 @@ class Config
         }
 
         if (!array_key_exists($key, $this->values) && $fallback && $this->baseConfig) {
-            return $this->baseConfig->getRaw($key);
+            return $this->baseConfig->getRaw($key, $default);
         }
 
-        return isset($this->values[$key]) ? $this->values[$key] : null;
+        return isset($this->values[$key]) ? $this->values[$key] : $default;
     }
 
     /**
@@ -298,13 +316,14 @@ class Config
             case self::DUMP_DIR:
             case self::WRITE_REPO:
             case self::READ_REPO:
-                $this->validateNotNull($key, $value);
-                $this->validateNonEmptyString($key, $value);
+                $this->assertNotNull($key, $value);
+                $this->assertString($key, $value);
+                $this->assertNonEmpty($key, $value);
                 break;
         }
     }
 
-    private function validateNotNull($key, $value)
+    private function assertNotNull($key, $value)
     {
         if (null === $value) {
             throw new InvalidConfigException(sprintf(
@@ -315,7 +334,7 @@ class Config
         }
     }
 
-    private function validateNonEmptyString($key, $value)
+    private function assertString($key, $value)
     {
         if (!is_string($value) && null !== $value) {
             throw new InvalidConfigException(sprintf(
@@ -324,7 +343,10 @@ class Config
                 is_object($value) ? get_class($value) : gettype($value)
             ));
         }
+    }
 
+    private function assertNonEmpty($key, $value)
+    {
         if ('' === $value) {
             throw new InvalidConfigException(sprintf(
                 'The value of the config key "%s" must not be empty.',
@@ -342,7 +364,7 @@ class Config
         $config = $this;
 
         return preg_replace_callback('~\{\$(.+)\}~', function ($matches) use ($config, $fallback) {
-            return $config->get($matches[1], $fallback);
+            return $config->get($matches[1], null, $fallback);
         }, $raw);
     }
 

@@ -143,16 +143,17 @@ class ConfigFileManager
      *
      * The value is returned raw as it is written in the file.
      *
-     * @param string $key The configuration key.
+     * @param string $key     The configuration key.
+     * @param mixed  $default The value to return if the key was not set.
      *
-     * @return mixed The value of the key or `null`, if none is set.
+     * @return mixed The value of the key or the default value, if none is set.
      *
-     * @throws NoSuchConfigKeyException If a configuration key is invalid.
+     * @throws NoSuchConfigKeyException If the configuration key is invalid.
      */
-    public function getConfigKey($key)
+    public function getConfigKey($key, $default = null)
     {
         // We're only interested in the value of the file, not in the default
-        return $this->configFile->getConfig()->getRaw($key, false);
+        return $this->configFile->getConfig()->getRaw($key, $default, false);
     }
 
     /**

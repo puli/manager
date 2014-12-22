@@ -70,7 +70,7 @@ class ConfigJsonReaderTest extends PHPUnit_Framework_TestCase
         $baseConfig->set(Config::PULI_DIR, 'my-puli-dir');
 
         $this->assertSame('my-puli-dir', $config->get(Config::PULI_DIR));
-        $this->assertNull($config->get(Config::PULI_DIR, false));
+        $this->assertNull($config->get(Config::PULI_DIR, null, false));
     }
 
     /**
