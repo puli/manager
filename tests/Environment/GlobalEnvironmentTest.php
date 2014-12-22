@@ -118,4 +118,125 @@ class GlobalEnvironmentTest extends PHPUnit_Framework_TestCase
             $this->dispatcher
         );
     }
+
+    public function testGetDiscoveryStorageWithAbbrevation()
+    {
+        $this->configFileStorage->expects($this->once())
+            ->method('loadConfigFile')
+            ->with($this->homeDir.'/config.json')
+            ->will($this->returnCallback(function ($path) {
+                $baseConfig = new Config();
+                $baseConfig->set(Config::DISCOVERY_STORAGE, 'php');
+
+                return new ConfigFile($path, $baseConfig);
+            }));
+
+        $environment = new GlobalEnvironment(
+            $this->homeDir,
+            $this->configFileStorage,
+            $this->dispatcher
+        );
+
+        $storage = $environment->getDiscoveryStorage();
+
+        $this->assertInstanceOf('Puli\Discovery\Storage\PhpDiscoveryStorage', $storage);
+    }
+
+    public function testGetDiscoveryStorageWithClassName()
+    {
+        $this->configFileStorage->expects($this->once())
+            ->method('loadConfigFile')
+            ->with($this->homeDir.'/config.json')
+            ->will($this->returnCallback(function ($path) {
+                $baseConfig = new Config();
+                $baseConfig->set(Config::DISCOVERY_STORAGE, __NAMESPACE__.'\Fixtures\MyDiscoveryStorage');
+
+                return new ConfigFile($path, $baseConfig);
+            }));
+
+        $environment = new GlobalEnvironment(
+            $this->homeDir,
+            $this->configFileStorage,
+            $this->dispatcher
+        );
+
+        $storage = $environment->getDiscoveryStorage();
+
+        $this->assertInstanceOf(__NAMESPACE__.'\Fixtures\MyDiscoveryStorage', $storage);
+    }
+
+    public function testGetDiscoveryStorageCachesInstance()
+    {
+        $this->configFileStorage->expects($this->once())
+            ->method('loadConfigFile')
+            ->with($this->homeDir.'/config.json')
+            ->will($this->returnCallback(function ($path) {
+                $baseConfig = new Config();
+                $baseConfig->set(Config::DISCOVERY_STORAGE, 'php');
+
+                return new ConfigFile($path, $baseConfig);
+            }));
+
+        $environment = new GlobalEnvironment(
+            $this->homeDir,
+            $this->configFileStorage,
+            $this->dispatcher
+        );
+
+        $storage1 = $environment->getDiscoveryStorage();
+        $storage2 = $environment->getDiscoveryStorage();
+
+        $this->assertSame($storage1, $storage2);
+    }
+
+    public function testGetDiscoveryStorageIgnoresLeadingBackslashInClassName()
+    {
+        $this->configFileStorage->expects($this->once())
+            ->method('loadConfigFile')
+            ->with($this->homeDir.'/config.json')
+            ->will($this->returnCallback(function ($path) {
+                $baseConfig = new Config();
+                $baseConfig->set(Config::DISCOVERY_STORAGE, '\\'.__NAMESPACE__.'\Fixtures\MyDiscoveryStorage');
+
+                return new ConfigFile($path, $baseConfig);
+            }));
+
+        $environment = new GlobalEnvironment(
+            $this->homeDir,
+            $this->configFileStorage,
+            $this->dispatcher
+        );
+
+        $storage1 = $environment->getDiscoveryStorage();
+        $storage2 = $environment->getDiscoveryStorage();
+
+        $this->assertSame($storage1, $storage2);
+    }
+
+    public function testGetDiscoveryStorageReloadsAfterChangingTheConfig()
+    {
+        $this->configFileStorage->expects($this->once())
+            ->method('loadConfigFile')
+            ->with($this->homeDir.'/config.json')
+            ->will($this->returnCallback(function ($path) {
+                $baseConfig = new Config();
+                $baseConfig->set(Config::DISCOVERY_STORAGE, 'php');
+
+                return new ConfigFile($path, $baseConfig);
+            }));
+
+        $environment = new GlobalEnvironment(
+            $this->homeDir,
+            $this->configFileStorage,
+            $this->dispatcher
+        );
+
+        $storage = $environment->getDiscoveryStorage();
+        $this->assertInstanceOf('Puli\Discovery\Storage\PhpDiscoveryStorage', $storage);
+
+        $environment->getConfig()->set(Config::DISCOVERY_STORAGE, __NAMESPACE__.'\Fixtures\MyDiscoveryStorage');
+
+        $storage = $environment->getDiscoveryStorage();
+        $this->assertInstanceOf(__NAMESPACE__.'\Fixtures\MyDiscoveryStorage', $storage);
+    }
 }

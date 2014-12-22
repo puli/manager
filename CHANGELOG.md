@@ -40,6 +40,7 @@ Changelog
  * added `bindings` and `binding-types` keys to puli.json
  * removed `tags` and `tag-definitions` keys from puli.json
  * added default returned value to `Config::get()` and `Config::getRaw()` 
+ * added `GlobalEnvironment::getDiscoveryStorage()`
 
 * 1.0.0-alpha1 (2014-12-03)
 

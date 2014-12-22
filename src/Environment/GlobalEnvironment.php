@@ -11,6 +11,7 @@
 
 namespace Puli\RepositoryManager\Environment;
 
+use Puli\Discovery\Storage\DiscoveryStorage;
 use Puli\RepositoryManager\Config\Config;
 use Puli\RepositoryManager\Config\ConfigFile\ConfigFile;
 use Puli\RepositoryManager\Config\ConfigFile\ConfigFileStorage;
@@ -35,6 +36,13 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 class GlobalEnvironment
 {
     /**
+     * @var string[]
+     */
+    private static $discoveryStorageClassNames = array(
+        'php' => 'Puli\Discovery\Storage\PhpDiscoveryStorage',
+    );
+
+    /**
      * @var string|null
      */
     private $homeDir;
@@ -53,6 +61,11 @@ class GlobalEnvironment
      * @var EventDispatcherInterface
      */
     private $dispatcher;
+
+    /**
+     * @var DiscoveryStorage|null
+     */
+    private $discoveryStorage;
 
     /**
      * Creates the global environment.
@@ -146,6 +159,26 @@ class GlobalEnvironment
     public function getEventDispatcher()
     {
         return $this->dispatcher;
+    }
+
+    /**
+     * Returns the configured discovery storage.
+     *
+     * @return DiscoveryStorage The discovery storage.
+     */
+    public function getDiscoveryStorage()
+    {
+        $className = ltrim($this->config->get(Config::DISCOVERY_STORAGE), '\\');
+
+        if (isset(self::$discoveryStorageClassNames[$className])) {
+            $className = self::$discoveryStorageClassNames[$className];
+        }
+
+        if (null === $this->discoveryStorage || $className !== get_class($this->discoveryStorage)) {
+            $this->discoveryStorage = new $className();
+        }
+
+        return $this->discoveryStorage;
     }
 
     /**
