@@ -2,10 +2,10 @@
     "name": "real-root",
     "packages": {
         "package1": {
-            "installPath": "package1"
+            "install-path": "package1"
         },
         "package2": {
-            "installPath": "package2"
+            "install-path": "package2"
         }
     }
 }

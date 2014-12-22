@@ -73,7 +73,7 @@
                 "type": "object",
                 "additionalProperties": false,
                 "properties": {
-                    "installPath": {
+                    "install-path": {
                         "type": "string",
                         "required": true
                     },

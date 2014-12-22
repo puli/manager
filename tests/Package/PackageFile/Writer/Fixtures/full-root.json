@@ -27,11 +27,11 @@
     ],
     "packages": {
         "package1": {
-            "installPath": "/path/to/package1",
+            "install-path": "/path/to/package1",
             "installer": "Composer"
         },
         "package2": {
-            "installPath": "/path/to/package2"
+            "install-path": "/path/to/package2"
         }
     }
 }

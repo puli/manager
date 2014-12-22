@@ -159,7 +159,7 @@ class PackageJsonWriter implements PackageFileWriter
 
             foreach ($installInfos as $installInfo) {
                 $installData = new \stdClass();
-                $installData->installPath = $installInfo->getInstallPath();
+                $installData->{'install-path'} = $installInfo->getInstallPath();
 
                 if (InstallInfo::DEFAULT_INSTALLER !== $installInfo->getInstaller()) {
                     $installData->installer = $installInfo->getInstaller();
