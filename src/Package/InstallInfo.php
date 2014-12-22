@@ -13,7 +13,7 @@ namespace Puli\RepositoryManager\Package;
 
 use Assert\Assertion;
 use InvalidArgumentException;
-use Puli\RepositoryManager\Tag\TagMapping;
+use Puli\RepositoryManager\Binding\BindingDescriptor;
 
 /**
  * Contains information about a package installation.
@@ -44,14 +44,14 @@ class InstallInfo
     private $installer = self::DEFAULT_INSTALLER;
 
     /**
-     * @var TagMapping[]
+     * @var BindingDescriptor[]
      */
-    private $enabledTagMappings = array();
+    private $enabledBindings = array();
 
     /**
-     * @var TagMapping[]
+     * @var BindingDescriptor[]
      */
-    private $disabledTagMappings = array();
+    private $disabledBindings = array();
 
     /**
      * Creates a new install info.
@@ -119,106 +119,106 @@ class InstallInfo
     }
 
     /**
-     * Returns the enabled tag mappings of the package.
+     * Returns the enabled resource bindings of the package.
      *
-     * @return TagMapping[] The enabled tag mappings.
+     * @return BindingDescriptor[] The enabled resource bindings.
      */
-    public function getEnabledTagMappings()
+    public function getEnabledBindings()
     {
-        return $this->enabledTagMappings;
+        return $this->enabledBindings;
     }
 
     /**
-     * Adds an enabled tag mapping for the package.
+     * Adds an enabled resource binding for the package.
      *
-     * @param TagMapping $tagMapping The enabled tag mapping.
+     * @param BindingDescriptor $binding The enabled resource binding.
      */
-    public function addEnabledTagMapping(TagMapping $tagMapping)
+    public function addEnabledBinding(BindingDescriptor $binding)
     {
-        if (in_array($tagMapping, $this->enabledTagMappings)) {
+        if (in_array($binding, $this->enabledBindings)) {
             return;
         }
 
-        $this->enabledTagMappings[] = $tagMapping;
+        $this->enabledBindings[] = $binding;
 
-        $this->removeDisabledTagMapping($tagMapping);
+        $this->removeDisabledBinding($binding);
     }
 
     /**
-     * Returns whether the tag mapping is enabled.
+     * Returns whether the resource binding is enabled.
      *
-     * @param TagMapping $tagMapping The tag mapping.
+     * @param BindingDescriptor $binding The resource binding.
      *
-     * @return bool Whether the tag mapping is enabled.
+     * @return bool Whether the resource binding is enabled.
      */
-    public function hasEnabledTagMapping(TagMapping $tagMapping)
+    public function hasEnabledBinding(BindingDescriptor $binding)
     {
-        return in_array($tagMapping, $this->enabledTagMappings);
+        return in_array($binding, $this->enabledBindings);
     }
 
     /**
-     * Removes an enabled tag mapping.
+     * Removes an enabled resource binding.
      *
-     * If the tag mapping is not enabled, this method does nothing.
+     * If the resource binding is not enabled, this method does nothing.
      *
-     * @param TagMapping $tagMapping The tag mapping to remove.
+     * @param BindingDescriptor $binding The resource binding to remove.
      */
-    public function removeEnabledTagMapping(TagMapping $tagMapping)
+    public function removeEnabledBinding(BindingDescriptor $binding)
     {
-        if (false !== ($key = array_search($tagMapping, $this->enabledTagMappings))) {
-            unset($this->enabledTagMappings[$key]);
+        if (false !== ($key = array_search($binding, $this->enabledBindings))) {
+            unset($this->enabledBindings[$key]);
         }
     }
 
     /**
-     * Returns the disabled tag mappings of the package.
+     * Returns the disabled resource bindings of the package.
      *
-     * @return TagMapping[] The disabled tag mappings.
+     * @return BindingDescriptor[] The disabled resource bindings.
      */
-    public function getDisabledTagMappings()
+    public function getDisabledBindings()
     {
-        return $this->disabledTagMappings;
+        return $this->disabledBindings;
     }
 
     /**
-     * Adds a disabled tag mapping for the package.
+     * Adds a disabled resource binding for the package.
      *
-     * @param TagMapping $tagMapping The disabled tag mapping.
+     * @param BindingDescriptor $binding The disabled resource binding.
      */
-    public function addDisabledTagMapping(TagMapping $tagMapping)
+    public function addDisabledBinding(BindingDescriptor $binding)
     {
-        if (in_array($tagMapping, $this->disabledTagMappings)) {
+        if (in_array($binding, $this->disabledBindings)) {
             return;
         }
 
-        $this->disabledTagMappings[] = $tagMapping;
+        $this->disabledBindings[] = $binding;
 
-        $this->removeEnabledTagMapping($tagMapping);
+        $this->removeEnabledBinding($binding);
     }
 
     /**
-     * Returns whether the tag mapping is disabled.
+     * Returns whether the resource binding is disabled.
      *
-     * @param TagMapping $tagMapping The tag mapping.
+     * @param BindingDescriptor $binding The resource binding.
      *
-     * @return bool Whether the tag mapping is disabled.
+     * @return bool Whether the resource binding is disabled.
      */
-    public function hasDisabledTagMapping(TagMapping $tagMapping)
+    public function hasDisabledBinding(BindingDescriptor $binding)
     {
-        return in_array($tagMapping, $this->disabledTagMappings);
+        return in_array($binding, $this->disabledBindings);
     }
 
     /**
-     * Removes a disabled tag mapping.
+     * Removes a disabled resource binding.
      *
-     * If the tag mapping is not disabled, this method does nothing.
+     * If the resource binding is not disabled, this method does nothing.
      *
-     * @param TagMapping $tagMapping The tag mapping to remove.
+     * @param BindingDescriptor $binding The resource binding to remove.
      */
-    public function removeDisabledTagMapping(TagMapping $tagMapping)
+    public function removeDisabledBinding(BindingDescriptor $binding)
     {
-        if (false !== ($key = array_search($tagMapping, $this->disabledTagMappings))) {
-            unset($this->disabledTagMappings[$key]);
+        if (false !== ($key = array_search($binding, $this->disabledBindings))) {
+            unset($this->disabledBindings[$key]);
         }
     }
 }

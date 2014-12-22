@@ -3,12 +3,21 @@
     "resources": {
         "/app": "res"
     },
-    "tags": {
-        "/app/config*.yml": "config"
-    },
-    "tag-definitions": {
-        "my/application/my-tag": {
-            "description": "Description of my tag."
+    "bindings": [
+        {
+            "selector": "/app/config*.yml",
+            "type": "my/type"
+        }
+    ],
+    "binding-types": {
+        "my/type": {
+            "description": "Description of my type.",
+            "parameters": {
+                "param": {
+                    "description": "Description of the parameter.",
+                    "default": 1234
+                }
+            }
         }
     },
     "override": "acme/blog"

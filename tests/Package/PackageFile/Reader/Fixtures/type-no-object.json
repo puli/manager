@@ -1,0 +1,5 @@
+{
+    "binding-types": [
+        { "type": "my/type" }
+    ]
+}

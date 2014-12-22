@@ -12,13 +12,14 @@
 namespace Puli\RepositoryManager\Tests\Package\PackageFile\Reader;
 
 use PHPUnit_Framework_TestCase;
+use Puli\RepositoryManager\Binding\BindingParameterDescriptor;
 use Puli\RepositoryManager\Config\Config;
 use Puli\RepositoryManager\Package\InstallInfo;
 use Puli\RepositoryManager\Package\PackageFile\PackageFile;
 use Puli\RepositoryManager\Package\PackageFile\Reader\PackageJsonReader;
 use Puli\RepositoryManager\Package\ResourceMapping;
-use Puli\RepositoryManager\Tag\TagDefinition;
-use Puli\RepositoryManager\Tag\TagMapping;
+use Puli\RepositoryManager\Binding\BindingTypeDescriptor;
+use Puli\RepositoryManager\Binding\BindingDescriptor;
 
 /**
  * @since  1.0
@@ -91,12 +92,28 @@ class PackageJsonReaderTest extends PHPUnit_Framework_TestCase
         $this->assertSame(array(), $packageFile->getPackageOrder());
     }
 
-    public function testReadTagDefinitionWithoutDescription()
+    public function testReadBindingTypeWithRequiredParameter()
     {
-        $packageFile = $this->reader->readPackageFile(__DIR__.'/Fixtures/tag-def-no-description.json', $this->baseConfig);
+        $packageFile = $this->reader->readPackageFile(__DIR__.'/Fixtures/type-param-required.json', $this->baseConfig);
 
         $this->assertInstanceOf('Puli\RepositoryManager\Package\PackageFile\PackageFile', $packageFile);
-        $this->assertEquals(array(new TagDefinition('my/application/my-tag')), $packageFile->getTagDefinitions());
+        $this->assertEquals(array(
+            new BindingTypeDescriptor('my/type', null, array(
+                new BindingParameterDescriptor('param', true),
+            ))
+        ), $packageFile->getTypeDescriptors());
+    }
+
+    public function testReadBindingWithParameters()
+    {
+        $packageFile = $this->reader->readPackageFile(__DIR__.'/Fixtures/bindings-params.json', $this->baseConfig);
+
+        $this->assertInstanceOf('Puli\RepositoryManager\Package\PackageFile\PackageFile', $packageFile);
+        $this->assertEquals(array(
+            new BindingDescriptor('/app/config*.yml', 'my/type', array(
+                'param' => 'value',
+            )),
+        ), $packageFile->getBindingDescriptors());
     }
 
     public function testRootPackageFileInheritsBaseConfig()
@@ -185,63 +202,17 @@ class PackageJsonReaderTest extends PHPUnit_Framework_TestCase
     /**
      * @expectedException \Puli\RepositoryManager\InvalidConfigException
      */
-    public function testResourceEntriesMustBeStrings()
+    public function testBindingTypesMustBeObject()
     {
-        $this->markTestSkipped('Not supported by the schema validator.');
-        return;
-
-        // $this->reader->readPackageFile(__DIR__.'/Fixtures/resources-entry-no-string.json');
-    }
-
-    public function testResourceEntriesMayBeArrays()
-    {
-        $this->reader->readPackageFile(__DIR__.'/Fixtures/resources-entry-array.json');
+        $this->reader->readPackageFile(__DIR__.'/Fixtures/type-no-object.json');
     }
 
     /**
      * @expectedException \Puli\RepositoryManager\InvalidConfigException
      */
-    public function testResourceEntryNestedEntriesMustBeStrings()
+    public function testBindingsMustBeArray()
     {
-        $this->markTestSkipped('Not supported by the schema validator.');
-        return;
-
-//         $this->reader->readPackageFile(__DIR__.'/Fixtures/resources-entry-entry-no-string.json');
-    }
-
-    /**
-     * @expectedException \Puli\RepositoryManager\InvalidConfigException
-     */
-    public function testTagsMustBeObject()
-    {
-        $this->reader->readPackageFile(__DIR__.'/Fixtures/tags-no-object.json');
-    }
-
-    /**
-     * @expectedException \Puli\RepositoryManager\InvalidConfigException
-     */
-    public function testTagEntriesMustBeStrings()
-    {
-        $this->markTestSkipped('Not supported by the schema validator.');
-        return;
-
-        // $this->reader->readPackageFile(__DIR__.'/Fixtures/tags-entry-no-string.json');
-    }
-
-    public function testTagEntriesMayBeArrays()
-    {
-        $this->reader->readPackageFile(__DIR__.'/Fixtures/tags-entry-array.json');
-    }
-
-    /**
-     * @expectedException \Puli\RepositoryManager\InvalidConfigException
-     */
-    public function testTagEntryNestedEntriesMustBeStrings()
-    {
-        $this->markTestSkipped('Not supported by the schema validator.');
-        return;
-
-//         $this->reader->readPackageFile(__DIR__.'/Fixtures/tags-entry-entry-no-string.json');
+        $this->reader->readPackageFile(__DIR__.'/Fixtures/bindings-no-array.json');
     }
 
     public function testOverrideMayBeArray()
@@ -287,8 +258,10 @@ class PackageJsonReaderTest extends PHPUnit_Framework_TestCase
     {
         $this->assertSame('my/application', $packageFile->getPackageName());
         $this->assertEquals(array(new ResourceMapping('/app', array('res'))), $packageFile->getResourceMappings());
-        $this->assertEquals(array(new TagMapping('/app/config*.yml', 'config')), $packageFile->getTagMappings());
-        $this->assertEquals(array(new TagDefinition('my/application/my-tag', 'Description of my tag.')), $packageFile->getTagDefinitions());
+        $this->assertEquals(array(new BindingDescriptor('/app/config*.yml', 'my/type')), $packageFile->getBindingDescriptors());
+        $this->assertEquals(array(new BindingTypeDescriptor('my/type', 'Description of my type.', array(
+            new BindingParameterDescriptor('param', false, 1234, 'Description of the parameter.'),
+        ))), $packageFile->getTypeDescriptors());
         $this->assertSame(array('acme/blog'), $packageFile->getOverriddenPackages());
     }
 
@@ -296,7 +269,7 @@ class PackageJsonReaderTest extends PHPUnit_Framework_TestCase
     {
         $this->assertNull($packageFile->getPackageName());
         $this->assertSame(array(), $packageFile->getResourceMappings());
-        $this->assertSame(array(), $packageFile->getTagMappings());
+        $this->assertSame(array(), $packageFile->getBindingDescriptors());
         $this->assertSame(array(), $packageFile->getOverriddenPackages());
     }
 }

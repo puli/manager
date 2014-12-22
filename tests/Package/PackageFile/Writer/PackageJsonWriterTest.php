@@ -11,14 +11,15 @@
 
 namespace Puli\RepositoryManager\Tests\Package\PackageFile\Writer;
 
+use Puli\RepositoryManager\Binding\BindingParameterDescriptor;
 use Puli\RepositoryManager\Config\Config;
 use Puli\RepositoryManager\Package\InstallInfo;
 use Puli\RepositoryManager\Package\PackageFile\PackageFile;
 use Puli\RepositoryManager\Package\PackageFile\RootPackageFile;
 use Puli\RepositoryManager\Package\PackageFile\Writer\PackageJsonWriter;
 use Puli\RepositoryManager\Package\ResourceMapping;
-use Puli\RepositoryManager\Tag\TagDefinition;
-use Puli\RepositoryManager\Tag\TagMapping;
+use Puli\RepositoryManager\Binding\BindingTypeDescriptor;
+use Puli\RepositoryManager\Binding\BindingDescriptor;
 use Puli\RepositoryManager\Tests\JsonWriterTestCase;
 use Symfony\Component\Filesystem\Filesystem;
 
@@ -57,8 +58,10 @@ class PackageJsonWriterTest extends JsonWriterTestCase
         $packageFile = new PackageFile();
         $packageFile->setPackageName('my/application');
         $packageFile->addResourceMapping(new ResourceMapping('/app', 'res'));
-        $packageFile->addTagMapping(new TagMapping('/app/config*.yml', 'config'));
-        $packageFile->addTagDefinition(new TagDefinition('my/application/my-tag', 'Description of my tag.'));
+        $packageFile->addBindingDescriptor(new BindingDescriptor('/app/config*.yml', 'my/type'));
+        $packageFile->addTypeDescriptor(new BindingTypeDescriptor('my/type', 'Description of my type.', array(
+            new BindingParameterDescriptor('param', false, 1234, 'Description of the parameter.'),
+        )));
         $packageFile->setOverriddenPackages('acme/blog');
 
         $this->writer->writePackageFile($packageFile, $this->tempFile);
@@ -68,17 +71,62 @@ class PackageJsonWriterTest extends JsonWriterTestCase
         $this->assertJsonFileEquals(__DIR__.'/Fixtures/full.json', $this->tempFile);
     }
 
-    public function testWriteTagDefinitionWithoutDescription()
+    public function testWriteTypeWithoutDescription()
     {
         $baseConfig = new Config();
         $packageFile = new PackageFile(null, null, $baseConfig);
-        $packageFile->addTagDefinition(new TagDefinition('my/application/my-tag'));
+        $packageFile->addTypeDescriptor(new BindingTypeDescriptor('my/type'));
 
         $this->writer->writePackageFile($packageFile, $this->tempFile);
 
         $this->assertFileExists($this->tempFile);
 
-        $this->assertJsonFileEquals(__DIR__.'/Fixtures/tag-def-no-description.json', $this->tempFile);
+        $this->assertJsonFileEquals(__DIR__.'/Fixtures/type-no-description.json', $this->tempFile);
+    }
+
+    public function testWriteTypeParameterWithoutDescriptionNorParameters()
+    {
+        $baseConfig = new Config();
+        $packageFile = new PackageFile(null, null, $baseConfig);
+        $packageFile->addTypeDescriptor(new BindingTypeDescriptor('my/type', null, array(
+            new BindingParameterDescriptor('param', false, 1234),
+        )));
+
+        $this->writer->writePackageFile($packageFile, $this->tempFile);
+
+        $this->assertFileExists($this->tempFile);
+
+        $this->assertJsonFileEquals(__DIR__.'/Fixtures/type-param-no-description.json', $this->tempFile);
+    }
+
+    public function testWriteTypeParameterWithoutDefaultValue()
+    {
+        $baseConfig = new Config();
+        $packageFile = new PackageFile(null, null, $baseConfig);
+        $packageFile->addTypeDescriptor(new BindingTypeDescriptor('my/type', null, array(
+            new BindingParameterDescriptor('param', false, null, 'Description of the parameter.'),
+        )));
+
+        $this->writer->writePackageFile($packageFile, $this->tempFile);
+
+        $this->assertFileExists($this->tempFile);
+
+        $this->assertJsonFileEquals(__DIR__.'/Fixtures/type-param-no-default.json', $this->tempFile);
+    }
+
+    public function testWriteRequiredTypeParameter()
+    {
+        $baseConfig = new Config();
+        $packageFile = new PackageFile(null, null, $baseConfig);
+        $packageFile->addTypeDescriptor(new BindingTypeDescriptor('my/type', null, array(
+            new BindingParameterDescriptor('param', true),
+        )));
+
+        $this->writer->writePackageFile($packageFile, $this->tempFile);
+
+        $this->assertFileExists($this->tempFile);
+
+        $this->assertJsonFileEquals(__DIR__.'/Fixtures/type-param-required.json', $this->tempFile);
     }
 
     public function testWriteRootPackageFile()
@@ -91,8 +139,10 @@ class PackageJsonWriterTest extends JsonWriterTestCase
         $packageFile = new RootPackageFile(null, null, $baseConfig);
         $packageFile->setPackageName('my/application');
         $packageFile->addResourceMapping(new ResourceMapping('/app', 'res'));
-        $packageFile->addTagMapping(new TagMapping('/app/config*.yml', 'config'));
-        $packageFile->addTagDefinition(new TagDefinition('my/application/my-tag', 'Description of my tag.'));
+        $packageFile->addBindingDescriptor(new BindingDescriptor('/app/config*.yml', 'my/type'));
+        $packageFile->addTypeDescriptor(new BindingTypeDescriptor('my/type', 'Description of my type.', array(
+            new BindingParameterDescriptor('param', false, 1234, 'Description of the parameter.'),
+        )));
         $packageFile->setOverriddenPackages('acme/blog');
         $packageFile->setPackageOrder(array('acme/blog-extension1', 'acme/blog-extension2'));
         $packageFile->addPluginClass('Puli\RepositoryManager\Tests\Package\PackageFile\Fixtures\TestPlugin');
@@ -146,20 +196,6 @@ class PackageJsonWriterTest extends JsonWriterTestCase
         $this->assertFileExists($this->tempFile);
 
         $this->assertJsonFileEquals(__DIR__.'/Fixtures/multi-resources.json', $this->tempFile);
-    }
-
-    public function testWriteTagsWithMultipleTags()
-    {
-        $packageFile = new PackageFile();
-        $packageFile->setPackageName('my/application');
-        $packageFile->addTagMapping(new TagMapping('/app/config*.yml', 'yaml'));
-        $packageFile->addTagMapping(new TagMapping('/app/config*.yml', 'config'));
-
-        $this->writer->writePackageFile($packageFile, $this->tempFile);
-
-        $this->assertFileExists($this->tempFile);
-
-        $this->assertJsonFileEquals(__DIR__.'/Fixtures/multi-tags.json', $this->tempFile);
     }
 
     public function testWriteMultipleOverriddenPackages()

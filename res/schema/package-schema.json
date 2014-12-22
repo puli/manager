@@ -11,19 +11,44 @@
                 "type": [ "string", "array" ]
             }
         },
-        "tags": {
-            "type": "object",
-            "additionalProperties": {
-                "type": [ "string", "array" ]
+        "bindings": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "selector": {
+                        "type": "string",
+                        "required": true
+                    },
+                    "type": {
+                        "type": "string",
+                        "required": true
+                    },
+                    "parameters": {
+                        "type": "object",
+                        "additionalProperties": true
+                    }
+                }
             }
         },
-        "tag-definitions": {
+        "binding-types": {
             "type": "object",
             "additionalProperties": {
                 "type": "object",
                 "properties": {
                     "description": {
                         "type": "string"
+                    },
+                    "parameters": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "object",
+                            "properties": {
+                                "description": {
+                                    "type": "string"
+                                }
+                            }
+                        }
                     }
                 }
             }

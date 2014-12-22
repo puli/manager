@@ -14,8 +14,8 @@ namespace Puli\RepositoryManager\Package\PackageFile;
 use Assert\Assertion;
 use InvalidArgumentException;
 use Puli\RepositoryManager\Package\ResourceMapping;
-use Puli\RepositoryManager\Tag\TagDefinition;
-use Puli\RepositoryManager\Tag\TagMapping;
+use Puli\RepositoryManager\Binding\BindingTypeDescriptor;
+use Puli\RepositoryManager\Binding\BindingDescriptor;
 
 /**
  * Stores the configuration of a package.
@@ -41,14 +41,14 @@ class PackageFile
     private $resourceMappings = array();
 
     /**
-     * @var TagMapping[]
+     * @var BindingDescriptor[]
      */
-    private $tagMappings = array();
+    private $bindingDescriptors = array();
 
     /**
-     * @var TagDefinition[]
+     * @var BindingTypeDescriptor[]
      */
-    private $tagDefinitions = array();
+    private $typeDescriptors = array();
 
     /**
      * @var string[]
@@ -151,105 +151,110 @@ class PackageFile
     }
 
     /**
-     * Returns the tag mappings.
+     * Returns the binding descriptors.
      *
-     * @return TagMapping[] The tag mappings.
+     * @return BindingDescriptor[] The binding descriptors.
      */
-    public function getTagMappings()
+    public function getBindingDescriptors()
     {
-        return array_values($this->tagMappings);
+        return array_values($this->bindingDescriptors);
     }
 
     /**
-     * Adds a tag mapping.
+     * Adds a binding descriptor.
      *
-     * @param TagMapping $tagMapping The tag mapping to add.
+     * @param BindingDescriptor $descriptor The binding descriptor to add.
      */
-    public function addTagMapping(TagMapping $tagMapping)
+    public function addBindingDescriptor(BindingDescriptor $descriptor)
     {
-        $this->tagMappings[] = $tagMapping;
+        $this->bindingDescriptors[] = $descriptor;
     }
 
     /**
-     * Removes a tag mapping.
+     * Removes a binding descriptor.
      *
-     * @param TagMapping $tagMapping The tag mapping to remove.
+     * @param BindingDescriptor $descriptor The binding descriptor to remove.
      */
-    public function removeTagMapping(TagMapping $tagMapping)
+    public function removeBindingDescriptor(BindingDescriptor $descriptor)
     {
-        if (false !== ($key = array_search($tagMapping, $this->tagMappings))) {
-            unset($this->tagMappings[$key]);
+        if (false !== ($key = array_search($descriptor, $this->bindingDescriptors))) {
+            unset($this->bindingDescriptors[$key]);
         }
     }
 
     /**
-     * Removes all tag mappings.
+     * Removes all binding descriptors.
      */
-    public function clearTagMappings()
+    public function clearBindingDescriptors()
     {
-        $this->tagMappings = array();
+        $this->bindingDescriptors = array();
     }
 
     /**
-     * Returns whether the tag mapping exists in this file.
+     * Returns whether the binding descriptor exists in this file.
      *
-     * @param TagMapping $tagMapping The tag mapping.
+     * @param BindingDescriptor $descriptor The binding descriptor.
      *
-     * @return bool Whether the file contains the tag mapping.
+     * @return bool Whether the file contains the binding descriptor.
      */
-    public function hasTagMapping(TagMapping $tagMapping)
+    public function hasBindingDescriptor(BindingDescriptor $descriptor)
     {
-        return in_array($tagMapping, $this->tagMappings);
+        return in_array($descriptor, $this->bindingDescriptors);
     }
 
     /**
-     * Returns the tag definitions.
+     * Returns the type descriptors.
      *
-     * @return TagDefinition[] The tag definitions.
+     * @return BindingTypeDescriptor[] The type descriptors.
      */
-    public function getTagDefinitions()
+    public function getTypeDescriptors()
     {
-        // Tags as keys are for internal use only
-        return array_values($this->tagDefinitions);
+        // Names as keys are for internal use only
+        return array_values($this->typeDescriptors);
     }
 
     /**
-     * Adds a tag definition.
+     * Adds a type descriptor.
      *
-     * @param TagDefinition $tagDefinition The tag definition.
+     * @param BindingTypeDescriptor $descriptor The type descriptor.
      */
-    public function addTagDefinition(TagDefinition $tagDefinition)
+    public function addTypeDescriptor(BindingTypeDescriptor $descriptor)
     {
-        $this->tagDefinitions[$tagDefinition->getTag()] = $tagDefinition;
+        $this->typeDescriptors[$descriptor->getName()] = $descriptor;
     }
 
     /**
-     * Removes a tag definition.
+     * Removes a type descriptor.
      *
-     * @param string $tag The tag.
+     * @param string $typeName The type name.
      */
-    public function removeTagDefinition($tag)
+    public function removeTypeDescriptor($typeName)
     {
-        unset($this->tagDefinitions[$tag]);
+        unset($this->typeDescriptors[$typeName]);
     }
 
     /**
-     * Removes all tag definitions.
+     * Removes all type descriptors.
      */
-    public function clearTagDefinitions()
+    public function clearTypeDescriptors()
     {
-        $this->tagDefinitions = array();
+        $this->typeDescriptors = array();
+    }
+
+    public function getTypeDescriptor($typeName)
+    {
+        return $this->typeDescriptors[$typeName];
     }
 
     /**
-     * Returns whether a tag is defined in this file.
+     * Returns whether a type is defined in this file.
      *
-     * @param string $tag The tag.
+     * @param string $typeName The type name.
      *
-     * @return bool Whether the tag is defined in the file.
+     * @return bool Whether the type is defined in the file.
      */
-    public function hasTagDefinition($tag)
+    public function hasTypeDescriptor($typeName)
     {
-        return isset($this->tagDefinitions[$tag]);
+        return isset($this->typeDescriptors[$typeName]);
     }
 }

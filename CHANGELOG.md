@@ -37,6 +37,8 @@ Changelog
  * removed `Interface` suffixes of all interfaces
  * made the HOME/PULI_HOME/APPDATA environment variables optional
  * renamed `installPath` to `install-path` in puli.json
+ * added `bindings` and `binding-types` keys to puli.json
+ * removed `tags` and `tag-definitions` keys from puli.json
 
 * 1.0.0-alpha1 (2014-12-03)
 

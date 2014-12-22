@@ -11,6 +11,7 @@
 
 namespace Puli\RepositoryManager\Package\PackageFile\Reader;
 
+use Puli\RepositoryManager\Binding\BindingParameterDescriptor;
 use Puli\RepositoryManager\Config\Config;
 use Puli\RepositoryManager\FileNotFoundException;
 use Puli\RepositoryManager\InvalidConfigException;
@@ -18,8 +19,8 @@ use Puli\RepositoryManager\Package\InstallInfo;
 use Puli\RepositoryManager\Package\PackageFile\PackageFile;
 use Puli\RepositoryManager\Package\PackageFile\RootPackageFile;
 use Puli\RepositoryManager\Package\ResourceMapping;
-use Puli\RepositoryManager\Tag\TagDefinition;
-use Puli\RepositoryManager\Tag\TagMapping;
+use Puli\RepositoryManager\Binding\BindingTypeDescriptor;
+use Puli\RepositoryManager\Binding\BindingDescriptor;
 use Webmozart\Json\DecodingFailedException;
 use Webmozart\Json\JsonDecoder;
 use Webmozart\Json\ValidationFailedException;
@@ -98,17 +99,36 @@ class PackageJsonReader implements PackageFileReader
             }
         }
 
-        if (isset($jsonData->tags)) {
-            foreach ((array) $jsonData->tags as $selector => $tags) {
-                foreach ((array) $tags as $tag) {
-                    $packageFile->addTagMapping(new TagMapping($selector, $tag));
-                }
+        if (isset($jsonData->bindings)) {
+            foreach ($jsonData->bindings as $bindingData) {
+                $packageFile->addBindingDescriptor(new BindingDescriptor(
+                    $bindingData->selector,
+                    $bindingData->type,
+                    isset($bindingData->parameters) ? (array) $bindingData->parameters : array()
+                ));
             }
         }
 
-        if (isset($jsonData->{'tag-definitions'})) {
-            foreach ($jsonData->{'tag-definitions'} as $tag => $data) {
-                $packageFile->addTagDefinition(new TagDefinition($tag, isset($data->description) ? $data->description : null));
+        if (isset($jsonData->{'binding-types'})) {
+            foreach ((array) $jsonData->{'binding-types'} as $typeName => $data) {
+                $parameters = array();
+
+                if (isset($data->parameters)) {
+                    foreach ((array) $data->parameters as $paramName => $paramData) {
+                        $parameters[] = new BindingParameterDescriptor(
+                            $paramName,
+                            isset($paramData->required) ? $paramData->required : false,
+                            isset($paramData->default) ? $paramData->default : null,
+                            isset($paramData->description) ? $paramData->description : null
+                        );
+                    }
+                }
+
+                $packageFile->addTypeDescriptor(new BindingTypeDescriptor(
+                    $typeName,
+                    isset($data->description) ? $data->description : null,
+                    $parameters
+                ));
             }
         }
 

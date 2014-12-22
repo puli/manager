@@ -38,8 +38,8 @@ class PackageJsonWriter implements PackageFileWriter
     private static $keyOrder = array(
         'name',
         'resources',
-        'tags',
-        'tag-definitions',
+        'bindings',
+        'binding-types',
         'override',
         'package-order',
         'config',
@@ -77,8 +77,8 @@ class PackageJsonWriter implements PackageFileWriter
     private function addConfig(array &$jsonData, PackageFile $packageFile)
     {
         $resourceMappings = $packageFile->getResourceMappings();
-        $tagMappings = $packageFile->getTagMappings();
-        $tagDefinitions = $packageFile->getTagDefinitions();
+        $bindings = $packageFile->getBindingDescriptors();
+        $bindingTypes = $packageFile->getTypeDescriptors();
         $overrides = $packageFile->getOverriddenPackages();
 
         if (null !== $packageFile->getPackageName()) {
@@ -88,44 +88,63 @@ class PackageJsonWriter implements PackageFileWriter
         if (count($resourceMappings) > 0) {
             $jsonData['resources'] = new \stdClass();
 
-            foreach ($resourceMappings as $mapping) {
-                $puliPath = $mapping->getPuliPath();
-                $localPaths = $mapping->getLocalPaths();
+            foreach ($resourceMappings as $binding) {
+                $puliPath = $binding->getPuliPath();
+                $localPaths = $binding->getLocalPaths();
 
                 $jsonData['resources']->$puliPath = count($localPaths) > 1 ? $localPaths : reset($localPaths);
             }
         }
 
-        if (count($tagMappings) > 0) {
-            $jsonData['tags'] = new \stdClass();
-            $tagsBySelector = array();
+        if (count($bindings) > 0) {
+            $jsonData['bindings'] = array();
 
-            foreach ($tagMappings as $mapping) {
-                $puliSelector = $mapping->getPuliSelector();
+            foreach ($bindings as $binding) {
+                $bindingData = new \stdClass();
+                $bindingData->selector = $binding->getSelector();
+                $bindingData->type = $binding->getTypeName();
 
-                if (!isset($tagsBySelector[$puliSelector])) {
-                    $tagsBySelector[$puliSelector] = array();
+                if (count($binding->getParameters()) > 0) {
+                    $bindingData->parameterss = $binding->getParameters();
                 }
 
-                $tagsBySelector[$puliSelector][] = $mapping->getTag();
-            }
-
-            foreach ($tagsBySelector as $puliSelector => $tags) {
-                $jsonData['tags']->$puliSelector = count($tags) > 1 ? $tags : reset($tags);
+                $jsonData['bindings'][] = $bindingData;
             }
         }
 
-        if (count($tagDefinitions) > 0) {
-            $jsonData['tag-definitions'] = new \stdClass();
+        if (count($bindingTypes) > 0) {
+            $jsonData['binding-types'] = new \stdClass();
 
-            foreach ($tagDefinitions as $tagDefinition) {
-                $definition = new \stdClass();
+            foreach ($bindingTypes as $bindingType) {
+                $typeData = new \stdClass();
 
-                if (null !== $tagDefinition->getDescription()) {
-                    $definition->description = $tagDefinition->getDescription();
+                if ($bindingType->getDescription()) {
+                    $typeData->description = $bindingType->getDescription();
                 }
 
-                $jsonData['tag-definitions']->{$tagDefinition->getTag()} = $definition;
+                if (count($bindingType->getParameters()) > 0) {
+                    $typeData->parameters = new \stdClass();
+
+                    foreach ($bindingType->getParameters() as $parameter) {
+                        $paramData = new \stdClass();
+
+                        if ($parameter->getDescription()) {
+                            $paramData->description = $parameter->getDescription();
+                        }
+
+                        if ($parameter->isRequired()) {
+                            $paramData->required = true;
+                        }
+
+                        if (null !== $parameter->getDefaultValue()) {
+                            $paramData->default = $parameter->getDefaultValue();
+                        }
+
+                        $typeData->parameters->{$parameter->getName()} = $paramData;
+                    }
+                }
+
+                $jsonData['binding-types']->{$bindingType->getName()} = $typeData;
             }
         }
 

@@ -13,7 +13,7 @@ namespace Puli\RepositoryManager\Tests\Package;
 
 use PHPUnit_Framework_TestCase;
 use Puli\RepositoryManager\Package\InstallInfo;
-use Puli\RepositoryManager\Tag\TagMapping;
+use Puli\RepositoryManager\Binding\BindingDescriptor;
 
 /**
  * @since  1.0
@@ -62,111 +62,111 @@ class InstallInfoTest extends PHPUnit_Framework_TestCase
         new InstallInfo('', '/path');
     }
 
-    public function testAddEnabledTagMapping()
+    public function testAddEnabledBinding()
     {
         $installInfo = new InstallInfo('package', '/path');
-        $mapping = new TagMapping('/tagged-path', 'tag1');
+        $binding = new BindingDescriptor('/bound-path', 'type');
 
-        $installInfo->addEnabledTagMapping($mapping);
+        $installInfo->addEnabledBinding($binding);
 
-        $this->assertSame(array($mapping), $installInfo->getEnabledTagMappings());
+        $this->assertSame(array($binding), $installInfo->getEnabledBindings());
     }
 
-    public function testAddEnabledTagMappingIgnoresDuplicates()
+    public function testAddEnabledBindingIgnoresDuplicates()
     {
         $installInfo = new InstallInfo('package', '/path');
-        $mapping = new TagMapping('/tagged-path', 'tag1');
+        $binding = new BindingDescriptor('/bound-path', 'type');
 
-        $installInfo->addEnabledTagMapping($mapping);
-        $installInfo->addEnabledTagMapping($mapping);
+        $installInfo->addEnabledBinding($binding);
+        $installInfo->addEnabledBinding($binding);
 
-        $this->assertSame(array($mapping), $installInfo->getEnabledTagMappings());
+        $this->assertSame(array($binding), $installInfo->getEnabledBindings());
     }
 
-    public function testRemoveEnabledTagMapping()
+    public function testRemoveEnabledBinding()
     {
         $installInfo = new InstallInfo('package', '/path');
-        $mapping = new TagMapping('/tagged-path', 'tag1');
+        $binding = new BindingDescriptor('/bound-path', 'type');
 
-        $installInfo->addEnabledTagMapping($mapping);
-        $installInfo->removeEnabledTagMapping($mapping);
+        $installInfo->addEnabledBinding($binding);
+        $installInfo->removeEnabledBinding($binding);
 
-        $this->assertSame(array(), $installInfo->getEnabledTagMappings());
+        $this->assertSame(array(), $installInfo->getEnabledBindings());
     }
 
-    public function testRemoveEnabledTagMappingIgnoresUnknown()
+    public function testRemoveEnabledBindingIgnoresUnknown()
     {
         $installInfo = new InstallInfo('package', '/path');
-        $mapping = new TagMapping('/tagged-path', 'tag1');
+        $binding = new BindingDescriptor('/bound-path', 'type');
 
-        $installInfo->removeEnabledTagMapping($mapping);
+        $installInfo->removeEnabledBinding($binding);
 
-        $this->assertSame(array(), $installInfo->getEnabledTagMappings());
+        $this->assertSame(array(), $installInfo->getEnabledBindings());
     }
 
-    public function testAddDisabledTagMapping()
+    public function testAddDisabledBinding()
     {
         $installInfo = new InstallInfo('package', '/path');
-        $mapping = new TagMapping('/tagged-path', 'tag1');
+        $binding = new BindingDescriptor('/bound-path', 'type');
 
-        $installInfo->addDisabledTagMapping($mapping);
+        $installInfo->addDisabledBinding($binding);
 
-        $this->assertSame(array($mapping), $installInfo->getDisabledTagMappings());
+        $this->assertSame(array($binding), $installInfo->getDisabledBindings());
     }
 
-    public function testAddDisabledTagMappingIgnoresDuplicates()
+    public function testAddDisabledBindingIgnoresDuplicates()
     {
         $installInfo = new InstallInfo('package', '/path');
-        $mapping = new TagMapping('/tagged-path', 'tag1');
+        $binding = new BindingDescriptor('/bound-path', 'type');
 
-        $installInfo->addDisabledTagMapping($mapping);
-        $installInfo->addDisabledTagMapping($mapping);
+        $installInfo->addDisabledBinding($binding);
+        $installInfo->addDisabledBinding($binding);
 
-        $this->assertSame(array($mapping), $installInfo->getDisabledTagMappings());
+        $this->assertSame(array($binding), $installInfo->getDisabledBindings());
     }
 
-    public function testRemoveDisabledTagMapping()
+    public function testRemoveDisabledBinding()
     {
         $installInfo = new InstallInfo('package', '/path');
-        $mapping = new TagMapping('/tagged-path', 'tag1');
+        $binding = new BindingDescriptor('/bound-path', 'type');
 
-        $installInfo->addDisabledTagMapping($mapping);
-        $installInfo->removeDisabledTagMapping($mapping);
+        $installInfo->addDisabledBinding($binding);
+        $installInfo->removeDisabledBinding($binding);
 
-        $this->assertSame(array(), $installInfo->getDisabledTagMappings());
+        $this->assertSame(array(), $installInfo->getDisabledBindings());
     }
 
-    public function testRemoveDisabledTagMappingIgnoresUnknown()
+    public function testRemoveDisabledBindingIgnoresUnknown()
     {
         $installInfo = new InstallInfo('package', '/path');
-        $mapping = new TagMapping('/tagged-path', 'tag1');
+        $binding = new BindingDescriptor('/bound-path', 'type');
 
-        $installInfo->removeDisabledTagMapping($mapping);
+        $installInfo->removeDisabledBinding($binding);
 
-        $this->assertSame(array(), $installInfo->getDisabledTagMappings());
+        $this->assertSame(array(), $installInfo->getDisabledBindings());
     }
 
-    public function testAddEnabledTagMappingRemovesDisabledMapping()
+    public function testAddEnabledBindingRemovesDisabledMapping()
     {
         $installInfo = new InstallInfo('package', '/path');
-        $mapping = new TagMapping('/tagged-path', 'tag1');
+        $binding = new BindingDescriptor('/bound-path', 'type');
 
-        $installInfo->addDisabledTagMapping($mapping);
-        $installInfo->addEnabledTagMapping($mapping);
+        $installInfo->addDisabledBinding($binding);
+        $installInfo->addEnabledBinding($binding);
 
-        $this->assertSame(array($mapping), $installInfo->getEnabledTagMappings());
-        $this->assertSame(array(), $installInfo->getDisabledTagMappings());
+        $this->assertSame(array($binding), $installInfo->getEnabledBindings());
+        $this->assertSame(array(), $installInfo->getDisabledBindings());
     }
 
-    public function testAddDisabledTagMappingRemovesEnabledMapping()
+    public function testAddDisabledBindingRemovesEnabledMapping()
     {
         $installInfo = new InstallInfo('package', '/path');
-        $mapping = new TagMapping('/tagged-path', 'tag1');
+        $binding = new BindingDescriptor('/bound-path', 'type');
 
-        $installInfo->addEnabledTagMapping($mapping);
-        $installInfo->addDisabledTagMapping($mapping);
+        $installInfo->addEnabledBinding($binding);
+        $installInfo->addDisabledBinding($binding);
 
-        $this->assertSame(array(), $installInfo->getEnabledTagMappings());
-        $this->assertSame(array($mapping), $installInfo->getDisabledTagMappings());
+        $this->assertSame(array(), $installInfo->getEnabledBindings());
+        $this->assertSame(array($binding), $installInfo->getDisabledBindings());
     }
 }

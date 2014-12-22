@@ -1,0 +1,11 @@
+{
+    "binding-types": {
+        "my/type": {
+            "parameters": {
+                "param": {
+                    "description": "Description of the parameter."
+                }
+            }
+        }
+    }
+}

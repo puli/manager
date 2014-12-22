@@ -1,0 +1,12 @@
+{
+    "name": "my/application",
+    "bindings": [
+        {
+            "selector": "/app/config*.yml",
+            "type": "my/type",
+            "parameters": {
+                "param": "value"
+            }
+        }
+    ]
+}
