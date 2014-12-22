@@ -67,7 +67,7 @@
         },
         "config": {
             "type": "object",
-            "additionalProperties": false,
+            "additionalProperties": true,
             "properties": {
                 "puli-dir": {
                     "type": "string"
@@ -82,6 +82,9 @@
                     "type": "string"
                 },
                 "read-repo": {
+                    "type": "string"
+                },
+                "discovery-storage": {
                     "type": "string"
                 }
             }

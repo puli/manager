@@ -54,6 +54,8 @@ class ConfigJsonWriterTest extends JsonWriterTestCase
             Config::DUMP_DIR => '{$puli-dir}/my-repo',
             Config::READ_REPO => '{$puli-dir}/my-repository.php',
             Config::WRITE_REPO => '{$puli-dir}/my-repository-dump.php',
+            Config::DISCOVERY_STORAGE => 'php',
+            'discovery-storage-foo' => '{$puli-dir}/bar',
         ));
 
         $this->writer->writeConfigFile($configFile, $this->tempFile);

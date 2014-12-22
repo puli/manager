@@ -43,6 +43,8 @@ class ConfigJsonReaderTest extends PHPUnit_Framework_TestCase
         $this->assertSame('puli-dir/my-repository.php', $config->get(Config::READ_REPO));
         $this->assertSame('puli-dir/my-repo', $config->get(Config::DUMP_DIR));
         $this->assertSame('puli-dir/my-repository-dump.php', $config->get(Config::WRITE_REPO));
+        $this->assertSame('php', $config->get(Config::DISCOVERY_STORAGE));
+        $this->assertSame('puli-dir/bar', $config->get('discovery-storage-foo'));
     }
 
     public function testReadMinimalConfigFile()
@@ -57,6 +59,8 @@ class ConfigJsonReaderTest extends PHPUnit_Framework_TestCase
         $this->assertNull($config->get(Config::READ_REPO));
         $this->assertNull($config->get(Config::DUMP_DIR));
         $this->assertNull($config->get(Config::WRITE_REPO));
+        $this->assertNull($config->get(Config::DISCOVERY_STORAGE));
+        $this->assertNull($config->get('discovery-storage-foo'));
     }
 
     public function testReadMinimalConfigFileWithBaseConfig()
@@ -71,15 +75,6 @@ class ConfigJsonReaderTest extends PHPUnit_Framework_TestCase
 
         $this->assertSame('my-puli-dir', $config->get(Config::PULI_DIR));
         $this->assertNull($config->get(Config::PULI_DIR, null, false));
-    }
-
-    /**
-     * @expectedException \Puli\RepositoryManager\InvalidConfigException
-     * @expectedExceptionMessage invalid.json
-     */
-    public function testReadConfigFileValidatesSchema()
-    {
-        $this->reader->readConfigFile(__DIR__.'/Fixtures/invalid.json');
     }
 
     /**

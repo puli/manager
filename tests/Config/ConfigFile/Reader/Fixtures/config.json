@@ -2,5 +2,7 @@
     "puli-dir": "puli-dir",
     "dump-dir": "{$puli-dir}/my-repo",
     "read-repo": "{$puli-dir}/my-repository.php",
-    "write-repo": "{$puli-dir}/my-repository-dump.php"
+    "write-repo": "{$puli-dir}/my-repository-dump.php",
+    "discovery-storage": "php",
+    "discovery-storage-foo": "{$puli-dir}/bar"
 }

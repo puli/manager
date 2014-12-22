@@ -63,6 +63,21 @@ class ConfigTest extends PHPUnit_Framework_TestCase
         $this->assertNull($config->get(Config::PULI_DIR, null, false));
     }
 
+    public function testGetDynamicValue()
+    {
+        $config = new Config();
+        $config->set('discovery-storage-foobar', 'my-value');
+
+        $this->assertSame('my-value', $config->get('discovery-storage-foobar'));
+    }
+
+    public function testGetWithCustomDefaultValue()
+    {
+        $config = new Config();
+
+        $this->assertSame('my-default', $config->get(Config::PULI_DIR, 'my-default'));
+    }
+
     public function testGetReplacesPlaceholder()
     {
         $config = new Config();
@@ -235,6 +250,17 @@ class ConfigTest extends PHPUnit_Framework_TestCase
 
         $this->assertSame('resource-repository.php', $config->get(Config::READ_REPO));
         $this->assertNull($config->get(Config::DUMP_DIR));
+    }
+
+    public function testRemoveDynamicValue()
+    {
+        $config = new Config();
+        $config->set('discovery-storage-foo', 'value1');
+        $config->set('discovery-storage-bar', 'value2');
+        $config->remove('discovery-storage-foo');
+
+        $this->assertNull($config->get('discovery-storage-foo'));
+        $this->assertSame('value2', $config->get('discovery-storage-bar'));
     }
 
     /**

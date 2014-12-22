@@ -89,16 +89,31 @@ class Config
 
     const READ_REPO = 'read-repo';
 
+    const DISCOVERY_STORAGE = 'discovery-storage';
+
+    const DISCOVERY_STORAGE_PATH = 'discovery-storage-path';
+
     /**
      * The accepted config keys.
      *
-     * @var string[]
+     * @var bool[]
      */
     private static $keys = array(
         self::PULI_DIR => true,
         self::DUMP_DIR => true,
         self::WRITE_REPO => true,
         self::READ_REPO => true,
+        self::DISCOVERY_STORAGE => true,
+        self::DISCOVERY_STORAGE_PATH => true,
+    );
+
+    /**
+     * The accepted config key prefixes.
+     *
+     * @var string[]
+     */
+    private static $keyPrefixes = array(
+        'discovery-storage-',
     );
 
     /**
@@ -114,6 +129,24 @@ class Config
      * @var Config
      */
     private $baseConfig;
+
+    /**
+     * Returns whether a configuration key contains an accepted prefix.
+     *
+     * @param string $key The key to test.
+     *
+     * @return bool Whether the key contains an accepted prefix.
+     */
+    private static function isValidKeyPrefix($key)
+    {
+        foreach (self::$keyPrefixes as $keyPrefix) {
+            if (0 === strpos($key, $keyPrefix)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 
     /**
      * Creates a new configuration.
@@ -146,7 +179,6 @@ class Config
      *
      * @return mixed The value of the configuration key.
      *
-     * @throws NoSuchConfigKeyException If the configuration key is invalid.
      */
     public function get($key, $default = null, $fallback = true)
     {
@@ -177,11 +209,10 @@ class Config
      *
      * @return mixed The value of the configuration key.
      *
-     * @throws NoSuchConfigKeyException If the configuration key is invalid.
      */
     public function getRaw($key, $default = null, $fallback = true)
     {
-        if (!isset(self::$keys[$key])) {
+        if (!isset(self::$keys[$key]) && !self::isValidKeyPrefix($key)) {
             throw new NoSuchConfigKeyException(sprintf(
                 'The config key "%s" does not exist.',
                 $key
@@ -206,7 +237,7 @@ class Config
      */
     public function set($key, $value)
     {
-        if (!isset(self::$keys[$key])) {
+        if (!isset(self::$keys[$key]) && !self::isValidKeyPrefix($key)) {
             throw new NoSuchConfigKeyException(sprintf(
                 'The config key "%s" does not exist.',
                 $key
@@ -245,7 +276,7 @@ class Config
      */
     public function remove($key)
     {
-        if (!isset(self::$keys[$key])) {
+        if (!isset(self::$keys[$key]) && !self::isValidKeyPrefix($key)) {
             throw new NoSuchConfigKeyException(sprintf(
                 'The config key "%s" does not exist.',
                 $key
