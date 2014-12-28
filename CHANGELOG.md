@@ -52,6 +52,7 @@ Changelog
  * added `MemcacheStoreGenerator`
  * added `NullStoreGenerator`
  * added `FileCopyRepositoryGenerator`
+ * added `getRepository()` and `getDiscovery()` to `ProjectEnvironment`
 
 * 1.0.0-alpha1 (2014-12-03)
 

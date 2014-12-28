@@ -25,9 +25,8 @@ use Webmozart\PathUtil\Path;
 class FileCopyRepositoryGenerator implements FactoryCodeGenerator
 {
     private static $defaultOptions = array(
-        'storageDir' => '',
         'versionStore' => array(
-            'type' => 'flintstone',
+            'type' => 'null',
         )
     );
 
@@ -38,10 +37,19 @@ class FileCopyRepositoryGenerator implements FactoryCodeGenerator
     {
         $options = array_replace_recursive(self::$defaultOptions, $options);
 
+        if (!isset($options['storageDir'])) {
+            $options['storageDir'] = $outputDir.'/repository';
+        }
+
         $kvsGenerator = $generatorFactory->createKeyValueStoreGenerator($options['versionStore']['type']);
         $kvsCode = $kvsGenerator->generateFactoryCode('$versionStore', $outputDir, $rootDir, $options['versionStore'], $generatorFactory);
 
-        $relStorageDir = Path::makeRelative($options['storageDir'], $outputDir);
+        $storageDir = Path::makeAbsolute($options['storageDir'], $rootDir);
+        $relStorageDir = Path::makeRelative($storageDir, $outputDir);
+
+        $escStorageDir = $relStorageDir
+            ? '__DIR__.'.var_export('/'.$relStorageDir, true)
+            : '__DIR__';
 
         $code = new FactoryCode();
         $code->addImports($kvsCode->getImports());
@@ -50,7 +58,7 @@ class FileCopyRepositoryGenerator implements FactoryCodeGenerator
         $code->addImport('Puli\Repository\FileCopyRepository');
         $code->addVarDeclaration($varName, <<<EOF
 $varName = new FileCopyRepository(
-    '{$relStorageDir}',
+    $escStorageDir,
     \$versionStore
 );
 EOF

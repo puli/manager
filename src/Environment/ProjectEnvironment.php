@@ -11,15 +11,20 @@
 
 namespace Puli\RepositoryManager\Environment;
 
+use Puli\Discovery\ResourceDiscovery;
+use Puli\Repository\ResourceRepository;
+use Puli\RepositoryManager\Config\Config;
 use Puli\RepositoryManager\Config\ConfigFile\ConfigFileStorage;
 use Puli\RepositoryManager\Config\DefaultConfig;
 use Puli\RepositoryManager\Config\EnvConfig;
 use Puli\RepositoryManager\FileNotFoundException;
+use Puli\RepositoryManager\Generator\RegistryGenerator;
 use Puli\RepositoryManager\NoDirectoryException;
 use Puli\RepositoryManager\Package\PackageFile\PackageFileStorage;
 use Puli\RepositoryManager\Package\PackageFile\RootPackageFile;
 use Puli\RepositoryManager\Plugin\ManagerPlugin;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Webmozart\PathUtil\Path;
 
 /**
  * The environment of a Puli project.
@@ -45,6 +50,16 @@ class ProjectEnvironment extends GlobalEnvironment
      * @var RootPackageFile
      */
     private $rootPackageFile;
+
+    /**
+     * @var ResourceRepository
+     */
+    private $repository;
+
+    /**
+     * @var ResourceDiscovery
+     */
+    private $discovery;
 
     /**
      * Creates the project environment.
@@ -122,5 +137,66 @@ class ProjectEnvironment extends GlobalEnvironment
     public function getRootPackageFile()
     {
         return $this->rootPackageFile;
+    }
+
+    /**
+     * Returns the resource repository of the project.
+     *
+     * @return ResourceRepository The resource repository.
+     */
+    public function getRepository()
+    {
+        if (!$this->repository) {
+            $registryClass = $this->getConfig()->get(Config::REGISTRY_CLASS);
+
+            if (!class_exists($registryClass)) {
+                $this->loadRegistry();
+            }
+
+            $this->repository = $registryClass::getRepository();
+        }
+
+        return $this->repository;
+    }
+
+    /**
+     * Returns the resource discovery of the project.
+     *
+     * @return ResourceDiscovery The resource discovery.
+     */
+    public function getDiscovery()
+    {
+        if (!$this->discovery) {
+            $registryClass = $this->getConfig()->get(Config::REGISTRY_CLASS);
+
+            if (!class_exists($registryClass)) {
+                $this->loadRegistry();
+            }
+
+            $this->discovery = $registryClass::getDiscovery();
+        }
+
+        return $this->discovery;
+    }
+
+    private function loadRegistry()
+    {
+        $registryFile = Path::makeAbsolute(
+            $this->getConfig()->get(Config::REGISTRY_FILE),
+            $this->rootDir
+        );
+
+        $configFile = $this->getConfigFile() ? $this->getConfigFile()->getPath() : null;
+        $rootPackageFile = $this->rootPackageFile->getPath();
+
+        // Refresh the file if the configuration has been updated
+        if (!file_exists($registryFile)
+            || ($configFile && filemtime($registryFile) < filemtime($configFile))
+            || (filemtime($registryFile) < filemtime($rootPackageFile))) {
+            $generator = new RegistryGenerator();
+            $generator->generateRegistry($this->rootDir, $this->getConfig());
+        }
+
+        require_once $registryFile;
     }
 }

@@ -16,11 +16,13 @@ use PHPUnit_Framework_TestCase;
 use Puli\RepositoryManager\Config\Config;
 use Puli\RepositoryManager\Config\ConfigFile\ConfigFile;
 use Puli\RepositoryManager\Config\ConfigFile\ConfigFileStorage;
+use Puli\RepositoryManager\Config\DefaultConfig;
 use Puli\RepositoryManager\Environment\ProjectEnvironment;
 use Puli\RepositoryManager\Package\PackageFile\PackageFileStorage;
 use Puli\RepositoryManager\Package\PackageFile\RootPackageFile;
 use Puli\RepositoryManager\Tests\Package\PackageFile\Fixtures\TestPlugin;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\Filesystem\Filesystem;
 
 /**
  * @since  1.0
@@ -28,6 +30,11 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
  */
 class ProjectEnvironmentTest extends PHPUnit_Framework_TestCase
 {
+    /**
+     * @var string
+     */
+    private $tempDir;
+
     /**
      * @var string
      */
@@ -55,8 +62,13 @@ class ProjectEnvironmentTest extends PHPUnit_Framework_TestCase
 
     protected function setUp()
     {
-        $this->homeDir = __DIR__.'/Fixtures/home';
-        $this->rootDir = __DIR__.'/Fixtures/root';
+        while (false === @mkdir($this->tempDir = sys_get_temp_dir().'/puli-repo-manager/KeyValueStoreDiscoveryGeneratorTest'.rand(10000, 99999), 0777, true)) {}
+
+        $filesystem = new Filesystem();
+        $filesystem->mirror(__DIR__.'/Fixtures', $this->tempDir);
+
+        $this->homeDir = $this->tempDir.'/home';
+        $this->rootDir = $this->tempDir.'/root';
         $this->configFileStorage = $this->getMockBuilder('Puli\RepositoryManager\Config\ConfigFile\ConfigFileStorage')
             ->disableOriginalConstructor()
             ->getMock();
@@ -64,6 +76,12 @@ class ProjectEnvironmentTest extends PHPUnit_Framework_TestCase
             ->disableOriginalConstructor()
             ->getMock();
         $this->dispatcher = $this->getMock('Symfony\Component\EventDispatcher\EventDispatcherInterface');
+    }
+
+    protected function tearDown()
+    {
+        $filesystem = new Filesystem();
+        $filesystem->remove($this->tempDir);
     }
 
     public function testCreate()
@@ -187,5 +205,57 @@ class ProjectEnvironmentTest extends PHPUnit_Framework_TestCase
         );
 
         $this->assertSame($environment, TestPlugin::getEnvironment());
+    }
+
+    /**
+     * @runInSeparateProcess
+     */
+    public function testGetRepository()
+    {
+        $this->configFileStorage->expects($this->once())
+            ->method('loadConfigFile')
+            ->with($this->homeDir.'/config.json')
+            ->will($this->returnValue(new ConfigFile($this->homeDir.'/config.json', new DefaultConfig())));
+
+        $this->packageFileStorage->expects($this->once())
+            ->method('loadRootPackageFile')
+            ->with($this->rootDir.'/puli.json')
+            ->will($this->returnValue(new RootPackageFile('root', $this->rootDir.'/puli.json', new DefaultConfig())));
+
+        $environment = new ProjectEnvironment(
+            $this->homeDir,
+            $this->rootDir,
+            $this->configFileStorage,
+            $this->packageFileStorage,
+            $this->dispatcher
+        );
+
+        $this->assertInstanceOf('Puli\Repository\FileCopyRepository', $environment->getRepository());
+    }
+
+    /**
+     * @runInSeparateProcess
+     */
+    public function testGetDiscovery()
+    {
+        $this->configFileStorage->expects($this->once())
+            ->method('loadConfigFile')
+            ->with($this->homeDir.'/config.json')
+            ->will($this->returnValue(new ConfigFile($this->homeDir.'/config.json', new DefaultConfig())));
+
+        $this->packageFileStorage->expects($this->once())
+            ->method('loadRootPackageFile')
+            ->with($this->rootDir.'/puli.json')
+            ->will($this->returnValue(new RootPackageFile('root', $this->rootDir.'/puli.json', new DefaultConfig())));
+
+        $environment = new ProjectEnvironment(
+            $this->homeDir,
+            $this->rootDir,
+            $this->configFileStorage,
+            $this->packageFileStorage,
+            $this->dispatcher
+        );
+
+        $this->assertInstanceOf('Puli\Discovery\KeyValueStoreDiscovery', $environment->getDiscovery());
     }
 }
