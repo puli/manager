@@ -81,6 +81,8 @@ class Config
 {
     const PULI_DIR = 'puli-dir';
 
+    const GENERATE_REGISTRY = 'generate-registry';
+
     const REGISTRY_CLASS = 'registry-class';
 
     const REGISTRY_FILE = 'registry-file';
@@ -97,6 +99,16 @@ class Config
 
     const REPO_VERSION_STORE_PATH = 'repo.version-store.path';
 
+    const REPO_VERSION_STORE_SERVER = 'repo.version-store.server';
+
+    const REPO_VERSION_STORE_PORT = 'repo.version-store.port';
+
+    const REPO_VERSION_STORE_GZIP = 'repo.version-store.gzip';
+
+    const REPO_VERSION_STORE_CACHE = 'repo.version-store.cache';
+
+    const REPO_VERSION_STORE_SWAP_MEMORY_LIMIT = 'repo.version-store.swap-memory-limit';
+
     const DISCOVERY = 'discovery';
 
     const DISCOVERY_TYPE = 'discovery.type';
@@ -107,6 +119,16 @@ class Config
 
     const DISCOVERY_STORE_PATH = 'discovery.store.path';
 
+    const DISCOVERY_STORE_SERVER = 'discovery.store.server';
+
+    const DISCOVERY_STORE_PORT = 'discovery.store.port';
+
+    const DISCOVERY_STORE_GZIP = 'discovery.store.gzip';
+
+    const DISCOVERY_STORE_CACHE = 'discovery.store.cache';
+
+    const DISCOVERY_STORE_SWAP_MEMORY_LIMIT = 'discovery.store.swap-memory-limit';
+
     /**
      * The accepted config keys.
      *
@@ -114,15 +136,26 @@ class Config
      */
     private static $keys = array(
         self::PULI_DIR => true,
+        self::GENERATE_REGISTRY => true,
         self::REGISTRY_CLASS => true,
         self::REGISTRY_FILE => true,
         self::REPO_TYPE => true,
         self::REPO_STORAGE_DIR => true,
         self::REPO_VERSION_STORE_TYPE => true,
         self::REPO_VERSION_STORE_PATH => true,
+        self::REPO_VERSION_STORE_SERVER => true,
+        self::REPO_VERSION_STORE_PORT => true,
+        self::REPO_VERSION_STORE_GZIP => true,
+        self::REPO_VERSION_STORE_CACHE => true,
+        self::REPO_VERSION_STORE_SWAP_MEMORY_LIMIT => true,
         self::DISCOVERY_TYPE => true,
         self::DISCOVERY_STORE_TYPE => true,
         self::DISCOVERY_STORE_PATH => true,
+        self::DISCOVERY_STORE_SERVER => true,
+        self::DISCOVERY_STORE_PORT => true,
+        self::DISCOVERY_STORE_GZIP => true,
+        self::DISCOVERY_STORE_CACHE => true,
+        self::DISCOVERY_STORE_SWAP_MEMORY_LIMIT => true,
     );
 
     private static $compositeKeys = array(
@@ -417,9 +450,25 @@ class Config
 
     private function validate($key, $value)
     {
+        $this->assertNotNull($key, $value);
+
         switch ($key) {
+            case self::GENERATE_REGISTRY:
+            case self::REPO_VERSION_STORE_GZIP:
+            case self::REPO_VERSION_STORE_CACHE:
+            case self::DISCOVERY_STORE_GZIP:
+            case self::DISCOVERY_STORE_CACHE:
+                $this->assertBoolean($key, $value);
+                break;
+
+            case self::REPO_VERSION_STORE_PORT:
+            case self::REPO_VERSION_STORE_SWAP_MEMORY_LIMIT:
+            case self::DISCOVERY_STORE_PORT:
+            case self::DISCOVERY_STORE_SWAP_MEMORY_LIMIT:
+                $this->assertInteger($key, $value);
+                break;
+
             default:
-                $this->assertNotNull($key, $value);
                 $this->assertString($key, $value);
                 $this->assertNonEmpty($key, $value);
                 break;
@@ -453,6 +502,28 @@ class Config
         if (!is_string($value) && null !== $value) {
             throw new InvalidConfigException(sprintf(
                 'The config key "%s" must be a string. Got: %s',
+                $key,
+                is_object($value) ? get_class($value) : gettype($value)
+            ));
+        }
+    }
+
+    private function assertInteger($key, $value)
+    {
+        if (!is_int($value) && null !== $value) {
+            throw new InvalidConfigException(sprintf(
+                'The config key "%s" must be an integer. Got: %s',
+                $key,
+                is_object($value) ? get_class($value) : gettype($value)
+            ));
+        }
+    }
+
+    private function assertBoolean($key, $value)
+    {
+        if (!is_bool($value) && null !== $value) {
+            throw new InvalidConfigException(sprintf(
+                'The config key "%s" must be a bool. Got: %s',
                 $key,
                 is_object($value) ? get_class($value) : gettype($value)
             ));

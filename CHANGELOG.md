@@ -42,6 +42,16 @@ Changelog
  * added default returned value to `Config::get()` and `Config::getRaw()` 
  * added `GlobalEnvironment::getDiscoveryStorage()`
  * added composite key handling to `Config`
+ * added `RegistryGenerator`
+ * added `FactoryCode` and `FactoryCodeGenerator`
+ * added `GeneratorFactory`
+ * added `KeyValueStoreDiscoveryGenerator`
+ * added `ArrayStoreGenerator`
+ * added `FlintstoneStoreGenerator`
+ * added `MemcachedStoreGenerator`
+ * added `MemcacheStoreGenerator`
+ * added `NullStoreGenerator`
+ * added `FileCopyRepositoryGenerator`
 
 * 1.0.0-alpha1 (2014-12-03)
 
