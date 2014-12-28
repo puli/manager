@@ -216,22 +216,4 @@ class ManagerFactoryTest extends PHPUnit_Framework_TestCase
 
         $this->assertInstanceOf('Puli\RepositoryManager\Repository\RepositoryManager', $manager);
     }
-
-    public function testCreateResourceRepository()
-    {
-        $environment = ManagerFactory::createProjectEnvironment($this->tempDir);
-        $repo = ManagerFactory::createRepository($environment);
-
-        $this->assertInstanceOf('Puli\Repository\ResourceRepository', $repo);
-    }
-
-    public function testCreateResourceRepositoryIfAlreadyGenerated()
-    {
-        $environment = ManagerFactory::createProjectEnvironment($this->tempDir);
-        $manager = ManagerFactory::createRepositoryManager($environment);
-        $manager->dumpRepository();
-        $repo = ManagerFactory::createRepository($environment);
-
-        $this->assertInstanceOf('Puli\Repository\ResourceRepository', $repo);
-    }
 }

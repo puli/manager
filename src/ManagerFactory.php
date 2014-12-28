@@ -225,28 +225,6 @@ class ManagerFactory
         );
     }
 
-    /**
-     * Creates the resource repository for a Puli project.
-     *
-     * @param ProjectEnvironment $environment The project environment.
-     *
-     * @return ResourceRepository The resource repository.
-     */
-    public static function createRepository(ProjectEnvironment $environment)
-    {
-        $repoPath = Path::makeAbsolute(
-            $environment->getConfig()->get(Config::READ_REPO),
-            $environment->getRootDirectory()
-        );
-
-        if (!file_exists($repoPath)) {
-            $manager = self::createRepositoryManager($environment);
-            $manager->dumpRepository();
-        }
-
-        return include $repoPath;
-    }
-
     private static function createConfigFileStorage()
     {
         return new ConfigFileStorage(

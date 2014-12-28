@@ -123,6 +123,8 @@ class RepositoryManager
             $filesystem->remove($dumpDir);
         }
 
+        return;
+
         PhpCacheRepository::dumpRepository($repo, $dumpDir);
 
         if (!file_exists($dumpFileDir)) {

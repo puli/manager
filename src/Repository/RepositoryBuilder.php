@@ -11,11 +11,11 @@
 
 namespace Puli\RepositoryManager\Repository;
 
-use Puli\Repository\Filesystem\Resource\LocalDirectoryResource;
-use Puli\Repository\Filesystem\Resource\LocalFileResource;
-use Puli\Repository\Filesystem\Resource\LocalResource;
 use Puli\Repository\ManageableRepository;
 use Puli\Repository\Resource\DirectoryResource;
+use Puli\Repository\Resource\LocalDirectoryResource;
+use Puli\Repository\Resource\LocalFileResource;
+use Puli\Repository\Resource\LocalResource;
 use Puli\RepositoryManager\Package\Collection\PackageCollection;
 use Puli\RepositoryManager\Package\Graph\PackageNameGraph;
 use Puli\RepositoryManager\Package\Package;

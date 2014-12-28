@@ -13,8 +13,8 @@ namespace Puli\RepositoryManager\Tests\Repository;
 
 use PHPUnit_Framework_MockObject_MockObject;
 use PHPUnit_Framework_TestCase;
-use Puli\Repository\Filesystem\Resource\LocalDirectoryResource;
 use Puli\Repository\ManageableRepository;
+use Puli\Repository\Resource\LocalDirectoryResource;
 use Puli\RepositoryManager\Package\Collection\PackageCollection;
 use Puli\RepositoryManager\Package\Package;
 use Puli\RepositoryManager\Package\PackageFile\PackageFile;

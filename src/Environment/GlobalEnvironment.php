@@ -63,11 +63,6 @@ class GlobalEnvironment
     private $dispatcher;
 
     /**
-     * @var DiscoveryStorage|null
-     */
-    private $discoveryStorage;
-
-    /**
      * Creates the global environment.
      *
      * The passed home directory will be be scanned for a file "config.json".
@@ -159,26 +154,6 @@ class GlobalEnvironment
     public function getEventDispatcher()
     {
         return $this->dispatcher;
-    }
-
-    /**
-     * Returns the configured discovery storage.
-     *
-     * @return DiscoveryStorage The discovery storage.
-     */
-    public function getDiscoveryStorage()
-    {
-        $className = ltrim($this->config->get(Config::DISCOVERY_STORAGE), '\\');
-
-        if (isset(self::$discoveryStorageClassNames[$className])) {
-            $className = self::$discoveryStorageClassNames[$className];
-        }
-
-        if (null === $this->discoveryStorage || $className !== get_class($this->discoveryStorage)) {
-            $this->discoveryStorage = new $className();
-        }
-
-        return $this->discoveryStorage;
     }
 
     /**
