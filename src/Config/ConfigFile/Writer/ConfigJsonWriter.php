@@ -42,7 +42,7 @@ class ConfigJsonWriter implements ConfigFileWriter
     {
         $jsonData = new \stdClass();
 
-        foreach ($configFile->getConfig()->toRawArray(false) as $key => $value) {
+        foreach ($configFile->getConfig()->toRawNestedArray(false) as $key => $value) {
             $jsonData->$key = $value;
         }
 

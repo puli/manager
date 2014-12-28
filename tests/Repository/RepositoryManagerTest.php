@@ -175,7 +175,7 @@ class RepositoryManagerTest extends ManagerTestCase
     public function testDumpRepositoryWithCustomCachePath()
     {
         return $this->markTestIncomplete('Does not work right now.');
-        
+
         $this->environment->getConfig()->set(Config::DUMP_DIR, $this->tempDir.'/dump');
         $this->environment->getConfig()->set(Config::WRITE_REPO, $this->tempDir.'/repository.php');
 

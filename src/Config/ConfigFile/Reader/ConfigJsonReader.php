@@ -50,7 +50,7 @@ class ConfigJsonReader implements ConfigFileReader
         $configFile = new ConfigFile($path, $baseConfig);
         $config = $configFile->getConfig();
 
-        $jsonData = $this->decodeFile($path);
+        $jsonData = $this->objectsToArrays($this->decodeFile($path));
 
         foreach ($jsonData as $key => $value) {
             $config->set($key, $value);
@@ -87,5 +87,16 @@ class ConfigJsonReader implements ConfigFileReader
                 $e->getMessage()
             ), $e->getCode(), $e);
         }
+    }
+
+    private function objectsToArrays($data)
+    {
+        $data = (array) $data;
+
+        foreach ($data as $key => $value) {
+            $data[$key] = is_object($value) ? $this->objectsToArrays($value) : $value;
+        }
+
+        return $data;
     }
 }

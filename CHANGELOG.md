@@ -41,6 +41,7 @@ Changelog
  * removed `tags` and `tag-definitions` keys from puli.json
  * added default returned value to `Config::get()` and `Config::getRaw()` 
  * added `GlobalEnvironment::getDiscoveryStorage()`
+ * added composite key handling to `Config`
 
 * 1.0.0-alpha1 (2014-12-03)
 

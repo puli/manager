@@ -26,9 +26,6 @@ class DefaultConfig extends Config
     {
         parent::__construct(null, array(
             self::PULI_DIR => '.puli',
-            self::DUMP_DIR => '{$puli-dir}/dump',
-            self::WRITE_REPO => '{$puli-dir}/resource-repository.php',
-            self::READ_REPO => '{$write-repo}',
         ));
     }
 }

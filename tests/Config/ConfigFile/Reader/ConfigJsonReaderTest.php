@@ -40,11 +40,11 @@ class ConfigJsonReaderTest extends PHPUnit_Framework_TestCase
 
         $config = $configFile->getConfig();
         $this->assertSame('puli-dir', $config->get(Config::PULI_DIR));
-        $this->assertSame('puli-dir/my-repository.php', $config->get(Config::READ_REPO));
-        $this->assertSame('puli-dir/my-repo', $config->get(Config::DUMP_DIR));
-        $this->assertSame('puli-dir/my-repository-dump.php', $config->get(Config::WRITE_REPO));
-        $this->assertSame('php', $config->get(Config::DISCOVERY_STORAGE));
-        $this->assertSame('puli-dir/bar', $config->get('discovery-storage-foo'));
+        $this->assertSame('Puli\MyServiceRegistry', $config->get(Config::REGISTRY_CLASS));
+        $this->assertSame('puli-dir/MyServiceRegistry.php', $config->get(Config::REGISTRY_FILE));
+        $this->assertSame('my-type', $config->get(Config::REPO_TYPE));
+        $this->assertSame('puli-dir/my-repo', $config->get(Config::REPO_STORAGE_DIR));
+        $this->assertSame('my-store-type', $config->get(Config::REPO_VERSION_STORE_TYPE));
     }
 
     public function testReadMinimalConfigFile()
@@ -56,11 +56,11 @@ class ConfigJsonReaderTest extends PHPUnit_Framework_TestCase
         // default values
         $config = $configFile->getConfig();
         $this->assertNull($config->get(Config::PULI_DIR));
-        $this->assertNull($config->get(Config::READ_REPO));
-        $this->assertNull($config->get(Config::DUMP_DIR));
-        $this->assertNull($config->get(Config::WRITE_REPO));
-        $this->assertNull($config->get(Config::DISCOVERY_STORAGE));
-        $this->assertNull($config->get('discovery-storage-foo'));
+        $this->assertNull($config->get(Config::REGISTRY_CLASS));
+        $this->assertNull($config->get(Config::REGISTRY_FILE));
+        $this->assertNull($config->get(Config::REPO_TYPE));
+        $this->assertNull($config->get(Config::REPO_STORAGE_DIR));
+        $this->assertNull($config->get(Config::REPO_VERSION_STORE_TYPE));
     }
 
     public function testReadMinimalConfigFileWithBaseConfig()

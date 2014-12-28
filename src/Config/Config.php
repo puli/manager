@@ -68,13 +68,11 @@ use Puli\RepositoryManager\InvalidConfigException;
  * ```php
  * $config = new Config();
  * $config->set(Config::PULI_DIR, '.puli');
- * $config->set(Config::INSTALL_FILE, '{$puli-dir}/install-file.json');
+ * $config->set(Config::REGISTRY_FILE, '{$puli-dir}/ServiceRegistry.php');
  *
- * echo $config->get(Config::PULI_DIR);
- * // => .puli/install-file.json
+ * echo $config->get(Config::REGISTRY_FILE);
+ * // => .puli/ServiceRegistry.php
  * ```
- *
- * This class was inspired by Composer's Config class.
  *
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
@@ -83,15 +81,31 @@ class Config
 {
     const PULI_DIR = 'puli-dir';
 
-    const DUMP_DIR = 'dump-dir';
+    const REGISTRY_CLASS = 'registry-class';
 
-    const WRITE_REPO = 'write-repo';
+    const REGISTRY_FILE = 'registry-file';
 
-    const READ_REPO = 'read-repo';
+    const REPO = 'repo';
 
-    const DISCOVERY_STORAGE = 'discovery-storage';
+    const REPO_TYPE = 'repo.type';
 
-    const DISCOVERY_STORAGE_PATH = 'discovery-storage-path';
+    const REPO_STORAGE_DIR = 'repo.storage-dir';
+
+    const REPO_VERSION_STORE = 'repo.version-store';
+
+    const REPO_VERSION_STORE_TYPE = 'repo.version-store.type';
+
+    const REPO_VERSION_STORE_PATH = 'repo.version-store.path';
+
+    const DISCOVERY = 'discovery';
+
+    const DISCOVERY_TYPE = 'discovery.type';
+
+    const DISCOVERY_STORE = 'discovery.store';
+
+    const DISCOVERY_STORE_TYPE = 'discovery.store.type';
+
+    const DISCOVERY_STORE_PATH = 'discovery.store.path';
 
     /**
      * The accepted config keys.
@@ -100,20 +114,22 @@ class Config
      */
     private static $keys = array(
         self::PULI_DIR => true,
-        self::DUMP_DIR => true,
-        self::WRITE_REPO => true,
-        self::READ_REPO => true,
-        self::DISCOVERY_STORAGE => true,
-        self::DISCOVERY_STORAGE_PATH => true,
+        self::REGISTRY_CLASS => true,
+        self::REGISTRY_FILE => true,
+        self::REPO_TYPE => true,
+        self::REPO_STORAGE_DIR => true,
+        self::REPO_VERSION_STORE_TYPE => true,
+        self::REPO_VERSION_STORE_PATH => true,
+        self::DISCOVERY_TYPE => true,
+        self::DISCOVERY_STORE_TYPE => true,
+        self::DISCOVERY_STORE_PATH => true,
     );
 
-    /**
-     * The accepted config key prefixes.
-     *
-     * @var string[]
-     */
-    private static $keyPrefixes = array(
-        'discovery-storage-',
+    private static $compositeKeys = array(
+        self::REPO => true,
+        self::REPO_VERSION_STORE => true,
+        self::DISCOVERY => true,
+        self::DISCOVERY_STORE => true,
     );
 
     /**
@@ -129,24 +145,6 @@ class Config
      * @var Config
      */
     private $baseConfig;
-
-    /**
-     * Returns whether a configuration key contains an accepted prefix.
-     *
-     * @param string $key The key to test.
-     *
-     * @return bool Whether the key contains an accepted prefix.
-     */
-    private static function isValidKeyPrefix($key)
-    {
-        foreach (self::$keyPrefixes as $keyPrefix) {
-            if (0 === strpos($key, $keyPrefix)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
 
     /**
      * Creates a new configuration.
@@ -188,7 +186,7 @@ class Config
     /**
      * Returns the raw value of a configuration key.
      *
-     * Contrary to {@link get()}, this method does not resolve placeholders:
+     * Unlike {@link get()}, this method does not resolve placeholders:
      *
      * ```php
      * $config = new Config();
@@ -212,7 +210,15 @@ class Config
      */
     public function getRaw($key, $default = null, $fallback = true)
     {
-        if (!isset(self::$keys[$key]) && !self::isValidKeyPrefix($key)) {
+        if (isset(self::$compositeKeys[$key])) {
+            return array_replace(
+                is_array($default) ? $default : array(),
+                $fallback && $this->baseConfig ? $this->baseConfig->filterByKeyPrefix($key.'.') : array(),
+                $this->filterByKeyPrefix($key.'.')
+            );
+        }
+
+        if (!isset(self::$keys[$key])) {
             throw new NoSuchConfigKeyException(sprintf(
                 'The config key "%s" does not exist.',
                 $key
@@ -237,7 +243,18 @@ class Config
      */
     public function set($key, $value)
     {
-        if (!isset(self::$keys[$key]) && !self::isValidKeyPrefix($key)) {
+        if (isset(self::$compositeKeys[$key])) {
+            $this->assertArray($key, $value);
+            $this->removeByKeyPrefix($key.'.');
+
+            foreach ($value as $k => $v) {
+                $this->set($key.'.'.$k, $v);
+            }
+
+            return;
+        }
+
+        if (!isset(self::$keys[$key])) {
             throw new NoSuchConfigKeyException(sprintf(
                 'The config key "%s" does not exist.',
                 $key
@@ -276,7 +293,13 @@ class Config
      */
     public function remove($key)
     {
-        if (!isset(self::$keys[$key]) && !self::isValidKeyPrefix($key)) {
+        if (isset(self::$compositeKeys[$key])) {
+            $this->removeByKeyPrefix($key.'.');
+
+            return;
+        }
+
+        if (!isset(self::$keys[$key])) {
             throw new NoSuchConfigKeyException(sprintf(
                 'The config key "%s" does not exist.',
                 $key
@@ -287,7 +310,7 @@ class Config
     }
 
     /**
-     * Returns all configuration values.
+     * Returns all configuration values as flat array.
      *
      * @param bool $includeFallback Whether to include values set in the base
      *                              configuration passed to {@link __construct()}.
@@ -296,35 +319,29 @@ class Config
      */
     public function toArray($includeFallback = true)
     {
-        $values = $this->toRawArray($includeFallback);
-
-        foreach ($values as $key => $value) {
-            $values[$key] = $this->replacePlaceholders($value, $includeFallback);
-        }
-
-        return $values;
+        return $this->replacePlaceholders($this->toRawArray($includeFallback), $includeFallback);
     }
 
     /**
-     * Returns all raw configuration values.
+     * Returns all raw configuration values as flat array.
      *
-     * Contrary to {@link toArray()}, this method does not resolve placeholders:
+     * Unlike {@link toArray()}, this method does not resolve placeholders:
      *
      * ```php
      * $config = new Config();
      * $config->set(Config::PULI_DIR, '.puli');
-     * $config->set(Config::INSTALL_FILE, '{$puli-dir}/install-file.json');
+     * $config->set(Config::REGISTRY_FILE, '{$puli-dir}/ServiceRegistry.php');
      *
      * print_r($config->toArray());
      * // Array(
      * //   'puli-dir' => '.puli',
-     * //   'install-file' => '.puli/install-file.json',
+     * //   'registry-file' => '.puli/ServiceRegistry.php',
      * // )
      *
      * print_r($config->toRawArray());
      * // Array(
      * //   'puli-dir' => '.puli',
-     * //   'install-file' => '{$puli-dir}/install-file.json',
+     * //   'registry-file' => '{$puli-dir}/ServiceRegistry.php',
      * // )
      * ```
      *
@@ -336,21 +353,98 @@ class Config
     public function toRawArray($includeFallback = true)
     {
         return $includeFallback && $this->baseConfig
-            ? array_replace($this->baseConfig->values, $this->values)
+            ? array_replace($this->baseConfig->toRawArray(), $this->values)
             : $this->values;
+    }
+
+    /**
+     * Returns all configuration values as nested array.
+     *
+     * @param bool $includeFallback Whether to include values set in the base
+     *                              configuration passed to {@link __construct()}.
+     *
+     * @return array The configuration values.
+     */
+    public function toNestedArray($includeFallback = true)
+    {
+        return $this->replacePlaceholders($this->toRawNestedArray($includeFallback), $includeFallback);
+    }
+
+    /**
+     * Returns all raw configuration values as nested array.
+     *
+     * Unlike {@link toNestedArray()}, this method does not resolve placeholders:
+     *
+     * ```php
+     * $config = new Config();
+     * $config->set(Config::PULI_DIR, '.puli');
+     * $config->set(Config::REPO_STORAGE_DIR, '{$puli-dir}/repository');
+     *
+     * print_r($config->toNestedArray());
+     * // Array(
+     * //     'puli-dir' => '.puli',
+     * //     'repo' => array(
+     * //         'storage-dir' => '.puli/repository',
+     * //      ),
+     * // )
+     *
+     * print_r($config->toRawNestedArray());
+     * // Array(
+     * //     'puli-dir' => '.puli',
+     * //     'repo' => array(
+     * //         'storage-dir' => '{$puli-dir}/repository',
+     * //      ),
+     * // )
+     * ```
+     *
+     * @param bool $includeFallback Whether to include values set in the base
+     *                              configuration passed to {@link __construct()}.
+     *
+     * @return array The raw configuration values.
+     */
+    public function toRawNestedArray($includeFallback = true)
+    {
+        $values = array();
+
+        foreach ($this->values as $key => $value) {
+            $target = &$values;
+            $keyParts = explode('.', $key);
+
+            for ($i = 0, $l = count($keyParts) - 1; $i < $l; ++$i) {
+                if (!isset($target[$keyParts[$i]])) {
+                    $target[$keyParts[$i]] = array();
+                }
+
+                $target = &$target[$keyParts[$i]];
+            }
+
+            $target[$keyParts[$l]] = $value;
+        }
+
+        return $includeFallback && $this->baseConfig
+            ? array_replace_recursive($this->baseConfig->toRawNestedArray(), $values)
+            : $values;
     }
 
     private function validate($key, $value)
     {
         switch ($key) {
-            case self::PULI_DIR:
-            case self::DUMP_DIR:
-            case self::WRITE_REPO:
-            case self::READ_REPO:
+            default:
                 $this->assertNotNull($key, $value);
                 $this->assertString($key, $value);
                 $this->assertNonEmpty($key, $value);
                 break;
+        }
+    }
+
+    private function assertArray($key, $value)
+    {
+        if (!is_array($value)) {
+            throw new InvalidConfigException(sprintf(
+                'The config key "%s" must be an array. Got: %s',
+                $key,
+                is_object($value) ? get_class($value) : gettype($value)
+            ));
         }
     }
 
@@ -369,7 +463,7 @@ class Config
     {
         if (!is_string($value) && null !== $value) {
             throw new InvalidConfigException(sprintf(
-                'The config key "%s" expects a string. Got: %s',
+                'The config key "%s" must be a string. Got: %s',
                 $key,
                 is_object($value) ? get_class($value) : gettype($value)
             ));
@@ -388,6 +482,14 @@ class Config
 
     private function replacePlaceholders($raw, $fallback = true)
     {
+        if (is_array($raw)) {
+            foreach ($raw as $key => $value) {
+                $raw[$key] = $this->replacePlaceholders($value, $fallback);
+            }
+
+            return $raw;
+        }
+
         if (!is_string($raw)) {
             return $raw;
         }
@@ -397,6 +499,33 @@ class Config
         return preg_replace_callback('~\{\$(.+)\}~', function ($matches) use ($config, $fallback) {
             return $config->get($matches[1], null, $fallback);
         }, $raw);
+    }
+
+    private function filterByKeyPrefix($keyPrefix)
+    {
+        $values = array();
+        $offset = strlen($keyPrefix);
+
+        foreach ($this->values as $k => $v) {
+            if (0 !== strpos($k, $keyPrefix)) {
+                continue;
+            }
+
+            $values[substr($k, $offset)] = $v;
+        }
+
+        return $values;
+    }
+
+    private function removeByKeyPrefix($keyPrefix)
+    {
+        foreach ($this->values as $k => $v) {
+            if (0 !== strpos($k, $keyPrefix)) {
+                continue;
+            }
+
+            unset($this->values[$k]);
+        }
     }
 
 }

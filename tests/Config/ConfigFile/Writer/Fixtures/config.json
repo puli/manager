@@ -1,8 +1,12 @@
 {
     "puli-dir": "puli-dir",
-    "dump-dir": "{$puli-dir}/my-repo",
-    "read-repo": "{$puli-dir}/my-repository.php",
-    "write-repo": "{$puli-dir}/my-repository-dump.php",
-    "discovery-storage": "php",
-    "discovery-storage-foo": "{$puli-dir}/bar"
+    "registry-class": "Puli\\MyServiceRegistry",
+    "registry-file": "{$puli-dir}/MyServiceRegistry.php",
+    "repo": {
+        "type": "my-type",
+        "storage-dir": "{$puli-dir}/my-repo",
+        "version-store": {
+            "type": "my-store-type"
+        }
+    }
 }

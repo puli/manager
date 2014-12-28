@@ -27,9 +27,15 @@
     ],
     "config": {
         "puli-dir": "puli-dir",
-        "dump-dir": "{$puli-dir}/my-repo",
-        "read-repo": "{$puli-dir}/my-repository.php",
-        "write-repo": "{$puli-dir}/my-repository-dump.php"
+        "registry-class": "Puli\\MyServiceRegistry",
+        "registry-file": "{$puli-dir}/MyServiceRegistry.php",
+        "repo": {
+            "type": "my-type",
+            "storage-dir": "{$puli-dir}/my-repo",
+            "version-store": {
+                "type": "my-store-type"
+            }
+        }
     },
     "plugins": [
         "Puli\\RepositoryManager\\Tests\\Package\\PackageFile\\Fixtures\\TestPlugin"

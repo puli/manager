@@ -159,7 +159,7 @@ class PackageJsonWriter implements PackageFileWriter
         $installInfos = $packageFile->getInstallInfos();
 
         // Pass false to exclude base configuration values
-        $configValues = $packageFile->getConfig()->toRawArray(false);
+        $configValues = $packageFile->getConfig()->toRawNestedArray(false);
 
         if (count($packageOrder) > 0) {
             $jsonData['package-order'] = $packageOrder;

@@ -11,7 +11,8 @@
 
 namespace Puli\RepositoryManager\Environment;
 
-use Puli\Discovery\Storage\DiscoveryStorage;
+use Puli\Discovery\ResourceDiscovery;
+use Puli\Repository\ResourceRepository;
 use Puli\RepositoryManager\Config\Config;
 use Puli\RepositoryManager\Config\ConfigFile\ConfigFile;
 use Puli\RepositoryManager\Config\ConfigFile\ConfigFileStorage;
@@ -35,13 +36,6 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
  */
 class GlobalEnvironment
 {
-    /**
-     * @var string[]
-     */
-    private static $discoveryStorageClassNames = array(
-        'php' => 'Puli\Discovery\Storage\PhpDiscoveryStorage',
-    );
-
     /**
      * @var string|null
      */

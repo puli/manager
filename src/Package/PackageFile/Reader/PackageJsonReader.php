@@ -150,7 +150,7 @@ class PackageJsonReader implements PackageFileReader
         if (isset($jsonData->config)) {
             $config = $packageFile->getConfig();
 
-            foreach ($jsonData->config as $key => $value) {
+            foreach ($this->objectsToArrays($jsonData->config) as $key => $value) {
                 $config->set($key, $value);
             }
         }
@@ -197,5 +197,16 @@ class PackageJsonReader implements PackageFileReader
         }
 
         return $jsonData;
+    }
+
+    private function objectsToArrays($data)
+    {
+        $data = (array) $data;
+
+        foreach ($data as $key => $value) {
+            $data[$key] = is_object($value) ? $this->objectsToArrays($value) : $value;
+        }
+
+        return $data;
     }
 }

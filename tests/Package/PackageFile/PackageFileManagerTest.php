@@ -73,12 +73,12 @@ class PackageFileManagerTest extends ManagerTestCase
                 $config = $packageFile->getConfig();
 
                 PHPUnit_Framework_Assert::assertSame('my-puli-dir', $config->get(Config::PULI_DIR));
-                PHPUnit_Framework_Assert::assertSame('my-puli-dir/my-my-dump', $config->get(Config::DUMP_DIR));
+                PHPUnit_Framework_Assert::assertSame('my-puli-dir/my-MyServiceRegistry.php', $config->get(Config::REGISTRY_FILE));
             }));
 
         $this->manager->setConfigKeys(array(
             Config::PULI_DIR => 'my-puli-dir',
-            Config::DUMP_DIR => '{$puli-dir}/my-my-dump',
+            Config::REGISTRY_FILE => '{$puli-dir}/my-MyServiceRegistry.php',
         ));
     }
 
@@ -101,26 +101,26 @@ class PackageFileManagerTest extends ManagerTestCase
     public function testGetConfigKeyReturnsRawValue()
     {
         $this->rootPackageFile->getConfig()->set(Config::PULI_DIR, 'my-puli-dir');
-        $this->rootPackageFile->getConfig()->set(Config::DUMP_DIR, '{$puli-dir}/my-dump');
+        $this->rootPackageFile->getConfig()->set(Config::REGISTRY_FILE, '{$puli-dir}/MyServiceRegistry.php');
 
-        $this->assertSame('{$puli-dir}/my-dump', $this->manager->getConfigKey(Config::DUMP_DIR));
+        $this->assertSame('{$puli-dir}/MyServiceRegistry.php', $this->manager->getConfigKey(Config::REGISTRY_FILE));
     }
 
     public function testGetConfigKeys()
     {
         $this->rootPackageFile->getConfig()->set(Config::PULI_DIR, 'my-puli-dir');
-        $this->rootPackageFile->getConfig()->set(Config::DUMP_DIR, '{$puli-dir}/my-dump');
+        $this->rootPackageFile->getConfig()->set(Config::REGISTRY_FILE, '{$puli-dir}/MyServiceRegistry.php');
 
         $this->assertSame(array(
             Config::PULI_DIR => 'my-puli-dir',
-            Config::DUMP_DIR => '{$puli-dir}/my-dump',
+            Config::REGISTRY_FILE => '{$puli-dir}/MyServiceRegistry.php',
         ), $this->manager->getConfigKeys());
     }
 
     public function testRemoveConfigKey()
     {
         $this->rootPackageFile->getConfig()->set(Config::PULI_DIR, 'my-puli-dir');
-        $this->rootPackageFile->getConfig()->set(Config::DUMP_DIR, 'my-dump');
+        $this->rootPackageFile->getConfig()->set(Config::REGISTRY_FILE, 'MyServiceRegistry.php');
 
         $this->packageFileStorage->expects($this->once())
             ->method('saveRootPackageFile')
@@ -129,7 +129,7 @@ class PackageFileManagerTest extends ManagerTestCase
                 $config = $packageFile->getConfig();
 
                 PHPUnit_Framework_Assert::assertNull($config->get(Config::PULI_DIR, null, false));
-                PHPUnit_Framework_Assert::assertSame('my-dump', $config->get(Config::DUMP_DIR, null, false));
+                PHPUnit_Framework_Assert::assertSame('MyServiceRegistry.php', $config->get(Config::REGISTRY_FILE, null, false));
             }));
 
         $this->manager->removeConfigKey(Config::PULI_DIR);
@@ -138,7 +138,7 @@ class PackageFileManagerTest extends ManagerTestCase
     public function testRemoveConfigKeys()
     {
         $this->rootPackageFile->getConfig()->set(Config::PULI_DIR, 'my-puli-dir');
-        $this->rootPackageFile->getConfig()->set(Config::DUMP_DIR, 'my-dump');
+        $this->rootPackageFile->getConfig()->set(Config::REGISTRY_FILE, 'MyServiceRegistry.php');
 
         $this->packageFileStorage->expects($this->once())
             ->method('saveRootPackageFile')
@@ -147,10 +147,10 @@ class PackageFileManagerTest extends ManagerTestCase
                 $config = $packageFile->getConfig();
 
                 PHPUnit_Framework_Assert::assertNull($config->get(Config::PULI_DIR, null, false));
-                PHPUnit_Framework_Assert::assertNull($config->get(Config::DUMP_DIR, null, false));
+                PHPUnit_Framework_Assert::assertNull($config->get(Config::REGISTRY_FILE, null, false));
             }));
 
-        $this->manager->removeConfigKeys(array(Config::PULI_DIR, Config::DUMP_DIR));
+        $this->manager->removeConfigKeys(array(Config::PULI_DIR, Config::REGISTRY_FILE));
     }
 
     public function testInstallPlugin()
