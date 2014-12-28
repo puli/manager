@@ -176,7 +176,7 @@ class PackageFileManager
     public function getConfigKeys()
     {
         // We're only interested in the values of the file, not in the defaults
-        return $this->packageFile->getConfig()->toRawArray(false);
+        return $this->packageFile->getConfig()->toFlatRawArray(false);
     }
 
     /**

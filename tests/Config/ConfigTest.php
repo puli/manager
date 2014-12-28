@@ -92,10 +92,14 @@ class ConfigTest extends PHPUnit_Framework_TestCase
         $config = new Config();
         $config->set(Config::REPO_TYPE, 'my-type');
         $config->set(Config::REPO_STORAGE_DIR, 'my-storage-dir');
+        $config->set(Config::REPO_VERSION_STORE_TYPE, 'my-store-type');
 
         $this->assertSame(array(
             'type' => 'my-type',
             'storage-dir' => 'my-storage-dir',
+            'version-store' => array(
+                'type' => 'my-store-type',
+            ),
         ), $config->getRaw(Config::REPO));
     }
 
@@ -277,10 +281,14 @@ class ConfigTest extends PHPUnit_Framework_TestCase
         $config = new Config();
         $config->set(Config::REPO_TYPE, 'my-type');
         $config->set(Config::REPO_STORAGE_DIR, 'my-storage-dir');
+        $config->set(Config::REPO_VERSION_STORE_TYPE, 'my-store-type');
 
         $this->assertSame(array(
             'type' => 'my-type',
             'storage-dir' => 'my-storage-dir',
+            'version-store' => array(
+                'type' => 'my-store-type',
+            ),
         ), $config->get(Config::REPO));
     }
 
@@ -375,13 +383,20 @@ class ConfigTest extends PHPUnit_Framework_TestCase
         $config->set(Config::REPO, array(
             'type' => 'my-type',
             'storage-dir' => 'my-storage-dir',
+            'version-store' => array(
+                'type' => 'my-store-type',
+            ),
         ));
 
         $this->assertSame('my-type', $config->get(Config::REPO_TYPE));
         $this->assertSame('my-storage-dir', $config->get(Config::REPO_STORAGE_DIR));
+        $this->assertSame('my-store-type', $config->get(Config::REPO_VERSION_STORE_TYPE));
         $this->assertSame(array(
             'type' => 'my-type',
             'storage-dir' => 'my-storage-dir',
+            'version-store' => array(
+                'type' => 'my-store-type',
+            ),
         ), $config->get(Config::REPO));
     }
 
@@ -508,8 +523,10 @@ class ConfigTest extends PHPUnit_Framework_TestCase
 
         $this->assertSame(array(
             Config::PULI_DIR => 'my-puli-dir',
-            Config::REPO_TYPE => 'my-type',
-            Config::REPO_STORAGE_DIR => '{$puli-dir}/my-storage-dir',
+            Config::REPO => array(
+                'type' => 'my-type',
+                'storage-dir' => '{$puli-dir}/my-storage-dir',
+            )
         ), $config->toRawArray());
     }
 
@@ -518,13 +535,16 @@ class ConfigTest extends PHPUnit_Framework_TestCase
         $baseConfig = new Config();
         $baseConfig->set(Config::PULI_DIR, 'my-puli-dir');
         $baseConfig->set(Config::REPO_TYPE, 'my-type');
+
         $config = new Config($baseConfig);
         $config->set(Config::REPO_STORAGE_DIR, '{$puli-dir}/my-storage-dir');
 
         $this->assertSame(array(
             Config::PULI_DIR => 'my-puli-dir',
-            Config::REPO_TYPE => 'my-type',
-            Config::REPO_STORAGE_DIR => '{$puli-dir}/my-storage-dir',
+            Config::REPO => array(
+                'type' => 'my-type',
+                'storage-dir' => '{$puli-dir}/my-storage-dir',
+            )
         ), $config->toRawArray());
     }
 
@@ -533,15 +553,18 @@ class ConfigTest extends PHPUnit_Framework_TestCase
         $baseConfig = new Config();
         $baseConfig->set(Config::PULI_DIR, 'my-puli-dir');
         $baseConfig->set(Config::REPO_TYPE, 'my-type');
+
         $config = new Config($baseConfig);
         $config->set(Config::REPO_STORAGE_DIR, '{$puli-dir}/my-storage-dir');
 
         $this->assertSame(array(
-            Config::REPO_STORAGE_DIR => '{$puli-dir}/my-storage-dir',
+            Config::REPO => array(
+                'storage-dir' => '{$puli-dir}/my-storage-dir',
+            )
         ), $config->toRawArray(false));
     }
 
-    public function testToRawNestedArray()
+    public function testToFlatRawArray()
     {
         $config = new Config();
         $config->set(Config::PULI_DIR, 'my-puli-dir');
@@ -550,47 +573,38 @@ class ConfigTest extends PHPUnit_Framework_TestCase
 
         $this->assertSame(array(
             Config::PULI_DIR => 'my-puli-dir',
-            Config::REPO => array(
-                'type' => 'my-type',
-                'storage-dir' => '{$puli-dir}/my-storage-dir',
-            )
-        ), $config->toRawNestedArray());
+            Config::REPO_TYPE => 'my-type',
+            Config::REPO_STORAGE_DIR => '{$puli-dir}/my-storage-dir',
+        ), $config->toFlatRawArray());
     }
 
-    public function testToRawNestedArrayWithFallback()
+    public function testToFlatRawArrayWithFallback()
     {
         $baseConfig = new Config();
         $baseConfig->set(Config::PULI_DIR, 'my-puli-dir');
         $baseConfig->set(Config::REPO_TYPE, 'my-type');
-
         $config = new Config($baseConfig);
         $config->set(Config::REPO_STORAGE_DIR, '{$puli-dir}/my-storage-dir');
 
         $this->assertSame(array(
             Config::PULI_DIR => 'my-puli-dir',
-            Config::REPO => array(
-                'type' => 'my-type',
-                'storage-dir' => '{$puli-dir}/my-storage-dir',
-            )
-        ), $config->toRawNestedArray());
+            Config::REPO_TYPE => 'my-type',
+            Config::REPO_STORAGE_DIR => '{$puli-dir}/my-storage-dir',
+        ), $config->toFlatRawArray());
     }
 
-    public function testToRawNestedArrayWithoutFallback()
+    public function testToFlatRawArrayWithoutFallback()
     {
         $baseConfig = new Config();
         $baseConfig->set(Config::PULI_DIR, 'my-puli-dir');
         $baseConfig->set(Config::REPO_TYPE, 'my-type');
-
         $config = new Config($baseConfig);
         $config->set(Config::REPO_STORAGE_DIR, '{$puli-dir}/my-storage-dir');
 
         $this->assertSame(array(
-            Config::REPO => array(
-                'storage-dir' => '{$puli-dir}/my-storage-dir',
-            )
-        ), $config->toRawNestedArray(false));
+            Config::REPO_STORAGE_DIR => '{$puli-dir}/my-storage-dir',
+        ), $config->toFlatRawArray(false));
     }
-
 
     public function testToArray()
     {
@@ -601,8 +615,10 @@ class ConfigTest extends PHPUnit_Framework_TestCase
 
         $this->assertSame(array(
             Config::PULI_DIR => 'my-puli-dir',
-            Config::REPO_TYPE => 'my-type',
-            Config::REPO_STORAGE_DIR => 'my-puli-dir/my-storage-dir',
+            Config::REPO => array(
+                'type' => 'my-type',
+                'storage-dir' => 'my-puli-dir/my-storage-dir',
+            )
         ), $config->toArray());
     }
 
@@ -611,63 +627,20 @@ class ConfigTest extends PHPUnit_Framework_TestCase
         $baseConfig = new Config();
         $baseConfig->set(Config::PULI_DIR, 'my-puli-dir');
         $baseConfig->set(Config::REPO_TYPE, 'my-type');
+
         $config = new Config($baseConfig);
         $config->set(Config::REPO_STORAGE_DIR, '{$puli-dir}/my-storage-dir');
 
         $this->assertSame(array(
             Config::PULI_DIR => 'my-puli-dir',
-            Config::REPO_TYPE => 'my-type',
-            Config::REPO_STORAGE_DIR => 'my-puli-dir/my-storage-dir',
+            Config::REPO => array(
+                'type' => 'my-type',
+                'storage-dir' => 'my-puli-dir/my-storage-dir',
+            )
         ), $config->toArray());
     }
 
     public function testToArrayWithoutFallback()
-    {
-        $baseConfig = new Config();
-        $baseConfig->set(Config::PULI_DIR, 'my-puli-dir');
-        $baseConfig->set(Config::REPO_TYPE, 'my-type');
-        $config = new Config($baseConfig);
-        $config->set(Config::REPO_STORAGE_DIR, '{$puli-dir}/my-storage-dir');
-
-        $this->assertSame(array(
-            Config::REPO_STORAGE_DIR => '/my-storage-dir',
-        ), $config->toArray(false));
-    }
-    public function testToNestedArray()
-    {
-        $config = new Config();
-        $config->set(Config::PULI_DIR, 'my-puli-dir');
-        $config->set(Config::REPO_TYPE, 'my-type');
-        $config->set(Config::REPO_STORAGE_DIR, '{$puli-dir}/my-storage-dir');
-
-        $this->assertSame(array(
-            Config::PULI_DIR => 'my-puli-dir',
-            Config::REPO => array(
-                'type' => 'my-type',
-                'storage-dir' => 'my-puli-dir/my-storage-dir',
-            )
-        ), $config->toNestedArray());
-    }
-
-    public function testToNestedArrayWithFallback()
-    {
-        $baseConfig = new Config();
-        $baseConfig->set(Config::PULI_DIR, 'my-puli-dir');
-        $baseConfig->set(Config::REPO_TYPE, 'my-type');
-
-        $config = new Config($baseConfig);
-        $config->set(Config::REPO_STORAGE_DIR, '{$puli-dir}/my-storage-dir');
-
-        $this->assertSame(array(
-            Config::PULI_DIR => 'my-puli-dir',
-            Config::REPO => array(
-                'type' => 'my-type',
-                'storage-dir' => 'my-puli-dir/my-storage-dir',
-            )
-        ), $config->toNestedArray());
-    }
-
-    public function testToNestedArrayWithoutFallback()
     {
         $baseConfig = new Config();
         $baseConfig->set(Config::PULI_DIR, 'my-puli-dir');
@@ -680,7 +653,49 @@ class ConfigTest extends PHPUnit_Framework_TestCase
             Config::REPO => array(
                 'storage-dir' => '/my-storage-dir',
             )
-        ), $config->toNestedArray(false));
+        ), $config->toArray(false));
+    }
+
+    public function testToFlatArray()
+    {
+        $config = new Config();
+        $config->set(Config::PULI_DIR, 'my-puli-dir');
+        $config->set(Config::REPO_TYPE, 'my-type');
+        $config->set(Config::REPO_STORAGE_DIR, '{$puli-dir}/my-storage-dir');
+
+        $this->assertSame(array(
+            Config::PULI_DIR => 'my-puli-dir',
+            Config::REPO_TYPE => 'my-type',
+            Config::REPO_STORAGE_DIR => 'my-puli-dir/my-storage-dir',
+        ), $config->toFlatArray());
+    }
+
+    public function testToFlatArrayWithFallback()
+    {
+        $baseConfig = new Config();
+        $baseConfig->set(Config::PULI_DIR, 'my-puli-dir');
+        $baseConfig->set(Config::REPO_TYPE, 'my-type');
+        $config = new Config($baseConfig);
+        $config->set(Config::REPO_STORAGE_DIR, '{$puli-dir}/my-storage-dir');
+
+        $this->assertSame(array(
+            Config::PULI_DIR => 'my-puli-dir',
+            Config::REPO_TYPE => 'my-type',
+            Config::REPO_STORAGE_DIR => 'my-puli-dir/my-storage-dir',
+        ), $config->toFlatArray());
+    }
+
+    public function testToFlatArrayWithoutFallback()
+    {
+        $baseConfig = new Config();
+        $baseConfig->set(Config::PULI_DIR, 'my-puli-dir');
+        $baseConfig->set(Config::REPO_TYPE, 'my-type');
+        $config = new Config($baseConfig);
+        $config->set(Config::REPO_STORAGE_DIR, '{$puli-dir}/my-storage-dir');
+
+        $this->assertSame(array(
+            Config::REPO_STORAGE_DIR => '/my-storage-dir',
+        ), $config->toFlatArray(false));
     }
 
     public function getNotNullKeys()

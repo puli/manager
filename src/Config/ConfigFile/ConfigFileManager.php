@@ -166,6 +166,6 @@ class ConfigFileManager
     public function getConfigKeys()
     {
         // We're only interested in the values of the file, not in the defaults
-        return $this->configFile->getConfig()->toRawArray(false);
+        return $this->configFile->getConfig()->toFlatRawArray(false);
     }
 }

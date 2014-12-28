@@ -317,28 +317,28 @@ class Config
      *
      * @return array The configuration values.
      */
-    public function toArray($includeFallback = true)
+    public function toFlatArray($includeFallback = true)
     {
-        return $this->replacePlaceholders($this->toRawArray($includeFallback), $includeFallback);
+        return $this->replacePlaceholders($this->toFlatRawArray($includeFallback), $includeFallback);
     }
 
     /**
      * Returns all raw configuration values as flat array.
      *
-     * Unlike {@link toArray()}, this method does not resolve placeholders:
+     * Unlike {@link toFlatArray()}, this method does not resolve placeholders:
      *
      * ```php
      * $config = new Config();
      * $config->set(Config::PULI_DIR, '.puli');
      * $config->set(Config::REGISTRY_FILE, '{$puli-dir}/ServiceRegistry.php');
      *
-     * print_r($config->toArray());
+     * print_r($config->toFlatArray());
      * // Array(
      * //   'puli-dir' => '.puli',
      * //   'registry-file' => '.puli/ServiceRegistry.php',
      * // )
      *
-     * print_r($config->toRawArray());
+     * print_r($config->toFlatRawArray());
      * // Array(
      * //   'puli-dir' => '.puli',
      * //   'registry-file' => '{$puli-dir}/ServiceRegistry.php',
@@ -350,10 +350,10 @@ class Config
      *
      * @return array The raw configuration values.
      */
-    public function toRawArray($includeFallback = true)
+    public function toFlatRawArray($includeFallback = true)
     {
         return $includeFallback && $this->baseConfig
-            ? array_replace($this->baseConfig->toRawArray(), $this->values)
+            ? array_replace($this->baseConfig->toFlatRawArray(), $this->values)
             : $this->values;
     }
 
@@ -365,22 +365,22 @@ class Config
      *
      * @return array The configuration values.
      */
-    public function toNestedArray($includeFallback = true)
+    public function toArray($includeFallback = true)
     {
-        return $this->replacePlaceholders($this->toRawNestedArray($includeFallback), $includeFallback);
+        return $this->replacePlaceholders($this->toRawArray($includeFallback), $includeFallback);
     }
 
     /**
      * Returns all raw configuration values as nested array.
      *
-     * Unlike {@link toNestedArray()}, this method does not resolve placeholders:
+     * Unlike {@link toArray()}, this method does not resolve placeholders:
      *
      * ```php
      * $config = new Config();
      * $config->set(Config::PULI_DIR, '.puli');
      * $config->set(Config::REPO_STORAGE_DIR, '{$puli-dir}/repository');
      *
-     * print_r($config->toNestedArray());
+     * print_r($config->toArray());
      * // Array(
      * //     'puli-dir' => '.puli',
      * //     'repo' => array(
@@ -388,7 +388,7 @@ class Config
      * //      ),
      * // )
      *
-     * print_r($config->toRawNestedArray());
+     * print_r($config->toRawArray());
      * // Array(
      * //     'puli-dir' => '.puli',
      * //     'repo' => array(
@@ -402,27 +402,16 @@ class Config
      *
      * @return array The raw configuration values.
      */
-    public function toRawNestedArray($includeFallback = true)
+    public function toRawArray($includeFallback = true)
     {
         $values = array();
 
         foreach ($this->values as $key => $value) {
-            $target = &$values;
-            $keyParts = explode('.', $key);
-
-            for ($i = 0, $l = count($keyParts) - 1; $i < $l; ++$i) {
-                if (!isset($target[$keyParts[$i]])) {
-                    $target[$keyParts[$i]] = array();
-                }
-
-                $target = &$target[$keyParts[$i]];
-            }
-
-            $target[$keyParts[$l]] = $value;
+            $this->addKeyValue($key, $value, $values);
         }
 
         return $includeFallback && $this->baseConfig
-            ? array_replace_recursive($this->baseConfig->toRawNestedArray(), $values)
+            ? array_replace_recursive($this->baseConfig->toRawArray(), $values)
             : $values;
     }
 
@@ -511,7 +500,7 @@ class Config
                 continue;
             }
 
-            $values[substr($k, $offset)] = $v;
+            $this->addKeyValue(substr($k, $offset), $v, $values);
         }
 
         return $values;
@@ -526,6 +515,22 @@ class Config
 
             unset($this->values[$k]);
         }
+    }
+
+    private function addKeyValue($key, $value, &$values)
+    {
+        $target = &$values;
+        $keyParts = explode('.', $key);
+
+        for ($i = 0, $l = count($keyParts) - 1; $i < $l; ++$i) {
+            if (!isset($target[$keyParts[$i]])) {
+                $target[$keyParts[$i]] = array();
+            }
+
+            $target = &$target[$keyParts[$i]];
+        }
+
+        $target[$keyParts[$l]] = $value;
     }
 
 }
