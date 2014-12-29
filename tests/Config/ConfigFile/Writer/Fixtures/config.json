@@ -1,8 +1,8 @@
 {
     "puli-dir": "puli-dir",
-    "registry": {
-        "class": "Puli\\MyServiceRegistry",
-        "file": "{$puli-dir}/MyServiceRegistry.php"
+    "factory": {
+        "class": "Puli\\MyFactory",
+        "file": "{$puli-dir}/MyFactory.php"
     },
     "repository": {
         "type": "my-type",

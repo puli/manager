@@ -11,30 +11,30 @@
 
 namespace Puli\RepositoryManager\Tests\Generator\KeyValueStore;
 
-use Puli\RepositoryManager\Generator\KeyValueStore\FlintstoneStoreGenerator;
-use Puli\RepositoryManager\Tests\Generator\AbstractGeneratorTest;
+use Puli\RepositoryManager\Generator\KeyValueStore\FlintstoneStoreRecipeProvider;
+use Puli\RepositoryManager\Tests\Generator\AbstractRecipeProviderTest;
 
 /**
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class FlintstoneStoreGeneratorTest extends AbstractGeneratorTest
+class FlintstoneStoreRecipeProviderTest extends AbstractRecipeProviderTest
 {
     /**
-     * @var FlintstoneStoreGenerator
+     * @var FlintstoneStoreRecipeProvider
      */
-    private $generator;
+    private $provider;
 
     protected function setUp()
     {
         parent::setUp();
 
-        $this->generator = new FlintstoneStoreGenerator();
+        $this->provider = new FlintstoneStoreRecipeProvider();
     }
 
-    public function testGenerate()
+    public function testGetRecipe()
     {
-        $code = $this->generator->generateFactoryCode(
+        $recipe = $this->provider->getRecipe(
             '$store',
             $this->outputDir,
             $this->rootDir,
@@ -54,12 +54,12 @@ class FlintstoneStoreGeneratorTest extends AbstractGeneratorTest
 );
 EOF;
 
-        $this->assertCode($expected, $code);
+        $this->assertCode($expected, $recipe);
     }
 
-    public function testGenerateInOutputDir()
+    public function testGetRecipeInOutputDir()
     {
-        $code = $this->generator->generateFactoryCode(
+        $recipe = $this->provider->getRecipe(
             '$store',
             $this->outputDir,
             $this->rootDir,
@@ -81,12 +81,12 @@ EOF;
 );
 EOF;
 
-        $this->assertCode($expected, $code);
+        $this->assertCode($expected, $recipe);
     }
 
     public function testEscapeOutput()
     {
-        $code = $this->generator->generateFactoryCode(
+        $recipe = $this->provider->getRecipe(
             '$store',
             $this->outputDir,
             $this->rootDir,
@@ -108,12 +108,12 @@ EOF;
 );
 EOF;
 
-        $this->assertCode($expected, $code);
+        $this->assertCode($expected, $recipe);
     }
 
-    public function testGenerateWithoutSuffix()
+    public function testGetRecipeWithoutSuffix()
     {
-        $code = $this->generator->generateFactoryCode(
+        $recipe = $this->provider->getRecipe(
             '$store',
             $this->outputDir,
             $this->rootDir,
@@ -135,12 +135,12 @@ EOF;
 );
 EOF;
 
-        $this->assertCode($expected, $code);
+        $this->assertCode($expected, $recipe);
     }
 
-    public function testGenerateWithCustomOptions()
+    public function testGetRecipeWithCustomOptions()
     {
-        $code = $this->generator->generateFactoryCode(
+        $recipe = $this->provider->getRecipe(
             '$store',
             $this->outputDir,
             $this->rootDir,
@@ -164,12 +164,12 @@ EOF;
 );
 EOF;
 
-        $this->assertCode($expected, $code);
+        $this->assertCode($expected, $recipe);
     }
 
-    public function testRunGeneratedCode()
+    public function testRunRecipe()
     {
-        $code = $this->generator->generateFactoryCode(
+        $recipe = $this->provider->getRecipe(
             '$store',
             $this->outputDir,
             $this->rootDir,
@@ -177,7 +177,7 @@ EOF;
             $this->generatorFactory
         );
 
-        $this->putCode($this->outputPath, $code);
+        $this->putCode($this->outputPath, $recipe);
 
         require $this->outputPath;
 

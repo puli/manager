@@ -11,30 +11,30 @@
 
 namespace Puli\RepositoryManager\Tests\Generator\Discovery;
 
-use Puli\RepositoryManager\Generator\Discovery\KeyValueStoreDiscoveryGenerator;
-use Puli\RepositoryManager\Tests\Generator\AbstractDiscoveryGeneratorTest;
+use Puli\RepositoryManager\Generator\Discovery\KeyValueStoreDiscoveryRecipeProvider;
+use Puli\RepositoryManager\Tests\Generator\AbstractDiscoveryRecipeProviderTest;
 
 /**
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class KeyValueStoreDiscoveryGeneratorTest extends AbstractDiscoveryGeneratorTest
+class KeyValueStoreDiscoveryRecipeProviderTest extends AbstractDiscoveryRecipeProviderTest
 {
     /**
-     * @var KeyValueStoreDiscoveryGenerator
+     * @var KeyValueStoreDiscoveryRecipeProvider
      */
-    private $generator;
+    private $provider;
 
     protected function setUp()
     {
         parent::setUp();
 
-        $this->generator = new KeyValueStoreDiscoveryGenerator();
+        $this->provider = new KeyValueStoreDiscoveryRecipeProvider();
     }
 
-    public function testGenerate()
+    public function testGetRecipe()
     {
-        $code = $this->generator->generateFactoryCode(
+        $recipe = $this->provider->getRecipe(
             '$discovery',
             $this->outputDir,
             $this->rootDir,
@@ -51,12 +51,12 @@ class KeyValueStoreDiscoveryGeneratorTest extends AbstractDiscoveryGeneratorTest
 );
 EOF;
 
-        $this->assertCode($expected, $code);
+        $this->assertCode($expected, $recipe);
     }
 
-    public function testRunGeneratedCode()
+    public function testRunRecipe()
     {
-        $code = $this->generator->generateFactoryCode(
+        $recipe = $this->provider->getRecipe(
             '$discovery',
             $this->outputDir,
             $this->rootDir,
@@ -64,7 +64,7 @@ EOF;
             $this->generatorFactory
         );
 
-        $this->putCode($this->outputPath, $code);
+        $this->putCode($this->outputPath, $recipe);
 
         require $this->outputPath;
 

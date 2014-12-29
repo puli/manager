@@ -12,21 +12,21 @@
 namespace Puli\RepositoryManager\Tests\Generator\KeyValueStore;
 
 use Memcache;
-use Puli\RepositoryManager\Generator\KeyValueStore\MemcacheStoreGenerator;
-use Puli\RepositoryManager\Tests\Generator\AbstractGeneratorTest;
+use Puli\RepositoryManager\Generator\KeyValueStore\MemcacheStoreRecipeProvider;
+use Puli\RepositoryManager\Tests\Generator\AbstractRecipeProviderTest;
 
 /**
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class MemcacheStoreGeneratorTest extends AbstractGeneratorTest
+class MemcacheStoreRecipeProviderTest extends AbstractRecipeProviderTest
 {
     private static $supported;
 
     /**
-     * @var MemcacheStoreGenerator
+     * @var MemcacheStoreRecipeProvider
      */
-    private $generator;
+    private $provider;
 
     public static function setUpBeforeClass()
     {
@@ -47,12 +47,12 @@ class MemcacheStoreGeneratorTest extends AbstractGeneratorTest
     {
         parent::setUp();
 
-        $this->generator = new MemcacheStoreGenerator();
+        $this->provider = new MemcacheStoreRecipeProvider();
     }
 
-    public function testGenerate()
+    public function testGetRecipe()
     {
-        $code = $this->generator->generateFactoryCode(
+        $recipe = $this->provider->getRecipe(
             '$store',
             $this->outputDir,
             $this->rootDir,
@@ -67,12 +67,12 @@ class MemcacheStoreGeneratorTest extends AbstractGeneratorTest
 \$store = new MemcacheStore(\$memcache);
 EOF;
 
-        $this->assertCode($expected, $code);
+        $this->assertCode($expected, $recipe);
     }
 
-    public function testGenerateWithCustomOptions()
+    public function testGetRecipeWithCustomOptions()
     {
-        $code = $this->generator->generateFactoryCode(
+        $recipe = $this->provider->getRecipe(
             '$store',
             $this->outputDir,
             $this->rootDir,
@@ -90,10 +90,10 @@ EOF;
 \$store = new MemcacheStore(\$memcache);
 EOF;
 
-        $this->assertCode($expected, $code);
+        $this->assertCode($expected, $recipe);
     }
 
-    public function testRunGeneratedCode()
+    public function testRunRecipe()
     {
         if (!self::$supported) {
             $this->markTestSkipped('Memcache is not supported');
@@ -101,7 +101,7 @@ EOF;
             return;
         }
 
-        $code = $this->generator->generateFactoryCode(
+        $recipe = $this->provider->getRecipe(
             '$store',
             $this->outputDir,
             $this->rootDir,
@@ -109,7 +109,7 @@ EOF;
             $this->generatorFactory
         );
 
-        $this->putCode($this->outputPath, $code);
+        $this->putCode($this->outputPath, $recipe);
 
         require $this->outputPath;
 

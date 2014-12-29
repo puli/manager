@@ -81,13 +81,13 @@ class Config
 {
     const PULI_DIR = 'puli-dir';
 
-    const REGISTRY = 'registry';
+    const FACTORY = 'factory';
 
-    const REGISTRY_AUTO_GENERATE = 'registry.auto-generate';
+    const FACTORY_AUTO_GENERATE = 'factory.auto-generate';
 
-    const REGISTRY_CLASS = 'registry.class';
+    const FACTORY_CLASS = 'factory.class';
 
-    const REGISTRY_FILE = 'registry.file';
+    const FACTORY_FILE = 'factory.file';
 
     const REPOSITORY = 'repository';
 
@@ -138,9 +138,9 @@ class Config
      */
     private static $keys = array(
         self::PULI_DIR => true,
-        self::REGISTRY_AUTO_GENERATE => true,
-        self::REGISTRY_CLASS => true,
-        self::REGISTRY_FILE => true,
+        self::FACTORY_AUTO_GENERATE => true,
+        self::FACTORY_CLASS => true,
+        self::FACTORY_FILE => true,
         self::REPOSITORY_TYPE => true,
         self::REPOSITORY_PATH => true,
         self::REPOSITORY_STORE_TYPE => true,
@@ -161,7 +161,7 @@ class Config
     );
 
     private static $compositeKeys = array(
-        self::REGISTRY => true,
+        self::FACTORY => true,
         self::REPOSITORY => true,
         self::REPOSITORY_STORE => true,
         self::DISCOVERY => true,
@@ -456,7 +456,7 @@ class Config
         $this->assertNotNull($key, $value);
 
         switch ($key) {
-            case self::REGISTRY_AUTO_GENERATE:
+            case self::FACTORY_AUTO_GENERATE:
             case self::REPOSITORY_STORE_GZIP:
             case self::REPOSITORY_STORE_CACHE:
             case self::DISCOVERY_STORE_GZIP:

@@ -15,37 +15,41 @@ use Assert\Assertion;
 use InvalidArgumentException;
 
 /**
- * Contains the factory code of a service.
+ * Stores the build recipe of a service.
  *
- * Use {@link addVarDeclaration()} to add the factory code with a given variable
- * name. With {@link addImport()}, you can add import statements for any classes
- * that you use in your code:
+ * The build recipe contains two important pieces of information:
+ *
+ *  * The source code needed to create the service. The source code is stored
+ *    in the form of a variable assignment: `$varName = new MyService();`
+ *  * The import statements needed for the source code to run successfully.
+ *
+ * Use {@link addVarDeclaration()} add the source code creating the service:
  *
  * ```php
- * use Puli\RepositoryManager\Generator\FactoryCode;
+ * use Puli\RepositoryManager\Generator\BuildRecipe;
  *
- * $factoryCode = new FactoryCode();
- * $factoryCode->addImport('Acme\TypeWriter');
- * $factoryCode->addVarDeclaration('$writer', '$writer = new TypeWriter();');
+ * $recipe = new BuildRecipe();
+ * $recipe->addImport('Acme\MyRepository');
+ * $recipe->addVarDeclaration('$repo', '$repo = new MyRepository();');
  * ```
  *
- * If your service depends on other services, add declarations for these
+ * If the created service depends on other services, add declarations for these
  * services before adding the declaration for the actual service:
  *
  * ```php
- * use Puli\RepositoryManager\Generator\FactoryCode;
+ * use Puli\RepositoryManager\Generator\BuildRecipe;
  *
- * $factoryCode = new FactoryCode();
- * $factoryCode->addImport('Acme\TypeWriter');
- * $factoryCode->addImport('Acme\InkRefiller');
- * $factoryCode->addVarDeclaration('$refiller', '$refiller = new InkRefiller();');
- * $factoryCode->addVarDeclaration('$writer', '$writer = new TypeWriter($refiller);');
+ * $recipe = new BuildRecipe();
+ * $recipe->addImport('Webmozart\KeyValueStore\MemcachedStore');
+ * $recipe->addImport('Acme\MyRepository');
+ * $recipe->addVarDeclaration('$store', '$store = new MemcachedStore();');
+ * $recipe->addVarDeclaration('$repo', '$repo = new MyRepository($store);');
  * ```
  *
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class FactoryCode
+class BuildRecipe
 {
     /**
      * @var bool[]

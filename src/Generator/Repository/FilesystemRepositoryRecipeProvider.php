@@ -11,23 +11,23 @@
 
 namespace Puli\RepositoryManager\Generator\Repository;
 
-use Puli\RepositoryManager\Generator\FactoryCode;
-use Puli\RepositoryManager\Generator\FactoryCodeGenerator;
-use Puli\RepositoryManager\Generator\GeneratorFactory;
+use Puli\RepositoryManager\Generator\BuildRecipe;
+use Puli\RepositoryManager\Generator\BuildRecipeProvider;
+use Puli\RepositoryManager\Generator\ProviderFactory;
 use Webmozart\PathUtil\Path;
 
 /**
- * Generates the factory code for a filesystem based repository.
+ * Creates the build recipe for a {@link FilesystemRepository}.
  *
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class FilesystemRepositoryGenerator implements FactoryCodeGenerator
+class FilesystemRepositoryRecipeProvider implements BuildRecipeProvider
 {
     /**
      * {@inheritdoc}
      */
-    public function generateFactoryCode($varName, $outputDir, $rootDir, array $options, GeneratorFactory $generatorFactory)
+    public function getRecipe($varName, $outputDir, $rootDir, array $options, ProviderFactory $providerFactory)
     {
         if (!isset($options['path'])) {
             $options['path'] = $outputDir.'/repository';
@@ -50,10 +50,10 @@ class FilesystemRepositoryGenerator implements FactoryCodeGenerator
 
         $declaration .= "$varName = new FilesystemRepository($escPath);";
 
-        $code = new FactoryCode();
-        $code->addImport('Puli\Repository\FilesystemRepository');
-        $code->addVarDeclaration($varName, $declaration);
+        $recipe = new BuildRecipe();
+        $recipe->addImport('Puli\Repository\FilesystemRepository');
+        $recipe->addVarDeclaration($varName, $declaration);
 
-        return $code;
+        return $recipe;
     }
 }

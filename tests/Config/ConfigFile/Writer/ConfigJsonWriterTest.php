@@ -51,8 +51,8 @@ class ConfigJsonWriterTest extends JsonWriterTestCase
         $configFile = new ConfigFile();
         $configFile->getConfig()->merge(array(
             Config::PULI_DIR => 'puli-dir',
-            Config::REGISTRY_CLASS => 'Puli\MyServiceRegistry',
-            Config::REGISTRY_FILE => '{$puli-dir}/MyServiceRegistry.php',
+            Config::FACTORY_CLASS => 'Puli\MyFactory',
+            Config::FACTORY_FILE => '{$puli-dir}/MyFactory.php',
             Config::REPOSITORY_TYPE => 'my-type',
             Config::REPOSITORY_PATH => '{$puli-dir}/my-repo',
             Config::REPOSITORY_STORE_TYPE => 'my-store-type',

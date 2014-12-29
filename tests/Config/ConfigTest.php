@@ -72,9 +72,9 @@ class ConfigTest extends PHPUnit_Framework_TestCase
     {
         $config = new Config();
         $config->set(Config::PULI_DIR, 'my-puli-dir');
-        $config->set(Config::REGISTRY_FILE, '{$puli-dir}/ServiceRegistry.php');
+        $config->set(Config::FACTORY_FILE, '{$puli-dir}/ServiceRegistry.php');
 
-        $this->assertSame('{$puli-dir}/ServiceRegistry.php', $config->getRaw(Config::REGISTRY_FILE));
+        $this->assertSame('{$puli-dir}/ServiceRegistry.php', $config->getRaw(Config::FACTORY_FILE));
     }
 
     /**
@@ -231,19 +231,19 @@ class ConfigTest extends PHPUnit_Framework_TestCase
     {
         $config = new Config();
         $config->set(Config::PULI_DIR, 'my-puli-dir');
-        $config->set(Config::REGISTRY_FILE, '{$puli-dir}/ServiceRegistry.php');
+        $config->set(Config::FACTORY_FILE, '{$puli-dir}/ServiceRegistry.php');
 
-        $this->assertSame('my-puli-dir/ServiceRegistry.php', $config->get(Config::REGISTRY_FILE));
+        $this->assertSame('my-puli-dir/ServiceRegistry.php', $config->get(Config::FACTORY_FILE));
     }
 
     public function testGetReplacesPlaceholderDefinedInDefaultConfig()
     {
         $baseConfig = new Config();
-        $baseConfig->set(Config::REGISTRY_FILE, '{$puli-dir}/ServiceRegistry.php');
+        $baseConfig->set(Config::FACTORY_FILE, '{$puli-dir}/ServiceRegistry.php');
         $config = new Config($baseConfig);
         $config->set(Config::PULI_DIR, 'my-puli-dir');
 
-        $this->assertSame('my-puli-dir/ServiceRegistry.php', $config->get(Config::REGISTRY_FILE));
+        $this->assertSame('my-puli-dir/ServiceRegistry.php', $config->get(Config::FACTORY_FILE));
     }
 
     public function testGetReplacesPlaceholderSetInDefaultConfig()
@@ -251,9 +251,9 @@ class ConfigTest extends PHPUnit_Framework_TestCase
         $baseConfig = new Config();
         $baseConfig->set(Config::PULI_DIR, 'my-puli-dir');
         $config = new Config($baseConfig);
-        $config->set(Config::REGISTRY_FILE, '{$puli-dir}/ServiceRegistry.php');
+        $config->set(Config::FACTORY_FILE, '{$puli-dir}/ServiceRegistry.php');
 
-        $this->assertSame('my-puli-dir/ServiceRegistry.php', $config->get(Config::REGISTRY_FILE));
+        $this->assertSame('my-puli-dir/ServiceRegistry.php', $config->get(Config::FACTORY_FILE));
     }
 
     public function testGetDoesNotUseFallbackPlaceholderIfFallbackDisabled()
@@ -261,9 +261,9 @@ class ConfigTest extends PHPUnit_Framework_TestCase
         $baseConfig = new Config();
         $baseConfig->set(Config::PULI_DIR, 'my-puli-dir');
         $config = new Config($baseConfig);
-        $config->set(Config::REGISTRY_FILE, '{$puli-dir}/ServiceRegistry.php');
+        $config->set(Config::FACTORY_FILE, '{$puli-dir}/ServiceRegistry.php');
 
-        $this->assertSame('/ServiceRegistry.php', $config->get(Config::REGISTRY_FILE, null, false));
+        $this->assertSame('/ServiceRegistry.php', $config->get(Config::FACTORY_FILE, null, false));
     }
 
     /**
@@ -457,26 +457,26 @@ class ConfigTest extends PHPUnit_Framework_TestCase
     {
         $config = new Config();
         $config->set(Config::PULI_DIR, 'puli-dir');
-        $config->set(Config::REGISTRY_CLASS, 'Puli\ServiceRegistry');
+        $config->set(Config::FACTORY_CLASS, 'Puli\ServiceRegistry');
         $config->merge(array(
-            Config::REGISTRY_CLASS => 'My\ServiceRegistry',
-            Config::REGISTRY_FILE => 'repo-file.php',
+            Config::FACTORY_CLASS => 'My\ServiceRegistry',
+            Config::FACTORY_FILE => 'repo-file.php',
         ));
 
         $this->assertSame('puli-dir', $config->get(Config::PULI_DIR));
-        $this->assertSame('My\ServiceRegistry', $config->get(Config::REGISTRY_CLASS));
-        $this->assertSame('repo-file.php', $config->get(Config::REGISTRY_FILE));
+        $this->assertSame('My\ServiceRegistry', $config->get(Config::FACTORY_CLASS));
+        $this->assertSame('repo-file.php', $config->get(Config::FACTORY_FILE));
     }
 
     public function testRemove()
     {
         $config = new Config();
-        $config->set(Config::REGISTRY_FILE, 'ServiceRegistry.php');
-        $config->set(Config::REGISTRY_CLASS, 'Puli\ServiceRegistry');
-        $config->remove(Config::REGISTRY_CLASS);
+        $config->set(Config::FACTORY_FILE, 'ServiceRegistry.php');
+        $config->set(Config::FACTORY_CLASS, 'Puli\ServiceRegistry');
+        $config->remove(Config::FACTORY_CLASS);
 
-        $this->assertSame('ServiceRegistry.php', $config->get(Config::REGISTRY_FILE));
-        $this->assertNull($config->get(Config::REGISTRY_CLASS));
+        $this->assertSame('ServiceRegistry.php', $config->get(Config::FACTORY_FILE));
+        $this->assertNull($config->get(Config::FACTORY_CLASS));
     }
 
     public function testRemoveCompositeKey()
@@ -504,14 +504,14 @@ class ConfigTest extends PHPUnit_Framework_TestCase
     public function testGetReturnsFallbackAfterRemove()
     {
         $baseConfig = new Config();
-        $baseConfig->set(Config::REGISTRY_CLASS, 'Fallback\ServiceRegistry');
+        $baseConfig->set(Config::FACTORY_CLASS, 'Fallback\ServiceRegistry');
         $config = new Config($baseConfig);
-        $config->set(Config::REGISTRY_FILE, 'ServiceRegistry.php');
-        $config->set(Config::REGISTRY_CLASS, 'Puli\ServiceRegistry');
-        $config->remove(Config::REGISTRY_CLASS);
+        $config->set(Config::FACTORY_FILE, 'ServiceRegistry.php');
+        $config->set(Config::FACTORY_CLASS, 'Puli\ServiceRegistry');
+        $config->remove(Config::FACTORY_CLASS);
 
-        $this->assertSame('ServiceRegistry.php', $config->get(Config::REGISTRY_FILE));
-        $this->assertSame('Fallback\ServiceRegistry', $config->get(Config::REGISTRY_CLASS));
+        $this->assertSame('ServiceRegistry.php', $config->get(Config::FACTORY_FILE));
+        $this->assertSame('Fallback\ServiceRegistry', $config->get(Config::FACTORY_CLASS));
     }
 
     public function testToRawArray()
@@ -702,8 +702,8 @@ class ConfigTest extends PHPUnit_Framework_TestCase
     {
         return array(
             array(Config::PULI_DIR),
-            array(Config::REGISTRY_CLASS),
-            array(Config::REGISTRY_FILE),
+            array(Config::FACTORY_CLASS),
+            array(Config::FACTORY_FILE),
         );
     }
 
@@ -711,8 +711,8 @@ class ConfigTest extends PHPUnit_Framework_TestCase
     {
         return array(
             array(Config::PULI_DIR),
-            array(Config::REGISTRY_CLASS),
-            array(Config::REGISTRY_FILE),
+            array(Config::FACTORY_CLASS),
+            array(Config::FACTORY_FILE),
         );
     }
 
@@ -720,8 +720,8 @@ class ConfigTest extends PHPUnit_Framework_TestCase
     {
         return array(
             array(Config::PULI_DIR),
-            array(Config::REGISTRY_CLASS),
-            array(Config::REGISTRY_FILE),
+            array(Config::FACTORY_CLASS),
+            array(Config::FACTORY_FILE),
         );
     }
 }

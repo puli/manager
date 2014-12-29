@@ -62,7 +62,7 @@ class ProjectEnvironmentTest extends PHPUnit_Framework_TestCase
 
     protected function setUp()
     {
-        while (false === @mkdir($this->tempDir = sys_get_temp_dir().'/puli-repo-manager/KeyValueStoreDiscoveryGeneratorTest'.rand(10000, 99999), 0777, true)) {}
+        while (false === @mkdir($this->tempDir = sys_get_temp_dir().'/puli-repo-manager/KeyValueStoreDiscoveryRecipeProviderTest'.rand(10000, 99999), 0777, true)) {}
 
         $filesystem = new Filesystem();
         $filesystem->mirror(__DIR__.'/Fixtures', $this->tempDir);

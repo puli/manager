@@ -19,16 +19,16 @@ use Puli\Repository\Api\ResourceRepository;
  */
 class TestRepository implements ResourceRepository
 {
-    private $storageDir;
+    private $path;
 
-    public function __construct($storageDir = null)
+    public function __construct($path = null)
     {
-        $this->storageDir = $storageDir;
+        $this->path = $path;
     }
 
-    public function getStorageDir()
+    public function getPath()
     {
-        return $this->storageDir;
+        return $this->path;
     }
 
     public function get($path, $version = null)

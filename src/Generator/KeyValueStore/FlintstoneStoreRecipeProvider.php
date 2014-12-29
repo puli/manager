@@ -11,19 +11,18 @@
 
 namespace Puli\RepositoryManager\Generator\KeyValueStore;
 
-use Puli\RepositoryManager\Generator\FactoryCode;
-use Puli\RepositoryManager\Generator\FactoryCodeGenerator;
-use Puli\RepositoryManager\Generator\GeneratorFactory;
+use Puli\RepositoryManager\Generator\BuildRecipe;
+use Puli\RepositoryManager\Generator\BuildRecipeProvider;
+use Puli\RepositoryManager\Generator\ProviderFactory;
 use Webmozart\PathUtil\Path;
 
 /**
- * Generates the factory code for a key-value store backed by the Flintstone
- * library.
+ * Creates the build recipe for a {@link FlintstoneStore}.
  *
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class FlintstoneStoreGenerator implements FactoryCodeGenerator
+class FlintstoneStoreRecipeProvider implements BuildRecipeProvider
 {
     private static $defaultOptions = array(
         'path' => 'data.dat',
@@ -35,13 +34,13 @@ class FlintstoneStoreGenerator implements FactoryCodeGenerator
     /**
      * {@inheritdoc}
      */
-    public function generateFactoryCode($varName, $outputDir, $rootDir, array $options, GeneratorFactory $generatorFactory)
+    public function getRecipe($varName, $outputDir, $rootDir, array $options, ProviderFactory $providerFactory)
     {
         $options = array_replace(self::$defaultOptions, $options);
 
-        $code = new FactoryCode();
-        $code->addImport('Webmozart\KeyValueStore\FlintstoneStore');
-        $code->addImport('Flintstone\FlintstoneDB');
+        $recipe = new BuildRecipe();
+        $recipe->addImport('Webmozart\KeyValueStore\FlintstoneStore');
+        $recipe->addImport('Flintstone\FlintstoneDB');
 
         $dbPath = Path::makeAbsolute($options['path'], $rootDir);
         $dbExtension = pathinfo($dbPath, PATHINFO_EXTENSION);
@@ -63,7 +62,7 @@ class FlintstoneStoreGenerator implements FactoryCodeGenerator
         $escCache = $options['cache'] ? 'true' : 'false';
         $escMemLimit = var_export($options['swapMemoryLimit'], true);
 
-        $code->addVarDeclaration($varName, <<<EOF
+        $recipe->addVarDeclaration($varName, <<<EOF
 $varName = new FlintstoneStore(
     new FlintstoneDB($escDbName, array(
         'dir' => $escDbDir,
@@ -76,6 +75,6 @@ $varName = new FlintstoneStore(
 EOF
         );
 
-        return $code;
+        return $recipe;
     }
 }

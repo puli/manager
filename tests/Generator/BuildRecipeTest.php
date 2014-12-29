@@ -12,56 +12,56 @@
 namespace Puli\RepositoryManager\Tests\Generator;
 
 use PHPUnit_Framework_TestCase;
-use Puli\RepositoryManager\Generator\FactoryCode;
+use Puli\RepositoryManager\Generator\BuildRecipe;
 
 /**
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class FactoryCodeTest extends PHPUnit_Framework_TestCase
+class BuildRecipeTest extends PHPUnit_Framework_TestCase
 {
     public function testSortImports()
     {
-        $code = new FactoryCode();
-        $code->addImport('C');
-        $code->addImport('A');
-        $code->addImport('B');
+        $recipe = new BuildRecipe();
+        $recipe->addImport('C');
+        $recipe->addImport('A');
+        $recipe->addImport('B');
 
-        $this->assertSame(array('A', 'B', 'C'), $code->getImports());
+        $this->assertSame(array('A', 'B', 'C'), $recipe->getImports());
     }
 
     public function testRemoveDuplicateImports()
     {
-        $code = new FactoryCode();
-        $code->addImport('B');
-        $code->addImport('A');
-        $code->addImport('B');
+        $recipe = new BuildRecipe();
+        $recipe->addImport('B');
+        $recipe->addImport('A');
+        $recipe->addImport('B');
 
-        $this->assertSame(array('A', 'B'), $code->getImports());
+        $this->assertSame(array('A', 'B'), $recipe->getImports());
     }
 
     public function testAddImports()
     {
-        $code = new FactoryCode();
-        $code->addImports(array('A', 'B'));
+        $recipe = new BuildRecipe();
+        $recipe->addImports(array('A', 'B'));
 
-        $this->assertSame(array('A', 'B'), $code->getImports());
+        $this->assertSame(array('A', 'B'), $recipe->getImports());
     }
 
     public function testAddVarDeclaration()
     {
-        $code = new FactoryCode();
-        $code->addVarDeclaration('$foo', '$foo = "Foo";');
+        $recipe = new BuildRecipe();
+        $recipe->addVarDeclaration('$foo', '$foo = "Foo";');
 
         $this->assertSame(array(
             '$foo' => '$foo = "Foo";',
-        ), $code->getVarDeclarations());
+        ), $recipe->getVarDeclarations());
     }
 
     public function testAddVarDeclarations()
     {
-        $code = new FactoryCode();
-        $code->addVarDeclarations(array(
+        $recipe = new BuildRecipe();
+        $recipe->addVarDeclarations(array(
             '$foo' => '$foo = "Foo";',
             '$bar' => '$bar = "Bar";',
         ));
@@ -69,7 +69,7 @@ class FactoryCodeTest extends PHPUnit_Framework_TestCase
         $this->assertSame(array(
             '$foo' => '$foo = "Foo";',
             '$bar' => '$bar = "Bar";',
-        ), $code->getVarDeclarations());
+        ), $recipe->getVarDeclarations());
     }
 
     /**
@@ -77,9 +77,9 @@ class FactoryCodeTest extends PHPUnit_Framework_TestCase
      */
     public function testAddVarDeclarationFailsIfVarNameAlreadyUsed()
     {
-        $code = new FactoryCode();
-        $code->addVarDeclaration('$foo', '$foo = "Foo";');
-        $code->addVarDeclaration('$foo', '$foo = "Bar";');
+        $recipe = new BuildRecipe();
+        $recipe->addVarDeclaration('$foo', '$foo = "Foo";');
+        $recipe->addVarDeclaration('$foo', '$foo = "Bar";');
     }
 
     /**
@@ -87,8 +87,8 @@ class FactoryCodeTest extends PHPUnit_Framework_TestCase
      */
     public function testVariablesMustStartWithDollar()
     {
-        $code = new FactoryCode();
-        $code->addVarDeclaration('foo', '$foo = "Foo";');
+        $recipe = new BuildRecipe();
+        $recipe->addVarDeclaration('foo', '$foo = "Foo";');
     }
 
     /**
@@ -96,7 +96,7 @@ class FactoryCodeTest extends PHPUnit_Framework_TestCase
      */
     public function testVariablesMustOccurInCode()
     {
-        $code = new FactoryCode();
-        $code->addVarDeclaration('$foo', '$bar = "Foo";');
+        $recipe = new BuildRecipe();
+        $recipe->addVarDeclaration('$foo', '$bar = "Foo";');
     }
 }

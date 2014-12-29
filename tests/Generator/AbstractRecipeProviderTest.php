@@ -12,15 +12,15 @@
 namespace Puli\RepositoryManager\Tests\Generator;
 
 use PHPUnit_Framework_TestCase;
-use Puli\RepositoryManager\Generator\FactoryCode;
-use Puli\RepositoryManager\Generator\GeneratorFactory;
+use Puli\RepositoryManager\Generator\BuildRecipe;
+use Puli\RepositoryManager\Generator\ProviderFactory;
 use Symfony\Component\Filesystem\Filesystem;
 
 /**
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-abstract class AbstractGeneratorTest extends PHPUnit_Framework_TestCase
+abstract class AbstractRecipeProviderTest extends PHPUnit_Framework_TestCase
 {
     /**
      * @var string
@@ -43,15 +43,15 @@ abstract class AbstractGeneratorTest extends PHPUnit_Framework_TestCase
     protected $outputPath;
 
     /**
-     * @var GeneratorFactory
+     * @var ProviderFactory
      */
     protected $generatorFactory;
 
     protected function setUp()
     {
-        while (false === @mkdir($this->tempDir = sys_get_temp_dir().'/puli-repo-manager/KeyValueStoreDiscoveryGeneratorTest'.rand(10000, 99999), 0777, true)) {}
+        while (false === @mkdir($this->tempDir = sys_get_temp_dir().'/puli-repo-manager/AbstractRecipeProviderTest'.rand(10000, 99999), 0777, true)) {}
 
-        $this->generatorFactory = new GeneratorFactory();
+        $this->generatorFactory = new ProviderFactory();
         $this->rootDir = $this->tempDir.'/root';
         $this->outputDir = $this->rootDir.'/out';
         $this->outputPath = $this->outputDir.'/generated.php';
@@ -66,18 +66,18 @@ abstract class AbstractGeneratorTest extends PHPUnit_Framework_TestCase
         $filesystem->remove($this->tempDir);
     }
 
-    protected function putCode($path, FactoryCode $code)
+    protected function putCode($path, BuildRecipe $recipe)
     {
-        $imports = 'use '.implode(";\nuse ", $code->getImports()).";\n";
-        $declarations = implode("\n", $code->getVarDeclarations());
+        $imports = 'use '.implode(";\nuse ", $recipe->getImports()).";\n";
+        $declarations = implode("\n", $recipe->getVarDeclarations());
 
         file_put_contents($path, "<?php\nnamespace Puli\\Test;\n$imports\n$declarations");
 
 //        echo file_get_contents($path);
     }
 
-    protected function assertCode($expected, FactoryCode $code)
+    protected function assertCode($expected, BuildRecipe $recipe)
     {
-        $this->assertSame($expected, implode("\n\n", $code->getVarDeclarations()));
+        $this->assertSame($expected, implode("\n\n", $recipe->getVarDeclarations()));
     }
 }

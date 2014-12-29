@@ -11,30 +11,30 @@
 
 namespace Puli\RepositoryManager\Tests\Generator\KeyValueStore;
 
-use Puli\RepositoryManager\Generator\KeyValueStore\ArrayStoreGenerator;
-use Puli\RepositoryManager\Tests\Generator\AbstractGeneratorTest;
+use Puli\RepositoryManager\Generator\KeyValueStore\ArrayStoreRecipeProvider;
+use Puli\RepositoryManager\Tests\Generator\AbstractRecipeProviderTest;
 
 /**
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class ArrayStoreGeneratorTest extends AbstractGeneratorTest
+class ArrayStoreRecipeProviderTest extends AbstractRecipeProviderTest
 {
     /**
-     * @var ArrayStoreGenerator
+     * @var ArrayStoreRecipeProvider
      */
-    private $generator;
+    private $provider;
 
     protected function setUp()
     {
         parent::setUp();
 
-        $this->generator = new ArrayStoreGenerator();
+        $this->provider = new ArrayStoreRecipeProvider();
     }
 
-    public function testGenerate()
+    public function testGetRecipe()
     {
-        $code = $this->generator->generateFactoryCode(
+        $recipe = $this->provider->getRecipe(
             '$store',
             $this->outputDir,
             $this->rootDir,
@@ -46,12 +46,12 @@ class ArrayStoreGeneratorTest extends AbstractGeneratorTest
 \$store = new ArrayStore();
 EOF;
 
-        $this->assertCode($expected, $code);
+        $this->assertCode($expected, $recipe);
     }
 
-    public function testRunGeneratedCode()
+    public function testRunRecipe()
     {
-        $code = $this->generator->generateFactoryCode(
+        $recipe = $this->provider->getRecipe(
             '$store',
             $this->outputDir,
             $this->rootDir,
@@ -59,7 +59,7 @@ EOF;
             $this->generatorFactory
         );
 
-        $this->putCode($this->outputPath, $code);
+        $this->putCode($this->outputPath, $recipe);
 
         require $this->outputPath;
 

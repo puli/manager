@@ -11,30 +11,30 @@
 
 namespace Puli\RepositoryManager\Tests\Generator\KeyValueStore;
 
-use Puli\RepositoryManager\Generator\KeyValueStore\NullStoreGenerator;
-use Puli\RepositoryManager\Tests\Generator\AbstractGeneratorTest;
+use Puli\RepositoryManager\Generator\KeyValueStore\NullStoreRecipeProvider;
+use Puli\RepositoryManager\Tests\Generator\AbstractRecipeProviderTest;
 
 /**
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class NullStoreGeneratorTest extends AbstractGeneratorTest
+class NullStoreRecipeProviderTest extends AbstractRecipeProviderTest
 {
     /**
-     * @var NullStoreGenerator
+     * @var NullStoreRecipeProvider
      */
-    private $generator;
+    private $provider;
 
     protected function setUp()
     {
         parent::setUp();
 
-        $this->generator = new NullStoreGenerator();
+        $this->provider = new NullStoreRecipeProvider();
     }
 
-    public function testGenerate()
+    public function testGetRecipe()
     {
-        $code = $this->generator->generateFactoryCode(
+        $recipe = $this->provider->getRecipe(
             '$store',
             $this->outputDir,
             $this->rootDir,
@@ -46,12 +46,12 @@ class NullStoreGeneratorTest extends AbstractGeneratorTest
 \$store = new NullStore();
 EOF;
 
-        $this->assertCode($expected, $code);
+        $this->assertCode($expected, $recipe);
     }
 
-    public function testRunGeneratedCode()
+    public function testRunRecipe()
     {
-        $code = $this->generator->generateFactoryCode(
+        $recipe = $this->provider->getRecipe(
             '$store',
             $this->outputDir,
             $this->rootDir,
@@ -59,7 +59,7 @@ EOF;
             $this->generatorFactory
         );
 
-        $this->putCode($this->outputPath, $code);
+        $this->putCode($this->outputPath, $recipe);
 
         require $this->outputPath;
 

@@ -11,17 +11,17 @@
 
 namespace Puli\RepositoryManager\Generator\KeyValueStore;
 
-use Puli\RepositoryManager\Generator\FactoryCode;
-use Puli\RepositoryManager\Generator\FactoryCodeGenerator;
-use Puli\RepositoryManager\Generator\GeneratorFactory;
+use Puli\RepositoryManager\Generator\BuildRecipe;
+use Puli\RepositoryManager\Generator\BuildRecipeProvider;
+use Puli\RepositoryManager\Generator\ProviderFactory;
 
 /**
- * Generates the factory code for a key-value store backed by Memcache.
+ * Creates the build recipe for a {@link MemcacheStore}.
  *
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class MemcacheStoreGenerator implements FactoryCodeGenerator
+class MemcacheStoreRecipeProvider implements BuildRecipeProvider
 {
     private static $defaultOptions = array(
         'server' => '127.0.0.1',
@@ -31,23 +31,23 @@ class MemcacheStoreGenerator implements FactoryCodeGenerator
     /**
      * {@inheritdoc}
      */
-    public function generateFactoryCode($varName, $outputDir, $rootDir, array $options, GeneratorFactory $generatorFactory)
+    public function getRecipe($varName, $outputDir, $rootDir, array $options, ProviderFactory $providerFactory)
     {
         $options = array_replace(self::$defaultOptions, $options);
 
         $escServer = var_export($options['server'], true);
         $escPort = var_export($options['port'], true);
 
-        $code = new FactoryCode();
-        $code->addImport('Memcache');
-        $code->addImport('Webmozart\KeyValueStore\MemcacheStore');
-        $code->addVarDeclaration('$memcache', <<<EOF
+        $recipe = new BuildRecipe();
+        $recipe->addImport('Memcache');
+        $recipe->addImport('Webmozart\KeyValueStore\MemcacheStore');
+        $recipe->addVarDeclaration('$memcache', <<<EOF
 \$memcache = new Memcache();
 \$memcache->connect($escServer, $escPort);
 EOF
         );
-        $code->addVarDeclaration($varName, $varName.' = new MemcacheStore($memcache);');
+        $recipe->addVarDeclaration($varName, $varName.' = new MemcacheStore($memcache);');
 
-        return $code;
+        return $recipe;
     }
 }

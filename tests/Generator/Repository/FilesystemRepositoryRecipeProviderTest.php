@@ -11,30 +11,30 @@
 
 namespace Puli\RepositoryManager\Tests\Generator\Discovery;
 
-use Puli\RepositoryManager\Generator\Repository\FilesystemRepositoryGenerator;
-use Puli\RepositoryManager\Tests\Generator\AbstractGeneratorTest;
+use Puli\RepositoryManager\Generator\Repository\FilesystemRepositoryRecipeProvider;
+use Puli\RepositoryManager\Tests\Generator\AbstractRecipeProviderTest;
 
 /**
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class FilesystemRepositoryGeneratorTest extends AbstractGeneratorTest
+class FilesystemRepositoryRecipeProviderTest extends AbstractRecipeProviderTest
 {
     /**
-     * @var FilesystemRepositoryGenerator
+     * @var FilesystemRepositoryRecipeProvider
      */
-    private $generator;
+    private $provider;
 
     protected function setUp()
     {
         parent::setUp();
 
-        $this->generator = new FilesystemRepositoryGenerator();
+        $this->provider = new FilesystemRepositoryRecipeProvider();
     }
 
-    public function testGenerate()
+    public function testGetRecipe()
     {
-        $code = $this->generator->generateFactoryCode(
+        $recipe = $this->provider->getRecipe(
             '$repo',
             $this->outputDir,
             $this->rootDir,
@@ -50,12 +50,12 @@ if (!file_exists(__DIR__.'/repository')) {
 \$repo = new FilesystemRepository(__DIR__.'/repository');
 EOF;
 
-        $this->assertCode($expected, $code);
+        $this->assertCode($expected, $recipe);
     }
 
-    public function testGenerateInOutputDir()
+    public function testGetRecipeInOutputDir()
     {
-        $code = $this->generator->generateFactoryCode(
+        $recipe = $this->provider->getRecipe(
             '$repo',
             $this->outputDir,
             $this->rootDir,
@@ -69,12 +69,12 @@ EOF;
 \$repo = new FilesystemRepository(__DIR__);
 EOF;
 
-        $this->assertCode($expected, $code);
+        $this->assertCode($expected, $recipe);
     }
 
-    public function testGenerateInCustomDir()
+    public function testGetRecipeInCustomDir()
     {
-        $code = $this->generator->generateFactoryCode(
+        $recipe = $this->provider->getRecipe(
             '$repo',
             $this->outputDir,
             $this->rootDir,
@@ -92,12 +92,12 @@ if (!file_exists(__DIR__.'/../my/repository')) {
 \$repo = new FilesystemRepository(__DIR__.'/../my/repository');
 EOF;
 
-        $this->assertCode($expected, $code);
+        $this->assertCode($expected, $recipe);
     }
 
-    public function testRunGeneratedCode()
+    public function testRunRecipe()
     {
-        $code = $this->generator->generateFactoryCode(
+        $recipe = $this->provider->getRecipe(
             '$repo',
             $this->outputDir,
             $this->rootDir,
@@ -105,7 +105,7 @@ EOF;
             $this->generatorFactory
         );
 
-        $this->putCode($this->outputPath, $code);
+        $this->putCode($this->outputPath, $recipe);
 
         require $this->outputPath;
 

@@ -13,12 +13,13 @@ namespace Puli\RepositoryManager\Environment;
 
 use Puli\Discovery\Api\EditableDiscovery;
 use Puli\Repository\Api\EditableRepository;
+use Puli\Repository\Assert\Assertion;
 use Puli\RepositoryManager\Config\Config;
 use Puli\RepositoryManager\Config\ConfigFile\ConfigFileStorage;
 use Puli\RepositoryManager\Config\DefaultConfig;
 use Puli\RepositoryManager\Config\EnvConfig;
 use Puli\RepositoryManager\FileNotFoundException;
-use Puli\RepositoryManager\Generator\RegistryGenerator;
+use Puli\RepositoryManager\Generator\PuliFactoryGenerator;
 use Puli\RepositoryManager\NoDirectoryException;
 use Puli\RepositoryManager\Package\PackageFile\PackageFileStorage;
 use Puli\RepositoryManager\Package\PackageFile\RootPackageFile;
@@ -50,6 +51,11 @@ class ProjectEnvironment extends GlobalEnvironment
      * @var RootPackageFile
      */
     private $rootPackageFile;
+
+    /**
+     * @var object
+     */
+    private $factory;
 
     /**
      * @var EditableRepository
@@ -147,13 +153,11 @@ class ProjectEnvironment extends GlobalEnvironment
     public function getRepository()
     {
         if (!$this->repository) {
-            $registryClass = $this->getConfig()->get(Config::REGISTRY_CLASS);
-
-            if (!class_exists($registryClass)) {
-                $this->loadRegistry();
+            if (!$this->factory) {
+                $this->loadFactory();
             }
 
-            $this->repository = $registryClass::getRepository();
+            $this->repository = $this->factory->createRepository();
         }
 
         return $this->repository;
@@ -167,30 +171,43 @@ class ProjectEnvironment extends GlobalEnvironment
     public function getDiscovery()
     {
         if (!$this->discovery) {
-            $registryClass = $this->getConfig()->get(Config::REGISTRY_CLASS);
-
-            if (!class_exists($registryClass)) {
-                $this->loadRegistry();
+            if (!$this->factory) {
+                $this->loadFactory();
             }
 
-            $this->discovery = $registryClass::getDiscovery();
+            $this->discovery = $this->factory->createDiscovery($this->getRepository());
         }
 
         return $this->discovery;
     }
 
-    private function loadRegistry()
+    private function loadFactory()
     {
-        $registryFile = Path::makeAbsolute(
-            $this->getConfig()->get(Config::REGISTRY_FILE),
-            $this->rootDir
-        );
+        $factoryFile = $this->getConfig()->get(Config::FACTORY_FILE);
+        $factoryClass = $this->getConfig()->get(Config::FACTORY_CLASS);
 
-        if (!file_exists($registryFile)) {
-            $generator = new RegistryGenerator();
-            $generator->generateRegistry($this->rootDir, $this->getConfig());
+        Assertion::string($factoryFile, 'The "'.Config::FACTORY_FILE.'" config key must contain a string. Got: %2$s');
+        Assertion::notEmpty($factoryFile, 'The "'.Config::FACTORY_FILE.'" config key must not be empty.');
+        Assertion::string($factoryClass, 'The "'.Config::FACTORY_CLASS.'" config key must contain a string. Got: %2$s');
+        Assertion::notEmpty($factoryClass, 'The "'.Config::FACTORY_CLASS.'" config key must not be empty.');
+
+        if (!class_exists($factoryClass, false)) {
+            $absFactoryFile = Path::makeAbsolute($factoryFile, $this->rootDir);
+
+            if (!file_exists($absFactoryFile)) {
+                $generator = new PuliFactoryGenerator();
+
+                $generator->generateFactory(
+                    $absFactoryFile,
+                    $factoryClass,
+                    $this->rootDir,
+                    $this->getConfig()
+                );
+            }
+
+            require_once $absFactoryFile;
         }
 
-        require_once $registryFile;
+        $this->factory = new $factoryClass;
     }
 }
