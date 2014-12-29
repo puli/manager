@@ -14,6 +14,7 @@ namespace Puli\RepositoryManager\Tests;
 use PHPUnit_Framework_MockObject_MockObject;
 use PHPUnit_Framework_TestCase;
 use Puli\RepositoryManager\Config\ConfigFile\ConfigFile;
+use Puli\RepositoryManager\Config\DefaultConfig;
 use Puli\RepositoryManager\Package\PackageFile\RootPackageFile;
 use Puli\RepositoryManager\Tests\Package\Fixtures\TestProjectEnvironment;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -56,10 +57,12 @@ abstract class ManagerTestCase extends PHPUnit_Framework_TestCase
 
     protected function initEnvironment($homeDir, $rootDir)
     {
+        $baseConfig = new DefaultConfig();
+
         $this->homeDir = $homeDir;
         $this->rootDir = $rootDir;
-        $this->configFile = new ConfigFile();
-        $this->rootPackageFile = new RootPackageFile('root');
+        $this->configFile = new ConfigFile(null, $baseConfig);
+        $this->rootPackageFile = new RootPackageFile('root', null, $baseConfig);
         $this->dispatcher = $this->getMock('Symfony\Component\EventDispatcher\EventDispatcherInterface');
 
         $this->environment = new TestProjectEnvironment(

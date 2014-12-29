@@ -147,7 +147,7 @@ class ProjectEnvironment extends GlobalEnvironment
     public function getRepository()
     {
         if (!$this->repository) {
-            $registryClass = $this->getConfig()->get(Config::REGISTRY_CLASS, 'Puli\PuliRegistry');
+            $registryClass = $this->getConfig()->get(Config::REGISTRY_CLASS);
 
             if (!class_exists($registryClass)) {
                 $this->loadRegistry();
@@ -167,7 +167,7 @@ class ProjectEnvironment extends GlobalEnvironment
     public function getDiscovery()
     {
         if (!$this->discovery) {
-            $registryClass = $this->getConfig()->get(Config::REGISTRY_CLASS, 'Puli\PuliRegistry');
+            $registryClass = $this->getConfig()->get(Config::REGISTRY_CLASS);
 
             if (!class_exists($registryClass)) {
                 $this->loadRegistry();
@@ -182,7 +182,7 @@ class ProjectEnvironment extends GlobalEnvironment
     private function loadRegistry()
     {
         $registryFile = Path::makeAbsolute(
-            $this->getConfig()->get(Config::REGISTRY_FILE, 'PuliRegistry.php'),
+            $this->getConfig()->get(Config::REGISTRY_FILE),
             $this->rootDir
         );
 
