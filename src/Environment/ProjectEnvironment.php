@@ -186,13 +186,7 @@ class ProjectEnvironment extends GlobalEnvironment
             $this->rootDir
         );
 
-        $configFile = $this->getConfigFile() ? $this->getConfigFile()->getPath() : null;
-        $rootPackageFile = $this->rootPackageFile->getPath();
-
-        // Refresh the file if the configuration has been updated
-        if (!file_exists($registryFile)
-            || ($configFile && filemtime($registryFile) < filemtime($configFile))
-            || (filemtime($registryFile) < filemtime($rootPackageFile))) {
+        if (!file_exists($registryFile)) {
             $generator = new RegistryGenerator();
             $generator->generateRegistry($this->rootDir, $this->getConfig());
         }
