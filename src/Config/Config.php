@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the puli/repository-manager package.
+ * This file is part of the puli/repository.itory-manager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -81,33 +81,35 @@ class Config
 {
     const PULI_DIR = 'puli-dir';
 
-    const GENERATE_REGISTRY = 'generate-registry';
+    const REGISTRY = 'registry';
 
-    const REGISTRY_CLASS = 'registry-class';
+    const REGISTRY_AUTO_GENERATE = 'registry.auto-generate';
 
-    const REGISTRY_FILE = 'registry-file';
+    const REGISTRY_CLASS = 'registry.class';
 
-    const REPO = 'repo';
+    const REGISTRY_FILE = 'registry.file';
 
-    const REPO_TYPE = 'repo.type';
+    const REPOSITORY = 'repository';
 
-    const REPO_STORAGE_DIR = 'repo.storage-dir';
+    const REPOSITORY_TYPE = 'repository.type';
 
-    const REPO_VERSION_STORE = 'repo.version-store';
+    const REPOSITORY_PATH = 'repository.path';
 
-    const REPO_VERSION_STORE_TYPE = 'repo.version-store.type';
+    const REPOSITORY_STORE = 'repository.store';
 
-    const REPO_VERSION_STORE_PATH = 'repo.version-store.path';
+    const REPOSITORY_STORE_TYPE = 'repository.store.type';
 
-    const REPO_VERSION_STORE_SERVER = 'repo.version-store.server';
+    const REPOSITORY_STORE_PATH = 'repository.store.path';
 
-    const REPO_VERSION_STORE_PORT = 'repo.version-store.port';
+    const REPOSITORY_STORE_SERVER = 'repository.store.server';
 
-    const REPO_VERSION_STORE_GZIP = 'repo.version-store.gzip';
+    const REPOSITORY_STORE_PORT = 'repository.store.port';
 
-    const REPO_VERSION_STORE_CACHE = 'repo.version-store.cache';
+    const REPOSITORY_STORE_GZIP = 'repository.store.gzip';
 
-    const REPO_VERSION_STORE_SWAP_MEMORY_LIMIT = 'repo.version-store.swap-memory-limit';
+    const REPOSITORY_STORE_CACHE = 'repository.store.cache';
+
+    const REPOSITORY_STORE_SWAP_MEMORY_LIMIT = 'repository.store.swap-memory-limit';
 
     const DISCOVERY = 'discovery';
 
@@ -136,18 +138,18 @@ class Config
      */
     private static $keys = array(
         self::PULI_DIR => true,
-        self::GENERATE_REGISTRY => true,
+        self::REGISTRY_AUTO_GENERATE => true,
         self::REGISTRY_CLASS => true,
         self::REGISTRY_FILE => true,
-        self::REPO_TYPE => true,
-        self::REPO_STORAGE_DIR => true,
-        self::REPO_VERSION_STORE_TYPE => true,
-        self::REPO_VERSION_STORE_PATH => true,
-        self::REPO_VERSION_STORE_SERVER => true,
-        self::REPO_VERSION_STORE_PORT => true,
-        self::REPO_VERSION_STORE_GZIP => true,
-        self::REPO_VERSION_STORE_CACHE => true,
-        self::REPO_VERSION_STORE_SWAP_MEMORY_LIMIT => true,
+        self::REPOSITORY_TYPE => true,
+        self::REPOSITORY_PATH => true,
+        self::REPOSITORY_STORE_TYPE => true,
+        self::REPOSITORY_STORE_PATH => true,
+        self::REPOSITORY_STORE_SERVER => true,
+        self::REPOSITORY_STORE_PORT => true,
+        self::REPOSITORY_STORE_GZIP => true,
+        self::REPOSITORY_STORE_CACHE => true,
+        self::REPOSITORY_STORE_SWAP_MEMORY_LIMIT => true,
         self::DISCOVERY_TYPE => true,
         self::DISCOVERY_STORE_TYPE => true,
         self::DISCOVERY_STORE_PATH => true,
@@ -159,8 +161,9 @@ class Config
     );
 
     private static $compositeKeys = array(
-        self::REPO => true,
-        self::REPO_VERSION_STORE => true,
+        self::REGISTRY => true,
+        self::REPOSITORY => true,
+        self::REPOSITORY_STORE => true,
         self::DISCOVERY => true,
         self::DISCOVERY_STORE => true,
     );
@@ -411,21 +414,21 @@ class Config
      * ```php
      * $config = new Config();
      * $config->set(Config::PULI_DIR, '.puli');
-     * $config->set(Config::REPO_STORAGE_DIR, '{$puli-dir}/repository');
+     * $config->set(Config::REPO_STORAGE_DIR, '{$puli-dir}/repository.itory');
      *
      * print_r($config->toArray());
      * // Array(
      * //     'puli-dir' => '.puli',
-     * //     'repo' => array(
-     * //         'storage-dir' => '.puli/repository',
+     * //     'repository. => array(
+     * //         'storage-dir' => '.puli/repository.itory',
      * //      ),
      * // )
      *
      * print_r($config->toRawArray());
      * // Array(
      * //     'puli-dir' => '.puli',
-     * //     'repo' => array(
-     * //         'storage-dir' => '{$puli-dir}/repository',
+     * //     'repository. => array(
+     * //         'storage-dir' => '{$puli-dir}/repository.itory',
      * //      ),
      * // )
      * ```
@@ -453,16 +456,16 @@ class Config
         $this->assertNotNull($key, $value);
 
         switch ($key) {
-            case self::GENERATE_REGISTRY:
-            case self::REPO_VERSION_STORE_GZIP:
-            case self::REPO_VERSION_STORE_CACHE:
+            case self::REGISTRY_AUTO_GENERATE:
+            case self::REPOSITORY_STORE_GZIP:
+            case self::REPOSITORY_STORE_CACHE:
             case self::DISCOVERY_STORE_GZIP:
             case self::DISCOVERY_STORE_CACHE:
                 $this->assertBoolean($key, $value);
                 break;
 
-            case self::REPO_VERSION_STORE_PORT:
-            case self::REPO_VERSION_STORE_SWAP_MEMORY_LIMIT:
+            case self::REPOSITORY_STORE_PORT:
+            case self::REPOSITORY_STORE_SWAP_MEMORY_LIMIT:
             case self::DISCOVERY_STORE_PORT:
             case self::DISCOVERY_STORE_SWAP_MEMORY_LIMIT:
                 $this->assertInteger($key, $value);

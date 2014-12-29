@@ -71,9 +71,9 @@ class PackageJsonReaderTest extends PHPUnit_Framework_TestCase
         $this->assertSame('puli-dir', $config->get(Config::PULI_DIR));
         $this->assertSame('Puli\MyServiceRegistry', $config->get(Config::REGISTRY_CLASS));
         $this->assertSame('puli-dir/MyServiceRegistry.php', $config->get(Config::REGISTRY_FILE));
-        $this->assertSame('my-type', $config->get(Config::REPO_TYPE));
-        $this->assertSame('puli-dir/my-repo', $config->get(Config::REPO_STORAGE_DIR));
-        $this->assertSame('my-store-type', $config->get(Config::REPO_VERSION_STORE_TYPE));
+        $this->assertSame('my-type', $config->get(Config::REPOSITORY_TYPE));
+        $this->assertSame('puli-dir/my-repo', $config->get(Config::REPOSITORY_PATH));
+        $this->assertSame('my-store-type', $config->get(Config::REPOSITORY_STORE_TYPE));
     }
 
     public function testReadMinimalPackageFile()

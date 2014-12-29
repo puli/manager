@@ -27,12 +27,14 @@
     ],
     "config": {
         "puli-dir": "puli-dir",
-        "registry-class": "Puli\\MyServiceRegistry",
-        "registry-file": "{$puli-dir}/MyServiceRegistry.php",
-        "repo": {
+        "registry": {
+            "class": "Puli\\MyServiceRegistry",
+            "file": "{$puli-dir}/MyServiceRegistry.php"
+        },
+        "repository": {
             "type": "my-type",
-            "storage-dir": "{$puli-dir}/my-repo",
-            "version-store": {
+            "path": "{$puli-dir}/my-repo",
+            "store": {
                 "type": "my-store-type"
             }
         }

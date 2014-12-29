@@ -72,8 +72,8 @@ class RegistryGeneratorTest extends PHPUnit_Framework_TestCase
         $config = new Config();
         $config->set(Config::REGISTRY_CLASS, 'Puli\\MyRegistry');
         $config->set(Config::REGISTRY_FILE, 'MyRegistry.php');
-        $config->set(Config::REPO_TYPE, 'my-repo-type');
-        $config->set(Config::REPO_STORAGE_DIR, 'my-storage-dir');
+        $config->set(Config::REPOSITORY_TYPE, 'my-repo-type');
+        $config->set(Config::REPOSITORY_PATH, 'my-storage-dir');
         $config->set(Config::DISCOVERY_TYPE, 'my-discovery-type');
 
         $this->registryGenerator->generateRegistry($this->tempDir, $config);
@@ -95,9 +95,9 @@ class RegistryGeneratorTest extends PHPUnit_Framework_TestCase
         $config = new Config();
         $config->set(Config::REGISTRY_CLASS, 'Puli\\MyRegistry');
         $config->set(Config::REGISTRY_FILE, 'MyRegistry.php');
-        $config->set(Config::REPO_TYPE, 'my-repo-type');
-        $config->set(Config::REPO_STORAGE_DIR, 'my-storage-dir');
-        $config->set(Config::REPO_STORAGE_DIR, 'my-storage-dir');
+        $config->set(Config::REPOSITORY_TYPE, 'my-repo-type');
+        $config->set(Config::REPOSITORY_PATH, 'my-storage-dir');
+        $config->set(Config::REPOSITORY_PATH, 'my-storage-dir');
         $config->set(Config::DISCOVERY_TYPE, 'my-discovery-type');
 
         $this->registryGenerator->generateRegistry($this->tempDir, $config);
@@ -116,8 +116,8 @@ class RegistryGeneratorTest extends PHPUnit_Framework_TestCase
         $config = new Config();
         $config->set(Config::REGISTRY_CLASS, 'MyRegistry');
         $config->set(Config::REGISTRY_FILE, 'MyRegistry.php');
-        $config->set(Config::REPO_TYPE, 'my-repo-type');
-        $config->set(Config::REPO_STORAGE_DIR, 'my-storage-dir');
+        $config->set(Config::REPOSITORY_TYPE, 'my-repo-type');
+        $config->set(Config::REPOSITORY_PATH, 'my-storage-dir');
         $config->set(Config::DISCOVERY_TYPE, 'my-discovery-type');
 
         $this->registryGenerator->generateRegistry($this->tempDir, $config);
@@ -136,8 +136,8 @@ class RegistryGeneratorTest extends PHPUnit_Framework_TestCase
         $config = new Config();
         $config->set(Config::REGISTRY_CLASS, 'Puli\\MyRegistry');
         $config->set(Config::REGISTRY_FILE, 'sub-dir/MyRegistry.php');
-        $config->set(Config::REPO_TYPE, 'my-repo-type');
-        $config->set(Config::REPO_STORAGE_DIR, 'my-storage-dir');
+        $config->set(Config::REPOSITORY_TYPE, 'my-repo-type');
+        $config->set(Config::REPOSITORY_PATH, 'my-storage-dir');
         $config->set(Config::DISCOVERY_TYPE, 'my-discovery-type');
 
         $this->registryGenerator->generateRegistry($this->tempDir, $config);

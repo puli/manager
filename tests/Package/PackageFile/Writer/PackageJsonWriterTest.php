@@ -150,9 +150,9 @@ class PackageJsonWriterTest extends JsonWriterTestCase
             Config::PULI_DIR => 'puli-dir',
             Config::REGISTRY_CLASS => 'Puli\MyServiceRegistry',
             Config::REGISTRY_FILE => '{$puli-dir}/MyServiceRegistry.php',
-            Config::REPO_TYPE => 'my-type',
-            Config::REPO_STORAGE_DIR => '{$puli-dir}/my-repo',
-            Config::REPO_VERSION_STORE_TYPE => 'my-store-type',
+            Config::REPOSITORY_TYPE => 'my-type',
+            Config::REPOSITORY_PATH => '{$puli-dir}/my-repo',
+            Config::REPOSITORY_STORE_TYPE => 'my-store-type',
         ));
         $packageFile->addInstallInfo($installInfo1);
         $packageFile->addInstallInfo($installInfo2);

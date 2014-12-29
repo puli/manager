@@ -60,7 +60,7 @@ EOF;
             $this->outputDir,
             $this->rootDir,
             array(
-                'storageDir' => $this->outputDir,
+                'path' => $this->outputDir,
             ),
             $this->generatorFactory
         );
@@ -79,7 +79,7 @@ EOF;
             $this->outputDir,
             $this->rootDir,
             array(
-                'storageDir' => 'my/repository',
+                'path' => 'my/repository',
             ),
             $this->generatorFactory
         );

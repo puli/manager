@@ -25,8 +25,8 @@ class TestRepositoryGenerator implements FactoryCodeGenerator
     {
         $code = new FactoryCode();
         $code->addImport(__NAMESPACE__.'\TestRepository');
-        $code->addVarDeclaration('$storageDir', '$storageDir = "'.$options['storageDir'].'";');
-        $code->addVarDeclaration($varName, $varName.' = new TestRepository($storageDir);');
+        $code->addVarDeclaration('$path', '$path = "'.$options['path'].'";');
+        $code->addVarDeclaration($varName, $varName.' = new TestRepository($path);');
 
         // Test global imports
         // Global imports need to be filtered when placing code in the global

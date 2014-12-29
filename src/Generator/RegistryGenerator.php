@@ -161,13 +161,13 @@ class RegistryGenerator
      */
     private function generateRepositoryCode($outputDir, $rootDir, Config $config)
     {
-        $generator = $this->factory->createRepositoryGenerator($config->get(Config::REPO_TYPE));
+        $generator = $this->factory->createRepositoryGenerator($config->get(Config::REPOSITORY_TYPE));
 
         return $generator->generateFactoryCode(
             self::REPO_VAR_NAME,
             $outputDir,
             $rootDir,
-            $this->camelizeKeys($config->get(Config::REPO)),
+            $this->camelizeKeys($config->get(Config::REPOSITORY)),
             $this->factory
         );
     }

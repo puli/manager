@@ -26,11 +26,11 @@ class DefaultConfig extends Config
     {
         parent::__construct(null, array(
             self::PULI_DIR => '.puli',
-            self::GENERATE_REGISTRY => true,
+            self::REGISTRY_AUTO_GENERATE => true,
             self::REGISTRY_CLASS => 'Puli\PuliRegistry',
             self::REGISTRY_FILE => '{$puli-dir}/PuliRegistry.php',
-            self::REPO_TYPE => 'filesystem',
-            self::REPO_STORAGE_DIR => '{$puli-dir}/repository',
+            self::REPOSITORY_TYPE => 'filesystem',
+            self::REPOSITORY_PATH => '{$puli-dir}/repository',
             self::DISCOVERY_TYPE => 'key-value-store',
         ));
     }

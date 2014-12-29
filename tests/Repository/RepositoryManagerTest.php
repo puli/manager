@@ -87,8 +87,8 @@ class RepositoryManagerTest extends ManagerTestCase
 
     public function testBuildRepository()
     {
-        $this->environment->getConfig()->set(Config::REPO_TYPE, 'filesystem');
-        $this->environment->getConfig()->set(Config::REPO_STORAGE_DIR, 'repository');
+        $this->environment->getConfig()->set(Config::REPOSITORY_TYPE, 'filesystem');
+        $this->environment->getConfig()->set(Config::REPOSITORY_PATH, 'repository');
         $this->environment->getConfig()->set(Config::DISCOVERY_TYPE, 'key-value-store');
 
         $this->rootPackageFile->addResourceMapping(new ResourceMapping('/root', 'resources'));
