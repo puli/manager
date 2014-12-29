@@ -249,7 +249,7 @@ class Config
         if (isset(self::$compositeKeys[$key])) {
             return array_replace(
                 is_array($default) ? $default : array(),
-                $fallback && $this->baseConfig ? $this->baseConfig->filterByKeyPrefix($key.'.') : array(),
+                $fallback && $this->baseConfig ? $this->baseConfig->getRaw($key) : array(),
                 $this->filterByKeyPrefix($key.'.')
             );
         }

@@ -138,6 +138,27 @@ class ConfigTest extends PHPUnit_Framework_TestCase
         ), $config->getRaw(Config::REPOSITORY));
     }
 
+    public function testGetRawCompositeKeyIncludesFallbackKeysOfMultipleLevels()
+    {
+        $baseBaseConfig = new Config();
+        $baseBaseConfig->set(Config::REPOSITORY_STORE_TYPE, 'my-store');
+
+        $baseConfig = new Config($baseBaseConfig);
+        $baseConfig->set(Config::REPOSITORY_TYPE, 'fallback-type');
+        $baseConfig->set(Config::REPOSITORY_PATH, 'fallback-path');
+
+        $config = new Config($baseConfig);
+        $config->set(Config::REPOSITORY_PATH, 'my-path');
+
+        $this->assertSame(array(
+            'store' => array(
+                'type' => 'my-store',
+            ),
+            'type' => 'fallback-type',
+            'path' => 'my-path',
+        ), $config->getRaw(Config::REPOSITORY));
+    }
+
     public function testGetRawCompositeKeyPassesDefaultToFallback()
     {
         $default = array('type' => 'my-type');
