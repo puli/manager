@@ -33,9 +33,9 @@ abstract class JsonWriterTestCase extends PHPUnit_Framework_TestCase
         self::assertEquals(
             // Adjust to json_encode() < 5.4.0:
             // Remove all newlines + following spaces except for newline at EOF
-            // Remove all single spaces between a colon ":" and one of '"', "{" or "["
-            // Replace all "/" by "\/"
-            str_replace('/', '\/', preg_replace('/(?<=:) (?=["{[])|\n\s*(?!$)/', '', file_get_contents($expected))),
+            // Remove all single spaces after a colon that is preceded by an
+            // object key
+            str_replace('/', '\/', preg_replace('/(?<=[^"]":) |\n\s*(?!$)/', '', file_get_contents($expected))),
             file_get_contents($actual),
             $message,
             0,
