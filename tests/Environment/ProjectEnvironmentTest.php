@@ -230,7 +230,7 @@ class ProjectEnvironmentTest extends PHPUnit_Framework_TestCase
             $this->dispatcher
         );
 
-        $this->assertInstanceOf('Puli\Repository\FileCopyRepository', $environment->getRepository());
+        $this->assertInstanceOf('Puli\Repository\FilesystemRepository', $environment->getRepository());
     }
 
     /**

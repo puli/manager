@@ -182,6 +182,6 @@ EOF;
         require $this->outputPath;
 
         $this->assertTrue(isset($store));
-        $this->assertInstanceOf('Webmozart\KeyValueStore\Impl\FlintstoneStore', $store);
+        $this->assertInstanceOf('Webmozart\KeyValueStore\FlintstoneStore', $store);
     }
 }

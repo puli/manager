@@ -51,10 +51,10 @@ class BindingTypeDescriptorTest extends PHPUnit_Framework_TestCase
 
         $type = $descriptor->toBindingType();
 
-        $this->assertInstanceOf('Puli\Discovery\Binding\BindingType', $type);
+        $this->assertInstanceOf('Puli\Discovery\Api\BindingType', $type);
         $this->assertSame('vendor/type', $type->getName());
         $this->assertCount(1, $type->getParameters());
-        $this->assertInstanceOf('Puli\Discovery\Binding\BindingParameter', $type->getParameter('param'));
+        $this->assertInstanceOf('Puli\Discovery\Api\BindingParameter', $type->getParameter('param'));
     }
 
     /**
@@ -106,7 +106,7 @@ class BindingTypeDescriptorTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\Discovery\Binding\NoSuchParameterException
+     * @expectedException \Puli\Discovery\Api\NoSuchParameterException
      */
     public function testGetParameterFailsIfUnknownParameter()
     {

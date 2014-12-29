@@ -111,6 +111,6 @@ EOF;
         require $this->outputPath;
 
         $this->assertTrue(isset($store));
-        $this->assertInstanceOf('Webmozart\KeyValueStore\Impl\MemcachedStore', $store);
+        $this->assertInstanceOf('Webmozart\KeyValueStore\MemcachedStore', $store);
     }
 }

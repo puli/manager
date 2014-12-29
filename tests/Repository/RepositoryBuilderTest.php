@@ -13,8 +13,8 @@ namespace Puli\RepositoryManager\Tests\Repository;
 
 use PHPUnit_Framework_MockObject_MockObject;
 use PHPUnit_Framework_TestCase;
-use Puli\Repository\ManageableRepository;
-use Puli\Repository\Resource\LocalDirectoryResource;
+use Puli\Repository\Api\EditableRepository;
+use Puli\Repository\Resource\DirectoryResource;
 use Puli\RepositoryManager\Package\Collection\PackageCollection;
 use Puli\RepositoryManager\Package\Package;
 use Puli\RepositoryManager\Package\PackageFile\PackageFile;
@@ -35,7 +35,7 @@ class RepositoryBuilderTest extends PHPUnit_Framework_TestCase
     private $packageCollection;
 
     /**
-     * @var PHPUnit_Framework_MockObject_MockObject|ManageableRepository
+     * @var PHPUnit_Framework_MockObject_MockObject|EditableRepository
      */
     private $repo;
 
@@ -53,7 +53,7 @@ class RepositoryBuilderTest extends PHPUnit_Framework_TestCase
     protected function setUp()
     {
         $this->packageCollection = new PackageCollection();
-        $this->repo = $this->getMock('Puli\Repository\ManageableRepository');
+        $this->repo = $this->getMock('Puli\Repository\Api\EditableRepository');
         $this->builder = new RepositoryBuilder();
         $this->package1Root = __DIR__.'/Fixtures/package1';
         $this->package2Root = __DIR__.'/Fixtures/package2';
@@ -83,11 +83,11 @@ class RepositoryBuilderTest extends PHPUnit_Framework_TestCase
 
         $this->repo->expects($this->at(0))
             ->method('add')
-            ->with('/package', new LocalDirectoryResource($this->package1Root.'/resources'));
+            ->with('/package', new DirectoryResource($this->package1Root.'/resources'));
 
         $this->repo->expects($this->at(1))
             ->method('add')
-            ->with('/package/css', new LocalDirectoryResource($this->package1Root.'/assets/css'));
+            ->with('/package/css', new DirectoryResource($this->package1Root.'/assets/css'));
 
         $this->builder->loadPackages($this->packageCollection);
         $this->builder->buildRepository($this->repo);
@@ -105,7 +105,7 @@ class RepositoryBuilderTest extends PHPUnit_Framework_TestCase
 
         $this->repo->expects($this->once())
             ->method('add')
-            ->with('/package', new LocalDirectoryResource($this->package2Root.'/resources'));
+            ->with('/package', new DirectoryResource($this->package2Root.'/resources'));
 
         $this->builder->loadPackages($this->packageCollection);
         $this->builder->buildRepository($this->repo);
@@ -165,11 +165,11 @@ class RepositoryBuilderTest extends PHPUnit_Framework_TestCase
 
         $this->repo->expects($this->at(0))
             ->method('add')
-            ->with('/package', new LocalDirectoryResource($this->package1Root.'/resources'));
+            ->with('/package', new DirectoryResource($this->package1Root.'/resources'));
 
         $this->repo->expects($this->at(1))
             ->method('add')
-            ->with('/package/css', new LocalDirectoryResource($this->package1Root.'/assets/css'));
+            ->with('/package/css', new DirectoryResource($this->package1Root.'/assets/css'));
 
         $this->builder->loadPackages($this->packageCollection);
         $this->builder->buildRepository($this->repo);
@@ -184,11 +184,11 @@ class RepositoryBuilderTest extends PHPUnit_Framework_TestCase
 
         $this->repo->expects($this->at(0))
             ->method('add')
-            ->with('/package', new LocalDirectoryResource($this->package1Root.'/resources'));
+            ->with('/package', new DirectoryResource($this->package1Root.'/resources'));
 
         $this->repo->expects($this->at(1))
             ->method('add')
-            ->with('/package', new LocalDirectoryResource($this->package1Root.'/assets'));
+            ->with('/package', new DirectoryResource($this->package1Root.'/assets'));
 
         $this->builder->loadPackages($this->packageCollection);
         $this->builder->buildRepository($this->repo);
@@ -211,19 +211,19 @@ class RepositoryBuilderTest extends PHPUnit_Framework_TestCase
 
         $this->repo->expects($this->at(0))
             ->method('add')
-            ->with('/package1', new LocalDirectoryResource($this->package1Root.'/resources'));
+            ->with('/package1', new DirectoryResource($this->package1Root.'/resources'));
 
         $this->repo->expects($this->at(1))
             ->method('add')
-            ->with('/package1/css', new LocalDirectoryResource($this->package1Root.'/assets/css'));
+            ->with('/package1/css', new DirectoryResource($this->package1Root.'/assets/css'));
 
         $this->repo->expects($this->at(2))
             ->method('add')
-            ->with('/package1', new LocalDirectoryResource($this->package2Root.'/override'));
+            ->with('/package1', new DirectoryResource($this->package2Root.'/override'));
 
         $this->repo->expects($this->at(3))
             ->method('add')
-            ->with('/package1/css', new LocalDirectoryResource($this->package2Root.'/css-override'));
+            ->with('/package1/css', new DirectoryResource($this->package2Root.'/css-override'));
 
         $this->builder->loadPackages($this->packageCollection);
         $this->builder->buildRepository($this->repo);
@@ -246,19 +246,19 @@ class RepositoryBuilderTest extends PHPUnit_Framework_TestCase
 
         $this->repo->expects($this->at(0))
             ->method('add')
-            ->with('/package1', new LocalDirectoryResource($this->package1Root.'/resources'));
+            ->with('/package1', new DirectoryResource($this->package1Root.'/resources'));
 
         $this->repo->expects($this->at(1))
             ->method('add')
-            ->with('/package1/css', new LocalDirectoryResource($this->package1Root.'/assets/css'));
+            ->with('/package1/css', new DirectoryResource($this->package1Root.'/assets/css'));
 
         $this->repo->expects($this->at(2))
             ->method('add')
-            ->with('/package1', new LocalDirectoryResource($this->package2Root.'/override'));
+            ->with('/package1', new DirectoryResource($this->package2Root.'/override'));
 
         $this->repo->expects($this->at(3))
             ->method('add')
-            ->with('/package1/css', new LocalDirectoryResource($this->package2Root.'/css-override'));
+            ->with('/package1/css', new DirectoryResource($this->package2Root.'/css-override'));
 
         $this->builder->loadPackages($this->packageCollection);
         $this->builder->buildRepository($this->repo);
@@ -283,15 +283,15 @@ class RepositoryBuilderTest extends PHPUnit_Framework_TestCase
 
         $this->repo->expects($this->at(0))
             ->method('add')
-            ->with('/package1', new LocalDirectoryResource($this->package1Root.'/resources'));
+            ->with('/package1', new DirectoryResource($this->package1Root.'/resources'));
 
         $this->repo->expects($this->at(1))
             ->method('add')
-            ->with('/package1', new LocalDirectoryResource($this->package2Root.'/override'));
+            ->with('/package1', new DirectoryResource($this->package2Root.'/override'));
 
         $this->repo->expects($this->at(2))
             ->method('add')
-            ->with('/package1', new LocalDirectoryResource($this->package3Root.'/override2'));
+            ->with('/package1', new DirectoryResource($this->package3Root.'/override2'));
 
         $this->builder->loadPackages($this->packageCollection);
         $this->builder->buildRepository($this->repo);
@@ -316,19 +316,19 @@ class RepositoryBuilderTest extends PHPUnit_Framework_TestCase
 
         $this->repo->expects($this->at(0))
             ->method('add')
-            ->with('/package1', new LocalDirectoryResource($this->package1Root.'/resources'));
+            ->with('/package1', new DirectoryResource($this->package1Root.'/resources'));
 
         $this->repo->expects($this->at(1))
             ->method('add')
-            ->with('/package2', new LocalDirectoryResource($this->package2Root.'/resources'));
+            ->with('/package2', new DirectoryResource($this->package2Root.'/resources'));
 
         $this->repo->expects($this->at(2))
             ->method('add')
-            ->with('/package1', new LocalDirectoryResource($this->package3Root.'/override1'));
+            ->with('/package1', new DirectoryResource($this->package3Root.'/override1'));
 
         $this->repo->expects($this->at(3))
             ->method('add')
-            ->with('/package2', new LocalDirectoryResource($this->package3Root.'/override2'));
+            ->with('/package2', new DirectoryResource($this->package3Root.'/override2'));
 
         $this->builder->loadPackages($this->packageCollection);
         $this->builder->buildRepository($this->repo);
@@ -344,7 +344,7 @@ class RepositoryBuilderTest extends PHPUnit_Framework_TestCase
 
         $this->repo->expects($this->at(0))
             ->method('add')
-            ->with('/package', new LocalDirectoryResource($this->package1Root.'/resources'));
+            ->with('/package', new DirectoryResource($this->package1Root.'/resources'));
 
         $this->builder->loadPackages($this->packageCollection);
         $this->builder->buildRepository($this->repo);
@@ -364,15 +364,15 @@ class RepositoryBuilderTest extends PHPUnit_Framework_TestCase
 
         $this->repo->expects($this->at(0))
             ->method('add')
-            ->with('/package1', new LocalDirectoryResource($this->package1Root.'/resources'));
+            ->with('/package1', new DirectoryResource($this->package1Root.'/resources'));
 
         $this->repo->expects($this->at(1))
             ->method('add')
-            ->with('/package1', new LocalDirectoryResource($this->package2Root.'/override'));
+            ->with('/package1', new DirectoryResource($this->package2Root.'/override'));
 
         $this->repo->expects($this->at(2))
             ->method('add')
-            ->with('/package1', new LocalDirectoryResource($this->package2Root.'/css-override'));
+            ->with('/package1', new DirectoryResource($this->package2Root.'/css-override'));
 
         $this->builder->loadPackages($this->packageCollection);
         $this->builder->buildRepository($this->repo);
@@ -433,11 +433,11 @@ class RepositoryBuilderTest extends PHPUnit_Framework_TestCase
 
         $this->repo->expects($this->at(0))
             ->method('add')
-            ->with('/path', new LocalDirectoryResource($this->package1Root.'/resources'));
+            ->with('/path', new DirectoryResource($this->package1Root.'/resources'));
 
         $this->repo->expects($this->at(1))
             ->method('add')
-            ->with('/path/new', new LocalDirectoryResource($this->package2Root.'/override'));
+            ->with('/path/new', new DirectoryResource($this->package2Root.'/override'));
 
         $this->builder->loadPackages($this->packageCollection);
         $this->builder->buildRepository($this->repo);
@@ -460,11 +460,11 @@ class RepositoryBuilderTest extends PHPUnit_Framework_TestCase
 
         $this->repo->expects($this->at(0))
             ->method('add')
-            ->with('/path', new LocalDirectoryResource($this->package1Root.'/resources'));
+            ->with('/path', new DirectoryResource($this->package1Root.'/resources'));
 
         $this->repo->expects($this->at(1))
             ->method('add')
-            ->with('/path', new LocalDirectoryResource($this->package2Root.'/override'));
+            ->with('/path', new DirectoryResource($this->package2Root.'/override'));
 
         $this->builder->loadPackages($this->packageCollection);
         $this->builder->buildRepository($this->repo);

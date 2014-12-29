@@ -29,7 +29,8 @@ class DefaultConfig extends Config
             self::GENERATE_REGISTRY => true,
             self::REGISTRY_CLASS => 'Puli\PuliRegistry',
             self::REGISTRY_FILE => '{$puli-dir}/PuliRegistry.php',
-            self::REPO_TYPE => 'file-copy',
+            self::REPO_TYPE => 'filesystem',
+            self::REPO_STORAGE_DIR => '{$puli-dir}/repository',
             self::DISCOVERY_TYPE => 'key-value-store',
         ));
     }

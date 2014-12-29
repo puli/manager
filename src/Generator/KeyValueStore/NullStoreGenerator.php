@@ -30,7 +30,7 @@ class NullStoreGenerator implements FactoryCodeGenerator
     public function generateFactoryCode($varName, $outputDir, $rootDir, array $options, GeneratorFactory $generatorFactory)
     {
         $code = new FactoryCode();
-        $code->addImport('Webmozart\KeyValueStore\Impl\NullStore');
+        $code->addImport('Webmozart\KeyValueStore\NullStore');
         $code->addVarDeclaration($varName, $varName.' = new NullStore();');
 
         return $code;

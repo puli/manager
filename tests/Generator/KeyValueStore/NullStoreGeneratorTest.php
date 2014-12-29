@@ -64,6 +64,6 @@ EOF;
         require $this->outputPath;
 
         $this->assertTrue(isset($store));
-        $this->assertInstanceOf('Webmozart\KeyValueStore\Impl\NullStore', $store);
+        $this->assertInstanceOf('Webmozart\KeyValueStore\NullStore', $store);
     }
 }

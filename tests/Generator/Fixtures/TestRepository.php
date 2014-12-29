@@ -11,7 +11,7 @@
 
 namespace Puli\RepositoryManager\Tests\Generator\Fixtures;
 
-use Puli\Repository\ResourceRepository;
+use Puli\Repository\Api\ResourceRepository;
 
 /**
  * @since  1.0
@@ -35,15 +35,19 @@ class TestRepository implements ResourceRepository
     {
     }
 
-    public function find($selector)
+    public function find($query, $language = 'glob')
     {
     }
 
-    public function contains($selector)
+    public function contains($query, $language = 'glob')
     {
     }
 
-    public function listDirectory($path)
+    public function hasChildren($path)
+    {
+    }
+
+    public function listChildren($path)
     {
     }
 }

@@ -46,7 +46,7 @@ class BindingParameterDescriptorTest extends PHPUnit_Framework_TestCase
 
         $parameter = $descriptor->toBindingParameter();
 
-        $this->assertInstanceOf('Puli\Discovery\Binding\BindingParameter', $parameter);
+        $this->assertInstanceOf('Puli\Discovery\Api\BindingParameter', $parameter);
         $this->assertSame('param', $parameter->getName());
         $this->assertFalse($parameter->isRequired());
         $this->assertSame('default', $parameter->getDefaultValue());

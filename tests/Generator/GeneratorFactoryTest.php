@@ -66,7 +66,7 @@ class GeneratorFactoryTest extends PHPUnit_Framework_TestCase
     public function provideRepositoryGeneratorNames()
     {
         return array(
-            array('file-copy', 'Puli\RepositoryManager\Generator\Repository\FileCopyRepositoryGenerator'),
+            array('filesystem', 'Puli\RepositoryManager\Generator\Repository\FilesystemRepositoryGenerator'),
             array(__NAMESPACE__.'\Fixtures\TestRepositoryGenerator', __NAMESPACE__.'\Fixtures\TestRepositoryGenerator'),
         );
     }

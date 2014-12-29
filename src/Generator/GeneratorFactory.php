@@ -32,7 +32,7 @@ class GeneratorFactory
      * @var string[]
      */
     private static $repositoryGeneratorClassNames = array(
-        'file-copy' => 'Puli\RepositoryManager\Generator\Repository\FileCopyRepositoryGenerator',
+        'filesystem' => 'Puli\RepositoryManager\Generator\Repository\FilesystemRepositoryGenerator',
     );
 
     /**

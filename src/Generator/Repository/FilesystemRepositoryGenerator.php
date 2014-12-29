@@ -17,32 +17,21 @@ use Puli\RepositoryManager\Generator\GeneratorFactory;
 use Webmozart\PathUtil\Path;
 
 /**
- * Generates the factory code for a file-copy based repository.
+ * Generates the factory code for a filesystem based repository.
  *
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class FileCopyRepositoryGenerator implements FactoryCodeGenerator
+class FilesystemRepositoryGenerator implements FactoryCodeGenerator
 {
-    private static $defaultOptions = array(
-        'versionStore' => array(
-            'type' => 'null',
-        )
-    );
-
     /**
      * {@inheritdoc}
      */
     public function generateFactoryCode($varName, $outputDir, $rootDir, array $options, GeneratorFactory $generatorFactory)
     {
-        $options = array_replace_recursive(self::$defaultOptions, $options);
-
         if (!isset($options['storageDir'])) {
             $options['storageDir'] = $outputDir.'/repository';
         }
-
-        $kvsGenerator = $generatorFactory->createKeyValueStoreGenerator($options['versionStore']['type']);
-        $kvsCode = $kvsGenerator->generateFactoryCode('$versionStore', $outputDir, $rootDir, $options['versionStore'], $generatorFactory);
 
         $storageDir = Path::makeAbsolute($options['storageDir'], $rootDir);
         $relStorageDir = Path::makeRelative($storageDir, $outputDir);
@@ -51,18 +40,19 @@ class FileCopyRepositoryGenerator implements FactoryCodeGenerator
             ? '__DIR__.'.var_export('/'.$relStorageDir, true)
             : '__DIR__';
 
-        $code = new FactoryCode();
-        $code->addImports($kvsCode->getImports());
-        $code->addVarDeclarations($kvsCode->getVarDeclarations());
+        $declaration = '';
 
-        $code->addImport('Puli\Repository\FileCopyRepository');
-        $code->addVarDeclaration($varName, <<<EOF
-$varName = new FileCopyRepository(
-    $escStorageDir,
-    \$versionStore
-);
-EOF
-        );
+        if ($relStorageDir) {
+            $declaration = "if (!file_exists($escStorageDir)) {\n".
+                "    mkdir($escStorageDir, 0777, true);\n".
+                "}\n\n";
+        }
+
+        $declaration .= "$varName = new FilesystemRepository($escStorageDir);";
+
+        $code = new FactoryCode();
+        $code->addImport('Puli\Repository\FilesystemRepository');
+        $code->addVarDeclaration($varName, $declaration);
 
         return $code;
     }

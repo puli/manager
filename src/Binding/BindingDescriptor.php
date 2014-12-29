@@ -13,7 +13,7 @@ namespace Puli\RepositoryManager\Binding;
 
 use Assert\Assertion;
 use InvalidArgumentException;
-use Puli\Discovery\Binding\NoSuchParameterException;
+use Puli\Discovery\Api\NoSuchParameterException;
 
 /**
  * Describes a resource binding.

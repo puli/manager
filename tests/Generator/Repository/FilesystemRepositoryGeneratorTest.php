@@ -11,17 +11,17 @@
 
 namespace Puli\RepositoryManager\Tests\Generator\Discovery;
 
-use Puli\RepositoryManager\Generator\Repository\FileCopyRepositoryGenerator;
+use Puli\RepositoryManager\Generator\Repository\FilesystemRepositoryGenerator;
 use Puli\RepositoryManager\Tests\Generator\AbstractGeneratorTest;
 
 /**
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class FileCopyRepositoryGeneratorTest extends AbstractGeneratorTest
+class FilesystemRepositoryGeneratorTest extends AbstractGeneratorTest
 {
     /**
-     * @var FileCopyRepositoryGenerator
+     * @var FilesystemRepositoryGenerator
      */
     private $generator;
 
@@ -29,7 +29,7 @@ class FileCopyRepositoryGeneratorTest extends AbstractGeneratorTest
     {
         parent::setUp();
 
-        $this->generator = new FileCopyRepositoryGenerator();
+        $this->generator = new FilesystemRepositoryGenerator();
     }
 
     public function testGenerate()
@@ -43,12 +43,11 @@ class FileCopyRepositoryGeneratorTest extends AbstractGeneratorTest
         );
 
         $expected = <<<EOF
-\$versionStore = new NullStore();
+if (!file_exists(__DIR__.'/repository')) {
+    mkdir(__DIR__.'/repository', 0777, true);
+}
 
-\$repo = new FileCopyRepository(
-    __DIR__.'/repository',
-    \$versionStore
-);
+\$repo = new FilesystemRepository(__DIR__.'/repository');
 EOF;
 
         $this->assertCode($expected, $code);
@@ -67,12 +66,7 @@ EOF;
         );
 
         $expected = <<<EOF
-\$versionStore = new NullStore();
-
-\$repo = new FileCopyRepository(
-    __DIR__,
-    \$versionStore
-);
+\$repo = new FilesystemRepository(__DIR__);
 EOF;
 
         $this->assertCode($expected, $code);
@@ -91,12 +85,11 @@ EOF;
         );
 
         $expected = <<<EOF
-\$versionStore = new NullStore();
+if (!file_exists(__DIR__.'/../my/repository')) {
+    mkdir(__DIR__.'/../my/repository', 0777, true);
+}
 
-\$repo = new FileCopyRepository(
-    __DIR__.'/../my/repository',
-    \$versionStore
-);
+\$repo = new FilesystemRepository(__DIR__.'/../my/repository');
 EOF;
 
         $this->assertCode($expected, $code);
@@ -117,6 +110,6 @@ EOF;
         require $this->outputPath;
 
         $this->assertTrue(isset($repo));
-        $this->assertInstanceOf('Puli\Repository\FileCopyRepository', $repo);
+        $this->assertInstanceOf('Puli\Repository\FilesystemRepository', $repo);
     }
 }

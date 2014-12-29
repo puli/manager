@@ -40,7 +40,7 @@ class FlintstoneStoreGenerator implements FactoryCodeGenerator
         $options = array_replace(self::$defaultOptions, $options);
 
         $code = new FactoryCode();
-        $code->addImport('Webmozart\KeyValueStore\Impl\FlintstoneStore');
+        $code->addImport('Webmozart\KeyValueStore\FlintstoneStore');
         $code->addImport('Flintstone\FlintstoneDB');
 
         $dbPath = Path::makeAbsolute($options['path'], $rootDir);

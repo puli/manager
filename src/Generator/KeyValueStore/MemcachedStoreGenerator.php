@@ -41,7 +41,7 @@ class MemcachedStoreGenerator implements FactoryCodeGenerator
 
         $code = new FactoryCode();
         $code->addImport('Memcached');
-        $code->addImport('Webmozart\KeyValueStore\Impl\MemcachedStore');
+        $code->addImport('Webmozart\KeyValueStore\MemcachedStore');
         $code->addVarDeclaration('$memcached', <<<EOF
 \$memcached = new Memcached();
 \$memcached->addServer($escServer, $escPort);

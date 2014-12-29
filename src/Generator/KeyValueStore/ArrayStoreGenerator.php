@@ -30,7 +30,7 @@ class ArrayStoreGenerator implements FactoryCodeGenerator
     public function generateFactoryCode($varName, $outputDir, $rootDir, array $options, GeneratorFactory $generatorFactory)
     {
         $code = new FactoryCode();
-        $code->addImport('Webmozart\KeyValueStore\Impl\ArrayStore');
+        $code->addImport('Webmozart\KeyValueStore\ArrayStore');
         $code->addVarDeclaration($varName, $varName.' = new ArrayStore();');
 
         return $code;

@@ -11,11 +11,10 @@
 
 namespace Puli\RepositoryManager\Repository;
 
-use Puli\Repository\ManageableRepository;
+use Puli\Repository\Api\EditableRepository;
+use Puli\Repository\Api\Resource\FilesystemResource;
 use Puli\Repository\Resource\DirectoryResource;
-use Puli\Repository\Resource\LocalDirectoryResource;
-use Puli\Repository\Resource\LocalFileResource;
-use Puli\Repository\Resource\LocalResource;
+use Puli\Repository\Resource\FileResource;
 use Puli\RepositoryManager\Package\Collection\PackageCollection;
 use Puli\RepositoryManager\Package\Graph\PackageNameGraph;
 use Puli\RepositoryManager\Package\Package;
@@ -93,10 +92,10 @@ class RepositoryBuilder
      *
      * Call {@link loadPackages()} first, otherwise this method will do nothing.
      *
-     * @param ManageableRepository $repo The repository that the
-     *                                            loaded resources are added to.
+     * @param EditableRepository $repo The repository that the loaded resources
+     *                                 are added to.
      */
-    public function buildRepository(ManageableRepository $repo)
+    public function buildRepository(EditableRepository $repo)
     {
         if (null === $this->packageGraph) {
             // Not loaded
@@ -174,8 +173,8 @@ class RepositoryBuilder
                 }
 
                 $resource = is_dir($absolutePath)
-                    ? new LocalDirectoryResource($absolutePath)
-                    : new LocalFileResource($absolutePath);
+                    ? new DirectoryResource($absolutePath)
+                    : new FileResource($absolutePath);
 
                 // Packages can set a repository path to multiple local paths
                 $this->resources[$packageName][$path][] = $resource;
@@ -191,7 +190,7 @@ class RepositoryBuilder
         }
     }
 
-    private function prepareConflictDetection($path, LocalResource $resource, $currentPackageName)
+    private function prepareConflictDetection($path, FilesystemResource $resource, $currentPackageName)
     {
         if (!isset($this->knownPaths[$path])) {
             $this->knownPaths[$path] = array();
@@ -202,8 +201,8 @@ class RepositoryBuilder
         // Detect conflicts in sub-directories
         if ($resource instanceof DirectoryResource) {
             $basePath = rtrim($path, '/').'/';
-            foreach ($resource->listEntries() as $entry) {
-                $this->prepareConflictDetection($basePath.basename($entry->getLocalPath()), $entry, $currentPackageName);
+            foreach ($resource->listChildren() as $entry) {
+                $this->prepareConflictDetection($basePath.basename($entry->getFilesystemPath()), $entry, $currentPackageName);
             }
         }
     }
@@ -288,7 +287,7 @@ class RepositoryBuilder
         }
     }
 
-    private function addResources(ManageableRepository $repo)
+    private function addResources(EditableRepository $repo)
     {
         $packageOrder = $this->packageGraph->getSortedPackageNames();
 

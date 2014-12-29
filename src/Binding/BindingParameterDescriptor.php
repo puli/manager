@@ -13,7 +13,7 @@ namespace Puli\RepositoryManager\Binding;
 
 use Assert\Assertion;
 use InvalidArgumentException;
-use Puli\Discovery\Binding\BindingParameter;
+use Puli\Discovery\Api\BindingParameter;
 use RuntimeException;
 
 /**
