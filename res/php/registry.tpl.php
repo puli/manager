@@ -52,7 +52,7 @@ class <?php echo $shortClassName."\n" ?>
     /**
      * Returns the resource discovery.
      *
-     * @return ResourceRepository The global resource discovery.
+     * @return ResourceDiscovery The global resource discovery.
      */
     public static function getDiscovery()
     {

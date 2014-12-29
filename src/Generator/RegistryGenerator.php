@@ -132,7 +132,11 @@ class RegistryGenerator
 
         $variables['imports'] = array_unique(array_merge(
             $repoCode->getImports(),
-            $discoveryCode->getImports()
+            $discoveryCode->getImports(),
+            array(
+                'Puli\Repository\Api\ResourceRepository',
+                'Puli\Discovery\Api\ResourceDiscovery',
+            )
         ));
 
         sort($variables['imports']);
