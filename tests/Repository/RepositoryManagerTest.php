@@ -64,132 +64,45 @@ class RepositoryManagerTest extends ManagerTestCase
 
     protected function setUp()
     {
-        while (false === @mkdir($this->tempDir = sys_get_temp_dir().'/puli-repo-manager/RepositoryManagerTest_temp'.rand(10000, 99999), 0777, true)) {}
+        while (false === @mkdir($this->tempDir = sys_get_temp_dir().'/puli-repo-manager/RepositoryManagerTest'.rand(10000, 99999), 0777, true)) {}
 
-        $this->packageDir1 = __DIR__.'/Fixtures/package1';
-        $this->packageDir2 = __DIR__.'/Fixtures/package2';
+        $filesystem = new Filesystem();
+        $filesystem->mirror(__DIR__.'/Fixtures', $this->tempDir);
+
+        $this->packageDir1 = $this->tempDir.'/package1';
+        $this->packageDir2 = $this->tempDir.'/package2';
 
         $this->packageFile1 = new PackageFile('package1');
         $this->packageFile2 = new PackageFile('package2');
 
-        $this->initEnvironment(__DIR__.'/Fixtures/home', __DIR__.'/Fixtures/root');
+        $this->initEnvironment($this->tempDir.'/home', $this->tempDir.'/root');
         $this->initManager();
     }
 
-    public function testDumpRepository()
+    protected function tearDown()
     {
-        return $this->markTestIncomplete('Does not work right now.');
+        $filesystem = new Filesystem();
+        $filesystem->remove($this->tempDir);
+    }
 
-        $this->environment->getConfig()->set(Config::DUMP_DIR, $this->tempDir.'/dump');
-        $this->environment->getConfig()->set(Config::WRITE_REPO, $this->tempDir.'/repository.php');
+    public function testBuildRepository()
+    {
+        $this->environment->getConfig()->set(Config::REPO_TYPE, 'filesystem');
+        $this->environment->getConfig()->set(Config::REPO_STORAGE_DIR, 'repository');
+        $this->environment->getConfig()->set(Config::DISCOVERY_TYPE, 'key-value-store');
 
         $this->rootPackageFile->addResourceMapping(new ResourceMapping('/root', 'resources'));
         $this->packageFile1->addResourceMapping(new ResourceMapping('/package1', 'resources'));
         $this->packageFile2->addResourceMapping(new ResourceMapping('/package2', 'resources'));
 
-        $this->manager->dumpRepository();
+        $this->manager->buildRepository();
 
-        $this->assertFileExists($this->tempDir.'/dump');
-        $this->assertFileExists($this->tempDir.'/repository.php');
+        $repo = $this->environment->getRepository();
 
-        /** @var ResourceRepository $repo */
-        $repo = require $this->tempDir.'/repository.php';
-
-        $this->assertSame($this->rootDir.'/resources', $repo->get('/root')->getLocalPath());
-        $this->assertSame($this->packageDir1.'/resources', $repo->get('/package1')->getLocalPath());
-        $this->assertSame($this->packageDir2.'/resources', $repo->get('/package2')->getLocalPath());
-    }
-
-    public function testDumpRepositoryReplacesExistingFiles()
-    {
-        return $this->markTestIncomplete('Does not work right now.');
-
-        $this->environment->getConfig()->set(Config::DUMP_DIR, $this->tempDir.'/dump');
-        $this->environment->getConfig()->set(Config::WRITE_REPO, $this->tempDir.'/repository.php');
-
-        mkdir($this->tempDir.'/dump');
-        touch($this->tempDir.'/dump/old');
-        touch($this->tempDir.'/repository.php');
-
-        $this->rootPackageFile->addResourceMapping(new ResourceMapping('/root', 'resources'));
-
-        $this->manager->dumpRepository();
-
-        $this->assertFileExists($this->tempDir.'/dump');
-        $this->assertFileExists($this->tempDir.'/repository.php');
-        $this->assertFileNotExists($this->tempDir.'/dump/old');
-
-        /** @var ResourceRepository $repo */
-        $repo = require $this->tempDir.'/repository.php';
-
-        $this->assertSame($this->rootDir.'/resources', $repo->get('/root')->getLocalPath());
-    }
-
-    public function testDumpRepositoryWithRelativePaths()
-    {
-        return $this->markTestIncomplete('Does not work right now.');
-
-        $filesystem = new Filesystem();
-        $filesystem->mirror(__DIR__.'/Fixtures/root', $this->tempDir);
-
-        $this->initEnvironment(__DIR__.'/Fixtures/home', $this->tempDir);
-        $this->initManager();
-
-        $this->environment->getConfig()->set(Config::DUMP_DIR, 'dump-dir/dump');
-        $this->environment->getConfig()->set(Config::WRITE_REPO, 'repo-dir/repository.php');
-
-        $this->rootPackageFile->addResourceMapping(new ResourceMapping('/root', 'resources'));
-
-        $this->manager->dumpRepository();
-
-        $this->assertFileExists($this->tempDir.'/dump-dir/dump');
-        $this->assertFileExists($this->tempDir.'/repo-dir/repository.php');
-
-        /** @var ResourceRepository $repo */
-        $repo = require $this->tempDir.'/repo-dir/repository.php';
-
-        $this->assertSame($this->tempDir.'/resources', $repo->get('/root')->getLocalPath());
-    }
-
-    public function testDumpRepositoryWithCustomRepositoryPath()
-    {
-        return $this->markTestIncomplete('Does not work right now.');
-
-        $this->environment->getConfig()->set(Config::DUMP_DIR, $this->tempDir.'/dump');
-        $this->environment->getConfig()->set(Config::WRITE_REPO, $this->tempDir.'/repository.php');
-
-        $this->rootPackageFile->addResourceMapping(new ResourceMapping('/root', 'resources'));
-
-        $this->manager->dumpRepository($this->tempDir.'/custom-repository.php');
-
-        $this->assertFileExists($this->tempDir.'/dump');
-        $this->assertFileExists($this->tempDir.'/custom-repository.php');
-        $this->assertFileNotExists($this->tempDir.'/repository.php');
-
-        /** @var ResourceRepository $repo */
-        $repo = require $this->tempDir.'/custom-repository.php';
-
-        $this->assertSame($this->rootDir.'/resources', $repo->get('/root')->getLocalPath());
-    }
-
-    public function testDumpRepositoryWithCustomCachePath()
-    {
-        return $this->markTestIncomplete('Does not work right now.');
-
-        $this->environment->getConfig()->set(Config::DUMP_DIR, $this->tempDir.'/dump');
-        $this->environment->getConfig()->set(Config::WRITE_REPO, $this->tempDir.'/repository.php');
-
-        $this->rootPackageFile->addResourceMapping(new ResourceMapping('/root', 'resources'));
-
-        $this->manager->dumpRepository(null, $this->tempDir.'/custom-cache');
-
-        $this->assertFileExists($this->tempDir.'/custom-cache');
-        $this->assertFileNotExists($this->tempDir.'/dump');
-
-        /** @var ResourceRepository $repo */
-        $repo = require $this->tempDir.'/repository.php';
-
-        $this->assertSame($this->rootDir.'/resources', $repo->get('/root')->getLocalPath());
+        $this->assertSame($this->rootDir.'/repository/root', $repo->get('/root')->getFilesystemPath());
+        $this->assertSame($this->rootDir.'/repository/package1', $repo->get('/package1')->getFilesystemPath());
+        $this->assertSame($this->rootDir.'/repository/package1/config/config.yml', $repo->get('/package1/config/config.yml')->getFilesystemPath());
+        $this->assertSame($this->rootDir.'/repository/package2', $repo->get('/package2')->getFilesystemPath());
     }
 
     private function initManager()

@@ -61,7 +61,7 @@ class RegistryGenerator
      */
     public function generateRegistry($rootDir, Config $config)
     {
-        $path = Path::makeAbsolute($config->get(Config::REGISTRY_FILE), $rootDir);
+        $path = Path::makeAbsolute($config->get(Config::REGISTRY_FILE, 'PuliRegistry.php'), $rootDir);
         $outputDir = Path::getDirectory($path);
 
         $variables = $this->generateVariables(
@@ -123,7 +123,7 @@ class RegistryGenerator
      */
     private function generateVariables(Config $config, FactoryCode $repoCode, FactoryCode $discoveryCode)
     {
-        $fqcn = trim($config->get(Config::REGISTRY_CLASS), '\\');
+        $fqcn = trim($config->get(Config::REGISTRY_CLASS, 'Puli\PuliRegistry'), '\\');
         $pos = strrpos($fqcn, '\\');
 
         $variables = array();

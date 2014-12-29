@@ -12,14 +12,14 @@
 namespace Puli\RepositoryManager\Tests\Package\PackageFile\Reader;
 
 use PHPUnit_Framework_TestCase;
+use Puli\RepositoryManager\Binding\BindingDescriptor;
 use Puli\RepositoryManager\Binding\BindingParameterDescriptor;
+use Puli\RepositoryManager\Binding\BindingTypeDescriptor;
 use Puli\RepositoryManager\Config\Config;
 use Puli\RepositoryManager\Package\InstallInfo;
 use Puli\RepositoryManager\Package\PackageFile\PackageFile;
 use Puli\RepositoryManager\Package\PackageFile\Reader\PackageJsonReader;
 use Puli\RepositoryManager\Package\ResourceMapping;
-use Puli\RepositoryManager\Binding\BindingTypeDescriptor;
-use Puli\RepositoryManager\Binding\BindingDescriptor;
 
 /**
  * @since  1.0

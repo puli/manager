@@ -11,7 +11,9 @@
 
 namespace Puli\RepositoryManager\Package\PackageFile\Reader;
 
+use Puli\RepositoryManager\Binding\BindingDescriptor;
 use Puli\RepositoryManager\Binding\BindingParameterDescriptor;
+use Puli\RepositoryManager\Binding\BindingTypeDescriptor;
 use Puli\RepositoryManager\Config\Config;
 use Puli\RepositoryManager\FileNotFoundException;
 use Puli\RepositoryManager\InvalidConfigException;
@@ -19,8 +21,6 @@ use Puli\RepositoryManager\Package\InstallInfo;
 use Puli\RepositoryManager\Package\PackageFile\PackageFile;
 use Puli\RepositoryManager\Package\PackageFile\RootPackageFile;
 use Puli\RepositoryManager\Package\ResourceMapping;
-use Puli\RepositoryManager\Binding\BindingTypeDescriptor;
-use Puli\RepositoryManager\Binding\BindingDescriptor;
 use Webmozart\Json\DecodingFailedException;
 use Webmozart\Json\JsonDecoder;
 use Webmozart\Json\ValidationFailedException;

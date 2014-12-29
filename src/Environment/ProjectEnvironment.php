@@ -11,8 +11,8 @@
 
 namespace Puli\RepositoryManager\Environment;
 
-use Puli\Discovery\ResourceDiscovery;
-use Puli\Repository\ResourceRepository;
+use Puli\Discovery\Api\EditableDiscovery;
+use Puli\Repository\Api\EditableRepository;
 use Puli\RepositoryManager\Config\Config;
 use Puli\RepositoryManager\Config\ConfigFile\ConfigFileStorage;
 use Puli\RepositoryManager\Config\DefaultConfig;
@@ -52,12 +52,12 @@ class ProjectEnvironment extends GlobalEnvironment
     private $rootPackageFile;
 
     /**
-     * @var ResourceRepository
+     * @var EditableRepository
      */
     private $repository;
 
     /**
-     * @var ResourceDiscovery
+     * @var EditableDiscovery
      */
     private $discovery;
 
@@ -142,12 +142,12 @@ class ProjectEnvironment extends GlobalEnvironment
     /**
      * Returns the resource repository of the project.
      *
-     * @return ResourceRepository The resource repository.
+     * @return EditableRepository The resource repository.
      */
     public function getRepository()
     {
         if (!$this->repository) {
-            $registryClass = $this->getConfig()->get(Config::REGISTRY_CLASS);
+            $registryClass = $this->getConfig()->get(Config::REGISTRY_CLASS, 'Puli\PuliRegistry');
 
             if (!class_exists($registryClass)) {
                 $this->loadRegistry();
@@ -162,12 +162,12 @@ class ProjectEnvironment extends GlobalEnvironment
     /**
      * Returns the resource discovery of the project.
      *
-     * @return ResourceDiscovery The resource discovery.
+     * @return EditableDiscovery The resource discovery.
      */
     public function getDiscovery()
     {
         if (!$this->discovery) {
-            $registryClass = $this->getConfig()->get(Config::REGISTRY_CLASS);
+            $registryClass = $this->getConfig()->get(Config::REGISTRY_CLASS, 'Puli\PuliRegistry');
 
             if (!class_exists($registryClass)) {
                 $this->loadRegistry();
@@ -182,7 +182,7 @@ class ProjectEnvironment extends GlobalEnvironment
     private function loadRegistry()
     {
         $registryFile = Path::makeAbsolute(
-            $this->getConfig()->get(Config::REGISTRY_FILE),
+            $this->getConfig()->get(Config::REGISTRY_FILE, 'PuliRegistry.php'),
             $this->rootDir
         );
 

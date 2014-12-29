@@ -13,7 +13,6 @@ namespace Puli\RepositoryManager;
 
 use Puli\Repository\ResourceRepository;
 use Puli\Repository\ResourceRepositoryInterface;
-use Puli\RepositoryManager\Config\Config;
 use Puli\RepositoryManager\Config\ConfigFile\ConfigFileManager;
 use Puli\RepositoryManager\Config\ConfigFile\ConfigFileStorage;
 use Puli\RepositoryManager\Config\ConfigFile\Reader\ConfigJsonReader;
@@ -30,7 +29,6 @@ use Puli\RepositoryManager\Tag\TagManager;
 use Puli\RepositoryManager\Util\System;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use Webmozart\PathUtil\Path;
 
 /**
  * Creates environment and manager instances.

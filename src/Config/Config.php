@@ -68,10 +68,10 @@ use Puli\RepositoryManager\InvalidConfigException;
  * ```php
  * $config = new Config();
  * $config->set(Config::PULI_DIR, '.puli');
- * $config->set(Config::REGISTRY_FILE, '{$puli-dir}/ServiceRegistry.php');
+ * $config->set(Config::REGISTRY_FILE, '{$puli-dir}/PuliRegistry.php');
  *
  * echo $config->get(Config::REGISTRY_FILE);
- * // => .puli/ServiceRegistry.php
+ * // => .puli/PuliRegistry.php
  * ```
  *
  * @since  1.0

@@ -12,8 +12,8 @@
 namespace Puli\RepositoryManager\Tests\Package;
 
 use PHPUnit_Framework_TestCase;
-use Puli\RepositoryManager\Package\InstallInfo;
 use Puli\RepositoryManager\Binding\BindingDescriptor;
+use Puli\RepositoryManager\Package\InstallInfo;
 
 /**
  * @since  1.0

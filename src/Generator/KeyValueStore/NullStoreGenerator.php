@@ -14,7 +14,6 @@ namespace Puli\RepositoryManager\Generator\KeyValueStore;
 use Puli\RepositoryManager\Generator\FactoryCode;
 use Puli\RepositoryManager\Generator\FactoryCodeGenerator;
 use Puli\RepositoryManager\Generator\GeneratorFactory;
-use Webmozart\PathUtil\Path;
 
 /**
  * Generates the factory code for a key-value store that does nothing.

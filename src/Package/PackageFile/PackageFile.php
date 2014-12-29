@@ -13,9 +13,9 @@ namespace Puli\RepositoryManager\Package\PackageFile;
 
 use Assert\Assertion;
 use InvalidArgumentException;
-use Puli\RepositoryManager\Package\ResourceMapping;
-use Puli\RepositoryManager\Binding\BindingTypeDescriptor;
 use Puli\RepositoryManager\Binding\BindingDescriptor;
+use Puli\RepositoryManager\Binding\BindingTypeDescriptor;
+use Puli\RepositoryManager\Package\ResourceMapping;
 
 /**
  * Stores the configuration of a package.
