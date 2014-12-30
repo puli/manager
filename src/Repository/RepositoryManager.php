@@ -14,8 +14,6 @@ namespace Puli\RepositoryManager\Repository;
 use ArrayIterator;
 use Puli\Repository\Api\EditableRepository;
 use Puli\Repository\Assert\Assertion;
-use Puli\Repository\Resource\DirectoryResource;
-use Puli\Repository\Resource\FileResource;
 use Puli\RepositoryManager\Config\Config;
 use Puli\RepositoryManager\Environment\ProjectEnvironment;
 use Puli\RepositoryManager\NoDirectoryException;
@@ -288,15 +286,15 @@ class RepositoryManager
     {
         $iterator = $this->getMappingIterator($mapping);
 
-        foreach ($iterator as $filesystemPath => $childPath) {
-            if (!isset($this->mappingsByPath[$childPath])) {
-                $this->mappingsByPath[$childPath] = array();
+        foreach ($iterator as $filesystemPath => $repositoryPath) {
+            if (!isset($this->mappingsByPath[$repositoryPath])) {
+                $this->mappingsByPath[$repositoryPath] = array();
             }
 
-            $this->mappingsByPath[$childPath][$packageName] = $mapping;
+            $this->mappingsByPath[$repositoryPath][$packageName] = $mapping;
 
-            $this->conflictDetector->register($childPath, $packageName);
-            $this->conflictDetector->markUnchecked($childPath);
+            $this->conflictDetector->register($repositoryPath, $packageName);
+            $this->conflictDetector->markUnchecked($repositoryPath);
         }
     }
 
@@ -304,14 +302,14 @@ class RepositoryManager
     {
         $iterator = $this->getMappingIterator($mapping);
 
-        foreach ($iterator as $filesystemPath => $childPath) {
-            $this->conflictDetector->unregister($childPath, $packageName);
+        foreach ($iterator as $filesystemPath => $repositoryPath) {
+            $this->conflictDetector->unregister($repositoryPath, $packageName);
 
-            unset($this->mappingsByPath[$childPath][$packageName]);
+            unset($this->mappingsByPath[$repositoryPath][$packageName]);
 
             // Reapply any overridden mappings
-            foreach ($this->mappingsByPath[$childPath] as $packageName => $mapping) {
-                $this->repoUpdater->add($mapping, $packageName);
+            foreach ($this->mappingsByPath[$repositoryPath] as $overriddenPackage => $overriddenMapping) {
+                $this->repoUpdater->add($overriddenMapping, $overriddenPackage);
             }
         }
     }
