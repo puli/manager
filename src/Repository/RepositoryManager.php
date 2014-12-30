@@ -119,6 +119,10 @@ class RepositoryManager
      */
     public function removeResourceMapping($repositoryPath)
     {
+        if (!$this->rootPackageFile->hasResourceMapping($repositoryPath)) {
+            return;
+        }
+
         $this->repo->remove($repositoryPath);
 
         $this->rootPackageFile->removeResourceMapping($repositoryPath);

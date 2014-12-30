@@ -174,6 +174,17 @@ class RepositoryManagerTest extends ManagerTestCase
         $this->manager->removeResourceMapping('/app');
     }
 
+    public function testRemoveResourceMappingDoesNothingIfUnknownPath()
+    {
+        $this->repo->expects($this->never())
+            ->method('remove');
+
+        $this->packageFileStorage->expects($this->never())
+            ->method('saveRootPackageFile');
+
+        $this->manager->removeResourceMapping('/app');
+    }
+
     public function testGetResourceMappings()
     {
         $this->rootPackageFile->addResourceMapping($mapping1 = new ResourceMapping('/app', 'resources'));
