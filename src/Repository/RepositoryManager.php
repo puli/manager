@@ -11,6 +11,7 @@
 
 namespace Puli\RepositoryManager\Repository;
 
+use ArrayIterator;
 use Puli\Repository\Api\EditableRepository;
 use Puli\Repository\Assert\Assertion;
 use Puli\Repository\Resource\DirectoryResource;
@@ -24,7 +25,8 @@ use Puli\RepositoryManager\Package\Package;
 use Puli\RepositoryManager\Package\PackageFile\PackageFileStorage;
 use Puli\RepositoryManager\Package\PackageFile\RootPackageFile;
 use Puli\RepositoryManager\Package\RootPackage;
-use Webmozart\Glob\Iterator\RecursiveDirectoryIterator;
+use Puli\RepositoryManager\Repository\Iterator\RecursivePathsIterator;
+use RecursiveIteratorIterator;
 
 /**
  * Manages the resource repository of a Puli project.
@@ -90,6 +92,11 @@ class RepositoryManager
     private $uncheckedPaths = array();
 
     /**
+     * @var bool[]
+     */
+    private $removedPaths = array();
+
+    /**
      * Creates a repository manager.
      *
      * @param ProjectEnvironment $environment
@@ -110,7 +117,7 @@ class RepositoryManager
 
         foreach ($packages as $package) {
             foreach ($package->getPackageFile()->getResourceMappings() as $mapping) {
-                $this->loadResourceMapping($package, $mapping);
+                $this->loadResourceMapping($mapping, $package);
             }
 
             $this->loadOverrideOrder($package);
@@ -138,7 +145,7 @@ class RepositoryManager
      */
     public function addResourceMapping(ResourceMapping $mapping)
     {
-        $this->loadResourceMapping($this->rootPackage, $mapping);
+        $this->loadResourceMapping($mapping, $this->rootPackage);
 
         $rootPackageName = $this->rootPackage->getName();
         $path = $mapping->getRepositoryPath();
@@ -148,12 +155,14 @@ class RepositoryManager
             $this->conflictGraph->addEdge($conflictingPackage, $rootPackageName);
         }
 
+        // Save config file before modifying the repository, so that the
+        // repository can be rebuilt *with* the changes on failures
+        $this->rootPackageFile->addResourceMapping($mapping);
+        $this->packageFileStorage->saveRootPackageFile($this->rootPackageFile);
+
         foreach ($this->filesystemPaths[$rootPackageName][$path] as $filesystemPath) {
             $this->repo->add($path, $this->createResource($filesystemPath));
         }
-
-        $this->rootPackageFile->addResourceMapping($mapping);
-        $this->packageFileStorage->saveRootPackageFile($this->rootPackageFile);
     }
 
     /**
@@ -167,10 +176,18 @@ class RepositoryManager
             return;
         }
 
-        $this->repo->remove($repositoryPath);
+        $this->unloadResourceMapping($repositoryPath, $this->rootPackage);
 
+        // Save config file before modifying the repository, so that the
+        // repository can be rebuilt *with* the changes on failures
         $this->rootPackageFile->removeResourceMapping($repositoryPath);
         $this->packageFileStorage->saveRootPackageFile($this->rootPackageFile);
+
+        $this->repo->remove($repositoryPath);
+
+        // Restore the overridden paths that have been tagged as removed in
+        // unloadResourceMapping()
+        $this->restoreOverriddenPaths();
     }
 
     /**
@@ -253,21 +270,34 @@ class RepositoryManager
     }
 
     /**
-     * @param Package $package
-     * @param         $mapping
+     * @param ResourceMapping $mapping
+     * @param Package         $package
      */
-    private function loadResourceMapping(Package $package, ResourceMapping $mapping)
+    private function loadResourceMapping(ResourceMapping $mapping, Package $package)
     {
         $path = $mapping->getRepositoryPath();
         $packageName = $package->getName();
-        $filesystemPaths = $this->getMappedPaths($mapping, $package);
+        $filesystemPaths = $this->getAbsoluteMappedPaths($mapping, $package);
 
         if (!isset($this->filesystemPaths[$packageName])) {
             $this->filesystemPaths[$packageName] = array();
         }
 
-        foreach ($filesystemPaths as $filesystemPath) {
-            $this->markPathUnchecked($path, $filesystemPath, $package);
+        $iterator = new RecursiveIteratorIterator(
+            new RecursivePathsIterator(new ArrayIterator($filesystemPaths), $path),
+            RecursiveIteratorIterator::SELF_FIRST
+        );
+
+        foreach ($iterator as $filesystemPath => $entryPath) {
+            if (!isset($this->pathReferences[$entryPath])) {
+                $this->pathReferences[$entryPath] = array();
+            }
+
+            // Mark paths for conflict detection
+            $this->uncheckedPaths[$entryPath] = true;
+
+            // Store referencing package
+            $this->pathReferences[$entryPath][$packageName] = true;
         }
 
         $this->filesystemPaths[$packageName][$path] = $filesystemPaths;
@@ -276,29 +306,25 @@ class RepositoryManager
         ksort($this->filesystemPaths[$packageName]);
     }
 
-    private function markPathUnchecked($path, $filesystemPath, Package $package)
+    private function unloadResourceMapping($path, Package $package)
     {
-        if (!isset($this->pathReferences[$path])) {
-            $this->pathReferences[$path] = array();
+        $packageName = $package->getName();
+        $filesystemPaths = $this->filesystemPaths[$packageName][$path];
+
+        $iterator = new RecursiveIteratorIterator(
+            new RecursivePathsIterator(new ArrayIterator($filesystemPaths), $path),
+            RecursiveIteratorIterator::SELF_FIRST
+        );
+
+        foreach ($iterator as $filesystemPath => $entryPath) {
+            // Mark path as removed
+            $this->removedPaths[$entryPath] = true;
+
+            // Remove referencing package
+            unset($this->pathReferences[$entryPath][$packageName]);
         }
 
-        // Check this path in detectConflict()
-        $this->uncheckedPaths[$path] = true;
-
-        // Remember which packages reference the path
-        $this->pathReferences[$path][$package->getName()] = true;
-
-        if (!is_dir($filesystemPath)) {
-            return;
-        }
-
-        // Mark nested paths as unchecked as well
-        $iterator = new RecursiveDirectoryIterator($filesystemPath);
-        $basePath = rtrim($path, '/').'/';
-
-        foreach ($iterator as $entry) {
-            $this->markPathUnchecked($basePath.basename($entry), $entry, $package);
-        }
+        unset($this->filesystemPaths[$packageName][$path]);
     }
 
     private function loadOverrideOrder(Package $package)
@@ -419,7 +445,7 @@ class RepositoryManager
      *
      * @return array
      */
-    private function getMappedPaths(ResourceMapping $mapping, Package $package)
+    private function getAbsoluteMappedPaths(ResourceMapping $mapping, Package $package)
     {
         $filesystemPaths = array();
 
@@ -453,5 +479,25 @@ class RepositoryManager
         return is_dir($filesystemPath)
             ? new DirectoryResource($filesystemPath)
             : new FileResource($filesystemPath);
+    }
+
+    private function restoreOverriddenPaths()
+    {
+        $packageOrder = $this->conflictGraph->getSortedPackageNames();
+
+        foreach ($packageOrder as $packageName) {
+            foreach ($this->removedPaths as $removedPath => $true) {
+                if (!isset($this->filesystemPaths[$packageName][$removedPath])) {
+                    continue;
+                }
+
+                $filesystemPaths = $this->filesystemPaths[$packageName][$removedPath];
+
+                foreach ($filesystemPaths as $filesystemPath) {
+                    $this->repo->add($removedPath,
+                        $this->createResource($filesystemPath));
+                }
+            }
+        }
     }
 }

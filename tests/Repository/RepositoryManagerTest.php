@@ -1,9 +1,9 @@
 <?php
 
 /*
- * This file is part of the Symfony package.
+ * This file is part of the puli/repository-manager package.
  *
- * (c) Fabien Potencier <fabien@symfony.com>
+ * (c) Bernhard Schussek <bschussek@gmail.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -430,9 +430,6 @@ class RepositoryManagerTest extends ManagerTestCase
 
     public function testRemoveResourceMapping()
     {
-        $this->initDefaultManager();
-
-        // TODO add overridden path from package
         $this->repo->expects($this->once())
             ->method('remove')
             ->with('/app');
@@ -448,20 +445,50 @@ class RepositoryManagerTest extends ManagerTestCase
 
         $this->rootPackageFile->addResourceMapping(new ResourceMapping('/app', 'resources'));
 
+        $this->initDefaultManager();
+
         $this->manager->removeResourceMapping('/app');
     }
 
     public function testRemoveResourceMappingDoesNothingIfUnknownPath()
     {
-        $this->initDefaultManager();
-
         $this->repo->expects($this->never())
             ->method('remove');
 
         $this->packageFileStorage->expects($this->never())
             ->method('saveRootPackageFile');
 
+        $this->initDefaultManager();
+
         $this->manager->removeResourceMapping('/app');
+    }
+
+    public function testRemoveResourceMappingRestoresOverriddenResources()
+    {
+        $this->repo->expects($this->at(0))
+            ->method('remove')
+            ->with('/package1');
+
+        $this->repo->expects($this->at(1))
+            ->method('add')
+            ->with('/package1', new DirectoryResource($this->packageDir1.'/resources'));
+
+        $this->packageFileStorage->expects($this->once())
+            ->method('saveRootPackageFile')
+            ->with($this->rootPackageFile)
+            ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) {
+                $mappings = $rootPackageFile->getResourceMappings();
+
+                PHPUnit_Framework_Assert::assertCount(0, $mappings);
+            }));
+
+        $this->packageFile1->addResourceMapping(new ResourceMapping('/package1', 'resources'));
+        $this->rootPackageFile->addResourceMapping(new ResourceMapping('/package1', 'resources'));
+        $this->rootPackageFile->setOverriddenPackages('package1');
+
+        $this->initDefaultManager();
+
+        $this->manager->removeResourceMapping('/package1');
     }
 
     public function testGetResourceMappings()
