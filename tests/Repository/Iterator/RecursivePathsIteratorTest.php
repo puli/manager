@@ -83,7 +83,9 @@ class RecursivePathsIteratorTest extends PHPUnit_Framework_TestCase
 
         $this->assertFalse($iterator->valid());
         $this->assertNull($iterator->current());
-        $this->assertNull($iterator->key());
+
+        // Different results on PHP < 5.5 and PHP >= 5.5
+        $this->assertEquals(null, $iterator->key());
     }
 
     public function testEmptyIterator()
