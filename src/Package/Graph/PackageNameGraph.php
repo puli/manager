@@ -81,6 +81,17 @@ class PackageNameGraph
     private $edges = array();
 
     /**
+     * Creates a new graph.
+     *
+     * @param string[] $packageNames The package names stored in the nodes of
+     *                               the graph.
+     */
+    public function __construct(array $packageNames = array())
+    {
+        $this->addPackageNames($packageNames);
+    }
+
+    /**
      * Adds a package name to the graph.
      *
      * @param string $packageName The package name.
@@ -98,6 +109,20 @@ class PackageNameGraph
 
         $this->packageNames[$packageName] = true;
         $this->edges[$packageName] = array();
+    }
+
+    /**
+     * Adds a list of package names to the graph.
+     *
+     * @param string[] $packageNames The package names.
+     *
+     * @throws RuntimeException If a package name already exists.
+     */
+    public function addPackageNames(array $packageNames)
+    {
+        foreach ($packageNames as $packageName) {
+            $this->addPackageName($packageName);
+        }
     }
 
     /**

@@ -132,6 +132,18 @@ class PackageFile
     }
 
     /**
+     * Adds an overridden package.
+     *
+     * @param string $overriddenPackage The name of the overridden package.
+     */
+    public function addOverriddenPackage($overriddenPackage)
+    {
+        if (!in_array($overriddenPackage, $this->overriddenPackages)) {
+            $this->overriddenPackages[] = $overriddenPackage;
+        }
+    }
+
+    /**
      * Returns the resource mappings.
      *
      * @return ResourceMapping[] The resource mappings.

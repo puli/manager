@@ -185,4 +185,23 @@ class PackageNameGraphTest extends PHPUnit_Framework_TestCase
         $this->assertTrue($this->graph->hasEdge('p1', 'p2'));
         $this->assertFalse($this->graph->hasEdge('p2', 'p1'));
     }
+
+    public function testAddPackageNames()
+    {
+        $this->assertFalse($this->graph->hasPackageName('p1'));
+        $this->assertFalse($this->graph->hasPackageName('p2'));
+
+        $this->graph->addPackageNames(array('p1', 'p2'));
+
+        $this->assertTrue($this->graph->hasPackageName('p1'));
+        $this->assertTrue($this->graph->hasPackageName('p2'));
+    }
+
+    public function testCreateWithPackageNames()
+    {
+        $this->graph = new PackageNameGraph(array('p1', 'p2'));
+
+        $this->assertTrue($this->graph->hasPackageName('p1'));
+        $this->assertTrue($this->graph->hasPackageName('p2'));
+    }
 }

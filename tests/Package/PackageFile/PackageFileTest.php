@@ -197,4 +197,30 @@ class PackageFileTest extends PHPUnit_Framework_TestCase
 
         $this->assertFalse($packageFile->hasResourceMapping('/foobar'));
     }
+
+    public function testSetOverriddenPackages()
+    {
+        $packageFile = new PackageFile();
+        $packageFile->setOverriddenPackages(array('package1', 'package2'));
+
+        $this->assertSame(array('package1', 'package2'), $packageFile->getOverriddenPackages());
+    }
+
+    public function testAddOverriddenPackage()
+    {
+        $packageFile = new PackageFile();
+        $packageFile->setOverriddenPackages(array('package1'));
+        $packageFile->addOverriddenPackage('package2');
+
+        $this->assertSame(array('package1', 'package2'), $packageFile->getOverriddenPackages());
+    }
+
+    public function testAddOverriddenPackageIgnoresDuplicates()
+    {
+        $packageFile = new PackageFile();
+        $packageFile->setOverriddenPackages(array('package1'));
+        $packageFile->addOverriddenPackage('package1');
+
+        $this->assertSame(array('package1'), $packageFile->getOverriddenPackages());
+    }
 }
