@@ -128,12 +128,7 @@ class RepositoryManager
      */
     public function loadPackages()
     {
-        if (!$this->repo) {
-            $this->loadRepository();
-        }
-
         $this->packageGraph = new PackageNameGraph($this->packages->getPackageNames());
-        $this->repoUpdater = new RepositoryUpdater($this->repo, $this->packageGraph);
         $this->conflictDetector = new ConflictDetector($this->packageGraph);
 
         foreach ($this->packages as $package) {
@@ -162,6 +157,10 @@ class RepositoryManager
     {
         if (!$this->packageGraph) {
             $this->loadPackages();
+        }
+
+        if (!$this->repo) {
+            $this->loadRepository();
         }
 
         $this->repoUpdater->clear();
@@ -201,6 +200,10 @@ class RepositoryManager
 
         if (!$this->packageGraph) {
             $this->loadPackages();
+        }
+
+        if (!$this->repo) {
+            $this->loadRepository();
         }
 
         $this->repoUpdater->clear();
@@ -282,16 +285,16 @@ class RepositoryManager
      */
     public function buildRepository()
     {
+        if (!$this->packageGraph) {
+            $this->loadPackages();
+        }
+
         if (!$this->repo) {
             $this->loadRepository();
         }
 
         if ($this->repo->hasChildren('/')) {
             // quit
-        }
-
-        if (!$this->packageGraph) {
-            $this->loadPackages();
         }
 
         $this->repoUpdater->clear();
@@ -308,6 +311,7 @@ class RepositoryManager
     private function loadRepository()
     {
         $this->repo = $this->environment->getRepository();
+        $this->repoUpdater = new RepositoryUpdater($this->repo, $this->packageGraph);
     }
 
     /**
