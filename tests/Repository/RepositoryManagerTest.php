@@ -141,6 +141,17 @@ class RepositoryManagerTest extends ManagerTestCase
         $this->manager->addResourceMapping(new ResourceMapping('/app/file', 'resources/file'));
     }
 
+    public function testGetResourceMappings()
+    {
+        $mapping1 = new ResourceMapping('/app', 'resources');
+        $mapping2 = new ResourceMapping('/test', 'tests');
+
+        $this->rootPackageFile->addResourceMapping($mapping1);
+        $this->rootPackageFile->addResourceMapping($mapping2);
+
+        $this->assertSame(array($mapping1, $mapping2), $this->manager->getResourceMappings());
+    }
+
     public function testBuildRepository()
     {
         return $this->markTestIncomplete('Not working at the moment');

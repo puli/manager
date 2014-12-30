@@ -113,6 +113,16 @@ class RepositoryManager
     }
 
     /**
+     * Returns the resource mappings.
+     *
+     * @return ResourceMapping[] The resource mappings.
+     */
+    public function getResourceMappings()
+    {
+        return $this->rootPackageFile->getResourceMappings();
+    }
+
+    /**
      * Builds the resource repository.
      *
      * @throws NoDirectoryException If the dump directory exists and is not a
