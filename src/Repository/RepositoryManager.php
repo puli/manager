@@ -77,6 +77,11 @@ class RepositoryManager
     private $conflictGraph;
 
     /**
+     * @var ConflictDetector
+     */
+    private $conflictDetector;
+
+    /**
      * @var string[][][]
      */
     private $filesystemPaths = array();
@@ -90,11 +95,6 @@ class RepositoryManager
      * @var bool[][]
      */
     private $pathReferences = array();
-
-    /**
-     * @var bool[]
-     */
-    private $uncheckedPaths = array();
 
     /**
      * Creates a repository manager.
@@ -114,6 +114,7 @@ class RepositoryManager
         $this->packages = $packages;
         $this->packageFileStorage = $packageFileStorage;
         $this->conflictGraph = new PackageNameGraph($this->packages->getPackageNames());
+        $this->conflictDetector = new ConflictDetector($this->conflictGraph);
 
         foreach ($packages as $package) {
             foreach ($package->getPackageFile()->getResourceMappings() as $mapping) {
@@ -123,7 +124,7 @@ class RepositoryManager
             $this->loadOverrideOrder($package);
         }
 
-        if ($conflict = $this->detectConflict()) {
+        if ($conflict = $this->conflictDetector->detectConflict()) {
             throw ResourceConflictException::forConflict($conflict);
         }
     }
@@ -286,9 +287,8 @@ class RepositoryManager
                 $this->pathReferences[$entryPath] = array();
             }
 
-            // Mark paths for conflict detection. This flag is removed again
-            // after checking conflicts.
-            $this->uncheckedPaths[$entryPath] = true;
+            $this->conflictDetector->register($entryPath, $packageName);
+            $this->conflictDetector->markUnchecked($entryPath);
 
             // Store referencing package and repository path of the mapping
             $this->pathReferences[$entryPath][$packageName] = $repositoryPath;
@@ -309,6 +309,8 @@ class RepositoryManager
         );
 
         foreach ($iterator as $filesystemPath => $entryPath) {
+            $this->conflictDetector->unregister($entryPath, $packageName);
+
             // Remove referencing package
             unset($this->pathReferences[$entryPath][$packageName]);
 
@@ -349,36 +351,9 @@ class RepositoryManager
         }
     }
 
-    private function detectConflict()
-    {
-        foreach ($this->uncheckedPaths as $path => $true) {
-            $packageNames = $this->pathReferences[$path];
-
-            if (1 === count($packageNames)) {
-                continue;
-            }
-
-            // Attention, the package names are stored in the keys
-            $orderedNames = $this->conflictGraph->getSortedPackageNames(array_keys($packageNames));
-
-            // An edge must exist between each package pair in the sorted set,
-            // otherwise the dependencies are not sufficiently defined
-            for ($i = 1, $l = count($orderedNames); $i < $l; ++$i) {
-                if (!$this->conflictGraph->hasEdge($orderedNames[$i - 1], $orderedNames[$i])) {
-                    return new ResourceConflict($path, $orderedNames[$i - 1], $orderedNames[$i]);
-                }
-            }
-
-            // Mark path as checked
-            unset($this->uncheckedPaths[$path]);
-        }
-
-        return null;
-    }
-
     private function getConflictingPackageName($packageName)
     {
-        $conflict = $this->detectConflict();
+        $conflict = $this->conflictDetector->detectConflict();
 
         if (!$conflict) {
             return null;
