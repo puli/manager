@@ -111,6 +111,8 @@ class RepositoryUpdater
 
                     $this->repo->add($repositoryPath, $resource);
                 }
+
+                unset($this->additions[$packageName][$repositoryPath]);
             }
         }
     }
