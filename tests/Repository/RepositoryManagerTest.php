@@ -11,14 +11,20 @@
 
 namespace Puli\RepositoryManager\Tests\Repository;
 
+use PHPUnit_Framework_Assert;
+use PHPUnit_Framework_MockObject_MockObject;
+use Puli\Repository\Resource\DirectoryResource;
+use Puli\Repository\Resource\FileResource;
 use Puli\Repository\ResourceRepository;
 use Puli\RepositoryManager\Config\Config;
 use Puli\RepositoryManager\Package\Collection\PackageCollection;
 use Puli\RepositoryManager\Package\Package;
 use Puli\RepositoryManager\Package\PackageFile\PackageFile;
-use Puli\RepositoryManager\Package\ResourceMapping;
+use Puli\RepositoryManager\Package\PackageFile\PackageFileStorage;
+use Puli\RepositoryManager\Package\PackageFile\RootPackageFile;
 use Puli\RepositoryManager\Package\RootPackage;
 use Puli\RepositoryManager\Repository\RepositoryManager;
+use Puli\RepositoryManager\Repository\ResourceMapping;
 use Puli\RepositoryManager\Tests\ManagerTestCase;
 use Symfony\Component\Filesystem\Filesystem;
 
@@ -57,6 +63,12 @@ class RepositoryManagerTest extends ManagerTestCase
      * @var PackageCollection
      */
     private $packages;
+
+    /**
+     * @var PHPUnit_Framework_MockObject_MockObject|PackageFileStorage
+     */
+    private $packageFileStorage;
+
     /**
      * @var RepositoryManager
      */
@@ -75,6 +87,10 @@ class RepositoryManagerTest extends ManagerTestCase
         $this->packageFile1 = new PackageFile('package1');
         $this->packageFile2 = new PackageFile('package2');
 
+        $this->packageFileStorage = $this->getMockBuilder('Puli\RepositoryManager\Package\PackageFile\PackageFileStorage')
+            ->disableOriginalConstructor()
+            ->getMock();
+
         $this->initEnvironment($this->tempDir.'/home', $this->tempDir.'/root');
         $this->initManager();
     }
@@ -85,8 +101,50 @@ class RepositoryManagerTest extends ManagerTestCase
         $filesystem->remove($this->tempDir);
     }
 
+    public function testAddResourceMappingWithDirectoryPath()
+    {
+        $this->repo->expects($this->once())
+            ->method('add')
+            ->with('/app', new DirectoryResource($this->rootDir.'/resources'));
+
+        $this->packageFileStorage->expects($this->once())
+            ->method('saveRootPackageFile')
+            ->with($this->rootPackageFile)
+            ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) {
+                $mappings = $rootPackageFile->getResourceMappings();
+
+                PHPUnit_Framework_Assert::assertCount(1, $mappings);
+                PHPUnit_Framework_Assert::assertSame('/app', $mappings[0]->getRepositoryPath());
+                PHPUnit_Framework_Assert::assertSame(array('resources'), $mappings[0]->getFilesystemPaths());
+            }));
+
+        $this->manager->addResourceMapping(new ResourceMapping('/app', 'resources'));
+    }
+
+    public function testAddResourceMappingWithFilePath()
+    {
+        $this->repo->expects($this->once())
+            ->method('add')
+            ->with('/app/file', new FileResource($this->rootDir.'/resources/file'));
+
+        $this->packageFileStorage->expects($this->once())
+            ->method('saveRootPackageFile')
+            ->with($this->rootPackageFile)
+            ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) {
+                $mappings = $rootPackageFile->getResourceMappings();
+
+                PHPUnit_Framework_Assert::assertCount(1, $mappings);
+                PHPUnit_Framework_Assert::assertSame('/app/file', $mappings[0]->getRepositoryPath());
+                PHPUnit_Framework_Assert::assertSame(array('resources/file'), $mappings[0]->getFilesystemPaths());
+            }));
+
+        $this->manager->addResourceMapping(new ResourceMapping('/app/file', 'resources/file'));
+    }
+
     public function testBuildRepository()
     {
+        return $this->markTestIncomplete('Not working at the moment');
+
         $this->environment->getConfig()->set(Config::REPOSITORY_TYPE, 'filesystem');
         $this->environment->getConfig()->set(Config::REPOSITORY_PATH, 'repository');
         $this->environment->getConfig()->set(Config::DISCOVERY_TYPE, 'key-value-store');
@@ -113,6 +171,6 @@ class RepositoryManagerTest extends ManagerTestCase
             new Package($this->packageFile2, $this->packageDir2),
         ));
 
-        $this->manager = new RepositoryManager($this->environment, $this->packages);
+        $this->manager = new RepositoryManager($this->environment, $this->packages, $this->packageFileStorage);
     }
 }

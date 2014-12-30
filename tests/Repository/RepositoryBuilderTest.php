@@ -19,9 +19,9 @@ use Puli\RepositoryManager\Package\Collection\PackageCollection;
 use Puli\RepositoryManager\Package\Package;
 use Puli\RepositoryManager\Package\PackageFile\PackageFile;
 use Puli\RepositoryManager\Package\PackageFile\RootPackageFile;
-use Puli\RepositoryManager\Package\ResourceMapping;
 use Puli\RepositoryManager\Package\RootPackage;
 use Puli\RepositoryManager\Repository\RepositoryBuilder;
+use Puli\RepositoryManager\Repository\ResourceMapping;
 
 /**
  * @since  1.0

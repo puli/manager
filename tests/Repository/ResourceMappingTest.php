@@ -9,10 +9,10 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\RepositoryManager\Tests\Package;
+namespace Puli\RepositoryManager\Tests\Repository;
 
 use PHPUnit_Framework_TestCase;
-use Puli\RepositoryManager\Package\ResourceMapping;
+use Puli\RepositoryManager\Repository\ResourceMapping;
 
 /**
  * @since  1.0
@@ -23,7 +23,7 @@ class ResourceMappingTest extends PHPUnit_Framework_TestCase
     /**
      * @expectedException \InvalidArgumentException
      */
-    public function testFailIfPuliPathNotString()
+    public function testFailIfRepositoryPathNotString()
     {
         new ResourceMapping(12345, 'resources');
     }
@@ -31,7 +31,7 @@ class ResourceMappingTest extends PHPUnit_Framework_TestCase
     /**
      * @expectedException \InvalidArgumentException
      */
-    public function testFailIfPuliPathEmpty()
+    public function testFailIfRepositoryPathEmpty()
     {
         new ResourceMapping('', 'resources');
     }
@@ -39,7 +39,7 @@ class ResourceMappingTest extends PHPUnit_Framework_TestCase
     /**
      * @expectedException \InvalidArgumentException
      */
-    public function testFailIfLocalPathsNotStringOrArray()
+    public function testFailIfFilesystemPathsNotStringOrArray()
     {
         new ResourceMapping('/path', 12345);
     }
@@ -47,7 +47,7 @@ class ResourceMappingTest extends PHPUnit_Framework_TestCase
     /**
      * @expectedException \InvalidArgumentException
      */
-    public function testFailIfLocalPathsEmptyString()
+    public function testFailIfFilesystemPathsEmptyString()
     {
         new ResourceMapping('/path', '');
     }
@@ -55,7 +55,7 @@ class ResourceMappingTest extends PHPUnit_Framework_TestCase
     /**
      * @expectedException \InvalidArgumentException
      */
-    public function testFailIfLocalPathsNotStringArray()
+    public function testFailIfFilesystemPathsNotStringArray()
     {
         new ResourceMapping('/path', array(12345));
     }
@@ -63,7 +63,7 @@ class ResourceMappingTest extends PHPUnit_Framework_TestCase
     /**
      * @expectedException \InvalidArgumentException
      */
-    public function testFailIfLocalPathsContainEmptyString()
+    public function testFailIfFilesystemPathsContainEmptyString()
     {
         new ResourceMapping('/path', array(''));
     }
@@ -71,7 +71,7 @@ class ResourceMappingTest extends PHPUnit_Framework_TestCase
     /**
      * @expectedException \InvalidArgumentException
      */
-    public function testFailIfNoLocalPaths()
+    public function testFailIfNoFilesystemPaths()
     {
         new ResourceMapping('/path', array());
     }

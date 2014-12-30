@@ -129,8 +129,8 @@ class RepositoryBuilder
         }
 
         foreach ($packageFile->getResourceMappings() as $mapping) {
-            $path = $mapping->getPuliPath();
-            $relativePaths = $mapping->getLocalPaths();
+            $path = $mapping->getRepositoryPath();
+            $relativePaths = $mapping->getFilesystemPaths();
 
             if (!isset($this->resources[$packageName][$path])) {
                 $this->resources[$packageName][$path] = array();

@@ -11,6 +11,7 @@
 
 namespace Puli\RepositoryManager\Tests\Package\Fixtures;
 
+use Puli\Repository\Api\EditableRepository;
 use Puli\RepositoryManager\Config\Config;
 use Puli\RepositoryManager\Config\ConfigFile\ConfigFile;
 use Puli\RepositoryManager\Config\ConfigFile\ConfigFileStorage;
@@ -34,12 +35,20 @@ class TestProjectEnvironment extends ProjectEnvironment implements ConfigFileRea
 
     private $rootPackageFile;
 
-    public function __construct($homeDir, $rootDir, ConfigFile $configFile, RootPackageFile $rootPackageFile, EventDispatcherInterface $dispatcher)
+    private $repo;
+
+    public function __construct($homeDir, $rootDir, ConfigFile $configFile, RootPackageFile $rootPackageFile, EventDispatcherInterface $dispatcher, EditableRepository $repo)
     {
         $this->configFile = $configFile;
         $this->rootPackageFile = $rootPackageFile;
+        $this->repo = $repo;
 
         parent::__construct($homeDir, $rootDir, new ConfigFileStorage($this, $this), new PackageFileStorage($this, $this, $dispatcher), $dispatcher);
+    }
+
+    public function getRepository()
+    {
+        return $this->repo;
     }
 
     public function readConfigFile($path, Config $baseConfig = null)

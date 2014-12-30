@@ -20,7 +20,7 @@ use Puli\RepositoryManager\InvalidConfigException;
 use Puli\RepositoryManager\Package\InstallInfo;
 use Puli\RepositoryManager\Package\PackageFile\PackageFile;
 use Puli\RepositoryManager\Package\PackageFile\RootPackageFile;
-use Puli\RepositoryManager\Package\ResourceMapping;
+use Puli\RepositoryManager\Repository\ResourceMapping;
 use Webmozart\Json\DecodingFailedException;
 use Webmozart\Json\JsonDecoder;
 use Webmozart\Json\ValidationFailedException;

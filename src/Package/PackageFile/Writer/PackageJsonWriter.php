@@ -89,8 +89,8 @@ class PackageJsonWriter implements PackageFileWriter
             $jsonData['resources'] = new \stdClass();
 
             foreach ($resourceMappings as $binding) {
-                $puliPath = $binding->getPuliPath();
-                $localPaths = $binding->getLocalPaths();
+                $puliPath = $binding->getRepositoryPath();
+                $localPaths = $binding->getFilesystemPaths();
 
                 $jsonData['resources']->$puliPath = count($localPaths) > 1 ? $localPaths : reset($localPaths);
             }

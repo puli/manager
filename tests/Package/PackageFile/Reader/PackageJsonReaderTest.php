@@ -19,7 +19,7 @@ use Puli\RepositoryManager\Config\Config;
 use Puli\RepositoryManager\Package\InstallInfo;
 use Puli\RepositoryManager\Package\PackageFile\PackageFile;
 use Puli\RepositoryManager\Package\PackageFile\Reader\PackageJsonReader;
-use Puli\RepositoryManager\Package\ResourceMapping;
+use Puli\RepositoryManager\Repository\ResourceMapping;
 
 /**
  * @since  1.0

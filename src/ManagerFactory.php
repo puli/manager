@@ -17,6 +17,7 @@ use Puli\RepositoryManager\Config\ConfigFile\ConfigFileManager;
 use Puli\RepositoryManager\Config\ConfigFile\ConfigFileStorage;
 use Puli\RepositoryManager\Config\ConfigFile\Reader\ConfigJsonReader;
 use Puli\RepositoryManager\Config\ConfigFile\Writer\ConfigJsonWriter;
+use Puli\RepositoryManager\Discovery\DiscoveryManager;
 use Puli\RepositoryManager\Environment\GlobalEnvironment;
 use Puli\RepositoryManager\Environment\ProjectEnvironment;
 use Puli\RepositoryManager\Package\PackageFile\PackageFileManager;
@@ -25,7 +26,6 @@ use Puli\RepositoryManager\Package\PackageFile\Reader\PackageJsonReader;
 use Puli\RepositoryManager\Package\PackageFile\Writer\PackageJsonWriter;
 use Puli\RepositoryManager\Package\PackageManager;
 use Puli\RepositoryManager\Repository\RepositoryManager;
-use Puli\RepositoryManager\Discovery\DiscoveryManager;
 use Puli\RepositoryManager\Util\System;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -201,7 +201,11 @@ class ManagerFactory
     {
         $packageManager = $packageManager ?: self::createPackageManager($environment);
 
-        return new RepositoryManager($environment, $packageManager->getPackages());
+        return new RepositoryManager(
+            $environment,
+            $packageManager->getPackages(),
+            self::createPackageFileStorage($environment->getEventDispatcher())
+        );
     }
 
     private static function createConfigFileStorage()

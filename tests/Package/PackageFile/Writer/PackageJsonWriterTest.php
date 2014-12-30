@@ -19,7 +19,7 @@ use Puli\RepositoryManager\Package\InstallInfo;
 use Puli\RepositoryManager\Package\PackageFile\PackageFile;
 use Puli\RepositoryManager\Package\PackageFile\RootPackageFile;
 use Puli\RepositoryManager\Package\PackageFile\Writer\PackageJsonWriter;
-use Puli\RepositoryManager\Package\ResourceMapping;
+use Puli\RepositoryManager\Repository\ResourceMapping;
 use Puli\RepositoryManager\Tests\JsonWriterTestCase;
 use Symfony\Component\Filesystem\Filesystem;
 
