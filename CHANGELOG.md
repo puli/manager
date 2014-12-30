@@ -53,6 +53,7 @@ Changelog
  * added `NullStoreRecipeProvider`
  * added `FilesystemRepositoryRecipeProvider`
  * added `getRepository()` and `getDiscovery()` to `ProjectEnvironment`
+ * removed `TagManager` and related classes
 
 * 1.0.0-alpha1 (2014-12-03)
 

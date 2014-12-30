@@ -25,7 +25,7 @@ use Puli\RepositoryManager\Package\PackageFile\Reader\PackageJsonReader;
 use Puli\RepositoryManager\Package\PackageFile\Writer\PackageJsonWriter;
 use Puli\RepositoryManager\Package\PackageManager;
 use Puli\RepositoryManager\Repository\RepositoryManager;
-use Puli\RepositoryManager\Tag\TagManager;
+use Puli\RepositoryManager\Discovery\DiscoveryManager;
 use Puli\RepositoryManager\Util\System;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -202,25 +202,6 @@ class ManagerFactory
         $packageManager = $packageManager ?: self::createPackageManager($environment);
 
         return new RepositoryManager($environment, $packageManager->getPackages());
-    }
-
-    /**
-     * Creates a resource tag manager.
-     *
-     * @param ProjectEnvironment $environment    The project environment.
-     * @param PackageManager     $packageManager The package manager. Optional.
-     *
-     * @return TagManager The tag manager.
-     */
-    public static function createTagManager(ProjectEnvironment $environment, PackageManager $packageManager = null)
-    {
-        $packageManager = $packageManager ?: self::createPackageManager($environment);
-
-        return new TagManager(
-            $environment,
-            $packageManager->getPackages(),
-            self::createPackageFileStorage($environment->getEventDispatcher())
-        );
     }
 
     private static function createConfigFileStorage()
