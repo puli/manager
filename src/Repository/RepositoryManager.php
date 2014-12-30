@@ -314,10 +314,6 @@ class RepositoryManager
             // Remove referencing package
             unset($this->pathReferences[$entryPath][$packageName]);
 
-            if (0 === count($this->pathReferences[$entryPath])) {
-                continue;
-            }
-
             // Reapply any overridden mappings
             foreach ($this->pathReferences[$entryPath] as $packageName => $mappingPath) {
                 $this->mappingQueue[$packageName][$mappingPath] = true;
