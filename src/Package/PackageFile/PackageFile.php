@@ -15,6 +15,7 @@ use Assert\Assertion;
 use InvalidArgumentException;
 use Puli\RepositoryManager\Binding\BindingDescriptor;
 use Puli\RepositoryManager\Binding\BindingTypeDescriptor;
+use Puli\RepositoryManager\Repository\NoSuchMappingException;
 use Puli\RepositoryManager\Repository\ResourceMapping;
 
 /**
@@ -141,13 +142,33 @@ class PackageFile
     }
 
     /**
+     * Returns the resource mapping for a repository path.
+     *
+     * @param string $repositoryPath The repository path.
+     *
+     * @return ResourceMapping The corresponding resource mapping.
+     *
+     * @throws NoSuchMappingException If the repository path is not mapped.
+     */
+    public function getResourceMapping($repositoryPath)
+    {
+        if (!isset($this->resourceMappings[$repositoryPath])) {
+            throw NoSuchMappingException::forRepositoryPath($repositoryPath);
+        }
+
+        return $this->resourceMappings[$repositoryPath];
+    }
+
+    /**
      * Adds a resource mapping.
      *
-     * @param ResourceMapping $resourceMapping The resource mapping.
+     * @param ResourceMapping $mapping The resource mapping.
      */
-    public function addResourceMapping(ResourceMapping $resourceMapping)
+    public function addResourceMapping(ResourceMapping $mapping)
     {
-        $this->resourceMappings[] = $resourceMapping;
+        $this->resourceMappings[$mapping->getRepositoryPath()] = $mapping;
+
+        ksort($this->resourceMappings);
     }
 
     /**

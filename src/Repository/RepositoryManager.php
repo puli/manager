@@ -113,6 +113,20 @@ class RepositoryManager
     }
 
     /**
+     * Returns the resource mapping for a repository path.
+     *
+     * @param string $repositoryPath The repository path.
+     *
+     * @return ResourceMapping The corresponding resource mapping.
+     *
+     * @throws NoSuchMappingException If the repository path is not mapped.
+     */
+    public function getResourceMapping($repositoryPath)
+    {
+        return $this->rootPackageFile->getResourceMapping($repositoryPath);
+    }
+
+    /**
      * Returns the resource mappings.
      *
      * @param string|string[] $packageName The package name(s) to filter by.

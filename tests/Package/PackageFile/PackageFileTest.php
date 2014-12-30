@@ -13,6 +13,7 @@ namespace Puli\RepositoryManager\Tests\Package\PackageFile;
 
 use PHPUnit_Framework_TestCase;
 use Puli\RepositoryManager\Package\PackageFile\PackageFile;
+use Puli\RepositoryManager\Repository\ResourceMapping;
 
 /**
  * @since  1.0
@@ -109,5 +110,62 @@ class PackageFileTest extends PHPUnit_Framework_TestCase
     {
         $packageFile = new PackageFile();
         $packageFile->setPackageName($invalidName);
+    }
+
+    public function testAddResourceMapping()
+    {
+        $mapping1 = new ResourceMapping('/path1', 'res1');
+        $mapping2 = new ResourceMapping('/path2', array('res2', 'res3'));
+
+        $packageFile = new PackageFile();
+        $packageFile->addResourceMapping($mapping1);
+        $packageFile->addResourceMapping($mapping2);
+
+        $this->assertSame(array(
+            '/path1' => $mapping1,
+            '/path2' => $mapping2,
+        ), $packageFile->getResourceMappings());
+    }
+
+    public function testGetResourceMappingsReturnsSortedResult()
+    {
+        $mapping1 = new ResourceMapping('/path1', 'res1');
+        $mapping2 = new ResourceMapping('/path2', 'res2');
+        $mapping3 = new ResourceMapping('/path3', 'res3');
+
+        $packageFile = new PackageFile();
+        $packageFile->addResourceMapping($mapping3);
+        $packageFile->addResourceMapping($mapping1);
+        $packageFile->addResourceMapping($mapping2);
+
+        $this->assertSame(array(
+            '/path1' => $mapping1,
+            '/path2' => $mapping2,
+            '/path3' => $mapping3,
+        ), $packageFile->getResourceMappings());
+    }
+
+    public function testGetResourceMapping()
+    {
+        $mapping1 = new ResourceMapping('/path1', 'res1');
+        $mapping2 = new ResourceMapping('/path2', array('res2', 'res3'));
+
+        $packageFile = new PackageFile();
+        $packageFile->addResourceMapping($mapping1);
+        $packageFile->addResourceMapping($mapping2);
+
+        $this->assertSame($mapping1, $packageFile->getResourceMapping('/path1'));
+        $this->assertSame($mapping2, $packageFile->getResourceMapping('/path2'));
+    }
+
+    /**
+     * @expectedException \Puli\RepositoryManager\Repository\NoSuchMappingException
+     * @expectedExceptionMessage foobar
+     */
+    public function testGetResourceMappingFailsIfPathNotFound()
+    {
+        $packageFile = new PackageFile();
+
+        $packageFile->getResourceMapping('/foobar');
     }
 }

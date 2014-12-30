@@ -259,7 +259,7 @@ class PackageJsonReaderTest extends PHPUnit_Framework_TestCase
     private function assertFullConfig(PackageFile $packageFile)
     {
         $this->assertSame('my/application', $packageFile->getPackageName());
-        $this->assertEquals(array(new ResourceMapping('/app', array('res'))), $packageFile->getResourceMappings());
+        $this->assertEquals(array('/app' => new ResourceMapping('/app', array('res'))), $packageFile->getResourceMappings());
         $this->assertEquals(array(new BindingDescriptor('/app/config*.yml', 'my/type')), $packageFile->getBindingDescriptors());
         $this->assertEquals(array(new BindingTypeDescriptor('my/type', 'Description of my type.', array(
             new BindingParameterDescriptor('param', false, 1234, 'Description of the parameter.'),

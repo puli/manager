@@ -126,8 +126,8 @@ class RepositoryManagerTest extends ManagerTestCase
                 $mappings = $rootPackageFile->getResourceMappings();
 
                 PHPUnit_Framework_Assert::assertCount(1, $mappings);
-                PHPUnit_Framework_Assert::assertSame('/app', $mappings[0]->getRepositoryPath());
-                PHPUnit_Framework_Assert::assertSame(array('resources'), $mappings[0]->getFilesystemPaths());
+                PHPUnit_Framework_Assert::assertSame('/app', $mappings['/app']->getRepositoryPath());
+                PHPUnit_Framework_Assert::assertSame(array('resources'), $mappings['/app']->getFilesystemPaths());
             }));
 
         $this->manager->addResourceMapping(new ResourceMapping('/app', 'resources'));
@@ -146,8 +146,8 @@ class RepositoryManagerTest extends ManagerTestCase
                 $mappings = $rootPackageFile->getResourceMappings();
 
                 PHPUnit_Framework_Assert::assertCount(1, $mappings);
-                PHPUnit_Framework_Assert::assertSame('/app/file', $mappings[0]->getRepositoryPath());
-                PHPUnit_Framework_Assert::assertSame(array('resources/file'), $mappings[0]->getFilesystemPaths());
+                PHPUnit_Framework_Assert::assertSame('/app/file', $mappings['/app/file']->getRepositoryPath());
+                PHPUnit_Framework_Assert::assertSame(array('resources/file'), $mappings['/app/file']->getFilesystemPaths());
             }));
 
         $this->manager->addResourceMapping(new ResourceMapping('/app/file', 'resources/file'));
@@ -171,6 +171,18 @@ class RepositoryManagerTest extends ManagerTestCase
 
         $this->assertSame(array($mapping2), $this->manager->getResourceMappings('package1'));
         $this->assertSame(array($mapping2, $mapping3), $this->manager->getResourceMappings(array('package1', 'package2')));
+    }
+
+    public function testGetResourceMapping()
+    {
+        $mapping1 = new ResourceMapping('/path1', 'res1');
+        $mapping2 = new ResourceMapping('/path2', 'res2');
+
+        $this->rootPackageFile->addResourceMapping($mapping1);
+        $this->rootPackageFile->addResourceMapping($mapping2);
+
+        $this->assertSame($mapping1, $this->manager->getResourceMapping('/path1'));
+        $this->assertSame($mapping2, $this->manager->getResourceMapping('/path2'));
     }
 
     public function testBuildRepository()
