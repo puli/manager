@@ -153,6 +153,27 @@ class RepositoryManagerTest extends ManagerTestCase
         $this->manager->addResourceMapping(new ResourceMapping('/app/file', 'resources/file'));
     }
 
+    public function testRemoveResourceMapping()
+    {
+        // TODO add overridden path from package
+        $this->repo->expects($this->once())
+            ->method('remove')
+            ->with('/app');
+
+        $this->packageFileStorage->expects($this->once())
+            ->method('saveRootPackageFile')
+            ->with($this->rootPackageFile)
+            ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) {
+                $mappings = $rootPackageFile->getResourceMappings();
+
+                PHPUnit_Framework_Assert::assertCount(0, $mappings);
+            }));
+
+        $this->rootPackageFile->addResourceMapping(new ResourceMapping('/app', 'resources'));
+
+        $this->manager->removeResourceMapping('/app');
+    }
+
     public function testGetResourceMappings()
     {
         $this->rootPackageFile->addResourceMapping($mapping1 = new ResourceMapping('/app', 'resources'));
@@ -183,6 +204,15 @@ class RepositoryManagerTest extends ManagerTestCase
 
         $this->assertSame($mapping1, $this->manager->getResourceMapping('/path1'));
         $this->assertSame($mapping2, $this->manager->getResourceMapping('/path2'));
+    }
+
+    public function testHasResourceMapping()
+    {
+        $this->assertFalse($this->manager->hasResourceMapping('/path'));
+
+        $this->rootPackageFile->addResourceMapping(new ResourceMapping('/path', 'res'));
+
+        $this->assertTrue($this->manager->hasResourceMapping('/path'));
     }
 
     public function testBuildRepository()

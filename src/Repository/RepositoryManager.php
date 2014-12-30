@@ -113,6 +113,31 @@ class RepositoryManager
     }
 
     /**
+     * Removes a resource mapping from the repository.
+     *
+     * @param string $repositoryPath The repository path.
+     */
+    public function removeResourceMapping($repositoryPath)
+    {
+        $this->repo->remove($repositoryPath);
+
+        $this->rootPackageFile->removeResourceMapping($repositoryPath);
+        $this->packageFileStorage->saveRootPackageFile($this->rootPackageFile);
+    }
+
+    /**
+     * Returns whether a repository path is mapped.
+     *
+     * @param string $repositoryPath The repository path.
+     *
+     * @return bool Returns `true` if the repository path is mapped.
+     */
+    public function hasResourceMapping($repositoryPath)
+    {
+        return $this->rootPackageFile->hasResourceMapping($repositoryPath);
+    }
+
+    /**
      * Returns the resource mapping for a repository path.
      *
      * @param string $repositoryPath The repository path.
