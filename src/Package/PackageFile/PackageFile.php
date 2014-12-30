@@ -160,6 +160,19 @@ class PackageFile
     }
 
     /**
+     * Returns whether the file contains a resource mapping for a repository
+     * path.
+     *
+     * @param string $repositoryPath The repository path.
+     *
+     * @return bool Returns `true` if the file contains a mapping for the path.
+     */
+    public function hasResourceMapping($repositoryPath)
+    {
+        return isset($this->resourceMappings[$repositoryPath]);
+    }
+
+    /**
      * Adds a resource mapping.
      *
      * @param ResourceMapping $mapping The resource mapping.
@@ -169,6 +182,16 @@ class PackageFile
         $this->resourceMappings[$mapping->getRepositoryPath()] = $mapping;
 
         ksort($this->resourceMappings);
+    }
+
+    /**
+     * Removes the resource mapping for a repository path.
+     *
+     * @param string $repositoryPath The repository path.
+     */
+    public function removeResourceMapping($repositoryPath)
+    {
+        unset($this->resourceMappings[$repositoryPath]);
     }
 
     /**

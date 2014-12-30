@@ -168,4 +168,33 @@ class PackageFileTest extends PHPUnit_Framework_TestCase
 
         $packageFile->getResourceMapping('/foobar');
     }
+
+    public function testHasResourceMapping()
+    {
+        $packageFile = new PackageFile();
+
+        $this->assertFalse($packageFile->hasResourceMapping('/path'));
+
+        $packageFile->addResourceMapping(new ResourceMapping('/path', 'res'));
+
+        $this->assertTrue($packageFile->hasResourceMapping('/path'));
+    }
+
+    public function testRemoveResourceMapping()
+    {
+        $packageFile = new PackageFile();
+
+        $packageFile->addResourceMapping(new ResourceMapping('/path', 'res'));
+        $packageFile->removeResourceMapping('/path');
+
+        $this->assertFalse($packageFile->hasResourceMapping('/path'));
+    }
+
+    public function testRemoveResourceMappingIgnoresUnknownPaths()
+    {
+        $packageFile = new PackageFile();
+        $packageFile->removeResourceMapping('/foobar');
+
+        $this->assertFalse($packageFile->hasResourceMapping('/foobar'));
+    }
 }
