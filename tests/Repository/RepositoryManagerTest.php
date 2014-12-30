@@ -350,7 +350,7 @@ class RepositoryManagerTest extends ManagerTestCase
     {
         $this->repo->expects($this->once())
             ->method('add')
-            ->with('/path', new DirectoryResource($this->rootDir.'/override'));
+            ->with('/path', new DirectoryResource($this->rootDir.'/resources'));
 
         $this->packageFileStorage->expects($this->once())
             ->method('saveRootPackageFile')
@@ -360,7 +360,7 @@ class RepositoryManagerTest extends ManagerTestCase
 
                 PHPUnit_Framework_Assert::assertCount(1, $mappings);
                 PHPUnit_Framework_Assert::assertSame('/path', $mappings['/path']->getRepositoryPath());
-                PHPUnit_Framework_Assert::assertSame(array('override'), $mappings['/path']->getFilesystemPaths());
+                PHPUnit_Framework_Assert::assertSame(array('resources'), $mappings['/path']->getFilesystemPaths());
 
                 // Only package2 was marked as overridden, because the
                 // dependency between package1 and package2 is clearly defined
@@ -373,7 +373,59 @@ class RepositoryManagerTest extends ManagerTestCase
 
         $this->initDefaultManager();
 
+        $this->manager->addResourceMapping(new ResourceMapping('/path', 'resources'));
+    }
+
+    public function testAddResourceMappingImplicitlyOverridesNestedPathOfConflictingPackage()
+    {
+        $this->repo->expects($this->once())
+            ->method('add')
+            ->with('/path', new DirectoryResource($this->rootDir.'/override'));
+
+        $this->packageFileStorage->expects($this->once())
+            ->method('saveRootPackageFile')
+            ->with($this->rootPackageFile)
+            ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) {
+                $mappings = $rootPackageFile->getResourceMappings();
+
+                PHPUnit_Framework_Assert::assertCount(1, $mappings);
+                PHPUnit_Framework_Assert::assertSame('/path', $mappings['/path']->getRepositoryPath());
+                PHPUnit_Framework_Assert::assertSame(array('override'), $mappings['/path']->getFilesystemPaths());
+                PHPUnit_Framework_Assert::assertSame(array('package1'), $rootPackageFile->getOverriddenPackages());
+            }));
+
+        $this->packageFile1->addResourceMapping(new ResourceMapping('/path/config', 'resources'));
+
+        $this->initDefaultManager();
+
+        // /override/config overrides /package1/resources/config
         $this->manager->addResourceMapping(new ResourceMapping('/path', 'override'));
+    }
+
+    public function testAddResourceMappingMapsToNestedPathOfConflictingPackage()
+    {
+        $this->repo->expects($this->once())
+            ->method('add')
+            ->with('/path/config', new DirectoryResource($this->rootDir.'/override'));
+
+        $this->packageFileStorage->expects($this->once())
+            ->method('saveRootPackageFile')
+            ->with($this->rootPackageFile)
+            ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) {
+                $mappings = $rootPackageFile->getResourceMappings();
+
+                PHPUnit_Framework_Assert::assertCount(1, $mappings);
+                PHPUnit_Framework_Assert::assertSame('/path/config', $mappings['/path/config']->getRepositoryPath());
+                PHPUnit_Framework_Assert::assertSame(array('override'), $mappings['/path/config']->getFilesystemPaths());
+                PHPUnit_Framework_Assert::assertSame(array('package1'), $rootPackageFile->getOverriddenPackages());
+            }));
+
+        $this->packageFile1->addResourceMapping(new ResourceMapping('/path', 'resources'));
+
+        $this->initDefaultManager();
+
+        // /override overrides /package1/resources/config
+        $this->manager->addResourceMapping(new ResourceMapping('/path/config', 'override'));
     }
 
     public function testRemoveResourceMapping()

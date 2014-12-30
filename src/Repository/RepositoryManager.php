@@ -75,14 +75,19 @@ class RepositoryManager
     private $conflictGraph;
 
     /**
-     * @var array[]
+     * @var string[][][]
      */
     private $filesystemPaths = array();
 
     /**
-     * @var array[]
+     * @var bool[][]
      */
-    private $pathOwners = array();
+    private $pathReferences = array();
+
+    /**
+     * @var bool[]
+     */
+    private $uncheckedPaths = array();
 
     /**
      * Creates a repository manager.
@@ -102,8 +107,6 @@ class RepositoryManager
         $this->packages = $packages;
         $this->packageFileStorage = $packageFileStorage;
         $this->conflictGraph = new PackageNameGraph($this->packages->getPackageNames());
-        $this->filesystemPaths = array();
-        $this->pathOwners = array();
 
         foreach ($packages as $package) {
             foreach ($package->getPackageFile()->getResourceMappings() as $mapping) {
@@ -113,7 +116,9 @@ class RepositoryManager
             $this->loadOverrideOrder($package);
         }
 
-        $this->assertNoConflicts();
+        if ($conflict = $this->detectConflict()) {
+            throw ResourceConflictException::forConflict($conflict);
+        }
     }
 
     /**
@@ -138,7 +143,7 @@ class RepositoryManager
         $rootPackageName = $this->rootPackage->getName();
         $path = $mapping->getRepositoryPath();
 
-        while ($conflictingPackage = $this->getConflictingPackageName($path, $rootPackageName)) {
+        while ($conflictingPackage = $this->getConflictingPackageName($rootPackageName)) {
             $this->rootPackageFile->addOverriddenPackage($conflictingPackage);
             $this->conflictGraph->addEdge($conflictingPackage, $rootPackageName);
         }
@@ -262,7 +267,7 @@ class RepositoryManager
         }
 
         foreach ($filesystemPaths as $filesystemPath) {
-            $this->markPathOwnedBy($path, $package, $filesystemPath);
+            $this->markPathUnchecked($path, $filesystemPath, $package);
         }
 
         $this->filesystemPaths[$packageName][$path] = $filesystemPaths;
@@ -271,29 +276,28 @@ class RepositoryManager
         ksort($this->filesystemPaths[$packageName]);
     }
 
-    private function markPathOwnedBy($path, Package $package, $filesystemPath)
+    private function markPathUnchecked($path, $filesystemPath, Package $package)
     {
-        if (!isset($this->pathOwners[$path])) {
-            $this->pathOwners[$path] = array();
+        if (!isset($this->pathReferences[$path])) {
+            $this->pathReferences[$path] = array();
         }
 
-        // Multiple packages may map a path. However, the override order between
-        // these packages must be clearly defined
-        $this->pathOwners[$path][$package->getName()] = true;
+        // Check this path in detectConflict()
+        $this->uncheckedPaths[$path] = true;
 
-        // Detect conflicts in sub-directories
-        $basePath = rtrim($path, '/').'/';
+        // Remember which packages reference the path
+        $this->pathReferences[$path][$package->getName()] = true;
 
         if (!is_dir($filesystemPath)) {
             return;
         }
 
+        // Mark nested paths as unchecked as well
         $iterator = new RecursiveDirectoryIterator($filesystemPath);
+        $basePath = rtrim($path, '/').'/';
 
-        foreach ($iterator as $entryPath) {
-            $childPath = $basePath.basename($entryPath);
-
-            $this->markPathOwnedBy($childPath, $package, $entryPath);
+        foreach ($iterator as $entry) {
+            $this->markPathUnchecked($basePath.basename($entry), $entry, $package);
         }
     }
 
@@ -307,7 +311,7 @@ class RepositoryManager
 
         if ($package instanceof RootPackage) {
             // Make sure we have numeric, ascending keys here
-            $packageOrder = array_values( $package->getPackageFile()->getPackageOrder());
+            $packageOrder = array_values($package->getPackageFile()->getPackageOrder());
 
             // Each package overrides the previous one in the list
             for ($i = 1, $l = count($packageOrder); $i < $l; ++$i) {
@@ -321,44 +325,36 @@ class RepositoryManager
         }
     }
 
-    private function assertNoConflicts()
+    private function detectConflict()
     {
-        foreach ($this->pathOwners as $path => $packageNames) {
-            if ($conflict = $this->detectConflict($path)) {
-                throw ResourceConflictException::forConflict($conflict);
+        foreach ($this->uncheckedPaths as $path => $true) {
+            $packageNames = $this->pathReferences[$path];
+
+            if (1 === count($packageNames)) {
+                continue;
             }
-        }
-    }
 
-    private function detectConflict($path)
-    {
-        if (!isset($this->pathOwners[$path])) {
-            return null;
-        }
+            // Attention, the package names are stored in the keys
+            $orderedNames = $this->conflictGraph->getSortedPackageNames(array_keys($packageNames));
 
-        $packageNames = $this->pathOwners[$path];
-
-        if (1 === count($packageNames)) {
-            return null;
-        }
-
-        // Attention, the package names are stored in the keys
-        $orderedNames = $this->conflictGraph->getSortedPackageNames(array_keys($packageNames));
-
-        // An edge must exist between each package pair in the sorted set,
-        // otherwise the dependencies are not sufficiently defined
-        for ($i = 1, $l = count($orderedNames); $i < $l; ++$i) {
-            if (!$this->conflictGraph->hasEdge($orderedNames[$i - 1], $orderedNames[$i])) {
-                return new ResourceConflict($path, $orderedNames[$i - 1], $orderedNames[$i]);
+            // An edge must exist between each package pair in the sorted set,
+            // otherwise the dependencies are not sufficiently defined
+            for ($i = 1, $l = count($orderedNames); $i < $l; ++$i) {
+                if (!$this->conflictGraph->hasEdge($orderedNames[$i - 1], $orderedNames[$i])) {
+                    return new ResourceConflict($path, $orderedNames[$i - 1], $orderedNames[$i]);
+                }
             }
+
+            // Mark path as checked
+            unset($this->uncheckedPaths[$path]);
         }
 
         return null;
     }
 
-    private function getConflictingPackageName($path, $packageName)
+    private function getConflictingPackageName($packageName)
     {
-        $conflict = $this->detectConflict($path);
+        $conflict = $this->detectConflict();
 
         if (!$conflict) {
             return null;
