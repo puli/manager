@@ -50,6 +50,11 @@ class RepositoryManagerTest extends ManagerTestCase
     private $packageDir2;
 
     /**
+     * @var string
+     */
+    private $packageDir3;
+
+    /**
      * @var PackageFile
      */
     private $packageFile1;
@@ -58,6 +63,11 @@ class RepositoryManagerTest extends ManagerTestCase
      * @var PackageFile
      */
     private $packageFile2;
+
+    /**
+     * @var PackageFile
+     */
+    private $packageFile3;
 
     /**
      * @var PackageCollection
@@ -83,9 +93,11 @@ class RepositoryManagerTest extends ManagerTestCase
 
         $this->packageDir1 = $this->tempDir.'/package1';
         $this->packageDir2 = $this->tempDir.'/package2';
+        $this->packageDir3 = $this->tempDir.'/package3';
 
         $this->packageFile1 = new PackageFile('package1');
         $this->packageFile2 = new PackageFile('package2');
+        $this->packageFile3 = new PackageFile('package3');
 
         $this->packageFileStorage = $this->getMockBuilder('Puli\RepositoryManager\Package\PackageFile\PackageFileStorage')
             ->disableOriginalConstructor()
@@ -143,13 +155,22 @@ class RepositoryManagerTest extends ManagerTestCase
 
     public function testGetResourceMappings()
     {
-        $mapping1 = new ResourceMapping('/app', 'resources');
-        $mapping2 = new ResourceMapping('/test', 'tests');
+        $this->rootPackageFile->addResourceMapping($mapping1 = new ResourceMapping('/app', 'resources'));
+        $this->packageFile1->addResourceMapping($mapping2 = new ResourceMapping('/package1', 'resources'));
+        $this->packageFile2->addResourceMapping($mapping3 = new ResourceMapping('/package2', 'resources'));
+        $this->packageFile3->addResourceMapping($mapping4 = new ResourceMapping('/package2', 'resources'));
 
-        $this->rootPackageFile->addResourceMapping($mapping1);
-        $this->rootPackageFile->addResourceMapping($mapping2);
+        $this->initManager();
 
-        $this->assertSame(array($mapping1, $mapping2), $this->manager->getResourceMappings());
+        $this->assertSame(array(
+            $mapping1,
+            $mapping2,
+            $mapping3,
+            $mapping4,
+        ), $this->manager->getResourceMappings());
+
+        $this->assertSame(array($mapping2), $this->manager->getResourceMappings('package1'));
+        $this->assertSame(array($mapping2, $mapping3), $this->manager->getResourceMappings(array('package1', 'package2')));
     }
 
     public function testBuildRepository()
@@ -180,6 +201,7 @@ class RepositoryManagerTest extends ManagerTestCase
             new RootPackage($this->rootPackageFile, $this->rootDir),
             new Package($this->packageFile1, $this->packageDir1),
             new Package($this->packageFile2, $this->packageDir2),
+            new Package($this->packageFile3, $this->packageDir3),
         ));
 
         $this->manager = new RepositoryManager($this->environment, $this->packages, $this->packageFileStorage);

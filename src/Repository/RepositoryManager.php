@@ -115,11 +115,24 @@ class RepositoryManager
     /**
      * Returns the resource mappings.
      *
+     * @param string|string[] $packageName The package name(s) to filter by.
+     *
      * @return ResourceMapping[] The resource mappings.
      */
-    public function getResourceMappings()
+    public function getResourceMappings($packageName = null)
     {
-        return $this->rootPackageFile->getResourceMappings();
+        $packageNames = $packageName ? (array) $packageName : $this->packages->getPackageNames();
+        $mappings = array();
+
+        foreach ($packageNames as $packageName) {
+            $packageFile = $this->packages[$packageName]->getPackageFile();
+
+            foreach ($packageFile->getResourceMappings() as $mapping) {
+                $mappings[] = $mapping;
+            }
+        }
+
+        return $mappings;
     }
 
     /**
