@@ -82,6 +82,11 @@ class RepositoryManager
     private $filesystemPaths = array();
 
     /**
+     * @var string[][][]
+     */
+    private $mappingQueue = array();
+
+    /**
      * @var bool[][]
      */
     private $pathReferences = array();
@@ -90,11 +95,6 @@ class RepositoryManager
      * @var bool[]
      */
     private $uncheckedPaths = array();
-
-    /**
-     * @var bool[]
-     */
-    private $removedPaths = array();
 
     /**
      * Creates a repository manager.
@@ -145,10 +145,11 @@ class RepositoryManager
      */
     public function addResourceMapping(ResourceMapping $mapping)
     {
+        $this->clearMappingQueue();
+
         $this->loadResourceMapping($mapping, $this->rootPackage);
 
         $rootPackageName = $this->rootPackage->getName();
-        $path = $mapping->getRepositoryPath();
 
         while ($conflictingPackage = $this->getConflictingPackageName($rootPackageName)) {
             $this->rootPackageFile->addOverriddenPackage($conflictingPackage);
@@ -160,9 +161,8 @@ class RepositoryManager
         $this->rootPackageFile->addResourceMapping($mapping);
         $this->packageFileStorage->saveRootPackageFile($this->rootPackageFile);
 
-        foreach ($this->filesystemPaths[$rootPackageName][$path] as $filesystemPath) {
-            $this->repo->add($path, $this->createResource($filesystemPath));
-        }
+        // Add the resources now
+        $this->processMappingQueue();
     }
 
     /**
@@ -176,6 +176,8 @@ class RepositoryManager
             return;
         }
 
+        $this->clearMappingQueue();
+
         $this->unloadResourceMapping($repositoryPath, $this->rootPackage);
 
         // Save config file before modifying the repository, so that the
@@ -187,7 +189,7 @@ class RepositoryManager
 
         // Restore the overridden paths that have been tagged as removed in
         // unloadResourceMapping()
-        $this->restoreOverriddenPaths();
+        $this->processMappingQueue();
     }
 
     /**
@@ -254,19 +256,9 @@ class RepositoryManager
             // quit
         }
 
-        $packageOrder = $this->conflictGraph->getSortedPackageNames();
+        $this->mappingQueue = $this->filesystemPaths;
 
-        foreach ($packageOrder as $packageName) {
-            if (!isset($this->filesystemPaths[$packageName])) {
-                continue;
-            }
-
-            foreach ($this->filesystemPaths[$packageName] as $path => $filesystemPaths) {
-                foreach ($filesystemPaths as $filesystemPath) {
-                    $this->repo->add($path, $this->createResource($filesystemPath));
-                }
-            }
-        }
+        $this->processMappingQueue();
     }
 
     /**
@@ -275,16 +267,17 @@ class RepositoryManager
      */
     private function loadResourceMapping(ResourceMapping $mapping, Package $package)
     {
-        $path = $mapping->getRepositoryPath();
+        $repositoryPath = $mapping->getRepositoryPath();
         $packageName = $package->getName();
         $filesystemPaths = $this->getAbsoluteMappedPaths($mapping, $package);
 
         if (!isset($this->filesystemPaths[$packageName])) {
             $this->filesystemPaths[$packageName] = array();
+            $this->mappingQueue[$packageName] = array();
         }
 
         $iterator = new RecursiveIteratorIterator(
-            new RecursivePathsIterator(new ArrayIterator($filesystemPaths), $path),
+            new RecursivePathsIterator(new ArrayIterator($filesystemPaths), $repositoryPath),
             RecursiveIteratorIterator::SELF_FIRST
         );
 
@@ -293,38 +286,43 @@ class RepositoryManager
                 $this->pathReferences[$entryPath] = array();
             }
 
-            // Mark paths for conflict detection
+            // Mark paths for conflict detection. This flag is removed again
+            // after checking conflicts.
             $this->uncheckedPaths[$entryPath] = true;
 
-            // Store referencing package
-            $this->pathReferences[$entryPath][$packageName] = true;
+            // Store referencing package and repository path of the mapping
+            $this->pathReferences[$entryPath][$packageName] = $repositoryPath;
         }
 
-        $this->filesystemPaths[$packageName][$path] = $filesystemPaths;
-
-        // Export shorter paths before longer paths
-        ksort($this->filesystemPaths[$packageName]);
+        $this->filesystemPaths[$packageName][$repositoryPath] = $filesystemPaths;
+        $this->mappingQueue[$packageName][$repositoryPath] = true;
     }
 
-    private function unloadResourceMapping($path, Package $package)
+    private function unloadResourceMapping($repositoryPath, Package $package)
     {
         $packageName = $package->getName();
-        $filesystemPaths = $this->filesystemPaths[$packageName][$path];
+        $filesystemPaths = $this->filesystemPaths[$packageName][$repositoryPath];
 
         $iterator = new RecursiveIteratorIterator(
-            new RecursivePathsIterator(new ArrayIterator($filesystemPaths), $path),
+            new RecursivePathsIterator(new ArrayIterator($filesystemPaths), $repositoryPath),
             RecursiveIteratorIterator::SELF_FIRST
         );
 
         foreach ($iterator as $filesystemPath => $entryPath) {
-            // Mark path as removed
-            $this->removedPaths[$entryPath] = true;
-
             // Remove referencing package
             unset($this->pathReferences[$entryPath][$packageName]);
+
+            if (0 === count($this->pathReferences[$entryPath])) {
+                continue;
+            }
+
+            // Reapply any overridden mappings
+            foreach ($this->pathReferences[$entryPath] as $packageName => $mappingPath) {
+                $this->mappingQueue[$packageName][$mappingPath] = true;
+            }
         }
 
-        unset($this->filesystemPaths[$packageName][$path]);
+        unset($this->filesystemPaths[$packageName][$repositoryPath]);
     }
 
     private function loadOverrideOrder(Package $package)
@@ -481,21 +479,31 @@ class RepositoryManager
             : new FileResource($filesystemPath);
     }
 
-    private function restoreOverriddenPaths()
+    private function clearMappingQueue()
     {
-        $packageOrder = $this->conflictGraph->getSortedPackageNames();
+        $this->mappingQueue = array();
+    }
 
-        foreach ($packageOrder as $packageName) {
-            foreach ($this->removedPaths as $removedPath => $true) {
-                if (!isset($this->filesystemPaths[$packageName][$removedPath])) {
+    private function processMappingQueue()
+    {
+        if (!$this->mappingQueue) {
+            return;
+        }
+
+        $packageNames = array_keys($this->mappingQueue);
+        $sortedNames = $this->conflictGraph->getSortedPackageNames($packageNames);
+
+        foreach ($sortedNames as $packageName) {
+            foreach ($this->mappingQueue[$packageName] as $repositoryPath => $true) {
+                // The filesystem paths should be set, but just in case
+                if (!isset($this->filesystemPaths[$packageName][$repositoryPath])) {
                     continue;
                 }
 
-                $filesystemPaths = $this->filesystemPaths[$packageName][$removedPath];
+                $filesystemPaths = $this->filesystemPaths[$packageName][$repositoryPath];
 
                 foreach ($filesystemPaths as $filesystemPath) {
-                    $this->repo->add($removedPath,
-                        $this->createResource($filesystemPath));
+                    $this->repo->add($repositoryPath, $this->createResource($filesystemPath));
                 }
             }
         }

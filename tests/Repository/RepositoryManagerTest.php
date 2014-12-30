@@ -376,7 +376,7 @@ class RepositoryManagerTest extends ManagerTestCase
         $this->manager->addResourceMapping(new ResourceMapping('/path', 'resources'));
     }
 
-    public function testAddResourceMappingImplicitlyOverridesNestedPathOfConflictingPackage()
+    public function testAddResourceMappingOverridesNestedPath1()
     {
         $this->repo->expects($this->once())
             ->method('add')
@@ -398,11 +398,11 @@ class RepositoryManagerTest extends ManagerTestCase
 
         $this->initDefaultManager();
 
-        // /override/config overrides /package1/resources/config
+        // /override overrides /package1/resources/config
         $this->manager->addResourceMapping(new ResourceMapping('/path', 'override'));
     }
 
-    public function testAddResourceMappingMapsToNestedPathOfConflictingPackage()
+    public function testAddResourceMappingOverridesNestedPath2()
     {
         $this->repo->expects($this->once())
             ->method('add')
@@ -463,7 +463,7 @@ class RepositoryManagerTest extends ManagerTestCase
         $this->manager->removeResourceMapping('/app');
     }
 
-    public function testRemoveResourceMappingRestoresOverriddenResources()
+    public function testRemoveResourceMappingRestoresOverriddenResource()
     {
         $this->repo->expects($this->at(0))
             ->method('remove')
@@ -489,6 +489,64 @@ class RepositoryManagerTest extends ManagerTestCase
         $this->initDefaultManager();
 
         $this->manager->removeResourceMapping('/package1');
+    }
+
+    public function testRemoveResourceMappingRestoresOverriddenNestedResource1()
+    {
+        $this->repo->expects($this->at(0))
+            ->method('remove')
+            ->with('/path/config');
+
+        $this->repo->expects($this->at(1))
+            ->method('add')
+            ->with('/path', new DirectoryResource($this->packageDir1.'/resources'));
+
+        $this->packageFileStorage->expects($this->once())
+            ->method('saveRootPackageFile')
+            ->with($this->rootPackageFile)
+            ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) {
+                $mappings = $rootPackageFile->getResourceMappings();
+
+                PHPUnit_Framework_Assert::assertCount(0, $mappings);
+            }));
+
+        // /override overrides /package1/resources/config
+        $this->packageFile1->addResourceMapping(new ResourceMapping('/path', 'resources'));
+        $this->rootPackageFile->addResourceMapping(new ResourceMapping('/path/config', 'override'));
+        $this->rootPackageFile->setOverriddenPackages('package1');
+
+        $this->initDefaultManager();
+
+        $this->manager->removeResourceMapping('/path/config');
+    }
+
+    public function testRemoveResourceMappingRestoresOverriddenNestedResource2()
+    {
+        $this->repo->expects($this->at(0))
+            ->method('remove')
+            ->with('/path');
+
+        $this->repo->expects($this->at(1))
+            ->method('add')
+            ->with('/path/config', new DirectoryResource($this->packageDir1.'/resources'));
+
+        $this->packageFileStorage->expects($this->once())
+            ->method('saveRootPackageFile')
+            ->with($this->rootPackageFile)
+            ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) {
+                $mappings = $rootPackageFile->getResourceMappings();
+
+                PHPUnit_Framework_Assert::assertCount(0, $mappings);
+            }));
+
+        // /override/config overrides /package1/resources
+        $this->packageFile1->addResourceMapping(new ResourceMapping('/path/config', 'resources'));
+        $this->rootPackageFile->addResourceMapping(new ResourceMapping('/path', 'override'));
+        $this->rootPackageFile->setOverriddenPackages('package1');
+
+        $this->initDefaultManager();
+
+        $this->manager->removeResourceMapping('/path');
     }
 
     public function testGetResourceMappings()
