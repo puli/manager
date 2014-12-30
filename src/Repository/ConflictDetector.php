@@ -20,7 +20,7 @@ use Puli\RepositoryManager\Package\Graph\PackageNameGraph;
  * with the package that registered the path. Whenever you want to look for
  * conflicts, call {@link markUnchecked()} with all paths that you want to
  * check. The detector will then check whether any of these paths have a
- * conflict according to the override graph passed to the constructor.
+ * conflict according to the package graph passed to the constructor.
  *
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
@@ -30,7 +30,7 @@ class ConflictDetector
     /**
      * @var PackageNameGraph
      */
-    private $overrideGraph;
+    private $packageGraph;
 
     /**
      * @var bool[]
@@ -45,13 +45,13 @@ class ConflictDetector
     /**
      * Creates a new conflict detector.
      *
-     * @param PackageNameGraph $overrideGraph The graph indicating which
-     *                                        package is overridden by which
-     *                                        other package.
+     * @param PackageNameGraph $packageGraph The graph indicating which
+     *                                       package is overridden by which
+     *                                       other package.
      */
-    public function __construct(PackageNameGraph $overrideGraph)
+    public function __construct(PackageNameGraph $packageGraph)
     {
-        $this->overrideGraph = $overrideGraph;
+        $this->packageGraph = $packageGraph;
     }
 
     /**
@@ -119,12 +119,12 @@ class ConflictDetector
                 continue;
             }
 
-            $sortedNames = $this->overrideGraph->getSortedPackageNames(array_keys($packageNames));
+            $sortedNames = $this->packageGraph->getSortedPackageNames(array_keys($packageNames));
 
             // An edge must exist between each package pair in the sorted set,
             // otherwise the dependencies are not sufficiently defined
             for ($i = 1, $l = count($sortedNames); $i < $l; ++$i) {
-                if (!$this->overrideGraph->hasEdge($sortedNames[$i - 1], $sortedNames[$i])) {
+                if (!$this->packageGraph->hasEdge($sortedNames[$i - 1], $sortedNames[$i])) {
                     return new ResourceConflict($path, $sortedNames[$i - 1], $sortedNames[$i]);
                 }
             }
