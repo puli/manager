@@ -115,20 +115,21 @@ class RepositoryManagerTest extends ManagerTestCase
     /**
      * @expectedException \InvalidArgumentException
      */
-    public function testCreateFailsIfResourceNotFound()
+    public function testLoadPackagesFailsIfResourceNotFound()
     {
         $packageFile = new PackageFile('package1');
         $packageFile->addResourceMapping(new ResourceMapping('/package', 'foobar'));
 
         $this->packages->add(new Package($packageFile, $this->packageDir1));
 
-        new RepositoryManager($this->environment, $this->packages, $this->packageFileStorage);
+        $manager = new RepositoryManager($this->environment, $this->packages, $this->packageFileStorage);
+        $manager->loadPackages();
     }
 
     /**
      * @expectedException \Puli\RepositoryManager\Repository\ResourceConflictException
      */
-    public function testCreateFailsIfPathConflict()
+    public function testLoadPackagesFailsIfPathConflict()
     {
         $packageFile1 = new PackageFile('package1');
         $packageFile1->addResourceMapping(new ResourceMapping('/path', 'resources'));
@@ -142,13 +143,14 @@ class RepositoryManagerTest extends ManagerTestCase
         $this->packages->add(new Package($packageFile1, $this->packageDir1));
         $this->packages->add(new Package($packageFile2, $this->packageDir2));
 
-        new RepositoryManager($this->environment, $this->packages, $this->packageFileStorage);
+        $manager = new RepositoryManager($this->environment, $this->packages, $this->packageFileStorage);
+        $manager->loadPackages();
     }
 
     /**
      * @expectedException \Puli\RepositoryManager\Repository\ResourceConflictException
      */
-    public function testCreateFailsIfPathConflictWithNestedPath()
+    public function testLoadPackagesFailsIfPathConflictWithNestedPath()
     {
         $packageFile1 = new PackageFile('package1');
         $packageFile1->addResourceMapping(new ResourceMapping('/path', 'resources'));
@@ -162,13 +164,14 @@ class RepositoryManagerTest extends ManagerTestCase
         $this->packages->add(new Package($packageFile1, $this->packageDir1));
         $this->packages->add(new Package($packageFile2, $this->packageDir2));
 
-        new RepositoryManager($this->environment, $this->packages, $this->packageFileStorage);
+        $manager = new RepositoryManager($this->environment, $this->packages, $this->packageFileStorage);
+        $manager->loadPackages();
     }
 
     /**
      * @expectedException \Puli\RepositoryManager\Repository\ResourceConflictException
      */
-    public function testCreateFailsIfPathConflictAndPackageOrderInNonRootPackage()
+    public function testLoadPackagesFailsIfPathConflictAndPackageOrderInNonRootPackage()
     {
         $packageFile1 = new PackageFile('package1');
         $packageFile1->addResourceMapping(new ResourceMapping('/path', 'resources'));
@@ -183,7 +186,8 @@ class RepositoryManagerTest extends ManagerTestCase
         $this->packages->add(new Package($packageFile2, $this->packageDir2));
         $this->packages->add(new Package($pseudoRootConfig, $this->packageDir3));
 
-        new RepositoryManager($this->environment, $this->packages, $this->packageFileStorage);
+        $manager = new RepositoryManager($this->environment, $this->packages, $this->packageFileStorage);
+        $manager->loadPackages();
     }
 
     public function testAddResourceMappingWithDirectoryPath()

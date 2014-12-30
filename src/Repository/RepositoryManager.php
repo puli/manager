@@ -105,16 +105,7 @@ class RepositoryManager
         $this->rootPackageFile = $environment->getRootPackageFile();
         $this->packages = $packages;
         $this->packageFileStorage = $packageFileStorage;
-        $this->packageGraph = new PackageNameGraph($this->packages->getPackageNames());
-        $this->repo = $environment->getRepository();
-        $this->repoUpdater = new RepositoryUpdater($this->repo, $this->packageGraph);
-        $this->conflictDetector = new ConflictDetector($this->packageGraph);
 
-        $this->loadPackages();
-
-        if ($conflict = $this->conflictDetector->detectConflict()) {
-            throw ResourceConflictException::forConflict($conflict);
-        }
     }
 
     /**
@@ -128,12 +119,51 @@ class RepositoryManager
     }
 
     /**
+     * Loads the resource mappings from the packages.
+     *
+     * This method is called automatically when necessary. You can however use
+     * it to validate the package configuration without doing any changes.
+     *
+     * @throws ResourceConflictException If a resource conflict is detected.
+     */
+    public function loadPackages()
+    {
+        if (!$this->repo) {
+            $this->loadRepository();
+        }
+
+        $this->packageGraph = new PackageNameGraph($this->packages->getPackageNames());
+        $this->repoUpdater = new RepositoryUpdater($this->repo, $this->packageGraph);
+        $this->conflictDetector = new ConflictDetector($this->packageGraph);
+
+        foreach ($this->packages as $package) {
+            foreach ($package->getPackageFile()->getResourceMappings() as $mapping) {
+                if (!$absMapping = $this->getAbsoluteMapping($mapping, $package)) {
+                    continue;
+                }
+
+                $this->loadResourceMapping($absMapping, $package->getName());
+            }
+
+            $this->loadOverrideOrder($package);
+        }
+
+        if ($conflict = $this->conflictDetector->detectConflict()) {
+            throw ResourceConflictException::forConflict($conflict);
+        }
+    }
+
+    /**
      * Adds a resource mapping to the repository.
      *
      * @param ResourceMapping $mapping The resource mapping.
      */
     public function addResourceMapping(ResourceMapping $mapping)
     {
+        if (!$this->packageGraph) {
+            $this->loadPackages();
+        }
+
         $this->repoUpdater->clear();
 
         $rootPackageName = $this->rootPackage->getName();
@@ -167,6 +197,10 @@ class RepositoryManager
     {
         if (!$this->rootPackageFile->hasResourceMapping($repositoryPath)) {
             return;
+        }
+
+        if (!$this->packageGraph) {
+            $this->loadPackages();
         }
 
         $this->repoUpdater->clear();
@@ -248,8 +282,16 @@ class RepositoryManager
      */
     public function buildRepository()
     {
+        if (!$this->repo) {
+            $this->loadRepository();
+        }
+
         if ($this->repo->hasChildren('/')) {
             // quit
+        }
+
+        if (!$this->packageGraph) {
+            $this->loadPackages();
         }
 
         $this->repoUpdater->clear();
@@ -263,19 +305,9 @@ class RepositoryManager
         $this->repoUpdater->commit();
     }
 
-    private function loadPackages()
+    private function loadRepository()
     {
-        foreach ($this->packages as $package) {
-            foreach ($package->getPackageFile()->getResourceMappings() as $mapping) {
-                if (!$absMapping = $this->getAbsoluteMapping($mapping, $package)) {
-                    continue;
-                }
-
-                $this->loadResourceMapping($absMapping, $package->getName());
-            }
-
-            $this->loadOverrideOrder($package);
-        }
+        $this->repo = $this->environment->getRepository();
     }
 
     /**
