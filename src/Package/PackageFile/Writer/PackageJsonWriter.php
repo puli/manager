@@ -101,7 +101,7 @@ class PackageJsonWriter implements PackageFileWriter
 
             foreach ($bindings as $binding) {
                 $bindingData = new \stdClass();
-                $bindingData->selector = $binding->getSelector();
+                $bindingData->selector = $binding->getQuery();
                 $bindingData->type = $binding->getTypeName();
 
                 if (count($binding->getParameters()) > 0) {

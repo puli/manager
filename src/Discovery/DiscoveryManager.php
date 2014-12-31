@@ -13,6 +13,7 @@ namespace Puli\RepositoryManager\Discovery;
 
 use Puli\Discovery\Api\DuplicateTypeException;
 use Puli\Discovery\Api\EditableDiscovery;
+use Puli\Discovery\Api\NoSuchTypeException;
 use Puli\RepositoryManager\Environment\ProjectEnvironment;
 use Puli\RepositoryManager\Package\Collection\PackageCollection;
 use Puli\RepositoryManager\Package\PackageFile\PackageFileStorage;
@@ -112,6 +113,59 @@ class DiscoveryManager
         }
 
         return $types;
+    }
+
+    /**
+     * Adds a new binding.
+     *
+     * @param BindingDescriptor $binding The binding to add.
+     *
+     * @throws NoSuchTypeException If the binding type is not found.
+     */
+    public function addBinding(BindingDescriptor $binding)
+    {
+        if (!$this->discovery) {
+            $this->loadDiscovery();
+        }
+
+        if (!$this->discovery->isDefined($binding->getTypeName())) {
+            throw NoSuchTypeException::forTypeName($binding->getTypeName());
+        }
+
+        $this->rootPackageFile->addBindingDescriptor($binding);
+        $this->packageFileStorage->saveRootPackageFile($this->rootPackageFile);
+
+        $this->discovery->bind(
+            $binding->getQuery(),
+            $binding->getTypeName(),
+            $binding->getParameters(),
+            $binding->getLanguage()
+        );
+    }
+
+    /**
+     * Returns all bindings.
+     *
+     * You can optionally filter types by one or multiple package names.
+     *
+     * @param string|string[] $packageName The package name(s) to filter by.
+     *
+     * @return BindingDescriptor[] The bindings.
+     */
+    public function getBindings($packageName = null)
+    {
+        $packageNames = $packageName ? (array) $packageName : $this->packages->getPackageNames();
+        $bindings = array();
+
+        foreach ($packageNames as $packageName) {
+            $packageFile = $this->packages[$packageName]->getPackageFile();
+
+            foreach ($packageFile->getBindingDescriptors() as $binding) {
+                $bindings[] = $binding;
+            }
+        }
+
+        return $bindings;
     }
 
     private function loadDiscovery()

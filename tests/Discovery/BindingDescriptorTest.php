@@ -26,18 +26,31 @@ class BindingDescriptorTest extends PHPUnit_Framework_TestCase
             'param' => 'value',
         ));
 
-        $this->assertSame('/path', $descriptor->getSelector());
+        $this->assertSame('/path', $descriptor->getQuery());
+        $this->assertSame('glob', $descriptor->getLanguage());
         $this->assertSame('type', $descriptor->getTypeName());
         $this->assertSame(array('param' => 'value'), $descriptor->getParameters());
         $this->assertSame('value', $descriptor->getParameter('param'));
         $this->assertTrue($descriptor->hasParameter('param'));
         $this->assertFalse($descriptor->hasParameter('foobar'));
+        $this->assertTrue($descriptor->hasParameters());
+    }
+
+    public function testCreateWithQueryLanguage()
+    {
+        $descriptor = new BindingDescriptor('/path', 'type', array(), 'xpath');
+
+        $this->assertSame('/path', $descriptor->getQuery());
+        $this->assertSame('xpath', $descriptor->getLanguage());
+        $this->assertSame('type', $descriptor->getTypeName());
+        $this->assertSame(array(), $descriptor->getParameters());
+        $this->assertFalse($descriptor->hasParameters());
     }
 
     /**
      * @expectedException \InvalidArgumentException
      */
-    public function testSelectorMustBeString()
+    public function testQueryMustBeString()
     {
         new BindingDescriptor(12345, 'type');
     }
@@ -45,7 +58,7 @@ class BindingDescriptorTest extends PHPUnit_Framework_TestCase
     /**
      * @expectedException \InvalidArgumentException
      */
-    public function testSelectorMustNotBeEmpty()
+    public function testQueryMustNotBeEmpty()
     {
         new BindingDescriptor('', 'type');
     }
@@ -74,5 +87,21 @@ class BindingDescriptorTest extends PHPUnit_Framework_TestCase
         $descriptor = new BindingDescriptor('/path', 'type');
 
         $descriptor->getParameter('foobar');
+    }
+
+    /**
+     * @expectedException \InvalidArgumentException
+     */
+    public function testLanguageMustBeString()
+    {
+        new BindingDescriptor('/path', 'type', array(), 1234);
+    }
+
+    /**
+     * @expectedException \InvalidArgumentException
+     */
+    public function testLanguageMustNotBeEmpty()
+    {
+        new BindingDescriptor('/path', 'type', array(), '');
     }
 }

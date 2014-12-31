@@ -13,6 +13,7 @@ namespace Puli\RepositoryManager\Tests\Discovery;
 
 use PHPUnit_Framework_Assert;
 use PHPUnit_Framework_MockObject_MockObject;
+use Puli\RepositoryManager\Discovery\BindingDescriptor;
 use Puli\RepositoryManager\Discovery\BindingParameterDescriptor;
 use Puli\RepositoryManager\Discovery\BindingTypeDescriptor;
 use Puli\RepositoryManager\Discovery\DiscoveryManager;
@@ -174,6 +175,76 @@ class DiscoveryManagerTest extends ManagerTestCase
 
         $this->assertSame(array($type2), $this->manager->getBindingTypes('package1'));
         $this->assertSame(array($type2, $type3), $this->manager->getBindingTypes(array('package1', 'package2')));
+    }
+
+    public function testAddBinding()
+    {
+        $this->initDefaultManager();
+
+        $binding = new BindingDescriptor('/path', 'my/type', array('param' => 'value'), 'xpath');
+
+        $this->discovery->expects($this->any())
+            ->method('isDefined')
+            ->with('my/type')
+            ->will($this->returnValue(true));
+
+        $this->discovery->expects($this->once())
+            ->method('bind')
+            ->with('/path', 'my/type', array('param' => 'value'), 'xpath');
+
+        $this->packageFileStorage->expects($this->once())
+            ->method('saveRootPackageFile')
+            ->with($this->rootPackageFile)
+            ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) use ($binding) {
+                $bindings = $rootPackageFile->getBindingDescriptors();
+
+                PHPUnit_Framework_Assert::assertSame(array($binding), $bindings);
+            }));
+
+        $this->manager->addBinding($binding);
+    }
+
+    /**
+     * @expectedException \Puli\Discovery\Api\NoSuchTypeException
+     */
+    public function testAddBindingFailsIfTypeNotDefined()
+    {
+        $this->initDefaultManager();
+
+        $binding = new BindingDescriptor('/path', 'my/type', array('param' => 'value'), 'xpath');
+
+        $this->discovery->expects($this->any())
+            ->method('isDefined')
+            ->with('my/type')
+            ->will($this->returnValue(false));
+
+        $this->discovery->expects($this->never())
+            ->method('bind');
+
+        $this->packageFileStorage->expects($this->never())
+            ->method('saveRootPackageFile');
+
+        $this->manager->addBinding($binding);
+    }
+
+    public function testGetBindings()
+    {
+        $this->initDefaultManager();
+
+        $this->rootPackageFile->addBindingDescriptor($binding1 = new BindingDescriptor('/path1', 'my/type1'));
+        $this->packageFile1->addBindingDescriptor($binding2 = new BindingDescriptor('/path2', 'my/type2'));
+        $this->packageFile2->addBindingDescriptor($binding3 = new BindingDescriptor('/path3', 'my/type3'));
+        $this->packageFile3->addBindingDescriptor($binding4 = new BindingDescriptor('/path4', 'my/type4'));
+
+        $this->assertSame(array(
+            $binding1,
+            $binding2,
+            $binding3,
+            $binding4,
+        ), $this->manager->getBindings());
+
+        $this->assertSame(array($binding2), $this->manager->getBindings('package1'));
+        $this->assertSame(array($binding2, $binding3), $this->manager->getBindings(array('package1', 'package2')));
     }
 
     private function initDefaultManager()

@@ -27,7 +27,12 @@ class BindingDescriptor
     /**
      * @var string
      */
-    private $selector;
+    private $query;
+
+    /**
+     * @var string
+     */
+    private $language;
 
     /**
      * @var string
@@ -42,36 +47,48 @@ class BindingDescriptor
     /**
      * Creates a new binding descriptor.
      *
-     * @param string $selector   The Puli selector. Must be a non-empty string.
+     * @param string $query      The query for the resources of the binding.
      * @param string $typeName   The name of the binding type.
      * @param array  $parameters The values of the binding parameters.
+     * @param string $language   The language of the query.
      *
      * @throws InvalidArgumentException If any of the arguments is invalid.
      *
      * @see ResourceBinding
      */
-    public function __construct($selector, $typeName, array $parameters = array())
+    public function __construct($query, $typeName, array $parameters = array(), $language = 'glob')
     {
-        Assertion::string($selector, 'The selector must be a string. Got: %2$s');
-        Assertion::notEmpty($selector, 'The selector must not be empty');
+        Assertion::string($query, 'The query must be a string. Got: %2$s');
+        Assertion::notEmpty($query, 'The query must not be empty');
+        Assertion::string($language, 'The language must be a string. Got: %2$s');
+        Assertion::notEmpty($language, 'The language must not be empty');
         Assertion::string($typeName, 'The type name must be a string. Got: %2$s');
         Assertion::notEmpty($typeName, 'The type name must not be empty');
 
-        $this->selector = $selector;
+        $this->query = $query;
+        $this->language = $language;
         $this->typeName = $typeName;
         $this->parameters = $parameters;
     }
 
     /**
-     * Returns the Puli selector.
+     * Returns the query for the resources of the binding.
      *
-     * The Puli selector can be a Puli path or a pattern containing wildcards.
-     *
-     * @return string The Puli selector.
+     * @return string The resource query.
      */
-    public function getSelector()
+    public function getQuery()
     {
-        return $this->selector;
+        return $this->query;
+    }
+
+    /**
+     * Returns the language of the query.
+     *
+     * @return string The query language.
+     */
+    public function getLanguage()
+    {
+        return $this->language;
     }
 
     /**
@@ -92,6 +109,16 @@ class BindingDescriptor
     public function getParameters()
     {
         return $this->parameters;
+    }
+
+    /**
+     * Returns whether the descriptor has any parameter values set.
+     *
+     * @return bool Returns `true` if any parameter values are set.
+     */
+    public function hasParameters()
+    {
+        return count($this->parameters) > 0;
     }
 
     /**
