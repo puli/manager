@@ -13,8 +13,8 @@ namespace Puli\RepositoryManager\Package\PackageFile;
 
 use Assert\Assertion;
 use InvalidArgumentException;
-use Puli\RepositoryManager\Binding\BindingDescriptor;
-use Puli\RepositoryManager\Binding\BindingTypeDescriptor;
+use Puli\RepositoryManager\Discovery\BindingDescriptor;
+use Puli\RepositoryManager\Discovery\BindingTypeDescriptor;
 use Puli\RepositoryManager\Repository\NoSuchMappingException;
 use Puli\RepositoryManager\Repository\ResourceMapping;
 

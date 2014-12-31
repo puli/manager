@@ -11,9 +11,9 @@
 
 namespace Puli\RepositoryManager\Tests\Package\PackageFile\Writer;
 
-use Puli\RepositoryManager\Binding\BindingDescriptor;
-use Puli\RepositoryManager\Binding\BindingParameterDescriptor;
-use Puli\RepositoryManager\Binding\BindingTypeDescriptor;
+use Puli\RepositoryManager\Discovery\BindingDescriptor;
+use Puli\RepositoryManager\Discovery\BindingParameterDescriptor;
+use Puli\RepositoryManager\Discovery\BindingTypeDescriptor;
 use Puli\RepositoryManager\Config\Config;
 use Puli\RepositoryManager\Package\InstallInfo;
 use Puli\RepositoryManager\Package\PackageFile\PackageFile;

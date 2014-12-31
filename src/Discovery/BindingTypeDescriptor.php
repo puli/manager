@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\RepositoryManager\Binding;
+namespace Puli\RepositoryManager\Discovery;
 
 use Assert\Assertion;
 use InvalidArgumentException;

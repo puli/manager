@@ -13,7 +13,7 @@ namespace Puli\RepositoryManager\Package;
 
 use Assert\Assertion;
 use InvalidArgumentException;
-use Puli\RepositoryManager\Binding\BindingDescriptor;
+use Puli\RepositoryManager\Discovery\BindingDescriptor;
 
 /**
  * Contains information about a package installation.

@@ -177,29 +177,6 @@ class ManagerFactoryTest extends PHPUnit_Framework_TestCase
         $this->assertSame('package2', $packages['package2']->getName());
     }
 
-    public function testCreateTagManager()
-    {
-        $this->markTestIncomplete('Needs to be fixed');
-        return;
-
-        $environment = ManagerFactory::createProjectEnvironment($this->tempDir);
-        $manager = ManagerFactory::createTagManager($environment);
-
-        $this->assertInstanceOf('Puli\RepositoryManager\Tag\TagManager', $manager);
-    }
-
-    public function testCreateTagManagerWithPackageManager()
-    {
-        $this->markTestIncomplete('Needs to be fixed');
-        return;
-
-        $environment = ManagerFactory::createProjectEnvironment($this->tempDir);
-        $packageManager = ManagerFactory::createPackageManager($environment);
-        $manager = ManagerFactory::createTagManager($environment, $packageManager);
-
-        $this->assertInstanceOf('Puli\RepositoryManager\Tag\TagManager', $manager);
-    }
-
     public function testCreateRepositoryManager()
     {
         $environment = ManagerFactory::createProjectEnvironment($this->tempDir);
@@ -215,5 +192,22 @@ class ManagerFactoryTest extends PHPUnit_Framework_TestCase
         $manager = ManagerFactory::createRepositoryManager($environment, $packageManager);
 
         $this->assertInstanceOf('Puli\RepositoryManager\Repository\RepositoryManager', $manager);
+    }
+
+    public function testCreateDiscoveryManager()
+    {
+        $environment = ManagerFactory::createProjectEnvironment($this->tempDir);
+        $manager = ManagerFactory::createDiscoveryManager($environment);
+
+        $this->assertInstanceOf('Puli\RepositoryManager\Discovery\DiscoveryManager', $manager);
+    }
+
+    public function testCreateDiscoveryManagerWithPackageManager()
+    {
+        $environment = ManagerFactory::createProjectEnvironment($this->tempDir);
+        $packageManager = ManagerFactory::createPackageManager($environment);
+        $manager = ManagerFactory::createDiscoveryManager($environment, $packageManager);
+
+        $this->assertInstanceOf('Puli\RepositoryManager\Discovery\DiscoveryManager', $manager);
     }
 }

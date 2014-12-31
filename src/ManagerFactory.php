@@ -208,6 +208,25 @@ class ManagerFactory
         );
     }
 
+    /**
+     * Creates a resource discovery manager.
+     *
+     * @param ProjectEnvironment $environment    The project environment.
+     * @param PackageManager     $packageManager The package manager. Optional.
+     *
+     * @return DiscoveryManager The discovery manager.
+     */
+    public static function createDiscoveryManager(ProjectEnvironment $environment, PackageManager $packageManager = null)
+    {
+        $packageManager = $packageManager ?: self::createPackageManager($environment);
+
+        return new DiscoveryManager(
+            $environment,
+            $packageManager->getPackages(),
+            self::createPackageFileStorage($environment->getEventDispatcher())
+        );
+    }
+
     private static function createConfigFileStorage()
     {
         return new ConfigFileStorage(

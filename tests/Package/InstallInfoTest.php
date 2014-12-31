@@ -12,7 +12,7 @@
 namespace Puli\RepositoryManager\Tests\Package;
 
 use PHPUnit_Framework_TestCase;
-use Puli\RepositoryManager\Binding\BindingDescriptor;
+use Puli\RepositoryManager\Discovery\BindingDescriptor;
 use Puli\RepositoryManager\Package\InstallInfo;
 
 /**

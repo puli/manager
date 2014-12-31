@@ -13,6 +13,7 @@ namespace Puli\RepositoryManager\Tests;
 
 use PHPUnit_Framework_MockObject_MockObject;
 use PHPUnit_Framework_TestCase;
+use Puli\Discovery\Api\EditableDiscovery;
 use Puli\Repository\Api\EditableRepository;
 use Puli\RepositoryManager\Config\ConfigFile\ConfigFile;
 use Puli\RepositoryManager\Config\DefaultConfig;
@@ -57,6 +58,11 @@ abstract class ManagerTestCase extends PHPUnit_Framework_TestCase
     protected $repo;
 
     /**
+     * @var PHPUnit_Framework_MockObject_MockObject|EditableDiscovery
+     */
+    protected $discovery;
+
+    /**
      * @var TestProjectEnvironment
      */
     protected $environment;
@@ -71,6 +77,7 @@ abstract class ManagerTestCase extends PHPUnit_Framework_TestCase
         $this->rootPackageFile = new RootPackageFile('root', null, $baseConfig);
         $this->dispatcher = $this->getMock('Symfony\Component\EventDispatcher\EventDispatcherInterface');
         $this->repo = $this->getMock('Puli\Repository\Api\EditableRepository');
+        $this->discovery = $this->getMock('Puli\Discovery\Api\EditableDiscovery');
 
         $this->environment = new TestProjectEnvironment(
             $this->homeDir,
@@ -78,7 +85,8 @@ abstract class ManagerTestCase extends PHPUnit_Framework_TestCase
             $this->configFile,
             $this->rootPackageFile,
             $this->dispatcher,
-            $this->repo
+            $this->repo,
+            $this->discovery
         );
     }
 }

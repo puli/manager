@@ -11,9 +11,9 @@
 
 namespace Puli\RepositoryManager\Package\PackageFile\Reader;
 
-use Puli\RepositoryManager\Binding\BindingDescriptor;
-use Puli\RepositoryManager\Binding\BindingParameterDescriptor;
-use Puli\RepositoryManager\Binding\BindingTypeDescriptor;
+use Puli\RepositoryManager\Discovery\BindingDescriptor;
+use Puli\RepositoryManager\Discovery\BindingParameterDescriptor;
+use Puli\RepositoryManager\Discovery\BindingTypeDescriptor;
 use Puli\RepositoryManager\Config\Config;
 use Puli\RepositoryManager\FileNotFoundException;
 use Puli\RepositoryManager\InvalidConfigException;

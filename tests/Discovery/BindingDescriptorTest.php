@@ -9,10 +9,10 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\RepositoryManager\Tests\Binding;
+namespace Puli\RepositoryManager\Tests\Discovery;
 
 use PHPUnit_Framework_TestCase;
-use Puli\RepositoryManager\Binding\BindingDescriptor;
+use Puli\RepositoryManager\Discovery\BindingDescriptor;
 
 /**
  * @since  1.0
