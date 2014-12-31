@@ -65,6 +65,7 @@ class BindingParameterDescriptor
     {
         Assertion::string($name, 'The parameter name must be a string. Got: %2$s');
         Assertion::notEmpty($name, 'The parameter name must not be empty.');
+        Assertion::regex($name, '~^[a-z][a-z0-9\-]*$~', 'The parameter name must contain lower-case characters, digits and hyphens only and start with a letter. Got: "%s"');
         Assertion::boolean($required, 'The parameter "$required" must be a boolean. Got: %s');
         Assertion::nullOrString($description, 'The parameter description must be a string or null. Got: %2$s');
         Assertion::nullOrNotEmpty($description, 'The parameter description must not be empty.');

@@ -43,42 +43,46 @@ class BindingTypeDescriptorTest extends PHPUnit_Framework_TestCase
         $this->assertNull($descriptor->getDescription());
         $this->assertSame(array(), $descriptor->getParameters());
     }
-    public function testToBindingType()
+
+    public function getValidNames()
     {
-        $descriptor = new BindingTypeDescriptor('vendor/type', 'The description.', array(
-            $param = new BindingParameterDescriptor('param'),
-        ));
-
-        $type = $descriptor->toBindingType();
-
-        $this->assertInstanceOf('Puli\Discovery\Api\BindingType', $type);
-        $this->assertSame('vendor/type', $type->getName());
-        $this->assertCount(1, $type->getParameters());
-        $this->assertInstanceOf('Puli\Discovery\Api\BindingParameter', $type->getParameter('param'));
+        return array(
+            array('my/type'),
+            array('my/type-name'),
+            array('my/type-name'),
+            array('my123/type-name-123')
+        );
     }
 
     /**
-     * @expectedException \InvalidArgumentException
+     * @dataProvider getValidNames
      */
-    public function testTypeMustBeString()
+    public function testValidName($name)
     {
-        new BindingTypeDescriptor(1234);
+        $descriptor = new BindingTypeDescriptor($name);
+
+        $this->assertSame($name, $descriptor->getName());
+    }
+
+    public function getInvalidNames()
+    {
+        return array(
+            array(1234),
+            array(''),
+            array('no-vendor'),
+            array('my/Type'),
+            array('my/type_name'),
+            array('123my/digits-first'),
+        );
     }
 
     /**
+     * @dataProvider getInvalidNames
      * @expectedException \InvalidArgumentException
      */
-    public function testTypeMustNotBeEmpty()
+    public function testFailIfInvalidName($name)
     {
-        new BindingTypeDescriptor('');
-    }
-
-    /**
-     * @expectedException \InvalidArgumentException
-     */
-    public function testTypeMustContainVendorName()
-    {
-        new BindingTypeDescriptor('foo');
+        new BindingTypeDescriptor($name);
     }
 
     /**
@@ -113,5 +117,23 @@ class BindingTypeDescriptorTest extends PHPUnit_Framework_TestCase
         $descriptor = new BindingTypeDescriptor('vendor/type');
 
         $descriptor->getParameter('foobar');
+    }
+
+    /**
+     * @dataProvider getValidNames
+     */
+    public function testToBindingType($name)
+    {
+        // Check that valid names are also accepted by BindingType
+        $descriptor = new BindingTypeDescriptor($name, 'The description.', array(
+            $param = new BindingParameterDescriptor('param'),
+        ));
+
+        $type = $descriptor->toBindingType();
+
+        $this->assertInstanceOf('Puli\Discovery\Api\BindingType', $type);
+        $this->assertSame($name, $type->getName());
+        $this->assertCount(1, $type->getParameters());
+        $this->assertInstanceOf('Puli\Discovery\Api\BindingParameter', $type->getParameter('param'));
     }
 }

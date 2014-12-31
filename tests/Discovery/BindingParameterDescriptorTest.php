@@ -40,32 +40,43 @@ class BindingParameterDescriptorTest extends PHPUnit_Framework_TestCase
         $this->assertNull($descriptor->getDescription());
     }
 
-    public function testToBindingParameter()
+    public function getValidNames()
     {
-        $descriptor = new BindingParameterDescriptor('param', false, 'default', 'The description');
-
-        $parameter = $descriptor->toBindingParameter();
-
-        $this->assertInstanceOf('Puli\Discovery\Api\BindingParameter', $parameter);
-        $this->assertSame('param', $parameter->getName());
-        $this->assertFalse($parameter->isRequired());
-        $this->assertSame('default', $parameter->getDefaultValue());
+        return array(
+            array('param'),
+            array('param-name'),
+            array('param-name-123'),
+        );
     }
 
     /**
-     * @expectedException \InvalidArgumentException
+     * @dataProvider getValidNames
      */
-    public function testNameMustBeString()
+    public function testValidName($name)
     {
-        new BindingParameterDescriptor(1234);
+        $descriptor = new BindingParameterDescriptor($name);
+
+        $this->assertSame($name, $descriptor->getName());
+    }
+
+    public function getInvalidNames()
+    {
+        return array(
+            array(1234),
+            array(''),
+            array('paramName'),
+            array('my/param'),
+            array('123digitsfirst'),
+        );
     }
 
     /**
+     * @dataProvider getInvalidNames
      * @expectedException \InvalidArgumentException
      */
-    public function testNameMustNotBeEmpty()
+    public function testFailIfInvalidName($name)
     {
-        new BindingParameterDescriptor('');
+        new BindingParameterDescriptor($name);
     }
 
     /**
@@ -90,5 +101,21 @@ class BindingParameterDescriptorTest extends PHPUnit_Framework_TestCase
     public function testDescriptionMustNotBeEmpty()
     {
         new BindingParameterDescriptor('param', false, null, '');
+    }
+
+    /**
+     * @dataProvider getValidNames
+     */
+    public function testToBindingParameter($name)
+    {
+        // Check that valid names are also accepted by BindingParameter
+        $descriptor = new BindingParameterDescriptor($name, false, 'default', 'The description');
+
+        $parameter = $descriptor->toBindingParameter();
+
+        $this->assertInstanceOf('Puli\Discovery\Api\BindingParameter', $parameter);
+        $this->assertSame($name, $parameter->getName());
+        $this->assertFalse($parameter->isRequired());
+        $this->assertSame('default', $parameter->getDefaultValue());
     }
 }
