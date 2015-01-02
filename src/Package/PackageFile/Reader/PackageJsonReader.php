@@ -139,8 +139,8 @@ class PackageJsonReader implements PackageFileReader
 
     private function populateRootConfig(RootPackageFile $packageFile, \stdClass $jsonData)
     {
-        if (isset($jsonData->{'package-order'})) {
-            $packageFile->setPackageOrder((array) $jsonData->{'package-order'});
+        if (isset($jsonData->{'override-order'})) {
+            $packageFile->setOverrideOrder((array) $jsonData->{'override-order'});
         }
 
         if (isset($jsonData->plugins)) {

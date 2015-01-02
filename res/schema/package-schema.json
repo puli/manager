@@ -59,7 +59,7 @@
                 "type": "string"
             }
         },
-        "package-order": {
+        "override-order": {
             "type": "array",
             "items": {
                 "type": "string"

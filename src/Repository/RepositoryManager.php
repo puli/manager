@@ -105,7 +105,6 @@ class RepositoryManager
         $this->rootPackageFile = $environment->getRootPackageFile();
         $this->packages = $packages;
         $this->packageFileStorage = $packageFileStorage;
-
     }
 
     /**
@@ -119,10 +118,30 @@ class RepositoryManager
     }
 
     /**
-     * Loads the resource mappings from the packages.
+     * Loads the resource mappings and override settings for the installed
+     * packages.
+     *
+     * The method processes the package configuration files and stores the
+     * following information:
+     *
+     *  * The resources mappings of each package.
+     *  * The override dependencies between the packages.
+     *
+     * Once all that information is loaded, the repository can be built by
+     * loading the resource mappings of the packages in the order determined
+     * by the override dependencies: First the resources of overridden packages
+     * are added to the repository, then the resources of the overriding ones.
+     *
+     * If two packages map the same resource path without having an override
+     * order specified between them, a conflict exception is raised. The
+     * override order can be specified either by marking one package to override
+     * the other one (see {@link PackageFile::setOverriddenPackages()} or by
+     * setting the order between the packages in the root package file
+     * (see RootPackageFile::setPackageOrder()}.
      *
      * This method is called automatically when necessary. You can however use
-     * it to validate the package configuration without doing any changes.
+     * it to validate the configuration files of the packages without doing any
+     * changes to them.
      *
      * @throws ResourceConflictException If a resource conflict is detected.
      */
@@ -360,7 +379,7 @@ class RepositoryManager
 
         if ($package instanceof RootPackage) {
             // Make sure we have numeric, ascending keys here
-            $packageOrder = array_values($package->getPackageFile()->getPackageOrder());
+            $packageOrder = array_values($package->getPackageFile()->getOverrideOrder());
 
             // Each package overrides the previous one in the list
             for ($i = 1, $l = count($packageOrder); $i < $l; ++$i) {

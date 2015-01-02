@@ -21,7 +21,7 @@
         }
     },
     "override": "acme/blog",
-    "package-order": [
+    "override-order": [
         "acme/blog-extension1",
         "acme/blog-extension2"
     ],

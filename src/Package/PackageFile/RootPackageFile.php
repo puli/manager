@@ -37,7 +37,7 @@ class RootPackageFile extends PackageFile
     /**
      * @var string[]
      */
-    private $packageOrder = array();
+    private $overrideOrder = array();
 
     /**
      * @var InstallInfo[]
@@ -80,29 +80,33 @@ class RootPackageFile extends PackageFile
     }
 
     /**
-     * Returns the order in which some packages should be loaded.
+     * Returns the order in which packages should be loaded.
      *
-     * If packages contain conflicting resource definitions, this setting can be
-     * used to specify in which order these packages should be loaded.
+     * If packages contain resource mappings for the same resource paths, this
+     * setting can be used to specify in which order these packages should be
+     * loaded. Alternatively, you can use {@link setOverriddenPackages()} to
+     * mark one of the packages to override the other one.
      *
      * @return string[] A list of package names.
      */
-    public function getPackageOrder()
+    public function getOverrideOrder()
     {
-        return $this->packageOrder;
+        return $this->overrideOrder;
     }
 
     /**
-     * Sets the order in which some packages should be loaded.
+     * Sets the order in which packages should be loaded.
      *
-     * If packages contain conflicting resource definitions, this setting can be
-     * used to specify in which order these packages should be loaded.
+     * If packages contain resource mappings for the same resource paths, this
+     * setting can be used to specify in which order these packages should be
+     * loaded. Alternatively, you can use {@link setOverriddenPackages()} to
+     * mark one of the packages to override the other one.
      *
-     * @param string[] $packageOrder A list of package names.
+     * @param string[] $overrideOrder A list of package names.
      */
-    public function setPackageOrder(array $packageOrder)
+    public function setOverrideOrder(array $overrideOrder)
     {
-        $this->packageOrder = $packageOrder;
+        $this->overrideOrder = $overrideOrder;
     }
 
     /**

@@ -41,7 +41,7 @@ class PackageJsonWriter implements PackageFileWriter
         'bindings',
         'binding-types',
         'override',
-        'package-order',
+        'override-order',
         'config',
         'plugins'
     );
@@ -155,14 +155,14 @@ class PackageJsonWriter implements PackageFileWriter
 
     private function addRootConfig(array &$jsonData, RootPackageFile $packageFile)
     {
-        $packageOrder = $packageFile->getPackageOrder();
+        $overrideOrder = $packageFile->getOverrideOrder();
         $installInfos = $packageFile->getInstallInfos();
 
         // Pass false to exclude base configuration values
         $configValues = $packageFile->getConfig()->toRawArray(false);
 
-        if (count($packageOrder) > 0) {
-            $jsonData['package-order'] = $packageOrder;
+        if (count($overrideOrder) > 0) {
+            $jsonData['override-order'] = $overrideOrder;
         }
 
         if (count($configValues) > 0) {

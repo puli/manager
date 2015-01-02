@@ -180,7 +180,7 @@ class RepositoryManagerTest extends ManagerTestCase
         $packageFile2->addResourceMapping(new ResourceMapping('/path', 'override'));
 
         $pseudoRootConfig = new RootPackageFile('root');
-        $pseudoRootConfig->setPackageOrder(array('package1', 'package2'));
+        $pseudoRootConfig->setOverrideOrder(array('package1', 'package2'));
 
         $this->packages->add(new Package($packageFile1, $this->packageDir1));
         $this->packages->add(new Package($packageFile2, $this->packageDir2));
@@ -875,7 +875,7 @@ class RepositoryManagerTest extends ManagerTestCase
         $packageFile2->addResourceMapping(new ResourceMapping('/path', 'override'));
 
         $rootConfig = new RootPackageFile('root');
-        $rootConfig->setPackageOrder(array('package1', 'package2'));
+        $rootConfig->setOverrideOrder(array('package1', 'package2'));
 
         $this->packages->add(new Package($packageFile1, $this->packageDir1));
         $this->packages->add(new Package($packageFile2, $this->packageDir2));

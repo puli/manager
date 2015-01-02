@@ -144,7 +144,7 @@ class PackageJsonWriterTest extends JsonWriterTestCase
             new BindingParameterDescriptor('param', false, 1234, 'Description of the parameter.'),
         )));
         $packageFile->setOverriddenPackages('acme/blog');
-        $packageFile->setPackageOrder(array('acme/blog-extension1', 'acme/blog-extension2'));
+        $packageFile->setOverrideOrder(array('acme/blog-extension1', 'acme/blog-extension2'));
         $packageFile->addPluginClass('Puli\RepositoryManager\Tests\Package\PackageFile\Fixtures\TestPlugin');
         $packageFile->getConfig()->merge(array(
             Config::PULI_DIR => 'puli-dir',

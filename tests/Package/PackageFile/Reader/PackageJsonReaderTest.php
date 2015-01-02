@@ -64,7 +64,7 @@ class PackageJsonReaderTest extends PHPUnit_Framework_TestCase
         $this->assertInstanceOf('Puli\RepositoryManager\Package\PackageFile\RootPackageFile', $packageFile);
         $this->assertSame(__DIR__.'/Fixtures/full.json', $packageFile->getPath());
         $this->assertFullConfig($packageFile);
-        $this->assertSame(array('acme/blog-extension1', 'acme/blog-extension2'), $packageFile->getPackageOrder());
+        $this->assertSame(array('acme/blog-extension1', 'acme/blog-extension2'), $packageFile->getOverrideOrder());
         $this->assertEquals(array($installInfo1, $installInfo2), $packageFile->getInstallInfos());
 
         $config = $packageFile->getConfig();
@@ -91,7 +91,7 @@ class PackageJsonReaderTest extends PHPUnit_Framework_TestCase
 
         $this->assertInstanceOf('Puli\RepositoryManager\Package\PackageFile\RootPackageFile', $packageFile);
         $this->assertMinimalConfig($packageFile);
-        $this->assertSame(array(), $packageFile->getPackageOrder());
+        $this->assertSame(array(), $packageFile->getOverrideOrder());
     }
 
     public function testReadBindingTypeWithRequiredParameter()
@@ -245,7 +245,7 @@ class PackageJsonReaderTest extends PHPUnit_Framework_TestCase
      */
     public function testPackageOrderMustBeArray()
     {
-        $this->reader->readPackageFile(__DIR__.'/Fixtures/package-order-no-array.json');
+        $this->reader->readPackageFile(__DIR__.'/Fixtures/override-order-no-array.json');
     }
 
     /**
@@ -253,7 +253,7 @@ class PackageJsonReaderTest extends PHPUnit_Framework_TestCase
      */
     public function testPackageOrderEntriesMustBeStrings()
     {
-        $this->reader->readPackageFile(__DIR__.'/Fixtures/package-order-entry-no-string.json');
+        $this->reader->readPackageFile(__DIR__.'/Fixtures/override-order-entry-no-string.json');
     }
 
     private function assertFullConfig(PackageFile $packageFile)

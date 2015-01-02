@@ -1,4 +1,4 @@
 {
     "name": "my/application",
-    "package-order": [ 12345 ]
+    "override-order": [ 12345 ]
 }

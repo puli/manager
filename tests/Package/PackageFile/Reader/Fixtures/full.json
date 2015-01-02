@@ -21,7 +21,7 @@
         }
     },
     "override": "acme/blog",
-    "package-order": [ "acme/blog-extension1", "acme/blog-extension2" ],
+    "override-order": [ "acme/blog-extension1", "acme/blog-extension2" ],
     "config": {
         "puli-dir": "puli-dir",
         "factory": {
