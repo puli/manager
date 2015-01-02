@@ -14,7 +14,7 @@ namespace Puli\RepositoryManager\Repository;
 use Puli\Repository\Api\EditableRepository;
 use Puli\Repository\Resource\DirectoryResource;
 use Puli\Repository\Resource\FileResource;
-use Puli\RepositoryManager\Package\Graph\PackageNameGraph;
+use Puli\RepositoryManager\Conflict\OverrideGraph;
 
 /**
  * Adds new resources to a resource repository.
@@ -35,9 +35,9 @@ class RepositoryUpdater
     private $repo;
 
     /**
-     * @var PackageNameGraph
+     * @var OverrideGraph
      */
-    private $packageGraph;
+    private $overrideGraph;
 
     /**
      * @var string[][][]
@@ -47,15 +47,15 @@ class RepositoryUpdater
     /**
      * Creates a new updater.
      *
-     * @param EditableRepository $repo         The repository to update.
-     * @param PackageNameGraph   $packageGraph The package graph determining the
-     *                                         order in which to process the
-     *                                         packages.
+     * @param EditableRepository $repo          The repository to update.
+     * @param OverrideGraph      $overrideGraph The graph determining which
+     *                                          the order in which to process
+     *                                          the packages.
      */
-    public function __construct(EditableRepository $repo, PackageNameGraph $packageGraph)
+    public function __construct(EditableRepository $repo, OverrideGraph $overrideGraph)
     {
         $this->repo = $repo;
-        $this->packageGraph = $packageGraph;
+        $this->overrideGraph = $overrideGraph;
     }
 
     /**
@@ -100,7 +100,7 @@ class RepositoryUpdater
         }
 
         $packageNames = array_keys($this->additions);
-        $sortedNames = $this->packageGraph->getSortedPackageNames($packageNames);
+        $sortedNames = $this->overrideGraph->getSortedPackageNames($packageNames);
 
         foreach ($sortedNames as $packageName) {
             foreach ($this->additions[$packageName] as $repositoryPath => $filesystemPaths) {

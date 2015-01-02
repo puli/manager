@@ -11,10 +11,10 @@
 
 namespace Puli\RepositoryManager\Tests\Package\PackageFile\Writer;
 
+use Puli\RepositoryManager\Config\Config;
 use Puli\RepositoryManager\Discovery\BindingDescriptor;
 use Puli\RepositoryManager\Discovery\BindingParameterDescriptor;
 use Puli\RepositoryManager\Discovery\BindingTypeDescriptor;
-use Puli\RepositoryManager\Config\Config;
 use Puli\RepositoryManager\Package\InstallInfo;
 use Puli\RepositoryManager\Package\PackageFile\PackageFile;
 use Puli\RepositoryManager\Package\PackageFile\RootPackageFile;

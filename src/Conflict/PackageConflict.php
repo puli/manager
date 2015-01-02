@@ -9,20 +9,21 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\RepositoryManager\Repository;
+namespace Puli\RepositoryManager\Conflict;
 
 /**
- * Represents a conflict between two packages that want to map the same path.
+ * A conflict between two packages claiming the same token.
  *
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
+ * @see    PackageConflictDetector
  */
-class ResourceConflict
+class PackageConflict
 {
     /**
      * @var string
      */
-    private $conflictingPath;
+    private $conflictingToken;
 
     /**
      * @var string
@@ -37,15 +38,16 @@ class ResourceConflict
     /**
      * Creates the conflict.
      *
-     * @param string $conflictingPath The conflicting repository path.
-     * @param string $packageName1    The name of the first package causing the
-     *                                conflict.
-     * @param string $packageName2    The name of the second package causing the
-     *                                conflict.
+     * @param string $conflictingToken The claimed token that caused the
+     *                                 conflict.
+     * @param string $packageName1     The name of the first package claiming
+     *                                 the token.
+     * @param string $packageName2     The name of the second package claiming
+     *                                 the token.
      */
-    public function __construct($conflictingPath, $packageName1, $packageName2)
+    public function __construct($conflictingToken, $packageName1, $packageName2)
     {
-        $this->conflictingPath = $conflictingPath;
+        $this->conflictingToken = $conflictingToken;
         $this->packageName1 = $packageName1;
         $this->packageName2 = $packageName2;
     }
@@ -55,9 +57,9 @@ class ResourceConflict
      *
      * @return string The conflicting repository path.
      */
-    public function getConflictingPath()
+    public function getConflictingToken()
     {
-        return $this->conflictingPath;
+        return $this->conflictingToken;
     }
 
     /**

@@ -15,10 +15,12 @@ use ArrayIterator;
 use Puli\Repository\Api\EditableRepository;
 use Puli\Repository\Assert\Assertion;
 use Puli\RepositoryManager\Config\Config;
+use Puli\RepositoryManager\Conflict\OverrideGraph;
+use Puli\RepositoryManager\Conflict\PackageConflictDetector;
+use Puli\RepositoryManager\Conflict\PackageConflictException;
 use Puli\RepositoryManager\Environment\ProjectEnvironment;
 use Puli\RepositoryManager\NoDirectoryException;
 use Puli\RepositoryManager\Package\Collection\PackageCollection;
-use Puli\RepositoryManager\Package\Graph\PackageNameGraph;
 use Puli\RepositoryManager\Package\Package;
 use Puli\RepositoryManager\Package\PackageFile\PackageFileStorage;
 use Puli\RepositoryManager\Package\PackageFile\RootPackageFile;
@@ -75,12 +77,12 @@ class RepositoryManager
     private $packageFileStorage;
 
     /**
-     * @var PackageNameGraph
+     * @var OverrideGraph
      */
-    private $packageGraph;
+    private $overrideGraph;
 
     /**
-     * @var ConflictDetector
+     * @var PackageConflictDetector
      */
     private $conflictDetector;
 
@@ -143,12 +145,12 @@ class RepositoryManager
      * it to validate the configuration files of the packages without doing any
      * changes to them.
      *
-     * @throws ResourceConflictException If a resource conflict is detected.
+     * @throws PackageConflictException If a resource conflict is detected.
      */
     public function loadPackages()
     {
-        $this->packageGraph = new PackageNameGraph($this->packages->getPackageNames());
-        $this->conflictDetector = new ConflictDetector($this->packageGraph);
+        $this->overrideGraph = new OverrideGraph($this->packages->getPackageNames());
+        $this->conflictDetector = new PackageConflictDetector($this->overrideGraph);
 
         foreach ($this->packages as $package) {
             foreach ($package->getPackageFile()->getResourceMappings() as $mapping) {
@@ -163,7 +165,7 @@ class RepositoryManager
         }
 
         if ($conflict = $this->conflictDetector->detectConflict()) {
-            throw ResourceConflictException::forConflict($conflict);
+            throw PackageConflictException::forPathConflict($conflict);
         }
     }
 
@@ -174,7 +176,7 @@ class RepositoryManager
      */
     public function addResourceMapping(ResourceMapping $mapping)
     {
-        if (!$this->packageGraph) {
+        if (!$this->overrideGraph) {
             $this->loadPackages();
         }
 
@@ -194,7 +196,7 @@ class RepositoryManager
 
         while ($conflictingPackage = $this->getConflictingPackageName($rootPackageName)) {
             $this->rootPackageFile->addOverriddenPackage($conflictingPackage);
-            $this->packageGraph->addEdge($conflictingPackage, $rootPackageName);
+            $this->overrideGraph->addEdge($conflictingPackage, $rootPackageName);
         }
 
         // Save config file before modifying the repository, so that the
@@ -217,7 +219,7 @@ class RepositoryManager
             return;
         }
 
-        if (!$this->packageGraph) {
+        if (!$this->overrideGraph) {
             $this->loadPackages();
         }
 
@@ -298,13 +300,13 @@ class RepositoryManager
      *
      * @throws NoDirectoryException If the dump directory exists and is not a
      *                              directory.
-     * @throws ResourceConflictException If two packages contain conflicting
+     * @throws PackageConflictException If two packages contain conflicting
      *                                   resource definitions.
      * @throws ResourceDefinitionException If a resource definition is invalid.
      */
     public function buildRepository()
     {
-        if (!$this->packageGraph) {
+        if (!$this->overrideGraph) {
             $this->loadPackages();
         }
 
@@ -330,7 +332,7 @@ class RepositoryManager
     private function loadRepository()
     {
         $this->repo = $this->environment->getRepository();
-        $this->repoUpdater = new RepositoryUpdater($this->repo, $this->packageGraph);
+        $this->repoUpdater = new RepositoryUpdater($this->repo, $this->overrideGraph);
     }
 
     /**
@@ -348,8 +350,7 @@ class RepositoryManager
 
             $this->mappingsByPath[$repositoryPath][$packageName] = $mapping;
 
-            $this->conflictDetector->register($repositoryPath, $packageName);
-            $this->conflictDetector->markUnchecked($repositoryPath);
+            $this->conflictDetector->claim($repositoryPath, $packageName);
         }
     }
 
@@ -358,7 +359,7 @@ class RepositoryManager
         $iterator = $this->getMappingIterator($mapping);
 
         foreach ($iterator as $filesystemPath => $repositoryPath) {
-            $this->conflictDetector->unregister($repositoryPath, $packageName);
+            $this->conflictDetector->release($repositoryPath, $packageName);
 
             unset($this->mappingsByPath[$repositoryPath][$packageName]);
 
@@ -372,8 +373,8 @@ class RepositoryManager
     private function loadOverrideOrder(Package $package)
     {
         foreach ($package->getPackageFile()->getOverriddenPackages() as $overriddenPackage) {
-            if ($this->packageGraph->hasPackageName($overriddenPackage)) {
-                $this->packageGraph->addEdge($overriddenPackage, $package->getName());
+            if ($this->overrideGraph->hasPackageName($overriddenPackage)) {
+                $this->overrideGraph->addEdge($overriddenPackage, $package->getName());
             }
         }
 
@@ -386,8 +387,8 @@ class RepositoryManager
                 $overriddenPackage = $packageOrder[$i - 1];
                 $overridingPackage = $packageOrder[$i];
 
-                if ($this->packageGraph->hasPackageName($overriddenPackage)) {
-                    $this->packageGraph->addEdge($overriddenPackage, $overridingPackage);
+                if ($this->overrideGraph->hasPackageName($overriddenPackage)) {
+                    $this->overrideGraph->addEdge($overriddenPackage, $overridingPackage);
                 }
             }
         }
@@ -403,7 +404,7 @@ class RepositoryManager
 
         // We are only interested in conflicts that involve this package
         if (!$conflict->involvesPackage($packageName)) {
-            throw ResourceConflictException::forConflict($conflict);
+            throw PackageConflictException::forPathConflict($conflict);
         }
 
         return $conflict->getOpponent($packageName);

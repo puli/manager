@@ -9,25 +9,25 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\RepositoryManager\Tests\Package\Graph;
+namespace Puli\RepositoryManager\Tests\Conflict;
 
 use PHPUnit_Framework_TestCase;
-use Puli\RepositoryManager\Package\Graph\PackageNameGraph;
+use Puli\RepositoryManager\Conflict\OverrideGraph;
 
 /**
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class PackageNameGraphTest extends PHPUnit_Framework_TestCase
+class OverrideGraphTest extends PHPUnit_Framework_TestCase
 {
     /**
-     * @var PackageNameGraph
+     * @var OverrideGraph
      */
     private $graph;
 
     protected function setUp()
     {
-        $this->graph = new PackageNameGraph();
+        $this->graph = new OverrideGraph();
     }
 
     private function initializeGraph()
@@ -128,7 +128,7 @@ class PackageNameGraphTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\RepositoryManager\Package\Graph\CycleException
+     * @expectedException \Puli\RepositoryManager\Conflict\CyclicDependencyException
      */
     public function testAddEdgeFailsIfCycle()
     {
@@ -199,7 +199,7 @@ class PackageNameGraphTest extends PHPUnit_Framework_TestCase
 
     public function testCreateWithPackageNames()
     {
-        $this->graph = new PackageNameGraph(array('p1', 'p2'));
+        $this->graph = new OverrideGraph(array('p1', 'p2'));
 
         $this->assertTrue($this->graph->hasPackageName('p1'));
         $this->assertTrue($this->graph->hasPackageName('p2'));

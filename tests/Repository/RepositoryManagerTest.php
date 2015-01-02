@@ -127,7 +127,7 @@ class RepositoryManagerTest extends ManagerTestCase
     }
 
     /**
-     * @expectedException \Puli\RepositoryManager\Repository\ResourceConflictException
+     * @expectedException \Puli\RepositoryManager\Conflict\PackageConflictException
      */
     public function testLoadPackagesFailsIfPathConflict()
     {
@@ -148,7 +148,7 @@ class RepositoryManagerTest extends ManagerTestCase
     }
 
     /**
-     * @expectedException \Puli\RepositoryManager\Repository\ResourceConflictException
+     * @expectedException \Puli\RepositoryManager\Conflict\PackageConflictException
      */
     public function testLoadPackagesFailsIfPathConflictWithNestedPath()
     {
@@ -169,7 +169,7 @@ class RepositoryManagerTest extends ManagerTestCase
     }
 
     /**
-     * @expectedException \Puli\RepositoryManager\Repository\ResourceConflictException
+     * @expectedException \Puli\RepositoryManager\Conflict\PackageConflictException
      */
     public function testLoadPackagesFailsIfPathConflictAndPackageOrderInNonRootPackage()
     {

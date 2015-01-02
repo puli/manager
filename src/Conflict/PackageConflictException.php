@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\RepositoryManager\Repository;
+namespace Puli\RepositoryManager\Conflict;
 
 use Exception;
 use RuntimeException;
@@ -20,9 +20,9 @@ use RuntimeException;
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class ResourceConflictException extends RuntimeException
+class PackageConflictException extends RuntimeException
 {
-    public static function forConflict(ResourceConflict $conflict, $code = 0, Exception $cause = null)
+    public static function forPathConflict(PackageConflict $conflict, $code = 0, Exception $cause = null)
     {
         return new static(sprintf(
             "The packages \"%s\" and \"%s\" add resources for the same path ".
@@ -33,7 +33,7 @@ class ResourceConflictException extends RuntimeException
             "package and define the order of the packages there.",
             $conflict->getPackageName1(),
             $conflict->getPackageName2(),
-            $conflict->getConflictingPath()
+            $conflict->getConflictingToken()
         ), $code, $cause);
     }
 }

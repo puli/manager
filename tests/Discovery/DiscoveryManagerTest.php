@@ -14,7 +14,6 @@ namespace Puli\RepositoryManager\Tests\Discovery;
 use PHPUnit_Framework_Assert;
 use PHPUnit_Framework_MockObject_MockObject;
 use Puli\RepositoryManager\Discovery\BindingDescriptor;
-use Puli\RepositoryManager\Discovery\BindingParameterDescriptor;
 use Puli\RepositoryManager\Discovery\BindingTypeDescriptor;
 use Puli\RepositoryManager\Discovery\DiscoveryManager;
 use Puli\RepositoryManager\Package\Collection\PackageCollection;

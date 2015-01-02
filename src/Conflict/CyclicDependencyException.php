@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\RepositoryManager\Package\Graph;
+namespace Puli\RepositoryManager\Conflict;
 
 use RuntimeException;
 
@@ -19,7 +19,6 @@ use RuntimeException;
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class CycleException extends RuntimeException
+class CyclicDependencyException extends RuntimeException
 {
-
 }

@@ -9,23 +9,23 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\RepositoryManager\Package\Graph;
+namespace Puli\RepositoryManager\Conflict;
 
 use RuntimeException;
 
 /**
  * A directed, acyclic graph of package names.
  *
- * Packages can be added with {@link addInstalledPackage()}. Edges between these packages
+ * Packages can be added with {@link addPackageName()}. Edges between these packages
  * can then be added using {@link addEdge()}. Both ends of an edge must have
  * been defined before the edge is added.
  *
  * ```php
- * $graph = new PackageNameGraph();
- * $graph->addInstalledPackage('acme/core');
- * $graph->addInstalledPackage('acme/blog');
- * $graph->addInstalledPackage('acme/blog-extension1');
- * $graph->addInstalledPackage('acme/blog-extension2');
+ * $graph = new OverrideGraph();
+ * $graph->addPackageName('acme/core');
+ * $graph->addPackageName('acme/blog');
+ * $graph->addPackageName('acme/blog-extension1');
+ * $graph->addPackageName('acme/blog-extension2');
  * $graph->addEdge('acme/core', 'acme/blog');
  * $graph->addEdge('acme/blog', 'acme/blog-extension1');
  * $graph->addEdge('acme/blog', 'acme/blog-extension2');
@@ -61,7 +61,7 @@ use RuntimeException;
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class PackageNameGraph
+class OverrideGraph
 {
     /**
      * Stores the names of all packages (vertices) as keys.
@@ -146,7 +146,7 @@ class PackageNameGraph
      * @throws RuntimeException If any of the packages does not exist in the
      *                          graph. Each package must have been added first.
      *
-     * @throws CycleException If adding the edge would create a cycle.
+     * @throws CyclicDependencyException If adding the edge would create a cycle.
      */
     public function addEdge($from, $to)
     {
@@ -167,7 +167,7 @@ class PackageNameGraph
         if (null !== ($path = $this->getPath($to, $from))) {
             $last = array_pop($path);
 
-            throw new CycleException(sprintf(
+            throw new CyclicDependencyException(sprintf(
                 'A cyclic dependency was discovered between the packages "%s" '.
                 'and "%s". Please check the "override" keys defined in these'.
                 'packages.',
