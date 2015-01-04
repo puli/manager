@@ -172,11 +172,9 @@ class DistinguishedName
         //              / "#" hexstring
         //              / QUOTATION *( quotechar / pair ) QUOTATION ; only from v2
         // quotechar  = <any character except "\" or QUOTATION >
-        // QUOTATION  =  <the ASCII double quotation mark character '"' decimal 34>
+        // QUOTATION  = <the ASCII double quotation mark character '"' decimal 34>
 
-        return '"'.preg_replace_callback('~[\\\\"]~', function ($matches) {
-            return '\\'.$matches[0];
-        }, $value).'"';
+        return '"'.str_replace(array('\\', '"'), array('\\\\', '\\"'), $value).'"';
     }
 
 }
