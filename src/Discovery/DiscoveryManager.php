@@ -30,16 +30,6 @@ use Rhumsaa\Uuid\Uuid;
  */
 class DiscoveryManager
 {
-    const IS_ENABLED = 1;
-
-    const IS_DISABLED = 2;
-
-    const IS_NEW = 3;
-
-    const TYPE_NOT_LOADED = 4;
-
-    const DUPLICATE_TYPE_DEFINITION = 5;
-
     /**
      * @var ProjectEnvironment
      */
@@ -320,7 +310,7 @@ class DiscoveryManager
      *
      * @return BindingDescriptor[] The enabled bindings.
      */
-    public function getBindings($packageName = null, $state = self::IS_ENABLED)
+    public function getBindings($packageName = null, $state = BindingState::ENABLED)
     {
         if (!$this->bindingTypes) {
             $this->loadPackages();
@@ -543,7 +533,7 @@ class DiscoveryManager
     {
         $uuidString = $binding->getUuid()->toString();
 
-        if (self::IS_ENABLED === $state) {
+        if (BindingState::ENABLED === $state) {
             if (!isset($this->enabledBindingRefs[$uuidString])) {
                 $this->enabledBindingRefs[$uuidString] = array();
             }
@@ -628,21 +618,21 @@ class DiscoveryManager
         $typeName = $bindingDescriptor->getTypeName();
 
         if (!$this->isBindingTypeLoaded($typeName)) {
-            return self::TYPE_NOT_LOADED;
+            return BindingState::TYPE_NOT_LOADED;
         }
 
         if ($this->isDuplicateBindingType($typeName)) {
-            return self::DUPLICATE_TYPE_DEFINITION;
+            return BindingState::DUPLICATE_TYPE_DEFINITION;
         }
 
         if (!$package instanceof RootPackage && $installInfo->hasDisabledBindingUuid($uuid)) {
-            return self::IS_DISABLED;
+            return BindingState::DISABLED;
         }
 
         if (!$package instanceof RootPackage && !$installInfo->hasEnabledBindingUuid($uuid)) {
-            return self::IS_NEW;
+            return BindingState::UNDECIDED;
         }
 
-        return self::IS_ENABLED;
+        return BindingState::ENABLED;
     }
 }
