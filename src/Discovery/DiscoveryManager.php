@@ -311,15 +311,16 @@ class DiscoveryManager
     }
 
     /**
-     * Returns all enabled bindings.
+     * Returns all bindings.
      *
      * You can optionally filter types by one or multiple package names.
      *
      * @param string|string[] $packageName The package name(s) to filter by.
+     * @param int             $state       The state of the bindings to return.
      *
      * @return BindingDescriptor[] The enabled bindings.
      */
-    public function getEnabledBindings($packageName = null)
+    public function getBindings($packageName = null, $state = self::IS_ENABLED)
     {
         if (!$this->bindingTypes) {
             $this->loadPackages();
@@ -329,42 +330,11 @@ class DiscoveryManager
         $bindings = array();
 
         foreach ($packageNames as $packageName) {
-            if (!isset($this->bindingsByState[$packageName][self::IS_ENABLED])) {
+            if (!isset($this->bindingsByState[$packageName][$state])) {
                 continue;
             }
 
-            foreach ($this->bindingsByState[$packageName][self::IS_ENABLED] as $uuidString => $binding) {
-                $bindings[$uuidString] = $binding;
-            }
-        }
-
-        return array_values($bindings);
-    }
-
-    /**
-     * Returns all disabled bindings.
-     *
-     * You can optionally filter types by one or multiple package names.
-     *
-     * @param string|string[] $packageName The package name(s) to filter by.
-     *
-     * @return BindingDescriptor[] The disabled bindings.
-     */
-    public function getDisabledBindings($packageName = null)
-    {
-        if (!$this->bindingTypes) {
-            $this->loadPackages();
-        }
-
-        $packageNames = $packageName ? (array) $packageName : $this->packages->getPackageNames();
-        $bindings = array();
-
-        foreach ($packageNames as $packageName) {
-            if (!isset($this->bindingsByState[$packageName][self::IS_DISABLED])) {
-                continue;
-            }
-
-            foreach ($this->bindingsByState[$packageName][self::IS_DISABLED] as $uuidString => $binding) {
+            foreach ($this->bindingsByState[$packageName][$state] as $uuidString => $binding) {
                 $bindings[$uuidString] = $binding;
             }
         }
