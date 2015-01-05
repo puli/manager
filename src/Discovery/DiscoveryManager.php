@@ -352,6 +352,10 @@ class DiscoveryManager
             $this->loadPackages();
         }
 
+        if (count($this->discovery->getBindings()) > 0 || count($this->discovery->getTypes()) > 0) {
+            throw new DiscoveryNotEmptyException('The discovery is not empty.');
+        }
+
         foreach ($this->bindingTypes as $typeDescriptor) {
             $this->defineTypeUnlessDisabled($typeDescriptor);
         }

@@ -14,6 +14,7 @@ namespace Puli\RepositoryManager\Tests\Discovery;
 use PHPUnit_Framework_Assert;
 use PHPUnit_Framework_MockObject_MockObject;
 use Psr\Log\LoggerInterface;
+use Puli\Discovery\Api\BindingType;
 use Puli\RepositoryManager\Discovery\BindingDescriptor;
 use Puli\RepositoryManager\Discovery\BindingTypeDescriptor;
 use Puli\RepositoryManager\Discovery\DiscoveryManager;
@@ -619,6 +620,40 @@ class DiscoveryManagerTest extends ManagerTestCase
 
         $this->logger->expects($this->once())
             ->method('warning');
+
+        $this->manager->buildDiscovery();
+    }
+
+    /**
+     * @expectedException \Puli\RepositoryManager\Discovery\DiscoveryNotEmptyException
+     */
+    public function testBuildDiscoveryFailsIfDiscoveryContainsBindings()
+    {
+        $this->initDefaultManager();
+
+        $this->discovery->expects($this->once())
+            ->method('getBindings')
+            ->willReturn(array($this->getMock('Puli\Discovery\Api\ResourceBinding')));
+
+        $this->discovery->expects($this->never())
+            ->method('define');
+
+        $this->manager->buildDiscovery();
+    }
+
+    /**
+     * @expectedException \Puli\RepositoryManager\Discovery\DiscoveryNotEmptyException
+     */
+    public function testBuildDiscoveryFailsIfDiscoveryContainsTypes()
+    {
+        $this->initDefaultManager();
+
+        $this->discovery->expects($this->once())
+            ->method('getTypes')
+            ->willReturn(array(new BindingType('type')));
+
+        $this->discovery->expects($this->never())
+            ->method('define');
 
         $this->manager->buildDiscovery();
     }
