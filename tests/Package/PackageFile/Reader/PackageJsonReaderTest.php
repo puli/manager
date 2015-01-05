@@ -169,6 +169,12 @@ class PackageJsonReaderTest extends PHPUnit_Framework_TestCase
      */
     public function testReadConfigFailsIfDecodingNotPossible()
     {
+        if (false !== strpos(PHP_VERSION, 'ubuntu')) {
+            $this->markTestSkipped('This error is not reported on PHP versions compiled for Ubuntu.');
+
+            return;
+        }
+
         $this->reader->readPackageFile(__DIR__.'/Fixtures/win-1258.json');
     }
 
@@ -178,6 +184,12 @@ class PackageJsonReaderTest extends PHPUnit_Framework_TestCase
      */
     public function testReadRootConfigFailsIfDecodingNotPossible()
     {
+        if (false !== strpos(PHP_VERSION, 'ubuntu')) {
+            $this->markTestSkipped('This error is not reported on PHP versions compiled for Ubuntu.');
+
+            return;
+        }
+
         $this->reader->readRootPackageFile(__DIR__.'/Fixtures/win-1258.json', $this->baseConfig);
     }
 

@@ -92,6 +92,12 @@ class ConfigJsonReaderTest extends PHPUnit_Framework_TestCase
      */
     public function testReadConfigFileFailsIfDecodingNotPossible()
     {
+        if (false !== strpos(PHP_VERSION, 'ubuntu')) {
+            $this->markTestSkipped('This error is not reported on PHP versions compiled for Ubuntu.');
+
+            return;
+        }
+
         $this->reader->readConfigFile(__DIR__.'/Fixtures/win-1258.json');
     }
 }

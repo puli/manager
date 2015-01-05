@@ -172,7 +172,7 @@ class PackageJsonWriterTest extends JsonWriterTestCase
         $this->writer->writePackageFile($packageFile, $this->tempFile);
 
         $this->assertFileExists($this->tempFile);
-        $this->assertFileEquals(__DIR__.'/Fixtures/minimal.json', $this->tempFile);
+        $this->assertJsonFileEquals(__DIR__.'/Fixtures/minimal.json', $this->tempFile);
     }
 
     public function testWriteRootPackageFileDoesNotWriteBaseConfigValues()
@@ -184,7 +184,7 @@ class PackageJsonWriterTest extends JsonWriterTestCase
         $this->writer->writePackageFile($packageFile, $this->tempFile);
 
         $this->assertFileExists($this->tempFile);
-        $this->assertFileEquals(__DIR__.'/Fixtures/minimal.json', $this->tempFile);
+        $this->assertJsonFileEquals(__DIR__.'/Fixtures/minimal.json', $this->tempFile);
     }
 
     public function testWriteResourcesWithMultipleLocalPaths()
@@ -221,7 +221,7 @@ class PackageJsonWriterTest extends JsonWriterTestCase
         $this->writer->writePackageFile($packageFile, $file);
 
         $this->assertFileExists($file);
-        $this->assertFileEquals(__DIR__.'/Fixtures/minimal.json', $file);
+        $this->assertJsonFileEquals(__DIR__.'/Fixtures/minimal.json', $file);
     }
 
     public function provideInvalidPaths()

@@ -72,7 +72,7 @@ class ConfigJsonWriterTest extends JsonWriterTestCase
         $this->writer->writeConfigFile($configFile, $this->tempFile);
 
         $this->assertFileExists($this->tempFile);
-        $this->assertFileEquals(__DIR__.'/Fixtures/empty.json', $this->tempFile);
+        $this->assertJsonFileEquals(__DIR__.'/Fixtures/empty.json', $this->tempFile);
     }
 
     public function testCreateMissingDirectoriesOnDemand()
@@ -83,7 +83,7 @@ class ConfigJsonWriterTest extends JsonWriterTestCase
         $this->writer->writeConfigFile($configFile, $file);
 
         $this->assertFileExists($file);
-        $this->assertFileEquals(__DIR__.'/Fixtures/empty.json', $file);
+        $this->assertJsonFileEquals(__DIR__.'/Fixtures/empty.json', $file);
     }
 
     public function provideInvalidPaths()
