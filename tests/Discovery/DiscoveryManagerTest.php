@@ -658,6 +658,16 @@ class DiscoveryManagerTest extends ManagerTestCase
         $this->manager->buildDiscovery();
     }
 
+    public function testClearDiscovery()
+    {
+        $this->initDefaultManager();
+
+        $this->discovery->expects($this->once())
+            ->method('clear');
+
+        $this->manager->clearDiscovery();
+    }
+
     private function initDefaultManager()
     {
         $this->packages->add(new RootPackage($this->rootPackageFile, $this->rootDir));

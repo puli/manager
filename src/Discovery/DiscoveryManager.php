@@ -365,6 +365,18 @@ class DiscoveryManager
         }
     }
 
+    /**
+     * Clears all contents of the resource discovery.
+     */
+    public function clearDiscovery()
+    {
+        if (!$this->discovery) {
+            $this->loadDiscovery();
+        }
+
+        $this->discovery->clear();
+    }
+
     private function loadDiscovery()
     {
         $this->discovery = $this->environment->getDiscovery();
