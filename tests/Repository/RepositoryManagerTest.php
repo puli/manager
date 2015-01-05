@@ -600,6 +600,8 @@ class RepositoryManagerTest extends ManagerTestCase
 
     public function testBuildRepository()
     {
+        $this->initDefaultManager();
+
         $packageFile = new PackageFile('package');
         $packageFile->addResourceMapping(new ResourceMapping('/package', 'resources'));
         $packageFile->addResourceMapping(new ResourceMapping('/package/css', 'assets/css'));
@@ -614,12 +616,13 @@ class RepositoryManagerTest extends ManagerTestCase
             ->method('add')
             ->with('/package/css', new DirectoryResource($this->packageDir1.'/assets/css'));
 
-        $manager = new RepositoryManager($this->environment, $this->packages, $this->packageFileStorage);
-        $manager->buildRepository();
+        $this->manager->buildRepository();
     }
 
     public function testBuildRepositoryIgnoresPackageWithoutResources()
     {
+        $this->initDefaultManager();
+
         $packageFile = new PackageFile('package');
 
         $this->packages->add(new Package($packageFile, $this->packageDir1));
@@ -627,12 +630,13 @@ class RepositoryManagerTest extends ManagerTestCase
         $this->repo->expects($this->never())
             ->method('add');
 
-        $manager = new RepositoryManager($this->environment, $this->packages, $this->packageFileStorage);
-        $manager->buildRepository();
+        $this->manager->buildRepository();
     }
 
     public function testBuildRepositoryAddsResourcesInSortedOrder()
     {
+        $this->initDefaultManager();
+
         $packageFile = new PackageFile('package');
         $packageFile->addResourceMapping(new ResourceMapping('/package/css', 'assets/css'));
         $packageFile->addResourceMapping(new ResourceMapping('/package', 'resources'));
@@ -647,12 +651,13 @@ class RepositoryManagerTest extends ManagerTestCase
             ->method('add')
             ->with('/package/css', new DirectoryResource($this->packageDir1.'/assets/css'));
 
-        $manager = new RepositoryManager($this->environment, $this->packages, $this->packageFileStorage);
-        $manager->buildRepository();
+        $this->manager->buildRepository();
     }
 
     public function testBuildRepositorySupportsOverridingExistingPackage()
     {
+        $this->initDefaultManager();
+
         $overridden = new PackageFile('package1');
         $overridden->addResourceMapping(new ResourceMapping('/package1', 'resources'));
         $overridden->addResourceMapping(new ResourceMapping('/package1/css', 'assets/css'));
@@ -684,12 +689,13 @@ class RepositoryManagerTest extends ManagerTestCase
             ->method('add')
             ->with('/package1/css', new DirectoryResource($this->packageDir2.'/css-override'));
 
-        $manager = new RepositoryManager($this->environment, $this->packages, $this->packageFileStorage);
-        $manager->buildRepository();
+        $this->manager->buildRepository();
     }
 
     public function testBuildRepositorySupportsOverridingFuturePackage()
     {
+        $this->initDefaultManager();
+
         $overridden = new PackageFile('package1');
         $overridden->addResourceMapping(new ResourceMapping('/package1', 'resources'));
         $overridden->addResourceMapping(new ResourceMapping('/package1/css', 'assets/css'));
@@ -721,12 +727,13 @@ class RepositoryManagerTest extends ManagerTestCase
             ->method('add')
             ->with('/package1/css', new DirectoryResource($this->packageDir2.'/css-override'));
 
-        $manager = new RepositoryManager($this->environment, $this->packages, $this->packageFileStorage);
-        $manager->buildRepository();
+        $this->manager->buildRepository();
     }
 
     public function testBuildRepositorySupportsChainedOverrides()
     {
+        $this->initDefaultManager();
+
         $packageFile1 = new PackageFile('package1');
         $packageFile1->addResourceMapping(new ResourceMapping('/package1', 'resources'));
 
@@ -756,12 +763,13 @@ class RepositoryManagerTest extends ManagerTestCase
             ->method('add')
             ->with('/package1', new DirectoryResource($this->packageDir3.'/override2'));
 
-        $manager = new RepositoryManager($this->environment, $this->packages, $this->packageFileStorage);
-        $manager->buildRepository();
+        $this->manager->buildRepository();
     }
 
     public function testBuildRepositorySupportsOverridingMultiplePackages()
     {
+        $this->initDefaultManager();
+
         $packageFile1 = new PackageFile('package1');
         $packageFile1->addResourceMapping(new ResourceMapping('/package1', 'resources'));
 
@@ -795,12 +803,13 @@ class RepositoryManagerTest extends ManagerTestCase
             ->method('add')
             ->with('/package2', new DirectoryResource($this->packageDir3.'/override2'));
 
-        $manager = new RepositoryManager($this->environment, $this->packages, $this->packageFileStorage);
-        $manager->buildRepository();
+        $this->manager->buildRepository();
     }
 
     public function testBuildRepositoryIgnoresUnknownOverriddenPackage()
     {
+        $this->initDefaultManager();
+
         $packageFile = new PackageFile('package');
         $packageFile->addResourceMapping(new ResourceMapping('/package', 'resources'));
         $packageFile->setOverriddenPackages('foobar');
@@ -811,12 +820,13 @@ class RepositoryManagerTest extends ManagerTestCase
             ->method('add')
             ->with('/package', new DirectoryResource($this->packageDir1.'/resources'));
 
-        $manager = new RepositoryManager($this->environment, $this->packages, $this->packageFileStorage);
-        $manager->buildRepository();
+        $this->manager->buildRepository();
     }
 
     public function testBuildRepositorySupportsOverridingWithMultipleDirectories()
     {
+        $this->initDefaultManager();
+
         $overridden = new PackageFile('package1');
         $overridden->addResourceMapping(new ResourceMapping('/package1', 'resources'));
 
@@ -839,12 +849,13 @@ class RepositoryManagerTest extends ManagerTestCase
             ->method('add')
             ->with('/package1', new DirectoryResource($this->packageDir2.'/css-override'));
 
-        $manager = new RepositoryManager($this->environment, $this->packages, $this->packageFileStorage);
-        $manager->buildRepository();
+        $this->manager->buildRepository();
     }
 
     public function testBuildRepositorySupportsOverridingOfNestedPaths()
     {
+        $this->initDefaultManager();
+
         $packageFile1 = new PackageFile('package1');
         $packageFile1->addResourceMapping(new ResourceMapping('/path', 'resources'));
 
@@ -862,12 +873,13 @@ class RepositoryManagerTest extends ManagerTestCase
             ->method('add')
             ->with('/path/new', new DirectoryResource($this->packageDir2.'/override'));
 
-        $manager = new RepositoryManager($this->environment, $this->packages, $this->packageFileStorage);
-        $manager->buildRepository();
+        $this->manager->buildRepository();
     }
 
     public function testBuildRepositorySupportsPackageOrderInRootPackage()
     {
+        $this->initDefaultManager();
+
         $packageFile1 = new PackageFile('package1');
         $packageFile1->addResourceMapping(new ResourceMapping('/path', 'resources'));
 
@@ -889,8 +901,17 @@ class RepositoryManagerTest extends ManagerTestCase
             ->method('add')
             ->with('/path', new DirectoryResource($this->packageDir2.'/override'));
 
-        $manager = new RepositoryManager($this->environment, $this->packages, $this->packageFileStorage);
-        $manager->buildRepository();
+        $this->manager->buildRepository();
+    }
+
+    public function testClearRepository()
+    {
+        $this->initDefaultManager();
+
+        $this->repo->expects($this->once())
+            ->method('clear');
+
+        $this->manager->clearRepository();
     }
 
     private function initDefaultManager()

@@ -329,8 +329,24 @@ class RepositoryManager
         $this->repoUpdater->commit();
     }
 
+    /**
+     * Clears the contents of the resource repository.
+     */
+    public function clearRepository()
+    {
+        if (!$this->repo) {
+            $this->loadRepository();
+        }
+
+        $this->repo->clear();
+    }
+
     private function loadRepository()
     {
+        if (!$this->overrideGraph) {
+            $this->loadPackages();
+        }
+
         $this->repo = $this->environment->getRepository();
         $this->repoUpdater = new RepositoryUpdater($this->repo, $this->overrideGraph);
     }
