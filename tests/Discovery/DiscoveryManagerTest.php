@@ -674,6 +674,83 @@ class DiscoveryManagerTest extends ManagerTestCase
         $this->assertSame(array(), $this->manager->getBindings('package1', DiscoveryManager::IS_DISABLED));
     }
 
+    public function testGetNewBindings()
+    {
+        $this->initDefaultManager();
+
+        $this->rootPackageFile->addTypeDescriptor(new BindingTypeDescriptor('my/type'));
+        $this->packageFile1->addBindingDescriptor($binding1 = BindingDescriptor::create('/path1', 'my/type'));
+        $this->packageFile2->addBindingDescriptor($binding2 = BindingDescriptor::create('/path2', 'my/type'));
+        $this->packageFile3->addBindingDescriptor($binding3 = BindingDescriptor::create('/path3', 'my/type'));
+
+        $this->assertSame(array(
+            $binding1,
+            $binding2,
+            $binding3,
+        ), $this->manager->getBindings(null, DiscoveryManager::IS_NEW));
+
+        $this->assertSame(array($binding1), $this->manager->getBindings('package1', DiscoveryManager::IS_NEW));
+        $this->assertSame(array($binding1, $binding2), $this->manager->getBindings(array('package1', 'package2'), DiscoveryManager::IS_NEW));
+    }
+
+    public function testGetNewBindingsDoesNotIncludeRootBindings()
+    {
+        $this->initDefaultManager();
+
+        $this->rootPackageFile->addTypeDescriptor(new BindingTypeDescriptor('my/type'));
+        $this->rootPackageFile->addBindingDescriptor(BindingDescriptor::create('/path', 'my/type'));
+
+        $this->assertSame(array(), $this->manager->getBindings(null, DiscoveryManager::IS_NEW));
+        $this->assertSame(array(), $this->manager->getBindings('root', DiscoveryManager::IS_NEW));
+    }
+
+    public function testGetNewBindingsDoesNotIncludeBindingsForWhichTypeIsNotLoaded()
+    {
+        $this->initDefaultManager();
+
+        $this->packageFile1->addBindingDescriptor($binding = BindingDescriptor::create('/path', 'my/type'));
+
+        $this->assertSame(array(), $this->manager->getBindings(null, DiscoveryManager::IS_NEW));
+        $this->assertSame(array(), $this->manager->getBindings('package1', DiscoveryManager::IS_NEW));
+    }
+
+    public function testGetNewBindingsDoesNotIncludeBindingsForWhichTypeIsDisabled()
+    {
+        $this->initDefaultManager();
+
+        // Duplicate type - disabled
+        $this->rootPackageFile->addTypeDescriptor(new BindingTypeDescriptor('my/type'));
+        $this->packageFile1->addTypeDescriptor(new BindingTypeDescriptor('my/type'));
+        $this->packageFile1->addBindingDescriptor($binding = BindingDescriptor::create('/path', 'my/type'));
+
+        $this->assertSame(array(), $this->manager->getBindings(null, DiscoveryManager::IS_NEW));
+        $this->assertSame(array(), $this->manager->getBindings('package1', DiscoveryManager::IS_NEW));
+    }
+
+    public function testGetNewBindingsDoesNotIncludeEnabledBindings()
+    {
+        $this->initDefaultManager();
+
+        $this->rootPackageFile->addTypeDescriptor(new BindingTypeDescriptor('my/type'));
+        $this->packageFile1->addBindingDescriptor($binding = BindingDescriptor::create('/path', 'my/type'));
+        $this->installInfo1->addEnabledBindingUuid($binding->getUuid());
+
+        $this->assertSame(array(), $this->manager->getBindings(null, DiscoveryManager::IS_NEW));
+        $this->assertSame(array(), $this->manager->getBindings('package1', DiscoveryManager::IS_NEW));
+    }
+
+    public function testGetNewBindingsDoesNotIncludeDisabledBindings()
+    {
+        $this->initDefaultManager();
+
+        $this->rootPackageFile->addTypeDescriptor(new BindingTypeDescriptor('my/type'));
+        $this->packageFile1->addBindingDescriptor($binding = BindingDescriptor::create('/path', 'my/type'));
+        $this->installInfo1->addDisabledBindingUuid($binding->getUuid());
+
+        $this->assertSame(array(), $this->manager->getBindings(null, DiscoveryManager::IS_NEW));
+        $this->assertSame(array(), $this->manager->getBindings('package1', DiscoveryManager::IS_NEW));
+    }
+
     public function testFindBindings()
     {
         $this->initDefaultManager();
