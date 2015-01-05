@@ -30,6 +30,16 @@ use Rhumsaa\Uuid\Uuid;
  */
 class DiscoveryManager
 {
+    const IS_ENABLED = 1;
+
+    const IS_DISABLED = 2;
+
+    const IS_NEW = 3;
+
+    const TYPE_NOT_LOADED = 4;
+
+    const DUPLICATE_TYPE_DEFINITION = 5;
+
     /**
      * @var ProjectEnvironment
      */
@@ -73,12 +83,12 @@ class DiscoveryManager
     /**
      * @var BindingDescriptor[]
      */
-    private $bindings = array();
+    private $enabledBindings = array();
 
     /**
-     * @var BindingDescriptor[][]
+     * @var BindingDescriptor[][][]
      */
-    private $enabledBindingsByPackage = array();
+    private $bindingsByState = array();
 
     /**
      * @var bool[][]
@@ -88,7 +98,7 @@ class DiscoveryManager
     /**
      * @var bool[][]
      */
-    private $packageNamesByBinding = array();
+    private $enabledBindingRefs = array();
 
     /**
      * Creates a tag manager.
@@ -181,7 +191,7 @@ class DiscoveryManager
         // If the type is still loaded, that means it is also defined by an
         // installed package
         if (isset($this->bindingTypes[$typeName])) {
-            $this->defineTypeUnlessDisabled($this->bindingTypes[$typeName]);
+            $this->defineTypeUnlessDuplicate($this->bindingTypes[$typeName]);
 
             return;
         }
@@ -246,11 +256,14 @@ class DiscoveryManager
         $this->rootPackageFile->addBindingDescriptor($binding);
         $this->packageFileStorage->saveRootPackageFile($this->rootPackageFile);
 
-        if (isset($this->bindings[$uuid->toString()])) {
+        // TODO binding should be loaded (but not bound) if duplicate
+        if (isset($this->enabledBindings[$uuid->toString()])) {
             return;
         }
 
-        $this->loadBinding($binding, $this->rootPackage->getName());
+        $state = $this->getBindingState($binding, $this->rootPackage);
+
+        $this->loadBinding($binding, $this->rootPackage->getName(), $state);
 
         $this->discovery->bind($query, $typeName, $parameters, $language);
     }
@@ -279,18 +292,18 @@ class DiscoveryManager
 
         // If the binding type does not exist, the binding was not loaded.
         // Nothing more to do in this case.
-        if (!isset($this->bindings[$uuid->toString()])) {
+        if (!isset($this->enabledBindings[$uuid->toString()])) {
             return;
         }
 
         // Remember the binding before removing it
-        $binding = $this->bindings[$uuid->toString()];
+        $binding = $this->enabledBindings[$uuid->toString()];
 
         $this->unloadBinding($uuid, $this->rootPackage->getName());
 
         // If the binding is still loaded, that means it is also defined by an
         // installed package
-        if (isset($this->bindings[$uuid->toString()])) {
+        if (isset($this->enabledBindings[$uuid->toString()])) {
             return;
         }
 
@@ -316,11 +329,42 @@ class DiscoveryManager
         $bindings = array();
 
         foreach ($packageNames as $packageName) {
-            if (!isset($this->enabledBindingsByPackage[$packageName])) {
+            if (!isset($this->bindingsByState[$packageName][self::IS_ENABLED])) {
                 continue;
             }
 
-            foreach ($this->enabledBindingsByPackage[$packageName] as $uuidString => $binding) {
+            foreach ($this->bindingsByState[$packageName][self::IS_ENABLED] as $uuidString => $binding) {
+                $bindings[$uuidString] = $binding;
+            }
+        }
+
+        return array_values($bindings);
+    }
+
+    /**
+     * Returns all disabled bindings.
+     *
+     * You can optionally filter types by one or multiple package names.
+     *
+     * @param string|string[] $packageName The package name(s) to filter by.
+     *
+     * @return BindingDescriptor[] The disabled bindings.
+     */
+    public function getDisabledBindings($packageName = null)
+    {
+        if (!$this->bindingTypes) {
+            $this->loadPackages();
+        }
+
+        $packageNames = $packageName ? (array) $packageName : $this->packages->getPackageNames();
+        $bindings = array();
+
+        foreach ($packageNames as $packageName) {
+            if (!isset($this->bindingsByState[$packageName][self::IS_DISABLED])) {
+                continue;
+            }
+
+            foreach ($this->bindingsByState[$packageName][self::IS_DISABLED] as $uuidString => $binding) {
                 $bindings[$uuidString] = $binding;
             }
         }
@@ -374,10 +418,10 @@ class DiscoveryManager
         }
 
         foreach ($this->bindingTypes as $typeDescriptor) {
-            $this->defineTypeUnlessDisabled($typeDescriptor);
+            $this->defineTypeUnlessDuplicate($typeDescriptor);
         }
 
-        foreach ($this->bindings as $bindingDescriptor) {
+        foreach ($this->enabledBindings as $bindingDescriptor) {
             $this->bind($bindingDescriptor);
         }
     }
@@ -434,21 +478,9 @@ class DiscoveryManager
         $packageName = $package->getName();
 
         foreach ($packageFile->getBindingDescriptors() as $bindingDescriptor) {
-            $installInfo = $package->getInstallInfo();
-            $uuid = $bindingDescriptor->getUuid();
+            $state = $this->getBindingState($bindingDescriptor, $package);
 
-            // Bindings for types that have not been loaded are ignored. The
-            // type may have been defined in an optional dependency
-            if (!$this->isBindingTypeEnabled($bindingDescriptor->getTypeName())) {
-                continue;
-            }
-
-            // For non-root packages, only enabled bindings are loaded
-            if (!$package instanceof RootPackage && !$installInfo->hasEnabledBindingUuid($uuid)) {
-                continue;
-            }
-
-            $this->loadBinding($bindingDescriptor, $packageName);
+            $this->loadBinding($bindingDescriptor, $packageName, $state);
         }
     }
 
@@ -496,18 +528,23 @@ class DiscoveryManager
         }
     }
 
-    private function isBindingTypeEnabled($typeName)
+    private function isBindingTypeLoaded($typeName)
+    {
+        return isset($this->bindingTypes[$typeName]);
+    }
+
+    private function isDuplicateBindingType($typeName)
     {
         return isset($this->packageNamesByType[$typeName]) &&
-            1 === count($this->packageNamesByType[$typeName]);
+            1 !== count($this->packageNamesByType[$typeName]);
     }
 
     /**
      * @param BindingTypeDescriptor $typeDescriptor
      */
-    private function defineTypeUnlessDisabled(BindingTypeDescriptor $typeDescriptor)
+    private function defineTypeUnlessDuplicate(BindingTypeDescriptor $typeDescriptor)
     {
-        if ($this->isBindingTypeEnabled($typeDescriptor->getName())) {
+        if (!$this->isDuplicateBindingType($typeDescriptor->getName())) {
             $this->defineType($typeDescriptor);
         }
     }
@@ -532,37 +569,53 @@ class DiscoveryManager
      * @param BindingDescriptor $binding
      * @param                   $packageName
      */
-    private function loadBinding(BindingDescriptor $binding, $packageName)
+    private function loadBinding(BindingDescriptor $binding, $packageName, $state)
     {
         $uuidString = $binding->getUuid()->toString();
 
-        if (!isset($this->packageNamesByBinding[$uuidString])) {
-            $this->packageNamesByBinding[$uuidString] = array();
+        if (self::IS_ENABLED === $state) {
+            if (!isset($this->enabledBindingRefs[$uuidString])) {
+                $this->enabledBindingRefs[$uuidString] = array();
+            }
+
+            $this->enabledBindings[$uuidString] = $binding;
+            $this->enabledBindingRefs[$uuidString][$packageName] = true;
         }
 
-        if (!isset($this->enabledBindingsByPackage[$packageName])) {
-            $this->enabledBindingsByPackage[$packageName] = array();
+        if (!isset($this->bindingsByState[$packageName])) {
+            $this->bindingsByState[$packageName] = array();
         }
 
-        $this->bindings[$uuidString] = $binding;
-        $this->packageNamesByBinding[$uuidString][$packageName] = true;
-        $this->enabledBindingsByPackage[$packageName][$uuidString] = $binding;
+        if (!isset($this->bindingsByState[$packageName][$state])) {
+            $this->bindingsByState[$packageName][$state] = array();
+        }
+
+        $this->bindingsByState[$packageName][$state][$uuidString] = $binding;
     }
 
     private function unloadBinding(Uuid $uuid, $packageName)
     {
         $uuidString = $uuid->toString();
 
-        unset($this->packageNamesByBinding[$uuidString][$packageName]);
-        unset($this->enabledBindingsByPackage[$packageName][$uuidString]);
+        if (isset($this->enabledBindings[$uuidString])) {
+            unset($this->enabledBindingRefs[$uuidString][$packageName]);
 
-        if (0 === count($this->packageNamesByBinding[$uuidString])) {
-            unset($this->bindings[$uuidString]);
-            unset($this->packageNamesByBinding[$uuidString]);
+            if (0 === count($this->enabledBindingRefs[$uuidString])) {
+                unset($this->enabledBindings[$uuidString]);
+                unset($this->enabledBindingRefs[$uuidString]);
+            }
         }
 
-        if (0 === count($this->enabledBindingsByPackage[$packageName])) {
-            unset($this->enabledBindingsByPackage[$packageName]);
+        foreach ($this->bindingsByState[$packageName] as $state => $bindings) {
+            unset($this->bindingsByState[$packageName][$state][$uuidString]);
+
+            if (0 === count($this->bindingsByState[$packageName][$state])) {
+                unset($this->bindingsByState[$packageName][$state]);
+            }
+        }
+
+        if (0 === count($this->bindingsByState[$packageName])) {
+            unset($this->bindingsByState[$packageName]);
         }
     }
 
@@ -590,5 +643,36 @@ class DiscoveryManager
             $binding->getParameters(),
             $binding->getLanguage()
         );
+    }
+
+    /**
+     * @param BindingDescriptor $bindingDescriptor
+     * @param Package           $package
+     *
+     * @return int
+     */
+    private function getBindingState(BindingDescriptor $bindingDescriptor, Package $package)
+    {
+        $installInfo = $package->getInstallInfo();
+        $uuid = $bindingDescriptor->getUuid();
+        $typeName = $bindingDescriptor->getTypeName();
+
+        if (!$this->isBindingTypeLoaded($typeName)) {
+            return self::TYPE_NOT_LOADED;
+        }
+
+        if ($this->isDuplicateBindingType($typeName)) {
+            return self::DUPLICATE_TYPE_DEFINITION;
+        }
+
+        if (!$package instanceof RootPackage && $installInfo->hasDisabledBindingUuid($uuid)) {
+            return self::IS_DISABLED;
+        }
+
+        if (!$package instanceof RootPackage && !$installInfo->hasEnabledBindingUuid($uuid)) {
+            return self::IS_NEW;
+        }
+
+        return self::IS_ENABLED;
     }
 }
