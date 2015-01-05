@@ -11,6 +11,7 @@
 
 namespace Puli\RepositoryManager;
 
+use Psr\Log\LoggerInterface;
 use Puli\Repository\ResourceRepository;
 use Puli\Repository\ResourceRepositoryInterface;
 use Puli\RepositoryManager\Config\ConfigFile\ConfigFileManager;
@@ -213,17 +214,19 @@ class ManagerFactory
      *
      * @param ProjectEnvironment $environment    The project environment.
      * @param PackageManager     $packageManager The package manager. Optional.
+     * @param LoggerInterface    $logger         The logger. Optional.
      *
      * @return DiscoveryManager The discovery manager.
      */
-    public static function createDiscoveryManager(ProjectEnvironment $environment, PackageManager $packageManager = null)
+    public static function createDiscoveryManager(ProjectEnvironment $environment, PackageManager $packageManager = null, LoggerInterface $logger = null)
     {
         $packageManager = $packageManager ?: self::createPackageManager($environment);
 
         return new DiscoveryManager(
             $environment,
             $packageManager->getPackages(),
-            self::createPackageFileStorage($environment->getEventDispatcher())
+            self::createPackageFileStorage($environment->getEventDispatcher()),
+            $logger
         );
     }
 
