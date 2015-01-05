@@ -76,6 +76,11 @@ class DiscoveryManager
     private $bindings = array();
 
     /**
+     * @var BindingDescriptor[][]
+     */
+    private $enabledBindingsByPackage = array();
+
+    /**
      * @var bool[][]
      */
     private $packageNamesByType = array();
@@ -293,24 +298,30 @@ class DiscoveryManager
     }
 
     /**
-     * Returns all bindings.
+     * Returns all enabled bindings.
      *
      * You can optionally filter types by one or multiple package names.
      *
      * @param string|string[] $packageName The package name(s) to filter by.
      *
-     * @return BindingDescriptor[] The bindings.
+     * @return BindingDescriptor[] The enabled bindings.
      */
-    public function getBindings($packageName = null)
+    public function getEnabledBindings($packageName = null)
     {
+        if (!$this->bindingTypes) {
+            $this->loadPackages();
+        }
+
         $packageNames = $packageName ? (array) $packageName : $this->packages->getPackageNames();
         $bindings = array();
 
         foreach ($packageNames as $packageName) {
-            $packageFile = $this->packages[$packageName]->getPackageFile();
+            if (!isset($this->enabledBindingsByPackage[$packageName])) {
+                continue;
+            }
 
-            foreach ($packageFile->getBindingDescriptors() as $binding) {
-                $bindings[$binding->getUuid()->toString()] = $binding;
+            foreach ($this->enabledBindingsByPackage[$packageName] as $uuidString => $binding) {
+                $bindings[$uuidString] = $binding;
             }
         }
 
@@ -529,8 +540,13 @@ class DiscoveryManager
             $this->packageNamesByBinding[$uuidString] = array();
         }
 
+        if (!isset($this->enabledBindingsByPackage[$packageName])) {
+            $this->enabledBindingsByPackage[$packageName] = array();
+        }
+
         $this->bindings[$uuidString] = $binding;
         $this->packageNamesByBinding[$uuidString][$packageName] = true;
+        $this->enabledBindingsByPackage[$packageName][$uuidString] = $binding;
     }
 
     private function unloadBinding(Uuid $uuid, $packageName)
@@ -538,10 +554,15 @@ class DiscoveryManager
         $uuidString = $uuid->toString();
 
         unset($this->packageNamesByBinding[$uuidString][$packageName]);
+        unset($this->enabledBindingsByPackage[$packageName][$uuidString]);
 
         if (0 === count($this->packageNamesByBinding[$uuidString])) {
             unset($this->bindings[$uuidString]);
             unset($this->packageNamesByBinding[$uuidString]);
+        }
+
+        if (0 === count($this->enabledBindingsByPackage[$packageName])) {
+            unset($this->enabledBindingsByPackage[$packageName]);
         }
     }
 
