@@ -30,11 +30,6 @@ use Puli\RepositoryManager\Package\RootPackage;
 class DiscoveryManager
 {
     /**
-     * Marks disabled binding types.
-     */
-    const TYPE_DISABLED = -1;
-
-    /**
      * @var ProjectEnvironment
      */
     private $environment;
@@ -75,9 +70,9 @@ class DiscoveryManager
     private $bindingTypes = array();
 
     /**
-     * @var string[]
+     * @var bool[][]
      */
-    private $packageNameByType = array();
+    private $packageNamesByType = array();
 
     /**
      * @var BindingDescriptor[]
@@ -170,7 +165,15 @@ class DiscoveryManager
         $this->rootPackageFile->removeTypeDescriptor($typeName);
         $this->packageFileStorage->saveRootPackageFile($this->rootPackageFile);
 
-        $this->unloadBindingType($typeName);
+        $this->unloadBindingType($typeName, $this->rootPackage->getName());
+
+        // If the type is still loaded, that means it is also defined by an
+        // installed package
+        if (isset($this->bindingTypes[$typeName])) {
+            $this->defineTypeUnlessDisabled($this->bindingTypes[$typeName]);
+
+            return;
+        }
 
         $this->discovery->undefine($typeName);
     }
@@ -274,9 +277,7 @@ class DiscoveryManager
         }
 
         foreach ($this->bindingTypes as $typeDescriptor) {
-            if (self::TYPE_DISABLED !== $typeDescriptor) {
-                $this->discovery->define($typeDescriptor->toBindingType());
-            }
+            $this->defineTypeUnlessDisabled($typeDescriptor);
         }
 
         foreach ($this->bindings as $bindingDescriptor) {
@@ -332,29 +333,48 @@ class DiscoveryManager
         $typeName = $bindingType->getName();
 
         if (isset($this->bindingTypes[$typeName])) {
+            $packageNames = array_keys($this->packageNamesByType[$typeName]);
+
             $this->logger->warning(sprintf(
                 'The packages "%s" and "%s" contain type definitions for '.
                 'the same type "%s". The type has been disabled.',
-                $this->packageNameByType[$typeName],
+                implode('", "', $packageNames),
                 $packageName,
                 $typeName
             ));
 
-            $this->bindingTypes[$typeName] = self::TYPE_DISABLED;
+            $this->packageNamesByType[$typeName][$packageName] = true;
 
             return;
         }
 
         $this->bindingTypes[$typeName] = $bindingType;
-        $this->packageNameByType[$typeName] = $packageName;
+        $this->packageNamesByType[$typeName] = array($packageName => true);
     }
 
     /**
      * @param $typeName
+     * @param $packageName
      */
-    private function unloadBindingType($typeName)
+    private function unloadBindingType($typeName, $packageName)
     {
-        unset($this->bindingTypes[$typeName]);
-        unset($this->packageNameByType[$typeName]);
+        unset($this->packageNamesByType[$typeName][$packageName]);
+
+        // If this was the only package referencing the type, remove it
+        // completely
+        if (0 === count($this->packageNamesByType[$typeName])) {
+            unset($this->bindingTypes[$typeName]);
+            unset($this->packageNamesByType[$typeName]);
+        }
+    }
+
+    /**
+     * @param BindingTypeDescriptor $typeDescriptor
+     */
+    private function defineTypeUnlessDisabled(BindingTypeDescriptor $typeDescriptor)
+    {
+        if (1 === count($this->packageNamesByType[$typeDescriptor->getName()])) {
+            $this->discovery->define($typeDescriptor->toBindingType());
+        }
     }
 }
