@@ -369,6 +369,22 @@ class DiscoveryManagerTest extends ManagerTestCase
         $this->manager->addBinding('/path', 'my/type');
     }
 
+    public function testAddBindingDoesNotAddBindingDuplicatedInRoot()
+    {
+        $this->initDefaultManager();
+
+        $this->packageFile1->addTypeDescriptor(new BindingTypeDescriptor('my/type'));
+        $this->rootPackageFile->addBindingDescriptor(BindingDescriptor::create('/path', 'my/type'));
+
+        $this->discovery->expects($this->never())
+            ->method('bind');
+
+        $this->packageFileStorage->expects($this->never())
+            ->method('saveRootPackageFile');
+
+        $this->manager->addBinding('/path', 'my/type');
+    }
+
     /**
      * @expectedException \Puli\Discovery\Api\NoSuchTypeException
      */

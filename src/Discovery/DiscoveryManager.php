@@ -228,14 +228,20 @@ class DiscoveryManager
         $binding = BindingDescriptor::create($query, $typeName, $parameters, $language);
         $uuid = $binding->getUuid();
 
+        if ($this->rootPackageFile->hasBindingDescriptor($uuid)) {
+            return;
+        }
+
         $this->rootPackageFile->addBindingDescriptor($binding);
         $this->packageFileStorage->saveRootPackageFile($this->rootPackageFile);
 
-        if (!isset($this->bindings[$uuid->toString()])) {
-            $this->bindings[$uuid->toString()] = $binding;
-
-            $this->discovery->bind($query, $typeName, $parameters, $language);
+        if (isset($this->bindings[$uuid->toString()])) {
+            return;
         }
+
+        $this->loadBinding($binding);
+
+        $this->discovery->bind($query, $typeName, $parameters, $language);
     }
 
     /**
@@ -376,5 +382,13 @@ class DiscoveryManager
         if (1 === count($this->packageNamesByType[$typeDescriptor->getName()])) {
             $this->discovery->define($typeDescriptor->toBindingType());
         }
+    }
+
+    /**
+     * @param BindingDescriptor $binding
+     */
+    private function loadBinding(BindingDescriptor $binding)
+    {
+        $this->bindings[$binding->getUuid()->toString()] = $binding;
     }
 }

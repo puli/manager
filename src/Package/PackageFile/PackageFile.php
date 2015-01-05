@@ -17,6 +17,7 @@ use Puli\RepositoryManager\Discovery\BindingDescriptor;
 use Puli\RepositoryManager\Discovery\BindingTypeDescriptor;
 use Puli\RepositoryManager\Repository\NoSuchMappingException;
 use Puli\RepositoryManager\Repository\ResourceMapping;
+use Rhumsaa\Uuid\Uuid;
 
 /**
  * Stores the configuration of a package.
@@ -223,19 +224,17 @@ class PackageFile
      */
     public function addBindingDescriptor(BindingDescriptor $descriptor)
     {
-        $this->bindingDescriptors[] = $descriptor;
+        $this->bindingDescriptors[$descriptor->getUuid()->toString()] = $descriptor;
     }
 
     /**
      * Removes a binding descriptor.
      *
-     * @param BindingDescriptor $descriptor The binding descriptor to remove.
+     * @param Uuid $uuid The UUID of the binding descriptor to remove.
      */
-    public function removeBindingDescriptor(BindingDescriptor $descriptor)
+    public function removeBindingDescriptor(Uuid $uuid)
     {
-        if (false !== ($key = array_search($descriptor, $this->bindingDescriptors))) {
-            unset($this->bindingDescriptors[$key]);
-        }
+        unset($this->bindingDescriptors[$uuid->toString()]);
     }
 
     /**
@@ -249,13 +248,13 @@ class PackageFile
     /**
      * Returns whether the binding descriptor exists in this file.
      *
-     * @param BindingDescriptor $descriptor The binding descriptor.
+     * @param Uuid $uuid The UUID of the binding descriptor.
      *
      * @return bool Whether the file contains the binding descriptor.
      */
-    public function hasBindingDescriptor(BindingDescriptor $descriptor)
+    public function hasBindingDescriptor(Uuid $uuid)
     {
-        return in_array($descriptor, $this->bindingDescriptors);
+        return isset($this->bindingDescriptors[$uuid->toString()]);
     }
 
     /**
