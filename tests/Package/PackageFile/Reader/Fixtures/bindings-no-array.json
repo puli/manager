@@ -1,6 +1,0 @@
-{
-    "name": "my/application",
-    "bindings": {
-        "/app/config*.yml": "my/type"
-    }
-}

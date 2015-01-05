@@ -11,9 +11,9 @@
 
 namespace Puli\RepositoryManager\Discovery;
 
-use Assert\Assertion;
 use InvalidArgumentException;
 use Puli\Discovery\Api\BindingParameter;
+use Puli\RepositoryManager\Assert\Assertion;
 use RuntimeException;
 
 /**
@@ -63,10 +63,9 @@ class BindingParameterDescriptor
      */
     public function __construct($name, $required = false, $defaultValue = null, $description = null)
     {
-        Assertion::string($name, 'The parameter name must be a string. Got: %2$s');
-        Assertion::notEmpty($name, 'The parameter name must not be empty.');
-        Assertion::regex($name, '~^[a-z][a-z0-9\-]*$~', 'The parameter name must contain lower-case characters, digits and hyphens only and start with a letter. Got: "%s"');
+        Assertion::parameterName($name);
         Assertion::boolean($required, 'The parameter "$required" must be a boolean. Got: %s');
+        Assertion::nullOrParameterValue($defaultValue);
         Assertion::nullOrString($description, 'The parameter description must be a string or null. Got: %2$s');
         Assertion::nullOrNotEmpty($description, 'The parameter description must not be empty.');
 

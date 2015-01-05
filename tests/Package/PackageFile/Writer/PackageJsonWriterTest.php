@@ -58,7 +58,7 @@ class PackageJsonWriterTest extends JsonWriterTestCase
         $packageFile = new PackageFile();
         $packageFile->setPackageName('my/application');
         $packageFile->addResourceMapping(new ResourceMapping('/app', 'res'));
-        $packageFile->addBindingDescriptor(new BindingDescriptor('/app/config*.yml', 'my/type'));
+        $packageFile->addBindingDescriptor(BindingDescriptor::create('/app/config*.yml', 'my/type'));
         $packageFile->addTypeDescriptor(new BindingTypeDescriptor('my/type', 'Description of my type.', array(
             new BindingParameterDescriptor('param', false, 1234, 'Description of the parameter.'),
         )));
@@ -82,6 +82,41 @@ class PackageJsonWriterTest extends JsonWriterTestCase
         $this->assertFileExists($this->tempFile);
 
         $this->assertJsonFileEquals(__DIR__.'/Fixtures/type-no-description.json', $this->tempFile);
+    }
+
+    public function testWriteBindingParameters()
+    {
+        $baseConfig = new Config();
+        $packageFile = new PackageFile(null, null, $baseConfig);
+        $packageFile->addBindingDescriptor(BindingDescriptor::create(
+            '/app/config*.yml',
+            'my/type',
+            array('param' => 'value')
+        ));
+
+        $this->writer->writePackageFile($packageFile, $this->tempFile);
+
+        $this->assertFileExists($this->tempFile);
+
+        $this->assertJsonFileEquals(__DIR__.'/Fixtures/binding-params.json', $this->tempFile);
+    }
+
+    public function testWriteBindingWithCustomLanguage()
+    {
+        $baseConfig = new Config();
+        $packageFile = new PackageFile(null, null, $baseConfig);
+        $packageFile->addBindingDescriptor(BindingDescriptor::create(
+            '//resource[name="config.yml"]',
+            'my/type',
+            array(),
+            'xpath'
+        ));
+
+        $this->writer->writePackageFile($packageFile, $this->tempFile);
+
+        $this->assertFileExists($this->tempFile);
+
+        $this->assertJsonFileEquals(__DIR__.'/Fixtures/binding-language.json', $this->tempFile);
     }
 
     public function testWriteTypeParameterWithoutDescriptionNorParameters()
@@ -139,7 +174,7 @@ class PackageJsonWriterTest extends JsonWriterTestCase
         $packageFile = new RootPackageFile(null, null, $baseConfig);
         $packageFile->setPackageName('my/application');
         $packageFile->addResourceMapping(new ResourceMapping('/app', 'res'));
-        $packageFile->addBindingDescriptor(new BindingDescriptor('/app/config*.yml', 'my/type'));
+        $packageFile->addBindingDescriptor(BindingDescriptor::create('/app/config*.yml', 'my/type'));
         $packageFile->addTypeDescriptor(new BindingTypeDescriptor('my/type', 'Description of my type.', array(
             new BindingParameterDescriptor('param', false, 1234, 'Description of the parameter.'),
         )));

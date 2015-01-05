@@ -1,0 +1,9 @@
+{
+    "name": "my/application",
+    "bindings": [
+        {
+            "query": "/app/config*.yml",
+            "type": "my/type"
+        }
+    ]
+}

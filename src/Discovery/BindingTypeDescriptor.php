@@ -11,10 +11,10 @@
 
 namespace Puli\RepositoryManager\Discovery;
 
-use Assert\Assertion;
 use InvalidArgumentException;
 use Puli\Discovery\Api\BindingType;
 use Puli\Discovery\Api\NoSuchParameterException;
+use Puli\RepositoryManager\Assert\Assertion;
 
 /**
  * Describes a binding type.
@@ -54,10 +54,7 @@ class BindingTypeDescriptor
      */
     public function __construct($name, $description = null, array $parameters = array())
     {
-        Assertion::string($name, 'The type name must be a string. Got: %2$s');
-        Assertion::notEmpty($name, 'The type name must not be empty.');
-        Assertion::contains($name, '/', 'The type name must contain a vendor name followed by a "/". Got: "%s"');
-        Assertion::regex($name, '~^[a-z][a-z0-9\-]*/[a-z0-9\-]+$~', 'The type name must contain lower-case characters, digits and hyphens only. Got: "%s"');
+        Assertion::typeName($name);
         Assertion::nullOrString($description, 'The type description must be a string or null. Got: %2$s');
         Assertion::nullOrNotEmpty($description, 'The type description must not be empty.');
         Assertion::allIsInstanceOf($parameters, __NAMESPACE__.'\BindingParameterDescriptor');

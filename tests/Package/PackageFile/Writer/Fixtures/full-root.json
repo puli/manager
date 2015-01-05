@@ -3,12 +3,12 @@
     "resources": {
         "/app": "res"
     },
-    "bindings": [
-        {
-            "selector": "/app/config*.yml",
+    "bindings": {
+        "e736d4e9-a290-50f7-a15c-c30d5e4baac2": {
+            "query": "/app/config*.yml",
             "type": "my/type"
         }
-    ],
+    },
     "binding-types": {
         "my/type": {
             "description": "Description of my type.",

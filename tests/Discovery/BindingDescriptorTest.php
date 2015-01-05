@@ -13,6 +13,8 @@ namespace Puli\RepositoryManager\Tests\Discovery;
 
 use PHPUnit_Framework_TestCase;
 use Puli\RepositoryManager\Discovery\BindingDescriptor;
+use Rhumsaa\Uuid\Uuid;
+use stdClass;
 
 /**
  * @since  1.0
@@ -20,15 +22,23 @@ use Puli\RepositoryManager\Discovery\BindingDescriptor;
  */
 class BindingDescriptorTest extends PHPUnit_Framework_TestCase
 {
+    private $uuid;
+
+    protected function setUp()
+    {
+        $this->uuid = Uuid::uuid4();
+    }
+
     public function testCreate()
     {
-        $descriptor = new BindingDescriptor('/path', 'type', array(
+        $descriptor = new BindingDescriptor($this->uuid, '/path', 'vendor/type', array(
             'param' => 'value',
         ));
 
+        $this->assertSame($this->uuid, $descriptor->getUuid());
         $this->assertSame('/path', $descriptor->getQuery());
         $this->assertSame('glob', $descriptor->getLanguage());
-        $this->assertSame('type', $descriptor->getTypeName());
+        $this->assertSame('vendor/type', $descriptor->getTypeName());
         $this->assertSame(array('param' => 'value'), $descriptor->getParameters());
         $this->assertSame('value', $descriptor->getParameter('param'));
         $this->assertTrue($descriptor->hasParameter('param'));
@@ -38,11 +48,12 @@ class BindingDescriptorTest extends PHPUnit_Framework_TestCase
 
     public function testCreateWithQueryLanguage()
     {
-        $descriptor = new BindingDescriptor('/path', 'type', array(), 'xpath');
+        $descriptor = new BindingDescriptor($this->uuid, '/path', 'vendor/type', array(), 'xpath');
 
+        $this->assertSame($this->uuid, $descriptor->getUuid());
         $this->assertSame('/path', $descriptor->getQuery());
         $this->assertSame('xpath', $descriptor->getLanguage());
-        $this->assertSame('type', $descriptor->getTypeName());
+        $this->assertSame('vendor/type', $descriptor->getTypeName());
         $this->assertSame(array(), $descriptor->getParameters());
         $this->assertFalse($descriptor->hasParameters());
     }
@@ -52,7 +63,7 @@ class BindingDescriptorTest extends PHPUnit_Framework_TestCase
      */
     public function testQueryMustBeString()
     {
-        new BindingDescriptor(12345, 'type');
+        new BindingDescriptor($this->uuid, 12345, 'vendor/type');
     }
 
     /**
@@ -60,7 +71,7 @@ class BindingDescriptorTest extends PHPUnit_Framework_TestCase
      */
     public function testQueryMustNotBeEmpty()
     {
-        new BindingDescriptor('', 'type');
+        new BindingDescriptor($this->uuid, '', 'vendor/type');
     }
 
     /**
@@ -68,7 +79,7 @@ class BindingDescriptorTest extends PHPUnit_Framework_TestCase
      */
     public function testTypeNameMustBeString()
     {
-        new BindingDescriptor('/path', 12345);
+        new BindingDescriptor($this->uuid, '/path', 12345);
     }
 
     /**
@@ -76,7 +87,7 @@ class BindingDescriptorTest extends PHPUnit_Framework_TestCase
      */
     public function testTypeNameMustNotBeEmpty()
     {
-        new BindingDescriptor('/path', '');
+        new BindingDescriptor($this->uuid, '/path', '');
     }
 
     /**
@@ -84,7 +95,7 @@ class BindingDescriptorTest extends PHPUnit_Framework_TestCase
      */
     public function testGetParameterFailsIfUnknownParameter()
     {
-        $descriptor = new BindingDescriptor('/path', 'type');
+        $descriptor = new BindingDescriptor($this->uuid, '/path', 'vendor/type');
 
         $descriptor->getParameter('foobar');
     }
@@ -94,7 +105,7 @@ class BindingDescriptorTest extends PHPUnit_Framework_TestCase
      */
     public function testLanguageMustBeString()
     {
-        new BindingDescriptor('/path', 'type', array(), 1234);
+        new BindingDescriptor($this->uuid, '/path', 'vendor/type', array(), 1234);
     }
 
     /**
@@ -102,6 +113,97 @@ class BindingDescriptorTest extends PHPUnit_Framework_TestCase
      */
     public function testLanguageMustNotBeEmpty()
     {
-        new BindingDescriptor('/path', 'type', array(), '');
+        new BindingDescriptor($this->uuid, '/path', 'vendor/type', array(), '');
+    }
+
+    /**
+     * @expectedException \InvalidArgumentException
+     */
+    public function testParameterNameMustNotContainSpecialChars()
+    {
+        new BindingDescriptor($this->uuid, '/path', 'vendor/type', array('param=' => 'value'));
+    }
+
+    /**
+     * @expectedException \InvalidArgumentException
+     */
+    public function testParameterValueMustNotBeObject()
+    {
+        new BindingDescriptor($this->uuid, '/path', 'vendor/type', array('param' => new stdClass()));
+    }
+
+    /**
+     * @expectedException \InvalidArgumentException
+     */
+    public function testParameterValueMustNotBeArray()
+    {
+        new BindingDescriptor($this->uuid, '/path', 'vendor/type', array('param' => array(1, 2, 3)));
+    }
+
+    public function testStaticCreate()
+    {
+        $descriptor = BindingDescriptor::create('/path', 'vendor/type', array('param' => 'value'));
+
+        $this->assertNotNull($descriptor->getUuid());
+        $this->assertSame('/path', $descriptor->getQuery());
+        $this->assertSame('glob', $descriptor->getLanguage());
+        $this->assertSame('vendor/type', $descriptor->getTypeName());
+        $this->assertSame(array('param' => 'value'), $descriptor->getParameters());
+    }
+
+    public function testForPackageGeneratesDeterministicUuid()
+    {
+        $descriptor1 = BindingDescriptor::create('/path', 'vendor/type', array('param' => 'value'));
+        $descriptor2 = BindingDescriptor::create('/path', 'vendor/type', array('param' => 'value'));
+
+        $this->assertEquals($descriptor1->getUuid(), $descriptor2->getUuid());
+    }
+
+    public function testUuidDependsOnQuery()
+    {
+        $descriptor1 = BindingDescriptor::create('/path1', 'vendor/type', array('param' => 'value'));
+        $descriptor2 = BindingDescriptor::create('/path2', 'vendor/type', array('param' => 'value'));
+
+        $this->assertNotEquals($descriptor1->getUuid(), $descriptor2->getUuid());
+    }
+
+    public function testUuidDependsOnType()
+    {
+        $descriptor1 = BindingDescriptor::create('/path', 'vendor/type1', array('param' => 'value'));
+        $descriptor2 = BindingDescriptor::create('/path', 'vendor/type2', array('param' => 'value'));
+
+        $this->assertNotEquals($descriptor1->getUuid(), $descriptor2->getUuid());
+    }
+
+    public function testUuidDependsOnParameterNames()
+    {
+        $descriptor1 = BindingDescriptor::create('/path', 'vendor/type', array('param1' => 'value'));
+        $descriptor2 = BindingDescriptor::create('/path', 'vendor/type', array('param2' => 'value'));
+
+        $this->assertNotEquals($descriptor1->getUuid(), $descriptor2->getUuid());
+    }
+
+    public function testUuidDependsOnParameterValues()
+    {
+        $descriptor1 = BindingDescriptor::create('/path', 'vendor/type', array('param' => 'value1'));
+        $descriptor2 = BindingDescriptor::create('/path', 'vendor/type', array('param' => 'value2'));
+
+        $this->assertNotEquals($descriptor1->getUuid(), $descriptor2->getUuid());
+    }
+
+    public function testUuidDependsOnParameterValueTypes()
+    {
+        $descriptor1 = BindingDescriptor::create('/path', 'vendor/type', array('param' => '1'));
+        $descriptor2 = BindingDescriptor::create('/path', 'vendor/type', array('param' => 1));
+
+        $this->assertNotEquals($descriptor1->getUuid(), $descriptor2->getUuid());
+    }
+
+    public function testUuidDependsOnLanguage()
+    {
+        $descriptor1 = BindingDescriptor::create('/path', 'vendor/type', array('param' => 'value'), 'language1');
+        $descriptor2 = BindingDescriptor::create('/path', 'vendor/type', array('param' => 'value'), 'language2');
+
+        $this->assertNotEquals($descriptor1->getUuid(), $descriptor2->getUuid());
     }
 }

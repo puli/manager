@@ -180,8 +180,6 @@ class DiscoveryManagerTest extends ManagerTestCase
     {
         $this->initDefaultManager();
 
-        $binding = new BindingDescriptor('/path', 'my/type', array('param' => 'value'), 'xpath');
-
         $this->discovery->expects($this->any())
             ->method('isDefined')
             ->with('my/type')
@@ -194,13 +192,17 @@ class DiscoveryManagerTest extends ManagerTestCase
         $this->packageFileStorage->expects($this->once())
             ->method('saveRootPackageFile')
             ->with($this->rootPackageFile)
-            ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) use ($binding) {
+            ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) {
                 $bindings = $rootPackageFile->getBindingDescriptors();
 
-                PHPUnit_Framework_Assert::assertSame(array($binding), $bindings);
+                PHPUnit_Framework_Assert::assertCount(1, $bindings);
+                PHPUnit_Framework_Assert::assertSame('/path', $bindings[0]->getQuery());
+                PHPUnit_Framework_Assert::assertSame('my/type', $bindings[0]->getTypeName());
+                PHPUnit_Framework_Assert::assertSame(array('param' => 'value'), $bindings[0]->getParameters());
+                PHPUnit_Framework_Assert::assertSame('xpath', $bindings[0]->getLanguage());
             }));
 
-        $this->manager->addBinding($binding);
+        $this->manager->addBinding('/path', 'my/type', array('param' => 'value'), 'xpath');
     }
 
     /**
@@ -209,8 +211,6 @@ class DiscoveryManagerTest extends ManagerTestCase
     public function testAddBindingFailsIfTypeNotDefined()
     {
         $this->initDefaultManager();
-
-        $binding = new BindingDescriptor('/path', 'my/type', array('param' => 'value'), 'xpath');
 
         $this->discovery->expects($this->any())
             ->method('isDefined')
@@ -223,17 +223,17 @@ class DiscoveryManagerTest extends ManagerTestCase
         $this->packageFileStorage->expects($this->never())
             ->method('saveRootPackageFile');
 
-        $this->manager->addBinding($binding);
+        $this->manager->addBinding('/path', 'my/type', array('param' => 'value'), 'xpath');
     }
 
     public function testGetBindings()
     {
         $this->initDefaultManager();
 
-        $this->rootPackageFile->addBindingDescriptor($binding1 = new BindingDescriptor('/path1', 'my/type1'));
-        $this->packageFile1->addBindingDescriptor($binding2 = new BindingDescriptor('/path2', 'my/type2'));
-        $this->packageFile2->addBindingDescriptor($binding3 = new BindingDescriptor('/path3', 'my/type3'));
-        $this->packageFile3->addBindingDescriptor($binding4 = new BindingDescriptor('/path4', 'my/type4'));
+        $this->rootPackageFile->addBindingDescriptor($binding1 = BindingDescriptor::create('/path1', 'my/type1'));
+        $this->packageFile1->addBindingDescriptor($binding2 = BindingDescriptor::create('/path2', 'my/type2'));
+        $this->packageFile2->addBindingDescriptor($binding3 = BindingDescriptor::create('/path3', 'my/type3'));
+        $this->packageFile3->addBindingDescriptor($binding4 = BindingDescriptor::create('/path4', 'my/type4'));
 
         $this->assertSame(array(
             $binding1,

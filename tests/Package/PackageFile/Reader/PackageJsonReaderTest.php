@@ -108,14 +108,27 @@ class PackageJsonReaderTest extends PHPUnit_Framework_TestCase
 
     public function testReadBindingWithParameters()
     {
-        $packageFile = $this->reader->readPackageFile(__DIR__.'/Fixtures/bindings-params.json', $this->baseConfig);
+        $packageFile = $this->reader->readPackageFile(__DIR__.'/Fixtures/binding-params.json', $this->baseConfig);
 
         $this->assertInstanceOf('Puli\RepositoryManager\Package\PackageFile\PackageFile', $packageFile);
-        $this->assertEquals(array(
-            new BindingDescriptor('/app/config*.yml', 'my/type', array(
-                'param' => 'value',
-            )),
-        ), $packageFile->getBindingDescriptors());
+        $this->assertEquals(array(BindingDescriptor::create(
+            '/app/config*.yml',
+            'my/type',
+            array('param' => 'value')
+        )), $packageFile->getBindingDescriptors());
+    }
+
+    public function testReadBindingWithLanguage()
+    {
+        $packageFile = $this->reader->readPackageFile(__DIR__.'/Fixtures/binding-language.json', $this->baseConfig);
+
+        $this->assertInstanceOf('Puli\RepositoryManager\Package\PackageFile\PackageFile', $packageFile);
+        $this->assertEquals(array(BindingDescriptor::create(
+            '//resource[name="config.yml"]',
+            'my/type',
+            array(),
+            'xpath'
+        )), $packageFile->getBindingDescriptors());
     }
 
     public function testRootPackageFileInheritsBaseConfig()
@@ -224,9 +237,9 @@ class PackageJsonReaderTest extends PHPUnit_Framework_TestCase
     /**
      * @expectedException \Puli\RepositoryManager\InvalidConfigException
      */
-    public function testBindingsMustBeArray()
+    public function testBindingsMustBeObject()
     {
-        $this->reader->readPackageFile(__DIR__.'/Fixtures/bindings-no-array.json');
+        $this->reader->readPackageFile(__DIR__.'/Fixtures/bindings-no-object.json');
     }
 
     public function testOverrideMayBeArray()
@@ -272,7 +285,7 @@ class PackageJsonReaderTest extends PHPUnit_Framework_TestCase
     {
         $this->assertSame('my/application', $packageFile->getPackageName());
         $this->assertEquals(array('/app' => new ResourceMapping('/app', array('res'))), $packageFile->getResourceMappings());
-        $this->assertEquals(array(new BindingDescriptor('/app/config*.yml', 'my/type')), $packageFile->getBindingDescriptors());
+        $this->assertEquals(array(BindingDescriptor::create('/app/config*.yml', 'my/type')), $packageFile->getBindingDescriptors());
         $this->assertEquals(array(new BindingTypeDescriptor('my/type', 'Description of my type.', array(
             new BindingParameterDescriptor('param', false, 1234, 'Description of the parameter.'),
         ))), $packageFile->getTypeDescriptors());

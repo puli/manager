@@ -13,6 +13,7 @@ namespace Puli\RepositoryManager\Tests\Discovery;
 
 use PHPUnit_Framework_TestCase;
 use Puli\RepositoryManager\Discovery\BindingParameterDescriptor;
+use stdClass;
 
 /**
  * @since  1.0
@@ -101,6 +102,14 @@ class BindingParameterDescriptorTest extends PHPUnit_Framework_TestCase
     public function testDescriptionMustNotBeEmpty()
     {
         new BindingParameterDescriptor('param', false, null, '');
+    }
+
+    /**
+     * @expectedException \InvalidArgumentException
+     */
+    public function testDefaultValueMustNotBeObject()
+    {
+        new BindingParameterDescriptor('param', false, new stdClass());
     }
 
     /**

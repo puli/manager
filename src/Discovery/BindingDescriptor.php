@@ -11,9 +11,11 @@
 
 namespace Puli\RepositoryManager\Discovery;
 
-use Assert\Assertion;
 use InvalidArgumentException;
 use Puli\Discovery\Api\NoSuchParameterException;
+use Puli\RepositoryManager\Assert\Assertion;
+use Puli\RepositoryManager\Util\DistinguishedName;
+use Rhumsaa\Uuid\Uuid;
 
 /**
  * Describes a resource binding.
@@ -24,6 +26,11 @@ use Puli\Discovery\Api\NoSuchParameterException;
  */
 class BindingDescriptor
 {
+    /**
+     * @var Uuid
+     */
+    private $uuid;
+
     /**
      * @var string
      */
@@ -45,8 +52,47 @@ class BindingDescriptor
     private $parameters;
 
     /**
+     * Creates a new binding descriptor with a generated UUID.
+     *
+     * The UUID is generated based on the given parameters.
+     *
+     * @param string $query      The query for the resources of the binding.
+     * @param string $typeName   The name of the binding type.
+     * @param array  $parameters The values of the binding parameters.
+     * @param string $language   The language of the query.
+     *
+     * @return static The created binding descriptor.
+     *
+     * @see ResourceBinding
+     */
+    public static function create($query, $typeName, array $parameters = array(), $language = 'glob')
+    {
+        Assertion::query($query);
+        Assertion::typeName($typeName);
+        Assertion::language($language);
+        Assertion::allParameterName(array_keys($parameters));
+        Assertion::allParameterValue($parameters);
+
+        $dn = new DistinguishedName(array(
+            'q' => $query,
+            'l' => $language,
+            't' => $typeName,
+        ));
+
+        foreach ($parameters as $parameter => $value) {
+            // Attribute values must be strings
+            $dn->add('p-'.$parameter, serialize($value));
+        }
+
+        $uuid = Uuid::uuid5(Uuid::NAMESPACE_X500, $dn->toString());
+
+        return new static($uuid, $query, $typeName, $parameters, $language);
+    }
+
+    /**
      * Creates a new binding descriptor.
      *
+     * @param Uuid   $uuid       The UUID of the binding.
      * @param string $query      The query for the resources of the binding.
      * @param string $typeName   The name of the binding type.
      * @param array  $parameters The values of the binding parameters.
@@ -56,19 +102,29 @@ class BindingDescriptor
      *
      * @see ResourceBinding
      */
-    public function __construct($query, $typeName, array $parameters = array(), $language = 'glob')
+    public function __construct(Uuid $uuid, $query, $typeName, array $parameters = array(), $language = 'glob')
     {
-        Assertion::string($query, 'The query must be a string. Got: %2$s');
-        Assertion::notEmpty($query, 'The query must not be empty');
-        Assertion::string($language, 'The language must be a string. Got: %2$s');
-        Assertion::notEmpty($language, 'The language must not be empty');
-        Assertion::string($typeName, 'The type name must be a string. Got: %2$s');
-        Assertion::notEmpty($typeName, 'The type name must not be empty');
+        Assertion::query($query);
+        Assertion::typeName($typeName);
+        Assertion::language($language);
+        Assertion::allParameterName(array_keys($parameters));
+        Assertion::allParameterValue($parameters);
 
+        $this->uuid = $uuid;
         $this->query = $query;
         $this->language = $language;
         $this->typeName = $typeName;
         $this->parameters = $parameters;
+    }
+
+    /**
+     * Returns the UUID of the binding.
+     *
+     * @return Uuid The universally unique ID.
+     */
+    public function getUuid()
+    {
+        return $this->uuid;
     }
 
     /**

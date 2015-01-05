@@ -128,29 +128,28 @@ class DiscoveryManager
     /**
      * Adds a new binding.
      *
-     * @param BindingDescriptor $binding The binding to add.
-     *
-     * @throws NoSuchTypeException If the binding type is not found.
+     * @param        $query
+     * @param        $typeName
+     * @param array  $parameters
+     * @param string $language
      */
-    public function addBinding(BindingDescriptor $binding)
+    public function addBinding($query, $typeName, array $parameters = array(), $language = 'glob')
     {
         if (!$this->discovery) {
             $this->loadDiscovery();
         }
 
-        if (!$this->discovery->isDefined($binding->getTypeName())) {
-            throw NoSuchTypeException::forTypeName($binding->getTypeName());
+        if (!$this->discovery->isDefined($typeName)) {
+            throw NoSuchTypeException::forTypeName($typeName);
         }
 
+        $binding = BindingDescriptor::create($query, $typeName, $parameters, $language);
+
         $this->rootPackageFile->addBindingDescriptor($binding);
+
         $this->packageFileStorage->saveRootPackageFile($this->rootPackageFile);
 
-        $this->discovery->bind(
-            $binding->getQuery(),
-            $binding->getTypeName(),
-            $binding->getParameters(),
-            $binding->getLanguage()
-        );
+        $this->discovery->bind($query, $typeName, $parameters, $language);
     }
 
     /**

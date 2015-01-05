@@ -15,6 +15,7 @@ use Puli\RepositoryManager\IOException;
 use Puli\RepositoryManager\Package\InstallInfo;
 use Puli\RepositoryManager\Package\PackageFile\PackageFile;
 use Puli\RepositoryManager\Package\PackageFile\RootPackageFile;
+use stdClass;
 use Symfony\Component\Filesystem\Filesystem;
 use Webmozart\Json\JsonEncoder;
 use Webmozart\PathUtil\Path;
@@ -86,7 +87,7 @@ class PackageJsonWriter implements PackageFileWriter
         }
 
         if (count($resourceMappings) > 0) {
-            $jsonData['resources'] = new \stdClass();
+            $jsonData['resources'] = new stdClass();
 
             foreach ($resourceMappings as $binding) {
                 $puliPath = $binding->getRepositoryPath();
@@ -97,36 +98,41 @@ class PackageJsonWriter implements PackageFileWriter
         }
 
         if (count($bindings) > 0) {
-            $jsonData['bindings'] = array();
+            $jsonData['bindings'] = new stdClass();
 
             foreach ($bindings as $binding) {
-                $bindingData = new \stdClass();
-                $bindingData->selector = $binding->getQuery();
+                $bindingData = new stdClass();
+                $bindingData->query = $binding->getQuery();
+
+                if ('glob' !== $binding->getLanguage()) {
+                    $bindingData->language = $binding->getLanguage();
+                }
+
                 $bindingData->type = $binding->getTypeName();
 
                 if (count($binding->getParameters()) > 0) {
-                    $bindingData->parameterss = $binding->getParameters();
+                    $bindingData->parameters = $binding->getParameters();
                 }
 
-                $jsonData['bindings'][] = $bindingData;
+                $jsonData['bindings']->{$binding->getUuid()->toString()} = $bindingData;
             }
         }
 
         if (count($bindingTypes) > 0) {
-            $jsonData['binding-types'] = new \stdClass();
+            $jsonData['binding-types'] = new stdClass();
 
             foreach ($bindingTypes as $bindingType) {
-                $typeData = new \stdClass();
+                $typeData = new stdClass();
 
                 if ($bindingType->getDescription()) {
                     $typeData->description = $bindingType->getDescription();
                 }
 
                 if (count($bindingType->getParameters()) > 0) {
-                    $typeData->parameters = new \stdClass();
+                    $typeData->parameters = new stdClass();
 
                     foreach ($bindingType->getParameters() as $parameter) {
-                        $paramData = new \stdClass();
+                        $paramData = new stdClass();
 
                         if ($parameter->getDescription()) {
                             $paramData->description = $parameter->getDescription();
@@ -174,10 +180,10 @@ class PackageJsonWriter implements PackageFileWriter
         }
 
         if (count($installInfos) > 0) {
-            $jsonData['packages'] = new \stdClass();
+            $jsonData['packages'] = new stdClass();
 
             foreach ($installInfos as $installInfo) {
-                $installData = new \stdClass();
+                $installData = new stdClass();
                 $installData->{'install-path'} = $installInfo->getInstallPath();
 
                 if (InstallInfo::DEFAULT_INSTALLER !== $installInfo->getInstaller()) {

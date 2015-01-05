@@ -17,7 +17,8 @@
         "webmozart/path-util": "~1.0",
         "symfony/event-dispatcher": "~2.3",
         "symfony/filesystem": "~2.3",
-        "beberlei/assert": "~2.3"
+        "beberlei/assert": "~2.3",
+        "rhumsaa/uuid": "~2.8"
     },
     "require-dev": {
         "fire015/flintstone": "~1.8"

@@ -21,6 +21,7 @@ use Puli\RepositoryManager\Package\InstallInfo;
 use Puli\RepositoryManager\Package\PackageFile\PackageFile;
 use Puli\RepositoryManager\Package\PackageFile\RootPackageFile;
 use Puli\RepositoryManager\Repository\ResourceMapping;
+use Rhumsaa\Uuid\Uuid;
 use Webmozart\Json\DecodingFailedException;
 use Webmozart\Json\JsonDecoder;
 use Webmozart\Json\ValidationFailedException;
@@ -100,11 +101,13 @@ class PackageJsonReader implements PackageFileReader
         }
 
         if (isset($jsonData->bindings)) {
-            foreach ($jsonData->bindings as $bindingData) {
+            foreach ($jsonData->bindings as $uuid => $bindingData) {
                 $packageFile->addBindingDescriptor(new BindingDescriptor(
-                    $bindingData->selector,
+                    Uuid::fromString($uuid),
+                    $bindingData->query,
                     $bindingData->type,
-                    isset($bindingData->parameters) ? (array) $bindingData->parameters : array()
+                    isset($bindingData->parameters) ? (array) $bindingData->parameters : array(),
+                    isset($bindingData->language) ? $bindingData->language : 'glob'
                 ));
             }
         }

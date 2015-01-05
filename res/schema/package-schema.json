@@ -12,13 +12,16 @@
             }
         },
         "bindings": {
-            "type": "array",
-            "items": {
+            "type": "object",
+            "additionalProperties": {
                 "type": "object",
                 "properties": {
-                    "selector": {
+                    "query": {
                         "type": "string",
                         "required": true
+                    },
+                    "language": {
+                        "type": "string"
                     },
                     "type": {
                         "type": "string",

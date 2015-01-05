@@ -14,6 +14,7 @@ namespace Puli\RepositoryManager\Package;
 use Assert\Assertion;
 use InvalidArgumentException;
 use Puli\RepositoryManager\Discovery\BindingDescriptor;
+use Rhumsaa\Uuid\Uuid;
 
 /**
  * Contains information about a package installation.
@@ -46,12 +47,12 @@ class InstallInfo
     /**
      * @var BindingDescriptor[]
      */
-    private $enabledBindings = array();
+    private $enabledBindingUuids = array();
 
     /**
      * @var BindingDescriptor[]
      */
-    private $disabledBindings = array();
+    private $disabledBindingUuids = array();
 
     /**
      * Creates a new install info.
@@ -121,39 +122,35 @@ class InstallInfo
     /**
      * Returns the enabled resource bindings of the package.
      *
-     * @return BindingDescriptor[] The enabled resource bindings.
+     * @return Uuid[] The UUIDs of the enabled resource bindings.
      */
-    public function getEnabledBindings()
+    public function getEnabledBindingUuids()
     {
-        return $this->enabledBindings;
+        return array_values($this->enabledBindingUuids);
     }
 
     /**
      * Adds an enabled resource binding for the package.
      *
-     * @param BindingDescriptor $binding The enabled resource binding.
+     * @param Uuid $uuid The UUID of the enabled resource binding.
      */
-    public function addEnabledBinding(BindingDescriptor $binding)
+    public function addEnabledBindingUuid(Uuid $uuid)
     {
-        if (in_array($binding, $this->enabledBindings)) {
-            return;
-        }
+        $this->enabledBindingUuids[$uuid->toString()] = $uuid;
 
-        $this->enabledBindings[] = $binding;
-
-        $this->removeDisabledBinding($binding);
+        $this->removeDisabledBindingUuid($uuid);
     }
 
     /**
      * Returns whether the resource binding is enabled.
      *
-     * @param BindingDescriptor $binding The resource binding.
+     * @param Uuid $uuid The UUID of the resource binding.
      *
      * @return bool Whether the resource binding is enabled.
      */
-    public function hasEnabledBinding(BindingDescriptor $binding)
+    public function hasEnabledBindingUuid(Uuid $uuid)
     {
-        return in_array($binding, $this->enabledBindings);
+        return isset($this->enabledBindingUuids[$uuid->toString()]);
     }
 
     /**
@@ -161,51 +158,45 @@ class InstallInfo
      *
      * If the resource binding is not enabled, this method does nothing.
      *
-     * @param BindingDescriptor $binding The resource binding to remove.
+     * @param Uuid $uuid The UUID of the resource binding to remove.
      */
-    public function removeEnabledBinding(BindingDescriptor $binding)
+    public function removeEnabledBindingUuid(Uuid $uuid)
     {
-        if (false !== ($key = array_search($binding, $this->enabledBindings))) {
-            unset($this->enabledBindings[$key]);
-        }
+        unset($this->enabledBindingUuids[$uuid->toString()]);
     }
 
     /**
      * Returns the disabled resource bindings of the package.
      *
-     * @return BindingDescriptor[] The disabled resource bindings.
+     * @return BindingDescriptor[] The UUIDs of the disabled resource bindings.
      */
-    public function getDisabledBindings()
+    public function getDisabledBindingUuids()
     {
-        return $this->disabledBindings;
+        return array_values($this->disabledBindingUuids);
     }
 
     /**
      * Adds a disabled resource binding for the package.
      *
-     * @param BindingDescriptor $binding The disabled resource binding.
+     * @param Uuid $uuid The UUID of the disabled resource binding.
      */
-    public function addDisabledBinding(BindingDescriptor $binding)
+    public function addDisabledBindingUuid(Uuid $uuid)
     {
-        if (in_array($binding, $this->disabledBindings)) {
-            return;
-        }
+        $this->disabledBindingUuids[$uuid->toString()] = $uuid;
 
-        $this->disabledBindings[] = $binding;
-
-        $this->removeEnabledBinding($binding);
+        $this->removeEnabledBindingUuid($uuid);
     }
 
     /**
      * Returns whether the resource binding is disabled.
      *
-     * @param BindingDescriptor $binding The resource binding.
+     * @param Uuid $uuid The UUID of the resource binding.
      *
      * @return bool Whether the resource binding is disabled.
      */
-    public function hasDisabledBinding(BindingDescriptor $binding)
+    public function hasDisabledBindingUuid(Uuid $uuid)
     {
-        return in_array($binding, $this->disabledBindings);
+        return isset($this->disabledBindingUuids[$uuid->toString()]);
     }
 
     /**
@@ -213,12 +204,10 @@ class InstallInfo
      *
      * If the resource binding is not disabled, this method does nothing.
      *
-     * @param BindingDescriptor $binding The resource binding to remove.
+     * @param Uuid $uuid The UUID of the resource binding to remove.
      */
-    public function removeDisabledBinding(BindingDescriptor $binding)
+    public function removeDisabledBindingUuid(Uuid $uuid)
     {
-        if (false !== ($key = array_search($binding, $this->disabledBindings))) {
-            unset($this->disabledBindings[$key]);
-        }
+        unset($this->disabledBindingUuids[$uuid->toString()]);
     }
 }
