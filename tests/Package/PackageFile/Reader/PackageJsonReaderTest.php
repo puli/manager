@@ -20,6 +20,7 @@ use Puli\RepositoryManager\Package\InstallInfo;
 use Puli\RepositoryManager\Package\PackageFile\PackageFile;
 use Puli\RepositoryManager\Package\PackageFile\Reader\PackageJsonReader;
 use Puli\RepositoryManager\Repository\ResourceMapping;
+use Rhumsaa\Uuid\Uuid;
 
 /**
  * @since  1.0
@@ -59,6 +60,8 @@ class PackageJsonReaderTest extends PHPUnit_Framework_TestCase
 
         $installInfo1 = new InstallInfo('package1', '/path/to/package1');
         $installInfo1->setInstaller('Composer');
+        $installInfo1->addEnabledBindingUuid(Uuid::fromString('a54e5668-2b36-43f4-a32c-2d175092b77d'));
+        $installInfo1->addDisabledBindingUuid(Uuid::fromString('4d02ee67-d845-4789-a9c1-8301351c6f5a'));
         $installInfo2 = new InstallInfo('package2', '/path/to/package2');
 
         $this->assertInstanceOf('Puli\RepositoryManager\Package\PackageFile\RootPackageFile', $packageFile);

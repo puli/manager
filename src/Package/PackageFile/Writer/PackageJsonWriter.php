@@ -190,6 +190,22 @@ class PackageJsonWriter implements PackageFileWriter
                     $installData->installer = $installInfo->getInstaller();
                 }
 
+                if ($installInfo->hasEnabledBindingUuids()) {
+                    $installData->{'enabled-bindings'} = array();
+
+                    foreach ($installInfo->getEnabledBindingUuids() as $uuid) {
+                        $installData->{'enabled-bindings'}[] = $uuid->toString();
+                    }
+                }
+
+                if ($installInfo->hasDisabledBindingUuids()) {
+                    $installData->{'disabled-bindings'} = array();
+
+                    foreach ($installInfo->getDisabledBindingUuids() as $uuid) {
+                        $installData->{'disabled-bindings'}[] = $uuid->toString();
+                    }
+                }
+
                 $jsonData['packages']->{$installInfo->getPackageName()} = $installData;
             }
         }

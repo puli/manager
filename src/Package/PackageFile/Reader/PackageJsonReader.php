@@ -166,6 +166,18 @@ class PackageJsonReader implements PackageFileReader
                     $installInfo->setInstaller($packageData->installer);
                 }
 
+                if (isset($packageData->{'enabled-bindings'})) {
+                    foreach ($packageData->{'enabled-bindings'} as $uuid) {
+                        $installInfo->addEnabledBindingUuid(Uuid::fromString($uuid));
+                    }
+                }
+
+                if (isset($packageData->{'disabled-bindings'})) {
+                    foreach ($packageData->{'disabled-bindings'} as $uuid) {
+                        $installInfo->addDisabledBindingUuid(Uuid::fromString($uuid));
+                    }
+                }
+
                 $packageFile->addInstallInfo($installInfo);
             }
         }

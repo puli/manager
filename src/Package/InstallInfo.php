@@ -142,18 +142,6 @@ class InstallInfo
     }
 
     /**
-     * Returns whether the resource binding is enabled.
-     *
-     * @param Uuid $uuid The UUID of the resource binding.
-     *
-     * @return bool Whether the resource binding is enabled.
-     */
-    public function hasEnabledBindingUuid(Uuid $uuid)
-    {
-        return isset($this->enabledBindingUuids[$uuid->toString()]);
-    }
-
-    /**
      * Removes an enabled resource binding.
      *
      * If the resource binding is not enabled, this method does nothing.
@@ -166,9 +154,31 @@ class InstallInfo
     }
 
     /**
+     * Returns whether the resource binding is enabled.
+     *
+     * @param Uuid $uuid The UUID of the resource binding.
+     *
+     * @return bool Whether the resource binding is enabled.
+     */
+    public function hasEnabledBindingUuid(Uuid $uuid)
+    {
+        return isset($this->enabledBindingUuids[$uuid->toString()]);
+    }
+
+    /**
+     * Returns whether the install info contains enabled bindings.
+     *
+     * @return bool Whether any bindings are enabled.
+     */
+    public function hasEnabledBindingUuids()
+    {
+        return count($this->enabledBindingUuids) > 0;
+    }
+
+    /**
      * Returns the disabled resource bindings of the package.
      *
-     * @return BindingDescriptor[] The UUIDs of the disabled resource bindings.
+     * @return Uuid[] The UUIDs of the disabled resource bindings.
      */
     public function getDisabledBindingUuids()
     {
@@ -188,6 +198,18 @@ class InstallInfo
     }
 
     /**
+     * Removes a disabled resource binding.
+     *
+     * If the resource binding is not disabled, this method does nothing.
+     *
+     * @param Uuid $uuid The UUID of the resource binding to remove.
+     */
+    public function removeDisabledBindingUuid(Uuid $uuid)
+    {
+        unset($this->disabledBindingUuids[$uuid->toString()]);
+    }
+
+    /**
      * Returns whether the resource binding is disabled.
      *
      * @param Uuid $uuid The UUID of the resource binding.
@@ -200,14 +222,12 @@ class InstallInfo
     }
 
     /**
-     * Removes a disabled resource binding.
+     * Returns whether the install info contains disabled bindings.
      *
-     * If the resource binding is not disabled, this method does nothing.
-     *
-     * @param Uuid $uuid The UUID of the resource binding to remove.
+     * @return bool Whether any bindings are disabled.
      */
-    public function removeDisabledBindingUuid(Uuid $uuid)
+    public function hasDisabledBindingUuids()
     {
-        unset($this->disabledBindingUuids[$uuid->toString()]);
+        return count($this->disabledBindingUuids) > 0;
     }
 }

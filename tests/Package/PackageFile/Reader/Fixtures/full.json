@@ -42,7 +42,13 @@
     "packages": {
         "package1": {
             "install-path": "/path/to/package1",
-            "installer": "Composer"
+            "installer": "Composer",
+            "enabled-bindings": [
+                "a54e5668-2b36-43f4-a32c-2d175092b77d"
+            ],
+            "disabled-bindings": [
+                "4d02ee67-d845-4789-a9c1-8301351c6f5a"
+            ]
         },
         "package2": {
             "install-path": "/path/to/package2"

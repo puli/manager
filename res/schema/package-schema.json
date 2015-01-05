@@ -110,6 +110,18 @@
                     },
                     "installer": {
                         "type": "string"
+                    },
+                    "enabled-bindings": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "disabled-bindings": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
                     }
                 }
             }

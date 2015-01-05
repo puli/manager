@@ -21,6 +21,7 @@ use Puli\RepositoryManager\Package\PackageFile\RootPackageFile;
 use Puli\RepositoryManager\Package\PackageFile\Writer\PackageJsonWriter;
 use Puli\RepositoryManager\Repository\ResourceMapping;
 use Puli\RepositoryManager\Tests\JsonWriterTestCase;
+use Rhumsaa\Uuid\Uuid;
 use Symfony\Component\Filesystem\Filesystem;
 
 /**
@@ -168,6 +169,8 @@ class PackageJsonWriterTest extends JsonWriterTestCase
     {
         $installInfo1 = new InstallInfo('package1', '/path/to/package1');
         $installInfo1->setInstaller('Composer');
+        $installInfo1->addEnabledBindingUuid(Uuid::fromString('a54e5668-2b36-43f4-a32c-2d175092b77d'));
+        $installInfo1->addDisabledBindingUuid(Uuid::fromString('4d02ee67-d845-4789-a9c1-8301351c6f5a'));
         $installInfo2 = new InstallInfo('package2', '/path/to/package2');
 
         $baseConfig = new Config();
