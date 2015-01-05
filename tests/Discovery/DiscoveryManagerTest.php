@@ -303,6 +303,19 @@ class DiscoveryManagerTest extends ManagerTestCase
         $this->assertSame(array($type2, $type3), $this->manager->getBindingTypes(array('package1', 'package2')));
     }
 
+    public function testGetBindingTypesReturnsDuplicatedTypesOnlyOnce()
+    {
+        $this->initDefaultManager();
+
+        $this->packageFile1->addTypeDescriptor($type = new BindingTypeDescriptor('my/type'));
+        $this->packageFile2->addTypeDescriptor($type);
+
+        $this->assertSame(array($type), $this->manager->getBindingTypes());
+        $this->assertSame(array($type), $this->manager->getBindingTypes('package1'));
+        $this->assertSame(array($type), $this->manager->getBindingTypes('package2'));
+        $this->assertSame(array($type), $this->manager->getBindingTypes(array('package1', 'package2')));
+    }
+
     public function testAddBinding()
     {
         $this->initDefaultManager();

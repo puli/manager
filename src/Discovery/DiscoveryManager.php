@@ -196,11 +196,11 @@ class DiscoveryManager
             $packageFile = $this->packages[$packageName]->getPackageFile();
 
             foreach ($packageFile->getTypeDescriptors() as $type) {
-                $types[] = $type;
+                $types[$type->getName()] = $type;
             }
         }
 
-        return $types;
+        return array_values($types);
     }
 
     /**
