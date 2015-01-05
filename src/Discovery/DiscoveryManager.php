@@ -272,7 +272,13 @@ class DiscoveryManager
         $this->rootPackageFile->removeBindingDescriptor($uuid);
         $this->packageFileStorage->saveRootPackageFile($this->rootPackageFile);
 
-        // Remember binding before removing it
+        // If the binding type does not exist, the binding was not loaded.
+        // Nothing more to do in this case.
+        if (!isset($this->bindings[$uuid->toString()])) {
+            return;
+        }
+
+        // Remember the binding before removing it
         $binding = $this->bindings[$uuid->toString()];
 
         $this->unloadBinding($uuid, $this->rootPackage->getName());
@@ -384,15 +390,21 @@ class DiscoveryManager
 
     private function loadPackages()
     {
+        // First load all the types
         foreach ($this->packages as $package) {
-            $this->loadPackage($package);
+            $this->loadTypesFromPackage($package);
+        }
+
+        // Then the bindings for the loaded types
+        foreach ($this->packages as $package) {
+            $this->loadBindingsFromPackage($package);
         }
     }
 
     /**
      * @param Package $package
      */
-    private function loadPackage(Package $package)
+    private function loadTypesFromPackage(Package $package)
     {
         $packageFile = $package->getPackageFile();
         $packageName = $package->getName();
@@ -400,14 +412,32 @@ class DiscoveryManager
         foreach ($packageFile->getTypeDescriptors() as $typeDescriptor) {
             $this->loadBindingType($typeDescriptor, $packageName);
         }
+    }
+
+    /**
+     * @param Package $package
+     */
+    private function loadBindingsFromPackage(Package $package)
+    {
+        $packageFile = $package->getPackageFile();
+        $packageName = $package->getName();
 
         foreach ($packageFile->getBindingDescriptors() as $bindingDescriptor) {
             $installInfo = $package->getInstallInfo();
             $uuid = $bindingDescriptor->getUuid();
 
-            if ($package instanceof RootPackage || $installInfo->hasEnabledBindingUuid($uuid)) {
-                $this->loadBinding($bindingDescriptor, $packageName);
+            // Bindings for types that have not been loaded are ignored. The
+            // type may have been defined in an optional dependency
+            if (!$this->isBindingTypeEnabled($bindingDescriptor->getTypeName())) {
+                continue;
             }
+
+            // For non-root packages, only enabled bindings are loaded
+            if (!$package instanceof RootPackage && !$installInfo->hasEnabledBindingUuid($uuid)) {
+                continue;
+            }
+
+            $this->loadBinding($bindingDescriptor, $packageName);
         }
     }
 
@@ -455,12 +485,18 @@ class DiscoveryManager
         }
     }
 
+    private function isBindingTypeEnabled($typeName)
+    {
+        return isset($this->packageNamesByType[$typeName]) &&
+            1 === count($this->packageNamesByType[$typeName]);
+    }
+
     /**
      * @param BindingTypeDescriptor $typeDescriptor
      */
     private function defineTypeUnlessDisabled(BindingTypeDescriptor $typeDescriptor)
     {
-        if (1 === count($this->packageNamesByType[$typeDescriptor->getName()])) {
+        if ($this->isBindingTypeEnabled($typeDescriptor->getName())) {
             $this->defineType($typeDescriptor);
         }
     }

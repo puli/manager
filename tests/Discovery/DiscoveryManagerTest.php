@@ -479,6 +479,29 @@ class DiscoveryManagerTest extends ManagerTestCase
         $this->manager->removeBinding($binding->getUuid());
     }
 
+    public function testRemoveBindingWorksIfTypeNotDefined()
+    {
+        $this->initDefaultManager();
+
+        // The type is not defined, thus the binding is not loaded. Removing
+        // still works, however
+        $this->rootPackageFile->addBindingDescriptor($binding = BindingDescriptor::create('/path', 'my/type', array('param' => 'value'), 'xpath'));
+
+        $this->discovery->expects($this->never())
+            ->method('unbind');
+
+        $this->packageFileStorage->expects($this->once())
+            ->method('saveRootPackageFile')
+            ->with($this->rootPackageFile)
+            ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) {
+                $bindings = $rootPackageFile->getBindingDescriptors();
+
+                PHPUnit_Framework_Assert::assertSame(array(), $bindings);
+            }));
+
+        $this->manager->removeBinding($binding->getUuid());
+    }
+
     public function testGetBindings()
     {
         $this->initDefaultManager();
@@ -604,6 +627,22 @@ class DiscoveryManagerTest extends ManagerTestCase
         $this->discovery->expects($this->once())
             ->method('bind')
             ->with('/path', 'my/type', array(), 'glob');
+
+        $this->manager->buildDiscovery();
+    }
+
+    public function testBuildDiscoveryDoesNotAddBindingsForUnknownTypes()
+    {
+        $this->initDefaultManager();
+
+        // The type could be defined in an optional package
+        $this->rootPackageFile->addBindingDescriptor(BindingDescriptor::create('/path', 'my/type'));
+
+        $this->discovery->expects($this->never())
+            ->method('define');
+
+        $this->discovery->expects($this->never())
+            ->method('bind');
 
         $this->manager->buildDiscovery();
     }
