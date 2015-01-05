@@ -498,6 +498,54 @@ class DiscoveryManagerTest extends ManagerTestCase
         $this->assertSame(array($binding2, $binding3), $this->manager->getBindings(array('package1', 'package2')));
     }
 
+    public function testGetBindingsMergesDuplicates()
+    {
+        $this->initDefaultManager();
+
+        $this->rootPackageFile->addBindingDescriptor($binding = BindingDescriptor::create('/path', 'my/type'));
+        $this->packageFile1->addBindingDescriptor($binding);
+
+        $this->assertSame(array($binding), $this->manager->getBindings());
+
+        $this->assertSame(array($binding), $this->manager->getBindings('root'));
+        $this->assertSame(array($binding), $this->manager->getBindings('package1'));
+    }
+
+    public function testFindBindings()
+    {
+        $this->initDefaultManager();
+
+        $binding1 = new BindingDescriptor(
+            Uuid::fromString('f966a2e1-4738-42ac-b007-1ac8798c1877'),
+            '/path1',
+            'my/type'
+        );
+        $binding2 = new BindingDescriptor(
+            Uuid::fromString('ecc5bb18-a4be-483d-9682-3999504b80d5'),
+            '/path2',
+            'my/type'
+        );
+        $binding3 = new BindingDescriptor(
+            Uuid::fromString('ecc0b0b5-67ff-4b01-9836-9aa4d5136af4'),
+            '/path3',
+            'my/type'
+        );
+
+        $this->rootPackageFile->addBindingDescriptor($binding1);
+        $this->packageFile1->addBindingDescriptor($binding2);
+        $this->packageFile2->addBindingDescriptor($binding3);
+
+        $this->assertSame(array($binding1), $this->manager->findBindings('f966a2'));
+        $this->assertSame(array($binding2), $this->manager->findBindings('ecc5bb'));
+        $this->assertSame(array($binding2, $binding3), $this->manager->findBindings('ecc'));
+
+        $this->assertSame(array($binding1), $this->manager->findBindings('f966a2', 'root'));
+        $this->assertSame(array(), $this->manager->findBindings('f966a2', 'package1'));
+        $this->assertSame(array($binding2), $this->manager->findBindings('ecc', 'package1'));
+        $this->assertSame(array($binding3), $this->manager->findBindings('ecc', 'package2'));
+        $this->assertSame(array($binding2, $binding3), $this->manager->findBindings('ecc', array('package1', 'package2')));
+    }
+
     public function testBuildDiscovery()
     {
         $this->initDefaultManager();

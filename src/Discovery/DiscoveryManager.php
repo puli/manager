@@ -304,11 +304,39 @@ class DiscoveryManager
             $packageFile = $this->packages[$packageName]->getPackageFile();
 
             foreach ($packageFile->getBindingDescriptors() as $binding) {
-                $bindings[] = $binding;
+                $bindings[$binding->getUuid()->toString()] = $binding;
             }
         }
 
-        return $bindings;
+        return array_values($bindings);
+    }
+
+    /**
+     * Returns all bindings with the given UUID prefix.
+     *
+     * @param string          $uuidPrefix  The UUID prefix to search.
+     * @param string|string[] $packageName The package name(s) to filter by.
+     *
+     * @return BindingDescriptor[] The bindings.
+     */
+    public function findBindings($uuidPrefix, $packageName = null)
+    {
+        $packageNames = $packageName ? (array) $packageName : $this->packages->getPackageNames();
+        $bindings = array();
+
+        foreach ($packageNames as $packageName) {
+            $packageFile = $this->packages[$packageName]->getPackageFile();
+
+            foreach ($packageFile->getBindingDescriptors() as $binding) {
+                $uuidString = $binding->getUuid()->toString();
+
+                if (0 === strpos($uuidString, $uuidPrefix)) {
+                    $bindings[$uuidString] = $binding;
+                }
+            }
+        }
+
+        return array_values($bindings);
     }
 
     /**
