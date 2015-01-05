@@ -904,6 +904,24 @@ class RepositoryManagerTest extends ManagerTestCase
         $this->manager->buildRepository();
     }
 
+    /**
+     * @expectedException \Puli\RepositoryManager\Repository\RepositoryNotEmptyException
+     */
+    public function testBuildRepositoryFailsIfNotEmpty()
+    {
+        $this->initDefaultManager();
+
+        $this->repo->expects($this->once())
+            ->method('hasChildren')
+            ->with('/')
+            ->willReturn(true);
+
+        $this->repo->expects($this->never())
+            ->method('add');
+
+        $this->manager->buildRepository();
+    }
+
     public function testClearRepository()
     {
         $this->initDefaultManager();

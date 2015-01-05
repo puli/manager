@@ -301,7 +301,7 @@ class RepositoryManager
      * @throws NoDirectoryException If the dump directory exists and is not a
      *                              directory.
      * @throws PackageConflictException If two packages contain conflicting
-     *                                   resource definitions.
+     *                                  resource definitions.
      * @throws ResourceDefinitionException If a resource definition is invalid.
      */
     public function buildRepository()
@@ -315,7 +315,7 @@ class RepositoryManager
         }
 
         if ($this->repo->hasChildren('/')) {
-            // quit
+            throw new RepositoryNotEmptyException('The repository is not empty.');
         }
 
         $this->repoUpdater->clear();
