@@ -25,6 +25,7 @@ use Puli\RepositoryManager\Package\PackageFile\PackageFileStorage;
 use Puli\RepositoryManager\Package\PackageFile\RootPackageFile;
 use Puli\RepositoryManager\Package\RootPackage;
 use Puli\RepositoryManager\Tests\ManagerTestCase;
+use Rhumsaa\Uuid\Uuid;
 use Symfony\Component\Filesystem\Filesystem;
 
 /**
@@ -399,6 +400,82 @@ class DiscoveryManagerTest extends ManagerTestCase
             ->method('saveRootPackageFile');
 
         $this->manager->addBinding('/path', 'my/type', array('param' => 'value'), 'xpath');
+    }
+
+    public function testRemoveBinding()
+    {
+        $this->initDefaultManager();
+
+        $this->rootPackageFile->addBindingDescriptor($binding = BindingDescriptor::create('/path', 'my/type', array('param' => 'value'), 'xpath'));
+        $this->packageFile1->addTypeDescriptor(new BindingTypeDescriptor('my/type'));
+
+        $this->discovery->expects($this->once())
+            ->method('unbind')
+            ->with('/path', 'my/type', array('param' => 'value'), 'xpath');
+
+        $this->packageFileStorage->expects($this->once())
+            ->method('saveRootPackageFile')
+            ->with($this->rootPackageFile)
+            ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) {
+                $bindings = $rootPackageFile->getBindingDescriptors();
+
+                PHPUnit_Framework_Assert::assertSame(array(), $bindings);
+            }));
+
+        $this->manager->removeBinding($binding->getUuid());
+    }
+
+    public function testRemoveBindingIgnoresNonExistingBindings()
+    {
+        $this->initDefaultManager();
+
+        $this->discovery->expects($this->never())
+            ->method('unbind');
+
+        $this->packageFileStorage->expects($this->never())
+            ->method('saveRootPackageFile');
+
+        $this->manager->removeBinding(Uuid::uuid4());
+    }
+
+    public function testRemoveBindingIgnoresBindingsInPackages()
+    {
+        $this->initDefaultManager();
+
+        $this->packageFile1->addBindingDescriptor($binding = BindingDescriptor::create('/path', 'my/type', array('param' => 'value'), 'xpath'));
+        $this->packageFile1->addTypeDescriptor(new BindingTypeDescriptor('my/type'));
+
+        $this->discovery->expects($this->never())
+            ->method('unbind');
+
+        $this->packageFileStorage->expects($this->never())
+            ->method('saveRootPackageFile');
+
+        $this->manager->removeBinding($binding->getUuid());
+    }
+
+    public function testRemoveBindingDoesNotUnbindDuplicatedBinding()
+    {
+        $this->initDefaultManager();
+
+        $this->rootPackageFile->addBindingDescriptor($binding = BindingDescriptor::create('/path', 'my/type', array('param' => 'value'), 'xpath'));
+        $this->packageFile1->addBindingDescriptor($binding);
+        $this->installInfo1->addEnabledBindingUuid($binding->getUuid());
+        $this->packageFile1->addTypeDescriptor(new BindingTypeDescriptor('my/type'));
+
+        $this->discovery->expects($this->never())
+            ->method('unbind');
+
+        $this->packageFileStorage->expects($this->once())
+            ->method('saveRootPackageFile')
+            ->with($this->rootPackageFile)
+            ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) {
+                $bindings = $rootPackageFile->getBindingDescriptors();
+
+                PHPUnit_Framework_Assert::assertSame(array(), $bindings);
+            }));
+
+        $this->manager->removeBinding($binding->getUuid());
     }
 
     public function testGetBindings()

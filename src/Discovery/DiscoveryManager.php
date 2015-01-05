@@ -22,6 +22,7 @@ use Puli\RepositoryManager\Package\Package;
 use Puli\RepositoryManager\Package\PackageFile\PackageFileStorage;
 use Puli\RepositoryManager\Package\PackageFile\RootPackageFile;
 use Puli\RepositoryManager\Package\RootPackage;
+use Rhumsaa\Uuid\Uuid;
 
 /**
  * @since  1.0
@@ -70,14 +71,19 @@ class DiscoveryManager
     private $bindingTypes = array();
 
     /**
+     * @var BindingDescriptor[]
+     */
+    private $bindings = array();
+
+    /**
      * @var bool[][]
      */
     private $packageNamesByType = array();
 
     /**
-     * @var BindingDescriptor[]
+     * @var bool[][]
      */
-    private $bindings = array();
+    private $packageNamesByBinding = array();
 
     /**
      * Creates a tag manager.
@@ -140,7 +146,7 @@ class DiscoveryManager
 
         $this->loadBindingType($bindingType, $this->rootPackage->getName());
 
-        $this->discovery->define($bindingType->toBindingType());
+        $this->defineType($bindingType);
     }
 
     /**
@@ -175,7 +181,7 @@ class DiscoveryManager
             return;
         }
 
-        $this->discovery->undefine($typeName);
+        $this->undefineType($typeName);
     }
 
     /**
@@ -239,9 +245,45 @@ class DiscoveryManager
             return;
         }
 
-        $this->loadBinding($binding);
+        $this->loadBinding($binding, $this->rootPackage->getName());
 
         $this->discovery->bind($query, $typeName, $parameters, $language);
+    }
+
+    /**
+     * Removes a binding.
+     *
+     * @param Uuid $uuid The UUID of the binding.
+     */
+    public function removeBinding(Uuid $uuid)
+    {
+        if (!$this->discovery) {
+            $this->loadDiscovery();
+        }
+
+        if (!$this->bindingTypes) {
+            $this->loadPackages();
+        }
+
+        if (!$this->rootPackageFile->hasBindingDescriptor($uuid)) {
+            return;
+        }
+
+        $this->rootPackageFile->removeBindingDescriptor($uuid);
+        $this->packageFileStorage->saveRootPackageFile($this->rootPackageFile);
+
+        // Remember binding before removing it
+        $binding = $this->bindings[$uuid->toString()];
+
+        $this->unloadBinding($uuid, $this->rootPackage->getName());
+
+        // If the binding is still loaded, that means it is also defined by an
+        // installed package
+        if (isset($this->bindings[$uuid->toString()])) {
+            return;
+        }
+
+        $this->unbind($binding);
     }
 
     /**
@@ -287,12 +329,7 @@ class DiscoveryManager
         }
 
         foreach ($this->bindings as $bindingDescriptor) {
-            $this->discovery->bind(
-                $bindingDescriptor->getQuery(),
-                $bindingDescriptor->getTypeName(),
-                $bindingDescriptor->getParameters(),
-                $bindingDescriptor->getLanguage()
-            );
+            $this->bind($bindingDescriptor);
         }
     }
 
@@ -325,7 +362,7 @@ class DiscoveryManager
             $uuid = $bindingDescriptor->getUuid();
 
             if ($package instanceof RootPackage || $installInfo->hasEnabledBindingUuid($uuid)) {
-                $this->bindings[$uuid->toString()] = $bindingDescriptor;
+                $this->loadBinding($bindingDescriptor, $packageName);
             }
         }
     }
@@ -380,15 +417,77 @@ class DiscoveryManager
     private function defineTypeUnlessDisabled(BindingTypeDescriptor $typeDescriptor)
     {
         if (1 === count($this->packageNamesByType[$typeDescriptor->getName()])) {
-            $this->discovery->define($typeDescriptor->toBindingType());
+            $this->defineType($typeDescriptor);
         }
     }
 
     /**
-     * @param BindingDescriptor $binding
+     * @param BindingTypeDescriptor $bindingType
      */
-    private function loadBinding(BindingDescriptor $binding)
+    private function defineType(BindingTypeDescriptor $bindingType)
     {
-        $this->bindings[$binding->getUuid()->toString()] = $binding;
+        $this->discovery->define($bindingType->toBindingType());
+    }
+
+    /**
+     * @param $typeName
+     */
+    private function undefineType($typeName)
+    {
+        $this->discovery->undefine($typeName);
+    }
+
+    /**
+     * @param BindingDescriptor $binding
+     * @param                   $packageName
+     */
+    private function loadBinding(BindingDescriptor $binding, $packageName)
+    {
+        $uuidString = $binding->getUuid()->toString();
+
+        if (!isset($this->packageNamesByBinding[$uuidString])) {
+            $this->packageNamesByBinding[$uuidString] = array();
+        }
+
+        $this->bindings[$uuidString] = $binding;
+        $this->packageNamesByBinding[$uuidString][$packageName] = true;
+    }
+
+    private function unloadBinding(Uuid $uuid, $packageName)
+    {
+        $uuidString = $uuid->toString();
+
+        unset($this->packageNamesByBinding[$uuidString][$packageName]);
+
+        if (0 === count($this->packageNamesByBinding[$uuidString])) {
+            unset($this->bindings[$uuidString]);
+            unset($this->packageNamesByBinding[$uuidString]);
+        }
+    }
+
+    /**
+     * @param $binding
+     */
+    private function bind(BindingDescriptor $binding)
+    {
+        $this->discovery->bind(
+            $binding->getQuery(),
+            $binding->getTypeName(),
+            $binding->getParameters(),
+            $binding->getLanguage()
+        );
+    }
+
+    /**
+     * @param $binding
+     */
+    private function unbind(BindingDescriptor $binding)
+    {
+        $this->discovery->unbind(
+            $binding->getQuery(),
+            $binding->getTypeName(),
+            $binding->getParameters(),
+            $binding->getLanguage()
+        );
     }
 }
