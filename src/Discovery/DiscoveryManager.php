@@ -16,8 +16,10 @@ use Puli\Discovery\Api\EditableDiscovery;
 use Puli\Discovery\Api\NoSuchTypeException;
 use Puli\RepositoryManager\Environment\ProjectEnvironment;
 use Puli\RepositoryManager\Package\Collection\PackageCollection;
+use Puli\RepositoryManager\Package\Package;
 use Puli\RepositoryManager\Package\PackageFile\PackageFileStorage;
 use Puli\RepositoryManager\Package\PackageFile\RootPackageFile;
+use Puli\RepositoryManager\Package\RootPackage;
 
 /**
  * @since  1.0
@@ -49,6 +51,16 @@ class DiscoveryManager
      * @var RootPackageFile
      */
     private $rootPackageFile;
+
+    /**
+     * @var BindingTypeDescriptor[]
+     */
+    private $bindingTypes = array();
+
+    /**
+     * @var BindingDescriptor[]
+     */
+    private $bindings = array();
 
     /**
      * Creates a tag manager.
@@ -88,14 +100,18 @@ class DiscoveryManager
             $this->loadDiscovery();
         }
 
-        if ($this->discovery->isDefined($bindingType->getName())) {
+        if (!$this->bindingTypes) {
+            $this->loadPackages();
+        }
+
+        if (isset($this->bindingTypes[$bindingType->getName()])) {
             throw DuplicateTypeException::forTypeName($bindingType->getName());
         }
 
-        // TODO should we check the package files too?
-
         $this->rootPackageFile->addTypeDescriptor($bindingType);
         $this->packageFileStorage->saveRootPackageFile($this->rootPackageFile);
+
+        $this->bindingTypes[$bindingType->getName()] = $bindingType;
 
         $this->discovery->define($bindingType->toBindingType());
     }
@@ -139,17 +155,25 @@ class DiscoveryManager
             $this->loadDiscovery();
         }
 
-        if (!$this->discovery->isDefined($typeName)) {
+        if (!$this->bindingTypes) {
+            $this->loadPackages();
+        }
+
+        if (!isset($this->bindingTypes[$typeName])) {
             throw NoSuchTypeException::forTypeName($typeName);
         }
 
         $binding = BindingDescriptor::create($query, $typeName, $parameters, $language);
+        $uuid = $binding->getUuid();
 
         $this->rootPackageFile->addBindingDescriptor($binding);
-
         $this->packageFileStorage->saveRootPackageFile($this->rootPackageFile);
 
-        $this->discovery->bind($query, $typeName, $parameters, $language);
+        if (!isset($this->bindings[$uuid->toString()])) {
+            $this->bindings[$uuid->toString()] = $binding;
+
+            $this->discovery->bind($query, $typeName, $parameters, $language);
+        }
     }
 
     /**
@@ -177,8 +201,63 @@ class DiscoveryManager
         return $bindings;
     }
 
+    /**
+     * Builds the resource discovery.
+     */
+    public function buildDiscovery()
+    {
+        if (!$this->discovery) {
+            $this->loadDiscovery();
+        }
+
+        if (!$this->bindingTypes) {
+            $this->loadPackages();
+        }
+
+        foreach ($this->bindingTypes as $typeDescriptor) {
+            $this->discovery->define($typeDescriptor->toBindingType());
+        }
+
+        foreach ($this->bindings as $bindingDescriptor) {
+            $this->discovery->bind(
+                $bindingDescriptor->getQuery(),
+                $bindingDescriptor->getTypeName(),
+                $bindingDescriptor->getParameters(),
+                $bindingDescriptor->getLanguage()
+            );
+        }
+    }
+
     private function loadDiscovery()
     {
         $this->discovery = $this->environment->getDiscovery();
+    }
+
+    private function loadPackages()
+    {
+        foreach ($this->packages as $package) {
+            $this->loadPackage($package);
+        }
+    }
+
+    /**
+     * @param Package $package
+     */
+    private function loadPackage(Package $package)
+    {
+        $packageFile = $package->getPackageFile();
+
+        foreach ($packageFile->getTypeDescriptors() as $typeDescriptor) {
+            $this->bindingTypes[$typeDescriptor->getName()] = $typeDescriptor;
+        }
+
+        foreach ($packageFile->getBindingDescriptors() as $bindingDescriptor) {
+            $installInfo = $package->getInstallInfo();
+            $uuid = $bindingDescriptor->getUuid();
+
+            if ($package instanceof RootPackage || $installInfo->hasEnabledBindingUuid($uuid)) {
+                $this->bindings[$uuid->toString()] = $bindingDescriptor;
+            }
+        }
     }
 }
