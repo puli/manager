@@ -11,6 +11,8 @@
 
 namespace Puli\RepositoryManager\Discovery;
 
+use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
 use Puli\Discovery\Api\DuplicateTypeException;
 use Puli\Discovery\Api\EditableDiscovery;
 use Puli\Discovery\Api\NoSuchTypeException;
@@ -28,9 +30,19 @@ use Puli\RepositoryManager\Package\RootPackage;
 class DiscoveryManager
 {
     /**
+     * Marks disabled binding types.
+     */
+    const TYPE_DISABLED = -1;
+
+    /**
      * @var ProjectEnvironment
      */
     private $environment;
+
+    /**
+     * @var LoggerInterface
+     */
+    private $logger;
 
     /**
      * @var EditableDiscovery
@@ -48,6 +60,11 @@ class DiscoveryManager
     private $packageFileStorage;
 
     /**
+     * @var RootPackage
+     */
+    private $rootPackage;
+
+    /**
      * @var RootPackageFile
      */
     private $rootPackageFile;
@@ -56,6 +73,11 @@ class DiscoveryManager
      * @var BindingTypeDescriptor[]
      */
     private $bindingTypes = array();
+
+    /**
+     * @var string[]
+     */
+    private $packageNameByType = array();
 
     /**
      * @var BindingDescriptor[]
@@ -68,13 +90,21 @@ class DiscoveryManager
      * @param ProjectEnvironment $environment
      * @param PackageCollection  $packages
      * @param PackageFileStorage $packageFileStorage
+     * @param LoggerInterface    $logger
      */
-    public function __construct(ProjectEnvironment $environment, PackageCollection $packages, PackageFileStorage $packageFileStorage)
+    public function __construct(
+        ProjectEnvironment $environment,
+        PackageCollection $packages,
+        PackageFileStorage $packageFileStorage,
+        LoggerInterface $logger = null
+    )
     {
         $this->environment = $environment;
         $this->packages = $packages;
         $this->packageFileStorage = $packageFileStorage;
+        $this->rootPackage = $packages->getRootPackage();
         $this->rootPackageFile = $environment->getRootPackageFile();
+        $this->logger = $logger ?: new NullLogger();
     }
 
     /**
@@ -104,16 +134,45 @@ class DiscoveryManager
             $this->loadPackages();
         }
 
-        if (isset($this->bindingTypes[$bindingType->getName()])) {
-            throw DuplicateTypeException::forTypeName($bindingType->getName());
+        $typeName = $bindingType->getName();
+
+        if (isset($this->bindingTypes[$typeName])) {
+            throw DuplicateTypeException::forTypeName($typeName);
         }
 
         $this->rootPackageFile->addTypeDescriptor($bindingType);
         $this->packageFileStorage->saveRootPackageFile($this->rootPackageFile);
 
-        $this->bindingTypes[$bindingType->getName()] = $bindingType;
+        $this->loadBindingType($bindingType, $this->rootPackage->getName());
 
         $this->discovery->define($bindingType->toBindingType());
+    }
+
+    /**
+     * Removes a binding type.
+     *
+     * @param string $typeName The name of the type to remove.
+     */
+    public function removeBindingType($typeName)
+    {
+        if (!$this->discovery) {
+            $this->loadDiscovery();
+        }
+
+        if (!$this->bindingTypes) {
+            $this->loadPackages();
+        }
+
+        if (!$this->rootPackageFile->hasTypeDescriptor($typeName)) {
+            return;
+        }
+
+        $this->rootPackageFile->removeTypeDescriptor($typeName);
+        $this->packageFileStorage->saveRootPackageFile($this->rootPackageFile);
+
+        $this->unloadBindingType($typeName);
+
+        $this->discovery->undefine($typeName);
     }
 
     /**
@@ -215,7 +274,9 @@ class DiscoveryManager
         }
 
         foreach ($this->bindingTypes as $typeDescriptor) {
-            $this->discovery->define($typeDescriptor->toBindingType());
+            if (self::TYPE_DISABLED !== $typeDescriptor) {
+                $this->discovery->define($typeDescriptor->toBindingType());
+            }
         }
 
         foreach ($this->bindings as $bindingDescriptor) {
@@ -246,9 +307,10 @@ class DiscoveryManager
     private function loadPackage(Package $package)
     {
         $packageFile = $package->getPackageFile();
+        $packageName = $package->getName();
 
         foreach ($packageFile->getTypeDescriptors() as $typeDescriptor) {
-            $this->bindingTypes[$typeDescriptor->getName()] = $typeDescriptor;
+            $this->loadBindingType($typeDescriptor, $packageName);
         }
 
         foreach ($packageFile->getBindingDescriptors() as $bindingDescriptor) {
@@ -259,5 +321,40 @@ class DiscoveryManager
                 $this->bindings[$uuid->toString()] = $bindingDescriptor;
             }
         }
+    }
+
+    /**
+     * @param BindingTypeDescriptor $bindingType
+     * @param                       $packageName
+     */
+    private function loadBindingType(BindingTypeDescriptor $bindingType, $packageName)
+    {
+        $typeName = $bindingType->getName();
+
+        if (isset($this->bindingTypes[$typeName])) {
+            $this->logger->warning(sprintf(
+                'The packages "%s" and "%s" contain type definitions for '.
+                'the same type "%s". The type has been disabled.',
+                $this->packageNameByType[$typeName],
+                $packageName,
+                $typeName
+            ));
+
+            $this->bindingTypes[$typeName] = self::TYPE_DISABLED;
+
+            return;
+        }
+
+        $this->bindingTypes[$typeName] = $bindingType;
+        $this->packageNameByType[$typeName] = $packageName;
+    }
+
+    /**
+     * @param $typeName
+     */
+    private function unloadBindingType($typeName)
+    {
+        unset($this->bindingTypes[$typeName]);
+        unset($this->packageNameByType[$typeName]);
     }
 }

@@ -18,7 +18,8 @@
         "symfony/event-dispatcher": "~2.3",
         "symfony/filesystem": "~2.3",
         "beberlei/assert": "~2.3",
-        "rhumsaa/uuid": "~2.8"
+        "rhumsaa/uuid": "~2.8",
+        "psr/log": "~1.0"
     },
     "require-dev": {
         "fire015/flintstone": "~1.8"

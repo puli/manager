@@ -13,6 +13,7 @@ namespace Puli\RepositoryManager\Tests\Discovery;
 
 use PHPUnit_Framework_Assert;
 use PHPUnit_Framework_MockObject_MockObject;
+use Psr\Log\LoggerInterface;
 use Puli\RepositoryManager\Discovery\BindingDescriptor;
 use Puli\RepositoryManager\Discovery\BindingTypeDescriptor;
 use Puli\RepositoryManager\Discovery\DiscoveryManager;
@@ -93,6 +94,11 @@ class DiscoveryManagerTest extends ManagerTestCase
     private $packageFileStorage;
 
     /**
+     * @var PHPUnit_Framework_MockObject_MockObject|LoggerInterface
+     */
+    private $logger;
+
+    /**
      * @var DiscoveryManager
      */
     private $manager;
@@ -117,6 +123,8 @@ class DiscoveryManagerTest extends ManagerTestCase
         $this->installInfo3 = new InstallInfo('package3', $this->packageDir3);
 
         $this->packages = new PackageCollection();
+
+        $this->logger = $this->getMock('Psr\Log\LoggerInterface');
 
         $this->packageFileStorage = $this->getMockBuilder('Puli\RepositoryManager\Package\PackageFile\PackageFileStorage')
             ->disableOriginalConstructor()
@@ -171,6 +179,56 @@ class DiscoveryManagerTest extends ManagerTestCase
             ->method('saveRootPackageFile');
 
         $this->manager->addBindingType($bindingType);
+    }
+
+    public function testRemoveBindingType()
+    {
+        $this->initDefaultManager();
+
+        $this->rootPackageFile->addTypeDescriptor(new BindingTypeDescriptor('my/type'));
+
+        $this->discovery->expects($this->once())
+            ->method('undefine')
+            ->with('my/type');
+
+        $this->packageFileStorage->expects($this->once())
+            ->method('saveRootPackageFile')
+            ->with($this->rootPackageFile)
+            ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) {
+                $types = $rootPackageFile->getTypeDescriptors();
+
+                PHPUnit_Framework_Assert::assertSame(array(), $types);
+            }));
+
+        $this->manager->removeBindingType('my/type');
+    }
+
+    public function testRemoveBindingTypeIgnoresNonExistingTypes()
+    {
+        $this->initDefaultManager();
+
+        $this->discovery->expects($this->never())
+            ->method('undefine');
+
+        $this->packageFileStorage->expects($this->never())
+            ->method('saveRootPackageFile');
+
+        $this->manager->removeBindingType('my/type');
+    }
+
+    public function testRemoveBindingTypeIgnoresTypesInInstalledPackages()
+    {
+        $this->initDefaultManager();
+
+        $this->packageFile1->addTypeDescriptor(new BindingTypeDescriptor('my/type'));
+
+        $this->discovery->expects($this->never())
+            ->method('undefine');
+
+        $this->packageFileStorage->expects($this->never())
+            ->method('saveRootPackageFile');
+
+        $this->manager->removeBindingType('my/type');
     }
 
     public function testGetBindingTypes()
@@ -343,6 +401,22 @@ class DiscoveryManagerTest extends ManagerTestCase
         $this->manager->buildDiscovery();
     }
 
+    public function testBuildDiscoveryEmitsWarningIfDuplicateType()
+    {
+        $this->initDefaultManager();
+
+        $this->packageFile1->addTypeDescriptor(new BindingTypeDescriptor('my/type'));
+        $this->packageFile2->addTypeDescriptor(new BindingTypeDescriptor('my/type'));
+
+        $this->discovery->expects($this->never())
+            ->method('define');
+
+        $this->logger->expects($this->once())
+            ->method('warning');
+
+        $this->manager->buildDiscovery();
+    }
+
     private function initDefaultManager()
     {
         $this->packages->add(new RootPackage($this->rootPackageFile, $this->rootDir));
@@ -350,6 +424,6 @@ class DiscoveryManagerTest extends ManagerTestCase
         $this->packages->add(new Package($this->packageFile2, $this->packageDir2, $this->installInfo2));
         $this->packages->add(new Package($this->packageFile3, $this->packageDir3, $this->installInfo3));
 
-        $this->manager = new DiscoveryManager($this->environment, $this->packages, $this->packageFileStorage);
+        $this->manager = new DiscoveryManager($this->environment, $this->packages, $this->packageFileStorage, $this->logger);
     }
 }
