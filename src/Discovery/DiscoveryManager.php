@@ -181,6 +181,7 @@ class DiscoveryManager
         // If the type is still loaded, that means it is also defined by an
         // installed package
         if (isset($this->bindingTypes[$typeName])) {
+            // TODO also add bindings if not duplicate
             $this->defineTypeUnlessDuplicate($this->bindingTypes[$typeName]);
 
             return;
@@ -237,18 +238,20 @@ class DiscoveryManager
         }
 
         $binding = BindingDescriptor::create($query, $typeName, $parameters, $language);
-        
+
         if ($this->rootPackageFile->hasBindingDescriptor($binding->getUuid())) {
             return;
         }
 
-        $this->rootPackageFile->addBindingDescriptor($binding);
-        $this->packageFileStorage->saveRootPackageFile($this->rootPackageFile);
-
         $state = $this->getBindingState($binding, $this->rootPackage);
 
+        // First check that the binding can actually be loaded
         $this->loadBinding($binding, $this->rootPackage->getName(), $state);
         $this->bindUnlessDuplicate($binding);
+
+        // If no error was detected, persist changes to the configuration
+        $this->rootPackageFile->addBindingDescriptor($binding);
+        $this->packageFileStorage->saveRootPackageFile($this->rootPackageFile);
     }
 
     /**

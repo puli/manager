@@ -14,8 +14,11 @@ namespace Puli\RepositoryManager\Tests\Discovery;
 use PHPUnit_Framework_Assert;
 use PHPUnit_Framework_MockObject_MockObject;
 use Psr\Log\LoggerInterface;
+use Puli\Discovery\Api\BindingException;
 use Puli\Discovery\Api\BindingType;
+use Puli\Discovery\Api\MissingParameterException;
 use Puli\RepositoryManager\Discovery\BindingDescriptor;
+use Puli\RepositoryManager\Discovery\BindingParameterDescriptor;
 use Puli\RepositoryManager\Discovery\BindingState;
 use Puli\RepositoryManager\Discovery\BindingTypeDescriptor;
 use Puli\RepositoryManager\Discovery\DiscoveryManager;
@@ -402,6 +405,46 @@ class DiscoveryManagerTest extends ManagerTestCase
             ->method('saveRootPackageFile');
 
         $this->manager->addBinding('/path', 'my/type', array('param' => 'value'), 'xpath');
+    }
+
+    /**
+     * @expectedException \Puli\Discovery\Api\MissingParameterException
+     */
+    public function testAddBindingFailsIfMissingParameters()
+    {
+        $this->initDefaultManager();
+
+        $this->packageFile1->addTypeDescriptor(new BindingTypeDescriptor('my/type', null, array(
+            new BindingParameterDescriptor('param', true),
+        )));
+
+        $this->discovery->expects($this->once())
+            ->method('bind')
+            ->willThrowException(new MissingParameterException());
+
+        $this->packageFileStorage->expects($this->never())
+            ->method('saveRootPackageFile');
+
+        $this->manager->addBinding('/path', 'my/type');
+    }
+
+    /**
+     * @expectedException \Puli\Discovery\Api\BindingException
+     */
+    public function testAddBindingFailsIfNoResourcesFound()
+    {
+        $this->initDefaultManager();
+
+        $this->packageFile1->addTypeDescriptor(new BindingTypeDescriptor('my/type'));
+
+        $this->discovery->expects($this->once())
+            ->method('bind')
+            ->willThrowException(new BindingException());
+
+        $this->packageFileStorage->expects($this->never())
+            ->method('saveRootPackageFile');
+
+        $this->manager->addBinding('/path', 'my/type');
     }
 
     public function testRemoveBinding()
