@@ -14,6 +14,8 @@ namespace Puli\RepositoryManager\Discovery;
 use InvalidArgumentException;
 use Puli\Discovery\Api\NoSuchParameterException;
 use Puli\RepositoryManager\Assert\Assertion;
+use Puli\RepositoryManager\Discovery\Store\BindingTypeStore;
+use Puli\RepositoryManager\Package\Package;
 use Puli\RepositoryManager\Util\DistinguishedName;
 use Rhumsaa\Uuid\Uuid;
 
@@ -235,6 +237,17 @@ class BindingDescriptor
         Assertion::choice($state, BindingState::all(), 'The value "%s" is not a valid binding state.');
 
         $this->state = $state;
+    }
+
+    /**
+     * Refreshes the state of the binding.
+     *
+     * @param Package          $package   The package that contains the binding.
+     * @param BindingTypeStore $typeStore The store with the defined types.
+     */
+    public function refreshState(Package $package, BindingTypeStore $typeStore)
+    {
+        $this->state = BindingState::detect($this, $package, $typeStore);
     }
 
     /**

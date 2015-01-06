@@ -11,6 +11,10 @@
 
 namespace Puli\RepositoryManager\Discovery;
 
+use Puli\RepositoryManager\Discovery\Store\BindingTypeStore;
+use Puli\RepositoryManager\Package\Package;
+use Puli\RepositoryManager\Package\RootPackage;
+
 /**
  * Contains constants representing the state of a binding.
  *
@@ -64,6 +68,42 @@ final class BindingState
             self::HELD_BACK,
             self::IGNORED
         );
+    }
+
+    /**
+     * Detects the binding state of a binding.
+     *
+     * @param BindingDescriptor $bindingDescriptor The binding.
+     * @param Package           $package           The package that contains the
+     *                                             binding.
+     * @param BindingTypeStore  $typeStore         The store with the defined
+     *                                             types.
+     *
+     * @return int The binding state.
+     */
+    public static function detect(BindingDescriptor $bindingDescriptor, Package $package, BindingTypeStore $typeStore)
+    {
+        $installInfo = $package->getInstallInfo();
+        $uuid = $bindingDescriptor->getUuid();
+        $typeName = $bindingDescriptor->getTypeName();
+
+        if (!$typeStore->isDefined($typeName)) {
+            return BindingState::HELD_BACK;
+        }
+
+        if ($typeStore->isDuplicate($typeName)) {
+            return BindingState::IGNORED;
+        }
+
+        if (!$package instanceof RootPackage && $installInfo->hasDisabledBindingUuid($uuid)) {
+            return BindingState::DISABLED;
+        }
+
+        if (!$package instanceof RootPackage && !$installInfo->hasEnabledBindingUuid($uuid)) {
+            return BindingState::UNDECIDED;
+        }
+
+        return BindingState::ENABLED;
     }
 
     /**
