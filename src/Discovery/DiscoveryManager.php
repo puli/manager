@@ -141,13 +141,22 @@ class DiscoveryManager
             $this->loadPackages();
         }
 
-        // First check that the type can be added without errors
-        $this->loadBindingType($bindingType, $this->rootPackage->getName());
-        $this->defineType($bindingType);
+        $this->loadBindingType($bindingType, $this->rootPackage);
 
-        // Then save the configuration
-        $this->rootPackageFile->addTypeDescriptor($bindingType);
-        $this->packageFileStorage->saveRootPackageFile($this->rootPackageFile);
+        try {
+            // First check that the type can be added without errors
+            $this->defineType($bindingType);
+
+            // Then save the configuration
+            $this->rootPackageFile->addTypeDescriptor($bindingType);
+            $this->packageFileStorage->saveRootPackageFile($this->rootPackageFile);
+        } catch (Exception $e) {
+            // Clean up
+            $this->unloadBindingType($bindingType->getName(), $this->rootPackage);
+            $this->undefineType($bindingType->getName());
+
+            throw $e;
+        }
 
         // Add bindings that have been held back until now
         $this->reloadBindingsByType($bindingType->getName(), BindingState::HELD_BACK);
@@ -172,10 +181,12 @@ class DiscoveryManager
             return;
         }
 
+        // First remove from the configuration. If all else fails, the
+        // discovery can be rebuilt completely with the deletion applied.
         $this->rootPackageFile->removeTypeDescriptor($typeName);
         $this->packageFileStorage->saveRootPackageFile($this->rootPackageFile);
 
-        $this->unloadBindingType($typeName, $this->rootPackage->getName());
+        $this->unloadBindingType($typeName, $this->rootPackage);
 
         if (!$this->isBindingTypeLoaded($typeName)) {
             $this->undefineType($typeName);
@@ -414,10 +425,8 @@ class DiscoveryManager
      */
     private function loadTypesFromPackage(Package $package)
     {
-        $packageName = $package->getName();
-
         foreach ($package->getPackageFile()->getTypeDescriptors() as $typeDescriptor) {
-            $this->loadBindingType($typeDescriptor, $packageName);
+            $this->loadBindingType($typeDescriptor, $package);
         }
     }
 
@@ -435,8 +444,9 @@ class DiscoveryManager
      * @param BindingTypeDescriptor $bindingType
      * @param                       $packageName
      */
-    private function loadBindingType(BindingTypeDescriptor $bindingType, $packageName)
+    private function loadBindingType(BindingTypeDescriptor $bindingType, Package $package)
     {
+        $packageName = $package->getName();
         $typeName = $bindingType->getName();
 
         if (isset($this->bindingTypes[$typeName])) {
@@ -463,8 +473,10 @@ class DiscoveryManager
      * @param $typeName
      * @param $packageName
      */
-    private function unloadBindingType($typeName, $packageName)
+    private function unloadBindingType($typeName, Package $package)
     {
+        $packageName = $package->getName();
+
         unset($this->bindingTypeRefs[$typeName][$packageName]);
 
         // If this was the only package referencing the type, remove it

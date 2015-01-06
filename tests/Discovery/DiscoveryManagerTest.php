@@ -249,6 +249,32 @@ class DiscoveryManagerTest extends ManagerTestCase
         $this->manager->addBindingType($bindingType);
     }
 
+    /**
+     * @expectedException \Exception
+     * @expectedExceptionMessage Some exception
+     */
+    public function testAddBindingTypeUndefinesTypeIfSavingFails()
+    {
+        $this->initDefaultManager();
+
+        $bindingType = new BindingTypeDescriptor('my/type');
+
+        $this->discovery->expects($this->once())
+            ->method('define')
+            ->with($bindingType->toBindingType());
+
+        $this->discovery->expects($this->once())
+            ->method('undefine')
+            ->with('my/type');
+
+        $this->packageFileStorage->expects($this->once())
+            ->method('saveRootPackageFile')
+            ->with($this->rootPackageFile)
+            ->willThrowException(new Exception('Some exception'));
+
+        $this->manager->addBindingType($bindingType);
+    }
+
     public function testRemoveBindingType()
     {
         $this->initDefaultManager();
