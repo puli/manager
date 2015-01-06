@@ -20,6 +20,11 @@ namespace Puli\RepositoryManager\Discovery;
 final class BindingState
 {
     /**
+     * State: The binding is not loaded.
+     */
+    const UNLOADED = 0;
+
+    /**
      * State: The binding is enabled.
      */
     const ENABLED = 1;
@@ -52,6 +57,7 @@ final class BindingState
     public static function all()
     {
         return array(
+            self::UNLOADED,
             self::ENABLED,
             self::DISABLED,
             self::UNDECIDED,

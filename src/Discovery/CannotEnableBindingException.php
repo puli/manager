@@ -28,17 +28,19 @@ class CannotEnableBindingException extends RuntimeException
      *
      * @param Uuid      $uuid        The UUID.
      * @param string    $packageName The name of the package.
+     * @param string    $reason      The reason why the binding could not be enabled.
      * @param int       $code        The exception code.
      * @param Exception $cause       The exception that caused this exception.
      *
      * @return static The created exception.
      */
-    public static function forUuid(Uuid $uuid, $packageName, $code = 0, Exception $cause = null)
+    public static function forUuid(Uuid $uuid, $packageName, $reason = '', $code = 0, Exception $cause = null)
     {
         return new static(sprintf(
-            'The binding with UUID "%s" in package "%s" cannot be enabled.',
+            'The binding with UUID "%s" in package "%s" cannot be enabled%s',
             $uuid->toString(),
-            $packageName
+            $packageName,
+            $reason ? ': '.$reason : '.'
         ), $code, $cause);
     }
 }

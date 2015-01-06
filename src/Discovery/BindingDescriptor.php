@@ -52,6 +52,11 @@ class BindingDescriptor
     private $parameters;
 
     /**
+     * @var int
+     */
+    private $state = BindingState::UNLOADED;
+
+    /**
      * Creates a new binding descriptor with a generated UUID.
      *
      * The UUID is generated based on the given parameters.
@@ -208,5 +213,99 @@ class BindingDescriptor
     public function hasParameter($name)
     {
         return isset($this->parameters[$name]);
+    }
+
+    /**
+     * Returns the state of the binding.
+     *
+     * @return int One of the {@link BindingState} constants.
+     */
+    public function getState()
+    {
+        return $this->state;
+    }
+
+    /**
+     * Sets the state of the binding.
+     *
+     * @param int $state One of the {@link BindingState} constants.
+     */
+    public function setState($state)
+    {
+        Assertion::choice($state, BindingState::all(), 'The value "%s" is not a valid binding state.');
+
+        $this->state = $state;
+    }
+
+    /**
+     * Returns whether the binding is not loaded.
+     *
+     * @return bool Returns `true` if the state is {@link BindingState::UNLOADED}.
+     *
+     * @see BindingState::UNLOADED
+     */
+    public function isUnloaded()
+    {
+        return BindingState::UNLOADED === $this->state;
+    }
+
+    /**
+     * Returns whether the binding is enabled.
+     *
+     * @return bool Returns `true` if the state is {@link BindingState::ENABLED}.
+     *
+     * @see BindingState::ENABLED
+     */
+    public function isEnabled()
+    {
+        return BindingState::ENABLED === $this->state;
+    }
+
+    /**
+     * Returns whether the binding is disabled.
+     *
+     * @return bool Returns `true` if the state is {@link BindingState::DISABLED}.
+     *
+     * @see BindingState::DISABLED
+     */
+    public function isDisabled()
+    {
+        return BindingState::DISABLED === $this->state;
+    }
+
+    /**
+     * Returns whether the binding is neither enabled nor disabled.
+     *
+     * @return bool Returns `true` if the state is {@link BindingState::UNDECIDED}.
+     *
+     * @see BindingState::UNDECIDED
+     */
+    public function isUndecided()
+    {
+        return BindingState::UNDECIDED === $this->state;
+    }
+
+    /**
+     * Returns whether the binding is held back.
+     *
+     * @return bool Returns `true` if the state is {@link BindingState::HELD_BACK}.
+     *
+     * @see BindingState::HELD_BACK
+     */
+    public function isHeldBack()
+    {
+        return BindingState::HELD_BACK === $this->state;
+    }
+
+    /**
+     * Returns whether the binding is ignored.
+     *
+     * @return bool Returns `true` if the state is {@link BindingState::IGNORED}.
+     *
+     * @see BindingState::IGNORED
+     */
+    public function isIgnored()
+    {
+        return BindingState::IGNORED === $this->state;
     }
 }
