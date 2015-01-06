@@ -12,8 +12,10 @@
 namespace Puli\RepositoryManager\Tests\Package\PackageFile;
 
 use PHPUnit_Framework_TestCase;
+use Puli\RepositoryManager\Discovery\BindingDescriptor;
 use Puli\RepositoryManager\Package\PackageFile\PackageFile;
 use Puli\RepositoryManager\Repository\ResourceMapping;
+use Rhumsaa\Uuid\Uuid;
 
 /**
  * @since  1.0
@@ -222,5 +224,44 @@ class PackageFileTest extends PHPUnit_Framework_TestCase
         $packageFile->addOverriddenPackage('package1');
 
         $this->assertSame(array('package1'), $packageFile->getOverriddenPackages());
+    }
+
+    public function testAddBindingDescriptor()
+    {
+        $packageFile = new PackageFile();
+        $packageFile->addBindingDescriptor($binding = BindingDescriptor::create('/path', 'my/type'));
+
+        $this->assertSame($binding, $packageFile->getBindingDescriptor($binding->getUuid()));
+        $this->assertSame(array($binding), $packageFile->getBindingDescriptors());
+    }
+
+    public function testRemoveBindingDescriptor()
+    {
+        $packageFile = new PackageFile();
+        $packageFile->addBindingDescriptor($binding1 = BindingDescriptor::create('/path1', 'my/type'));
+        $packageFile->addBindingDescriptor($binding2 = BindingDescriptor::create('/path2', 'my/type'));
+        $packageFile->removeBindingDescriptor($binding1->getUuid());
+
+        $this->assertSame(array($binding2), $packageFile->getBindingDescriptors());
+    }
+
+    public function testHasBindingDescriptor()
+    {
+        $packageFile = new PackageFile();
+        $binding = BindingDescriptor::create('/path', 'my/type');
+
+        $this->assertFalse($packageFile->hasBindingDescriptor($binding->getUuid()));
+        $packageFile->addBindingDescriptor($binding);
+        $this->assertTrue($packageFile->hasBindingDescriptor($binding->getUuid()));
+    }
+
+    /**
+     * @expectedException \Puli\RepositoryManager\Discovery\NoSuchBindingException
+     * @expectedExceptionMessage 8546da2c-dfec-48be-8cd3-93798c41b72f
+     */
+    public function testGetBindingDescriptorFailsIfUnknownUuid()
+    {
+        $packageFile = new PackageFile();
+        $packageFile->getBindingDescriptor(Uuid::fromString('8546da2c-dfec-48be-8cd3-93798c41b72f'));
     }
 }

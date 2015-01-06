@@ -16,7 +16,6 @@ use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Puli\Discovery\Api\DuplicateTypeException;
 use Puli\Discovery\Api\EditableDiscovery;
-use Puli\Discovery\Api\NoSuchTypeException;
 use Puli\RepositoryManager\Environment\ProjectEnvironment;
 use Puli\RepositoryManager\Package\Collection\PackageCollection;
 use Puli\RepositoryManager\Package\Package;
@@ -72,24 +71,24 @@ class DiscoveryManager
     private $bindingTypes = array();
 
     /**
-     * @var BindingDescriptor[]
-     */
-    private $enabledBindings = array();
-
-    /**
-     * @var BindingDescriptor[][][]
-     */
-    private $bindingsByState = array();
-
-    /**
      * @var bool[][]
      */
     private $bindingTypeRefs = array();
 
     /**
+     * @var BindingDescriptor[]
+     */
+    private $enabledBindings = array();
+
+    /**
      * @var bool[][]
      */
     private $enabledBindingRefs = array();
+
+    /**
+     * @var BindingDescriptor[][][]
+     */
+    private $bindingsByState = array();
 
     /**
      * Creates a tag manager.
@@ -307,6 +306,57 @@ class DiscoveryManager
     }
 
     /**
+     * Enables a binding.
+     *
+     * @param Uuid            $uuid        The UUID of the binding.
+     * @param string|string[] $packageName The package name to enable the
+     *                                     binding in. Useful if the same
+     *                                     binding exists in multiple packages.
+     *
+     * @throws NoSuchBindingException If the binding could not be found.
+     * @throws CannotEnableBindingException If the binding could not be enabled.
+     */
+    public function enableBinding(Uuid $uuid, $packageName = null)
+    {
+        if (!$this->discovery) {
+            $this->loadDiscovery();
+        }
+
+        if (!$this->bindingTypes) {
+            $this->loadPackages();
+        }
+
+        if (!$bindingsToEnable = $this->getBindingsToEnable($uuid, $packageName)) {
+            return;
+        }
+
+        $wasDisabled = array();
+
+        try {
+            foreach ($bindingsToEnable as $packageName => $binding) {
+                $installInfo = $this->packages[$packageName]->getInstallInfo();
+                $wasDisabled[$uuid->toString()] = $installInfo->hasDisabledBindingUuid($uuid);
+                $installInfo->addEnabledBindingUuid($uuid);
+                $this->reloadBinding($binding, $this->packages[$packageName]);
+            }
+
+            $this->packageFileStorage->saveRootPackageFile($this->rootPackageFile);
+        } catch (Exception $e) {
+            foreach ($bindingsToEnable as $packageName => $binding) {
+                $installInfo = $this->packages[$packageName]->getInstallInfo();
+                if ($wasDisabled[$uuid->toString()]) {
+                    $installInfo->addDisabledBindingUuid($uuid);
+                } else {
+                    $installInfo->removeEnabledBindingUuid($uuid);
+                }
+                $this->reloadBinding($binding, $this->packages[$packageName]);
+            }
+
+            throw $e;
+        }
+    }
+
+    /**
      * Returns all bindings.
      *
      * You can optionally filter types by one or multiple package names.
@@ -339,17 +389,18 @@ class DiscoveryManager
     }
 
     /**
-     * Returns all bindings with the given UUID prefix.
+     * Returns all bindings with the given UUID (prefix).
      *
-     * @param string          $uuidPrefix  The UUID prefix to search.
+     * @param Uuid|string     $uuid        The UUID (prefix) to search.
      * @param string|string[] $packageName The package name(s) to filter by.
      *
      * @return BindingDescriptor[] The bindings.
      */
-    public function findBindings($uuidPrefix, $packageName = null)
+    public function findBindings($uuid, $packageName = null)
     {
         $packageNames = $packageName ? (array) $packageName : $this->packages->getPackageNames();
         $bindings = array();
+        $uuid = $uuid instanceof Uuid ? $uuid->toString() : $uuid;
 
         foreach ($packageNames as $packageName) {
             $packageFile = $this->packages[$packageName]->getPackageFile();
@@ -357,7 +408,7 @@ class DiscoveryManager
             foreach ($packageFile->getBindingDescriptors() as $binding) {
                 $uuidString = $binding->getUuid()->toString();
 
-                if (0 === strpos($uuidString, $uuidPrefix)) {
+                if (0 === strpos($uuidString, $uuid)) {
                     $bindings[$uuidString] = $binding;
                 }
             }
@@ -707,5 +758,55 @@ class DiscoveryManager
         }
 
         return BindingState::ENABLED;
+    }
+
+    /**
+     * @param Uuid $uuid
+     * @param      $packageName
+     *
+     * @return array
+     */
+    private function getBindingsToEnable(Uuid $uuid, $packageName = null)
+    {
+        $rootPackageName = $this->rootPackage->getName();
+        $packageNames = $packageName ? (array) $packageName : $this->packages->getPackageNames();
+        $bindingsByPackage = $this->getBindingsByPackage($uuid, $packageNames);
+
+        if (!$bindingsByPackage) {
+            throw NoSuchBindingException::forUuid($uuid);
+        }
+
+        if (1 === count($bindingsByPackage) && isset($bindingsByPackage[$rootPackageName])) {
+            throw CannotEnableBindingException::forUuid($uuid, $rootPackageName);
+        }
+
+        $bindingsToEnable = array();
+
+        foreach ($bindingsByPackage as $packageName => $binding) {
+            $installInfo = $this->packages[$packageName]->getInstallInfo();
+
+            if ($installInfo->hasEnabledBindingUuid($uuid)) {
+                continue;
+            }
+
+            $bindingsToEnable[$packageName] = $binding;
+        }
+
+        return $bindingsToEnable;
+    }
+
+    private function getBindingsByPackage(Uuid $uuid, array $packageNames)
+    {
+        $bindingsByPackage = array();
+
+        foreach ($packageNames as $packageName) {
+            $packageFile = $this->packages[$packageName]->getPackageFile();
+
+            if ($packageFile->hasBindingDescriptor($uuid)) {
+                $bindingsByPackage[$packageName] = $packageFile->getBindingDescriptor($uuid);
+            }
+        }
+
+        return $bindingsByPackage;
     }
 }

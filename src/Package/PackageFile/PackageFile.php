@@ -15,6 +15,7 @@ use Assert\Assertion;
 use InvalidArgumentException;
 use Puli\RepositoryManager\Discovery\BindingDescriptor;
 use Puli\RepositoryManager\Discovery\BindingTypeDescriptor;
+use Puli\RepositoryManager\Discovery\NoSuchBindingException;
 use Puli\RepositoryManager\Repository\NoSuchMappingException;
 use Puli\RepositoryManager\Repository\ResourceMapping;
 use Rhumsaa\Uuid\Uuid;
@@ -215,6 +216,26 @@ class PackageFile
     public function getBindingDescriptors()
     {
         return array_values($this->bindingDescriptors);
+    }
+
+    /**
+     * Returns the binding descriptor with the given UUID.
+     *
+     * @param Uuid $uuid The UUID of the binding descriptor.
+     *
+     * @return BindingDescriptor The binding descriptor.
+     *
+     * @throws NoSuchBindingException If the UUID was not found.
+     */
+    public function getBindingDescriptor(Uuid $uuid)
+    {
+        $uuidString = $uuid->toString();
+
+        if (!isset($this->bindingDescriptors[$uuidString])) {
+            throw NoSuchBindingException::forUuid($uuid);
+        }
+
+        return $this->bindingDescriptors[$uuidString];
     }
 
     /**

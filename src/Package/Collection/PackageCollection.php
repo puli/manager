@@ -118,6 +118,48 @@ class PackageCollection implements IteratorAggregate, Countable, ArrayAccess
     }
 
     /**
+     * Returns the name of the root package.
+     *
+     * If the collection contains no root package, `null` is returned.
+     *
+     * @return string|null The root package name or `null` if none exists.
+     */
+    public function getRootPackageName()
+    {
+        return $this->rootPackage ? $this->rootPackage->getName() : null;
+    }
+
+    /**
+     * Returns all installed packages.
+     *
+     * The installed packages are all packages that are not the root package.
+     *
+     * @return Package[] The installed packages indexed by their names.
+     */
+    public function getInstalledPackages()
+    {
+        $packages = $this->packages;
+
+        if ($this->rootPackage) {
+            unset($packages[$this->rootPackage->getName()]);
+        }
+
+        return $packages;
+    }
+
+    /**
+     * Returns the names of all installed packages.
+     *
+     * The installed packages are all packages that are not the root package.
+     *
+     * @return string[] The names of the installed packages.
+     */
+    public function getInstalledPackageNames()
+    {
+        return array_keys($this->getInstalledPackages());
+    }
+
+    /**
      * Returns the names of all packages.
      *
      * @return string[] The package names.

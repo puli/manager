@@ -75,6 +75,78 @@ class PackageCollectionTest extends PHPUnit_Framework_TestCase
         $this->assertSame($rootPackage, $this->collection->getRootPackage());
     }
 
+    public function testGetRootPackageName()
+    {
+        $rootPackageFile = new RootPackageFile('root');
+        $rootPackage = new RootPackage($rootPackageFile, '/path');
+
+        $this->collection->add($rootPackage);
+
+        $this->assertSame('root', $this->collection->getRootPackageName());
+    }
+
+    public function testGetRootPackageNameReturnsNullIfNoRootPackage()
+    {
+        $packageFile = new PackageFile('package');
+        $package = new Package($packageFile, '/path');
+
+        $this->collection->add($package);
+
+        $this->assertNull($this->collection->getRootPackageName());
+    }
+
+    public function testGetInstalledPackages()
+    {
+        $packageFile1 = new PackageFile('package1');
+        $package1 = new Package($packageFile1, '/path1');
+
+        $packageFile2 = new PackageFile('package2');
+        $package2 = new Package($packageFile2, '/path2');
+
+        $this->collection->add($package1);
+        $this->collection->add($package2);
+
+        $this->assertSame(array(
+            'package1' => $package1,
+            'package2' => $package2
+        ), $this->collection->getInstalledPackages());
+    }
+
+    public function testGetInstalledPackagesDoesNotIncludeRoot()
+    {
+        $packageFile1 = new PackageFile('package1');
+        $package1 = new Package($packageFile1, '/path1');
+
+        $packageFile2 = new PackageFile('package2');
+        $package2 = new Package($packageFile2, '/path2');
+
+        $rootPackageFile = new RootPackageFile('root');
+        $rootPackage = new RootPackage($rootPackageFile, '/path3');
+
+        $this->collection->add($package1);
+        $this->collection->add($rootPackage);
+        $this->collection->add($package2);
+
+        $this->assertSame(array(
+            'package1' => $package1,
+            'package2' => $package2
+        ), $this->collection->getInstalledPackages());
+    }
+
+    public function testGetInstalledPackageNames()
+    {
+        $packageFile1 = new PackageFile('package1');
+        $package1 = new Package($packageFile1, '/path1');
+
+        $packageFile2 = new PackageFile('package2');
+        $package2 = new Package($packageFile2, '/path2');
+
+        $this->collection->add($package1);
+        $this->collection->add($package2);
+
+        $this->assertSame(array('package1', 'package2'), $this->collection->getInstalledPackageNames());
+    }
+
     public function testRemove()
     {
         $packageFile1 = new PackageFile('package1');
