@@ -45,6 +45,22 @@ final class BindingState
     const IGNORED = 5;
 
     /**
+     * Returns all binding states.
+     *
+     * @return int[] The binding states.
+     */
+    public static function all()
+    {
+        return array(
+            self::ENABLED,
+            self::DISABLED,
+            self::UNDECIDED,
+            self::HELD_BACK,
+            self::IGNORED
+        );
+    }
+
+    /**
      * Must not be instantiated.
      */
     private function __construct() {}

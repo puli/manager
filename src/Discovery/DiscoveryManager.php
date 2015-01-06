@@ -178,6 +178,7 @@ class DiscoveryManager
 
         if (!$this->isBindingTypeLoaded($typeName)) {
             $this->undefineType($typeName);
+            $this->reloadBindingsByType($typeName);
 
             return;
         }
@@ -582,26 +583,37 @@ class DiscoveryManager
 
     private function reloadBinding(BindingDescriptor $binding, Package $package)
     {
+        $enabledBefore = $this->isBindingEnabled($binding->getUuid());
         $this->unloadBinding($binding->getUuid(), $package);
         $this->loadBinding($binding, $package);
+        $enabledAfter = $this->isBindingEnabled($binding->getUuid());
+
+        if (!$enabledBefore && $enabledAfter) {
+            $this->bind($binding);
+        } elseif ($enabledBefore && !$enabledAfter) {
+            $this->unbind($binding);
+        }
     }
 
-    private function reloadBindingsByType($typeName, $state)
+    private function reloadBindingsByType($typeName, $stateFilter = null)
     {
+        $states = $stateFilter ? array($stateFilter) : BindingState::all();
+
         foreach ($this->bindingsByState as $packageName => $bindingsByState) {
-            if (!isset($this->bindingsByState[$packageName][$state])) {
-                continue;
-            }
-
-            $bindings = $this->bindingsByState[$packageName][$state];
-
-            foreach ($bindings as $uuidString => $binding) {
-                if ($typeName !== $binding->getTypeName()) {
+            foreach ($states as $state) {
+                if (!isset($this->bindingsByState[$packageName][$state])) {
                     continue;
                 }
 
-                $this->reloadBinding($binding, $this->packages[$packageName]);
-                $this->bindUnlessDuplicate($binding);
+                $bindings = $this->bindingsByState[$packageName][$state];
+
+                foreach ($bindings as $uuidString => $binding) {
+                    if ($typeName !== $binding->getTypeName()) {
+                        continue;
+                    }
+
+                    $this->reloadBinding($binding, $this->packages[$packageName]);
+                }
             }
         }
     }

@@ -349,6 +349,62 @@ class DiscoveryManagerTest extends ManagerTestCase
         $this->manager->removeBindingType('my/type');
     }
 
+    public function testRemoveBindingTypeUnbindsCorrespondingBindings()
+    {
+        $this->initDefaultManager();
+
+        $this->rootPackageFile->addTypeDescriptor(new BindingTypeDescriptor('my/type'));
+        $this->rootPackageFile->addBindingDescriptor(BindingDescriptor::create('/path', 'my/type'));
+
+        $this->discovery->expects($this->once())
+            ->method('undefine')
+            ->with('my/type');
+
+        $this->discovery->expects($this->once())
+            ->method('unbind')
+            ->with('/path', 'my/type', array(), 'glob');
+
+        $this->packageFileStorage->expects($this->once())
+            ->method('saveRootPackageFile')
+            ->with($this->rootPackageFile)
+            ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) {
+                $types = $rootPackageFile->getTypeDescriptors();
+
+                PHPUnit_Framework_Assert::assertSame(array(), $types);
+            }));
+
+        $this->manager->removeBindingType('my/type');
+    }
+
+    public function testRemoveBindingTypeUnbindsCorrespondingDuplicatedBindings()
+    {
+        $this->initDefaultManager();
+
+        $this->rootPackageFile->addTypeDescriptor(new BindingTypeDescriptor('my/type'));
+        $this->rootPackageFile->addBindingDescriptor($binding = BindingDescriptor::create('/path', 'my/type'));
+        $this->packageFile1->addBindingDescriptor($binding);
+        $this->installInfo1->addEnabledBindingUuid($binding->getUuid());
+
+        $this->discovery->expects($this->once())
+            ->method('undefine')
+            ->with('my/type');
+
+        $this->discovery->expects($this->once())
+            ->method('unbind')
+            ->with('/path', 'my/type', array(), 'glob');
+
+        $this->packageFileStorage->expects($this->once())
+            ->method('saveRootPackageFile')
+            ->with($this->rootPackageFile)
+            ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) {
+                $types = $rootPackageFile->getTypeDescriptors();
+
+                PHPUnit_Framework_Assert::assertSame(array(), $types);
+            }));
+
+        $this->manager->removeBindingType('my/type');
+    }
+
     public function testRemoveBindingTypeAddsFormerlyIgnoredBindings()
     {
         $this->initDefaultManager();
