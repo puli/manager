@@ -11,6 +11,7 @@
 
 namespace Puli\RepositoryManager\Discovery;
 
+use Exception;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Puli\Discovery\Api\DuplicateTypeException;
@@ -232,23 +233,28 @@ class DiscoveryManager
             $this->loadPackages();
         }
 
-        if (!isset($this->bindingTypes[$typeName])) {
-            throw NoSuchTypeException::forTypeName($typeName);
-        }
-
         $binding = BindingDescriptor::create($query, $typeName, $parameters, $language);
 
         if ($this->rootPackageFile->hasBindingDescriptor($binding->getUuid())) {
             return;
         }
 
-        // First check that the binding can actually be loaded and bound
         $this->loadBinding($binding, $this->rootPackage);
-        $this->bindUnlessDuplicate($binding);
 
-        // If no error was detected, persist changes to the configuration
-        $this->rootPackageFile->addBindingDescriptor($binding);
-        $this->packageFileStorage->saveRootPackageFile($this->rootPackageFile);
+        try {
+            // First check that the binding can actually be loaded and bound
+            $this->bindUnlessDuplicate($binding);
+
+            // If no error was detected, persist changes to the configuration
+            $this->rootPackageFile->addBindingDescriptor($binding);
+            $this->packageFileStorage->saveRootPackageFile($this->rootPackageFile);
+        } catch (Exception $e) {
+            // Clean up
+            $this->unloadBinding($binding->getUuid(), $this->rootPackage);
+            $this->unbindUnlessStillReferenced($binding);
+
+            throw $e;
+        }
     }
 
     /**

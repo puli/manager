@@ -11,6 +11,7 @@
 
 namespace Puli\RepositoryManager\Tests\Discovery;
 
+use Exception;
 use PHPUnit_Framework_Assert;
 use PHPUnit_Framework_MockObject_MockObject;
 use Psr\Log\LoggerInterface;
@@ -18,6 +19,7 @@ use Puli\Discovery\Api\BindingException;
 use Puli\Discovery\Api\BindingType;
 use Puli\Discovery\Api\DuplicateTypeException;
 use Puli\Discovery\Api\MissingParameterException;
+use Puli\Discovery\Api\NoSuchTypeException;
 use Puli\RepositoryManager\Discovery\BindingDescriptor;
 use Puli\RepositoryManager\Discovery\BindingParameterDescriptor;
 use Puli\RepositoryManager\Discovery\BindingState;
@@ -575,8 +577,9 @@ class DiscoveryManagerTest extends ManagerTestCase
     {
         $this->initDefaultManager();
 
-        $this->discovery->expects($this->never())
-            ->method('bind');
+        $this->discovery->expects($this->once())
+            ->method('bind')
+            ->willThrowException(new NoSuchTypeException());
 
         $this->packageFileStorage->expects($this->never())
             ->method('saveRootPackageFile');
@@ -622,6 +625,32 @@ class DiscoveryManagerTest extends ManagerTestCase
             ->method('saveRootPackageFile');
 
         $this->manager->addBinding('/path', 'my/type');
+    }
+
+    /**
+     * @expectedException Exception
+     * @expectedExceptionMessage Some exception
+     */
+    public function testAddBindingUnbindsIfSavingFailed()
+    {
+        $this->initDefaultManager();
+
+        $this->packageFile1->addTypeDescriptor(new BindingTypeDescriptor('my/type'));
+
+        $this->discovery->expects($this->once())
+            ->method('bind')
+            ->with('/path', 'my/type', array('param' => 'value'), 'xpath');
+
+        $this->discovery->expects($this->once())
+            ->method('unbind')
+            ->with('/path', 'my/type', array('param' => 'value'), 'xpath');
+
+        $this->packageFileStorage->expects($this->once())
+            ->method('saveRootPackageFile')
+            ->with($this->rootPackageFile)
+            ->willThrowException(new Exception('Some exception'));
+
+        $this->manager->addBinding('/path', 'my/type', array('param' => 'value'), 'xpath');
     }
 
     public function testRemoveBinding()
