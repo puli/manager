@@ -109,9 +109,9 @@ class ProjectEnvironment extends GlobalEnvironment
         // Get the global config.json, if any
         $configFile = $this->getConfigFile();
 
-        $this->rootDir = $rootDir;
+        $this->rootDir = Path::canonicalize($rootDir);
         $this->rootPackageFile = $packageFileStorage->loadRootPackageFile(
-            $rootDir.'/puli.json',
+            $this->rootDir.'/puli.json',
             $configFile ? $configFile->getConfig() : new DefaultConfig()
         );
 

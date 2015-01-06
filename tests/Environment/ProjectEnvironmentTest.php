@@ -180,6 +180,34 @@ class ProjectEnvironmentTest extends PHPUnit_Framework_TestCase
         );
     }
 
+    public function testCanonicalizeDirectories()
+    {
+        $this->configFileStorage->expects($this->once())
+            ->method('loadConfigFile')
+            ->with($this->homeDir.'/config.json')
+            ->will($this->returnCallback(function ($path, Config $baseConfig = null) {
+                return new ConfigFile($path, $baseConfig);
+            }));
+
+        $this->packageFileStorage->expects($this->once())
+            ->method('loadRootPackageFile')
+            ->with($this->rootDir.'/puli.json')
+            ->will($this->returnCallback(function ($path, Config $baseConfig = null) {
+                return new RootPackageFile('root', $path, $baseConfig);
+            }));
+
+        $environment = new ProjectEnvironment(
+            $this->homeDir.'/../home',
+            $this->rootDir.'/../root',
+            $this->configFileStorage,
+            $this->packageFileStorage,
+            $this->dispatcher
+        );
+
+        $this->assertSame($this->rootDir, $environment->getRootDirectory());
+        $this->assertSame($this->homeDir, $environment->getHomeDirectory());
+    }
+
     public function testActivatePlugins()
     {
         $configFile = new ConfigFile();

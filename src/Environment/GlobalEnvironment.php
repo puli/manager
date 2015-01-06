@@ -21,6 +21,7 @@ use Puli\RepositoryManager\Config\EnvConfig;
 use Puli\RepositoryManager\FileNotFoundException;
 use Puli\RepositoryManager\NoDirectoryException;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Webmozart\PathUtil\Path;
 
 /**
  * The global environment.
@@ -90,9 +91,9 @@ class GlobalEnvironment
                 ));
             }
 
-            $this->homeDir = $homeDir;
+            $this->homeDir = Path::canonicalize($homeDir);
             $this->configFile = $configFileStorage->loadConfigFile(
-                $homeDir.'/config.json',
+                $this->homeDir.'/config.json',
                 new DefaultConfig()
             );
             $this->config = new EnvConfig($this->configFile->getConfig());

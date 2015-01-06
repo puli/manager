@@ -93,6 +93,24 @@ class GlobalEnvironmentTest extends PHPUnit_Framework_TestCase
         $this->assertSame('.puli', $environment->getConfig()->get(Config::PULI_DIR));
     }
 
+    public function testCanonicalizeHomeDir()
+    {
+        $this->configFileStorage->expects($this->once())
+            ->method('loadConfigFile')
+            ->with($this->homeDir.'/config.json')
+            ->will($this->returnCallback(function ($path, Config $baseConfig = null) {
+                return new ConfigFile($path, $baseConfig);
+            }));
+
+        $environment = new GlobalEnvironment(
+            $this->homeDir.'/../home',
+            $this->configFileStorage,
+            $this->dispatcher
+        );
+
+        $this->assertSame($this->homeDir, $environment->getHomeDirectory());
+    }
+
     /**
      * @expectedException \Puli\RepositoryManager\FileNotFoundException
      * @expectedExceptionMessage /foobar
