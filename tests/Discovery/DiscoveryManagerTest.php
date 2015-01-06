@@ -249,13 +249,11 @@ class DiscoveryManagerTest extends ManagerTestCase
         $this->manager->addBindingType($bindingType);
     }
 
-    /**
-     * @expectedException \Exception
-     * @expectedExceptionMessage Some exception
-     */
     public function testAddBindingTypeUndefinesTypeIfSavingFails()
     {
         $this->initDefaultManager();
+
+        $this->rootPackageFile->addTypeDescriptor($existingType = new BindingTypeDescriptor('my/existing'));
 
         $bindingType = new BindingTypeDescriptor('my/type');
 
@@ -272,7 +270,13 @@ class DiscoveryManagerTest extends ManagerTestCase
             ->with($this->rootPackageFile)
             ->willThrowException(new Exception('Some exception'));
 
-        $this->manager->addBindingType($bindingType);
+        try {
+            $this->manager->addBindingType($bindingType);
+            $this->fail('Expected an exception');
+        } catch (Exception $e) {
+        }
+
+        $this->assertSame(array($existingType), $this->rootPackageFile->getTypeDescriptors());
     }
 
     public function testRemoveBindingType()
@@ -653,14 +657,11 @@ class DiscoveryManagerTest extends ManagerTestCase
         $this->manager->addBinding('/path', 'my/type');
     }
 
-    /**
-     * @expectedException Exception
-     * @expectedExceptionMessage Some exception
-     */
     public function testAddBindingUnbindsIfSavingFailed()
     {
         $this->initDefaultManager();
 
+        $this->rootPackageFile->addBindingDescriptor($existing = BindingDescriptor::create('/existing', 'my/type'));
         $this->packageFile1->addTypeDescriptor(new BindingTypeDescriptor('my/type'));
 
         $this->discovery->expects($this->once())
@@ -676,7 +677,13 @@ class DiscoveryManagerTest extends ManagerTestCase
             ->with($this->rootPackageFile)
             ->willThrowException(new Exception('Some exception'));
 
-        $this->manager->addBinding('/path', 'my/type', array('param' => 'value'), 'xpath');
+        try {
+            $this->manager->addBinding('/path', 'my/type', array('param' => 'value'), 'xpath');
+            $this->fail('Expected an exception');
+        } catch (Exception $e) {
+        }
+
+        $this->assertSame(array($existing), $this->rootPackageFile->getBindingDescriptors());
     }
 
     public function testRemoveBinding()

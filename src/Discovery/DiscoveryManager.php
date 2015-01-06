@@ -152,6 +152,7 @@ class DiscoveryManager
             $this->packageFileStorage->saveRootPackageFile($this->rootPackageFile);
         } catch (Exception $e) {
             // Clean up
+            $this->rootPackageFile->removeTypeDescriptor($bindingType->getName());
             $this->unloadBindingType($bindingType->getName(), $this->rootPackage);
             $this->undefineType($bindingType->getName());
 
@@ -261,6 +262,7 @@ class DiscoveryManager
             $this->packageFileStorage->saveRootPackageFile($this->rootPackageFile);
         } catch (Exception $e) {
             // Clean up
+            $this->rootPackageFile->removeBindingDescriptor($binding->getUuid());
             $this->unloadBinding($binding->getUuid(), $this->rootPackage);
             $this->unbindUnlessStillReferenced($binding);
 
