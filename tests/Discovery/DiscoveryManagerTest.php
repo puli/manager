@@ -16,6 +16,7 @@ use PHPUnit_Framework_MockObject_MockObject;
 use Psr\Log\LoggerInterface;
 use Puli\Discovery\Api\BindingException;
 use Puli\Discovery\Api\BindingType;
+use Puli\Discovery\Api\DuplicateTypeException;
 use Puli\Discovery\Api\MissingParameterException;
 use Puli\RepositoryManager\Discovery\BindingDescriptor;
 use Puli\RepositoryManager\Discovery\BindingParameterDescriptor;
@@ -178,11 +179,70 @@ class DiscoveryManagerTest extends ManagerTestCase
 
         $this->packageFile1->addTypeDescriptor($bindingType);
 
-        $this->discovery->expects($this->never())
-            ->method('define');
+        $this->discovery->expects($this->once())
+            ->method('define')
+            ->willThrowException(new DuplicateTypeException());
 
         $this->packageFileStorage->expects($this->never())
             ->method('saveRootPackageFile');
+
+        $this->manager->addBindingType($bindingType);
+    }
+
+    public function testAddBindingTypeAddsHeldBackBindings()
+    {
+        $this->initDefaultManager();
+
+        $this->rootPackageFile->addBindingDescriptor(BindingDescriptor::create('/path', 'my/type'));
+
+        $bindingType = new BindingTypeDescriptor('my/type');
+
+        $this->discovery->expects($this->once())
+            ->method('define')
+            ->with($bindingType->toBindingType());
+
+        $this->discovery->expects($this->once())
+            ->method('bind')
+            ->with('/path', 'my/type', array(), 'glob');
+
+        $this->packageFileStorage->expects($this->once())
+            ->method('saveRootPackageFile')
+            ->with($this->rootPackageFile)
+            ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) use ($bindingType) {
+                $types = $rootPackageFile->getTypeDescriptors();
+
+                PHPUnit_Framework_Assert::assertSame(array($bindingType), $types);
+            }));
+
+        $this->manager->addBindingType($bindingType);
+    }
+
+    public function testAddBindingTypeAddsDuplicateHeldBackBindingsOnlyOnce()
+    {
+        $this->initDefaultManager();
+
+        $this->rootPackageFile->addBindingDescriptor($binding = BindingDescriptor::create('/path', 'my/type'));
+        $this->packageFile1->addBindingDescriptor($binding);
+        $this->installInfo1->addEnabledBindingUuid($binding->getUuid());
+
+        $bindingType = new BindingTypeDescriptor('my/type');
+
+        $this->discovery->expects($this->once())
+            ->method('define')
+            ->with($bindingType->toBindingType());
+
+        $this->discovery->expects($this->once())
+            ->method('bind')
+            ->with('/path', 'my/type', array(), 'glob');
+
+        $this->packageFileStorage->expects($this->once())
+            ->method('saveRootPackageFile')
+            ->with($this->rootPackageFile)
+            ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) use ($bindingType) {
+                $types = $rootPackageFile->getTypeDescriptors();
+
+                PHPUnit_Framework_Assert::assertSame(array($bindingType), $types);
+            }));
 
         $this->manager->addBindingType($bindingType);
     }

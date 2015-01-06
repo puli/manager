@@ -140,18 +140,16 @@ class DiscoveryManager
             $this->loadPackages();
         }
 
-        $typeName = $bindingType->getName();
+        // First check that the type can be added without errors
+        $this->loadBindingType($bindingType, $this->rootPackage->getName());
+        $this->defineType($bindingType);
 
-        if (isset($this->bindingTypes[$typeName])) {
-            throw DuplicateTypeException::forTypeName($typeName);
-        }
-
+        // Then save the configuration
         $this->rootPackageFile->addTypeDescriptor($bindingType);
         $this->packageFileStorage->saveRootPackageFile($this->rootPackageFile);
 
-        $this->loadBindingType($bindingType, $this->rootPackage->getName());
-
-        $this->defineType($bindingType);
+        // Add bindings that have been held back until now
+        $this->reloadHeldBackBindings($bindingType->getName());
     }
 
     /**
@@ -579,6 +577,32 @@ class DiscoveryManager
 
         if (0 === count($this->bindingsByState[$packageName])) {
             unset($this->bindingsByState[$packageName]);
+        }
+    }
+
+    private function reloadBinding(BindingDescriptor $binding, Package $package)
+    {
+        $this->unloadBinding($binding->getUuid(), $package);
+        $this->loadBinding($binding, $package);
+    }
+
+    private function reloadHeldBackBindings($typeName)
+    {
+        foreach ($this->bindingsByState as $packageName => $bindingsByState) {
+            if (!isset($this->bindingsByState[$packageName][BindingState::HELD_BACK])) {
+                continue;
+            }
+
+            $bindings = $this->bindingsByState[$packageName][BindingState::HELD_BACK];
+
+            foreach ($bindings as $uuidString => $binding) {
+                if ($typeName !== $binding->getTypeName()) {
+                    continue;
+                }
+
+                $this->reloadBinding($binding, $this->packages[$packageName]);
+                $this->bindUnlessDuplicate($binding);
+            }
         }
     }
 
