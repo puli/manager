@@ -76,7 +76,7 @@ class DiscoveryManager
     /**
      * @var BindingStore
      */
-    private $bindings;
+    private $bindingStore;
 
     /**
      * Creates a tag manager.
@@ -261,7 +261,7 @@ class DiscoveryManager
         $this->rootPackageFile->removeBindingDescriptor($uuid);
         $this->packageFileStorage->saveRootPackageFile($this->rootPackageFile);
 
-        if (!$binding = $this->bindings->get($uuid, $this->rootPackage)) {
+        if (!$binding = $this->bindingStore->get($uuid, $this->rootPackage)) {
             return;
         }
 
@@ -396,8 +396,8 @@ class DiscoveryManager
             }
         }
 
-        foreach ($this->bindings->getUuids() as $uuid) {
-            $binding = $this->bindings->get($uuid);
+        foreach ($this->bindingStore->getUuids() as $uuid) {
+            $binding = $this->bindingStore->get($uuid);
 
             if ($binding->isEnabled()) {
                 $this->bind($binding);
@@ -437,7 +437,7 @@ class DiscoveryManager
     private function loadPackages()
     {
         $this->typeStore = new BindingTypeStore();
-        $this->bindings = new BindingStore();
+        $this->bindingStore = new BindingStore();
 
         // First load all the types
         foreach ($this->packages as $package) {
@@ -490,16 +490,16 @@ class DiscoveryManager
     {
         $binding->refreshState($package, $this->typeStore);
 
-        $this->bindings->add($binding, $package);
+        $this->bindingStore->add($binding, $package);
     }
 
     private function unloadBinding(Uuid $uuid, Package $package)
     {
-        if ($this->bindings->exists($uuid, $package)) {
-            $this->bindings->get($uuid, $package)->setState(BindingState::UNLOADED);
+        if ($this->bindingStore->exists($uuid, $package)) {
+            $this->bindingStore->get($uuid, $package)->setState(BindingState::UNLOADED);
         }
 
-        $this->bindings->remove($uuid, $package);
+        $this->bindingStore->remove($uuid, $package);
     }
 
     private function reloadBinding(BindingDescriptor $binding, Package $package)
@@ -514,7 +514,7 @@ class DiscoveryManager
     {
         $this->loadBinding($binding, $this->rootPackage);
 
-        if (!$this->bindings->isDuplicate($binding->getUuid()) && $binding->isEnabled()) {
+        if (!$this->bindingStore->isDuplicate($binding->getUuid()) && $binding->isEnabled()) {
             $this->bind($binding);
         }
     }
@@ -526,18 +526,18 @@ class DiscoveryManager
     {
         $this->unloadBinding($binding->getUuid(), $this->rootPackage);
 
-        if (!$this->bindings->existsAny($binding->getUuid())) {
+        if (!$this->bindingStore->existsAny($binding->getUuid())) {
             $this->unbind($binding);
         }
     }
 
     private function reloadAndBind(BindingDescriptor $binding, Package $package)
     {
-        $enabledBefore = $this->bindings->existsEnabled($binding->getUuid());
+        $enabledBefore = $this->bindingStore->existsEnabled($binding->getUuid());
 
         $this->reloadBinding($binding, $package);
 
-        $enabledAfter = $this->bindings->existsEnabled($binding->getUuid());
+        $enabledAfter = $this->bindingStore->existsEnabled($binding->getUuid());
 
         if (!$enabledBefore && $enabledAfter) {
             $this->bind($binding);
