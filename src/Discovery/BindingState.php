@@ -35,14 +35,14 @@ final class BindingState
     const UNDECIDED = 3;
 
     /**
-     * State: The binding is ignored because the type is not loaded.
+     * State: The binding is held back. The referenced type is not loaded.
      */
-    const TYPE_NOT_LOADED = 4;
+    const HELD_BACK = 4;
 
     /**
-     * State: The binding is ignored because the type has been defined twice.
+     * State: The binding is ignored. This happens if its type is duplicated.
      */
-    const DUPLICATE_TYPE_DEFINITION = 5;
+    const IGNORED = 5;
 
     /**
      * Must not be instantiated.

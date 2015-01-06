@@ -610,7 +610,7 @@ class DiscoveryManagerTest extends ManagerTestCase
         $this->assertSame(array($binding), $this->manager->getBindings('package1'));
     }
 
-    public function testGetEnabledBindingsDoesNotIncludeBindingsForWhichTypeIsNotLoaded()
+    public function testGetEnabledBindingsDoesNotIncludeHeldBackBindings()
     {
         $this->initDefaultManager();
 
@@ -622,7 +622,7 @@ class DiscoveryManagerTest extends ManagerTestCase
         $this->assertSame(array(), $this->manager->getBindings('package1'));
     }
 
-    public function testGetEnabledBindingsDoesNotIncludeBindingsForWhichTypeIsDisabled()
+    public function testGetEnabledBindingsDoesNotIncludeIgnoredBindings()
     {
         $this->initDefaultManager();
 
@@ -694,7 +694,7 @@ class DiscoveryManagerTest extends ManagerTestCase
         $this->assertSame(array(), $this->manager->getBindings('root', BindingState::DISABLED));
     }
 
-    public function testGetDisabledBindingsDoesNotIncludeBindingsForWhichTypeIsNotLoaded()
+    public function testGetDisabledBindingsDoesNotIncludeHeldBackBindings()
     {
         $this->initDefaultManager();
 
@@ -705,7 +705,7 @@ class DiscoveryManagerTest extends ManagerTestCase
         $this->assertSame(array(), $this->manager->getBindings('package1', BindingState::DISABLED));
     }
 
-    public function testGetDisabledBindingsDoesNotIncludeBindingsForWhichTypeIsDisabled()
+    public function testGetDisabledBindingsDoesNotIncludeIgnoredBindings()
     {
         $this->initDefaultManager();
 
@@ -773,7 +773,7 @@ class DiscoveryManagerTest extends ManagerTestCase
         $this->assertSame(array(), $this->manager->getBindings('root', BindingState::UNDECIDED));
     }
 
-    public function testGetUndecidedBindingsDoesNotIncludeBindingsForWhichTypeIsNotLoaded()
+    public function testGetUndecidedBindingsDoesNotIncludeHeldBackBindings()
     {
         $this->initDefaultManager();
 
@@ -783,7 +783,7 @@ class DiscoveryManagerTest extends ManagerTestCase
         $this->assertSame(array(), $this->manager->getBindings('package1', BindingState::UNDECIDED));
     }
 
-    public function testGetUndecidedBindingsDoesNotIncludeBindingsForWhichTypeIsDisabled()
+    public function testGetUndecidedBindingsDoesNotIncludeIgnoredBindings()
     {
         $this->initDefaultManager();
 
@@ -820,7 +820,7 @@ class DiscoveryManagerTest extends ManagerTestCase
         $this->assertSame(array(), $this->manager->getBindings('package1', BindingState::UNDECIDED));
     }
 
-    public function testGetBindingsWithUnloadedTypes()
+    public function testGetHeldBackBindings()
     {
         $this->initDefaultManager();
 
@@ -837,13 +837,13 @@ class DiscoveryManagerTest extends ManagerTestCase
             $binding2,
             $binding3,
             $binding4,
-        ), $this->manager->getBindings(null, BindingState::TYPE_NOT_LOADED));
+        ), $this->manager->getBindings(null, BindingState::HELD_BACK));
 
-        $this->assertSame(array($binding2), $this->manager->getBindings('package1', BindingState::TYPE_NOT_LOADED));
-        $this->assertSame(array($binding2, $binding3), $this->manager->getBindings(array('package1', 'package2'), BindingState::TYPE_NOT_LOADED));
+        $this->assertSame(array($binding2), $this->manager->getBindings('package1', BindingState::HELD_BACK));
+        $this->assertSame(array($binding2, $binding3), $this->manager->getBindings(array('package1', 'package2'), BindingState::HELD_BACK));
     }
 
-    public function testGetBindingsWithUnloadedTypesDoesNotIncludeBindingsForWhichTypeIsDisabled()
+    public function testGetHeldBackBindingsDoesNotIncludeIgnoredBindings()
     {
         $this->initDefaultManager();
 
@@ -854,33 +854,33 @@ class DiscoveryManagerTest extends ManagerTestCase
         $this->packageFile1->addBindingDescriptor($binding2 = BindingDescriptor::create('/path2', 'my/type'));
         $this->installInfo1->addEnabledBindingUuid($binding2->getUuid());
 
-        $this->assertSame(array(), $this->manager->getBindings(null, BindingState::TYPE_NOT_LOADED));
-        $this->assertSame(array(), $this->manager->getBindings('package1', BindingState::TYPE_NOT_LOADED));
+        $this->assertSame(array(), $this->manager->getBindings(null, BindingState::HELD_BACK));
+        $this->assertSame(array(), $this->manager->getBindings('package1', BindingState::HELD_BACK));
     }
 
-    public function testGetBindingsWithUnloadedTypesIncludesNewBindings()
+    public function testGetHeldBackBindingsIncludesNewBindings()
     {
         $this->initDefaultManager();
 
         // neither enabled nor disabled
         $this->packageFile1->addBindingDescriptor($binding = BindingDescriptor::create('/path', 'my/type'));
 
-        $this->assertSame(array($binding), $this->manager->getBindings(null, BindingState::TYPE_NOT_LOADED));
-        $this->assertSame(array($binding), $this->manager->getBindings('package1', BindingState::TYPE_NOT_LOADED));
+        $this->assertSame(array($binding), $this->manager->getBindings(null, BindingState::HELD_BACK));
+        $this->assertSame(array($binding), $this->manager->getBindings('package1', BindingState::HELD_BACK));
     }
 
-    public function testGetBindingsWithUnloadedTypesIncludesDisabledBindings()
+    public function testGetHeldBackBindingsIncludesDisabledBindings()
     {
         $this->initDefaultManager();
 
         $this->packageFile1->addBindingDescriptor($binding = BindingDescriptor::create('/path', 'my/type'));
         $this->installInfo1->addDisabledBindingUuid($binding->getUuid());
 
-        $this->assertSame(array($binding), $this->manager->getBindings(null, BindingState::TYPE_NOT_LOADED));
-        $this->assertSame(array($binding), $this->manager->getBindings('package1', BindingState::TYPE_NOT_LOADED));
+        $this->assertSame(array($binding), $this->manager->getBindings(null, BindingState::HELD_BACK));
+        $this->assertSame(array($binding), $this->manager->getBindings('package1', BindingState::HELD_BACK));
     }
 
-    public function testGetBindingsWithDisabledTypes()
+    public function testGetIgnoredBindings()
     {
         $this->initDefaultManager();
 
@@ -899,13 +899,13 @@ class DiscoveryManagerTest extends ManagerTestCase
             $binding2,
             $binding3,
             $binding4,
-        ), $this->manager->getBindings(null, BindingState::DUPLICATE_TYPE_DEFINITION));
+        ), $this->manager->getBindings(null, BindingState::IGNORED));
 
-        $this->assertSame(array($binding2), $this->manager->getBindings('package1', BindingState::DUPLICATE_TYPE_DEFINITION));
-        $this->assertSame(array($binding2, $binding3), $this->manager->getBindings(array('package1', 'package2'), BindingState::DUPLICATE_TYPE_DEFINITION));
+        $this->assertSame(array($binding2), $this->manager->getBindings('package1', BindingState::IGNORED));
+        $this->assertSame(array($binding2, $binding3), $this->manager->getBindings(array('package1', 'package2'), BindingState::IGNORED));
     }
 
-    public function testGetBindingsWithDisabledTypesDoesNotIncludeBindingsWithUnloadedTypes()
+    public function testGetIgnoredBindingsDoesNotIncludeBindingsWithUnloadedTypes()
     {
         $this->initDefaultManager();
 
@@ -913,11 +913,11 @@ class DiscoveryManagerTest extends ManagerTestCase
         $this->packageFile1->addBindingDescriptor($binding2 = BindingDescriptor::create('/path2', 'my/type'));
         $this->installInfo1->addEnabledBindingUuid($binding2->getUuid());
 
-        $this->assertSame(array(), $this->manager->getBindings(null, BindingState::DUPLICATE_TYPE_DEFINITION));
-        $this->assertSame(array(), $this->manager->getBindings('package1', BindingState::DUPLICATE_TYPE_DEFINITION));
+        $this->assertSame(array(), $this->manager->getBindings(null, BindingState::IGNORED));
+        $this->assertSame(array(), $this->manager->getBindings('package1', BindingState::IGNORED));
     }
 
-    public function testGetBindingsWithDisabledTypesIncludesNewBindings()
+    public function testGetIgnoredBindingsIncludesNewBindings()
     {
         $this->initDefaultManager();
 
@@ -926,11 +926,11 @@ class DiscoveryManagerTest extends ManagerTestCase
         $this->packageFile1->addTypeDescriptor(new BindingTypeDescriptor('my/type'));
         $this->packageFile1->addBindingDescriptor($binding = BindingDescriptor::create('/path', 'my/type'));
 
-        $this->assertSame(array($binding), $this->manager->getBindings(null, BindingState::DUPLICATE_TYPE_DEFINITION));
-        $this->assertSame(array($binding), $this->manager->getBindings('package1', BindingState::DUPLICATE_TYPE_DEFINITION));
+        $this->assertSame(array($binding), $this->manager->getBindings(null, BindingState::IGNORED));
+        $this->assertSame(array($binding), $this->manager->getBindings('package1', BindingState::IGNORED));
     }
 
-    public function testGetBindingsWithDisabledTypesIncludesDisabledBindings()
+    public function testGetIgnoredBindingsIncludesDisabledBindings()
     {
         $this->initDefaultManager();
 
@@ -939,8 +939,8 @@ class DiscoveryManagerTest extends ManagerTestCase
         $this->packageFile1->addBindingDescriptor($binding = BindingDescriptor::create('/path', 'my/type'));
         $this->installInfo1->addDisabledBindingUuid($binding->getUuid());
 
-        $this->assertSame(array($binding), $this->manager->getBindings(null, BindingState::DUPLICATE_TYPE_DEFINITION));
-        $this->assertSame(array($binding), $this->manager->getBindings('package1', BindingState::DUPLICATE_TYPE_DEFINITION));
+        $this->assertSame(array($binding), $this->manager->getBindings(null, BindingState::IGNORED));
+        $this->assertSame(array($binding), $this->manager->getBindings('package1', BindingState::IGNORED));
     }
 
     public function testFindBindings()

@@ -635,11 +635,11 @@ class DiscoveryManager
         $typeName = $bindingDescriptor->getTypeName();
 
         if (!$this->isBindingTypeLoaded($typeName)) {
-            return BindingState::TYPE_NOT_LOADED;
+            return BindingState::HELD_BACK;
         }
 
         if ($this->isDuplicateBindingType($typeName)) {
-            return BindingState::DUPLICATE_TYPE_DEFINITION;
+            return BindingState::IGNORED;
         }
 
         if (!$package instanceof RootPackage && $installInfo->hasDisabledBindingUuid($uuid)) {
