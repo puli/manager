@@ -243,7 +243,7 @@ class DiscoveryManager
             return;
         }
 
-        // First check that the binding can actually be loaded
+        // First check that the binding can actually be loaded and bound
         $this->loadBinding($binding, $this->rootPackage);
         $this->bindUnlessDuplicate($binding);
 
@@ -276,24 +276,16 @@ class DiscoveryManager
         $this->rootPackageFile->removeBindingDescriptor($uuid);
         $this->packageFileStorage->saveRootPackageFile($this->rootPackageFile);
 
-        // If the binding type does not exist, the binding was not loaded.
-        // Nothing more to do in this case.
-        if (!isset($this->enabledBindings[$uuid->toString()])) {
+        // The binding is not enabled if the binding type was not loaded
+        if (!$this->isBindingEnabled($uuid)) {
             return;
         }
 
         // Remember the binding before removing it
         $binding = $this->enabledBindings[$uuid->toString()];
 
-        $this->unloadBinding($uuid, $this->rootPackage->getName());
-
-        // If the binding is still loaded, that means it is also defined by an
-        // installed package
-        if (isset($this->enabledBindings[$uuid->toString()])) {
-            return;
-        }
-
-        $this->unbind($binding);
+        $this->unloadBinding($uuid, $this->rootPackage);
+        $this->unbindUnlessStillReferenced($binding);
     }
 
     /**
@@ -498,6 +490,16 @@ class DiscoveryManager
     }
 
     /**
+     * @param Uuid $uuid
+     *
+     * @return bool
+     */
+    private function isBindingEnabled(Uuid $uuid)
+    {
+        return isset($this->enabledBindings[$uuid->toString()]);
+    }
+
+    /**
      * @param BindingTypeDescriptor $typeDescriptor
      */
     private function defineTypeUnlessDuplicate(BindingTypeDescriptor $typeDescriptor)
@@ -553,8 +555,9 @@ class DiscoveryManager
         $this->bindingsByState[$packageName][$state][$uuidString] = $binding;
     }
 
-    private function unloadBinding(Uuid $uuid, $packageName)
+    private function unloadBinding(Uuid $uuid, Package $package)
     {
+        $packageName = $package->getName();
         $uuidString = $uuid->toString();
 
         if (isset($this->enabledBindings[$uuidString])) {
@@ -583,6 +586,13 @@ class DiscoveryManager
     {
         if (!$this->isDuplicateBinding($binding->getUuid())) {
             $this->bind($binding);
+        }
+    }
+
+    private function unbindUnlessStillReferenced(BindingDescriptor $binding)
+    {
+        if (!$this->isBindingEnabled($binding->getUuid())) {
+            $this->unbind($binding);
         }
     }
 
