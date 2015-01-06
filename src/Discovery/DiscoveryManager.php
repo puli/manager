@@ -243,10 +243,8 @@ class DiscoveryManager
             return;
         }
 
-        $state = $this->getBindingState($binding, $this->rootPackage);
-
         // First check that the binding can actually be loaded
-        $this->loadBinding($binding, $this->rootPackage->getName(), $state);
+        $this->loadBinding($binding, $this->rootPackage);
         $this->bindUnlessDuplicate($binding);
 
         // If no error was detected, persist changes to the configuration
@@ -273,6 +271,8 @@ class DiscoveryManager
             return;
         }
 
+        // First remove from the configuration. If all else fails, the
+        // discovery can be rebuilt completely with the deletion applied.
         $this->rootPackageFile->removeBindingDescriptor($uuid);
         $this->packageFileStorage->saveRootPackageFile($this->rootPackageFile);
 
@@ -417,10 +417,9 @@ class DiscoveryManager
      */
     private function loadTypesFromPackage(Package $package)
     {
-        $packageFile = $package->getPackageFile();
         $packageName = $package->getName();
 
-        foreach ($packageFile->getTypeDescriptors() as $typeDescriptor) {
+        foreach ($package->getPackageFile()->getTypeDescriptors() as $typeDescriptor) {
             $this->loadBindingType($typeDescriptor, $packageName);
         }
     }
@@ -430,13 +429,8 @@ class DiscoveryManager
      */
     private function loadBindingsFromPackage(Package $package)
     {
-        $packageFile = $package->getPackageFile();
-        $packageName = $package->getName();
-
-        foreach ($packageFile->getBindingDescriptors() as $bindingDescriptor) {
-            $state = $this->getBindingState($bindingDescriptor, $package);
-
-            $this->loadBinding($bindingDescriptor, $packageName, $state);
+        foreach ($package->getPackageFile()->getBindingDescriptors() as $bindingDescriptor) {
+            $this->loadBinding($bindingDescriptor, $package);
         }
     }
 
@@ -531,11 +525,13 @@ class DiscoveryManager
 
     /**
      * @param BindingDescriptor $binding
-     * @param                   $packageName
+     * @param Package           $package
      */
-    private function loadBinding(BindingDescriptor $binding, $packageName, $state)
+    private function loadBinding(BindingDescriptor $binding, Package $package)
     {
+        $packageName = $package->getName();
         $uuidString = $binding->getUuid()->toString();
+        $state = $this->getBindingState($binding, $package);
 
         if (BindingState::ENABLED === $state) {
             if (!isset($this->enabledBindingRefs[$uuidString])) {
