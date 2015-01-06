@@ -1027,6 +1027,26 @@ class DiscoveryManagerTest extends ManagerTestCase
     /**
      * @expectedException \Puli\RepositoryManager\Discovery\CannotEnableBindingException
      */
+    public function testEnableBindingFailsIfBindingInRootPackage()
+    {
+        $this->initDefaultManager();
+
+        $this->packageFile1->addTypeDescriptor(new BindingTypeDescriptor('my/type'));
+        $this->rootPackageFile->addBindingDescriptor($binding = BindingDescriptor::create('/path', 'my/type', array('param' => 'value'), 'xpath'));
+        $this->packageFile1->addBindingDescriptor($binding);
+
+        $this->discovery->expects($this->never())
+            ->method('bind');
+
+        $this->packageFileStorage->expects($this->never())
+            ->method('saveRootPackageFile');
+
+        $this->manager->enableBinding($binding->getUuid());
+    }
+
+    /**
+     * @expectedException \Puli\RepositoryManager\Discovery\CannotEnableBindingException
+     */
     public function testEnableBindingFailsIfBindingHeldBack()
     {
         $this->initDefaultManager();

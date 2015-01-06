@@ -617,7 +617,6 @@ class DiscoveryManager
      */
     private function getBindingsToEnable(Uuid $uuid, $packageName = null)
     {
-        $rootPackageName = $this->rootPackage->getName();
         $packageNames = $packageName ? (array) $packageName : $this->packages->getPackageNames();
         $bindingsByPackage = $this->getBindingsByPackage($uuid, $packageNames);
 
@@ -625,16 +624,18 @@ class DiscoveryManager
             throw NoSuchBindingException::forUuid($uuid);
         }
 
-        if (1 === count($bindingsByPackage) && isset($bindingsByPackage[$rootPackageName])) {
-            throw CannotEnableBindingException::forUuid($uuid, $rootPackageName);
-        }
-
         $bindingsToEnable = array();
 
         foreach ($bindingsByPackage as $packageName => $binding) {
-            $installInfo = $this->packages[$packageName]->getInstallInfo();
+            $package = $this->packages[$packageName];
 
-            if ($installInfo->hasEnabledBindingUuid($uuid)) {
+            if ($package instanceof RootPackage) {
+                throw CannotEnableBindingException::forUuid($uuid, $package->getName());
+            }
+
+            $installInfo = $package->getInstallInfo();
+
+            if (!$installInfo || $installInfo->hasEnabledBindingUuid($uuid)) {
                 continue;
             }
 
