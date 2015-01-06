@@ -88,22 +88,26 @@ final class BindingState
         $typeName = $bindingDescriptor->getTypeName();
 
         if (!$typeStore->isDefined($typeName)) {
-            return BindingState::HELD_BACK;
+            return self::HELD_BACK;
         }
 
         if ($typeStore->isDuplicate($typeName)) {
-            return BindingState::IGNORED;
+            return self::IGNORED;
         }
 
-        if (!$package instanceof RootPackage && $installInfo->hasDisabledBindingUuid($uuid)) {
-            return BindingState::DISABLED;
+        if ($package instanceof RootPackage) {
+            return self::ENABLED;
         }
 
-        if (!$package instanceof RootPackage && !$installInfo->hasEnabledBindingUuid($uuid)) {
-            return BindingState::UNDECIDED;
+        if ($installInfo->hasDisabledBindingUuid($uuid)) {
+            return self::DISABLED;
         }
 
-        return BindingState::ENABLED;
+        if ($installInfo->hasEnabledBindingUuid($uuid)) {
+            return self::ENABLED;
+        }
+
+        return self::UNDECIDED;
     }
 
     /**
