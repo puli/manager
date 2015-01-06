@@ -15,11 +15,10 @@ use Exception;
 use PHPUnit_Framework_Assert;
 use PHPUnit_Framework_MockObject_MockObject;
 use Psr\Log\LoggerInterface;
-use Puli\Discovery\Api\BindingException;
 use Puli\Discovery\Api\BindingType;
 use Puli\Discovery\Api\DuplicateTypeException;
 use Puli\Discovery\Api\MissingParameterException;
-use Puli\Discovery\Api\NoSuchTypeException;
+use Puli\Discovery\Api\NoQueryMatchesException;
 use Puli\RepositoryManager\Discovery\BindingDescriptor;
 use Puli\RepositoryManager\Discovery\BindingParameterDescriptor;
 use Puli\RepositoryManager\Discovery\BindingState;
@@ -640,7 +639,7 @@ class DiscoveryManagerTest extends ManagerTestCase
     }
 
     /**
-     * @expectedException \Puli\Discovery\Api\BindingException
+     * @expectedException \Puli\Discovery\Api\NoQueryMatchesException
      */
     public function testAddBindingFailsIfNoResourcesFound()
     {
@@ -650,7 +649,7 @@ class DiscoveryManagerTest extends ManagerTestCase
 
         $this->discovery->expects($this->once())
             ->method('bind')
-            ->willThrowException(new BindingException());
+            ->willThrowException(new NoQueryMatchesException());
 
         $this->packageFileStorage->expects($this->never())
             ->method('saveRootPackageFile');
