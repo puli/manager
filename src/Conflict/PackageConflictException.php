@@ -27,9 +27,9 @@ class PackageConflictException extends RuntimeException
         return new static(sprintf(
             "The packages \"%s\" and \"%s\" add resources for the same path ".
             "\"%s\", but have no override order defined between them.\n\n".
-            "Resolutions:\n\n(1) Add the key \"override\" to the composer.json ".
+            "Resolutions:\n\n(1) Add the key \"override\" to the puli.json ".
             "of one package and set its value to the other package name.\n(2) ".
-            "Add the key \"override-order\" to the composer.json of the root ".
+            "Add the key \"override-order\" to the puli.json of the root ".
             "package and define the order of the packages there.",
             $conflict->getPackageName1(),
             $conflict->getPackageName2(),
