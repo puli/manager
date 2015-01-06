@@ -43,4 +43,52 @@ class CannotEnableBindingException extends RuntimeException
             $reason ? ': '.$reason : '.'
         ), $code, $cause);
     }
+
+    /**
+     * Creates an exception for a UUID that could not be enabled because the
+     * binding is in the root package.
+     *
+     * @param Uuid      $uuid        The UUID.
+     * @param string    $packageName The name of the package.
+     * @param int       $code        The exception code.
+     * @param Exception $cause       The exception that caused this exception.
+     *
+     * @return static The created exception.
+     */
+    public static function rootPackageNotAccepted(Uuid $uuid, $packageName, $code = 0, Exception $cause = null)
+    {
+        return static::forUuid($uuid, $packageName, '', $code, $cause);
+    }
+
+    /**
+     * Creates an exception for a UUID that could not be enabled because the
+     * binding type is not loaded.
+     *
+     * @param Uuid      $uuid        The UUID.
+     * @param string    $packageName The name of the package.
+     * @param int       $code        The exception code.
+     * @param Exception $cause       The exception that caused this exception.
+     *
+     * @return static The created exception.
+     */
+    public static function typeNotLoaded(Uuid $uuid, $packageName, $code = 0, Exception $cause = null)
+    {
+        return static::forUuid($uuid, $packageName, 'The type of the binding is not loaded.', $code, $cause);
+    }
+
+    /**
+     * Creates an exception for a UUID that could not be enabled because the
+     * binding type is defined twice.
+     *
+     * @param Uuid      $uuid        The UUID.
+     * @param string    $packageName The name of the package.
+     * @param int       $code        The exception code.
+     * @param Exception $cause       The exception that caused this exception.
+     *
+     * @return static The created exception.
+     */
+    public static function duplicateType(Uuid $uuid, $packageName, $code = 0, Exception $cause = null)
+    {
+        return static::forUuid($uuid, $packageName, 'The type definition is duplicated.', $code, $cause);
+    }
 }

@@ -630,7 +630,7 @@ class DiscoveryManager
             $package = $this->packages[$packageName];
 
             if ($package instanceof RootPackage) {
-                throw CannotEnableBindingException::forUuid($uuid, $package->getName());
+                throw CannotEnableBindingException::rootPackageNotAccepted($uuid, $package->getName());
             }
 
             $installInfo = $package->getInstallInfo();
@@ -640,19 +640,11 @@ class DiscoveryManager
             }
 
             if ($binding->isHeldBack()) {
-                throw CannotEnableBindingException::forUuid(
-                    $uuid,
-                    $packageName,
-                    'The type of the binding is not loaded.'
-                );
+                throw CannotEnableBindingException::typeNotLoaded($uuid, $packageName);
             }
 
             if ($binding->isIgnored()) {
-                throw CannotEnableBindingException::forUuid(
-                    $uuid,
-                    $packageName,
-                    'The type of the binding is duplicated.'
-                );
+                throw CannotEnableBindingException::duplicateType($uuid, $packageName);
             }
 
             $bindingsToEnable[$packageName] = $binding;
