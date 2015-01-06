@@ -503,6 +503,31 @@ class DiscoveryManagerTest extends ManagerTestCase
         $this->manager->removeBinding($binding->getUuid());
     }
 
+    public function testAddBindingWithDuplicateCanBeUndoneWithRemoveBinding()
+    {
+        $this->initDefaultManager();
+
+        $this->packageFile1->addTypeDescriptor(new BindingTypeDescriptor('my/type'));
+        $this->packageFile1->addBindingDescriptor($binding = BindingDescriptor::create('/path', 'my/type'));
+        $this->installInfo1->addEnabledBindingUuid($binding->getUuid());
+
+        $this->discovery->expects($this->never())
+            ->method('bind');
+
+        $this->discovery->expects($this->never())
+            ->method('unbind');
+
+        $this->packageFileStorage->expects($this->exactly(2))
+            ->method('saveRootPackageFile')
+            ->with($this->rootPackageFile);
+
+        // Duplicate, not bound
+        $this->manager->addBinding('/path', 'my/type');
+
+        // Duplicate removed, not unbound
+        $this->manager->removeBinding($binding->getUuid());
+    }
+
     public function testGetEnabledBindings()
     {
         $this->initDefaultManager();

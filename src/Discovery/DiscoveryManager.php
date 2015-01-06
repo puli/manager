@@ -237,25 +237,18 @@ class DiscoveryManager
         }
 
         $binding = BindingDescriptor::create($query, $typeName, $parameters, $language);
-        $uuid = $binding->getUuid();
-
-        if ($this->rootPackageFile->hasBindingDescriptor($uuid)) {
+        
+        if ($this->rootPackageFile->hasBindingDescriptor($binding->getUuid())) {
             return;
         }
 
         $this->rootPackageFile->addBindingDescriptor($binding);
         $this->packageFileStorage->saveRootPackageFile($this->rootPackageFile);
 
-        // TODO binding should be loaded (but not bound) if duplicate
-        if (isset($this->enabledBindings[$uuid->toString()])) {
-            return;
-        }
-
         $state = $this->getBindingState($binding, $this->rootPackage);
 
         $this->loadBinding($binding, $this->rootPackage->getName(), $state);
-
-        $this->discovery->bind($query, $typeName, $parameters, $language);
+        $this->bindUnlessDuplicate($binding);
     }
 
     /**
@@ -499,6 +492,14 @@ class DiscoveryManager
             1 !== count($this->packageNamesByType[$typeName]);
     }
 
+    private function isDuplicateBinding(Uuid $uuid)
+    {
+        $uuidString = $uuid->toString();
+
+        return isset($this->enabledBindingRefs[$uuidString]) &&
+            1 !== count($this->enabledBindingRefs[$uuidString]);
+    }
+
     /**
      * @param BindingTypeDescriptor $typeDescriptor
      */
@@ -576,6 +577,13 @@ class DiscoveryManager
 
         if (0 === count($this->bindingsByState[$packageName])) {
             unset($this->bindingsByState[$packageName]);
+        }
+    }
+
+    private function bindUnlessDuplicate(BindingDescriptor $binding)
+    {
+        if (!$this->isDuplicateBinding($binding->getUuid())) {
+            $this->bind($binding);
         }
     }
 
