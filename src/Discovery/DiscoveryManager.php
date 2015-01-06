@@ -83,7 +83,7 @@ class DiscoveryManager
     /**
      * @var bool[][]
      */
-    private $packageNamesByType = array();
+    private $bindingTypeRefs = array();
 
     /**
      * @var bool[][]
@@ -149,7 +149,7 @@ class DiscoveryManager
         $this->packageFileStorage->saveRootPackageFile($this->rootPackageFile);
 
         // Add bindings that have been held back until now
-        $this->reloadHeldBackBindings($bindingType->getName());
+        $this->reloadBindingsByType($bindingType->getName(), BindingState::HELD_BACK);
     }
 
     /**
@@ -176,16 +176,16 @@ class DiscoveryManager
 
         $this->unloadBindingType($typeName, $this->rootPackage->getName());
 
-        // If the type is still loaded, that means it is also defined by an
-        // installed package
-        if (isset($this->bindingTypes[$typeName])) {
-            // TODO also add bindings if not duplicate
-            $this->defineTypeUnlessDuplicate($this->bindingTypes[$typeName]);
+        if (!$this->isBindingTypeLoaded($typeName)) {
+            $this->undefineType($typeName);
 
             return;
         }
 
-        $this->undefineType($typeName);
+        if (!$this->isDuplicateBindingType($typeName)) {
+            $this->defineType($this->bindingTypes[$typeName]);
+            $this->reloadBindingsByType($typeName, BindingState::IGNORED);
+        }
     }
 
     /**
@@ -433,7 +433,7 @@ class DiscoveryManager
         $typeName = $bindingType->getName();
 
         if (isset($this->bindingTypes[$typeName])) {
-            $packageNames = array_keys($this->packageNamesByType[$typeName]);
+            $packageNames = array_keys($this->bindingTypeRefs[$typeName]);
 
             $this->logger->warning(sprintf(
                 'The packages "%s" and "%s" contain type definitions for '.
@@ -443,13 +443,13 @@ class DiscoveryManager
                 $typeName
             ));
 
-            $this->packageNamesByType[$typeName][$packageName] = true;
+            $this->bindingTypeRefs[$typeName][$packageName] = true;
 
             return;
         }
 
         $this->bindingTypes[$typeName] = $bindingType;
-        $this->packageNamesByType[$typeName] = array($packageName => true);
+        $this->bindingTypeRefs[$typeName] = array($packageName => true);
     }
 
     /**
@@ -458,13 +458,13 @@ class DiscoveryManager
      */
     private function unloadBindingType($typeName, $packageName)
     {
-        unset($this->packageNamesByType[$typeName][$packageName]);
+        unset($this->bindingTypeRefs[$typeName][$packageName]);
 
         // If this was the only package referencing the type, remove it
         // completely
-        if (0 === count($this->packageNamesByType[$typeName])) {
+        if (0 === count($this->bindingTypeRefs[$typeName])) {
             unset($this->bindingTypes[$typeName]);
-            unset($this->packageNamesByType[$typeName]);
+            unset($this->bindingTypeRefs[$typeName]);
         }
     }
 
@@ -475,8 +475,8 @@ class DiscoveryManager
 
     private function isDuplicateBindingType($typeName)
     {
-        return isset($this->packageNamesByType[$typeName]) &&
-            1 !== count($this->packageNamesByType[$typeName]);
+        return isset($this->bindingTypeRefs[$typeName]) &&
+            1 !== count($this->bindingTypeRefs[$typeName]);
     }
 
     private function isDuplicateBinding(Uuid $uuid)
@@ -586,14 +586,14 @@ class DiscoveryManager
         $this->loadBinding($binding, $package);
     }
 
-    private function reloadHeldBackBindings($typeName)
+    private function reloadBindingsByType($typeName, $state)
     {
         foreach ($this->bindingsByState as $packageName => $bindingsByState) {
-            if (!isset($this->bindingsByState[$packageName][BindingState::HELD_BACK])) {
+            if (!isset($this->bindingsByState[$packageName][$state])) {
                 continue;
             }
 
-            $bindings = $this->bindingsByState[$packageName][BindingState::HELD_BACK];
+            $bindings = $this->bindingsByState[$packageName][$state];
 
             foreach ($bindings as $uuidString => $binding) {
                 if ($typeName !== $binding->getTypeName()) {
