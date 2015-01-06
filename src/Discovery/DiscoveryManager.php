@@ -67,14 +67,9 @@ class DiscoveryManager
     private $rootPackageFile;
 
     /**
-     * @var BindingTypeDescriptor[]
+     * @var BindingTypeDescriptor[][]
      */
     private $bindingTypes = array();
-
-    /**
-     * @var bool[][]
-     */
-    private $bindingTypeRefs = array();
 
     /**
      * @var BindingDescriptor[][]
@@ -187,7 +182,7 @@ class DiscoveryManager
         }
 
         if (!$this->isDuplicateBindingType($typeName)) {
-            $this->defineType($this->bindingTypes[$typeName]);
+            $this->defineType($this->getBindingType($typeName));
             $this->reloadAndRebindByType($typeName, BindingState::IGNORED);
         }
     }
@@ -235,7 +230,7 @@ class DiscoveryManager
             $this->loadPackages();
         }
 
-        if (!isset($this->bindingTypes[$typeName])) {
+        if (!$this->isBindingTypeLoaded($typeName)) {
             throw NoSuchTypeException::forTypeName($typeName);
         }
 
@@ -426,8 +421,10 @@ class DiscoveryManager
             throw new DiscoveryNotEmptyException('The discovery is not empty.');
         }
 
-        foreach ($this->bindingTypes as $typeDescriptor) {
-            $this->defineTypeUnlessDuplicate($typeDescriptor);
+        foreach ($this->bindingTypes as $typeName => $typesByPackage) {
+            $type = reset($typesByPackage);
+
+            $this->defineTypeUnlessDuplicate($type);
         }
 
         foreach ($this->bindings as $uuidString => $bindingsByPackage) {
@@ -500,8 +497,8 @@ class DiscoveryManager
         $packageName = $package->getName();
         $typeName = $bindingType->getName();
 
-        if (isset($this->bindingTypes[$typeName])) {
-            $packageNames = array_keys($this->bindingTypeRefs[$typeName]);
+        if ($this->isBindingTypeLoaded($typeName)) {
+            $packageNames = array_keys($this->bindingTypes[$typeName]);
 
             $this->logger->warning(sprintf(
                 'The packages "%s" and "%s" contain type definitions for '.
@@ -511,13 +508,12 @@ class DiscoveryManager
                 $typeName
             ));
 
-            $this->bindingTypeRefs[$typeName][$packageName] = true;
+            $this->bindingTypes[$typeName][$packageName] = $bindingType;
 
             return;
         }
 
-        $this->bindingTypes[$typeName] = $bindingType;
-        $this->bindingTypeRefs[$typeName] = array($packageName => true);
+        $this->bindingTypes[$typeName] = array($packageName => $bindingType);
     }
 
     /**
@@ -528,13 +524,12 @@ class DiscoveryManager
     {
         $packageName = $package->getName();
 
-        unset($this->bindingTypeRefs[$typeName][$packageName]);
+        unset($this->bindingTypes[$typeName][$packageName]);
 
         // If this was the only package referencing the type, remove it
         // completely
-        if (0 === count($this->bindingTypeRefs[$typeName])) {
+        if (0 === count($this->bindingTypes[$typeName])) {
             unset($this->bindingTypes[$typeName]);
-            unset($this->bindingTypeRefs[$typeName]);
         }
     }
 
@@ -543,10 +538,19 @@ class DiscoveryManager
         return isset($this->bindingTypes[$typeName]);
     }
 
+    private function getBindingType($typeName)
+    {
+        if (!isset($this->bindingTypes[$typeName])) {
+            return null;
+        }
+
+        return reset($this->bindingTypes[$typeName]);
+    }
+
     private function isDuplicateBindingType($typeName)
     {
-        return isset($this->bindingTypeRefs[$typeName]) &&
-            1 !== count($this->bindingTypeRefs[$typeName]);
+        return isset($this->bindingTypes[$typeName]) &&
+            1 !== count($this->bindingTypes[$typeName]);
     }
 
     private function isBindingLoaded(Uuid $uuid)
