@@ -13,6 +13,12 @@ namespace Puli\RepositoryManager\Tests\Discovery;
 
 use PHPUnit_Framework_TestCase;
 use Puli\RepositoryManager\Discovery\BindingDescriptor;
+use Puli\RepositoryManager\Discovery\BindingParameterDescriptor;
+use Puli\RepositoryManager\Discovery\BindingTypeDescriptor;
+use Puli\RepositoryManager\Discovery\Store\BindingTypeStore;
+use Puli\RepositoryManager\Package\InstallInfo;
+use Puli\RepositoryManager\Package\Package;
+use Puli\RepositoryManager\Package\PackageFile\PackageFile;
 use Rhumsaa\Uuid\Uuid;
 use stdClass;
 
@@ -24,9 +30,21 @@ class BindingDescriptorTest extends PHPUnit_Framework_TestCase
 {
     private $uuid;
 
+    /**
+     * @var BindingTypeStore
+     */
+    private $typeStore;
+
+    /**
+     * @var Package
+     */
+    private $package;
+
     protected function setUp()
     {
         $this->uuid = Uuid::uuid4();
+        $this->typeStore = new BindingTypeStore();
+        $this->package = new Package(new PackageFile(), '/path', new InstallInfo('package', '/path'));
     }
 
     public function testCreate()
@@ -39,11 +57,11 @@ class BindingDescriptorTest extends PHPUnit_Framework_TestCase
         $this->assertSame('/path', $descriptor->getQuery());
         $this->assertSame('glob', $descriptor->getLanguage());
         $this->assertSame('vendor/type', $descriptor->getTypeName());
-        $this->assertSame(array('param' => 'value'), $descriptor->getParameters());
-        $this->assertSame('value', $descriptor->getParameter('param'));
-        $this->assertTrue($descriptor->hasParameter('param'));
-        $this->assertFalse($descriptor->hasParameter('foobar'));
-        $this->assertTrue($descriptor->hasParameters());
+        $this->assertSame(array('param' => 'value'), $descriptor->getParameterValues());
+        $this->assertSame('value', $descriptor->getParameterValue('param'));
+        $this->assertTrue($descriptor->hasParameterValue('param'));
+        $this->assertFalse($descriptor->hasParameterValue('foobar'));
+        $this->assertTrue($descriptor->hasParameterValues());
     }
 
     public function testCreateWithQueryLanguage()
@@ -54,8 +72,8 @@ class BindingDescriptorTest extends PHPUnit_Framework_TestCase
         $this->assertSame('/path', $descriptor->getQuery());
         $this->assertSame('xpath', $descriptor->getLanguage());
         $this->assertSame('vendor/type', $descriptor->getTypeName());
-        $this->assertSame(array(), $descriptor->getParameters());
-        $this->assertFalse($descriptor->hasParameters());
+        $this->assertSame(array(), $descriptor->getParameterValues());
+        $this->assertFalse($descriptor->hasParameterValues());
     }
 
     /**
@@ -88,16 +106,6 @@ class BindingDescriptorTest extends PHPUnit_Framework_TestCase
     public function testTypeNameMustNotBeEmpty()
     {
         new BindingDescriptor($this->uuid, '/path', '');
-    }
-
-    /**
-     * @expectedException \Puli\Discovery\Api\Binding\NoSuchParameterException
-     */
-    public function testGetParameterFailsIfUnknownParameter()
-    {
-        $descriptor = new BindingDescriptor($this->uuid, '/path', 'vendor/type');
-
-        $descriptor->getParameter('foobar');
     }
 
     /**
@@ -148,7 +156,7 @@ class BindingDescriptorTest extends PHPUnit_Framework_TestCase
         $this->assertSame('/path', $descriptor->getQuery());
         $this->assertSame('glob', $descriptor->getLanguage());
         $this->assertSame('vendor/type', $descriptor->getTypeName());
-        $this->assertSame(array('param' => 'value'), $descriptor->getParameters());
+        $this->assertSame(array('param' => 'value'), $descriptor->getParameterValues());
     }
 
     public function testForPackageGeneratesDeterministicUuid()
@@ -205,5 +213,189 @@ class BindingDescriptorTest extends PHPUnit_Framework_TestCase
         $descriptor2 = BindingDescriptor::create('/path', 'vendor/type', array('param' => 'value'), 'language2');
 
         $this->assertNotEquals($descriptor1->getUuid(), $descriptor2->getUuid());
+    }
+
+    public function testGetParameterValuesWhenUnloaded()
+    {
+        $descriptor = BindingDescriptor::create('/path', 'vendor/type', array('param' => 'value'));
+
+        $this->assertSame(array('param' => 'value'), $descriptor->getParameterValues());
+    }
+
+    public function testGetParameterValuesWhenLoadedIncludesDefaultValues()
+    {
+        $type = new BindingTypeDescriptor('vendor/type', null, array(
+            new BindingParameterDescriptor('foo', false, 'bar'),
+            new BindingParameterDescriptor('param', false, 'default'),
+        ));
+        $this->typeStore->add($type, $this->package);
+        $type->refreshState($this->typeStore);
+
+        $descriptor = BindingDescriptor::create('/path', 'vendor/type', array('param' => 'value'));
+        $descriptor->refreshState($this->package, $this->typeStore);
+
+        $this->assertSame(array('foo' => 'bar', 'param' => 'value'), $descriptor->getParameterValues());
+    }
+
+    public function testGetParameterValuesWhenLoadedDoesNotIncludeDefaultValuesIfSuppressed()
+    {
+        $type = new BindingTypeDescriptor('vendor/type', null, array(
+            new BindingParameterDescriptor('foo', false, 'bar'),
+            new BindingParameterDescriptor('param', false, 'default'),
+        ));
+        $this->typeStore->add($type, $this->package);
+        $type->refreshState($this->typeStore);
+
+        $descriptor = BindingDescriptor::create('/path', 'vendor/type', array('param' => 'value'));
+        $descriptor->refreshState($this->package, $this->typeStore);
+
+        $this->assertSame(array('param' => 'value'), $descriptor->getParameterValues(false));
+    }
+
+    public function testGetParameterValueWhenUnloaded()
+    {
+        $descriptor = BindingDescriptor::create('/path', 'vendor/type', array('param' => 'value'));
+
+        $this->assertSame('value', $descriptor->getParameterValue('param'));
+    }
+
+    /**
+     * @expectedException \Puli\Discovery\Api\Binding\NoSuchParameterException
+     */
+    public function testGetParameterValueWhenUnloadedThrowsExceptionIfNotFound()
+    {
+        $descriptor = BindingDescriptor::create('/path', 'vendor/type');
+
+        $descriptor->getParameterValue('foo');
+    }
+
+    public function testGetParameterValueWhenLoadedReturnsDefaultValue()
+    {
+        $type = new BindingTypeDescriptor('vendor/type', null, array(
+            new BindingParameterDescriptor('param', false, 'default'),
+        ));
+        $this->typeStore->add($type, $this->package);
+        $type->refreshState($this->typeStore);
+
+        $descriptor = BindingDescriptor::create('/path', 'vendor/type');
+        $descriptor->refreshState($this->package, $this->typeStore);
+
+        $this->assertSame('default', $descriptor->getParameterValue('param'));
+    }
+
+    public function testGetParameterValueWhenLoadedDoesNotReturnDefaultValuesIfSuppressed()
+    {
+        $type = new BindingTypeDescriptor('vendor/type', null, array(
+            new BindingParameterDescriptor('param', false, 'default'),
+        ));
+        $this->typeStore->add($type, $this->package);
+        $type->refreshState($this->typeStore);
+
+        $descriptor = BindingDescriptor::create('/path', 'vendor/type');
+        $descriptor->refreshState($this->package, $this->typeStore);
+
+        $this->assertNull($descriptor->getParameterValue('param', false));
+    }
+
+    public function testGetParameterValueWhenLoadedPrefersOverriddenValue()
+    {
+        $type = new BindingTypeDescriptor('vendor/type', null, array(
+            new BindingParameterDescriptor('param', false, 'default'),
+        ));
+        $this->typeStore->add($type, $this->package);
+        $type->refreshState($this->typeStore);
+
+        $descriptor = BindingDescriptor::create('/path', 'vendor/type', array('param' => 'value'));
+        $descriptor->refreshState($this->package, $this->typeStore);
+
+        $this->assertSame('value', $descriptor->getParameterValue('param'));
+    }
+
+    /**
+     * @expectedException \Puli\Discovery\Api\Binding\NoSuchParameterException
+     */
+    public function testGetParameterValueWhenLoadedThrowsExceptionIfNotFound()
+    {
+        $type = new BindingTypeDescriptor('vendor/type');
+        $this->typeStore->add($type, $this->package);
+        $type->refreshState($this->typeStore);
+
+        $descriptor = BindingDescriptor::create('/path', 'vendor/type');
+        $descriptor->refreshState($this->package, $this->typeStore);
+
+        $descriptor->getParameterValue('foo');
+    }
+
+    public function testHasParameterValuesWhenUnloaded()
+    {
+        $descriptor = BindingDescriptor::create('/path', 'vendor/type', array('param' => 'value'));
+
+        $this->assertTrue($descriptor->hasParameterValues());
+    }
+
+    public function testHasParameterValuesWhenLoadedIncludesDefaultValues()
+    {
+        $type = new BindingTypeDescriptor('vendor/type', null, array(
+            new BindingParameterDescriptor('param', false, 'default'),
+        ));
+        $this->typeStore->add($type, $this->package);
+        $type->refreshState($this->typeStore);
+
+        $descriptor = BindingDescriptor::create('/path', 'vendor/type');
+        $descriptor->refreshState($this->package, $this->typeStore);
+
+        $this->assertTrue($descriptor->hasParameterValues());
+    }
+
+    public function testHasParameterValuesWhenLoadedDoesNotIncludeDefaultValuesIfSuppressed()
+    {
+        $type = new BindingTypeDescriptor('vendor/type', null, array(
+            new BindingParameterDescriptor('param', false, 'default'),
+        ));
+        $this->typeStore->add($type, $this->package);
+        $type->refreshState($this->typeStore);
+
+        $descriptor = BindingDescriptor::create('/path', 'vendor/type');
+        $descriptor->refreshState($this->package, $this->typeStore);
+
+        $this->assertFalse($descriptor->hasParameterValues(false));
+    }
+
+    public function testHasParameterValueWhenUnloaded()
+    {
+        $descriptor = BindingDescriptor::create('/path', 'vendor/type', array('param' => 'value'));
+
+        $this->assertTrue($descriptor->hasParameterValue('param'));
+        $this->assertFalse($descriptor->hasParameterValue('foo'));
+    }
+
+    public function testHasParameterValueWhenLoaded()
+    {
+        $type = new BindingTypeDescriptor('vendor/type', null, array(
+            new BindingParameterDescriptor('default', false, 'value'),
+        ));
+        $this->typeStore->add($type, $this->package);
+        $type->refreshState($this->typeStore);
+
+        $descriptor = BindingDescriptor::create('/path', 'vendor/type', array('param' => 'value'));
+        $descriptor->refreshState($this->package, $this->typeStore);
+
+        $this->assertTrue($descriptor->hasParameterValue('default'));
+        $this->assertTrue($descriptor->hasParameterValue('param'));
+        $this->assertFalse($descriptor->hasParameterValue('foo'));
+    }
+
+    public function testHasParameterValueWhenLoadedReturnsFalseForDefaultIfSuppressed()
+    {
+        $type = new BindingTypeDescriptor('vendor/type', null, array(
+            new BindingParameterDescriptor('default', false, 'value'),
+        ));
+        $this->typeStore->add($type, $this->package);
+        $type->refreshState($this->typeStore);
+
+        $descriptor = BindingDescriptor::create('/path', 'vendor/type');
+        $descriptor->refreshState($this->package, $this->typeStore);
+
+        $this->assertFalse($descriptor->hasParameterValue('default', false));
     }
 }

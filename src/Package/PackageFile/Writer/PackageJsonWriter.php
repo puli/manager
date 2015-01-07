@@ -110,8 +110,9 @@ class PackageJsonWriter implements PackageFileWriter
 
                 $bindingData->type = $binding->getTypeName();
 
-                if (count($binding->getParameters()) > 0) {
-                    $bindingData->parameters = $binding->getParameters();
+                // Don't include the default values of the binding type
+                if ($binding->hasParameterValues(false)) {
+                    $bindingData->parameters = $binding->getParameterValues(false);
                 }
 
                 $jsonData['bindings']->{$binding->getUuid()->toString()} = $bindingData;

@@ -119,6 +119,139 @@ class BindingTypeDescriptorTest extends PHPUnit_Framework_TestCase
         $descriptor->getParameter('foobar');
     }
 
+    public function testGetParameterValues()
+    {
+        $descriptor = new BindingTypeDescriptor('vendor/type', null, array(
+            new BindingParameterDescriptor('param', false, 'value'),
+        ));
+
+        $this->assertSame(array('param' => 'value'), $descriptor->getParameterValues());
+    }
+
+    public function testGetParameterValuesIgnoresRequiredParameters()
+    {
+        $descriptor = new BindingTypeDescriptor('vendor/type', null, array(
+            new BindingParameterDescriptor('param', true),
+        ));
+
+        $this->assertSame(array(), $descriptor->getParameterValues());
+    }
+
+    public function testGetParameterValue()
+    {
+        $descriptor = new BindingTypeDescriptor('vendor/type', null, array(
+            new BindingParameterDescriptor('param', false, 'value'),
+        ));
+
+        $this->assertSame('value', $descriptor->getParameterValue('param'));
+    }
+
+    public function testGetParameterValueReturnsNullForRequiredParameter()
+    {
+        $descriptor = new BindingTypeDescriptor('vendor/type', null, array(
+            new BindingParameterDescriptor('param', true),
+        ));
+
+        $this->assertNull($descriptor->getParameterValue('param'));
+    }
+
+    /**
+     * @expectedException \Puli\Discovery\Api\Binding\NoSuchParameterException
+     */
+    public function testGetParameterValueFailsIfUnknownParameter()
+    {
+        $descriptor = new BindingTypeDescriptor('vendor/type');
+
+        $descriptor->getParameterValue('foobar');
+    }
+
+    public function testHasParameterValues()
+    {
+        $descriptor = new BindingTypeDescriptor('vendor/type', null, array(
+            new BindingParameterDescriptor('param', false, 'value'),
+        ));
+
+        $this->assertTrue($descriptor->hasParameterValues());
+    }
+
+    public function testHasParameterValuesIgnoresRequiredParameters()
+    {
+        $descriptor = new BindingTypeDescriptor('vendor/type', null, array(
+            new BindingParameterDescriptor('param', true),
+        ));
+
+        $this->assertFalse($descriptor->hasParameterValues());
+    }
+
+    public function testHasParameterValue()
+    {
+        $descriptor = new BindingTypeDescriptor('vendor/type', null, array(
+            new BindingParameterDescriptor('param', false, 'value'),
+        ));
+
+        $this->assertTrue($descriptor->hasParameterValue('param'));
+        $this->assertFalse($descriptor->hasParameterValue('foo'));
+    }
+
+    public function testHasParameterValueIgnoresRequiredParameters()
+    {
+        $descriptor = new BindingTypeDescriptor('vendor/type', null, array(
+            new BindingParameterDescriptor('param', true),
+        ));
+
+        $this->assertFalse($descriptor->hasParameterValue('param'));
+    }
+
+    public function testHasRequiredParametersReturnsTrueIfRequiredParameters()
+    {
+        $descriptor = new BindingTypeDescriptor('vendor/type', null, array(
+            new BindingParameterDescriptor('param', true),
+        ));
+
+        $this->assertTrue($descriptor->hasRequiredParameters());
+    }
+
+    public function testHasRequiredParametersReturnsFalseIfNoRequiredParameters()
+    {
+        $descriptor = new BindingTypeDescriptor('vendor/type', null, array(
+            new BindingParameterDescriptor('param', false),
+        ));
+
+        $this->assertFalse($descriptor->hasRequiredParameters());
+    }
+
+    public function testHasRequiredParametersReturnsFalseIfNoParameters()
+    {
+        $descriptor = new BindingTypeDescriptor('vendor/type');
+
+        $this->assertFalse($descriptor->hasRequiredParameters());
+    }
+
+    public function testHasOptionalParametersReturnsTrueIfOptionalParameters()
+    {
+        $descriptor = new BindingTypeDescriptor('vendor/type', null, array(
+            new BindingParameterDescriptor('param', false),
+        ));
+
+        $this->assertTrue($descriptor->hasOptionalParameters());
+    }
+
+    public function testHasOptionalParametersReturnsFalseIfNoOptionalParameters()
+    {
+        $descriptor = new BindingTypeDescriptor('vendor/type', null, array(
+            new BindingParameterDescriptor('param', true),
+        ));
+
+        $this->assertFalse($descriptor->hasOptionalParameters());
+    }
+
+    public function testHasOptionalParametersReturnsFalseIfNoParameters()
+    {
+        $descriptor = new BindingTypeDescriptor('vendor/type');
+
+        $this->assertFalse($descriptor->hasOptionalParameters());
+    }
+
     /**
      * @dataProvider getValidNames
      */

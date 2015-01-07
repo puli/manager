@@ -15,7 +15,6 @@ use PHPUnit_Framework_Assert;
 use PHPUnit_Framework_MockObject_MockObject;
 use Psr\Log\LoggerInterface;
 use Puli\Discovery\Api\Binding\BindingType;
-use Puli\Discovery\Api\Binding\MissingParameterException;
 use Puli\Discovery\Api\NoQueryMatchesException;
 use Puli\RepositoryManager\Discovery\BindingDescriptor;
 use Puli\RepositoryManager\Discovery\BindingParameterDescriptor;
@@ -144,6 +143,21 @@ class DiscoveryManagerTest extends ManagerTestCase
     {
         $filesystem = new Filesystem();
         $filesystem->remove($this->tempDir);
+    }
+
+    public function testLoadedBindingsContainDefaultParameters()
+    {
+        $this->initDefaultManager();
+
+        $this->rootPackageFile->addTypeDescriptor(new BindingTypeDescriptor('my/type', null, array(
+            new BindingParameterDescriptor('optional', false, 'default'),
+            new BindingParameterDescriptor('required', true),
+        )));
+
+        $this->packageFile1->addBindingDescriptor(BindingDescriptor::create('/path', 'my/type', array(
+            'required' => 'value',
+        )));
+
     }
 
     public function testAddBindingType()
@@ -642,12 +656,41 @@ class DiscoveryManagerTest extends ManagerTestCase
                 PHPUnit_Framework_Assert::assertCount(1, $bindings);
                 PHPUnit_Framework_Assert::assertSame('/path', $bindings[0]->getQuery());
                 PHPUnit_Framework_Assert::assertSame('my/type', $bindings[0]->getTypeName());
-                PHPUnit_Framework_Assert::assertSame(array('param' => 'value'), $bindings[0]->getParameters());
+                PHPUnit_Framework_Assert::assertSame(array('param' => 'value'), $bindings[0]->getParameterValues());
                 PHPUnit_Framework_Assert::assertSame('xpath', $bindings[0]->getLanguage());
                 PHPUnit_Framework_Assert::assertTrue($bindings[0]->isEnabled());
             }));
 
         $this->manager->addBinding('/path', 'my/type', array('param' => 'value'), 'xpath');
+    }
+
+    public function testAddBindingForTypeWithDefaultParameters()
+    {
+        $this->initDefaultManager();
+
+        $this->packageFile1->addTypeDescriptor(new BindingTypeDescriptor('my/type', null, array(
+            new BindingParameterDescriptor('param', false, 'default'),
+        )));
+
+        $this->discovery->expects($this->once())
+            ->method('bind')
+            ->with('/path', 'my/type', array('param' => 'default'), 'xpath');
+
+        $this->packageFileStorage->expects($this->once())
+            ->method('saveRootPackageFile')
+            ->with($this->rootPackageFile)
+            ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) {
+                $bindings = $rootPackageFile->getBindingDescriptors();
+
+                PHPUnit_Framework_Assert::assertCount(1, $bindings);
+                PHPUnit_Framework_Assert::assertSame('/path', $bindings[0]->getQuery());
+                PHPUnit_Framework_Assert::assertSame('my/type', $bindings[0]->getTypeName());
+                PHPUnit_Framework_Assert::assertSame(array('param' => 'default'), $bindings[0]->getParameterValues());
+                PHPUnit_Framework_Assert::assertSame('xpath', $bindings[0]->getLanguage());
+                PHPUnit_Framework_Assert::assertTrue($bindings[0]->isEnabled());
+            }));
+
+        $this->manager->addBinding('/path', 'my/type', array(), 'xpath');
     }
 
     public function testAddBindingDoesNotAddBindingDuplicatedInPackage()
@@ -670,7 +713,7 @@ class DiscoveryManagerTest extends ManagerTestCase
                 PHPUnit_Framework_Assert::assertCount(1, $bindings);
                 PHPUnit_Framework_Assert::assertSame('/path', $bindings[0]->getQuery());
                 PHPUnit_Framework_Assert::assertSame('my/type', $bindings[0]->getTypeName());
-                PHPUnit_Framework_Assert::assertSame(array(), $bindings[0]->getParameters());
+                PHPUnit_Framework_Assert::assertSame(array(), $bindings[0]->getParameterValues());
                 PHPUnit_Framework_Assert::assertSame('glob', $bindings[0]->getLanguage());
                 PHPUnit_Framework_Assert::assertTrue($bindings[0]->isEnabled());
             }));
@@ -821,12 +864,37 @@ class DiscoveryManagerTest extends ManagerTestCase
                 PHPUnit_Framework_Assert::assertSame(array(), $bindings);
             }));
 
-        // Verify that the state is updated
-        $binding->setState(BindingState::ENABLED);
-
         $this->manager->removeBinding($binding->getUuid());
 
         $this->assertTrue($binding->isUnloaded());
+    }
+
+    public function testRemoveBindingWorksWithDefaultParameters()
+    {
+        $this->initDefaultManager();
+
+        // default parameters: ["param" => "default"]
+        $this->packageFile1->addTypeDescriptor(new BindingTypeDescriptor('my/type', null, array(
+            new BindingParameterDescriptor('param', false, 'default'),
+        )));
+
+        // actual parameters: []
+        $this->rootPackageFile->addBindingDescriptor($binding = BindingDescriptor::create('/path', 'my/type'));
+
+        $this->discovery->expects($this->once())
+            ->method('unbind')
+            ->with('/path', 'my/type', array('param' => 'default'), 'glob');
+
+        $this->packageFileStorage->expects($this->once())
+            ->method('saveRootPackageFile')
+            ->with($this->rootPackageFile)
+            ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) {
+                $bindings = $rootPackageFile->getBindingDescriptors();
+
+                PHPUnit_Framework_Assert::assertSame(array(), $bindings);
+            }));
+
+        $this->manager->removeBinding($binding->getUuid());
     }
 
     public function testRemoveBindingIgnoresNonExistingBindings()
@@ -881,9 +949,6 @@ class DiscoveryManagerTest extends ManagerTestCase
 
                 PHPUnit_Framework_Assert::assertSame(array(), $bindings);
             }));
-
-        $binding1->setState(BindingState::ENABLED);
-        $binding2->setState(BindingState::ENABLED);
 
         $this->manager->removeBinding($binding1->getUuid());
 

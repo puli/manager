@@ -15,7 +15,9 @@ use Puli\RepositoryManager\Config\Config;
 use Puli\RepositoryManager\Discovery\BindingDescriptor;
 use Puli\RepositoryManager\Discovery\BindingParameterDescriptor;
 use Puli\RepositoryManager\Discovery\BindingTypeDescriptor;
+use Puli\RepositoryManager\Discovery\Store\BindingTypeStore;
 use Puli\RepositoryManager\Package\InstallInfo;
+use Puli\RepositoryManager\Package\Package;
 use Puli\RepositoryManager\Package\PackageFile\PackageFile;
 use Puli\RepositoryManager\Package\PackageFile\RootPackageFile;
 use Puli\RepositoryManager\Package\PackageFile\Writer\PackageJsonWriter;
@@ -70,6 +72,35 @@ class PackageJsonWriterTest extends JsonWriterTestCase
         $this->assertFileExists($this->tempFile);
 
         $this->assertJsonFileEquals(__DIR__.'/Fixtures/full.json', $this->tempFile);
+    }
+
+    public function testWritePackageFileDoesWriteDefaultParameterValuesOfBindings()
+    {
+        $packageFile = new PackageFile();
+        $typeStore = new BindingTypeStore();
+        $package = new Package($packageFile, '/path', new InstallInfo('package', '/path'));
+
+        // We need to create a type and a binding in state ENABLED
+        $bindingType = new BindingTypeDescriptor('my/type', null, array(
+            new BindingParameterDescriptor('param', false, 'default'),
+        ));
+        $typeStore->add($bindingType, $package);
+        $bindingType->refreshState($typeStore);
+
+        $binding = BindingDescriptor::create('/app/config*.yml', 'my/type');
+        $binding->refreshState($package, $typeStore);
+
+        // The default value is accessible
+        $this->assertSame('default', $binding->getParameterValue('param'));
+
+        // But not written by the writer
+        $packageFile->addBindingDescriptor($binding);
+
+        $this->writer->writePackageFile($packageFile, $this->tempFile);
+
+        $this->assertFileExists($this->tempFile);
+
+        $this->assertJsonFileEquals(__DIR__.'/Fixtures/binding-no-default-params.json', $this->tempFile);
     }
 
     public function testWriteTypeWithoutDescription()

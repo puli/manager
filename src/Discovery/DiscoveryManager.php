@@ -208,10 +208,10 @@ class DiscoveryManager
      *
      * @param        $query
      * @param        $typeName
-     * @param array  $parameters
+     * @param array  $parameterValues
      * @param string $language
      */
-    public function addBinding($query, $typeName, array $parameters = array(), $language = 'glob')
+    public function addBinding($query, $typeName, array $parameterValues = array(), $language = 'glob')
     {
         $this->assertDiscoveryLoaded();
         $this->assertPackagesLoaded();
@@ -224,7 +224,7 @@ class DiscoveryManager
             throw TypeNotEnabledException::forTypeName($typeName);
         }
 
-        $binding = BindingDescriptor::create($query, $typeName, $parameters, $language);
+        $binding = BindingDescriptor::create($query, $typeName, $parameterValues, $language);
 
         if ($this->rootPackageFile->hasBindingDescriptor($binding->getUuid())) {
             return;
@@ -576,7 +576,7 @@ class DiscoveryManager
     private function unloadBindingType($typeName, Package $package)
     {
         if ($this->typeStore->exists($typeName, $package)) {
-            $this->typeStore->get($typeName, $package)->setState(BindingTypeState::UNLOADED);
+            $this->typeStore->get($typeName, $package)->resetState();
             $this->typeStore->remove($typeName, $package);
 
             if ($this->typeStore->existsAny($typeName)) {
@@ -644,7 +644,7 @@ class DiscoveryManager
     private function unloadBinding(Uuid $uuid, Package $package)
     {
         if ($this->bindingStore->exists($uuid, $package)) {
-            $this->bindingStore->get($uuid, $package)->setState(BindingState::UNLOADED);
+            $this->bindingStore->get($uuid, $package)->resetState();
             $this->bindingStore->remove($uuid, $package);
         }
     }
@@ -664,11 +664,14 @@ class DiscoveryManager
 
     private function unloadBindingAndUnbind(BindingDescriptor $binding)
     {
-        $this->unloadBinding($binding->getUuid(), $this->rootPackage);
-
-        if (!$this->bindingStore->existsAny($binding->getUuid())) {
+        if (!$this->bindingStore->isDuplicate($binding->getUuid())) {
+            // unbind() must run before unload(), otherwise the binding's
+            // reference to the type is lost
             $this->unbind($binding);
         }
+
+        $this->unloadBinding($binding->getUuid(), $this->rootPackage);
+
     }
 
     private function reloadBindingAndUpdate(BindingDescriptor $binding, Package $package)
@@ -731,7 +734,7 @@ class DiscoveryManager
         $this->discovery->bind(
             $binding->getQuery(),
             $binding->getTypeName(),
-            $binding->getParameters(),
+            $binding->getParameterValues(),
             $binding->getLanguage()
         );
     }
@@ -744,7 +747,7 @@ class DiscoveryManager
         $this->discovery->unbind(
             $binding->getQuery(),
             $binding->getTypeName(),
-            $binding->getParameters(),
+            $binding->getParameterValues(),
             $binding->getLanguage()
         );
     }

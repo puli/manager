@@ -106,34 +106,137 @@ class BindingTypeDescriptor
     /**
      * Returns the descriptor for a parameter.
      *
-     * @param string $name The parameter name.
+     * @param string $parameterName The parameter name.
      *
      * @return BindingParameterDescriptor The descriptor of the parameter.
      *
      * @throws NoSuchParameterException If the parameter was not set.
      */
-    public function getParameter($name)
+    public function getParameter($parameterName)
     {
-        if (!isset($this->parameters[$name])) {
+        if (!isset($this->parameters[$parameterName])) {
             throw new NoSuchParameterException(sprintf(
                 'The parameter "%s" does not exist.',
-                $name
+                $parameterName
             ));
         }
 
-        return $this->parameters[$name];
+        return $this->parameters[$parameterName];
     }
 
     /**
-     * Returns whether the descriptor contains a parameter.
+     * Returns whether the type has a parameter.
      *
-     * @param string $name The parameter name.
+     * @param string $parameterName The parameter name.
      *
      * @return bool Whether the type contains a parameter with that name.
      */
-    public function hasParameter($name)
+    public function hasParameter($parameterName)
     {
-        return isset($this->parameters[$name]);
+        return isset($this->parameters[$parameterName]);
+    }
+
+    /**
+     * Returns whether the type has any parameters.
+     *
+     * @return bool Returns `true` if the type has parameters.
+     */
+    public function hasParameters()
+    {
+        return count($this->parameters) > 0;
+    }
+
+    /**
+     * Returns whether the type has any required parameters.
+     *
+     * @return bool Returns `true` if the type has at least one required
+     *              parameter.
+     */
+    public function hasRequiredParameters()
+    {
+        foreach ($this->parameters as $parameter) {
+            if ($parameter->isRequired()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Returns whether the type has any optional parameters.
+     *
+     * @return bool Returns `true` if the type has at least one optional
+     *              parameter.
+     */
+    public function hasOptionalParameters()
+    {
+        foreach ($this->parameters as $parameter) {
+            if (!$parameter->isRequired()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Returns the default values of all optional parameters.
+     *
+     * @return array The default values.
+     */
+    public function getParameterValues()
+    {
+        $values = array();
+
+        foreach ($this->parameters as $name => $parameter) {
+            if (!$parameter->isRequired()) {
+                $values[$name] = $parameter->getDefaultValue();
+            }
+        }
+
+        return $values;
+    }
+
+    /**
+     * Returns the default value of a parameter.
+     *
+     * @param string $parameterName The parameter name.
+     *
+     * @return mixed The default value of the parameter.
+     *
+     * @throws NoSuchParameterException If the parameter was not set.
+     */
+    public function getParameterValue($parameterName)
+    {
+        return $this->getParameter($parameterName)->getDefaultValue();
+    }
+
+    /**
+     * Returns whether the type has any parameters with default values.
+     *
+     * This method is an alias for {@link hasOptionalParameters()}.
+     *
+     * @return bool Whether a parameter with a default value exists.
+     */
+    public function hasParameterValues()
+    {
+        return $this->hasOptionalParameters();
+    }
+
+    /**
+     * Returns whether the type has a parameter with a default value.
+     *
+     * This method checks whether the parameter exists and is optional.
+     *
+     * @param string $parameterName The parameter name.
+     *
+     * @return bool Returns `true` if the parameter exists and is optional
+     *              (not required).
+     */
+    public function hasParameterValue($parameterName)
+    {
+        return $this->hasParameter($parameterName) && !$this->getParameter($parameterName)->isRequired();
     }
 
     /**
@@ -163,15 +266,11 @@ class BindingTypeDescriptor
     }
 
     /**
-     * Sets the state of the binding type.
-     *
-     * @param int $state One of the {@link BindingTypeState} constants.
+     * Resets the state of the binding type to unloaded.
      */
-    public function setState($state)
+    public function resetState()
     {
-        Assert::choice($state, BindingTypeState::all(), 'The value "%s" is not a valid binding type state.');
-
-        $this->state = $state;
+        $this->state = BindingTypeState::UNLOADED;
     }
 
     /**
