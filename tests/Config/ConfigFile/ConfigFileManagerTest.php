@@ -33,6 +33,11 @@ class ConfigFileManagerTest extends PHPUnit_Framework_TestCase
     private $homeDir;
 
     /**
+     * @var Config
+     */
+    private $baseConfig;
+
+    /**
      * @var ConfigFile
      */
     private $configFile;
@@ -60,7 +65,8 @@ class ConfigFileManagerTest extends PHPUnit_Framework_TestCase
     protected function setUp()
     {
         $this->homeDir = __DIR__.'/Fixtures/home';
-        $this->configFile = new ConfigFile();
+        $this->baseConfig = new Config();
+        $this->configFile = new ConfigFile(null, $this->baseConfig);
         $this->dispatcher = $this->getMock('Symfony\Component\EventDispatcher\EventDispatcherInterface');
 
         $this->environment = new TestGlobalEnvironment(
@@ -99,12 +105,12 @@ class ConfigFileManagerTest extends PHPUnit_Framework_TestCase
                 $config = $configFile->getConfig();
 
                 PHPUnit_Framework_Assert::assertSame('my-puli-dir', $config->get(Config::PULI_DIR));
-                PHPUnit_Framework_Assert::assertSame('my-puli-dir/my-dump', $config->get(Config::FACTORY_FILE));
+                PHPUnit_Framework_Assert::assertSame('my-puli-dir/MyFactory.php', $config->get(Config::FACTORY_FILE));
             }));
 
         $this->manager->setConfigKeys(array(
             Config::PULI_DIR => 'my-puli-dir',
-            Config::FACTORY_FILE => '{$puli-dir}/my-dump',
+            Config::FACTORY_FILE => '{$puli-dir}/MyFactory.php',
         ));
     }
 
@@ -125,20 +131,77 @@ class ConfigFileManagerTest extends PHPUnit_Framework_TestCase
     public function testGetConfigKeyReturnsRawValue()
     {
         $this->configFile->getConfig()->set(Config::PULI_DIR, 'my-puli-dir');
-        $this->configFile->getConfig()->set(Config::FACTORY_FILE, '{$puli-dir}/my-dump');
+        $this->configFile->getConfig()->set(Config::FACTORY_FILE, '{$puli-dir}/MyFactory.php');
 
-        $this->assertSame('{$puli-dir}/my-dump', $this->manager->getConfigKey(Config::FACTORY_FILE));
+        $this->assertSame('{$puli-dir}/MyFactory.php', $this->manager->getConfigKey(Config::FACTORY_FILE));
+    }
+
+    public function testGetConfigKeyReturnsNullIfNotSet()
+    {
+        $this->baseConfig->set(Config::PULI_DIR, 'fallback');
+
+        $this->assertNull($this->manager->getConfigKey(Config::PULI_DIR));
+    }
+
+    public function testGetConfigKeyReturnsFallbackIfRequested()
+    {
+        $this->baseConfig->set(Config::PULI_DIR, 'fallback');
+
+        $this->assertSame('fallback', $this->manager->getConfigKey(Config::PULI_DIR, null, true));
     }
 
     public function testGetConfigKeys()
     {
+        $this->baseConfig->set(Config::FACTORY_CLASS, 'My\Class');
+
         $this->configFile->getConfig()->set(Config::PULI_DIR, 'my-puli-dir');
-        $this->configFile->getConfig()->set(Config::FACTORY_FILE, '{$puli-dir}/my-dump');
+        $this->configFile->getConfig()->set(Config::FACTORY_FILE, '{$puli-dir}/MyFactory.php');
 
         $this->assertSame(array(
             Config::PULI_DIR => 'my-puli-dir',
-            Config::FACTORY_FILE => '{$puli-dir}/my-dump',
+            Config::FACTORY_FILE => '{$puli-dir}/MyFactory.php',
         ), $this->manager->getConfigKeys());
+    }
+
+    public function testGetConfigKeysReordersToDefaultOrder()
+    {
+        $this->baseConfig->set(Config::FACTORY_CLASS, 'My\Class');
+
+        $this->configFile->getConfig()->set(Config::FACTORY_FILE, '{$puli-dir}/MyFactory.php');
+        $this->configFile->getConfig()->set(Config::PULI_DIR, 'my-puli-dir');
+
+        $this->assertSame(array(
+            Config::PULI_DIR => 'my-puli-dir',
+            Config::FACTORY_FILE => '{$puli-dir}/MyFactory.php',
+        ), $this->manager->getConfigKeys());
+    }
+
+    public function testGetConfigKeysWithFallback()
+    {
+        $this->baseConfig->set(Config::FACTORY_CLASS, 'My\Class');
+
+        $this->configFile->getConfig()->set(Config::PULI_DIR, 'my-puli-dir');
+        $this->configFile->getConfig()->set(Config::FACTORY_FILE, '{$puli-dir}/MyFactory.php');
+
+        $this->assertSame(array(
+            Config::PULI_DIR => 'my-puli-dir',
+            Config::FACTORY_CLASS => 'My\Class',
+            Config::FACTORY_FILE => '{$puli-dir}/MyFactory.php',
+        ), $this->manager->getConfigKeys(true));
+    }
+
+    public function testGetConfigKeysWithAllKeys()
+    {
+        $this->baseConfig->set(Config::FACTORY_CLASS, 'My\Class');
+
+        $this->configFile->getConfig()->set(Config::PULI_DIR, 'my-puli-dir');
+        $this->configFile->getConfig()->set(Config::FACTORY_FILE, '{$puli-dir}/MyFactory.php');
+
+        $values = $this->manager->getConfigKeys(false, true);
+
+        $this->assertSame(Config::getKeys(), array_keys($values));
+        $this->assertSame('my-puli-dir', $values[Config::PULI_DIR]);
+        $this->assertSame('{$puli-dir}/MyFactory.php', $values[Config::FACTORY_FILE]);
     }
 
     public function testRemoveConfigKey()

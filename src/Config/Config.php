@@ -186,6 +186,16 @@ class Config
     private $baseConfig;
 
     /**
+     * Returns all valid configuration keys.
+     *
+     * @return string[] The config keys.
+     */
+    public static function getKeys()
+    {
+        return array_keys(self::$keys);
+    }
+
+    /**
      * Creates a new configuration.
      *
      * @param Config $baseConfig The configuration to fall back to if a value is

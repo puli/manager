@@ -11,6 +11,7 @@
 
 namespace Puli\RepositoryManager\Package\PackageFile;
 
+use Puli\RepositoryManager\Config\Config;
 use Puli\RepositoryManager\Config\NoSuchConfigKeyException;
 use Puli\RepositoryManager\Environment\ProjectEnvironment;
 use Puli\RepositoryManager\InvalidConfigException;
@@ -153,17 +154,18 @@ class PackageFileManager
      *
      * The value is returned raw as it is written in the file.
      *
-     * @param string $key     The configuration key.
-     * @param mixed  $default The value to return if the key was not set.
+     * @param string $key      The configuration key.
+     * @param mixed  $default  The value to return if the key was not set.
+     * @param bool   $fallback Whether to return the value of the base
+     *                         configuration if the key was not set.
      *
      * @return mixed The value of the key or the default value, if none is set.
      *
      * @throws NoSuchConfigKeyException If the configuration key is invalid.
      */
-    public function getConfigKey($key, $default = null)
+    public function getConfigKey($key, $default = null, $fallback = false)
     {
-        // We're only interested in the value of the file, not in the default
-        return $this->packageFile->getConfig()->getRaw($key, $default, false);
+        return $this->packageFile->getConfig()->getRaw($key, $default, $fallback);
     }
 
     /**
@@ -171,12 +173,24 @@ class PackageFileManager
      *
      * The values are returned raw as they are written in the file.
      *
+     * @param bool $includeFallback Whether to include values set in the base
+     *                              configuration.
+     * @param bool $includeUnset    Whether to include unset keys in the result.
+     *
      * @return array A mapping of configuration keys to values.
      */
-    public function getConfigKeys()
+    public function getConfigKeys($includeFallback = false, $includeUnset = false)
     {
-        // We're only interested in the values of the file, not in the defaults
-        return $this->packageFile->getConfig()->toFlatRawArray(false);
+        $values = $this->packageFile->getConfig()->toFlatRawArray($includeFallback);
+
+        // Reorder the returned values
+        $keysInDefaultOrder = Config::getKeys();
+
+        if (!$includeUnset) {
+            $keysInDefaultOrder = array_intersect($keysInDefaultOrder, array_keys($values));
+        }
+
+        return array_replace(array_flip($keysInDefaultOrder), $values);
     }
 
     /**

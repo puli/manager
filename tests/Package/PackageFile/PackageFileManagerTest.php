@@ -45,6 +45,8 @@ class PackageFileManagerTest extends ManagerTestCase
             ->disableOriginalConstructor()
             ->getMock();
 
+        $this->baseConfig = new Config();
+
         $this->initEnvironment(__DIR__.'/Fixtures/home', __DIR__.'/Fixtures/root');
 
         $this->manager = new PackageFileManager($this->environment, $this->packageFileStorage);
@@ -73,19 +75,17 @@ class PackageFileManagerTest extends ManagerTestCase
                 $config = $packageFile->getConfig();
 
                 PHPUnit_Framework_Assert::assertSame('my-puli-dir', $config->get(Config::PULI_DIR));
-                PHPUnit_Framework_Assert::assertSame('my-puli-dir/my-MyServiceRegistry.php', $config->get(Config::FACTORY_FILE));
+                PHPUnit_Framework_Assert::assertSame('my-puli-dir/MyFactory.php', $config->get(Config::FACTORY_FILE));
             }));
 
         $this->manager->setConfigKeys(array(
             Config::PULI_DIR => 'my-puli-dir',
-            Config::FACTORY_FILE => '{$puli-dir}/my-MyServiceRegistry.php',
+            Config::FACTORY_FILE => '{$puli-dir}/MyFactory.php',
         ));
     }
 
     public function testGetConfigKey()
     {
-        $this->assertNull($this->manager->getConfigKey(Config::PULI_DIR));
-
         $this->rootPackageFile->getConfig()->set(Config::PULI_DIR, 'my-puli-dir');
 
         $this->assertSame('my-puli-dir', $this->manager->getConfigKey(Config::PULI_DIR));
@@ -93,34 +93,89 @@ class PackageFileManagerTest extends ManagerTestCase
 
     public function testGetConfigKeyReturnsDefault()
     {
-        $this->assertNull($this->manager->getConfigKey(Config::PULI_DIR));
-
         $this->assertSame('my-puli-dir', $this->manager->getConfigKey(Config::PULI_DIR, 'my-puli-dir'));
     }
 
     public function testGetConfigKeyReturnsRawValue()
     {
         $this->rootPackageFile->getConfig()->set(Config::PULI_DIR, 'my-puli-dir');
-        $this->rootPackageFile->getConfig()->set(Config::FACTORY_FILE, '{$puli-dir}/MyServiceRegistry.php');
+        $this->rootPackageFile->getConfig()->set(Config::FACTORY_FILE, '{$puli-dir}/MyFactory.php');
 
-        $this->assertSame('{$puli-dir}/MyServiceRegistry.php', $this->manager->getConfigKey(Config::FACTORY_FILE));
+        $this->assertSame('{$puli-dir}/MyFactory.php', $this->manager->getConfigKey(Config::FACTORY_FILE));
+    }
+
+    public function testGetConfigKeyReturnsNullIfNotSet()
+    {
+        $this->baseConfig->set(Config::PULI_DIR, 'fallback');
+
+        $this->assertNull($this->manager->getConfigKey(Config::PULI_DIR));
+    }
+
+    public function testGetConfigKeyReturnsFallbackIfRequested()
+    {
+        $this->baseConfig->set(Config::PULI_DIR, 'fallback');
+
+        $this->assertSame('fallback', $this->manager->getConfigKey(Config::PULI_DIR, null, true));
     }
 
     public function testGetConfigKeys()
     {
+        $this->baseConfig->set(Config::FACTORY_CLASS, 'My\Class');
+
         $this->rootPackageFile->getConfig()->set(Config::PULI_DIR, 'my-puli-dir');
-        $this->rootPackageFile->getConfig()->set(Config::FACTORY_FILE, '{$puli-dir}/MyServiceRegistry.php');
+        $this->rootPackageFile->getConfig()->set(Config::FACTORY_FILE, '{$puli-dir}/MyFactory.php');
 
         $this->assertSame(array(
             Config::PULI_DIR => 'my-puli-dir',
-            Config::FACTORY_FILE => '{$puli-dir}/MyServiceRegistry.php',
+            Config::FACTORY_FILE => '{$puli-dir}/MyFactory.php',
         ), $this->manager->getConfigKeys());
+    }
+
+    public function testGetConfigKeysReordersToDefaultOrder()
+    {
+        $this->baseConfig->set(Config::FACTORY_CLASS, 'My\Class');
+
+        $this->rootPackageFile->getConfig()->set(Config::FACTORY_FILE, '{$puli-dir}/MyFactory.php');
+        $this->rootPackageFile->getConfig()->set(Config::PULI_DIR, 'my-puli-dir');
+
+        $this->assertSame(array(
+            Config::PULI_DIR => 'my-puli-dir',
+            Config::FACTORY_FILE => '{$puli-dir}/MyFactory.php',
+        ), $this->manager->getConfigKeys());
+    }
+
+    public function testGetConfigKeysWithFallback()
+    {
+        $this->baseConfig->set(Config::FACTORY_CLASS, 'My\Class');
+
+        $this->rootPackageFile->getConfig()->set(Config::PULI_DIR, 'my-puli-dir');
+        $this->rootPackageFile->getConfig()->set(Config::FACTORY_FILE, '{$puli-dir}/MyFactory.php');
+
+        $this->assertSame(array(
+            Config::PULI_DIR => 'my-puli-dir',
+            Config::FACTORY_CLASS => 'My\Class',
+            Config::FACTORY_FILE => '{$puli-dir}/MyFactory.php',
+        ), $this->manager->getConfigKeys(true));
+    }
+
+    public function testGetConfigKeysWithAllKeys()
+    {
+        $this->baseConfig->set(Config::FACTORY_CLASS, 'My\Class');
+
+        $this->rootPackageFile->getConfig()->set(Config::PULI_DIR, 'my-puli-dir');
+        $this->rootPackageFile->getConfig()->set(Config::FACTORY_FILE, '{$puli-dir}/MyFactory.php');
+
+        $values = $this->manager->getConfigKeys(false, true);
+
+        $this->assertSame(Config::getKeys(), array_keys($values));
+        $this->assertSame('my-puli-dir', $values[Config::PULI_DIR]);
+        $this->assertSame('{$puli-dir}/MyFactory.php', $values[Config::FACTORY_FILE]);
     }
 
     public function testRemoveConfigKey()
     {
         $this->rootPackageFile->getConfig()->set(Config::PULI_DIR, 'my-puli-dir');
-        $this->rootPackageFile->getConfig()->set(Config::FACTORY_FILE, 'MyServiceRegistry.php');
+        $this->rootPackageFile->getConfig()->set(Config::FACTORY_FILE, 'MyFactory.php');
 
         $this->packageFileStorage->expects($this->once())
             ->method('saveRootPackageFile')
@@ -129,7 +184,7 @@ class PackageFileManagerTest extends ManagerTestCase
                 $config = $packageFile->getConfig();
 
                 PHPUnit_Framework_Assert::assertNull($config->get(Config::PULI_DIR, null, false));
-                PHPUnit_Framework_Assert::assertSame('MyServiceRegistry.php', $config->get(Config::FACTORY_FILE, null, false));
+                PHPUnit_Framework_Assert::assertSame('MyFactory.php', $config->get(Config::FACTORY_FILE, null, false));
             }));
 
         $this->manager->removeConfigKey(Config::PULI_DIR);
@@ -138,7 +193,7 @@ class PackageFileManagerTest extends ManagerTestCase
     public function testRemoveConfigKeys()
     {
         $this->rootPackageFile->getConfig()->set(Config::PULI_DIR, 'my-puli-dir');
-        $this->rootPackageFile->getConfig()->set(Config::FACTORY_FILE, 'MyServiceRegistry.php');
+        $this->rootPackageFile->getConfig()->set(Config::FACTORY_FILE, 'MyFactory.php');
 
         $this->packageFileStorage->expects($this->once())
             ->method('saveRootPackageFile')

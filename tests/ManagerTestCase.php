@@ -15,6 +15,7 @@ use PHPUnit_Framework_MockObject_MockObject;
 use PHPUnit_Framework_TestCase;
 use Puli\Discovery\Api\EditableDiscovery;
 use Puli\Repository\Api\EditableRepository;
+use Puli\RepositoryManager\Config\Config;
 use Puli\RepositoryManager\Config\ConfigFile\ConfigFile;
 use Puli\RepositoryManager\Config\DefaultConfig;
 use Puli\RepositoryManager\Package\PackageFile\RootPackageFile;
@@ -36,6 +37,11 @@ abstract class ManagerTestCase extends PHPUnit_Framework_TestCase
      * @var string
      */
     protected $rootDir;
+
+    /**
+     * @var Config
+     */
+    protected $baseConfig;
 
     /**
      * @var ConfigFile
@@ -69,12 +75,14 @@ abstract class ManagerTestCase extends PHPUnit_Framework_TestCase
 
     protected function initEnvironment($homeDir, $rootDir)
     {
-        $baseConfig = new DefaultConfig();
+        if (!$this->baseConfig) {
+            $this->baseConfig = new DefaultConfig();
+        }
 
         $this->homeDir = $homeDir;
         $this->rootDir = $rootDir;
-        $this->configFile = new ConfigFile(null, $baseConfig);
-        $this->rootPackageFile = new RootPackageFile('root', null, $baseConfig);
+        $this->configFile = new ConfigFile(null, $this->baseConfig);
+        $this->rootPackageFile = new RootPackageFile('root', null, $this->baseConfig);
         $this->dispatcher = $this->getMock('Symfony\Component\EventDispatcher\EventDispatcherInterface');
         $this->repo = $this->getMock('Puli\Repository\Api\EditableRepository');
         $this->discovery = $this->getMock('Puli\Discovery\Api\EditableDiscovery');
