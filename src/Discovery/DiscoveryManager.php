@@ -122,6 +122,7 @@ class DiscoveryManager
     {
         $this->assertDiscoveryLoaded();
         $this->assertPackagesLoaded();
+        $this->emitWarningForDuplicateTypes();
 
         if ($this->typeStore->existsAny($bindingType->getName())) {
             throw DuplicateTypeException::forTypeName($bindingType->getName());
@@ -163,6 +164,9 @@ class DiscoveryManager
         $this->packageFileStorage->saveRootPackageFile($this->rootPackageFile);
 
         $this->unloadBindingTypeAndUndefine($typeName);
+
+        // Don't include the warning for the removed type unless necessary
+        $this->emitWarningForDuplicateTypes();
     }
 
     /**
@@ -412,6 +416,7 @@ class DiscoveryManager
     {
         $this->assertDiscoveryLoaded();
         $this->assertPackagesLoaded();
+        $this->emitWarningForDuplicateTypes();
 
         if (count($this->discovery->getBindings()) > 0 || count($this->discovery->getTypes()) > 0) {
             throw new DiscoveryNotEmptyException('The discovery is not empty.');
@@ -479,20 +484,28 @@ class DiscoveryManager
         }
     }
 
+    private function emitWarningForDuplicateTypes()
+    {
+        foreach ($this->typeStore->getTypeNames() as $typeName) {
+            if ($this->typeStore->isDuplicate($typeName)) {
+                $packageNames = $this->typeStore->getDefiningPackageNames($typeName);
+                $lastPackageName = array_pop($packageNames);
+
+                $this->logger->warning(sprintf(
+                    'The packages "%s" and "%s" contain type definitions for '.
+                    'the same type "%s". The type has been disabled.',
+                    implode('", "', $packageNames),
+                    $lastPackageName,
+                    $typeName
+                ));
+            }
+        }
+    }
+
     private function loadBindingTypesFromPackage(Package $package)
     {
         foreach ($package->getPackageFile()->getTypeDescriptors() as $bindingType) {
             $this->loadBindingType($bindingType, $package);
-
-            if ($bindingType->isDuplicate()) {
-                $this->logger->warning(sprintf(
-                    'The packages "%s" and "%s" contain type definitions for '.
-                    'the same type "%s". The type has been disabled.',
-                    implode('", "', $this->typeStore->getDefiningPackageNames($bindingType->getName())),
-                    $package->getName(),
-                    $bindingType->getName()
-                ));
-            }
         }
     }
 
