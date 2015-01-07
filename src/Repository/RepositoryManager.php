@@ -13,7 +13,7 @@ namespace Puli\RepositoryManager\Repository;
 
 use ArrayIterator;
 use Puli\Repository\Api\EditableRepository;
-use Puli\Repository\Assert\Assertion;
+use Puli\RepositoryManager\Assert\Assert;
 use Puli\RepositoryManager\Config\Config;
 use Puli\RepositoryManager\Conflict\OverrideGraph;
 use Puli\RepositoryManager\Conflict\PackageConflictDetector;
@@ -443,7 +443,7 @@ class RepositoryManager
                 continue;
             }
 
-            Assertion::true(file_exists($absolutePath), sprintf(
+            Assert::true(file_exists($absolutePath), sprintf(
                 'The path %s mapped to %s by package "%s" does not exist.',
                 $relativePath,
                 $mapping->getRepositoryPath(),

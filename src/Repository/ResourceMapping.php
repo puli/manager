@@ -12,7 +12,7 @@
 namespace Puli\RepositoryManager\Repository;
 
 use InvalidArgumentException;
-use Puli\Repository\Assert\Assertion;
+use Puli\RepositoryManager\Assert\Assert;
 
 /**
  * Maps a repository path to one or more filesystem paths.
@@ -45,13 +45,13 @@ class ResourceMapping
      */
     public function __construct($repositoryPath, $filesystemPaths)
     {
-        Assertion::path($repositoryPath);
+        Assert::path($repositoryPath);
 
         $filesystemPaths = (array) $filesystemPaths;
 
-        Assertion::notEmpty($filesystemPaths, 'At least one local path must be passed.');
-        Assertion::allString($filesystemPaths, 'The local paths must be strings. Got: %2$s');
-        Assertion::allNotEmpty($filesystemPaths, 'The local paths must not be empty.');
+        Assert::notEmpty($filesystemPaths, 'At least one local path must be passed.');
+        Assert::allString($filesystemPaths, 'The local paths must be strings. Got: %2$s');
+        Assert::allNotEmpty($filesystemPaths, 'The local paths must not be empty.');
 
         $this->repositoryPath = $repositoryPath;
         $this->filesystemPaths = $filesystemPaths;

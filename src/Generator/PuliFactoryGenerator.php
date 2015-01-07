@@ -12,7 +12,7 @@
 namespace Puli\RepositoryManager\Generator;
 
 use InvalidArgumentException;
-use Puli\Repository\Assert\Assertion;
+use Puli\RepositoryManager\Assert\Assert;
 use Puli\RepositoryManager\Config\Config;
 use Webmozart\PathUtil\Path;
 
@@ -79,14 +79,14 @@ class PuliFactoryGenerator
      */
     public function generateFactory($path, $className, $rootDir, Config $config)
     {
-        Assertion::string($path, 'The path to the generated factory file must be a string. Got: %2$s');
-        Assertion::notEmpty($path, 'The path to the generated factory file must not be empty.');
-        Assertion::true(Path::isAbsolute($path), sprintf('The path "%s" is not absolute.', $path));
-        Assertion::string($className, 'The class name of the generated factory must be a string. Got: %2$s');
-        Assertion::notEmpty($className, 'The class name of the generated factory must not be empty.');
-        Assertion::string($rootDir, 'The root directory must be a string. Got: %2$s');
-        Assertion::notEmpty($rootDir, 'The root directory must not be empty.');
-        Assertion::directory($rootDir, 'The root directory "%s" was expected to be a directory.');
+        Assert::string($path, 'The path to the generated factory file must be a string. Got: %2$s');
+        Assert::notEmpty($path, 'The path to the generated factory file must not be empty.');
+        Assert::true(Path::isAbsolute($path), sprintf('The path "%s" is not absolute.', $path));
+        Assert::string($className, 'The class name of the generated factory must be a string. Got: %2$s');
+        Assert::notEmpty($className, 'The class name of the generated factory must not be empty.');
+        Assert::string($rootDir, 'The root directory must be a string. Got: %2$s');
+        Assert::notEmpty($rootDir, 'The root directory must not be empty.');
+        Assert::directory($rootDir, 'The root directory "%s" was expected to be a directory.');
 
         $outputDir = Path::getDirectory($path);
 

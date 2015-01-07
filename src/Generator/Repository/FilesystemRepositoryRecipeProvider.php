@@ -11,7 +11,7 @@
 
 namespace Puli\RepositoryManager\Generator\Repository;
 
-use Puli\RepositoryManager\Assert\Assertion;
+use Puli\RepositoryManager\Assert\Assert;
 use Puli\RepositoryManager\Generator\BuildRecipe;
 use Puli\RepositoryManager\Generator\BuildRecipeProvider;
 use Puli\RepositoryManager\Generator\ProviderFactory;
@@ -40,8 +40,8 @@ class FilesystemRepositoryRecipeProvider implements BuildRecipeProvider
             $options['path'] = $outputDir.'/repository';
         }
 
-        Assertion::string($options['path'], 'The "path" option should be a string. Got: %2$s');
-        Assertion::boolean($options['symlink'], 'The "symlink" option should be a boolean. Got: %s');
+        Assert::string($options['path'], 'The "path" option should be a string. Got: %2$s');
+        Assert::boolean($options['symlink'], 'The "symlink" option should be a boolean. Got: %s');
 
         $path = Path::makeAbsolute($options['path'], $rootDir);
         $relPath = Path::makeRelative($path, $outputDir);

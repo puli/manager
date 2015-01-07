@@ -13,7 +13,7 @@ namespace Puli\RepositoryManager\Discovery;
 
 use InvalidArgumentException;
 use Puli\Discovery\Api\Binding\BindingParameter;
-use Puli\RepositoryManager\Assert\Assertion;
+use Puli\RepositoryManager\Assert\Assert;
 use RuntimeException;
 
 /**
@@ -63,11 +63,11 @@ class BindingParameterDescriptor
      */
     public function __construct($name, $required = false, $defaultValue = null, $description = null)
     {
-        Assertion::parameterName($name);
-        Assertion::boolean($required, 'The parameter "$required" must be a boolean. Got: %s');
-        Assertion::nullOrParameterValue($defaultValue);
-        Assertion::nullOrString($description, 'The parameter description must be a string or null. Got: %2$s');
-        Assertion::nullOrNotEmpty($description, 'The parameter description must not be empty.');
+        Assert::parameterName($name);
+        Assert::boolean($required, 'The parameter "$required" must be a boolean. Got: %s');
+        Assert::nullOrParameterValue($defaultValue);
+        Assert::nullOrString($description, 'The parameter description must be a string or null. Got: %2$s');
+        Assert::nullOrNotEmpty($description, 'The parameter description must not be empty.');
 
         if ($required && null !== $defaultValue) {
             throw new RuntimeException('Required parameters cannot have default values.');

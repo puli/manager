@@ -13,7 +13,7 @@ namespace Puli\RepositoryManager\Environment;
 
 use Puli\Discovery\Api\EditableDiscovery;
 use Puli\Repository\Api\EditableRepository;
-use Puli\Repository\Assert\Assertion;
+use Puli\RepositoryManager\Assert\Assert;
 use Puli\RepositoryManager\Config\Config;
 use Puli\RepositoryManager\Config\ConfigFile\ConfigFileStorage;
 use Puli\RepositoryManager\Config\DefaultConfig;
@@ -186,10 +186,10 @@ class ProjectEnvironment extends GlobalEnvironment
         $factoryFile = $this->getConfig()->get(Config::FACTORY_FILE);
         $factoryClass = $this->getConfig()->get(Config::FACTORY_CLASS);
 
-        Assertion::string($factoryFile, 'The "'.Config::FACTORY_FILE.'" config key must contain a string. Got: %2$s');
-        Assertion::notEmpty($factoryFile, 'The "'.Config::FACTORY_FILE.'" config key must not be empty.');
-        Assertion::string($factoryClass, 'The "'.Config::FACTORY_CLASS.'" config key must contain a string. Got: %2$s');
-        Assertion::notEmpty($factoryClass, 'The "'.Config::FACTORY_CLASS.'" config key must not be empty.');
+        Assert::string($factoryFile, 'The "'.Config::FACTORY_FILE.'" config key must contain a string. Got: %2$s');
+        Assert::notEmpty($factoryFile, 'The "'.Config::FACTORY_FILE.'" config key must not be empty.');
+        Assert::string($factoryClass, 'The "'.Config::FACTORY_CLASS.'" config key must contain a string. Got: %2$s');
+        Assert::notEmpty($factoryClass, 'The "'.Config::FACTORY_CLASS.'" config key must not be empty.');
 
         if (!class_exists($factoryClass, false)) {
             $absFactoryFile = Path::makeAbsolute($factoryFile, $this->rootDir);

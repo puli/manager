@@ -91,7 +91,7 @@ class BindingDescriptorTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\Discovery\Api\NoSuchParameterException
+     * @expectedException \Puli\Discovery\Api\Binding\NoSuchParameterException
      */
     public function testGetParameterFailsIfUnknownParameter()
     {

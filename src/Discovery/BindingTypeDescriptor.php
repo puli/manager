@@ -14,7 +14,7 @@ namespace Puli\RepositoryManager\Discovery;
 use InvalidArgumentException;
 use Puli\Discovery\Api\Binding\BindingType;
 use Puli\Discovery\Api\Binding\NoSuchParameterException;
-use Puli\RepositoryManager\Assert\Assertion;
+use Puli\RepositoryManager\Assert\Assert;
 use Puli\RepositoryManager\Discovery\Store\BindingTypeStore;
 
 /**
@@ -60,10 +60,10 @@ class BindingTypeDescriptor
      */
     public function __construct($name, $description = null, array $parameters = array())
     {
-        Assertion::typeName($name);
-        Assertion::nullOrString($description, 'The type description must be a string or null. Got: %2$s');
-        Assertion::nullOrNotEmpty($description, 'The type description must not be empty.');
-        Assertion::allIsInstanceOf($parameters, __NAMESPACE__.'\BindingParameterDescriptor');
+        Assert::typeName($name);
+        Assert::nullOrString($description, 'The type description must be a string or null. Got: %2$s');
+        Assert::nullOrNotEmpty($description, 'The type description must not be empty.');
+        Assert::allIsInstanceOf($parameters, __NAMESPACE__.'\BindingParameterDescriptor');
 
         $this->name = $name;
         $this->description = $description;
@@ -169,7 +169,7 @@ class BindingTypeDescriptor
      */
     public function setState($state)
     {
-        Assertion::choice($state, BindingTypeState::all(), 'The value "%s" is not a valid binding type state.');
+        Assert::choice($state, BindingTypeState::all(), 'The value "%s" is not a valid binding type state.');
 
         $this->state = $state;
     }

@@ -12,7 +12,7 @@
 namespace Puli\RepositoryManager\Util;
 
 use OutOfBoundsException;
-use Puli\RepositoryManager\Assert\Assertion;
+use Puli\RepositoryManager\Assert\Assert;
 
 /**
  * A LDAPv3 Distinguished Name.
@@ -51,14 +51,14 @@ class DistinguishedName
      */
     public function add($name, $value)
     {
-        Assertion::string($name, 'The attribute name must be a string. Got: %2$s');
-        Assertion::notEmpty($name, 'The attribute name must not be empty.');
-        Assertion::true((bool) preg_match('~^[a-zA-Z][a-zA-Z0-9\-]*$~', $name), sprintf(
+        Assert::string($name, 'The attribute name must be a string. Got: %2$s');
+        Assert::notEmpty($name, 'The attribute name must not be empty.');
+        Assert::true((bool) preg_match('~^[a-zA-Z][a-zA-Z0-9\-]*$~', $name), sprintf(
             'The attribute name must start with a letter and consist of '.
             'letters, numbers and hyphens only. Got: "%s"',
             $name
         ));
-        Assertion::string($value, 'The attribute value must be a string. Got: %2$s');
+        Assert::string($value, 'The attribute value must be a string. Got: %2$s');
 
         $this->attributes[$name] = $value;
     }

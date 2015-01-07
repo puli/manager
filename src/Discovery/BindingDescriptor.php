@@ -13,7 +13,7 @@ namespace Puli\RepositoryManager\Discovery;
 
 use InvalidArgumentException;
 use Puli\Discovery\Api\Binding\NoSuchParameterException;
-use Puli\RepositoryManager\Assert\Assertion;
+use Puli\RepositoryManager\Assert\Assert;
 use Puli\RepositoryManager\Discovery\Store\BindingTypeStore;
 use Puli\RepositoryManager\Package\Package;
 use Puli\RepositoryManager\Util\DistinguishedName;
@@ -74,11 +74,11 @@ class BindingDescriptor
      */
     public static function create($query, $typeName, array $parameters = array(), $language = 'glob')
     {
-        Assertion::query($query);
-        Assertion::typeName($typeName);
-        Assertion::language($language);
-        Assertion::allParameterName(array_keys($parameters));
-        Assertion::allParameterValue($parameters);
+        Assert::query($query);
+        Assert::typeName($typeName);
+        Assert::language($language);
+        Assert::allParameterName(array_keys($parameters));
+        Assert::allParameterValue($parameters);
 
         $dn = new DistinguishedName(array(
             'q' => $query,
@@ -111,11 +111,11 @@ class BindingDescriptor
      */
     public function __construct(Uuid $uuid, $query, $typeName, array $parameters = array(), $language = 'glob')
     {
-        Assertion::query($query);
-        Assertion::typeName($typeName);
-        Assertion::language($language);
-        Assertion::allParameterName(array_keys($parameters));
-        Assertion::allParameterValue($parameters);
+        Assert::query($query);
+        Assert::typeName($typeName);
+        Assert::language($language);
+        Assert::allParameterName(array_keys($parameters));
+        Assert::allParameterValue($parameters);
 
         $this->uuid = $uuid;
         $this->query = $query;
@@ -234,7 +234,7 @@ class BindingDescriptor
      */
     public function setState($state)
     {
-        Assertion::choice($state, BindingState::all(), 'The value "%s" is not a valid binding state.');
+        Assert::choice($state, BindingState::all(), 'The value "%s" is not a valid binding state.');
 
         $this->state = $state;
     }

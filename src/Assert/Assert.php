@@ -11,6 +11,8 @@
 
 namespace Puli\RepositoryManager\Assert;
 
+use Assert\Assertion;
+
 /**
  * Contains domain-specific assertions.
  *
@@ -30,8 +32,13 @@ namespace Puli\RepositoryManager\Assert;
  * @method static void allParameterName($value, $message = null, $propertyPath = null)
  * @method static void allParameterValue($value, $message = null, $propertyPath = null)
  */
-class Assertion extends \Assert\Assertion
+class Assert extends Assertion
 {
+    public static function path($value)
+    {
+        \Puli\Repository\Assert\Assert::path($value);
+    }
+
     public static function packageName($value)
     {
         self::string($value, 'The package name must be a string. Got: %2$s');
@@ -52,22 +59,22 @@ class Assertion extends \Assert\Assertion
 
     public static function typeName($value)
     {
-        Assertion::string($value, 'The type name must be a string. Got: %2$s');
-        Assertion::notEmpty($value, 'The type name must not be empty.');
-        Assertion::contains($value, '/', 'The type name must contain a vendor name followed by a "/". Got: "%s"');
-        Assertion::regex($value, '~^[a-z][a-z0-9\-]*/[a-z0-9\-]+$~', 'The type name must contain lower-case characters, digits and hyphens only. Got: "%s"');
+        Assert::string($value, 'The type name must be a string. Got: %2$s');
+        Assert::notEmpty($value, 'The type name must not be empty.');
+        Assert::contains($value, '/', 'The type name must contain a vendor name followed by a "/". Got: "%s"');
+        Assert::regex($value, '~^[a-z][a-z0-9\-]*/[a-z0-9\-]+$~', 'The type name must contain lower-case characters, digits and hyphens only. Got: "%s"');
     }
 
     public static function parameterName($value)
     {
-        Assertion::string($value, 'The parameter name must be a string. Got: %2$s');
-        Assertion::notEmpty($value, 'The parameter name must not be empty.');
-        Assertion::regex($value, '~^[a-z][a-z0-9\-]*$~', 'The parameter name must contain lower-case characters, digits and hyphens only and start with a letter. Got: "%s"');
+        Assert::string($value, 'The parameter name must be a string. Got: %2$s');
+        Assert::notEmpty($value, 'The parameter name must not be empty.');
+        Assert::regex($value, '~^[a-z][a-z0-9\-]*$~', 'The parameter name must contain lower-case characters, digits and hyphens only and start with a letter. Got: "%s"');
     }
 
     public static function parameterValue($value)
     {
-        Assertion::scalar($value, sprintf(
+        Assert::scalar($value, sprintf(
             'The parameter value must be a scalar value. Got: %s',
             is_object($value) ? get_class($value) : gettype($value)
         ));
