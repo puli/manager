@@ -12,8 +12,6 @@
 namespace Puli\RepositoryManager\Discovery;
 
 use Puli\RepositoryManager\Discovery\Store\BindingTypeStore;
-use Puli\RepositoryManager\Package\Package;
-use Puli\RepositoryManager\Package\RootPackage;
 
 /**
  * Contains constants representing the state of a binding type.

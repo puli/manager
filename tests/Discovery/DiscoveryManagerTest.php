@@ -11,12 +11,11 @@
 
 namespace Puli\RepositoryManager\Tests\Discovery;
 
-use Exception;
 use PHPUnit_Framework_Assert;
 use PHPUnit_Framework_MockObject_MockObject;
 use Psr\Log\LoggerInterface;
-use Puli\Discovery\Api\BindingType;
-use Puli\Discovery\Api\MissingParameterException;
+use Puli\Discovery\Api\Binding\BindingType;
+use Puli\Discovery\Api\Binding\MissingParameterException;
 use Puli\Discovery\Api\NoQueryMatchesException;
 use Puli\RepositoryManager\Discovery\BindingDescriptor;
 use Puli\RepositoryManager\Discovery\BindingParameterDescriptor;
@@ -729,7 +728,7 @@ class DiscoveryManagerTest extends ManagerTestCase
     }
 
     /**
-     * @expectedException \Puli\Discovery\Api\MissingParameterException
+     * @expectedException \Puli\Discovery\Api\Binding\MissingParameterException
      */
     public function testAddBindingFailsIfMissingParameters()
     {

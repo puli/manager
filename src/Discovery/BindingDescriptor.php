@@ -12,7 +12,7 @@
 namespace Puli\RepositoryManager\Discovery;
 
 use InvalidArgumentException;
-use Puli\Discovery\Api\NoSuchParameterException;
+use Puli\Discovery\Api\Binding\NoSuchParameterException;
 use Puli\RepositoryManager\Assert\Assertion;
 use Puli\RepositoryManager\Discovery\Store\BindingTypeStore;
 use Puli\RepositoryManager\Package\Package;

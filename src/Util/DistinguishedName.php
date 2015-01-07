@@ -12,7 +12,7 @@
 namespace Puli\RepositoryManager\Util;
 
 use OutOfBoundsException;
-use Puli\Repository\Assert\Assertion;
+use Puli\RepositoryManager\Assert\Assertion;
 
 /**
  * A LDAPv3 Distinguished Name.
