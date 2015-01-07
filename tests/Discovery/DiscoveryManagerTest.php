@@ -22,6 +22,7 @@ use Puli\RepositoryManager\Discovery\BindingDescriptor;
 use Puli\RepositoryManager\Discovery\BindingParameterDescriptor;
 use Puli\RepositoryManager\Discovery\BindingState;
 use Puli\RepositoryManager\Discovery\BindingTypeDescriptor;
+use Puli\RepositoryManager\Discovery\BindingTypeState;
 use Puli\RepositoryManager\Discovery\DiscoveryManager;
 use Puli\RepositoryManager\Package\Collection\PackageCollection;
 use Puli\RepositoryManager\Package\InstallInfo;
@@ -533,17 +534,34 @@ class DiscoveryManagerTest extends ManagerTestCase
         $this->assertSame(array($type2, $type3), $this->manager->getBindingTypes(array('package1', 'package2')));
     }
 
-    public function testGetBindingTypesReturnsDuplicatedTypesOnlyOnce()
+    public function testGetEnabledBindingTypesDoesNotIncludeDuplicateTypes()
     {
         $this->initDefaultManager();
 
-        $this->packageFile1->addTypeDescriptor($type1 = new BindingTypeDescriptor('my/type'));
-        $this->packageFile2->addTypeDescriptor($type2 = clone $type1);
+        $this->packageFile1->addTypeDescriptor($type1 = new BindingTypeDescriptor('my/type1'));
+        $this->packageFile1->addTypeDescriptor($type2 = new BindingTypeDescriptor('my/type2'));
+        $this->packageFile2->addTypeDescriptor($type3 = clone $type2);
+        $this->packageFile2->addTypeDescriptor($type4 = new BindingTypeDescriptor('my/type3'));
 
-        $this->assertEquals(array($type1), $this->manager->getBindingTypes());
+        $this->assertEquals(array($type1, $type4), $this->manager->getBindingTypes());
         $this->assertEquals(array($type1), $this->manager->getBindingTypes('package1'));
-        $this->assertEquals(array($type2), $this->manager->getBindingTypes('package2'));
-        $this->assertEquals(array($type1), $this->manager->getBindingTypes(array('package1', 'package2')));
+        $this->assertEquals(array($type4), $this->manager->getBindingTypes('package2'));
+        $this->assertEquals(array($type1, $type4), $this->manager->getBindingTypes(array('package1', 'package2')));
+    }
+
+    public function testGetDuplicateBindingTypesDoesNotIncludeEnabledTypes()
+    {
+        $this->initDefaultManager();
+
+        $this->packageFile1->addTypeDescriptor($type1 = new BindingTypeDescriptor('my/type1'));
+        $this->packageFile1->addTypeDescriptor($type2 = new BindingTypeDescriptor('my/type2'));
+        $this->packageFile2->addTypeDescriptor($type3 = clone $type2);
+        $this->packageFile2->addTypeDescriptor($type4 = new BindingTypeDescriptor('my/type3'));
+
+        $this->assertEquals(array($type2, $type3), $this->manager->getBindingTypes(null, BindingTypeState::DUPLICATE));
+        $this->assertEquals(array($type2), $this->manager->getBindingTypes('package1', BindingTypeState::DUPLICATE));
+        $this->assertEquals(array($type3), $this->manager->getBindingTypes('package2', BindingTypeState::DUPLICATE));
+        $this->assertEquals(array($type2, $type3), $this->manager->getBindingTypes(array('package1', 'package2'), BindingTypeState::DUPLICATE));
     }
 
     public function testAddBinding()

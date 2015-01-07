@@ -171,11 +171,14 @@ class DiscoveryManager
      * You can optionally filter types by one or multiple package names.
      *
      * @param string|string[] $packageName The package name(s) to filter by.
+     * @param int             $state       The state of the types to return.
      *
      * @return BindingTypeDescriptor[] The binding types.
      */
-    public function getBindingTypes($packageName = null)
+    public function getBindingTypes($packageName = null, $state = BindingTypeState::ENABLED)
     {
+        $this->assertPackagesLoaded();
+
         $packageNames = $packageName ? (array) $packageName : $this->packages->getPackageNames();
         $types = array();
 
@@ -183,7 +186,9 @@ class DiscoveryManager
             $packageFile = $this->packages[$packageName]->getPackageFile();
 
             foreach ($packageFile->getTypeDescriptors() as $type) {
-                $types[$type->getName()] = $type;
+                if ($state === $type->getState()) {
+                    $types[] = $type;
+                }
             }
         }
 
