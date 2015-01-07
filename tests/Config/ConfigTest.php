@@ -456,6 +456,17 @@ class ConfigTest extends PHPUnit_Framework_TestCase
 
     /**
      * @dataProvider getStringKeys
+     */
+    public function testStringKeys($key)
+    {
+        $config = new Config();
+        $config->set($key, 'string');
+
+        $this->assertSame('string', $config->get($key));
+    }
+
+    /**
+     * @dataProvider getStringKeys
      * @expectedException \Puli\RepositoryManager\InvalidConfigException
      */
     public function testSetFailsIfValueIsNotString($key)
@@ -472,6 +483,27 @@ class ConfigTest extends PHPUnit_Framework_TestCase
     {
         $config = new Config();
         $config->set($key, '');
+    }
+
+    /**
+     * @dataProvider getBooleanKeys
+     */
+    public function testBooleanValues($key)
+    {
+        $config = new Config();
+        $config->set($key, true);
+
+        $this->assertTrue($config->get($key));
+    }
+
+    /**
+     * @dataProvider getBooleanKeys
+     * @expectedException \Puli\RepositoryManager\InvalidConfigException
+     */
+    public function testSetFailsIfValueIsNotBoolean($key)
+    {
+        $config = new Config();
+        $config->set($key, 'true');
     }
 
     public function testMerge()
@@ -743,6 +775,18 @@ class ConfigTest extends PHPUnit_Framework_TestCase
             array(Config::PULI_DIR),
             array(Config::FACTORY_CLASS),
             array(Config::FACTORY_FILE),
+        );
+    }
+
+    public function getBooleanKeys()
+    {
+        return array(
+            array(Config::FACTORY_AUTO_GENERATE),
+            array(Config::REPOSITORY_SYMLINK),
+            array(Config::REPOSITORY_STORE_GZIP),
+            array(Config::REPOSITORY_STORE_CACHE),
+            array(Config::DISCOVERY_STORE_GZIP),
+            array(Config::DISCOVERY_STORE_CACHE)
         );
     }
 }

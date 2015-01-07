@@ -95,6 +95,8 @@ class Config
 
     const REPOSITORY_PATH = 'repository.path';
 
+    const REPOSITORY_SYMLINK = 'repository.symlink';
+
     const REPOSITORY_STORE = 'repository.store';
 
     const REPOSITORY_STORE_TYPE = 'repository.store.type';
@@ -143,6 +145,7 @@ class Config
         self::FACTORY_FILE => true,
         self::REPOSITORY_TYPE => true,
         self::REPOSITORY_PATH => true,
+        self::REPOSITORY_SYMLINK => true,
         self::REPOSITORY_STORE_TYPE => true,
         self::REPOSITORY_STORE_PATH => true,
         self::REPOSITORY_STORE_SERVER => true,
@@ -414,13 +417,13 @@ class Config
      * ```php
      * $config = new Config();
      * $config->set(Config::PULI_DIR, '.puli');
-     * $config->set(Config::REPO_STORAGE_DIR, '{$puli-dir}/repository.itory');
+     * $config->set(Config::REPO_STORAGE_DIR, '{$puli-dir}/repository');
      *
      * print_r($config->toArray());
      * // Array(
      * //     'puli-dir' => '.puli',
      * //     'repository. => array(
-     * //         'storage-dir' => '.puli/repository.itory',
+     * //         'storage-dir' => '.puli/repository',
      * //      ),
      * // )
      *
@@ -428,7 +431,7 @@ class Config
      * // Array(
      * //     'puli-dir' => '.puli',
      * //     'repository. => array(
-     * //         'storage-dir' => '{$puli-dir}/repository.itory',
+     * //         'storage-dir' => '{$puli-dir}/repository',
      * //      ),
      * // )
      * ```
@@ -457,6 +460,7 @@ class Config
 
         switch ($key) {
             case self::FACTORY_AUTO_GENERATE:
+            case self::REPOSITORY_SYMLINK:
             case self::REPOSITORY_STORE_GZIP:
             case self::REPOSITORY_STORE_CACHE:
             case self::DISCOVERY_STORE_GZIP:
