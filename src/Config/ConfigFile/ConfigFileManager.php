@@ -11,11 +11,13 @@
 
 namespace Puli\RepositoryManager\Config\ConfigFile;
 
+use ArrayIterator;
 use Puli\RepositoryManager\Config\Config;
 use Puli\RepositoryManager\Config\NoSuchConfigKeyException;
 use Puli\RepositoryManager\Environment\GlobalEnvironment;
 use Puli\RepositoryManager\InvalidConfigException;
 use Puli\RepositoryManager\IOException;
+use Webmozart\Glob\Iterator\GlobFilterIterator;
 
 /**
  * Manages changes to the global configuration file.
@@ -182,5 +184,29 @@ class ConfigFileManager
         }
 
         return array_replace($defaultValues, $values);
+    }
+
+    /**
+     * Returns the values of all configuration keys matching a pattern.
+     *
+     * @param string $pattern         The configuration key pattern. May contain
+     *                                the wildcard "*".
+     * @param bool   $includeFallback Whether to include values set in the base
+     *                                configuration.
+     * @param bool   $includeUnset    Whether to include unset keys in the result.
+     *
+     * @return array A mapping of configuration keys to values.
+     */
+    public function findConfigKeys($pattern, $includeFallback = false, $includeUnset = false)
+    {
+        $values = $this->getConfigKeys($includeFallback, $includeUnset);
+
+        $iterator = new GlobFilterIterator(
+            $pattern,
+            new ArrayIterator($values),
+            GlobFilterIterator::FILTER_KEY | GlobFilterIterator::KEY_AS_KEY
+        );
+
+        return iterator_to_array($iterator);
     }
 }

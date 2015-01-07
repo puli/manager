@@ -206,6 +206,63 @@ class ConfigFileManagerTest extends PHPUnit_Framework_TestCase
         $this->assertNull($values[Config::FACTORY_AUTO_GENERATE]);
     }
 
+    public function testFindConfigKeys()
+    {
+        $this->baseConfig->set(Config::FACTORY_AUTO_GENERATE, true);
+
+        $this->configFile->getConfig()->set(Config::PULI_DIR, 'my-puli-dir');
+        $this->configFile->getConfig()->set(Config::FACTORY_CLASS, 'MyFactory');
+        $this->configFile->getConfig()->set(Config::FACTORY_FILE, '{$puli-dir}/MyFactory.php');
+
+        $this->assertSame(array(
+            Config::FACTORY_CLASS => 'MyFactory',
+            Config::FACTORY_FILE => '{$puli-dir}/MyFactory.php',
+        ), $this->manager->findConfigKeys('factory.*'));
+    }
+
+    public function testFindConfigKeysReordersToDefaultOrder()
+    {
+        $this->baseConfig->set(Config::FACTORY_AUTO_GENERATE, true);
+
+        $this->configFile->getConfig()->set(Config::PULI_DIR, 'my-puli-dir');
+        $this->configFile->getConfig()->set(Config::FACTORY_FILE, '{$puli-dir}/MyFactory.php');
+        $this->configFile->getConfig()->set(Config::FACTORY_CLASS, 'MyFactory');
+
+        $this->assertSame(array(
+            Config::FACTORY_CLASS => 'MyFactory',
+            Config::FACTORY_FILE => '{$puli-dir}/MyFactory.php',
+        ), $this->manager->findConfigKeys('factory.*'));
+    }
+
+    public function testFindConfigKeysWithFallback()
+    {
+        $this->baseConfig->set(Config::FACTORY_AUTO_GENERATE, true);
+
+        $this->configFile->getConfig()->set(Config::PULI_DIR, 'my-puli-dir');
+        $this->configFile->getConfig()->set(Config::FACTORY_CLASS, 'MyFactory');
+        $this->configFile->getConfig()->set(Config::FACTORY_FILE, '{$puli-dir}/MyFactory.php');
+
+        $this->assertSame(array(
+            Config::FACTORY_AUTO_GENERATE => true,
+            Config::FACTORY_CLASS => 'MyFactory',
+            Config::FACTORY_FILE => '{$puli-dir}/MyFactory.php',
+        ), $this->manager->findConfigKeys('factory.*', true));
+    }
+
+    public function testFindConfigKeysWithUnsetKeys()
+    {
+        $this->baseConfig->set(Config::FACTORY_AUTO_GENERATE, true);
+
+        $this->configFile->getConfig()->set(Config::PULI_DIR, 'my-puli-dir');
+        $this->configFile->getConfig()->set(Config::FACTORY_CLASS, 'MyFactory');
+
+        $this->assertSame(array(
+            Config::FACTORY_AUTO_GENERATE => true,
+            Config::FACTORY_CLASS => 'MyFactory',
+            Config::FACTORY_FILE => null,
+        ), $this->manager->findConfigKeys('factory.*', true, true));
+    }
+
     public function testRemoveConfigKey()
     {
         $this->configFile->getConfig()->set(Config::PULI_DIR, 'my-puli-dir');
