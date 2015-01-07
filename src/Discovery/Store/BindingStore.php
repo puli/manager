@@ -45,6 +45,16 @@ class BindingStore
         return $this->store->getFirst($uuid->toString());
     }
 
+    /**
+     * @param Uuid $uuid
+     *
+     * @return BindingDescriptor[]
+     */
+    public function getAll(Uuid $uuid)
+    {
+        return $this->store->getAll($uuid->toString());
+    }
+
     public function exists(Uuid $uuid, Package $package)
     {
         return $this->store->contains($uuid->toString(), $package->getName());
@@ -82,6 +92,9 @@ class BindingStore
         return $this->store->getCount($uuid->toString()) > 1;
     }
 
+    /**
+     * @return Uuid[]
+     */
     public function getUuids()
     {
         $uuids = array();

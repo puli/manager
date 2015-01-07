@@ -11,8 +11,11 @@
 
 namespace Puli\RepositoryManager\Discovery;
 
+use BadMethodCallException;
 use InvalidArgumentException;
 use Puli\Discovery\Api\Binding\NoSuchParameterException;
+use Puli\Discovery\Api\Validation\ConstraintViolation;
+use Puli\Discovery\Validation\SimpleParameterValidator;
 use Puli\RepositoryManager\Assert\Assert;
 use Puli\RepositoryManager\Discovery\Store\BindingTypeStore;
 use Puli\RepositoryManager\Package\Package;
@@ -57,6 +60,11 @@ class BindingDescriptor
      * @var int
      */
     private $state = BindingState::UNLOADED;
+
+    /**
+     * @var ConstraintViolation[]
+     */
+    private $violations = array();
 
     /**
      * Creates a new binding descriptor with a generated UUID.
@@ -237,6 +245,7 @@ class BindingDescriptor
         Assert::choice($state, BindingState::all(), 'The value "%s" is not a valid binding state.');
 
         $this->state = $state;
+        $this->violations = array();
     }
 
     /**
@@ -247,7 +256,24 @@ class BindingDescriptor
      */
     public function refreshState(Package $package, BindingTypeStore $typeStore)
     {
+        if ($typeStore->existsEnabled($this->typeName)) {
+            $type = $typeStore->get($this->typeName)->toBindingType();
+            $validator = new SimpleParameterValidator();
+
+            $this->violations = $validator->validate($this->parameters, $type);
+        }
+
         $this->state = BindingState::detect($this, $package, $typeStore);
+    }
+
+    /**
+     * Returns the violations of the binding parameters.
+     *
+     * @return ConstraintViolation[] The violations.
+     */
+    public function getViolations()
+    {
+        return $this->violations;
     }
 
     /**
@@ -320,5 +346,17 @@ class BindingDescriptor
     public function isIgnored()
     {
         return BindingState::IGNORED === $this->state;
+    }
+
+    /**
+     * Returns whether the binding is invalid.
+     *
+     * @return bool Returns `true` if the state is {@link BindingState::INVALID}.
+     *
+     * @see BindingState::INVALID
+     */
+    public function isInvalid()
+    {
+        return BindingState::INVALID === $this->state;
     }
 }

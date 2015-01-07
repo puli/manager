@@ -14,9 +14,13 @@ namespace Puli\RepositoryManager\Discovery;
 use Exception;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
+use Puli\Discovery\Api\Binding\MissingParameterException;
+use Puli\Discovery\Api\Binding\NoSuchParameterException;
 use Puli\Discovery\Api\DuplicateTypeException;
 use Puli\Discovery\Api\EditableDiscovery;
 use Puli\Discovery\Api\NoSuchTypeException;
+use Puli\Discovery\Api\Validation\ConstraintViolation;
+use Puli\Discovery\Validation\SimpleParameterValidator;
 use Puli\RepositoryManager\Discovery\Store\BindingStore;
 use Puli\RepositoryManager\Discovery\Store\BindingTypeStore;
 use Puli\RepositoryManager\Environment\ProjectEnvironment;
@@ -421,6 +425,7 @@ class DiscoveryManager
         $this->assertDiscoveryLoaded();
         $this->assertPackagesLoaded();
         $this->emitWarningForDuplicateTypes();
+        $this->emitWarningForInvalidBindings();
 
         if (count($this->discovery->getBindings()) > 0 || count($this->discovery->getTypes()) > 0) {
             throw new DiscoveryNotEmptyException('The discovery is not empty.');
@@ -467,6 +472,18 @@ class DiscoveryManager
         }
     }
 
+    private function assertBindingValid(BindingDescriptor $binding)
+    {
+        foreach ($binding->getViolations() as $violation) {
+            switch ($violation->getCode()) {
+                case ConstraintViolation::NO_SUCH_PARAMETER:
+                    throw NoSuchParameterException::forParameterName($violation->getParameterName(), $violation->getTypeName());
+                case ConstraintViolation::MISSING_PARAMETER:
+                    throw MissingParameterException::forParameterName($violation->getParameterName(), $violation->getTypeName());
+            }
+        }
+    }
+
     private function loadDiscovery()
     {
         $this->discovery = $this->environment->getDiscovery();
@@ -502,6 +519,40 @@ class DiscoveryManager
                     $lastPackageName,
                     $typeName
                 ));
+            }
+        }
+    }
+
+    private function emitWarningForInvalidBindings()
+    {
+        foreach ($this->bindingStore->getUuids() as $uuid) {
+            foreach ($this->bindingStore->getAll($uuid) as $packageName => $binding) {
+                foreach ($binding->getViolations() as $violation) {
+                    switch ($violation->getCode()) {
+                        case ConstraintViolation::NO_SUCH_PARAMETER:
+                            $reason = sprintf(
+                                'The parameter "%s" does not exist.',
+                                $violation->getParameterName()
+                            );
+                            break;
+                        case ConstraintViolation::MISSING_PARAMETER:
+                            $reason = sprintf(
+                                'The parameter "%s" is missing.',
+                                $violation->getParameterName()
+                            );
+                            break;
+                        default:
+                            $reason = 'Unknown reason.';
+                            break;
+                    }
+
+                    $this->logger->warning(sprintf(
+                        'The binding "%s" in package "%s" is invalid: %s',
+                        $uuid->toString(),
+                        $packageName,
+                        $reason
+                    ));
+                }
             }
         }
     }
@@ -601,6 +652,10 @@ class DiscoveryManager
     private function loadBindingAndBind(BindingDescriptor $binding)
     {
         $this->loadBinding($binding, $this->rootPackage);
+
+        if (!$binding->isHeldBack() && !$binding->isIgnored()) {
+            $this->assertBindingValid($binding);
+        }
 
         if (!$this->bindingStore->isDuplicate($binding->getUuid()) && $binding->isEnabled()) {
             $this->bind($binding);

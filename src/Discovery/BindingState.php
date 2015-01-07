@@ -54,6 +54,11 @@ final class BindingState
     const IGNORED = 5;
 
     /**
+     * State: The binding does not match the constraints of the binding type.
+     */
+    const INVALID = 6;
+
+    /**
      * Returns all binding states.
      *
      * @return int[] The binding states.
@@ -66,7 +71,8 @@ final class BindingState
             self::DISABLED,
             self::UNDECIDED,
             self::HELD_BACK,
-            self::IGNORED
+            self::IGNORED,
+            self::INVALID,
         );
     }
 
@@ -93,6 +99,10 @@ final class BindingState
 
         if ($typeStore->isDuplicate($typeName)) {
             return self::IGNORED;
+        }
+
+        if (count($bindingDescriptor->getViolations()) > 0) {
+            return self::INVALID;
         }
 
         if ($package instanceof RootPackage) {
