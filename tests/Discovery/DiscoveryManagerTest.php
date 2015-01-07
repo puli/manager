@@ -848,12 +848,39 @@ class DiscoveryManagerTest extends ManagerTestCase
         $this->assertTrue($binding->isEnabled());
     }
 
-    public function testEnableBinding()
+    public function testEnableBindingBindsIfUndecided()
     {
         $this->initDefaultManager();
 
         $this->packageFile1->addTypeDescriptor(new BindingTypeDescriptor('my/type'));
         $this->packageFile1->addBindingDescriptor($binding = BindingDescriptor::create('/path', 'my/type', array('param' => 'value'), 'xpath'));
+
+        $this->discovery->expects($this->once())
+            ->method('bind')
+            ->with('/path', 'my/type', array('param' => 'value'), 'xpath');
+
+        $this->packageFileStorage->expects($this->once())
+            ->method('saveRootPackageFile')
+            ->with($this->rootPackageFile)
+            ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) use ($binding) {
+                $installInfo = $rootPackageFile->getInstallInfo('package1');
+                $enabledBindingUuids = $installInfo->getEnabledBindingUuids();
+
+                PHPUnit_Framework_Assert::assertSame(array($binding->getUuid()), $enabledBindingUuids);
+            }));
+
+        $this->manager->enableBinding($binding->getUuid());
+
+        $this->assertTrue($binding->isEnabled());
+    }
+
+    public function testEnableBindingBindsIfDisabled()
+    {
+        $this->initDefaultManager();
+
+        $this->packageFile1->addTypeDescriptor(new BindingTypeDescriptor('my/type'));
+        $this->packageFile1->addBindingDescriptor($binding = BindingDescriptor::create('/path', 'my/type', array('param' => 'value'), 'xpath'));
+        $this->installInfo1->addDisabledBindingUuid($binding->getUuid());
 
         $this->discovery->expects($this->once())
             ->method('bind')
@@ -960,9 +987,9 @@ class DiscoveryManagerTest extends ManagerTestCase
         $this->initDefaultManager();
 
         $this->packageFile1->addTypeDescriptor(new BindingTypeDescriptor('my/type'));
-        $this->packageFile1->addBindingDescriptor($binding = BindingDescriptor::create('/path', 'my/type', array('param' => 'value'), 'xpath'));
-        $this->packageFile2->addBindingDescriptor($binding);
-        $this->packageFile3->addBindingDescriptor($binding);
+        $this->packageFile1->addBindingDescriptor($binding1 = BindingDescriptor::create('/path', 'my/type', array('param' => 'value'), 'xpath'));
+        $this->packageFile2->addBindingDescriptor($binding2 = clone $binding1);
+        $this->packageFile3->addBindingDescriptor($binding3 = clone $binding1);
 
         $this->discovery->expects($this->once())
             ->method('bind')
@@ -971,7 +998,7 @@ class DiscoveryManagerTest extends ManagerTestCase
         $this->packageFileStorage->expects($this->once())
             ->method('saveRootPackageFile')
             ->with($this->rootPackageFile)
-            ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) use ($binding) {
+            ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) use ($binding1, $binding2) {
                 $installInfo1 = $rootPackageFile->getInstallInfo('package1');
                 $installInfo2 = $rootPackageFile->getInstallInfo('package2');
                 $installInfo3 = $rootPackageFile->getInstallInfo('package3');
@@ -979,12 +1006,12 @@ class DiscoveryManagerTest extends ManagerTestCase
                 $enabledBindingUuids2 = $installInfo2->getEnabledBindingUuids();
                 $enabledBindingUuids3 = $installInfo3->getEnabledBindingUuids();
 
-                PHPUnit_Framework_Assert::assertSame(array($binding->getUuid()), $enabledBindingUuids1);
-                PHPUnit_Framework_Assert::assertSame(array($binding->getUuid()), $enabledBindingUuids2);
+                PHPUnit_Framework_Assert::assertSame(array($binding1->getUuid()), $enabledBindingUuids1);
+                PHPUnit_Framework_Assert::assertSame(array($binding2->getUuid()), $enabledBindingUuids2);
                 PHPUnit_Framework_Assert::assertSame(array(), $enabledBindingUuids3);
             }));
 
-        $this->manager->enableBinding($binding->getUuid(), array('package1', 'package2'));
+        $this->manager->enableBinding($binding1->getUuid(), array('package1', 'package2'));
     }
 
     /**
@@ -1089,6 +1116,7 @@ class DiscoveryManagerTest extends ManagerTestCase
         $this->packageFile1->addBindingDescriptor($existing = BindingDescriptor::create('/existing', 'my/type', array('param' => 'value'), 'xpath'));
         $this->installInfo1->addEnabledBindingUuid($existing->getUuid());
         $this->packageFile1->addBindingDescriptor($binding = BindingDescriptor::create('/path', 'my/type', array('param' => 'value'), 'xpath'));
+        $this->installInfo1->addDisabledBindingUuid($binding->getUuid());
 
         $this->discovery->expects($this->once())
             ->method('bind')
@@ -1110,6 +1138,7 @@ class DiscoveryManagerTest extends ManagerTestCase
         }
 
         $this->assertSame(array($existing->getUuid()), $this->installInfo1->getEnabledBindingUuids());
+        $this->assertSame(array($binding->getUuid()), $this->installInfo1->getDisabledBindingUuids());
     }
 
     public function testEnableBindingRestoresDisabledBindingsIfSavingFails()
@@ -1141,6 +1170,336 @@ class DiscoveryManagerTest extends ManagerTestCase
 
         $this->assertSame(array(), $this->installInfo1->getEnabledBindingUuids());
         $this->assertSame(array($binding->getUuid()), $this->installInfo1->getDisabledBindingUuids());
+    }
+
+    public function testDisableBindingUnbindsIfEnabled()
+    {
+        $this->initDefaultManager();
+
+        $this->packageFile1->addTypeDescriptor(new BindingTypeDescriptor('my/type'));
+        $this->packageFile1->addBindingDescriptor($binding = BindingDescriptor::create('/path', 'my/type', array('param' => 'value'), 'xpath'));
+        $this->installInfo1->addEnabledBindingUuid($binding->getUuid());
+
+        $this->discovery->expects($this->once())
+            ->method('unbind')
+            ->with('/path', 'my/type', array('param' => 'value'), 'xpath');
+
+        $this->packageFileStorage->expects($this->once())
+            ->method('saveRootPackageFile')
+            ->with($this->rootPackageFile)
+            ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) use ($binding) {
+                $installInfo = $rootPackageFile->getInstallInfo('package1');
+                $disabledBindingUuids = $installInfo->getDisabledBindingUuids();
+
+                PHPUnit_Framework_Assert::assertSame(array($binding->getUuid()), $disabledBindingUuids);
+            }));
+
+        $this->manager->disableBinding($binding->getUuid());
+
+        $this->assertTrue($binding->isDisabled());
+    }
+
+    public function testDisableBindingDoesNotUnbindIfUndecided()
+    {
+        $this->initDefaultManager();
+
+        $this->packageFile1->addTypeDescriptor(new BindingTypeDescriptor('my/type'));
+        $this->packageFile1->addBindingDescriptor($binding = BindingDescriptor::create('/path', 'my/type', array('param' => 'value'), 'xpath'));
+
+        $this->discovery->expects($this->never())
+            ->method('unbind');
+
+        $this->packageFileStorage->expects($this->once())
+            ->method('saveRootPackageFile')
+            ->with($this->rootPackageFile)
+            ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) use ($binding) {
+                $installInfo = $rootPackageFile->getInstallInfo('package1');
+                $disabledBindingUuids = $installInfo->getDisabledBindingUuids();
+
+                PHPUnit_Framework_Assert::assertSame(array($binding->getUuid()), $disabledBindingUuids);
+            }));
+
+        $this->manager->disableBinding($binding->getUuid());
+
+        $this->assertTrue($binding->isDisabled());
+    }
+
+    public function testDisableBindingDoesNothingIfAlreadyDisabled()
+    {
+        $this->initDefaultManager();
+
+        $this->packageFile1->addTypeDescriptor(new BindingTypeDescriptor('my/type'));
+        $this->packageFile1->addBindingDescriptor($binding = BindingDescriptor::create('/path', 'my/type', array('param' => 'value'), 'xpath'));
+        $this->installInfo1->addDisabledBindingUuid($binding->getUuid());
+
+        $this->discovery->expects($this->never())
+            ->method('unbind');
+
+        $this->packageFileStorage->expects($this->never())
+            ->method('saveRootPackageFile');
+
+        $this->manager->disableBinding($binding->getUuid());
+
+        $this->assertTrue($binding->isDisabled());
+    }
+
+    public function testDisableBindingAppliedToAllPackagesByDefault()
+    {
+        $this->initDefaultManager();
+
+        $this->packageFile1->addTypeDescriptor(new BindingTypeDescriptor('my/type'));
+        $this->packageFile1->addBindingDescriptor($binding1 = BindingDescriptor::create('/path', 'my/type', array('param' => 'value'), 'xpath'));
+        $this->packageFile2->addBindingDescriptor($binding2 = clone $binding1);
+        $this->installInfo1->addEnabledBindingUuid($binding1->getUuid());
+        $this->installInfo2->addEnabledBindingUuid($binding2->getUuid());
+
+        $this->discovery->expects($this->once())
+            ->method('unbind')
+            ->with('/path', 'my/type', array('param' => 'value'), 'xpath');
+
+        $this->packageFileStorage->expects($this->once())
+            ->method('saveRootPackageFile')
+            ->with($this->rootPackageFile)
+            ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) use ($binding1) {
+                $installInfo1 = $rootPackageFile->getInstallInfo('package1');
+                $installInfo2 = $rootPackageFile->getInstallInfo('package2');
+                $disabledBindingUuids1 = $installInfo1->getDisabledBindingUuids();
+                $disabledBindingUuids2 = $installInfo2->getDisabledBindingUuids();
+
+                PHPUnit_Framework_Assert::assertSame(array($binding1->getUuid()), $disabledBindingUuids1);
+                PHPUnit_Framework_Assert::assertSame(array($binding1->getUuid()), $disabledBindingUuids2);
+            }));
+
+        $this->manager->disableBinding($binding1->getUuid());
+
+        $this->assertTrue($binding1->isDisabled());
+        $this->assertTrue($binding2->isDisabled());
+    }
+
+    public function testDisableBindingForOnePackageDoesNotUnbind()
+    {
+        $this->initDefaultManager();
+
+        $this->packageFile1->addTypeDescriptor(new BindingTypeDescriptor('my/type'));
+        $this->packageFile1->addBindingDescriptor($binding1 = BindingDescriptor::create('/path', 'my/type', array('param' => 'value'), 'xpath'));
+        $this->packageFile2->addBindingDescriptor($binding2 = clone $binding1);
+        $this->installInfo1->addEnabledBindingUuid($binding1->getUuid());
+        $this->installInfo2->addEnabledBindingUuid($binding2->getUuid());
+
+        // The other binding still exists
+        $this->discovery->expects($this->never())
+            ->method('unbind');
+
+        $this->packageFileStorage->expects($this->once())
+            ->method('saveRootPackageFile')
+            ->with($this->rootPackageFile)
+            ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) use ($binding1) {
+                $installInfo1 = $rootPackageFile->getInstallInfo('package1');
+                $installInfo2 = $rootPackageFile->getInstallInfo('package2');
+                $disabledBindingUuids1 = $installInfo1->getDisabledBindingUuids();
+                $disabledBindingUuids2 = $installInfo2->getDisabledBindingUuids();
+
+                PHPUnit_Framework_Assert::assertSame(array($binding1->getUuid()), $disabledBindingUuids1);
+                PHPUnit_Framework_Assert::assertSame(array(), $disabledBindingUuids2);
+            }));
+
+        $this->manager->disableBinding($binding1->getUuid(), 'package1');
+
+        $this->assertTrue($binding1->isDisabled());
+        $this->assertFalse($binding2->isDisabled());
+    }
+
+    public function testDisableBindingForMultiplePackagesDoesNotUnbind()
+    {
+        $this->initDefaultManager();
+
+        $this->packageFile1->addTypeDescriptor(new BindingTypeDescriptor('my/type'));
+        $this->packageFile1->addBindingDescriptor($binding1 = BindingDescriptor::create('/path', 'my/type', array('param' => 'value'), 'xpath'));
+        $this->packageFile2->addBindingDescriptor($binding2 = clone $binding1);
+        $this->packageFile3->addBindingDescriptor($binding3 = clone $binding1);
+        $this->installInfo1->addEnabledBindingUuid($binding1->getUuid());
+        $this->installInfo2->addEnabledBindingUuid($binding2->getUuid());
+        $this->installInfo3->addEnabledBindingUuid($binding3->getUuid());
+
+        // One binding still exists
+        $this->discovery->expects($this->never())
+            ->method('unbind');
+
+        $this->packageFileStorage->expects($this->once())
+            ->method('saveRootPackageFile')
+            ->with($this->rootPackageFile)
+            ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) use ($binding1, $binding2) {
+                $installInfo1 = $rootPackageFile->getInstallInfo('package1');
+                $installInfo2 = $rootPackageFile->getInstallInfo('package2');
+                $installInfo3 = $rootPackageFile->getInstallInfo('package3');
+                $disabledBindingUuids1 = $installInfo1->getDisabledBindingUuids();
+                $disabledBindingUuids2 = $installInfo2->getDisabledBindingUuids();
+                $disabledBindingUuids3 = $installInfo3->getDisabledBindingUuids();
+
+                PHPUnit_Framework_Assert::assertSame(array($binding1->getUuid()), $disabledBindingUuids1);
+                PHPUnit_Framework_Assert::assertSame(array($binding2->getUuid()), $disabledBindingUuids2);
+                PHPUnit_Framework_Assert::assertSame(array(), $disabledBindingUuids3);
+            }));
+
+        $this->manager->disableBinding($binding1->getUuid(), array('package1', 'package2'));
+    }
+
+    /**
+     * @expectedException \Puli\RepositoryManager\Discovery\NoSuchBindingException
+     * @expectedExceptionMessage 8546da2c-dfec-48be-8cd3-93798c41b72f
+     */
+    public function testDisableBindingFailsIfBindingNotFound()
+    {
+        $this->initDefaultManager();
+
+        $this->discovery->expects($this->never())
+            ->method('unbind');
+
+        $this->packageFileStorage->expects($this->never())
+            ->method('saveRootPackageFile');
+
+        $this->manager->disableBinding(Uuid::fromString('8546da2c-dfec-48be-8cd3-93798c41b72f'));
+    }
+
+    /**
+     * @expectedException \Puli\RepositoryManager\Discovery\CannotDisableBindingException
+     */
+    public function testDisableBindingFailsIfBindingInRootPackageOnly()
+    {
+        $this->initDefaultManager();
+
+        $this->packageFile1->addTypeDescriptor(new BindingTypeDescriptor('my/type'));
+        $this->rootPackageFile->addBindingDescriptor($binding = BindingDescriptor::create('/path', 'my/type', array('param' => 'value'), 'xpath'));
+
+        $this->discovery->expects($this->never())
+            ->method('unbind');
+
+        $this->packageFileStorage->expects($this->never())
+            ->method('saveRootPackageFile');
+
+        $this->manager->disableBinding($binding->getUuid());
+    }
+
+    /**
+     * @expectedException \Puli\RepositoryManager\Discovery\CannotDisableBindingException
+     */
+    public function testDisableBindingFailsIfBindingInRootPackage()
+    {
+        $this->initDefaultManager();
+
+        $this->packageFile1->addTypeDescriptor(new BindingTypeDescriptor('my/type'));
+        $this->rootPackageFile->addBindingDescriptor($binding = BindingDescriptor::create('/path', 'my/type', array('param' => 'value'), 'xpath'));
+        $this->packageFile1->addBindingDescriptor($binding);
+
+        $this->discovery->expects($this->never())
+            ->method('unbind');
+
+        $this->packageFileStorage->expects($this->never())
+            ->method('saveRootPackageFile');
+
+        $this->manager->disableBinding($binding->getUuid());
+    }
+
+    /**
+     * @expectedException \Puli\RepositoryManager\Discovery\CannotDisableBindingException
+     */
+    public function testDisableBindingFailsIfBindingHeldBack()
+    {
+        $this->initDefaultManager();
+
+        $this->packageFile1->addBindingDescriptor($binding = BindingDescriptor::create('/path', 'my/type', array('param' => 'value'), 'xpath'));
+
+        $this->discovery->expects($this->never())
+            ->method('unbind');
+
+        $this->packageFileStorage->expects($this->never())
+            ->method('saveRootPackageFile');
+
+        $this->manager->disableBinding($binding->getUuid());
+    }
+
+    /**
+     * @expectedException \Puli\RepositoryManager\Discovery\CannotDisableBindingException
+     */
+    public function testDisableBindingFailsIfBindingIgnored()
+    {
+        $this->initDefaultManager();
+
+        $this->rootPackageFile->addTypeDescriptor(new BindingTypeDescriptor('my/type'));
+        $this->packageFile1->addTypeDescriptor(new BindingTypeDescriptor('my/type'));
+        $this->packageFile1->addBindingDescriptor($binding = BindingDescriptor::create('/path', 'my/type', array('param' => 'value'), 'xpath'));
+
+        $this->discovery->expects($this->never())
+            ->method('unbind');
+
+        $this->packageFileStorage->expects($this->never())
+            ->method('saveRootPackageFile');
+
+        $this->manager->disableBinding($binding->getUuid());
+    }
+
+    public function testDisableBindingRebindsIfSavingFails()
+    {
+        $this->initDefaultManager();
+
+        $this->packageFile1->addTypeDescriptor(new BindingTypeDescriptor('my/type'));
+        $this->packageFile1->addBindingDescriptor($existing = BindingDescriptor::create('/existing', 'my/type', array('param' => 'value'), 'xpath'));
+        $this->installInfo1->addDisabledBindingUuid($existing->getUuid());
+        $this->packageFile1->addBindingDescriptor($binding = BindingDescriptor::create('/path', 'my/type', array('param' => 'value'), 'xpath'));
+        $this->installInfo1->addEnabledBindingUuid($binding->getUuid());
+
+        $this->discovery->expects($this->once())
+            ->method('unbind')
+            ->with('/path', 'my/type', array('param' => 'value'), 'xpath');
+
+        $this->discovery->expects($this->once())
+            ->method('bind')
+            ->with('/path', 'my/type', array('param' => 'value'), 'xpath');
+
+        $this->packageFileStorage->expects($this->once())
+            ->method('saveRootPackageFile')
+            ->with($this->rootPackageFile)
+            ->willThrowException(new Exception('Some exception'));
+
+        try {
+            $this->manager->disableBinding($binding->getUuid());
+            $this->fail('Expected an exception');
+        } catch (Exception $e) {
+        }
+
+        $this->assertSame(array($existing->getUuid()), $this->installInfo1->getDisabledBindingUuids());
+        $this->assertSame(array($binding->getUuid()), $this->installInfo1->getEnabledBindingUuids());
+    }
+
+    public function testDisableBindingRestoresEnabledBindingsIfSavingFails()
+    {
+        $this->initDefaultManager();
+
+        $this->packageFile1->addTypeDescriptor(new BindingTypeDescriptor('my/type'));
+        $this->packageFile1->addBindingDescriptor($binding = BindingDescriptor::create('/path', 'my/type', array('param' => 'value'), 'xpath'));
+        $this->installInfo1->addEnabledBindingUuid($binding->getUuid());
+
+        $this->discovery->expects($this->once())
+            ->method('unbind')
+            ->with('/path', 'my/type', array('param' => 'value'), 'xpath');
+
+        $this->discovery->expects($this->once())
+            ->method('bind')
+            ->with('/path', 'my/type', array('param' => 'value'), 'xpath');
+
+        $this->packageFileStorage->expects($this->once())
+            ->method('saveRootPackageFile')
+            ->with($this->rootPackageFile)
+            ->willThrowException(new Exception('Some exception'));
+
+        try {
+            $this->manager->disableBinding($binding->getUuid());
+            $this->fail('Expected an exception');
+        } catch (Exception $e) {
+        }
+
+        $this->assertSame(array(), $this->installInfo1->getDisabledBindingUuids());
+        $this->assertSame(array($binding->getUuid()), $this->installInfo1->getEnabledBindingUuids());
     }
 
     public function testGetEnabledBindings()

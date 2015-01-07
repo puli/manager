@@ -319,6 +319,41 @@ class DiscoveryManager
         }
     }
 
+    public function disableBinding(Uuid $uuid, $packageName = null)
+    {
+        $this->assertDiscoveryLoaded();
+        $this->assertPackagesLoaded();
+
+        if (!$bindingsToDisable = $this->getBindingsToDisable($uuid, $packageName)) {
+            return;
+        }
+
+        $wasEnabled = array();
+
+        try {
+            foreach ($bindingsToDisable as $packageName => $binding) {
+                $installInfo = $this->packages[$packageName]->getInstallInfo();
+                $wasEnabled[$uuid->toString()] = $installInfo->hasEnabledBindingUuid($uuid);
+                $installInfo->addDisabledBindingUuid($uuid);
+                $this->reloadAndBind($binding, $this->packages[$packageName]);
+            }
+
+            $this->packageFileStorage->saveRootPackageFile($this->rootPackageFile);
+        } catch (Exception $e) {
+            foreach ($bindingsToDisable as $packageName => $binding) {
+                $installInfo = $this->packages[$packageName]->getInstallInfo();
+                if ($wasEnabled[$uuid->toString()]) {
+                    $installInfo->addEnabledBindingUuid($uuid);
+                } else {
+                    $installInfo->removeDisabledBindingUuid($uuid);
+                }
+                $this->reloadAndBind($binding, $this->packages[$packageName]);
+            }
+
+            throw $e;
+        }
+    }
+
     /**
      * Returns all bindings.
      *
@@ -651,6 +686,50 @@ class DiscoveryManager
         }
 
         return $bindingsToEnable;
+    }
+
+    /**
+     * @param Uuid $uuid
+     * @param      $packageName
+     *
+     * @return BindingDescriptor[]
+     */
+    private function getBindingsToDisable(Uuid $uuid, $packageName = null)
+    {
+        $packageNames = $packageName ? (array) $packageName : $this->packages->getPackageNames();
+        $bindingsByPackage = $this->getBindingsByPackage($uuid, $packageNames);
+
+        if (!$bindingsByPackage) {
+            throw NoSuchBindingException::forUuid($uuid);
+        }
+
+        $bindingsToDisable = array();
+
+        foreach ($bindingsByPackage as $packageName => $binding) {
+            $package = $this->packages[$packageName];
+
+            if ($package instanceof RootPackage) {
+                throw CannotDisableBindingException::rootPackageNotAccepted($uuid, $package->getName());
+            }
+
+            $installInfo = $package->getInstallInfo();
+
+            if (!$installInfo || $installInfo->hasDisabledBindingUuid($uuid)) {
+                continue;
+            }
+
+            if ($binding->isHeldBack()) {
+                throw CannotDisableBindingException::typeNotLoaded($uuid, $packageName);
+            }
+
+            if ($binding->isIgnored()) {
+                throw CannotDisableBindingException::duplicateType($uuid, $packageName);
+            }
+
+            $bindingsToDisable[$packageName] = $binding;
+        }
+
+        return $bindingsToDisable;
     }
 
     /**
