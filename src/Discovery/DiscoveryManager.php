@@ -216,6 +216,10 @@ class DiscoveryManager
             throw NoSuchTypeException::forTypeName($typeName);
         }
 
+        if (!$this->typeStore->existsEnabled($typeName)) {
+            throw TypeNotEnabledException::forTypeName($typeName);
+        }
+
         $binding = BindingDescriptor::create($query, $typeName, $parameters, $language);
 
         if ($this->rootPackageFile->hasBindingDescriptor($binding->getUuid())) {

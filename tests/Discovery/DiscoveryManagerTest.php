@@ -710,6 +710,25 @@ class DiscoveryManagerTest extends ManagerTestCase
     }
 
     /**
+     * @expectedException \Puli\RepositoryManager\Discovery\TypeNotEnabledException
+     */
+    public function testAddBindingFailsIfTypeNotEnabled()
+    {
+        $this->initDefaultManager();
+
+        $this->rootPackageFile->addTypeDescriptor(new BindingTypeDescriptor('my/type'));
+        $this->packageFile1->addTypeDescriptor(new BindingTypeDescriptor('my/type'));
+
+        $this->discovery->expects($this->never())
+            ->method('bind');
+
+        $this->packageFileStorage->expects($this->never())
+            ->method('saveRootPackageFile');
+
+        $this->manager->addBinding('/path', 'my/type', array('param' => 'value'), 'xpath');
+    }
+
+    /**
      * @expectedException \Puli\Discovery\Api\MissingParameterException
      */
     public function testAddBindingFailsIfMissingParameters()
