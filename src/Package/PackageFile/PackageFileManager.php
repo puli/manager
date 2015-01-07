@@ -185,12 +185,13 @@ class PackageFileManager
 
         // Reorder the returned values
         $keysInDefaultOrder = Config::getKeys();
+        $defaultValues = array_fill_keys($keysInDefaultOrder, null);
 
         if (!$includeUnset) {
-            $keysInDefaultOrder = array_intersect($keysInDefaultOrder, array_keys($values));
+            $defaultValues = array_intersect_key($defaultValues, $values);
         }
 
-        return array_replace(array_flip($keysInDefaultOrder), $values);
+        return array_replace($defaultValues, $values);
     }
 
     /**
