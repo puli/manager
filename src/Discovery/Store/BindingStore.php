@@ -57,7 +57,13 @@ class BindingStore
 
     public function existsEnabled(Uuid $uuid)
     {
-        foreach ($this->store->getAll($uuid->toString()) as $binding) {
+        $uuidString = $uuid->toString();
+
+        if (!$this->store->contains($uuidString)) {
+            return false;
+        }
+
+        foreach ($this->store->getAll($uuidString) as $binding) {
             if ($binding->isEnabled()) {
                 return true;
             }

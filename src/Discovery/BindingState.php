@@ -87,7 +87,7 @@ final class BindingState
         $uuid = $bindingDescriptor->getUuid();
         $typeName = $bindingDescriptor->getTypeName();
 
-        if (!$typeStore->isDefined($typeName)) {
+        if (!$typeStore->existsAny($typeName)) {
             return self::HELD_BACK;
         }
 

@@ -44,14 +44,39 @@ class BindingTypeStore
         return $this->store->getFirst($typeName);
     }
 
+    /**
+     * @param $typeName
+     *
+     * @return BindingTypeDescriptor[]
+     */
+    public function getAll($typeName)
+    {
+        return $this->store->getAll($typeName);
+    }
+
     public function exists($typeName, Package $package)
     {
         return $this->store->contains($typeName, $package->getName());
     }
 
-    public function isDefined($typeName)
+    public function existsAny($typeName)
     {
         return $this->store->contains($typeName);
+    }
+
+    public function existsEnabled($typeName)
+    {
+        if (!$this->store->contains($typeName)) {
+            return false;
+        }
+
+        foreach ($this->store->getAll($typeName) as $type) {
+            if ($type->isEnabled()) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public function getDefiningPackageNames($typeName)

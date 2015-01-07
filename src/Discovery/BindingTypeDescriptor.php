@@ -15,6 +15,7 @@ use InvalidArgumentException;
 use Puli\Discovery\Api\BindingType;
 use Puli\Discovery\Api\NoSuchParameterException;
 use Puli\RepositoryManager\Assert\Assertion;
+use Puli\RepositoryManager\Discovery\Store\BindingTypeStore;
 
 /**
  * Describes a binding type.
@@ -39,6 +40,11 @@ class BindingTypeDescriptor
      * @var BindingParameterDescriptor[]
      */
     private $parameters = array();
+
+    /**
+     * @var int
+     */
+    private $state;
 
     /**
      * Creates a binding type descriptor.
@@ -144,5 +150,73 @@ class BindingTypeDescriptor
         }
 
         return new BindingType($this->name, $parameters);
+    }
+
+    /**
+     * Returns the state of the binding type.
+     *
+     * @return int One of the {@link BindingTypeState} constants.
+     */
+    public function getState()
+    {
+        return $this->state;
+    }
+
+    /**
+     * Sets the state of the binding type.
+     *
+     * @param int $state One of the {@link BindingTypeState} constants.
+     */
+    public function setState($state)
+    {
+        Assertion::choice($state, BindingTypeState::all(), 'The value "%s" is not a valid binding type state.');
+
+        $this->state = $state;
+    }
+
+    /**
+     * Refreshes the state of the binding type.
+     *
+     * @param BindingTypeStore $typeStore The store with the defined types.
+     */
+    public function refreshState(BindingTypeStore $typeStore)
+    {
+        $this->state = BindingTypeState::detect($this, $typeStore);
+    }
+
+    /**
+     * Returns whether the binding type is not loaded.
+     *
+     * @return bool Returns `true` if the state is {@link BindingTypeState::UNLOADED}.
+     *
+     * @see BindingTypeState::UNLOADED
+     */
+    public function isUnloaded()
+    {
+        return BindingTypeState::UNLOADED === $this->state;
+    }
+
+    /**
+     * Returns whether the binding type is enabled.
+     *
+     * @return bool Returns `true` if the state is {@link BindingTypeState::ENABLED}.
+     *
+     * @see BindingTypeState::ENABLED
+     */
+    public function isEnabled()
+    {
+        return BindingTypeState::ENABLED === $this->state;
+    }
+
+    /**
+     * Returns whether the binding type is duplicated.
+     *
+     * @return bool Returns `true` if the state is {@link BindingTypeState::DUPLICATE}.
+     *
+     * @see BindingTypeState::DUPLICATE
+     */
+    public function isDuplicate()
+    {
+        return BindingTypeState::DUPLICATE === $this->state;
     }
 }

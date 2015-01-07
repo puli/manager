@@ -16,7 +16,6 @@ use PHPUnit_Framework_Assert;
 use PHPUnit_Framework_MockObject_MockObject;
 use Psr\Log\LoggerInterface;
 use Puli\Discovery\Api\BindingType;
-use Puli\Discovery\Api\DuplicateTypeException;
 use Puli\Discovery\Api\MissingParameterException;
 use Puli\Discovery\Api\NoQueryMatchesException;
 use Puli\RepositoryManager\Discovery\BindingDescriptor;
@@ -167,6 +166,8 @@ class DiscoveryManagerTest extends ManagerTestCase
             }));
 
         $this->manager->addBindingType($bindingType);
+
+        $this->assertTrue($bindingType->isEnabled());
     }
 
     /**
@@ -180,14 +181,15 @@ class DiscoveryManagerTest extends ManagerTestCase
 
         $this->packageFile1->addTypeDescriptor($bindingType);
 
-        $this->discovery->expects($this->once())
-            ->method('define')
-            ->willThrowException(new DuplicateTypeException());
+        $this->discovery->expects($this->never())
+            ->method('define');
 
         $this->packageFileStorage->expects($this->never())
             ->method('saveRootPackageFile');
 
         $this->manager->addBindingType($bindingType);
+
+        $this->assertFalse($bindingType->isEnabled());
     }
 
     public function testAddBindingTypeAddsHeldBackBindings()
@@ -267,22 +269,25 @@ class DiscoveryManagerTest extends ManagerTestCase
         $this->packageFileStorage->expects($this->once())
             ->method('saveRootPackageFile')
             ->with($this->rootPackageFile)
-            ->willThrowException(new Exception('Some exception'));
+            ->willThrowException(new TestException('Some exception'));
 
         try {
             $this->manager->addBindingType($bindingType);
             $this->fail('Expected an exception');
-        } catch (Exception $e) {
+        } catch (TestException $e) {
         }
 
         $this->assertSame(array($existingType), $this->rootPackageFile->getTypeDescriptors());
+
+        $this->assertTrue($existingType->isEnabled());
+        $this->assertFalse($bindingType->isEnabled());
     }
 
     public function testRemoveBindingType()
     {
         $this->initDefaultManager();
 
-        $this->rootPackageFile->addTypeDescriptor(new BindingTypeDescriptor('my/type'));
+        $this->rootPackageFile->addTypeDescriptor($bindingType = new BindingTypeDescriptor('my/type'));
 
         $this->discovery->expects($this->once())
             ->method('undefine')
@@ -298,6 +303,8 @@ class DiscoveryManagerTest extends ManagerTestCase
             }));
 
         $this->manager->removeBindingType('my/type');
+
+        $this->assertTrue($bindingType->isUnloaded());
     }
 
     public function testRemoveBindingTypeIgnoresNonExistingTypes()
@@ -317,7 +324,7 @@ class DiscoveryManagerTest extends ManagerTestCase
     {
         $this->initDefaultManager();
 
-        $this->packageFile1->addTypeDescriptor(new BindingTypeDescriptor('my/type'));
+        $this->packageFile1->addTypeDescriptor($bindingType = new BindingTypeDescriptor('my/type'));
 
         $this->discovery->expects($this->never())
             ->method('undefine');
@@ -326,18 +333,20 @@ class DiscoveryManagerTest extends ManagerTestCase
             ->method('saveRootPackageFile');
 
         $this->manager->removeBindingType('my/type');
+
+        $this->assertTrue($bindingType->isEnabled());
     }
 
     public function testRemoveBindingTypeDefinesTypeIfResolvingDuplication()
     {
         $this->initDefaultManager();
 
-        $this->rootPackageFile->addTypeDescriptor($bindingType = new BindingTypeDescriptor('my/type'));
-        $this->packageFile1->addTypeDescriptor($bindingType);
+        $this->rootPackageFile->addTypeDescriptor($bindingType1 = new BindingTypeDescriptor('my/type'));
+        $this->packageFile1->addTypeDescriptor($bindingType2 = clone $bindingType1);
 
         $this->discovery->expects($this->once())
             ->method('define')
-            ->with($bindingType->toBindingType());
+            ->with($bindingType1->toBindingType());
 
         $this->discovery->expects($this->never())
             ->method('undefine');
@@ -345,22 +354,25 @@ class DiscoveryManagerTest extends ManagerTestCase
         $this->packageFileStorage->expects($this->once())
             ->method('saveRootPackageFile')
             ->with($this->rootPackageFile)
-            ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) use ($bindingType) {
+            ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) {
                 $types = $rootPackageFile->getTypeDescriptors();
 
                 PHPUnit_Framework_Assert::assertSame(array(), $types);
             }));
 
         $this->manager->removeBindingType('my/type');
+
+        $this->assertTrue($bindingType1->isUnloaded());
+        $this->assertTrue($bindingType2->isEnabled());
     }
 
     public function testRemoveBindingTypeDoesNotDefineTypeIfStillDuplicated()
     {
         $this->initDefaultManager();
 
-        $this->rootPackageFile->addTypeDescriptor($bindingType = new BindingTypeDescriptor('my/type'));
-        $this->packageFile1->addTypeDescriptor($bindingType);
-        $this->packageFile2->addTypeDescriptor($bindingType);
+        $this->rootPackageFile->addTypeDescriptor($bindingType1 = new BindingTypeDescriptor('my/type'));
+        $this->packageFile1->addTypeDescriptor($bindingType2 = clone $bindingType1);
+        $this->packageFile2->addTypeDescriptor($bindingType3 = clone $bindingType1);
 
         $this->discovery->expects($this->never())
             ->method('define');
@@ -371,13 +383,17 @@ class DiscoveryManagerTest extends ManagerTestCase
         $this->packageFileStorage->expects($this->once())
             ->method('saveRootPackageFile')
             ->with($this->rootPackageFile)
-            ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) use ($bindingType) {
+            ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) {
                 $types = $rootPackageFile->getTypeDescriptors();
 
                 PHPUnit_Framework_Assert::assertSame(array(), $types);
             }));
 
         $this->manager->removeBindingType('my/type');
+
+        $this->assertTrue($bindingType1->isUnloaded());
+        $this->assertTrue($bindingType2->isDuplicate());
+        $this->assertTrue($bindingType3->isDuplicate());
     }
 
     public function testRemoveBindingTypeUnbindsCorrespondingBindings()
@@ -521,13 +537,13 @@ class DiscoveryManagerTest extends ManagerTestCase
     {
         $this->initDefaultManager();
 
-        $this->packageFile1->addTypeDescriptor($type = new BindingTypeDescriptor('my/type'));
-        $this->packageFile2->addTypeDescriptor($type);
+        $this->packageFile1->addTypeDescriptor($type1 = new BindingTypeDescriptor('my/type'));
+        $this->packageFile2->addTypeDescriptor($type2 = clone $type1);
 
-        $this->assertSame(array($type), $this->manager->getBindingTypes());
-        $this->assertSame(array($type), $this->manager->getBindingTypes('package1'));
-        $this->assertSame(array($type), $this->manager->getBindingTypes('package2'));
-        $this->assertSame(array($type), $this->manager->getBindingTypes(array('package1', 'package2')));
+        $this->assertEquals(array($type1), $this->manager->getBindingTypes());
+        $this->assertEquals(array($type1), $this->manager->getBindingTypes('package1'));
+        $this->assertEquals(array($type2), $this->manager->getBindingTypes('package2'));
+        $this->assertEquals(array($type1), $this->manager->getBindingTypes(array('package1', 'package2')));
     }
 
     public function testAddBinding()
@@ -675,12 +691,12 @@ class DiscoveryManagerTest extends ManagerTestCase
         $this->packageFileStorage->expects($this->once())
             ->method('saveRootPackageFile')
             ->with($this->rootPackageFile)
-            ->willThrowException(new Exception('Some exception'));
+            ->willThrowException(new TestException('Some exception'));
 
         try {
             $this->manager->addBinding('/path', 'my/type', array('param' => 'value'), 'xpath');
             $this->fail('Expected an exception');
-        } catch (Exception $e) {
+        } catch (TestException $e) {
         }
 
         $this->assertSame(array($existing), $this->rootPackageFile->getBindingDescriptors());
@@ -1129,12 +1145,12 @@ class DiscoveryManagerTest extends ManagerTestCase
         $this->packageFileStorage->expects($this->once())
             ->method('saveRootPackageFile')
             ->with($this->rootPackageFile)
-            ->willThrowException(new Exception('Some exception'));
+            ->willThrowException(new TestException('Some exception'));
 
         try {
             $this->manager->enableBinding($binding->getUuid());
             $this->fail('Expected an exception');
-        } catch (Exception $e) {
+        } catch (TestException $e) {
         }
 
         $this->assertSame(array($existing->getUuid()), $this->installInfo1->getEnabledBindingUuids());
@@ -1160,12 +1176,12 @@ class DiscoveryManagerTest extends ManagerTestCase
         $this->packageFileStorage->expects($this->once())
             ->method('saveRootPackageFile')
             ->with($this->rootPackageFile)
-            ->willThrowException(new Exception('Some exception'));
+            ->willThrowException(new TestException('Some exception'));
 
         try {
             $this->manager->enableBinding($binding->getUuid());
             $this->fail('Expected an exception');
-        } catch (Exception $e) {
+        } catch (TestException $e) {
         }
 
         $this->assertSame(array(), $this->installInfo1->getEnabledBindingUuids());
@@ -1459,12 +1475,12 @@ class DiscoveryManagerTest extends ManagerTestCase
         $this->packageFileStorage->expects($this->once())
             ->method('saveRootPackageFile')
             ->with($this->rootPackageFile)
-            ->willThrowException(new Exception('Some exception'));
+            ->willThrowException(new TestException('Some exception'));
 
         try {
             $this->manager->disableBinding($binding->getUuid());
             $this->fail('Expected an exception');
-        } catch (Exception $e) {
+        } catch (TestException $e) {
         }
 
         $this->assertSame(array($existing->getUuid()), $this->installInfo1->getDisabledBindingUuids());
@@ -1490,12 +1506,12 @@ class DiscoveryManagerTest extends ManagerTestCase
         $this->packageFileStorage->expects($this->once())
             ->method('saveRootPackageFile')
             ->with($this->rootPackageFile)
-            ->willThrowException(new Exception('Some exception'));
+            ->willThrowException(new TestException('Some exception'));
 
         try {
             $this->manager->disableBinding($binding->getUuid());
             $this->fail('Expected an exception');
-        } catch (Exception $e) {
+        } catch (TestException $e) {
         }
 
         $this->assertSame(array(), $this->installInfo1->getDisabledBindingUuids());
