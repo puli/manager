@@ -31,6 +31,7 @@ class DefaultConfig extends Config
             self::FACTORY_FILE => '{$puli-dir}/PuliFactory.php',
             self::REPOSITORY_TYPE => 'filesystem',
             self::REPOSITORY_PATH => '{$puli-dir}/repository',
+            self::REPOSITORY_SYMLINK => true,
             self::DISCOVERY_TYPE => 'key-value-store',
         ));
     }
