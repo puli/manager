@@ -427,7 +427,7 @@ class DiscoveryManager
         $this->emitWarningForDuplicateTypes();
         $this->emitWarningForInvalidBindings();
 
-        if (count($this->discovery->getBindings()) > 0 || count($this->discovery->getTypes()) > 0) {
+        if (count($this->discovery->getBindings()) > 0 || count($this->discovery->getDefinedTypes()) > 0) {
             throw new DiscoveryNotEmptyException('The discovery is not empty.');
         }
 
@@ -712,7 +712,7 @@ class DiscoveryManager
      */
     private function defineType(BindingTypeDescriptor $bindingType)
     {
-        $this->discovery->define($bindingType->toBindingType());
+        $this->discovery->defineType($bindingType->toBindingType());
     }
 
     /**
@@ -720,7 +720,7 @@ class DiscoveryManager
      */
     private function undefineType($typeName)
     {
-        $this->discovery->undefine($typeName);
+        $this->discovery->undefineType($typeName);
     }
 
     /**

@@ -153,7 +153,7 @@ class DiscoveryManagerTest extends ManagerTestCase
         $bindingType = new BindingTypeDescriptor('my/type');
 
         $this->discovery->expects($this->once())
-            ->method('define')
+            ->method('defineType')
             ->with($bindingType->toBindingType());
 
         $this->packageFileStorage->expects($this->once())
@@ -182,7 +182,7 @@ class DiscoveryManagerTest extends ManagerTestCase
         $this->packageFile1->addTypeDescriptor($bindingType);
 
         $this->discovery->expects($this->never())
-            ->method('define');
+            ->method('defineType');
 
         $this->packageFileStorage->expects($this->never())
             ->method('saveRootPackageFile');
@@ -201,7 +201,7 @@ class DiscoveryManagerTest extends ManagerTestCase
         $bindingType = new BindingTypeDescriptor('my/type');
 
         $this->discovery->expects($this->once())
-            ->method('define')
+            ->method('defineType')
             ->with($bindingType->toBindingType());
 
         $this->discovery->expects($this->once())
@@ -231,7 +231,7 @@ class DiscoveryManagerTest extends ManagerTestCase
         $bindingType = new BindingTypeDescriptor('my/type');
 
         $this->discovery->expects($this->once())
-            ->method('define')
+            ->method('defineType')
             ->with($bindingType->toBindingType());
 
         $this->discovery->expects($this->once())
@@ -259,11 +259,11 @@ class DiscoveryManagerTest extends ManagerTestCase
         $bindingType = new BindingTypeDescriptor('my/type');
 
         $this->discovery->expects($this->once())
-            ->method('define')
+            ->method('defineType')
             ->with($bindingType->toBindingType());
 
         $this->discovery->expects($this->once())
-            ->method('undefine')
+            ->method('undefineType')
             ->with('my/type');
 
         $this->packageFileStorage->expects($this->once())
@@ -290,7 +290,7 @@ class DiscoveryManagerTest extends ManagerTestCase
         $this->rootPackageFile->addTypeDescriptor($bindingType = new BindingTypeDescriptor('my/type'));
 
         $this->discovery->expects($this->once())
-            ->method('undefine')
+            ->method('undefineType')
             ->with('my/type');
 
         $this->packageFileStorage->expects($this->once())
@@ -312,7 +312,7 @@ class DiscoveryManagerTest extends ManagerTestCase
         $this->initDefaultManager();
 
         $this->discovery->expects($this->never())
-            ->method('undefine');
+            ->method('undefineType');
 
         $this->packageFileStorage->expects($this->never())
             ->method('saveRootPackageFile');
@@ -327,7 +327,7 @@ class DiscoveryManagerTest extends ManagerTestCase
         $this->packageFile1->addTypeDescriptor($bindingType = new BindingTypeDescriptor('my/type'));
 
         $this->discovery->expects($this->never())
-            ->method('undefine');
+            ->method('undefineType');
 
         $this->packageFileStorage->expects($this->never())
             ->method('saveRootPackageFile');
@@ -345,11 +345,11 @@ class DiscoveryManagerTest extends ManagerTestCase
         $this->packageFile1->addTypeDescriptor($bindingType2 = clone $bindingType1);
 
         $this->discovery->expects($this->once())
-            ->method('define')
+            ->method('defineType')
             ->with($bindingType1->toBindingType());
 
         $this->discovery->expects($this->never())
-            ->method('undefine');
+            ->method('undefineType');
 
         $this->packageFileStorage->expects($this->once())
             ->method('saveRootPackageFile')
@@ -375,10 +375,10 @@ class DiscoveryManagerTest extends ManagerTestCase
         $this->packageFile2->addTypeDescriptor($bindingType3 = clone $bindingType1);
 
         $this->discovery->expects($this->never())
-            ->method('define');
+            ->method('defineType');
 
         $this->discovery->expects($this->never())
-            ->method('undefine');
+            ->method('undefineType');
 
         $this->packageFileStorage->expects($this->once())
             ->method('saveRootPackageFile')
@@ -404,7 +404,7 @@ class DiscoveryManagerTest extends ManagerTestCase
         $this->rootPackageFile->addBindingDescriptor(BindingDescriptor::create('/path', 'my/type'));
 
         $this->discovery->expects($this->once())
-            ->method('undefine')
+            ->method('undefineType')
             ->with('my/type');
 
         $this->discovery->expects($this->once())
@@ -433,7 +433,7 @@ class DiscoveryManagerTest extends ManagerTestCase
         $this->installInfo1->addEnabledBindingUuid($binding->getUuid());
 
         $this->discovery->expects($this->once())
-            ->method('undefine')
+            ->method('undefineType')
             ->with('my/type');
 
         $this->discovery->expects($this->once())
@@ -461,11 +461,11 @@ class DiscoveryManagerTest extends ManagerTestCase
         $this->rootPackageFile->addBindingDescriptor(BindingDescriptor::create('/path', 'my/type'));
 
         $this->discovery->expects($this->once())
-            ->method('define')
+            ->method('defineType')
             ->with($bindingType->toBindingType());
 
         $this->discovery->expects($this->never())
-            ->method('undefine');
+            ->method('undefineType');
 
         $this->discovery->expects($this->once())
             ->method('bind')
@@ -493,10 +493,10 @@ class DiscoveryManagerTest extends ManagerTestCase
         $this->rootPackageFile->addBindingDescriptor(BindingDescriptor::create('/path', 'my/type'));
 
         $this->discovery->expects($this->never())
-            ->method('define');
+            ->method('defineType');
 
         $this->discovery->expects($this->never())
-            ->method('undefine');
+            ->method('undefineType');
 
         $this->discovery->expects($this->never())
             ->method('bind');
@@ -524,11 +524,11 @@ class DiscoveryManagerTest extends ManagerTestCase
             ->method('warning');
 
         $this->discovery->expects($this->once())
-            ->method('define')
+            ->method('defineType')
             ->with($bindingType->toBindingType());
 
         $this->discovery->expects($this->never())
-            ->method('undefine');
+            ->method('undefineType');
 
         $this->packageFileStorage->expects($this->once())
             ->method('saveRootPackageFile')
@@ -554,10 +554,10 @@ class DiscoveryManagerTest extends ManagerTestCase
             ->method('warning');
 
         $this->discovery->expects($this->never())
-            ->method('define');
+            ->method('defineType');
 
         $this->discovery->expects($this->never())
-            ->method('undefine');
+            ->method('undefineType');
 
         $this->packageFileStorage->expects($this->once())
             ->method('saveRootPackageFile')
@@ -2087,7 +2087,7 @@ class DiscoveryManagerTest extends ManagerTestCase
         $this->packageFile1->addTypeDescriptor($bindingType = new BindingTypeDescriptor('my/type'));
 
         $this->discovery->expects($this->once())
-            ->method('define')
+            ->method('defineType')
             ->with($bindingType->toBindingType());
 
         $this->discovery->expects($this->once())
@@ -2109,7 +2109,7 @@ class DiscoveryManagerTest extends ManagerTestCase
         $this->packageFile1->addTypeDescriptor($bindingType = new BindingTypeDescriptor('my/type'));
 
         $this->discovery->expects($this->once())
-            ->method('define')
+            ->method('defineType')
             ->with($bindingType->toBindingType());
 
         $this->discovery->expects($this->once())
@@ -2130,7 +2130,7 @@ class DiscoveryManagerTest extends ManagerTestCase
         $this->packageFile1->addTypeDescriptor($bindingType = new BindingTypeDescriptor('my/type'));
 
         $this->discovery->expects($this->once())
-            ->method('define')
+            ->method('defineType')
             ->with($bindingType->toBindingType());
 
         $this->discovery->expects($this->once())
@@ -2201,7 +2201,7 @@ class DiscoveryManagerTest extends ManagerTestCase
         $this->packageFile2->addTypeDescriptor(new BindingTypeDescriptor('my/type'));
 
         $this->discovery->expects($this->never())
-            ->method('define');
+            ->method('defineType');
 
         $this->logger->expects($this->once())
             ->method('warning');
@@ -2221,7 +2221,7 @@ class DiscoveryManagerTest extends ManagerTestCase
             ->willReturn(array($this->getMock('Puli\Discovery\Api\ResourceBinding')));
 
         $this->discovery->expects($this->never())
-            ->method('define');
+            ->method('defineType');
 
         $this->manager->buildDiscovery();
     }
@@ -2234,11 +2234,11 @@ class DiscoveryManagerTest extends ManagerTestCase
         $this->initDefaultManager();
 
         $this->discovery->expects($this->once())
-            ->method('getTypes')
+            ->method('getDefinedTypes')
             ->willReturn(array(new BindingType('type')));
 
         $this->discovery->expects($this->never())
-            ->method('define');
+            ->method('defineType');
 
         $this->manager->buildDiscovery();
     }
