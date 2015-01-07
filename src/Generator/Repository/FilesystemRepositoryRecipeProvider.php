@@ -11,6 +11,7 @@
 
 namespace Puli\RepositoryManager\Generator\Repository;
 
+use Puli\RepositoryManager\Assert\Assertion;
 use Puli\RepositoryManager\Generator\BuildRecipe;
 use Puli\RepositoryManager\Generator\BuildRecipeProvider;
 use Puli\RepositoryManager\Generator\ProviderFactory;
@@ -24,14 +25,23 @@ use Webmozart\PathUtil\Path;
  */
 class FilesystemRepositoryRecipeProvider implements BuildRecipeProvider
 {
+    private static $defaultOptions = array(
+        'symlink' => true,
+    );
+
     /**
      * {@inheritdoc}
      */
     public function getRecipe($varName, $outputDir, $rootDir, array $options, ProviderFactory $providerFactory)
     {
+        $options = array_replace(self::$defaultOptions, $options);
+
         if (!isset($options['path'])) {
             $options['path'] = $outputDir.'/repository';
         }
+
+        Assertion::string($options['path'], 'The "path" option should be a string. Got: %2$s');
+        Assertion::boolean($options['symlink'], 'The "symlink" option should be a boolean. Got: %s');
 
         $path = Path::makeAbsolute($options['path'], $rootDir);
         $relPath = Path::makeRelative($path, $outputDir);
@@ -39,6 +49,7 @@ class FilesystemRepositoryRecipeProvider implements BuildRecipeProvider
         $escPath = $relPath
             ? '__DIR__.'.var_export('/'.$relPath, true)
             : '__DIR__';
+        $escSymlink = var_export($options['symlink'], true);
 
         $declaration = '';
 
@@ -48,7 +59,7 @@ class FilesystemRepositoryRecipeProvider implements BuildRecipeProvider
                 "}\n\n";
         }
 
-        $declaration .= "$varName = new FilesystemRepository($escPath);";
+        $declaration .= "$varName = new FilesystemRepository($escPath, $escSymlink);";
 
         $recipe = new BuildRecipe();
         $recipe->addImport('Puli\Repository\FilesystemRepository');
