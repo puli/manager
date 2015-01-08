@@ -133,7 +133,7 @@ class PuliFactoryGenerator
 
         ob_start();
 
-        require __DIR__.'/../../res/template/PuliFactory.tpl.php';
+        require __DIR__.'/../../res/template/GeneratedPuliFactory.tpl.php';
 
         return "<?php\n".ob_get_clean();
     }
