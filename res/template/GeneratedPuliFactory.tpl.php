@@ -23,7 +23,7 @@ use <?php echo $import ?>;
  *
  * Otherwise any modifications will be overwritten!
  */
-class <?php echo $shortClassName."\n" ?> implements PuliFactory
+class <?php echo $shortClassName ?> implements PuliFactory
 {
     /**
      * Creates the resource repository.
