@@ -337,6 +337,71 @@ class ProjectEnvironmentTest extends PHPUnit_Framework_TestCase
     /**
      * @runInSeparateProcess
      */
+    public function testGlobalConfigFileMayBeMissing()
+    {
+        $this->configFileStorage->expects($this->once())
+            ->method('loadConfigFile')
+            ->with($this->homeDir.'/config.json')
+            ->will($this->returnValue(new ConfigFile($this->homeDir.'/config.json', $this->config)));
+
+        $this->packageFileStorage->expects($this->once())
+            ->method('loadRootPackageFile')
+            ->with($this->rootDir.'/puli.json')
+            ->will($this->returnValue(new RootPackageFile('root', $this->rootDir.'/puli.json', $this->config)));
+
+        $environment = new ProjectEnvironment(
+            $this->homeDir,
+            $this->rootDir,
+            $this->configFileStorage,
+            $this->packageFileStorage,
+            $this->dispatcher
+        );
+
+        // Simulate previous generation of the factory file
+        $this->config->set(Config::FACTORY_FILE, 'MyFactory.php');
+        $this->config->set(Config::FACTORY_CLASS, 'Puli\RepositoryManager\Tests\Environment\Fixtures\MyFactory');
+        file_put_contents($this->rootDir.'/MyFactory.php', file_get_contents(__DIR__.'/Fixtures/MyFactory.php'));
+
+        unlink($this->homeDir.'/config.json');
+
+        // Shouldn't check filemtime() this time
+        // MyFactory returns NULL
+        $this->assertNull($environment->getRepository());
+    }
+
+    /**
+     * @runInSeparateProcess
+     */
+    public function testHomeDirMayBeMissing()
+    {
+        $this->packageFileStorage->expects($this->once())
+            ->method('loadRootPackageFile')
+            ->with($this->rootDir.'/puli.json')
+            ->will($this->returnValue(new RootPackageFile('root', $this->rootDir.'/puli.json', $this->config)));
+
+        $environment = new ProjectEnvironment(
+            null,
+            $this->rootDir,
+            $this->configFileStorage,
+            $this->packageFileStorage,
+            $this->dispatcher
+        );
+
+        // Simulate previous generation of the factory file
+        $this->config->set(Config::FACTORY_FILE, 'MyFactory.php');
+        $this->config->set(Config::FACTORY_CLASS, 'Puli\RepositoryManager\Tests\Environment\Fixtures\MyFactory');
+        file_put_contents($this->rootDir.'/MyFactory.php', file_get_contents(__DIR__.'/Fixtures/MyFactory.php'));
+
+        unlink($this->homeDir.'/config.json');
+
+        // Shouldn't check filemtime() this time
+        // MyFactory returns NULL
+        $this->assertNull($environment->getRepository());
+    }
+
+    /**
+     * @runInSeparateProcess
+     */
     public function testFactoryIsRegeneratedAfterChangingRootPackageFile()
     {
         $this->configFileStorage->expects($this->once())

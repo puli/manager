@@ -203,7 +203,7 @@ class ProjectEnvironment extends GlobalEnvironment
                 clearstatcache(true, $this->rootPackageFile->getPath());
                 $lastConfigChange = filemtime($this->rootPackageFile->getPath());
 
-                if ($this->getConfigFile()) {
+                if ($this->getConfigFile() && file_exists($this->getConfigFile()->getPath())) {
                     clearstatcache(true, $this->getConfigFile()->getPath());
                     $lastConfigChange = max(filemtime($this->getConfigFile()->getPath()), $lastConfigChange);
                 }
