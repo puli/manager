@@ -192,17 +192,27 @@ class ProjectEnvironment extends GlobalEnvironment
         Assert::notEmpty($factoryClass, 'The "'.Config::FACTORY_CLASS.'" config key must not be empty.');
 
         if (!class_exists($factoryClass, false)) {
+            $autoGenerate = $this->getConfig()->get(Config::FACTORY_AUTO_GENERATE);
             $absFactoryFile = Path::makeAbsolute($factoryFile, $this->rootDir);
+            $lastConfigChange = 0;
+            $lastFactoryUpdate = 0;
 
-            // Clear cache before querying filemtime()
-            clearstatcache();
-            $lastConfigChange = filemtime($this->rootPackageFile->getPath());
+            // Regenerate file if the configuration has changed and
+            // auto-generation is enabled
+            if (file_exists($absFactoryFile) && $autoGenerate) {
+                clearstatcache(true, $this->rootPackageFile->getPath());
+                $lastConfigChange = filemtime($this->rootPackageFile->getPath());
 
-            if ($this->getConfigFile()) {
-                $lastConfigChange = max(filemtime($this->getConfigFile()->getPath()), $lastConfigChange);
+                if ($this->getConfigFile()) {
+                    clearstatcache(true, $this->getConfigFile()->getPath());
+                    $lastConfigChange = max(filemtime($this->getConfigFile()->getPath()), $lastConfigChange);
+                }
+
+                clearstatcache(true, $absFactoryFile);
+                $lastFactoryUpdate = filemtime($absFactoryFile);
             }
 
-            if (!file_exists($absFactoryFile) || $lastConfigChange > filemtime($absFactoryFile)) {
+            if (!file_exists($absFactoryFile) || $lastConfigChange > $lastFactoryUpdate) {
                 $generator = new PuliFactoryGenerator();
 
                 $generator->generateFactory(
