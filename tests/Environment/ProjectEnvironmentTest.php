@@ -46,6 +46,11 @@ class ProjectEnvironmentTest extends PHPUnit_Framework_TestCase
     private $rootDir;
 
     /**
+     * @var Config
+     */
+    private $config;
+
+    /**
      * @var PHPUnit_Framework_MockObject_MockObject|ConfigFileStorage
      */
     private $configFileStorage;
@@ -67,6 +72,7 @@ class ProjectEnvironmentTest extends PHPUnit_Framework_TestCase
         $filesystem = new Filesystem();
         $filesystem->mirror(__DIR__.'/Fixtures', $this->tempDir);
 
+        $this->config = new DefaultConfig();
         $this->homeDir = $this->tempDir.'/home';
         $this->rootDir = $this->tempDir.'/root';
         $this->configFileStorage = $this->getMockBuilder('Puli\RepositoryManager\Config\ConfigFile\ConfigFileStorage')
@@ -167,13 +173,13 @@ class ProjectEnvironmentTest extends PHPUnit_Framework_TestCase
 
     /**
      * @expectedException \Puli\RepositoryManager\NoDirectoryException
-     * @expectedExceptionMessage /file
+     * @expectedExceptionMessage /puli.json
      */
     public function testFailIfRootDirNoDirectory()
     {
         new ProjectEnvironment(
             $this->homeDir,
-            $this->rootDir.'/file',
+            $this->rootDir.'/puli.json',
             $this->configFileStorage,
             $this->packageFileStorage,
             $this->dispatcher
@@ -243,12 +249,12 @@ class ProjectEnvironmentTest extends PHPUnit_Framework_TestCase
         $this->configFileStorage->expects($this->once())
             ->method('loadConfigFile')
             ->with($this->homeDir.'/config.json')
-            ->will($this->returnValue(new ConfigFile($this->homeDir.'/config.json', new DefaultConfig())));
+            ->will($this->returnValue(new ConfigFile($this->homeDir.'/config.json', $this->config)));
 
         $this->packageFileStorage->expects($this->once())
             ->method('loadRootPackageFile')
             ->with($this->rootDir.'/puli.json')
-            ->will($this->returnValue(new RootPackageFile('root', $this->rootDir.'/puli.json', new DefaultConfig())));
+            ->will($this->returnValue(new RootPackageFile('root', $this->rootDir.'/puli.json', $this->config)));
 
         $environment = new ProjectEnvironment(
             $this->homeDir,
@@ -269,12 +275,12 @@ class ProjectEnvironmentTest extends PHPUnit_Framework_TestCase
         $this->configFileStorage->expects($this->once())
             ->method('loadConfigFile')
             ->with($this->homeDir.'/config.json')
-            ->will($this->returnValue(new ConfigFile($this->homeDir.'/config.json', new DefaultConfig())));
+            ->will($this->returnValue(new ConfigFile($this->homeDir.'/config.json', $this->config)));
 
         $this->packageFileStorage->expects($this->once())
             ->method('loadRootPackageFile')
             ->with($this->rootDir.'/puli.json')
-            ->will($this->returnValue(new RootPackageFile('root', $this->rootDir.'/puli.json', new DefaultConfig())));
+            ->will($this->returnValue(new RootPackageFile('root', $this->rootDir.'/puli.json', $this->config)));
 
         $environment = new ProjectEnvironment(
             $this->homeDir,
@@ -285,5 +291,83 @@ class ProjectEnvironmentTest extends PHPUnit_Framework_TestCase
         );
 
         $this->assertInstanceOf('Puli\Discovery\KeyValueStoreDiscovery', $environment->getDiscovery());
+    }
+
+    /**
+     * @runInSeparateProcess
+     */
+    public function testFactoryIsRegeneratedAfterChangingGlobalConfig()
+    {
+        $this->configFileStorage->expects($this->once())
+            ->method('loadConfigFile')
+            ->with($this->homeDir.'/config.json')
+            ->will($this->returnValue(new ConfigFile($this->homeDir.'/config.json', $this->config)));
+
+        $this->packageFileStorage->expects($this->once())
+            ->method('loadRootPackageFile')
+            ->with($this->rootDir.'/puli.json')
+            ->will($this->returnValue(new RootPackageFile('root', $this->rootDir.'/puli.json', $this->config)));
+
+        $environment = new ProjectEnvironment(
+            $this->homeDir,
+            $this->rootDir,
+            $this->configFileStorage,
+            $this->packageFileStorage,
+            $this->dispatcher
+        );
+
+        // Simulate previous generation of the factory file
+        clearstatcache();
+        $this->config->set(Config::FACTORY_FILE, 'MyFactory.php');
+        file_put_contents($this->rootDir.'/MyFactory.php', 'factory code');
+        $lastModified = filemtime($this->rootDir.'/MyFactory.php');
+
+        // Wait and modify global config
+        sleep(1);
+        file_put_contents($this->homeDir.'/config.json', 'updated config');
+
+        $environment->getRepository();
+
+        // File was updated
+        $this->assertGreaterThan($lastModified, filemtime($this->rootDir.'/MyFactory.php'));
+    }
+
+    /**
+     * @runInSeparateProcess
+     */
+    public function testFactoryIsRegeneratedAfterChangingRootPackageFile()
+    {
+        $this->configFileStorage->expects($this->once())
+            ->method('loadConfigFile')
+            ->with($this->homeDir.'/config.json')
+            ->will($this->returnValue(new ConfigFile($this->homeDir.'/config.json', $this->config)));
+
+        $this->packageFileStorage->expects($this->once())
+            ->method('loadRootPackageFile')
+            ->with($this->rootDir.'/puli.json')
+            ->will($this->returnValue(new RootPackageFile('root', $this->rootDir.'/puli.json', $this->config)));
+
+        $environment = new ProjectEnvironment(
+            $this->homeDir,
+            $this->rootDir,
+            $this->configFileStorage,
+            $this->packageFileStorage,
+            $this->dispatcher
+        );
+
+        // Simulate previous generation of the factory file
+        clearstatcache();
+        $this->config->set(Config::FACTORY_FILE, 'MyFactory.php');
+        file_put_contents($this->rootDir.'/MyFactory.php', 'factory code');
+        $lastModified = filemtime($this->rootDir.'/MyFactory.php');
+
+        // Wait and modify package file
+        sleep(1);
+        file_put_contents($this->rootDir.'/puli.json', 'updated config');
+
+        $environment->getRepository();
+
+        // File was updated
+        $this->assertGreaterThan($lastModified, filemtime($this->rootDir.'/MyFactory.php'));
     }
 }

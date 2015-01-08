@@ -126,12 +126,12 @@ class GlobalEnvironmentTest extends PHPUnit_Framework_TestCase
 
     /**
      * @expectedException \Puli\RepositoryManager\NoDirectoryException
-     * @expectedExceptionMessage /file
+     * @expectedExceptionMessage /config.json
      */
     public function testFailIfHomeDirNoDirectory()
     {
         new GlobalEnvironment(
-            $this->homeDir.'/file',
+            $this->homeDir.'/config.json',
             $this->configFileStorage,
             $this->dispatcher
         );

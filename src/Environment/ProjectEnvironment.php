@@ -194,7 +194,15 @@ class ProjectEnvironment extends GlobalEnvironment
         if (!class_exists($factoryClass, false)) {
             $absFactoryFile = Path::makeAbsolute($factoryFile, $this->rootDir);
 
-            if (!file_exists($absFactoryFile)) {
+            // Clear cache before querying filemtime()
+            clearstatcache();
+            $lastConfigChange = filemtime($this->rootPackageFile->getPath());
+
+            if ($this->getConfigFile()) {
+                $lastConfigChange = max(filemtime($this->getConfigFile()->getPath()), $lastConfigChange);
+            }
+
+            if (!file_exists($absFactoryFile) || $lastConfigChange > filemtime($absFactoryFile)) {
                 $generator = new PuliFactoryGenerator();
 
                 $generator->generateFactory(
