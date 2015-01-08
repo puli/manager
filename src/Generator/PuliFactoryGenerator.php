@@ -150,21 +150,31 @@ class PuliFactoryGenerator
     private function generateVariables($className, BuildRecipe $repoRecipe, BuildRecipe $discoveryRecipe)
     {
         $className = trim($className, '\\');
-        $pos = strrpos($className, '\\');
+        $longInterfaceName = 'Puli\Factory\PuliFactory';
+        $shortInterfaceName = $this->getShortClassName($longInterfaceName);
 
         $variables = array();
-        $variables['namespace'] = false !== $pos ? substr($className, 0, $pos) : '';
-        $variables['shortClassName'] = false !== $pos ? substr($className, $pos + 1) : $className;
+        $variables['namespace'] = $this->getNamespaceName($className);
+        $variables['shortClassName'] = $this->getShortClassName($className);
 
-        $variables['imports'] = array_unique(array_merge(
+        $variables['imports'] = array_merge(
             $repoRecipe->getImports(),
             $discoveryRecipe->getImports(),
             array(
                 'Puli\Repository\Api\ResourceRepository',
                 'Puli\Discovery\Api\ResourceDiscovery',
-                'Puli\Factory\PuliFactory',
             )
-        ));
+        );
+
+        // Check for name clashes
+        if ($shortInterfaceName === $variables['shortClassName']) {
+            $variables['factoryInterfaceName'] = '\\'.$longInterfaceName;
+        } else {
+            $variables['imports'][] = $longInterfaceName;
+            $variables['factoryInterfaceName'] = $shortInterfaceName;
+        }
+
+        $variables['imports'] = array_unique($variables['imports']);
 
         sort($variables['imports']);
 
@@ -253,5 +263,19 @@ class PuliFactoryGenerator
         return preg_replace_callback('/\W+([a-z])/', function ($matches) {
             return strtoupper($matches[1]);
         }, $string);
+    }
+
+    private function getNamespaceName($className)
+    {
+        $pos = strrpos($className, '\\');
+
+        return false !== $pos ? substr($className, 0, $pos) : '';
+    }
+
+    private function getShortClassName($className)
+    {
+        $pos = strrpos($className, '\\');
+
+        return false !== $pos ? substr($className, $pos + 1) : $className;
     }
 }

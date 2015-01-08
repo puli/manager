@@ -123,6 +123,30 @@ class PuliFactoryGeneratorTest extends PHPUnit_Framework_TestCase
         $this->assertInstanceOf(__NAMESPACE__.'\Fixtures\TestDiscovery', $discovery);
     }
 
+    public function testGenerateFactoryWithSameShortNameAsInterface()
+    {
+        $config = new Config();
+        $config->set(Config::REPOSITORY_TYPE, 'my-repo-type');
+        $config->set(Config::REPOSITORY_PATH, 'my-storage-dir');
+        $config->set(Config::DISCOVERY_TYPE, 'my-discovery-type');
+
+        $this->factoryGenerator->generateFactory(
+            $this->tempDir.'/PuliFactory.php',
+            'Puli\PuliFactory',
+            $this->tempDir,
+            $config
+        );
+
+        require $this->tempDir.'/PuliFactory.php';
+
+        $factory = new \Puli\PuliFactory();
+        $repo = $factory->createRepository();
+        $discovery = $factory->createDiscovery($repo);
+
+        $this->assertInstanceOf(__NAMESPACE__.'\Fixtures\TestRepository', $repo);
+        $this->assertInstanceOf(__NAMESPACE__.'\Fixtures\TestDiscovery', $discovery);
+    }
+
     public function testGenerateFactoryInNonExistingDirectory()
     {
         $config = new Config();
