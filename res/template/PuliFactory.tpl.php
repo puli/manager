@@ -23,7 +23,7 @@ use <?php echo $import ?>;
  *
  * Otherwise any modifications will be overwritten!
  */
-class <?php echo $shortClassName."\n" ?>
+class <?php echo $shortClassName."\n" ?> implements PuliFactory
 {
     /**
      * Creates the resource repository.
@@ -45,7 +45,7 @@ class <?php echo $shortClassName."\n" ?>
      *
      * @return ResourceDiscovery The created resource discovery.
      */
-    public static function createDiscovery(ResourceRepository <?php echo $repoVarName ?>)
+    public function createDiscovery(ResourceRepository <?php echo $repoVarName ?>)
     {
 <?php foreach ($discoveryDeclarations as $declaration): ?>
 <?php echo $this->indent($declaration, 8)."\n\n" ?>

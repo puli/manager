@@ -13,6 +13,7 @@ namespace Puli\RepositoryManager\Tests\Generator;
 
 use PHPUnit_Framework_MockObject_MockObject;
 use PHPUnit_Framework_TestCase;
+use Puli\Factory\PuliFactory;
 use Puli\RepositoryManager\Config\Config;
 use Puli\RepositoryManager\Generator\ProviderFactory;
 use Puli\RepositoryManager\Generator\PuliFactoryGenerator;
@@ -83,7 +84,11 @@ class PuliFactoryGeneratorTest extends PHPUnit_Framework_TestCase
 
         require $this->tempDir.'/MyFactory.php';
 
+        /** @var PuliFactory $factory */
         $factory = new \Puli\MyFactory();
+
+        $this->assertInstanceOf('Puli\Factory\PuliFactory', $factory);
+
         $repo = $factory->createRepository();
         $discovery = $factory->createDiscovery($repo);
 

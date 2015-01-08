@@ -162,6 +162,7 @@ class PuliFactoryGenerator
             array(
                 'Puli\Repository\Api\ResourceRepository',
                 'Puli\Discovery\Api\ResourceDiscovery',
+                'Puli\Factory\PuliFactory',
             )
         ));
 
