@@ -44,7 +44,7 @@
         "Puli\\RepositoryManager\\Tests\\Package\\PackageFile\\Fixtures\\TestPlugin"
     ],
     "packages": {
-        "package1": {
+        "vendor/package1": {
             "install-path": "/path/to/package1",
             "installer": "Composer",
             "enabled-bindings": [
@@ -54,7 +54,7 @@
                 "4d02ee67-d845-4789-a9c1-8301351c6f5a"
             ]
         },
-        "package2": {
+        "vendor/package2": {
             "install-path": "/path/to/package2"
         }
     }

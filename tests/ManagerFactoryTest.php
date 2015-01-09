@@ -179,9 +179,9 @@ class ManagerFactoryTest extends PHPUnit_Framework_TestCase
         $packages = $manager->getPackages();
 
         $this->assertCount(3, $packages);
-        $this->assertSame('real-root', $packages['real-root']->getName());
-        $this->assertSame('package1', $packages['package1']->getName());
-        $this->assertSame('package2', $packages['package2']->getName());
+        $this->assertTrue($packages->contains('vendor/root'));
+        $this->assertTrue($packages->contains('vendor/package1'));
+        $this->assertTrue($packages->contains('vendor/package2'));
     }
 
     public function testCreateRepositoryManager()

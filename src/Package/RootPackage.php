@@ -22,9 +22,9 @@ use Puli\RepositoryManager\Package\PackageFile\RootPackageFile;
 class RootPackage extends Package
 {
     /**
-     * @var string|null
+     * The default name of the root package.
      */
-    protected static $defaultName = '__root__';
+    const DEFAULT_NAME = '__root__';
 
     /**
      * Creates a new root package.

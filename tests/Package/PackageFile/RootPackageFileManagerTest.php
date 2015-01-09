@@ -307,11 +307,11 @@ class RootPackageFileManagerTest extends ManagerTestCase
     public function testGetPackageName()
     {
         // Default name set in initEnvironment()
-        $this->assertSame('root', $this->manager->getPackageName());
+        $this->assertSame('vendor/root', $this->manager->getPackageName());
 
-        $this->rootPackageFile->setPackageName('package');
+        $this->rootPackageFile->setPackageName('vendor/package');
 
-        $this->assertSame('package', $this->manager->getPackageName());
+        $this->assertSame('vendor/package', $this->manager->getPackageName());
     }
 
     public function testSetPackageName()
@@ -320,23 +320,23 @@ class RootPackageFileManagerTest extends ManagerTestCase
             ->method('saveRootPackageFile')
             ->with($this->rootPackageFile)
             ->will($this->returnCallback(function (RootPackageFile $packageFile) {
-                PHPUnit_Framework_Assert::assertSame('package', $packageFile->getPackageName());
+                PHPUnit_Framework_Assert::assertSame('vendor/package', $packageFile->getPackageName());
             }));
 
-        $this->manager->setPackageName('package');
+        $this->manager->setPackageName('vendor/package');
 
-        $this->assertSame('package', $this->manager->getPackageName());
+        $this->assertSame('vendor/package', $this->manager->getPackageName());
     }
 
     public function testSetPackageNameDoesNotSaveIfUnchanged()
     {
-        $this->rootPackageFile->setPackageName('package');
+        $this->rootPackageFile->setPackageName('vendor/package');
 
         $this->packageFileStorage->expects($this->never())
             ->method('saveRootPackageFile');
 
-        $this->manager->setPackageName('package');
+        $this->manager->setPackageName('vendor/package');
 
-        $this->assertSame('package', $this->manager->getPackageName());
+        $this->assertSame('vendor/package', $this->manager->getPackageName());
     }
 }

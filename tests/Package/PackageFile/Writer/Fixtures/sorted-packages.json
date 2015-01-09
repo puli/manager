@@ -1,13 +1,13 @@
 {
     "version": "1.0",
     "packages": {
-        "a": {
+        "vendor/a": {
             "install-path": "/path/to/package2"
         },
-        "b": {
+        "vendor/b": {
             "install-path": "/path/to/package3"
         },
-        "c": {
+        "vendor/c": {
             "install-path": "/path/to/package1"
         }
     }

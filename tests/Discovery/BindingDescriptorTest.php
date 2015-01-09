@@ -44,7 +44,7 @@ class BindingDescriptorTest extends PHPUnit_Framework_TestCase
     {
         $this->uuid = Uuid::uuid4();
         $this->typeStore = new BindingTypeStore();
-        $this->package = new Package(new PackageFile(), '/path', new InstallInfo('package', '/path'));
+        $this->package = new Package(new PackageFile(), '/path', new InstallInfo('vendor/package', '/path'));
     }
 
     public function testCreate()

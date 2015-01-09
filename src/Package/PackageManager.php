@@ -13,6 +13,7 @@ namespace Puli\RepositoryManager\Package;
 
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
+use Puli\RepositoryManager\Assert\Assert;
 use Puli\RepositoryManager\Environment\ProjectEnvironment;
 use Puli\RepositoryManager\FileNotFoundException;
 use Puli\RepositoryManager\InvalidConfigException;
@@ -100,6 +101,8 @@ class PackageManager
      */
     public function installPackage($installPath, $name = null, $installer = InstallInfo::DEFAULT_INSTALLER)
     {
+        Assert::nullOrPackageName($name);
+
         $this->assertPackagesLoaded();
 
         $installPath = Path::makeAbsolute($installPath, $this->rootDir);

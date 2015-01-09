@@ -78,7 +78,7 @@ class PackageJsonWriterTest extends JsonWriterTestCase
     {
         $packageFile = new PackageFile();
         $typeStore = new BindingTypeStore();
-        $package = new Package($packageFile, '/path', new InstallInfo('package', '/path'));
+        $package = new Package($packageFile, '/path', new InstallInfo('vendor/package', '/path'));
 
         // We need to create a type and a binding in state ENABLED
         $bindingType = new BindingTypeDescriptor('my/type', null, array(
@@ -198,11 +198,11 @@ class PackageJsonWriterTest extends JsonWriterTestCase
 
     public function testWriteRootPackageFile()
     {
-        $installInfo1 = new InstallInfo('package1', '/path/to/package1');
+        $installInfo1 = new InstallInfo('vendor/package1', '/path/to/package1');
         $installInfo1->setInstaller('Composer');
         $installInfo1->addEnabledBindingUuid(Uuid::fromString('a54e5668-2b36-43f4-a32c-2d175092b77d'));
         $installInfo1->addDisabledBindingUuid(Uuid::fromString('4d02ee67-d845-4789-a9c1-8301351c6f5a'));
-        $installInfo2 = new InstallInfo('package2', '/path/to/package2');
+        $installInfo2 = new InstallInfo('vendor/package2', '/path/to/package2');
 
         $baseConfig = new Config();
         $packageFile = new RootPackageFile(null, null, $baseConfig);
@@ -235,9 +235,9 @@ class PackageJsonWriterTest extends JsonWriterTestCase
 
     public function testWriteRootPackageFileSortsPackagesByName()
     {
-        $installInfo1 = new InstallInfo('c', '/path/to/package1');
-        $installInfo2 = new InstallInfo('a', '/path/to/package2');
-        $installInfo3 = new InstallInfo('b', '/path/to/package3');
+        $installInfo1 = new InstallInfo('vendor/c', '/path/to/package1');
+        $installInfo2 = new InstallInfo('vendor/a', '/path/to/package2');
+        $installInfo3 = new InstallInfo('vendor/b', '/path/to/package3');
 
         $packageFile = new RootPackageFile();
         $packageFile->addInstallInfo($installInfo1);

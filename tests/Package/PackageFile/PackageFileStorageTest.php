@@ -62,7 +62,7 @@ class PackageFileStorageTest extends PHPUnit_Framework_TestCase
 
     public function testLoadPackageFile()
     {
-        $packageFile = new PackageFile('package-name');
+        $packageFile = new PackageFile('vendor/package');
 
         $this->reader->expects($this->once())
             ->method('readPackageFile')
@@ -74,7 +74,7 @@ class PackageFileStorageTest extends PHPUnit_Framework_TestCase
 
     public function testLoadPackageFileDispatchesEvent()
     {
-        $packageFile = new PackageFile('package-name');
+        $packageFile = new PackageFile('vendor/package');
 
         $this->reader->expects($this->once())
             ->method('readPackageFile')
@@ -112,10 +112,10 @@ class PackageFileStorageTest extends PHPUnit_Framework_TestCase
             ->method('dispatch')
             ->with(ManagerEvents::LOAD_PACKAGE_FILE, $this->isInstanceOf('Puli\RepositoryManager\Event\PackageFileEvent'))
             ->will($this->returnCallback(function ($eventName, PackageFileEvent $event) {
-                $event->getPackageFile()->setPackageName('package-name');
+                $event->getPackageFile()->setPackageName('vendor/package');
             }));
 
-        $packageFile = new PackageFile('package-name', '/path');
+        $packageFile = new PackageFile('vendor/package', '/path');
 
         $this->assertEquals($packageFile, $this->storage->loadPackageFile('/path'));
     }
@@ -133,7 +133,7 @@ class PackageFileStorageTest extends PHPUnit_Framework_TestCase
 
     public function testSavePackageFileDispatchesEvent()
     {
-        $packageFile = new PackageFile('package-name', '/path');
+        $packageFile = new PackageFile('vendor/package', '/path');
 
         $this->writer->expects($this->once())
             ->method('writePackageFile')
@@ -156,7 +156,7 @@ class PackageFileStorageTest extends PHPUnit_Framework_TestCase
 
     public function testSavePackageFileListenerMayRemoveName()
     {
-        $packageFile = new PackageFile('package-name', '/path');
+        $packageFile = new PackageFile('vendor/package', '/path');
 
         $this->writer->expects($this->once())
             ->method('writePackageFile')
@@ -183,7 +183,7 @@ class PackageFileStorageTest extends PHPUnit_Framework_TestCase
     public function testLoadRootPackageFile()
     {
         $baseConfig = new Config();
-        $packageFile = new RootPackageFile('package-name', null, $baseConfig);
+        $packageFile = new RootPackageFile('vendor/package', null, $baseConfig);
 
         $this->reader->expects($this->once())
             ->method('readRootPackageFile')
@@ -196,7 +196,7 @@ class PackageFileStorageTest extends PHPUnit_Framework_TestCase
     public function testLoadRootPackageFileDispatchesEvent()
     {
         $baseConfig = new Config();
-        $packageFile = new RootPackageFile('package-name', null, $baseConfig);
+        $packageFile = new RootPackageFile('vendor/package', null, $baseConfig);
 
         $this->reader->expects($this->once())
             ->method('readRootPackageFile')
@@ -233,8 +233,7 @@ class PackageFileStorageTest extends PHPUnit_Framework_TestCase
     public function testSaveRootPackageFileDispatchesEvent()
     {
         $baseConfig = new Config();
-        $packageFile = new RootPackageFile('package-name', '/path',
-            $baseConfig);
+        $packageFile = new RootPackageFile('vendor/package', '/path', $baseConfig);
 
         $this->writer->expects($this->once())
             ->method('writePackageFile')
@@ -258,8 +257,7 @@ class PackageFileStorageTest extends PHPUnit_Framework_TestCase
     public function testSaveRootPackageFileListenerMayRemoveName()
     {
         $baseConfig = new Config();
-        $packageFile = new RootPackageFile('package-name', '/path',
-            $baseConfig);
+        $packageFile = new RootPackageFile('vendor/package', '/path', $baseConfig);
 
         $this->writer->expects($this->once())
             ->method('writePackageFile')

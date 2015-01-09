@@ -11,8 +11,8 @@
 
 namespace Puli\RepositoryManager\Package\PackageFile;
 
-use Assert\Assertion;
 use InvalidArgumentException;
+use Puli\RepositoryManager\Assert\Assert;
 use Puli\RepositoryManager\Discovery\BindingDescriptor;
 use Puli\RepositoryManager\Discovery\BindingTypeDescriptor;
 use Puli\RepositoryManager\Discovery\NoSuchBindingException;
@@ -70,11 +70,11 @@ class PackageFile
      */
     public function __construct($packageName = null, $path = null)
     {
-        Assertion::nullOrString($path, 'The path to the package file should be a string or null. Got: %2$s');
-        Assertion::nullOrNotEmpty($path, 'The path to the package file should not be empty.');
+        Assert::nullOrPackageName($packageName);
+        Assert::nullOrAbsoluteSystemPath($path);
 
         $this->path = $path;
-        $this->setPackageName($packageName);
+        $this->packageName = $packageName;
     }
 
     /**
@@ -96,8 +96,7 @@ class PackageFile
      */
     public function setPackageName($packageName)
     {
-        Assertion::nullOrString($packageName, 'The package name should be a string or null. Got: %2$s');
-        Assertion::nullOrNotEmpty($packageName, 'The package name should not be empty.');
+        Assert::nullOrPackageName($packageName);
 
         $this->packageName = $packageName;
     }

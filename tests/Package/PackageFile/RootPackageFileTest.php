@@ -185,21 +185,21 @@ class RootPackageFileTest extends PHPUnit_Framework_TestCase
 
     public function testAddInstallInfo()
     {
-        $installInfo1 = new InstallInfo('package1', '/path/to/package1');
-        $installInfo2 = new InstallInfo('package2', '/path/to/package2');
+        $installInfo1 = new InstallInfo('vendor/package1', '/path/to/package1');
+        $installInfo2 = new InstallInfo('vendor/package2', '/path/to/package2');
 
         $this->packageFile->addInstallInfo($installInfo1);
         $this->packageFile->addInstallInfo($installInfo2);
 
         $this->assertSame(array($installInfo1, $installInfo2), $this->packageFile->getInstallInfos());
-        $this->assertSame($installInfo1, $this->packageFile->getInstallInfo('package1'));
-        $this->assertSame($installInfo2, $this->packageFile->getInstallInfo('package2'));
+        $this->assertSame($installInfo1, $this->packageFile->getInstallInfo('vendor/package1'));
+        $this->assertSame($installInfo2, $this->packageFile->getInstallInfo('vendor/package2'));
     }
 
     public function testSetInstallInfos()
     {
-        $installInfo1 = new InstallInfo('package1', '/path/to/package1');
-        $installInfo2 = new InstallInfo('package2', '/path/to/package2');
+        $installInfo1 = new InstallInfo('vendor/package1', '/path/to/package1');
+        $installInfo2 = new InstallInfo('vendor/package2', '/path/to/package2');
 
         $this->packageFile->setInstallInfos(array($installInfo1, $installInfo2));
 
@@ -217,20 +217,20 @@ class RootPackageFileTest extends PHPUnit_Framework_TestCase
 
     public function testRemoveInstallInfo()
     {
-        $installInfo1 = new InstallInfo('package1', '/path/to/package1');
-        $installInfo2 = new InstallInfo('package2', '/path/to/package2');
+        $installInfo1 = new InstallInfo('vendor/package1', '/path/to/package1');
+        $installInfo2 = new InstallInfo('vendor/package2', '/path/to/package2');
 
         $this->packageFile->addInstallInfo($installInfo1);
         $this->packageFile->addInstallInfo($installInfo2);
 
-        $this->packageFile->removeInstallInfo('package1');
+        $this->packageFile->removeInstallInfo('vendor/package1');
 
         $this->assertSame(array($installInfo2), $this->packageFile->getInstallInfos());
     }
 
     public function testRemoveInstallInfoIgnoresUnknownPackageName()
     {
-        $installInfo1 = new InstallInfo('package1', '/path/to/package1');
+        $installInfo1 = new InstallInfo('vendor/package1', '/path/to/package1');
 
         $this->packageFile->addInstallInfo($installInfo1);
 
@@ -241,10 +241,10 @@ class RootPackageFileTest extends PHPUnit_Framework_TestCase
 
     public function testHasInstallInfo()
     {
-        $this->assertFalse($this->packageFile->hasInstallInfo('package'));
+        $this->assertFalse($this->packageFile->hasInstallInfo('vendor/package'));
 
-        $this->packageFile->addInstallInfo(new InstallInfo('package', '/path/to/package'));
+        $this->packageFile->addInstallInfo(new InstallInfo('vendor/package', '/path/to/package'));
 
-        $this->assertTrue($this->packageFile->hasInstallInfo('package'));
+        $this->assertTrue($this->packageFile->hasInstallInfo('vendor/package'));
     }
 }

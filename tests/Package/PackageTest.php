@@ -24,28 +24,28 @@ class PackageTest extends PHPUnit_Framework_TestCase
 {
     public function testUsePackageNameFromPackageFile()
     {
-        $packageFile = new PackageFile('name');
+        $packageFile = new PackageFile('vendor/name');
         $package = new Package($packageFile, '/path');
 
-        $this->assertSame('name', $package->getName());
+        $this->assertSame('vendor/name', $package->getName());
     }
 
     public function testUsePackageNameFromInstallInfo()
     {
         $packageFile = new PackageFile();
-        $installInfo = new InstallInfo('name', '/path');
+        $installInfo = new InstallInfo('vendor/name', '/path');
         $package = new Package($packageFile, '/path', $installInfo);
 
-        $this->assertSame('name', $package->getName());
+        $this->assertSame('vendor/name', $package->getName());
     }
 
     public function testPreferPackageNameFromInstallInfo()
     {
-        $packageFile = new PackageFile('package-file');
-        $installInfo = new InstallInfo('install-info', '/path');
+        $packageFile = new PackageFile('vendor/package-file');
+        $installInfo = new InstallInfo('vendor/install-info', '/path');
         $package = new Package($packageFile, '/path', $installInfo);
 
-        $this->assertSame('install-info', $package->getName());
+        $this->assertSame('vendor/install-info', $package->getName());
     }
 
     public function testNameIsNullIfNoneSetAndNoInstallInfoGiven()

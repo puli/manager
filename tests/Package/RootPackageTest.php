@@ -23,10 +23,10 @@ class RootPackageTest extends PHPUnit_Framework_TestCase
 {
     public function testPackageName()
     {
-        $packageFile = new RootPackageFile('name');
+        $packageFile = new RootPackageFile('vendor/name');
         $package = new RootPackage($packageFile, '/path');
 
-        $this->assertSame('name', $package->getName());
+        $this->assertSame('vendor/name', $package->getName());
     }
 
     public function testPackageNameSetToDefaultIfEmpty()

@@ -11,8 +11,8 @@
 
 namespace Puli\RepositoryManager\Package;
 
-use Assert\Assertion;
 use InvalidArgumentException;
+use Puli\RepositoryManager\Assert\Assert;
 use Puli\RepositoryManager\Discovery\BindingDescriptor;
 use Rhumsaa\Uuid\Uuid;
 
@@ -67,10 +67,8 @@ class InstallInfo
      */
     public function __construct($packageName, $installPath)
     {
-        Assertion::string($packageName, 'The package name must be a string. Got: %2$s');
-        Assertion::notEmpty($packageName, 'The package name must not be empty.');
-        Assertion::string($installPath, 'The package install path must be a string. Got: %2$s');
-        Assertion::notEmpty($installPath, 'The package install path must not be empty.');
+        Assert::packageName($packageName);
+        Assert::systemPath($installPath);
 
         $this->packageName = $packageName;
         $this->installPath = $installPath;

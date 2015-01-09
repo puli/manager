@@ -1,11 +1,11 @@
 {
     "version": "1.0",
-    "name": "real-root",
+    "name": "vendor/root",
     "packages": {
-        "package1": {
+        "vendor/package1": {
             "install-path": "package1"
         },
-        "package2": {
+        "vendor/package2": {
             "install-path": "package2"
         }
     }

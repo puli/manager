@@ -36,12 +36,12 @@ class PackageCollectionTest extends PHPUnit_Framework_TestCase
 
     public function testGetPackage()
     {
-        $packageFile = new PackageFile('package');
+        $packageFile = new PackageFile('vendor/package');
         $package = new Package($packageFile, '/path');
 
         $this->collection->add($package);
 
-        $this->assertSame($package, $this->collection->get('package'));
+        $this->assertSame($package, $this->collection->get('vendor/package'));
     }
 
     /**
@@ -49,7 +49,7 @@ class PackageCollectionTest extends PHPUnit_Framework_TestCase
      */
     public function testGetPackageFailsIfNotFound()
     {
-        $this->collection->get('package');
+        $this->collection->get('vendor/package');
     }
 
     public function testGetRootPackageReturnsNull()
@@ -59,13 +59,13 @@ class PackageCollectionTest extends PHPUnit_Framework_TestCase
 
     public function testGetRootPackageReturnsAddedRootPackage()
     {
-        $packageFile1 = new PackageFile('package1');
+        $packageFile1 = new PackageFile('vendor/package1');
         $package1 = new Package($packageFile1, '/path1');
 
-        $packageFile2 = new PackageFile('package2');
+        $packageFile2 = new PackageFile('vendor/package2');
         $package2 = new Package($packageFile2, '/path2');
 
-        $rootPackageFile = new RootPackageFile('root');
+        $rootPackageFile = new RootPackageFile('vendor/root');
         $rootPackage = new RootPackage($rootPackageFile, '/path3');
 
         $this->collection->add($package1);
@@ -77,17 +77,17 @@ class PackageCollectionTest extends PHPUnit_Framework_TestCase
 
     public function testGetRootPackageName()
     {
-        $rootPackageFile = new RootPackageFile('root');
+        $rootPackageFile = new RootPackageFile('vendor/root');
         $rootPackage = new RootPackage($rootPackageFile, '/path');
 
         $this->collection->add($rootPackage);
 
-        $this->assertSame('root', $this->collection->getRootPackageName());
+        $this->assertSame('vendor/root', $this->collection->getRootPackageName());
     }
 
     public function testGetRootPackageNameReturnsNullIfNoRootPackage()
     {
-        $packageFile = new PackageFile('package');
+        $packageFile = new PackageFile('vendor/package');
         $package = new Package($packageFile, '/path');
 
         $this->collection->add($package);
@@ -97,30 +97,30 @@ class PackageCollectionTest extends PHPUnit_Framework_TestCase
 
     public function testGetInstalledPackages()
     {
-        $packageFile1 = new PackageFile('package1');
+        $packageFile1 = new PackageFile('vendor/package1');
         $package1 = new Package($packageFile1, '/path1');
 
-        $packageFile2 = new PackageFile('package2');
+        $packageFile2 = new PackageFile('vendor/package2');
         $package2 = new Package($packageFile2, '/path2');
 
         $this->collection->add($package1);
         $this->collection->add($package2);
 
         $this->assertSame(array(
-            'package1' => $package1,
-            'package2' => $package2
+            'vendor/package1' => $package1,
+            'vendor/package2' => $package2
         ), $this->collection->getInstalledPackages());
     }
 
     public function testGetInstalledPackagesDoesNotIncludeRoot()
     {
-        $packageFile1 = new PackageFile('package1');
+        $packageFile1 = new PackageFile('vendor/package1');
         $package1 = new Package($packageFile1, '/path1');
 
-        $packageFile2 = new PackageFile('package2');
+        $packageFile2 = new PackageFile('vendor/package2');
         $package2 = new Package($packageFile2, '/path2');
 
-        $rootPackageFile = new RootPackageFile('root');
+        $rootPackageFile = new RootPackageFile('vendor/root');
         $rootPackage = new RootPackage($rootPackageFile, '/path3');
 
         $this->collection->add($package1);
@@ -128,40 +128,40 @@ class PackageCollectionTest extends PHPUnit_Framework_TestCase
         $this->collection->add($package2);
 
         $this->assertSame(array(
-            'package1' => $package1,
-            'package2' => $package2
+            'vendor/package1' => $package1,
+            'vendor/package2' => $package2
         ), $this->collection->getInstalledPackages());
     }
 
     public function testGetInstalledPackageNames()
     {
-        $packageFile1 = new PackageFile('package1');
+        $packageFile1 = new PackageFile('vendor/package1');
         $package1 = new Package($packageFile1, '/path1');
 
-        $packageFile2 = new PackageFile('package2');
+        $packageFile2 = new PackageFile('vendor/package2');
         $package2 = new Package($packageFile2, '/path2');
 
         $this->collection->add($package1);
         $this->collection->add($package2);
 
-        $this->assertSame(array('package1', 'package2'), $this->collection->getInstalledPackageNames());
+        $this->assertSame(array('vendor/package1', 'vendor/package2'), $this->collection->getInstalledPackageNames());
     }
 
     public function testRemove()
     {
-        $packageFile1 = new PackageFile('package1');
+        $packageFile1 = new PackageFile('vendor/package1');
         $package1 = new Package($packageFile1, '/path1');
 
-        $packageFile2 = new PackageFile('package2');
+        $packageFile2 = new PackageFile('vendor/package2');
         $package2 = new Package($packageFile2, '/path2');
 
         $this->collection->add($package1);
         $this->collection->add($package2);
 
-        $this->collection->remove('package1');
+        $this->collection->remove('vendor/package1');
 
-        $this->assertFalse($this->collection->contains('package1'));
-        $this->assertTrue($this->collection->contains('package2'));
+        $this->assertFalse($this->collection->contains('vendor/package1'));
+        $this->assertTrue($this->collection->contains('vendor/package2'));
     }
 
     public function testRemoveUnknown()
@@ -173,37 +173,37 @@ class PackageCollectionTest extends PHPUnit_Framework_TestCase
 
     public function testRemoveRoot()
     {
-        $packageFile1 = new PackageFile('package1');
+        $packageFile1 = new PackageFile('vendor/package1');
         $package1 = new Package($packageFile1, '/path1');
 
-        $packageFile2 = new PackageFile('package2');
+        $packageFile2 = new PackageFile('vendor/package2');
         $package2 = new Package($packageFile2, '/path2');
 
-        $rootPackageFile = new RootPackageFile('root');
+        $rootPackageFile = new RootPackageFile('vendor/root');
         $rootPackage = new RootPackage($rootPackageFile, '/path3');
 
         $this->collection->add($package1);
         $this->collection->add($rootPackage);
         $this->collection->add($package2);
 
-        $this->collection->remove('root');
+        $this->collection->remove('vendor/root');
 
-        $this->assertFalse($this->collection->contains('root'));
-        $this->assertTrue($this->collection->contains('package1'));
-        $this->assertTrue($this->collection->contains('package2'));
+        $this->assertFalse($this->collection->contains('vendor/root'));
+        $this->assertTrue($this->collection->contains('vendor/package1'));
+        $this->assertTrue($this->collection->contains('vendor/package2'));
 
         $this->assertNull($this->collection->getRootPackage());
     }
 
     public function testIterate()
     {
-        $packageFile1 = new PackageFile('package1');
+        $packageFile1 = new PackageFile('vendor/package1');
         $package1 = new Package($packageFile1, '/path1');
 
-        $packageFile2 = new PackageFile('package2');
+        $packageFile2 = new PackageFile('vendor/package2');
         $package2 = new Package($packageFile2, '/path2');
 
-        $rootPackageFile = new RootPackageFile('root');
+        $rootPackageFile = new RootPackageFile('vendor/root');
         $rootPackage = new RootPackage($rootPackageFile, '/path3');
 
         $this->collection->add($package1);
@@ -211,21 +211,21 @@ class PackageCollectionTest extends PHPUnit_Framework_TestCase
         $this->collection->add($package2);
 
         $this->assertSame(array(
-            'package1' => $package1,
-            'root' => $rootPackage,
-            'package2' => $package2,
+            'vendor/package1' => $package1,
+            'vendor/root' => $rootPackage,
+            'vendor/package2' => $package2,
         ), iterator_to_array($this->collection));
     }
 
     public function testToArray()
     {
-        $packageFile1 = new PackageFile('package1');
+        $packageFile1 = new PackageFile('vendor/package1');
         $package1 = new Package($packageFile1, '/path1');
 
-        $packageFile2 = new PackageFile('package2');
+        $packageFile2 = new PackageFile('vendor/package2');
         $package2 = new Package($packageFile2, '/path2');
 
-        $rootPackageFile = new RootPackageFile('root');
+        $rootPackageFile = new RootPackageFile('vendor/root');
         $rootPackage = new RootPackage($rootPackageFile, '/path3');
 
         $this->collection->add($package1);
@@ -233,44 +233,44 @@ class PackageCollectionTest extends PHPUnit_Framework_TestCase
         $this->collection->add($package2);
 
         $this->assertSame(array(
-            'package1' => $package1,
-            'root' => $rootPackage,
-            'package2' => $package2,
+            'vendor/package1' => $package1,
+            'vendor/root' => $rootPackage,
+            'vendor/package2' => $package2,
         ), $this->collection->toArray());
     }
 
     public function testArrayAccess()
     {
-        $packageFile1 = new PackageFile('package1');
+        $packageFile1 = new PackageFile('vendor/package1');
         $package1 = new Package($packageFile1, '/path1');
 
-        $packageFile2 = new PackageFile('package2');
+        $packageFile2 = new PackageFile('vendor/package2');
         $package2 = new Package($packageFile2, '/path2');
 
-        $rootPackageFile = new RootPackageFile('root');
+        $rootPackageFile = new RootPackageFile('vendor/root');
         $rootPackage = new RootPackage($rootPackageFile, '/path3');
 
-        $this->assertFalse(isset($this->collection['package1']));
-        $this->assertFalse(isset($this->collection['package2']));
-        $this->assertFalse(isset($this->collection['root']));
+        $this->assertFalse(isset($this->collection['vendor/package1']));
+        $this->assertFalse(isset($this->collection['vendor/package2']));
+        $this->assertFalse(isset($this->collection['vendor/root']));
 
         $this->collection[] = $package1;
         $this->collection[] = $package2;
         $this->collection[] = $rootPackage;
 
-        $this->assertTrue(isset($this->collection['package1']));
-        $this->assertTrue(isset($this->collection['package2']));
-        $this->assertTrue(isset($this->collection['root']));
+        $this->assertTrue(isset($this->collection['vendor/package1']));
+        $this->assertTrue(isset($this->collection['vendor/package2']));
+        $this->assertTrue(isset($this->collection['vendor/root']));
 
-        $this->assertSame($rootPackage, $this->collection['root']);
+        $this->assertSame($rootPackage, $this->collection['vendor/root']);
         $this->assertSame($rootPackage, $this->collection->getRootPackage());
-        $this->assertSame($package1, $this->collection['package1']);
-        $this->assertSame($package2, $this->collection['package2']);
+        $this->assertSame($package1, $this->collection['vendor/package1']);
+        $this->assertSame($package2, $this->collection['vendor/package2']);
 
-        unset($this->collection['package1']);
+        unset($this->collection['vendor/package1']);
 
-        $this->assertFalse(isset($this->collection['package1']));
-        $this->assertTrue(isset($this->collection['package2']));
-        $this->assertTrue(isset($this->collection['root']));
+        $this->assertFalse(isset($this->collection['vendor/package1']));
+        $this->assertTrue(isset($this->collection['vendor/package2']));
+        $this->assertTrue(isset($this->collection['vendor/root']));
     }
 }

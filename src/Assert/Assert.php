@@ -12,6 +12,8 @@
 namespace Puli\RepositoryManager\Assert;
 
 use Assert\Assertion;
+use Puli\RepositoryManager\Package\RootPackage;
+use Webmozart\PathUtil\Path;
 
 /**
  * Contains domain-specific assertions.
@@ -19,12 +21,18 @@ use Assert\Assertion;
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  *
+ * @method static void nullOrPath($value, $message = null, $propertyPath = null)
+ * @method static void nullOrSystemPath($value, $message = null, $propertyPath = null)
+ * @method static void nullOrAbsoluteSystemPath($value, $message = null, $propertyPath = null)
  * @method static void nullOrPackageName($value, $message = null, $propertyPath = null)
  * @method static void nullOrQuery($value, $message = null, $propertyPath = null)
  * @method static void nullOrLanguage($value, $message = null, $propertyPath = null)
  * @method static void nullOrTypeName($value, $message = null, $propertyPath = null)
  * @method static void nullOrParameterName($value, $message = null, $propertyPath = null)
  * @method static void nullOrParameterValue($value, $message = null, $propertyPath = null)
+ * @method static void allPath($value, $object, $message = null, $propertyPath = null)
+ * @method static void allSystemPath($value, $object, $message = null, $propertyPath = null)
+ * @method static void allAbsoluteSystemPath($value, $object, $message = null, $propertyPath = null)
  * @method static void allPackageName($value, $object, $message = null, $propertyPath = null)
  * @method static void allQuery($value, $message = null, $propertyPath = null)
  * @method static void allLanguage($value, $message = null, $propertyPath = null)
@@ -39,10 +47,29 @@ class Assert extends Assertion
         \Puli\Repository\Assert\Assert::path($value);
     }
 
+    public static function systemPath($value)
+    {
+        Assert::string($value, 'The path must be a string. Got: %2$s');
+        Assert::notEmpty($value, 'The path must not be empty.');
+    }
+
+    public static function absoluteSystemPath($value)
+    {
+        Assert::systemPath($value);
+        Assert::true(Path::isAbsolute($value), sprintf(
+            'The path "%s" is not absolute.',
+            $value
+        ));
+    }
+
     public static function packageName($value)
     {
         self::string($value, 'The package name must be a string. Got: %2$s');
         self::notEmpty($value, 'The package name must not be empty.');
+
+        if (RootPackage::DEFAULT_NAME !== $value) {
+            self::contains($value, '/', 'The package name must contain a vendor name followed by a "/". Got: "%s"');
+        }
     }
 
     public static function query($value)

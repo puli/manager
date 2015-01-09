@@ -12,6 +12,7 @@
 namespace Puli\RepositoryManager\Package;
 
 use Exception;
+use Puli\RepositoryManager\Assert\Assert;
 use Puli\RepositoryManager\Package\PackageFile\PackageFile;
 
 /**
@@ -23,9 +24,9 @@ use Puli\RepositoryManager\Package\PackageFile\PackageFile;
 class Package
 {
     /**
-     * @var string|null
+     * The name given to packages by default.
      */
-    protected static $defaultName = null;
+    const DEFAULT_NAME = null;
 
     /**
      * @var string
@@ -67,6 +68,9 @@ class Package
      */
     public function __construct(PackageFile $packageFile = null, $installPath, InstallInfo $installInfo = null, Exception $loadError = null)
     {
+        Assert::absoluteSystemPath($installPath);
+        Assert::true($packageFile || $loadError, 'The load error must be passed if the package file is null.');
+
         // If a package name was set during installation, that name wins over
         // the predefined name in the puli.json file (if any)
         $this->name = $installInfo && null !== $installInfo->getPackageName()
@@ -74,7 +78,7 @@ class Package
             : $packageFile->getPackageName();
 
         if (null === $this->name) {
-            $this->name = static::$defaultName;
+            $this->name = static::DEFAULT_NAME;
         }
 
         // The path is stored both here and in the install info. While the

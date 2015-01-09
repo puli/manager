@@ -93,9 +93,9 @@ class RepositoryManagerTest extends ManagerTestCase
         $this->packageDir2 = $this->tempDir.'/package2';
         $this->packageDir3 = $this->tempDir.'/package3';
 
-        $this->packageFile1 = new PackageFile('package1');
-        $this->packageFile2 = new PackageFile('package2');
-        $this->packageFile3 = new PackageFile('package3');
+        $this->packageFile1 = new PackageFile('vendor/package1');
+        $this->packageFile2 = new PackageFile('vendor/package2');
+        $this->packageFile3 = new PackageFile('vendor/package3');
 
         $this->packages = new PackageCollection();
 
@@ -117,7 +117,7 @@ class RepositoryManagerTest extends ManagerTestCase
      */
     public function testLoadPackagesFailsIfResourceNotFound()
     {
-        $packageFile = new PackageFile('package1');
+        $packageFile = new PackageFile('vendor/package1');
         $packageFile->addResourceMapping(new ResourceMapping('/package', 'foobar'));
 
         $this->packages->add(new Package($packageFile, $this->packageDir1));
@@ -131,10 +131,10 @@ class RepositoryManagerTest extends ManagerTestCase
      */
     public function testLoadPackagesFailsIfPathConflict()
     {
-        $packageFile1 = new PackageFile('package1');
+        $packageFile1 = new PackageFile('vendor/package1');
         $packageFile1->addResourceMapping(new ResourceMapping('/path', 'resources'));
 
-        $packageFile2 = new PackageFile('package2');
+        $packageFile2 = new PackageFile('vendor/package2');
         $packageFile2->addResourceMapping(new ResourceMapping('/path', 'resources'));
 
         // One of the packages  must explicitly set the other package as
@@ -152,10 +152,10 @@ class RepositoryManagerTest extends ManagerTestCase
      */
     public function testLoadPackagesFailsIfPathConflictWithNestedPath()
     {
-        $packageFile1 = new PackageFile('package1');
+        $packageFile1 = new PackageFile('vendor/package1');
         $packageFile1->addResourceMapping(new ResourceMapping('/path', 'resources'));
 
-        $packageFile2 = new PackageFile('package2');
+        $packageFile2 = new PackageFile('vendor/package2');
         $packageFile2->addResourceMapping(new ResourceMapping('/path/config', 'override'));
 
         // One of the packages  must explicitly set the other package as
@@ -173,14 +173,14 @@ class RepositoryManagerTest extends ManagerTestCase
      */
     public function testLoadPackagesFailsIfPathConflictAndPackageOrderInNonRootPackage()
     {
-        $packageFile1 = new PackageFile('package1');
+        $packageFile1 = new PackageFile('vendor/package1');
         $packageFile1->addResourceMapping(new ResourceMapping('/path', 'resources'));
 
-        $packageFile2 = new PackageFile('package2');
+        $packageFile2 = new PackageFile('vendor/package2');
         $packageFile2->addResourceMapping(new ResourceMapping('/path', 'override'));
 
-        $pseudoRootConfig = new RootPackageFile('root');
-        $pseudoRootConfig->setOverrideOrder(array('package1', 'package2'));
+        $pseudoRootConfig = new RootPackageFile('vendor/root');
+        $pseudoRootConfig->setOverrideOrder(array('vendor/package1', 'vendor/package2'));
 
         $this->packages->add(new Package($packageFile1, $this->packageDir1));
         $this->packages->add(new Package($packageFile2, $this->packageDir2));
@@ -276,10 +276,10 @@ class RepositoryManagerTest extends ManagerTestCase
 
                 PHPUnit_Framework_Assert::assertCount(1, $mappings);
                 PHPUnit_Framework_Assert::assertSame('/package1', $mappings['/package1']->getRepositoryPath());
-                PHPUnit_Framework_Assert::assertSame(array('@package1:resources'), $mappings['/package1']->getFilesystemPaths());
+                PHPUnit_Framework_Assert::assertSame(array('@vendor/package1:resources'), $mappings['/package1']->getFilesystemPaths());
             }));
 
-        $this->manager->addResourceMapping(new ResourceMapping('/package1', '@package1:resources'));
+        $this->manager->addResourceMapping(new ResourceMapping('/package1', '@vendor/package1:resources'));
     }
 
     /**
@@ -339,10 +339,10 @@ class RepositoryManagerTest extends ManagerTestCase
                 PHPUnit_Framework_Assert::assertSame(array('override'), $mappings['/package2']->getFilesystemPaths());
 
                 // Package was added to overridden packages
-                PHPUnit_Framework_Assert::assertSame(array('package1', 'package2'), $rootPackageFile->getOverriddenPackages());
+                PHPUnit_Framework_Assert::assertSame(array('vendor/package1', 'vendor/package2'), $rootPackageFile->getOverriddenPackages());
             }));
 
-        $this->rootPackageFile->setOverriddenPackages('package1');
+        $this->rootPackageFile->setOverriddenPackages('vendor/package1');
         $this->packageFile2->addResourceMapping(new ResourceMapping('/package2', 'resources'));
 
         $this->initDefaultManager();
@@ -368,12 +368,12 @@ class RepositoryManagerTest extends ManagerTestCase
 
                 // Only package2 was marked as overridden, because the
                 // dependency between package1 and package2 is clearly defined
-                PHPUnit_Framework_Assert::assertSame(array('package2'), $rootPackageFile->getOverriddenPackages());
+                PHPUnit_Framework_Assert::assertSame(array('vendor/package2'), $rootPackageFile->getOverriddenPackages());
             }));
 
         $this->packageFile1->addResourceMapping(new ResourceMapping('/path', 'resources'));
         $this->packageFile2->addResourceMapping(new ResourceMapping('/path', 'resources'));
-        $this->packageFile2->setOverriddenPackages('package1');
+        $this->packageFile2->setOverriddenPackages('vendor/package1');
 
         $this->initDefaultManager();
 
@@ -395,7 +395,7 @@ class RepositoryManagerTest extends ManagerTestCase
                 PHPUnit_Framework_Assert::assertCount(1, $mappings);
                 PHPUnit_Framework_Assert::assertSame('/path', $mappings['/path']->getRepositoryPath());
                 PHPUnit_Framework_Assert::assertSame(array('override'), $mappings['/path']->getFilesystemPaths());
-                PHPUnit_Framework_Assert::assertSame(array('package1'), $rootPackageFile->getOverriddenPackages());
+                PHPUnit_Framework_Assert::assertSame(array('vendor/package1'), $rootPackageFile->getOverriddenPackages());
             }));
 
         $this->packageFile1->addResourceMapping(new ResourceMapping('/path/config', 'resources'));
@@ -421,7 +421,7 @@ class RepositoryManagerTest extends ManagerTestCase
                 PHPUnit_Framework_Assert::assertCount(1, $mappings);
                 PHPUnit_Framework_Assert::assertSame('/path/config', $mappings['/path/config']->getRepositoryPath());
                 PHPUnit_Framework_Assert::assertSame(array('override'), $mappings['/path/config']->getFilesystemPaths());
-                PHPUnit_Framework_Assert::assertSame(array('package1'), $rootPackageFile->getOverriddenPackages());
+                PHPUnit_Framework_Assert::assertSame(array('vendor/package1'), $rootPackageFile->getOverriddenPackages());
             }));
 
         $this->packageFile1->addResourceMapping(new ResourceMapping('/path', 'resources'));
@@ -488,7 +488,7 @@ class RepositoryManagerTest extends ManagerTestCase
 
         $this->packageFile1->addResourceMapping(new ResourceMapping('/package1', 'resources'));
         $this->rootPackageFile->addResourceMapping(new ResourceMapping('/package1', 'resources'));
-        $this->rootPackageFile->setOverriddenPackages('package1');
+        $this->rootPackageFile->setOverriddenPackages('vendor/package1');
 
         $this->initDefaultManager();
 
@@ -517,7 +517,7 @@ class RepositoryManagerTest extends ManagerTestCase
         // /override overrides /package1/resources/config
         $this->packageFile1->addResourceMapping(new ResourceMapping('/path', 'resources'));
         $this->rootPackageFile->addResourceMapping(new ResourceMapping('/path/config', 'override'));
-        $this->rootPackageFile->setOverriddenPackages('package1');
+        $this->rootPackageFile->setOverriddenPackages('vendor/package1');
 
         $this->initDefaultManager();
 
@@ -546,7 +546,7 @@ class RepositoryManagerTest extends ManagerTestCase
         // /override/config overrides /package1/resources
         $this->packageFile1->addResourceMapping(new ResourceMapping('/path/config', 'resources'));
         $this->rootPackageFile->addResourceMapping(new ResourceMapping('/path', 'override'));
-        $this->rootPackageFile->setOverriddenPackages('package1');
+        $this->rootPackageFile->setOverriddenPackages('vendor/package1');
 
         $this->initDefaultManager();
 
@@ -569,8 +569,8 @@ class RepositoryManagerTest extends ManagerTestCase
             $mapping4,
         ), $this->manager->getResourceMappings());
 
-        $this->assertSame(array($mapping2), $this->manager->getResourceMappings('package1'));
-        $this->assertSame(array($mapping2, $mapping3), $this->manager->getResourceMappings(array('package1', 'package2')));
+        $this->assertSame(array($mapping2), $this->manager->getResourceMappings('vendor/package1'));
+        $this->assertSame(array($mapping2, $mapping3), $this->manager->getResourceMappings(array('vendor/package1', 'vendor/package2')));
     }
 
     public function testGetResourceMapping()
@@ -602,7 +602,7 @@ class RepositoryManagerTest extends ManagerTestCase
     {
         $this->initDefaultManager();
 
-        $packageFile = new PackageFile('package');
+        $packageFile = new PackageFile('vendor/package');
         $packageFile->addResourceMapping(new ResourceMapping('/package', 'resources'));
         $packageFile->addResourceMapping(new ResourceMapping('/package/css', 'assets/css'));
 
@@ -623,7 +623,7 @@ class RepositoryManagerTest extends ManagerTestCase
     {
         $this->initDefaultManager();
 
-        $packageFile = new PackageFile('package');
+        $packageFile = new PackageFile('vendor/package');
 
         $this->packages->add(new Package($packageFile, $this->packageDir1));
 
@@ -637,7 +637,7 @@ class RepositoryManagerTest extends ManagerTestCase
     {
         $this->initDefaultManager();
 
-        $packageFile = new PackageFile('package');
+        $packageFile = new PackageFile('vendor/package');
         $packageFile->addResourceMapping(new ResourceMapping('/package/css', 'assets/css'));
         $packageFile->addResourceMapping(new ResourceMapping('/package', 'resources'));
 
@@ -658,16 +658,16 @@ class RepositoryManagerTest extends ManagerTestCase
     {
         $this->initDefaultManager();
 
-        $overridden = new PackageFile('package1');
+        $overridden = new PackageFile('vendor/package1');
         $overridden->addResourceMapping(new ResourceMapping('/package1', 'resources'));
         $overridden->addResourceMapping(new ResourceMapping('/package1/css', 'assets/css'));
 
-        $overrider = new PackageFile('package2');
+        $overrider = new PackageFile('vendor/package2');
         $overrider->addResourceMapping(new ResourceMapping('/package1', 'override'));
         $overrider->addResourceMapping(new ResourceMapping('/package1/css', 'css-override'));
 
         // Order must be specified
-        $overrider->setOverriddenPackages('package1');
+        $overrider->setOverriddenPackages('vendor/package1');
 
         // Add overridden package first
         $this->packages->add(new Package($overridden, $this->packageDir1));
@@ -696,16 +696,16 @@ class RepositoryManagerTest extends ManagerTestCase
     {
         $this->initDefaultManager();
 
-        $overridden = new PackageFile('package1');
+        $overridden = new PackageFile('vendor/package1');
         $overridden->addResourceMapping(new ResourceMapping('/package1', 'resources'));
         $overridden->addResourceMapping(new ResourceMapping('/package1/css', 'assets/css'));
 
-        $overrider = new PackageFile('package2');
+        $overrider = new PackageFile('vendor/package2');
         $overrider->addResourceMapping(new ResourceMapping('/package1', 'override'));
         $overrider->addResourceMapping(new ResourceMapping('/package1/css', 'css-override'));
 
         // Order must be specified
-        $overrider->setOverriddenPackages('package1');
+        $overrider->setOverriddenPackages('vendor/package1');
 
         // Add overriding package first
         $this->packages->add(new Package($overrider, $this->packageDir2));
@@ -734,18 +734,18 @@ class RepositoryManagerTest extends ManagerTestCase
     {
         $this->initDefaultManager();
 
-        $packageFile1 = new PackageFile('package1');
+        $packageFile1 = new PackageFile('vendor/package1');
         $packageFile1->addResourceMapping(new ResourceMapping('/package1', 'resources'));
 
-        $packageFile2 = new PackageFile('package2');
+        $packageFile2 = new PackageFile('vendor/package2');
         $packageFile2->addResourceMapping(new ResourceMapping('/package1', 'override'));
 
-        $packageFile3 = new PackageFile('package3');
+        $packageFile3 = new PackageFile('vendor/package3');
         $packageFile3->addResourceMapping(new ResourceMapping('/package1', 'override2'));
 
         // Order must be specified
-        $packageFile2->setOverriddenPackages('package1');
-        $packageFile3->setOverriddenPackages('package2');
+        $packageFile2->setOverriddenPackages('vendor/package1');
+        $packageFile3->setOverriddenPackages('vendor/package2');
 
         $this->packages->add(new Package($packageFile1, $this->packageDir1));
         $this->packages->add(new Package($packageFile2, $this->packageDir2));
@@ -770,18 +770,18 @@ class RepositoryManagerTest extends ManagerTestCase
     {
         $this->initDefaultManager();
 
-        $packageFile1 = new PackageFile('package1');
+        $packageFile1 = new PackageFile('vendor/package1');
         $packageFile1->addResourceMapping(new ResourceMapping('/package1', 'resources'));
 
-        $packageFile2 = new PackageFile('package2');
+        $packageFile2 = new PackageFile('vendor/package2');
         $packageFile2->addResourceMapping(new ResourceMapping('/package2', 'resources'));
 
-        $packageFile3 = new PackageFile('package3');
+        $packageFile3 = new PackageFile('vendor/package3');
         $packageFile3->addResourceMapping(new ResourceMapping('/package1', 'override1'));
         $packageFile3->addResourceMapping(new ResourceMapping('/package2', 'override2'));
 
         // Order must be specified
-        $packageFile3->setOverriddenPackages(array('package1', 'package2'));
+        $packageFile3->setOverriddenPackages(array('vendor/package1', 'vendor/package2'));
 
         $this->packages->add(new Package($packageFile1, $this->packageDir1));
         $this->packages->add(new Package($packageFile2, $this->packageDir2));
@@ -810,7 +810,7 @@ class RepositoryManagerTest extends ManagerTestCase
     {
         $this->initDefaultManager();
 
-        $packageFile = new PackageFile('package');
+        $packageFile = new PackageFile('vendor/package');
         $packageFile->addResourceMapping(new ResourceMapping('/package', 'resources'));
         $packageFile->setOverriddenPackages('foobar');
 
@@ -827,12 +827,12 @@ class RepositoryManagerTest extends ManagerTestCase
     {
         $this->initDefaultManager();
 
-        $overridden = new PackageFile('package1');
+        $overridden = new PackageFile('vendor/package1');
         $overridden->addResourceMapping(new ResourceMapping('/package1', 'resources'));
 
-        $overrider = new PackageFile('package2');
+        $overrider = new PackageFile('vendor/package2');
         $overrider->addResourceMapping(new ResourceMapping('/package1', array('override', 'css-override')));
-        $overrider->setOverriddenPackages('package1');
+        $overrider->setOverriddenPackages('vendor/package1');
 
         $this->packages->add(new Package($overridden, $this->packageDir1));
         $this->packages->add(new Package($overrider, $this->packageDir2));
@@ -856,10 +856,10 @@ class RepositoryManagerTest extends ManagerTestCase
     {
         $this->initDefaultManager();
 
-        $packageFile1 = new PackageFile('package1');
+        $packageFile1 = new PackageFile('vendor/package1');
         $packageFile1->addResourceMapping(new ResourceMapping('/path', 'resources'));
 
-        $packageFile2 = new PackageFile('package2');
+        $packageFile2 = new PackageFile('vendor/package2');
         $packageFile2->addResourceMapping(new ResourceMapping('/path/new', 'override'));
 
         $this->packages->add(new Package($packageFile1, $this->packageDir1));
@@ -880,14 +880,14 @@ class RepositoryManagerTest extends ManagerTestCase
     {
         $this->initDefaultManager();
 
-        $packageFile1 = new PackageFile('package1');
+        $packageFile1 = new PackageFile('vendor/package1');
         $packageFile1->addResourceMapping(new ResourceMapping('/path', 'resources'));
 
-        $packageFile2 = new PackageFile('package2');
+        $packageFile2 = new PackageFile('vendor/package2');
         $packageFile2->addResourceMapping(new ResourceMapping('/path', 'override'));
 
-        $rootConfig = new RootPackageFile('root');
-        $rootConfig->setOverrideOrder(array('package1', 'package2'));
+        $rootConfig = new RootPackageFile('vendor/root');
+        $rootConfig->setOverrideOrder(array('vendor/package1', 'vendor/package2'));
 
         $this->packages->add(new Package($packageFile1, $this->packageDir1));
         $this->packages->add(new Package($packageFile2, $this->packageDir2));

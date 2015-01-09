@@ -82,7 +82,7 @@ abstract class ManagerTestCase extends PHPUnit_Framework_TestCase
         $this->homeDir = $homeDir;
         $this->rootDir = $rootDir;
         $this->configFile = new ConfigFile(null, $this->baseConfig);
-        $this->rootPackageFile = new RootPackageFile('root', null, $this->baseConfig);
+        $this->rootPackageFile = new RootPackageFile('vendor/root', null, $this->baseConfig);
         $this->dispatcher = $this->getMock('Symfony\Component\EventDispatcher\EventDispatcherInterface');
         $this->repo = $this->getMock('Puli\Repository\Api\EditableRepository');
         $this->discovery = $this->getMock('Puli\Discovery\Api\EditableDiscovery');

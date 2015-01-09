@@ -103,7 +103,7 @@ class ProjectEnvironmentTest extends PHPUnit_Framework_TestCase
             ->method('loadRootPackageFile')
             ->with($this->rootDir.'/puli.json')
             ->will($this->returnCallback(function ($path, Config $baseConfig = null) {
-                return new RootPackageFile('root', $path, $baseConfig);
+                return new RootPackageFile('vendor/root', $path, $baseConfig);
             }));
 
         $environment = new ProjectEnvironment(
@@ -134,7 +134,7 @@ class ProjectEnvironmentTest extends PHPUnit_Framework_TestCase
             ->method('loadRootPackageFile')
             ->with($this->rootDir.'/puli.json')
             ->will($this->returnCallback(function ($path, Config $baseConfig = null) {
-                return new RootPackageFile('root', $path, $baseConfig);
+                return new RootPackageFile('vendor/root', $path, $baseConfig);
             }));
 
         $environment = new ProjectEnvironment(
@@ -199,7 +199,7 @@ class ProjectEnvironmentTest extends PHPUnit_Framework_TestCase
             ->method('loadRootPackageFile')
             ->with($this->rootDir.'/puli.json')
             ->will($this->returnCallback(function ($path, Config $baseConfig = null) {
-                return new RootPackageFile('root', $path, $baseConfig);
+                return new RootPackageFile('vendor/root', $path, $baseConfig);
             }));
 
         $environment = new ProjectEnvironment(
@@ -254,7 +254,7 @@ class ProjectEnvironmentTest extends PHPUnit_Framework_TestCase
         $this->packageFileStorage->expects($this->once())
             ->method('loadRootPackageFile')
             ->with($this->rootDir.'/puli.json')
-            ->will($this->returnValue(new RootPackageFile('root', $this->rootDir.'/puli.json', $this->config)));
+            ->will($this->returnValue(new RootPackageFile('vendor/root', $this->rootDir.'/puli.json', $this->config)));
 
         $environment = new ProjectEnvironment(
             $this->homeDir,
@@ -280,7 +280,7 @@ class ProjectEnvironmentTest extends PHPUnit_Framework_TestCase
         $this->packageFileStorage->expects($this->once())
             ->method('loadRootPackageFile')
             ->with($this->rootDir.'/puli.json')
-            ->will($this->returnValue(new RootPackageFile('root', $this->rootDir.'/puli.json', $this->config)));
+            ->will($this->returnValue(new RootPackageFile('vendor/root', $this->rootDir.'/puli.json', $this->config)));
 
         $environment = new ProjectEnvironment(
             $this->homeDir,
@@ -306,7 +306,7 @@ class ProjectEnvironmentTest extends PHPUnit_Framework_TestCase
         $this->packageFileStorage->expects($this->once())
             ->method('loadRootPackageFile')
             ->with($this->rootDir.'/puli.json')
-            ->will($this->returnValue(new RootPackageFile('root', $this->rootDir.'/puli.json', $this->config)));
+            ->will($this->returnValue(new RootPackageFile('vendor/root', $this->rootDir.'/puli.json', $this->config)));
 
         $environment = new ProjectEnvironment(
             $this->homeDir,
@@ -347,7 +347,7 @@ class ProjectEnvironmentTest extends PHPUnit_Framework_TestCase
         $this->packageFileStorage->expects($this->once())
             ->method('loadRootPackageFile')
             ->with($this->rootDir.'/puli.json')
-            ->will($this->returnValue(new RootPackageFile('root', $this->rootDir.'/puli.json', $this->config)));
+            ->will($this->returnValue(new RootPackageFile('vendor/root', $this->rootDir.'/puli.json', $this->config)));
 
         $environment = new ProjectEnvironment(
             $this->homeDir,
@@ -377,7 +377,7 @@ class ProjectEnvironmentTest extends PHPUnit_Framework_TestCase
         $this->packageFileStorage->expects($this->once())
             ->method('loadRootPackageFile')
             ->with($this->rootDir.'/puli.json')
-            ->will($this->returnValue(new RootPackageFile('root', $this->rootDir.'/puli.json', $this->config)));
+            ->will($this->returnValue(new RootPackageFile('vendor/root', $this->rootDir.'/puli.json', $this->config)));
 
         $environment = new ProjectEnvironment(
             null,
@@ -412,7 +412,7 @@ class ProjectEnvironmentTest extends PHPUnit_Framework_TestCase
         $this->packageFileStorage->expects($this->once())
             ->method('loadRootPackageFile')
             ->with($this->rootDir.'/puli.json')
-            ->will($this->returnValue(new RootPackageFile('root', $this->rootDir.'/puli.json', $this->config)));
+            ->will($this->returnValue(new RootPackageFile('vendor/root', $this->rootDir.'/puli.json', $this->config)));
 
         $environment = new ProjectEnvironment(
             $this->homeDir,
@@ -453,7 +453,7 @@ class ProjectEnvironmentTest extends PHPUnit_Framework_TestCase
         $this->packageFileStorage->expects($this->once())
             ->method('loadRootPackageFile')
             ->with($this->rootDir.'/puli.json')
-            ->will($this->returnValue(new RootPackageFile('root', $this->rootDir.'/puli.json', $this->config)));
+            ->will($this->returnValue(new RootPackageFile('vendor/root', $this->rootDir.'/puli.json', $this->config)));
 
         $environment = new ProjectEnvironment(
             $this->homeDir,

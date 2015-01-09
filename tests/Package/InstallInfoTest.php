@@ -23,10 +23,10 @@ class InstallInfoTest extends PHPUnit_Framework_TestCase
 {
     public function testCreate()
     {
-        $installInfo = new InstallInfo('package', '/path');
+        $installInfo = new InstallInfo('vendor/package', '/path');
         $installInfo->setInstaller('Composer');
 
-        $this->assertSame('package', $installInfo->getPackageName());
+        $this->assertSame('vendor/package', $installInfo->getPackageName());
         $this->assertSame('/path', $installInfo->getInstallPath());
         $this->assertSame('Composer', $installInfo->getInstaller());
     }
@@ -35,7 +35,7 @@ class InstallInfoTest extends PHPUnit_Framework_TestCase
      */
     public function testFailIfInstallPathNotString()
     {
-        new InstallInfo('package', 12345);
+        new InstallInfo('vendor/package', 12345);
     }
 
     /**
@@ -43,7 +43,7 @@ class InstallInfoTest extends PHPUnit_Framework_TestCase
      */
     public function testFailIfInstallPathEmpty()
     {
-        new InstallInfo('package', '');
+        new InstallInfo('vendor/package', '');
     }
 
     /**
@@ -64,7 +64,7 @@ class InstallInfoTest extends PHPUnit_Framework_TestCase
 
     public function testAddEnabledBindingUuid()
     {
-        $installInfo = new InstallInfo('package', '/path');
+        $installInfo = new InstallInfo('vendor/package', '/path');
         $uuid = Uuid::uuid4();
 
         $installInfo->addEnabledBindingUuid($uuid);
@@ -74,7 +74,7 @@ class InstallInfoTest extends PHPUnit_Framework_TestCase
 
     public function testAddEnabledBindingUuidIgnoresDuplicates()
     {
-        $installInfo = new InstallInfo('package', '/path');
+        $installInfo = new InstallInfo('vendor/package', '/path');
         $uuid = Uuid::uuid4();
 
         $installInfo->addEnabledBindingUuid($uuid);
@@ -85,7 +85,7 @@ class InstallInfoTest extends PHPUnit_Framework_TestCase
 
     public function testRemoveEnabledBindingUuid()
     {
-        $installInfo = new InstallInfo('package', '/path');
+        $installInfo = new InstallInfo('vendor/package', '/path');
         $uuid = Uuid::uuid4();
 
         $installInfo->addEnabledBindingUuid($uuid);
@@ -96,7 +96,7 @@ class InstallInfoTest extends PHPUnit_Framework_TestCase
 
     public function testRemoveEnabledBindingUuidIgnoresUnknown()
     {
-        $installInfo = new InstallInfo('package', '/path');
+        $installInfo = new InstallInfo('vendor/package', '/path');
         $uuid = Uuid::uuid4();
 
         $installInfo->removeEnabledBindingUuid($uuid);
@@ -106,7 +106,7 @@ class InstallInfoTest extends PHPUnit_Framework_TestCase
 
     public function testAddDisabledBindingUuid()
     {
-        $installInfo = new InstallInfo('package', '/path');
+        $installInfo = new InstallInfo('vendor/package', '/path');
         $uuid = Uuid::uuid4();
 
         $installInfo->addDisabledBindingUuid($uuid);
@@ -116,7 +116,7 @@ class InstallInfoTest extends PHPUnit_Framework_TestCase
 
     public function testAddDisabledBindingUuidIgnoresDuplicates()
     {
-        $installInfo = new InstallInfo('package', '/path');
+        $installInfo = new InstallInfo('vendor/package', '/path');
         $uuid = Uuid::uuid4();
 
         $installInfo->addDisabledBindingUuid($uuid);
@@ -127,7 +127,7 @@ class InstallInfoTest extends PHPUnit_Framework_TestCase
 
     public function testRemoveDisabledBindingUuid()
     {
-        $installInfo = new InstallInfo('package', '/path');
+        $installInfo = new InstallInfo('vendor/package', '/path');
         $uuid = Uuid::uuid4();
 
         $installInfo->addDisabledBindingUuid($uuid);
@@ -138,7 +138,7 @@ class InstallInfoTest extends PHPUnit_Framework_TestCase
 
     public function testRemoveDisabledBindingUuidIgnoresUnknown()
     {
-        $installInfo = new InstallInfo('package', '/path');
+        $installInfo = new InstallInfo('vendor/package', '/path');
         $uuid = Uuid::uuid4();
 
         $installInfo->removeDisabledBindingUuid($uuid);
@@ -148,7 +148,7 @@ class InstallInfoTest extends PHPUnit_Framework_TestCase
 
     public function testAddEnabledBindingUuidRemovesDisabledMapping()
     {
-        $installInfo = new InstallInfo('package', '/path');
+        $installInfo = new InstallInfo('vendor/package', '/path');
         $uuid = Uuid::uuid4();
 
         $installInfo->addDisabledBindingUuid($uuid);
@@ -160,7 +160,7 @@ class InstallInfoTest extends PHPUnit_Framework_TestCase
 
     public function testAddDisabledBindingUuidRemovesEnabledMapping()
     {
-        $installInfo = new InstallInfo('package', '/path');
+        $installInfo = new InstallInfo('vendor/package', '/path');
         $uuid = Uuid::uuid4();
 
         $installInfo->addEnabledBindingUuid($uuid);
