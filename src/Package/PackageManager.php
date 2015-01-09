@@ -258,18 +258,21 @@ class PackageManager
      * Returns all packages installed by the given installer.
      *
      * @param string $installer The installer name.
+     * @param int    $state     The state of the packages to return.
      *
      * @return PackageCollection The packages.
      */
-    public function getPackagesByInstaller($installer)
+    public function getPackagesByInstaller($installer, $state = PackageState::ENABLED)
     {
         $this->assertPackagesLoaded();
 
         $packages = new PackageCollection();
 
         foreach ($this->packages as $package) {
+            $installInfo = $package->getInstallInfo();
+
             // The root package has no install info
-            if ($package->getInstallInfo() && $installer === $package->getInstallInfo()->getInstaller()) {
+            if ($installInfo && $installer === $installInfo->getInstaller() && $state === $package->getState()) {
                 $packages->add($package);
             }
         }

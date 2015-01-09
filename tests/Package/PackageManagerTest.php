@@ -174,6 +174,63 @@ class PackageManagerTest extends ManagerTestCase
         ), $packages->toArray());
     }
 
+    public function testGetEnabledPackagesByInstaller()
+    {
+        $this->initDefaultManager();
+
+        $this->rootPackageFile->addInstallInfo($installInfo1 = new InstallInfo('package1', $this->packageDir1));
+        $this->rootPackageFile->addInstallInfo($installInfo2 = new InstallInfo('package2', $this->packageDir2));
+        $this->rootPackageFile->addInstallInfo($installInfo3 = new InstallInfo('package3', $this->packageDir3));
+
+        $installInfo1->setInstaller('Composer');
+        $installInfo2->setInstaller('User');
+        $installInfo3->setInstaller('Composer');
+
+        $this->manager = new PackageManager($this->environment, $this->packageFileStorage, $this->logger);
+
+        $composerPackages = $this->manager->getPackagesByInstaller('Composer');
+        $userPackages = $this->manager->getPackagesByInstaller('User');
+
+        $this->assertInstanceOf('Puli\RepositoryManager\Package\PackageCollection', $composerPackages);
+        $this->assertEquals(array(
+            'package1' => new Package($this->packageFile1, $this->packageDir1, $installInfo1),
+            'package3' => new Package($this->packageFile3, $this->packageDir3, $installInfo3),
+        ), $composerPackages->toArray());
+
+        $this->assertInstanceOf('Puli\RepositoryManager\Package\PackageCollection', $userPackages);
+        $this->assertEquals(array(
+            'package2' => new Package($this->packageFile2, $this->packageDir2, $installInfo2),
+        ), $userPackages->toArray());
+    }
+
+    public function testGetNotFoundPackagesByInstaller()
+    {
+        $this->initDefaultManager();
+
+        $this->rootPackageFile->addInstallInfo($installInfo1 = new InstallInfo('package1', 'foo'));
+        $this->rootPackageFile->addInstallInfo($installInfo2 = new InstallInfo('package2', 'bar'));
+        $this->rootPackageFile->addInstallInfo($installInfo3 = new InstallInfo('package3', $this->packageDir3));
+
+        $installInfo1->setInstaller('Composer');
+        $installInfo2->setInstaller('User');
+        $installInfo3->setInstaller('Composer');
+
+        $this->manager = new PackageManager($this->environment, $this->packageFileStorage, $this->logger);
+
+        $composerPackages = $this->manager->getPackagesByInstaller('Composer', PackageState::NOT_FOUND);
+        $userPackages = $this->manager->getPackagesByInstaller('User', PackageState::NOT_FOUND);
+
+        $this->assertInstanceOf('Puli\RepositoryManager\Package\PackageCollection', $composerPackages);
+        $this->assertEquals(array(
+            'package1' => new Package(null, $this->rootDir.'/foo', $installInfo1),
+        ), $composerPackages->toArray());
+
+        $this->assertInstanceOf('Puli\RepositoryManager\Package\PackageCollection', $userPackages);
+        $this->assertEquals(array(
+            'package2' => new Package(null, $this->rootDir.'/bar', $installInfo2),
+        ), $userPackages->toArray());
+    }
+
     public function testLoadPackagesLogsWarningIfPackageDirectoryNotFound()
     {
         $manager = new PackageManager($this->environment, $this->packageFileStorage, $this->logger);
@@ -507,42 +564,6 @@ class PackageManagerTest extends ManagerTestCase
         $this->assertSame('root', $rootPackage->getName());
         $this->assertSame($this->rootDir, $rootPackage->getInstallPath());
         $this->assertSame($this->rootPackageFile, $rootPackage->getPackageFile());
-    }
-
-    public function testGetPackagesByInstaller()
-    {
-        $this->initDefaultManager();
-
-        $installInfo1 = new InstallInfo('package1', $this->packageDir1);
-        $installInfo1->setInstaller('Composer');
-        $installInfo2 = new InstallInfo('package2', $this->packageDir2);
-        $installInfo2->setInstaller('User');
-        $installInfo3 = new InstallInfo('package3', $this->packageDir3);
-        $installInfo3->setInstaller('Composer');
-
-        $this->rootPackageFile->addInstallInfo($installInfo1);
-        $this->rootPackageFile->addInstallInfo($installInfo2);
-        $this->rootPackageFile->addInstallInfo($installInfo3);
-
-        $this->manager = new PackageManager($this->environment, $this->packageFileStorage, $this->logger);
-
-        $composerPackages = $this->manager->getPackagesByInstaller('Composer');
-        $userPackages = $this->manager->getPackagesByInstaller('User');
-
-        $this->assertInstanceOf('Puli\RepositoryManager\Package\PackageCollection', $composerPackages);
-        $this->assertCount(2, $composerPackages);
-        $this->assertInstanceOf('Puli\RepositoryManager\Package\Package', $composerPackages['package1']);
-        $this->assertSame('package1', $composerPackages['package1']->getName());
-        $this->assertSame($installInfo1, $composerPackages['package1']->getInstallInfo());
-        $this->assertInstanceOf('Puli\RepositoryManager\Package\Package', $composerPackages['package3']);
-        $this->assertSame('package3', $composerPackages['package3']->getName());
-        $this->assertSame($installInfo3, $composerPackages['package3']->getInstallInfo());
-
-        $this->assertInstanceOf('Puli\RepositoryManager\Package\PackageCollection', $userPackages);
-        $this->assertCount(1, $userPackages);
-        $this->assertInstanceOf('Puli\RepositoryManager\Package\Package', $userPackages['package2']);
-        $this->assertSame('package2', $userPackages['package2']->getName());
-        $this->assertSame($installInfo2, $userPackages['package2']->getInstallInfo());
     }
 
     private function initDefaultManager()
