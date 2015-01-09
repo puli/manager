@@ -1,4 +1,5 @@
 {
+    "version": "1.0",
     "bindings": {
         "bbcdc814-a00e-564c-8ef1-fab913072091": {
             "query": "//resource[name=\"config.yml\"]",

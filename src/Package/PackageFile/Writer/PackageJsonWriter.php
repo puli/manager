@@ -37,6 +37,7 @@ class PackageJsonWriter implements PackageFileWriter
      * @var string[]
      */
     private static $keyOrder = array(
+        'version',
         'name',
         'resources',
         'bindings',
@@ -81,6 +82,8 @@ class PackageJsonWriter implements PackageFileWriter
         $bindings = $packageFile->getBindingDescriptors();
         $bindingTypes = $packageFile->getTypeDescriptors();
         $overrides = $packageFile->getOverriddenPackages();
+
+        $jsonData['version'] = '1.0';
 
         if (null !== $packageFile->getPackageName()) {
             $jsonData['name'] = $packageFile->getPackageName();

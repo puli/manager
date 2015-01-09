@@ -1,4 +1,5 @@
 {
+    "version": "1.0",
     "bindings": {
         "e736d4e9-a290-50f7-a15c-c30d5e4baac2": {
             "query": "/app/config*.yml",

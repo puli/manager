@@ -211,6 +211,14 @@ class PackageJsonReader implements PackageFileReader
             ), $e->getCode(), $e);
         }
 
+        if (version_compare($jsonData->version, '1.0', '<')) {
+            throw UnsupportedVersionException::versionTooLow($jsonData->version, '1.0', $path);
+        }
+
+        if (version_compare($jsonData->version, '1.0', '>')) {
+            throw UnsupportedVersionException::versionTooHigh($jsonData->version, '1.0', $path);
+        }
+
         return $jsonData;
     }
 

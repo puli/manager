@@ -147,7 +147,7 @@ class PackageJsonReaderTest extends PHPUnit_Framework_TestCase
      * @expectedException \Puli\RepositoryManager\InvalidConfigException
      * @expectedExceptionMessage extra-prop.json
      */
-    public function testReadConfigValidatesSchema()
+    public function testReadPackageFileValidatesSchema()
     {
         $this->reader->readPackageFile(__DIR__.'/Fixtures/extra-prop.json');
     }
@@ -156,7 +156,7 @@ class PackageJsonReaderTest extends PHPUnit_Framework_TestCase
      * @expectedException \Puli\RepositoryManager\InvalidConfigException
      * @expectedExceptionMessage extra-prop.json
      */
-    public function testReadRootConfigValidatesSchema()
+    public function testReadRootPackageFileValidatesSchema()
     {
         $this->reader->readRootPackageFile(__DIR__.'/Fixtures/extra-prop.json', $this->baseConfig);
     }
@@ -165,7 +165,7 @@ class PackageJsonReaderTest extends PHPUnit_Framework_TestCase
      * @expectedException \Puli\RepositoryManager\FileNotFoundException
      * @expectedExceptionMessage bogus.json
      */
-    public function testReadConfigFailsIfNotFound()
+    public function testReadPackageFileFailsIfNotFound()
     {
         $this->reader->readPackageFile('bogus.json');
     }
@@ -174,7 +174,7 @@ class PackageJsonReaderTest extends PHPUnit_Framework_TestCase
      * @expectedException \Puli\RepositoryManager\FileNotFoundException
      * @expectedExceptionMessage bogus.json
      */
-    public function testReadRootConfigFailsIfNotFound()
+    public function testReadRootPackageFileFailsIfNotFound()
     {
         $this->reader->readRootPackageFile('bogus.json', $this->baseConfig);
     }
@@ -183,7 +183,7 @@ class PackageJsonReaderTest extends PHPUnit_Framework_TestCase
      * @expectedException \Puli\RepositoryManager\InvalidConfigException
      * @expectedExceptionMessage win-1258.json
      */
-    public function testReadConfigFailsIfDecodingNotPossible()
+    public function testReadPackageFileFailsIfDecodingNotPossible()
     {
         if (false !== strpos(PHP_VERSION, 'ubuntu')) {
             $this->markTestSkipped('This error is not reported on PHP versions compiled for Ubuntu.');
@@ -198,7 +198,7 @@ class PackageJsonReaderTest extends PHPUnit_Framework_TestCase
      * @expectedException \Puli\RepositoryManager\InvalidConfigException
      * @expectedExceptionMessage win-1258.json
      */
-    public function testReadRootConfigFailsIfDecodingNotPossible()
+    public function testReadRootPackageFileFailsIfDecodingNotPossible()
     {
         if (false !== strpos(PHP_VERSION, 'ubuntu')) {
             $this->markTestSkipped('This error is not reported on PHP versions compiled for Ubuntu.');
@@ -207,6 +207,42 @@ class PackageJsonReaderTest extends PHPUnit_Framework_TestCase
         }
 
         $this->reader->readRootPackageFile(__DIR__.'/Fixtures/win-1258.json', $this->baseConfig);
+    }
+
+    /**
+     * @expectedException \Puli\RepositoryManager\Package\PackageFile\Reader\UnsupportedVersionException
+     * @expectedExceptionMessage lowest readable version
+     */
+    public function testReadPackageFileVersionTooLow()
+    {
+        $this->reader->readPackageFile(__DIR__.'/Fixtures/version-too-low.json', $this->baseConfig);
+    }
+
+    /**
+     * @expectedException \Puli\RepositoryManager\Package\PackageFile\Reader\UnsupportedVersionException
+     * @expectedExceptionMessage highest readable version
+     */
+    public function testReadPackageFileVersionTooHigh()
+    {
+        $this->reader->readPackageFile(__DIR__.'/Fixtures/version-too-high.json', $this->baseConfig);
+    }
+
+    /**
+     * @expectedException \Puli\RepositoryManager\Package\PackageFile\Reader\UnsupportedVersionException
+     * @expectedExceptionMessage lowest readable version
+     */
+    public function testReadRootPackageFileVersionTooLow()
+    {
+        $this->reader->readRootPackageFile(__DIR__.'/Fixtures/version-too-low.json', $this->baseConfig);
+    }
+
+    /**
+     * @expectedException \Puli\RepositoryManager\Package\PackageFile\Reader\UnsupportedVersionException
+     * @expectedExceptionMessage highest readable version
+     */
+    public function testReadRootPackageFileVersionTooHigh()
+    {
+        $this->reader->readRootPackageFile(__DIR__.'/Fixtures/version-too-high.json', $this->baseConfig);
     }
 
     ////////////////////////////////////////////////////////////////////////////

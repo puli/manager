@@ -34,6 +34,8 @@ interface PackageFileReader
      *
      * @throws FileNotFoundException If the file was not found.
      * @throws InvalidConfigException If the source contains invalid configuration.
+     * @throws UnsupportedVersionException If the version of the package file
+     *                                     is not supported by the reader.
      */
     public function readPackageFile($path);
 
@@ -48,6 +50,8 @@ interface PackageFileReader
      *
      * @throws FileNotFoundException If the file was not found.
      * @throws InvalidConfigException If the file contains invalid configuration.
+     * @throws UnsupportedVersionException If the version of the package file
+     *                                     is not supported by the reader.
      */
     public function readRootPackageFile($path, Config $baseConfig = null);
 }
