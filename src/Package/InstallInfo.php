@@ -27,7 +27,7 @@ class InstallInfo
     /**
      * The default installer of packages.
      */
-    const DEFAULT_INSTALLER = 'User';
+    const DEFAULT_INSTALLER = 'user';
 
     /**
      * @var string
