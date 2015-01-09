@@ -270,7 +270,7 @@ class BindingTypeDescriptor
      */
     public function resetState()
     {
-        $this->state = BindingTypeState::UNLOADED;
+        $this->state = BindingTypeState::NOT_LOADED;
     }
 
     /**
@@ -284,15 +284,16 @@ class BindingTypeDescriptor
     }
 
     /**
-     * Returns whether the binding type is not loaded.
+     * Returns whether the binding type is loaded.
      *
-     * @return bool Returns `true` if the state is {@link BindingTypeState::UNLOADED}.
+     * @return bool Returns `true` if the state is not
+     *              {@link BindingTypeState::NOT_LOADED}.
      *
-     * @see BindingTypeState::UNLOADED
+     * @see BindingTypeState::NOT_LOADED
      */
-    public function isUnloaded()
+    public function isLoaded()
     {
-        return BindingTypeState::UNLOADED === $this->state;
+        return BindingTypeState::NOT_LOADED !== $this->state;
     }
 
     /**

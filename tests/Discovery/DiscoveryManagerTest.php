@@ -318,7 +318,7 @@ class DiscoveryManagerTest extends ManagerTestCase
 
         $this->manager->removeBindingType('my/type');
 
-        $this->assertTrue($bindingType->isUnloaded());
+        $this->assertFalse($bindingType->isLoaded());
     }
 
     public function testRemoveBindingTypeIgnoresNonExistingTypes()
@@ -376,7 +376,7 @@ class DiscoveryManagerTest extends ManagerTestCase
 
         $this->manager->removeBindingType('my/type');
 
-        $this->assertTrue($bindingType1->isUnloaded());
+        $this->assertFalse($bindingType1->isLoaded());
         $this->assertTrue($bindingType2->isEnabled());
     }
 
@@ -405,7 +405,7 @@ class DiscoveryManagerTest extends ManagerTestCase
 
         $this->manager->removeBindingType('my/type');
 
-        $this->assertTrue($bindingType1->isUnloaded());
+        $this->assertFalse($bindingType1->isLoaded());
         $this->assertTrue($bindingType2->isDuplicate());
         $this->assertTrue($bindingType3->isDuplicate());
     }
@@ -866,7 +866,7 @@ class DiscoveryManagerTest extends ManagerTestCase
 
         $this->manager->removeBinding($binding->getUuid());
 
-        $this->assertTrue($binding->isUnloaded());
+        $this->assertFalse($binding->isLoaded());
     }
 
     public function testRemoveBindingWorksWithDefaultParameters()

@@ -26,7 +26,7 @@ final class BindingState
     /**
      * State: The binding is not loaded.
      */
-    const UNLOADED = 0;
+    const NOT_LOADED = 0;
 
     /**
      * State: The binding is enabled.
@@ -66,7 +66,7 @@ final class BindingState
     public static function all()
     {
         return array(
-            self::UNLOADED,
+            self::NOT_LOADED,
             self::ENABLED,
             self::DISABLED,
             self::UNDECIDED,

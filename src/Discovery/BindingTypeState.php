@@ -24,7 +24,7 @@ final class BindingTypeState
     /**
      * State: The type is not loaded.
      */
-    const UNLOADED = 0;
+    const NOT_LOADED = 0;
 
     /**
      * State: The type is enabled.
@@ -44,7 +44,7 @@ final class BindingTypeState
     public static function all()
     {
         return array(
-            self::UNLOADED,
+            self::NOT_LOADED,
             self::ENABLED,
             self::DUPLICATE
         );
@@ -64,7 +64,7 @@ final class BindingTypeState
         $typeName = $typeDescriptor->getName();
 
         if (!$typeStore->existsAny($typeName)) {
-            return self::UNLOADED;
+            return self::NOT_LOADED;
         }
 
         if ($typeStore->isDuplicate($typeName)) {

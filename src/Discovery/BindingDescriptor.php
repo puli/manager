@@ -59,7 +59,7 @@ class BindingDescriptor
     /**
      * @var int
      */
-    private $state = BindingState::UNLOADED;
+    private $state = BindingState::NOT_LOADED;
 
     /**
      * @var BindingTypeDescriptor
@@ -284,7 +284,7 @@ class BindingDescriptor
     {
         $this->type = null;
         $this->violations = array();
-        $this->state = BindingState::UNLOADED;
+        $this->state = BindingState::NOT_LOADED;
     }
 
     /**
@@ -318,15 +318,16 @@ class BindingDescriptor
     }
 
     /**
-     * Returns whether the binding is not loaded.
+     * Returns whether the binding is loaded.
      *
-     * @return bool Returns `true` if the state is {@link BindingState::UNLOADED}.
+     * @return bool Returns `true` if the state is not
+     *              {@link BindingState::NOT_LOADED}.
      *
-     * @see BindingState::UNLOADED
+     * @see BindingState::NOT_LOADED
      */
-    public function isUnloaded()
+    public function isLoaded()
     {
-        return BindingState::UNLOADED === $this->state;
+        return BindingState::NOT_LOADED !== $this->state;
     }
 
     /**
