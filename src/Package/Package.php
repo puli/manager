@@ -22,6 +22,11 @@ use Puli\RepositoryManager\Package\PackageFile\PackageFile;
 class Package
 {
     /**
+     * @var string|null
+     */
+    protected static $defaultName = null;
+
+    /**
      * @var string
      */
     private $name;
@@ -42,13 +47,19 @@ class Package
     private $installInfo;
 
     /**
+     * @var int
+     */
+    private $state = PackageState::NOT_LOADED;
+
+    /**
      * Creates a new package.
      *
-     * @param PackageFile $packageFile The package file.
-     * @param string      $installPath The absolute install path.
-     * @param InstallInfo $installInfo The install info of this package.
+     * @param PackageFile|null $packageFile The package file or `null` if the
+     *                                      package file could not be loaded.
+     * @param string           $installPath The absolute install path.
+     * @param InstallInfo      $installInfo The install info of this package.
      */
-    public function __construct(PackageFile $packageFile, $installPath, InstallInfo $installInfo = null)
+    public function __construct(PackageFile $packageFile = null, $installPath, InstallInfo $installInfo = null)
     {
         // If a package name was set during installation, that name wins over
         // the predefined name in the puli.json file (if any)
@@ -56,7 +67,9 @@ class Package
             ? $installInfo->getPackageName()
             : $packageFile->getPackageName();
 
-        $this->packageFile = $packageFile;
+        if (null === $this->name) {
+            $this->name = static::$defaultName;
+        }
 
         // The path is stored both here and in the install info. While the
         // install info contains the path as it is stored in the install file
@@ -64,6 +77,9 @@ class Package
         // always an absolute path.
         $this->installPath = $installPath;
         $this->installInfo = $installInfo;
+        $this->packageFile = $packageFile;
+
+        $this->state = PackageState::detect($this);
     }
 
     /**
@@ -77,7 +93,7 @@ class Package
     }
 
     /**
-     * Returns the path at which the package is installed.
+     * Returns the absolute path at which the package is installed.
      *
      * @return string The absolute install path of the package.
      */
@@ -89,7 +105,8 @@ class Package
     /**
      * Returns the package file of the package.
      *
-     * @return PackageFile The package file.
+     * @return PackageFile|null The package file or `null` if the file could not
+     *                          be loaded.
      */
     public function getPackageFile()
     {
@@ -107,12 +124,77 @@ class Package
     }
 
     /**
-     * Sets the package name.
+     * Returns the state of the package.
      *
-     * @param string $name The package name.
+     * @return int One of the {@link PackageState} constants.
      */
-    protected function setName($name)
+    public function getState()
     {
-        $this->name = $name;
+        return $this->state;
+    }
+
+    /**
+     * Resets the state of the package to unloaded.
+     */
+    public function resetState()
+    {
+        $this->state = PackageState::NOT_LOADED;
+    }
+
+    /**
+     * Refreshes the state of the package.
+     */
+    public function refreshState()
+    {
+        $this->state = PackageState::detect($this);
+    }
+
+    /**
+     * Returns whether the package is loaded.
+     *
+     * @return bool Returns `true` if the state is not
+     *              {@link PackageState::NOT_LOADED}.
+     *
+     * @see PackageState::NOT_LOADED
+     */
+    public function isLoaded()
+    {
+        return PackageState::NOT_LOADED !== $this->state;
+    }
+
+    /**
+     * Returns whether the package is enabled.
+     *
+     * @return bool Returns `true` if the state is {@link PackageState::ENABLED}.
+     *
+     * @see PackageState::ENABLED
+     */
+    public function isEnabled()
+    {
+        return PackageState::ENABLED === $this->state;
+    }
+
+    /**
+     * Returns whether the package was not found.
+     *
+     * @return bool Returns `true` if the state is {@link PackageState::NOT_FOUND}.
+     *
+     * @see PackageState::NOT_FOUND
+     */
+    public function isNotFound()
+    {
+        return PackageState::NOT_FOUND === $this->state;
+    }
+
+    /**
+     * Returns whether the package was not loadable.
+     *
+     * @return bool Returns `true` if the state is {@link PackageState::NOT_LOADABLE}.
+     *
+     * @see PackageState::NOT_LOADABLE
+     */
+    public function isNotLoadable()
+    {
+        return PackageState::NOT_LOADABLE === $this->state;
     }
 }

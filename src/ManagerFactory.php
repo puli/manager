@@ -212,14 +212,16 @@ class ManagerFactory
      * Creates a package manager.
      *
      * @param ProjectEnvironment $environment The project environment.
+     * @param LoggerInterface    $logger      The logger. Optional.
      *
      * @return PackageManager The package manager.
      */
-    public function createPackageManager(ProjectEnvironment $environment)
+    public function createPackageManager(ProjectEnvironment $environment, LoggerInterface $logger = null)
     {
         return new PackageManager(
             $environment,
-            $this->getPackageFileStorage($environment->getEventDispatcher())
+            $this->getPackageFileStorage($environment->getEventDispatcher()),
+            $logger
         );
     }
 

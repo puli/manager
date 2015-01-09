@@ -13,9 +13,12 @@ namespace Puli\RepositoryManager\Tests\Package;
 
 use PHPUnit_Framework_Assert;
 use PHPUnit_Framework_MockObject_MockObject;
+use Psr\Log\LoggerInterface;
+use Puli\RepositoryManager\InvalidConfigException;
 use Puli\RepositoryManager\Package\InstallInfo;
 use Puli\RepositoryManager\Package\PackageFile\PackageFile;
 use Puli\RepositoryManager\Package\PackageFile\PackageFileStorage;
+use Puli\RepositoryManager\Package\PackageFile\Reader\UnsupportedVersionException;
 use Puli\RepositoryManager\Package\PackageFile\RootPackageFile;
 use Puli\RepositoryManager\Package\PackageManager;
 use Puli\RepositoryManager\Tests\ManagerTestCase;
@@ -68,6 +71,11 @@ class PackageManagerTest extends ManagerTestCase
     private $packageFileStorage;
 
     /**
+     * @var PHPUnit_Framework_MockObject_MockObject|LoggerInterface
+     */
+    private $logger;
+
+    /**
      * @var PackageManager
      */
     private $manager;
@@ -87,6 +95,8 @@ class PackageManagerTest extends ManagerTestCase
         $this->packageFileStorage = $this->getMockBuilder('Puli\RepositoryManager\Package\PackageFile\PackageFileStorage')
             ->disableOriginalConstructor()
             ->getMock();
+
+        $this->logger = $this->getMock('Psr\Log\LoggerInterface');
 
         $this->initEnvironment(__DIR__.'/Fixtures/home', __DIR__.'/Fixtures/root');
     }
@@ -112,12 +122,13 @@ class PackageManagerTest extends ManagerTestCase
             ->method('loadPackageFile')
             ->with($this->packageDir1.'/puli.json')
             ->will($this->returnValue($packageFile1));
+
         $this->packageFileStorage->expects($this->at(1))
             ->method('loadPackageFile')
             ->with($this->packageDir2.'/puli.json')
             ->will($this->returnValue($packageFile2));
 
-        $manager = new PackageManager($this->environment, $this->packageFileStorage);
+        $manager = new PackageManager($this->environment, $this->packageFileStorage, $this->logger);
 
         $packages = $manager->getPackages();
 
@@ -150,7 +161,7 @@ class PackageManagerTest extends ManagerTestCase
             ->with($this->packageDir1.'/puli.json')
             ->will($this->returnValue($packageFile));
 
-        $manager = new PackageManager($this->environment, $this->packageFileStorage);
+        $manager = new PackageManager($this->environment, $this->packageFileStorage, $this->logger);
 
         $packages = $manager->getPackages();
 
@@ -166,40 +177,72 @@ class PackageManagerTest extends ManagerTestCase
         $this->assertSame($packageFile, $packages['package1-custom']->getPackageFile());
     }
 
-    /**
-     * @expectedException \Puli\RepositoryManager\FileNotFoundException
-     * @expectedExceptionMessage foobar
-     */
-    public function testLoadPackagesFailsIfPackageDirNotFound()
+    public function testLogWarningIfPackageDirectoryNotFound()
     {
+        $manager = new PackageManager($this->environment, $this->packageFileStorage, $this->logger);
+
         $this->rootPackageFile->addInstallInfo(new InstallInfo('package', 'foobar'));
 
-        new PackageManager($this->environment, $this->packageFileStorage);
+        $this->logger->expects($this->once())
+            ->method('warning');
+
+        $manager->loadPackages();
+
+        $this->assertTrue($manager->getPackage('package')->isNotFound());
     }
 
-    /**
-     * @expectedException \Puli\RepositoryManager\NoDirectoryException
-     * @expectedExceptionMessage /file
-     */
-    public function testLoadPackagesFailsIfPackageNoDirectory()
+    public function testLogWarningIfPackageNoDirectory()
     {
         $this->rootPackageFile->addInstallInfo(new InstallInfo('package', __DIR__.'/Fixtures/file'));
 
-        new PackageManager($this->environment, $this->packageFileStorage);
+        $manager = new PackageManager($this->environment, $this->packageFileStorage, $this->logger);
+
+        $this->logger->expects($this->once())
+            ->method('warning');
+
+        $manager->loadPackages();
+
+        $this->assertTrue($manager->getPackage('package')->isNotLoadable());
+    }
+
+    public function testLogWarningIfPackageFileVersionNotSupported()
+    {
+        $this->rootPackageFile->addInstallInfo(new InstallInfo('package', $this->packageDir1));
+
+        $this->packageFileStorage->expects($this->once())
+            ->method('loadPackageFile')
+            ->with($this->packageDir1.'/puli.json')
+            ->willThrowException(new UnsupportedVersionException());
+
+        $manager = new PackageManager($this->environment, $this->packageFileStorage, $this->logger);
+
+        $manager->loadPackages();
+
+        $this->assertTrue($manager->getPackage('package')->isNotLoadable());
+    }
+
+    public function testLogWarningIfPackageFileInvalid()
+    {
+        $this->rootPackageFile->addInstallInfo(new InstallInfo('package', $this->packageDir1));
+
+        $this->packageFileStorage->expects($this->once())
+            ->method('loadPackageFile')
+            ->with($this->packageDir1.'/puli.json')
+            ->willThrowException(new InvalidConfigException());
+
+        $manager = new PackageManager($this->environment, $this->packageFileStorage, $this->logger);
+
+        $manager->loadPackages();
+
+        $this->assertTrue($manager->getPackage('package')->isNotLoadable());
     }
 
     public function testInstallPackage()
     {
         $this->initDefaultManager();
 
-        $packageFile = new PackageFile('package3');
         $packageDir1 = $this->packageDir1;
         $packageDir2 = $this->packageDir2;
-
-        $this->packageFileStorage->expects($this->exactly(2))
-            ->method('loadPackageFile')
-            ->with($this->packageDir3.'/puli.json')
-            ->will($this->returnValue($packageFile));
 
         $this->packageFileStorage->expects($this->once())
             ->method('saveRootPackageFile')
@@ -220,14 +263,8 @@ class PackageManagerTest extends ManagerTestCase
     {
         $this->initDefaultManager();
 
-        $packageFile = new PackageFile('package3');
         $packageDir1 = $this->packageDir1;
         $packageDir2 = $this->packageDir2;
-
-        $this->packageFileStorage->expects($this->exactly(2))
-            ->method('loadPackageFile')
-            ->with($this->packageDir3.'/puli.json')
-            ->will($this->returnValue($packageFile));
 
         $this->packageFileStorage->expects($this->once())
             ->method('saveRootPackageFile')
@@ -248,14 +285,8 @@ class PackageManagerTest extends ManagerTestCase
     {
         $this->initDefaultManager();
 
-        $packageFile = new PackageFile('package3');
         $packageDir1 = $this->packageDir1;
         $packageDir2 = $this->packageDir2;
-
-        $this->packageFileStorage->expects($this->once())
-            ->method('loadPackageFile')
-            ->with($this->packageDir3.'/puli.json')
-            ->will($this->returnValue($packageFile));
 
         $this->packageFileStorage->expects($this->once())
             ->method('saveRootPackageFile')
@@ -279,14 +310,8 @@ class PackageManagerTest extends ManagerTestCase
     {
         $this->initDefaultManager();
 
-        $packageFile = new PackageFile('package3');
         $packageDir1 = $this->packageDir1;
         $packageDir2 = $this->packageDir2;
-
-        $this->packageFileStorage->expects($this->exactly(2))
-            ->method('loadPackageFile')
-            ->with($this->packageDir3.'/puli.json')
-            ->will($this->returnValue($packageFile));
 
         $this->packageFileStorage->expects($this->once())
             ->method('saveRootPackageFile')
@@ -309,9 +334,6 @@ class PackageManagerTest extends ManagerTestCase
     public function testInstallPackageDoesNothingIfAlreadyInstalled()
     {
         $this->initDefaultManager();
-
-        $this->packageFileStorage->expects($this->never())
-            ->method('loadPackageFile');
 
         $this->packageFileStorage->expects($this->never())
             ->method('saveRootPackageFile');
@@ -423,6 +445,8 @@ class PackageManagerTest extends ManagerTestCase
     {
         $this->initDefaultManager();
 
+        $this->manager->loadPackages();
+
         $this->packageFileStorage->expects($this->never())
             ->method('saveRootPackageFile');
 
@@ -503,7 +527,7 @@ class PackageManagerTest extends ManagerTestCase
         $this->rootPackageFile->addInstallInfo($installInfo2);
         $this->rootPackageFile->addInstallInfo($installInfo3);
 
-        $this->manager = new PackageManager($this->environment, $this->packageFileStorage);
+        $this->manager = new PackageManager($this->environment, $this->packageFileStorage, $this->logger);
 
         $composerPackages = $this->manager->getPackagesByInstaller('Composer');
         $userPackages = $this->manager->getPackagesByInstaller('User');
@@ -532,18 +556,14 @@ class PackageManagerTest extends ManagerTestCase
         $this->rootPackageFile->addInstallInfo($installInfo1);
         $this->rootPackageFile->addInstallInfo($installInfo2);
 
-        $packageFiles = array(
-            $this->packageDir1.'/puli.json' => $this->packageFile1,
-            $this->packageDir2.'/puli.json' => $this->packageFile2,
-            $this->packageDir3.'/puli.json' => $this->packageFile3,
-        );
-
         $this->packageFileStorage->expects($this->any())
             ->method('loadPackageFile')
-            ->will($this->returnCallback(function ($path) use ($packageFiles) {
-                return $packageFiles[$path];
-            }));
+            ->willReturnMap(array(
+                array($this->packageDir1.'/puli.json', $this->packageFile1),
+                array($this->packageDir2.'/puli.json', $this->packageFile2),
+                array($this->packageDir3.'/puli.json', $this->packageFile3),
+            ));
 
-        $this->manager = new PackageManager($this->environment, $this->packageFileStorage);
+        $this->manager = new PackageManager($this->environment, $this->packageFileStorage, $this->logger);
     }
 }

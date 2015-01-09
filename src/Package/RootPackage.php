@@ -22,6 +22,11 @@ use Puli\RepositoryManager\Package\PackageFile\RootPackageFile;
 class RootPackage extends Package
 {
     /**
+     * @var string|null
+     */
+    protected static $defaultName = '__root__';
+
+    /**
      * Creates a new root package.
      *
      * @param RootPackageFile $packageFile The package file.
@@ -30,10 +35,6 @@ class RootPackage extends Package
     public function __construct(RootPackageFile $packageFile, $installPath)
     {
         parent::__construct($packageFile, $installPath);
-
-        if (null === $this->getName()) {
-            $this->setName('__root__');
-        }
     }
 
     /**

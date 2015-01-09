@@ -11,6 +11,9 @@
 
 namespace Puli\RepositoryManager\Package;
 
+use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
+use Puli\RepositoryManager\Assert\Assert;
 use Puli\RepositoryManager\Environment\ProjectEnvironment;
 use Puli\RepositoryManager\FileNotFoundException;
 use Puli\RepositoryManager\InvalidConfigException;
@@ -18,6 +21,8 @@ use Puli\RepositoryManager\NoDirectoryException;
 use Puli\RepositoryManager\Package\Collection\PackageCollection;
 use Puli\RepositoryManager\Package\PackageFile\PackageFile;
 use Puli\RepositoryManager\Package\PackageFile\PackageFileStorage;
+use Puli\RepositoryManager\Package\PackageFile\Reader\UnsupportedVersionException;
+use Puli\RepositoryManager\Package\PackageFile\RootPackageFile;
 use Webmozart\PathUtil\Path;
 
 /**
@@ -39,6 +44,11 @@ class PackageManager
     private $rootDir;
 
     /**
+     * @var RootPackageFile
+     */
+    private $rootPackageFile;
+
+    /**
      * @var PackageFileStorage
      */
     private $packageFileStorage;
@@ -49,10 +59,16 @@ class PackageManager
     private $packages;
 
     /**
+     * @var LoggerInterface
+     */
+    private $logger;
+
+    /**
      * Loads the package repository for a given project.
      *
      * @param ProjectEnvironment $environment        The project environment.
      * @param PackageFileStorage $packageFileStorage The package file storage.
+     * @param LoggerInterface    $logger             The used logger.
      *
      * @throws FileNotFoundException If the install path of a package not exist.
      * @throws NoDirectoryException If the install path of a package points to a file.
@@ -61,15 +77,15 @@ class PackageManager
      */
     public function __construct(
         ProjectEnvironment $environment,
-        PackageFileStorage $packageFileStorage
+        PackageFileStorage $packageFileStorage,
+        LoggerInterface $logger = null
     )
     {
         $this->environment = $environment;
         $this->rootDir = $environment->getRootDirectory();
+        $this->rootPackageFile = $environment->getRootPackageFile();
         $this->packageFileStorage = $packageFileStorage;
-        $this->packages = new PackageCollection();
-
-        $this->loadPackages();
+        $this->logger = $logger ?: new NullLogger();
     }
 
     /**
@@ -80,15 +96,14 @@ class PackageManager
      *                                 should be read from the package's puli.json.
      * @param string      $installer   The name of the installer.
      *
-     * @throws FileNotFoundException If the package directory does not exist.
-     * @throws NoDirectoryException If the package path points to a file.
      * @throws InvalidConfigException If the package is not configured correctly.
      * @throws NameConflictException If the package has the same name as another
      *                               loaded package.
      */
     public function installPackage($installPath, $name = null, $installer = InstallInfo::DEFAULT_INSTALLER)
     {
-        $rootPackageFile = $this->environment->getRootPackageFile();
+        $this->assertPackagesLoaded();
+
         $installPath = Path::makeAbsolute($installPath, $this->rootDir);
 
         if ($this->isPackageInstalled($installPath)) {
@@ -97,8 +112,7 @@ class PackageManager
 
         if (null === $name) {
             // Read the name from the package file
-            $packageFile = $this->loadPackageFile($installPath);
-            $name = $packageFile->getPackageName();
+            $name = $this->loadPackageFile($installPath)->getPackageName();
         }
 
         if (null === $name) {
@@ -111,16 +125,28 @@ class PackageManager
             ));
         }
 
+        if ($this->packages->contains($name)) {
+            $conflictingPackage = $this->packages->get($name);
+
+            throw new NameConflictException(sprintf(
+                'Cannot load package "%s" at %s: The package at %s has the '.
+                'same name.',
+                $name,
+                $installPath,
+                $conflictingPackage->getInstallPath()
+            ));
+        }
+
         $relInstallPath = Path::makeRelative($installPath, $this->rootDir);
         $installInfo = new InstallInfo($name, $relInstallPath);
         $installInfo->setInstaller($installer);
         $package = $this->loadPackage($installInfo);
 
         // OK, now add it
-        $rootPackageFile->addInstallInfo($installInfo);
+        $this->rootPackageFile->addInstallInfo($installInfo);
         $this->packages->add($package);
 
-        $this->packageFileStorage->saveRootPackageFile($rootPackageFile);
+        $this->packageFileStorage->saveRootPackageFile($this->rootPackageFile);
     }
 
     /**
@@ -132,6 +158,8 @@ class PackageManager
      */
     public function isPackageInstalled($installPath)
     {
+        $this->assertPackagesLoaded();
+
         $installPath = Path::makeAbsolute($installPath, $this->rootDir);
 
         foreach ($this->packages as $package) {
@@ -150,17 +178,17 @@ class PackageManager
      */
     public function removePackage($name)
     {
+        $this->assertPackagesLoaded();
+
         if (!$this->packages->contains($name)) {
             return;
         }
 
-        $rootPackageFile = $this->environment->getRootPackageFile();
-
         $this->packages->remove($name);
 
-        if ($rootPackageFile->hasInstallInfo($name)) {
-            $rootPackageFile->removeInstallInfo($name);
-            $this->packageFileStorage->saveRootPackageFile($rootPackageFile);
+        if ($this->rootPackageFile->hasInstallInfo($name)) {
+            $this->rootPackageFile->removeInstallInfo($name);
+            $this->packageFileStorage->saveRootPackageFile($this->rootPackageFile);
         }
     }
 
@@ -173,6 +201,8 @@ class PackageManager
      */
     public function hasPackage($name)
     {
+        $this->assertPackagesLoaded();
+
         return $this->packages->contains($name);
     }
 
@@ -187,6 +217,8 @@ class PackageManager
      */
     public function getPackage($name)
     {
+        $this->assertPackagesLoaded();
+
         return $this->packages->get($name);
     }
 
@@ -197,6 +229,8 @@ class PackageManager
      */
     public function getRootPackage()
     {
+        $this->assertPackagesLoaded();
+
         return $this->packages->getRootPackage();
     }
 
@@ -207,6 +241,8 @@ class PackageManager
      */
     public function getPackages()
     {
+        $this->assertPackagesLoaded();
+
         return $this->packages;
     }
 
@@ -219,6 +255,8 @@ class PackageManager
      */
     public function getPackagesByInstaller($installer)
     {
+        $this->assertPackagesLoaded();
+
         $packages = new PackageCollection();
 
         foreach ($this->packages as $package) {
@@ -251,21 +289,24 @@ class PackageManager
      * @throws NameConflictException If a package has the same name as another
      *                               loaded package.
      */
-    private function loadPackages()
+    public function loadPackages()
     {
-        $rootPackageFile = $this->environment->getRootPackageFile();
+        $this->packages = new PackageCollection();
+        $this->packages->add(new RootPackage($this->rootPackageFile, $this->rootDir));
 
-        $this->packages->add(new RootPackage($rootPackageFile, $this->rootDir));
-
-        foreach ($rootPackageFile->getInstallInfos() as $installInfo) {
-            $this->packages->add($this->loadPackage($installInfo));
+        foreach ($this->rootPackageFile->getInstallInfos() as $installInfo) {
+            // Catch and log exceptions so that single packages cannot break
+            // the whole repository
+            $this->packages->add($this->loadPackage($installInfo, true));
         }
     }
 
     /**
      * Loads a package for the given install info.
      *
-     * @param InstallInfo $installInfo The install info.
+     * @param InstallInfo $installInfo   The install info.
+     * @param bool        $logExceptions Whether to log exceptions occurring
+     *                                   when reading the package file.
      *
      * @return Package The package.
      *
@@ -274,54 +315,64 @@ class PackageManager
      * @throws NameConflictException If the package has the same name as another
      *                               loaded package.
      */
-    private function loadPackage(InstallInfo $installInfo)
+    private function loadPackage(InstallInfo $installInfo, $logExceptions = false)
     {
         $installPath = Path::makeAbsolute($installInfo->getInstallPath(), $this->rootDir);
-        $packageFile = $this->loadPackageFile($installPath);
-        $package = new Package($packageFile, $installPath, $installInfo);
+        $packageFile = $this->loadPackageFile($installPath, $logExceptions);
 
-        if ($this->packages->contains($package->getName())) {
-            $conflictingPackage = $this->packages->get($package->getName());
-
-            throw new NameConflictException(sprintf(
-                'Cannot load package "%s" at %s: The package at %s has the '.
-                'same name.',
-                $package->getName(),
-                $installPath,
-                $conflictingPackage->getInstallPath()
-            ));
-        }
-
-        return $package;
+        return new Package($packageFile, $installPath, $installInfo);
     }
 
     /**
      * Loads the package file for the package at the given install path.
      *
      * @param string $installPath The absolute install path of the package
+     * @param bool   $logExceptions Whether to log exceptions occurring when
+     *                              reading the package file.
      *
-     * @return PackageFile The loaded package file.
-     *
-     * @throws FileNotFoundException If the install path does not exist.
-     * @throws NoDirectoryException If the install path points to a file.
+     * @return PackageFile|null The loaded package file or `null` if an
+     *                          exception occurred and $logExceptions is set.
      */
-    private function loadPackageFile($installPath)
+    private function loadPackageFile($installPath, $logExceptions = false)
     {
-        if (!file_exists($installPath)) {
-            throw new FileNotFoundException(sprintf(
-                'Could not load package: The directory %s does not exist.',
-                $installPath
-            ));
+        $e = null;
+
+        try {
+            if (!file_exists($installPath)) {
+                throw new FileNotFoundException(sprintf(
+                    'Could not load package: The directory %s does not exist.',
+                    $installPath
+                ));
+            }
+
+            if (!is_dir($installPath)) {
+                throw new NoDirectoryException(sprintf(
+                    'Could not load package: The path %s is a file. Expected a '.
+                    'directory.',
+                    $installPath
+                ));
+            }
+
+            return $this->packageFileStorage->loadPackageFile($installPath.'/puli.json');
+        } catch (InvalidConfigException $e) {
+        } catch (UnsupportedVersionException $e) {
+        } catch (FileNotFoundException $e) {
+        } catch (NoDirectoryException $e) {
         }
 
-        if (!is_dir($installPath)) {
-            throw new NoDirectoryException(sprintf(
-                'Could not load package: The path %s is a file. Expected a '.
-                'directory.',
-                $installPath
-            ));
+        if (!$logExceptions) {
+            throw $e;
         }
 
-        return $this->packageFileStorage->loadPackageFile($installPath.'/puli.json');
+        $this->logger->warning($e->getMessage());
+
+        return null;
+    }
+
+    private function assertPackagesLoaded()
+    {
+        if (!$this->packages) {
+            $this->loadPackages();
+        }
     }
 }
