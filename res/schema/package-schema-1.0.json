@@ -74,27 +74,7 @@
         },
         "config": {
             "type": "object",
-            "additionalProperties": true,
-            "properties": {
-                "puli-dir": {
-                    "type": "string"
-                },
-                "install-file": {
-                    "type": "string"
-                },
-                "dump-dir": {
-                    "type": "string"
-                },
-                "write-repo": {
-                    "type": "string"
-                },
-                "read-repo": {
-                    "type": "string"
-                },
-                "discovery-storage": {
-                    "type": "string"
-                }
-            }
+            "additionalProperties": true
         },
         "plugins": {
             "type": "array",
