@@ -184,7 +184,7 @@ class PackageJsonWriter implements PackageFileWriter
         }
 
         if (count($installInfos) > 0) {
-            $jsonData['packages'] = new stdClass();
+            $packagesData = array();
 
             foreach ($installInfos as $installInfo) {
                 $installData = new stdClass();
@@ -210,8 +210,12 @@ class PackageJsonWriter implements PackageFileWriter
                     }
                 }
 
-                $jsonData['packages']->{$installInfo->getPackageName()} = $installData;
+                $packagesData[$installInfo->getPackageName()] = $installData;
             }
+
+            ksort($packagesData);
+
+            $jsonData['packages'] = (object) $packagesData;
         }
     }
 

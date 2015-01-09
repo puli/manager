@@ -1,0 +1,14 @@
+{
+    "version": "1.0",
+    "packages": {
+        "a": {
+            "install-path": "/path/to/package2"
+        },
+        "b": {
+            "install-path": "/path/to/package3"
+        },
+        "c": {
+            "install-path": "/path/to/package1"
+        }
+    }
+}

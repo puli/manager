@@ -233,6 +233,24 @@ class PackageJsonWriterTest extends JsonWriterTestCase
         $this->assertJsonFileEquals(__DIR__.'/Fixtures/full-root.json', $this->tempFile);
     }
 
+    public function testWriteRootPackageFileSortsPackagesByName()
+    {
+        $installInfo1 = new InstallInfo('c', '/path/to/package1');
+        $installInfo2 = new InstallInfo('a', '/path/to/package2');
+        $installInfo3 = new InstallInfo('b', '/path/to/package3');
+
+        $packageFile = new RootPackageFile();
+        $packageFile->addInstallInfo($installInfo1);
+        $packageFile->addInstallInfo($installInfo2);
+        $packageFile->addInstallInfo($installInfo3);
+
+        $this->writer->writePackageFile($packageFile, $this->tempFile);
+
+        $this->assertFileExists($this->tempFile);
+
+        $this->assertJsonFileEquals(__DIR__.'/Fixtures/sorted-packages.json', $this->tempFile);
+    }
+
     public function testWriteMinimalRootPackageFile()
     {
         $baseConfig = new Config();
