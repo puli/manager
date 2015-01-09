@@ -22,6 +22,7 @@ use Puli\RepositoryManager\Package\PackageFile\PackageFileStorage;
 use Puli\RepositoryManager\Package\PackageFile\Reader\UnsupportedVersionException;
 use Puli\RepositoryManager\Package\PackageFile\RootPackageFile;
 use Puli\RepositoryManager\Package\PackageManager;
+use Puli\RepositoryManager\Package\PackageState;
 use Puli\RepositoryManager\Package\RootPackage;
 use Puli\RepositoryManager\Tests\ManagerTestCase;
 use Symfony\Component\Filesystem\Filesystem;
@@ -139,7 +140,7 @@ class PackageManagerTest extends ManagerTestCase
         $filesystem->remove($this->tempDir);
     }
 
-    public function testGetPackages()
+    public function testGetEnabledPackages()
     {
         $this->rootPackageFile->addInstallInfo($installInfo1 = new InstallInfo('package1', '../package1'));
         $this->rootPackageFile->addInstallInfo($installInfo2 = new InstallInfo('package2', $this->packageDir2));
@@ -153,6 +154,23 @@ class PackageManagerTest extends ManagerTestCase
             'root' => new RootPackage($this->rootPackageFile, $this->rootDir),
             'package1' => new Package($this->packageFile1, $this->packageDir1, $installInfo1),
             'package2' => new Package($this->packageFile2, $this->packageDir2, $installInfo2),
+        ), $packages->toArray());
+    }
+
+    public function testGetNotFoundPackages()
+    {
+        $this->rootPackageFile->addInstallInfo($installInfo1 = new InstallInfo('package1', 'foo'));
+        $this->rootPackageFile->addInstallInfo($installInfo2 = new InstallInfo('package2', $this->packageDir2));
+        $this->rootPackageFile->addInstallInfo($installInfo3 = new InstallInfo('package3', 'bar'));
+
+        $manager = new PackageManager($this->environment, $this->packageFileStorage, $this->logger);
+
+        $packages = $manager->getPackages(PackageState::NOT_FOUND);
+
+        $this->assertInstanceOf('Puli\RepositoryManager\Package\PackageCollection', $packages);
+        $this->assertEquals(array(
+            'package1' => new Package(null, $this->rootDir.'/foo', $installInfo1),
+            'package3' => new Package(null, $this->rootDir.'/bar', $installInfo3),
         ), $packages->toArray());
     }
 

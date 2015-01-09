@@ -235,13 +235,23 @@ class PackageManager
     /**
      * Returns all installed packages.
      *
+     * @param int $state The state of the packages to return.
+     *
      * @return PackageCollection The installed packages.
      */
-    public function getPackages()
+    public function getPackages($state = PackageState::ENABLED)
     {
         $this->assertPackagesLoaded();
 
-        return $this->packages;
+        $packages = new PackageCollection();
+
+        foreach ($this->packages as $package) {
+            if ($state === $package->getState()) {
+                $packages[] = $package;
+            }
+        }
+
+        return $packages;
     }
 
     /**
