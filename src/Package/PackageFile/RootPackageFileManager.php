@@ -29,7 +29,7 @@ use Webmozart\Glob\Iterator\RegexFilterIterator;
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class PackageFileManager
+class RootPackageFileManager
 {
     /**
      * @var ProjectEnvironment
@@ -39,7 +39,7 @@ class PackageFileManager
     /**
      * @var RootPackageFile
      */
-    private $packageFile;
+    private $rootPackageFile;
 
     /**
      * @var PackageFileStorage
@@ -55,7 +55,7 @@ class PackageFileManager
     public function __construct(ProjectEnvironment $environment, PackageFileStorage $packageFileStorage)
     {
         $this->environment = $environment;
-        $this->packageFile = $environment->getRootPackageFile();
+        $this->rootPackageFile = $environment->getRootPackageFile();
         $this->packageFileStorage = $packageFileStorage;
     }
 
@@ -76,7 +76,30 @@ class PackageFileManager
      */
     public function getPackageFile()
     {
-        return $this->packageFile;
+        return $this->rootPackageFile;
+    }
+
+    /**
+     * Returns the package name configured in the package file.
+     *
+     * @return null|string The configured package name.
+     */
+    public function getPackageName()
+    {
+        return $this->rootPackageFile->getPackageName();
+    }
+
+    /**
+     * Sets the package name configured in the package file.
+     *
+     * @param string $packageName The package name.
+     */
+    public function setPackageName($packageName)
+    {
+        if ($packageName !== $this->rootPackageFile->getPackageName()) {
+            $this->rootPackageFile->setPackageName($packageName);
+            $this->packageFileStorage->saveRootPackageFile($this->rootPackageFile);
+        }
     }
 
     /**
@@ -93,9 +116,8 @@ class PackageFileManager
      */
     public function setConfigKey($key, $value)
     {
-        $this->packageFile->getConfig()->set($key, $value);
-
-        $this->packageFileStorage->saveRootPackageFile($this->packageFile);
+        $this->rootPackageFile->getConfig()->set($key, $value);
+        $this->packageFileStorage->saveRootPackageFile($this->rootPackageFile);
     }
 
     /**
@@ -111,9 +133,8 @@ class PackageFileManager
      */
     public function setConfigKeys(array $values)
     {
-        $this->packageFile->getConfig()->merge($values);
-
-        $this->packageFileStorage->saveRootPackageFile($this->packageFile);
+        $this->rootPackageFile->getConfig()->merge($values);
+        $this->packageFileStorage->saveRootPackageFile($this->rootPackageFile);
     }
 
     /**
@@ -128,9 +149,8 @@ class PackageFileManager
      */
     public function removeConfigKey($key)
     {
-        $this->packageFile->getConfig()->remove($key);
-
-        $this->packageFileStorage->saveRootPackageFile($this->packageFile);
+        $this->rootPackageFile->getConfig()->remove($key);
+        $this->packageFileStorage->saveRootPackageFile($this->rootPackageFile);
     }
 
     /**
@@ -146,10 +166,10 @@ class PackageFileManager
     public function removeConfigKeys(array $keys)
     {
         foreach ($keys as $key) {
-            $this->packageFile->getConfig()->remove($key);
+            $this->rootPackageFile->getConfig()->remove($key);
         }
 
-        $this->packageFileStorage->saveRootPackageFile($this->packageFile);
+        $this->packageFileStorage->saveRootPackageFile($this->rootPackageFile);
     }
 
     /**
@@ -168,7 +188,7 @@ class PackageFileManager
      */
     public function getConfigKey($key, $default = null, $fallback = false)
     {
-        return $this->packageFile->getConfig()->getRaw($key, $default, $fallback);
+        return $this->rootPackageFile->getConfig()->getRaw($key, $default, $fallback);
     }
 
     /**
@@ -184,7 +204,7 @@ class PackageFileManager
      */
     public function getConfigKeys($includeFallback = false, $includeUnset = false)
     {
-        $values = $this->packageFile->getConfig()->toFlatRawArray($includeFallback);
+        $values = $this->rootPackageFile->getConfig()->toFlatRawArray($includeFallback);
 
         // Reorder the returned values
         $keysInDefaultOrder = Config::getKeys();
@@ -236,14 +256,14 @@ class PackageFileManager
      */
     public function installPluginClass($pluginClass)
     {
-        if ($this->packageFile->hasPluginClass($pluginClass)) {
+        if ($this->rootPackageFile->hasPluginClass($pluginClass)) {
             // Already installed locally
             return;
         }
 
-        $this->packageFile->addPluginClass($pluginClass);
+        $this->rootPackageFile->addPluginClass($pluginClass);
 
-        $this->packageFileStorage->saveRootPackageFile($this->packageFile);
+        $this->packageFileStorage->saveRootPackageFile($this->rootPackageFile);
     }
 
     /**
@@ -263,7 +283,7 @@ class PackageFileManager
      */
     public function isPluginClassInstalled($pluginClass, $includeGlobal = true)
     {
-        return $this->packageFile->hasPluginClass($pluginClass, $includeGlobal);
+        return $this->rootPackageFile->hasPluginClass($pluginClass, $includeGlobal);
     }
 
     /**
@@ -282,6 +302,6 @@ class PackageFileManager
      */
     public function getPluginClasses($includeGlobal = true)
     {
-        return $this->packageFile->getPluginClasses($includeGlobal);
+        return $this->rootPackageFile->getPluginClasses($includeGlobal);
     }
 }

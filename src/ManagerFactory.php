@@ -21,7 +21,7 @@ use Puli\RepositoryManager\Config\ConfigFile\Writer\ConfigJsonWriter;
 use Puli\RepositoryManager\Discovery\DiscoveryManager;
 use Puli\RepositoryManager\Environment\GlobalEnvironment;
 use Puli\RepositoryManager\Environment\ProjectEnvironment;
-use Puli\RepositoryManager\Package\PackageFile\PackageFileManager;
+use Puli\RepositoryManager\Package\PackageFile\RootPackageFileManager;
 use Puli\RepositoryManager\Package\PackageFile\PackageFileStorage;
 use Puli\RepositoryManager\Package\PackageFile\Reader\PackageJsonReader;
 use Puli\RepositoryManager\Package\PackageFile\Writer\PackageJsonWriter;
@@ -62,7 +62,7 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
  *    created with {@link createConfigFileManager()}.
  *
  *  * The "package file manager" manages modifications to the "puli.json" file
- *    of a Puli project. Use {@link createPackageFileManager()} to create it.
+ *    of a Puli project. Use {@link createRootPackageFileManager()} to create it.
  *
  *  * The "package manager" manages the package repository of a Puli project.
  *    A package manager can be created with {@link createPackageManager()}.
@@ -164,11 +164,11 @@ class ManagerFactory
      *
      * @param ProjectEnvironment $environment The project environment.
      *
-     * @return PackageFileManager The created package file manager.
+     * @return RootPackageFileManager The created package file manager.
      */
-    public static function createPackageFileManager(ProjectEnvironment $environment)
+    public static function createRootPackageFileManager(ProjectEnvironment $environment)
     {
-        return new PackageFileManager(
+        return new RootPackageFileManager(
             $environment,
             self::createPackageFileStorage($environment->getEventDispatcher()),
             self::createConfigFileManager($environment)

@@ -152,12 +152,12 @@ class ManagerFactoryTest extends PHPUnit_Framework_TestCase
         $this->assertSame($environment, $manager->getEnvironment());
     }
 
-    public function testCreatePackageFileManager()
+    public function testCreateRootPackageFileManager()
     {
         $environment = ManagerFactory::createProjectEnvironment($this->tempDir);
-        $manager = ManagerFactory::createPackageFileManager($environment);
+        $manager = ManagerFactory::createRootPackageFileManager($environment);
 
-        $this->assertInstanceOf('Puli\RepositoryManager\Package\PackageFile\PackageFileManager', $manager);
+        $this->assertInstanceOf('Puli\RepositoryManager\Package\PackageFile\RootPackageFileManager', $manager);
         $this->assertSame($environment, $manager->getEnvironment());
     }
 

@@ -14,7 +14,7 @@ namespace Puli\RepositoryManager\Tests\Package\PackageFile;
 use PHPUnit_Framework_Assert;
 use PHPUnit_Framework_MockObject_MockObject;
 use Puli\RepositoryManager\Config\Config;
-use Puli\RepositoryManager\Package\PackageFile\PackageFileManager;
+use Puli\RepositoryManager\Package\PackageFile\RootPackageFileManager;
 use Puli\RepositoryManager\Package\PackageFile\PackageFileStorage;
 use Puli\RepositoryManager\Package\PackageFile\RootPackageFile;
 use Puli\RepositoryManager\Tests\ManagerTestCase;
@@ -23,7 +23,7 @@ use Puli\RepositoryManager\Tests\ManagerTestCase;
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class PackageFileManagerTest extends ManagerTestCase
+class RootPackageFileManagerTest extends ManagerTestCase
 {
     const PLUGIN_CLASS = 'Puli\RepositoryManager\Tests\Package\PackageFile\Fixtures\TestPlugin';
 
@@ -35,7 +35,7 @@ class PackageFileManagerTest extends ManagerTestCase
     private $packageFileStorage;
 
     /**
-     * @var PackageFileManager
+     * @var RootPackageFileManager
      */
     private $manager;
 
@@ -49,7 +49,7 @@ class PackageFileManagerTest extends ManagerTestCase
 
         $this->initEnvironment(__DIR__.'/Fixtures/home', __DIR__.'/Fixtures/root');
 
-        $this->manager = new PackageFileManager($this->environment, $this->packageFileStorage);
+        $this->manager = new RootPackageFileManager($this->environment, $this->packageFileStorage);
     }
 
     public function testSetConfigKey()
@@ -271,9 +271,9 @@ class PackageFileManagerTest extends ManagerTestCase
     {
         $this->packageFileStorage->expects($this->once())
             ->method('saveRootPackageFile')
-            ->with($this->isInstanceOf('Puli\RepositoryManager\Package\PackageFile\RootPackageFile'))
+            ->with($this->rootPackageFile)
             ->will($this->returnCallback(function (RootPackageFile $packageFile) {
-                PHPUnit_Framework_Assert::assertSame(array(PackageFileManagerTest::PLUGIN_CLASS), $packageFile->getPluginClasses());
+                PHPUnit_Framework_Assert::assertSame(array(RootPackageFileManagerTest::PLUGIN_CLASS), $packageFile->getPluginClasses());
             }));
 
         $this->manager->installPluginClass(self::PLUGIN_CLASS);
@@ -302,5 +302,41 @@ class PackageFileManagerTest extends ManagerTestCase
         $this->assertFalse($this->manager->isPluginClassInstalled(self::OTHER_PLUGIN_CLASS));
 
         $this->assertFalse($this->manager->isPluginClassInstalled('foobar'));
+    }
+
+    public function testGetPackageName()
+    {
+        // Default name set in initEnvironment()
+        $this->assertSame('root', $this->manager->getPackageName());
+
+        $this->rootPackageFile->setPackageName('package');
+
+        $this->assertSame('package', $this->manager->getPackageName());
+    }
+
+    public function testSetPackageName()
+    {
+        $this->packageFileStorage->expects($this->once())
+            ->method('saveRootPackageFile')
+            ->with($this->rootPackageFile)
+            ->will($this->returnCallback(function (RootPackageFile $packageFile) {
+                PHPUnit_Framework_Assert::assertSame('package', $packageFile->getPackageName());
+            }));
+
+        $this->manager->setPackageName('package');
+
+        $this->assertSame('package', $this->manager->getPackageName());
+    }
+
+    public function testSetPackageNameDoesNotSaveIfUnchanged()
+    {
+        $this->rootPackageFile->setPackageName('package');
+
+        $this->packageFileStorage->expects($this->never())
+            ->method('saveRootPackageFile');
+
+        $this->manager->setPackageName('package');
+
+        $this->assertSame('package', $this->manager->getPackageName());
     }
 }
