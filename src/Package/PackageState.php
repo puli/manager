@@ -67,7 +67,7 @@ final class PackageState
             return PackageState::NOT_FOUND;
         }
 
-        if (null === $package->getPackageFile()) {
+        if (null === $package->getPackageFile() || null !== $package->getLoadError()) {
             return PackageState::NOT_LOADABLE;
         }
 

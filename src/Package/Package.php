@@ -11,6 +11,7 @@
 
 namespace Puli\RepositoryManager\Package;
 
+use Exception;
 use Puli\RepositoryManager\Package\PackageFile\PackageFile;
 
 /**
@@ -52,6 +53,11 @@ class Package
     private $state = PackageState::NOT_LOADED;
 
     /**
+     * @var Exception|null
+     */
+    private $loadError;
+
+    /**
      * Creates a new package.
      *
      * @param PackageFile|null $packageFile The package file or `null` if the
@@ -59,7 +65,7 @@ class Package
      * @param string           $installPath The absolute install path.
      * @param InstallInfo      $installInfo The install info of this package.
      */
-    public function __construct(PackageFile $packageFile = null, $installPath, InstallInfo $installInfo = null)
+    public function __construct(PackageFile $packageFile = null, $installPath, InstallInfo $installInfo = null, Exception $loadError = null)
     {
         // If a package name was set during installation, that name wins over
         // the predefined name in the puli.json file (if any)
@@ -78,6 +84,7 @@ class Package
         $this->installPath = $installPath;
         $this->installInfo = $installInfo;
         $this->packageFile = $packageFile;
+        $this->loadError = $loadError;
 
         $this->state = PackageState::detect($this);
     }
@@ -121,6 +128,17 @@ class Package
     public function getInstallInfo()
     {
         return $this->installInfo;
+    }
+
+    /**
+     * Returns the error that occurred during loading of the package.
+     *
+     * @return Exception|null The exception or `null` if the package was loaded
+     *                        successfully.
+     */
+    public function getLoadError()
+    {
+        return $this->loadError;
     }
 
     /**

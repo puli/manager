@@ -329,55 +329,49 @@ class PackageManager
     private function loadPackage(InstallInfo $installInfo, $logExceptions = false)
     {
         $installPath = Path::makeAbsolute($installInfo->getInstallPath(), $this->rootDir);
-        $packageFile = $this->loadPackageFile($installPath, $logExceptions);
+        $packageFile = null;
+        $loadError = null;
 
-        return new Package($packageFile, $installPath, $installInfo);
+        try {
+            $packageFile = $this->loadPackageFile($installPath, $logExceptions);
+        } catch (InvalidConfigException $loadError) {
+        } catch (UnsupportedVersionException $loadError) {
+        } catch (FileNotFoundException $loadError) {
+        } catch (NoDirectoryException $loadError) {
+        }
+
+        if ($loadError) {
+            if (!$logExceptions) {
+                throw $loadError;
+            }
+
+            $this->logger->warning($loadError->getMessage());
+        }
+
+        return new Package($packageFile, $installPath, $installInfo, $loadError);
     }
 
     /**
      * Loads the package file for the package at the given install path.
      *
      * @param string $installPath The absolute install path of the package
-     * @param bool   $logExceptions Whether to log exceptions occurring when
-     *                              reading the package file.
      *
-     * @return PackageFile|null The loaded package file or `null` if an
-     *                          exception occurred and $logExceptions is set.
+     * @return PackageFile The loaded package file.
      */
-    private function loadPackageFile($installPath, $logExceptions = false)
+    private function loadPackageFile($installPath)
     {
-        $e = null;
-
-        try {
-            if (!file_exists($installPath)) {
-                throw new FileNotFoundException(sprintf(
-                    'Could not load package: The directory %s does not exist.',
-                    $installPath
-                ));
-            }
-
-            if (!is_dir($installPath)) {
-                throw new NoDirectoryException(sprintf(
-                    'Could not load package: The path %s is a file. Expected a '.
-                    'directory.',
-                    $installPath
-                ));
-            }
-
-            return $this->packageFileStorage->loadPackageFile($installPath.'/puli.json');
-        } catch (InvalidConfigException $e) {
-        } catch (UnsupportedVersionException $e) {
-        } catch (FileNotFoundException $e) {
-        } catch (NoDirectoryException $e) {
+        if (!file_exists($installPath)) {
+            throw FileNotFoundException::forPath($installPath);
         }
 
-        if (!$logExceptions) {
-            throw $e;
+        if (!is_dir($installPath)) {
+            throw new NoDirectoryException(sprintf(
+                'The path %s is a file. Expected a directory.',
+                $installPath
+            ));
         }
 
-        $this->logger->warning($e->getMessage());
-
-        return null;
+        return $this->packageFileStorage->loadPackageFile($installPath.'/puli.json');
     }
 
     private function assertPackagesLoaded()

@@ -168,9 +168,38 @@ class PackageManagerTest extends ManagerTestCase
         $packages = $manager->getPackages(PackageState::NOT_FOUND);
 
         $this->assertInstanceOf('Puli\RepositoryManager\Package\PackageCollection', $packages);
+        $this->assertTrue($packages->contains('package1'));
+        $this->assertTrue($packages->contains('package3'));
+        $this->assertCount(2, $packages);
+    }
+
+    public function testGetNotLoadablePackages()
+    {
+        $this->rootPackageFile->addInstallInfo($installInfo1 = new InstallInfo('package1', $this->packageDir1));
+        $this->rootPackageFile->addInstallInfo($installInfo2 = new InstallInfo('version-too-high', '../version-too-high'));
+
+        $manager = new PackageManager($this->environment, $this->packageFileStorage, $this->logger);
+        $e = new UnsupportedVersionException('The exception text.');
+
+        $this->packageFileStorage->expects($this->at(0))
+            ->method('loadPackageFile')
+            ->with($this->packageDir1.'/puli.json')
+            ->willReturn($this->packageFile1);
+        $this->packageFileStorage->expects($this->at(1))
+            ->method('loadPackageFile')
+            ->with(__DIR__.'/Fixtures/version-too-high/puli.json')
+            ->willThrowException($e);
+
+        $packages = $manager->getPackages(PackageState::NOT_LOADABLE);
+
+        $this->assertInstanceOf('Puli\RepositoryManager\Package\PackageCollection', $packages);
         $this->assertEquals(array(
-            'package1' => new Package(null, $this->rootDir.'/foo', $installInfo1),
-            'package3' => new Package(null, $this->rootDir.'/bar', $installInfo3),
+            'version-too-high' => new Package(
+                null,
+                __DIR__.'/Fixtures/version-too-high',
+                $installInfo2,
+                $e
+            ),
         ), $packages->toArray());
     }
 
@@ -221,14 +250,13 @@ class PackageManagerTest extends ManagerTestCase
         $userPackages = $this->manager->getPackagesByInstaller('user', PackageState::NOT_FOUND);
 
         $this->assertInstanceOf('Puli\RepositoryManager\Package\PackageCollection', $composerPackages);
-        $this->assertEquals(array(
-            'package1' => new Package(null, $this->rootDir.'/foo', $installInfo1),
-        ), $composerPackages->toArray());
+        $this->assertTrue($composerPackages->contains('package1'));
+        $this->assertCount(1, $composerPackages);
 
         $this->assertInstanceOf('Puli\RepositoryManager\Package\PackageCollection', $userPackages);
-        $this->assertEquals(array(
-            'package2' => new Package(null, $this->rootDir.'/bar', $installInfo2),
-        ), $userPackages->toArray());
+
+        $this->assertTrue($userPackages->contains('package2'));
+        $this->assertCount(1, $userPackages);
     }
 
     public function testLoadPackagesLogsWarningIfPackageDirectoryNotFound()

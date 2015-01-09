@@ -191,10 +191,7 @@ class PackageJsonReader implements PackageFileReader
         $schema = realpath(__DIR__.'/../../../../res/schema/package-schema-1.0.json');
 
         if (!file_exists($path)) {
-            throw new FileNotFoundException(sprintf(
-                'The file %s does not exist.',
-                $path
-            ));
+            throw FileNotFoundException::forPath($path);
         }
 
         try {

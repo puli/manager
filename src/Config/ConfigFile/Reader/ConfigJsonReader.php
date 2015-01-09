@@ -66,10 +66,7 @@ class ConfigJsonReader implements ConfigFileReader
         $configSchema = $schema->properties->config;
 
         if (!file_exists($path)) {
-            throw new FileNotFoundException(sprintf(
-                'The file %s does not exist.',
-                $path
-            ));
+            throw FileNotFoundException::forPath($path);
         }
 
         try {
