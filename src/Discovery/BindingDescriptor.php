@@ -11,7 +11,6 @@
 
 namespace Puli\RepositoryManager\Discovery;
 
-use BadMethodCallException;
 use InvalidArgumentException;
 use Puli\Discovery\Api\Binding\NoSuchParameterException;
 use Puli\Discovery\Api\Validation\ConstraintViolation;

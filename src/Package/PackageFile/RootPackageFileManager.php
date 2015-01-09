@@ -11,15 +11,9 @@
 
 namespace Puli\RepositoryManager\Package\PackageFile;
 
-use ArrayIterator;
-use Puli\RepositoryManager\Config\Config;
 use Puli\RepositoryManager\Config\ConfigFile\AbstractConfigFileManager;
-use Puli\RepositoryManager\Config\NoSuchConfigKeyException;
 use Puli\RepositoryManager\Environment\ProjectEnvironment;
 use Puli\RepositoryManager\InvalidConfigException;
-use Puli\RepositoryManager\IOException;
-use Webmozart\Glob\Iterator\GlobFilterIterator;
-use Webmozart\Glob\Iterator\RegexFilterIterator;
 
 /**
  * Manages changes to the root package file.

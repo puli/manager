@@ -11,13 +11,7 @@
 
 namespace Puli\RepositoryManager\Config\ConfigFile;
 
-use ArrayIterator;
-use Puli\RepositoryManager\Config\Config;
-use Puli\RepositoryManager\Config\NoSuchConfigKeyException;
 use Puli\RepositoryManager\Environment\GlobalEnvironment;
-use Puli\RepositoryManager\InvalidConfigException;
-use Puli\RepositoryManager\IOException;
-use Webmozart\Glob\Iterator\GlobFilterIterator;
 
 /**
  * Manages changes to the global configuration file.

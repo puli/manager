@@ -9,11 +9,11 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\RepositoryManager\Tests\Package\Collection;
+namespace Puli\RepositoryManager\Tests\Package;
 
 use PHPUnit_Framework_TestCase;
-use Puli\RepositoryManager\Package\Collection\PackageCollection;
 use Puli\RepositoryManager\Package\Package;
+use Puli\RepositoryManager\Package\PackageCollection;
 use Puli\RepositoryManager\Package\PackageFile\PackageFile;
 use Puli\RepositoryManager\Package\PackageFile\RootPackageFile;
 use Puli\RepositoryManager\Package\RootPackage;

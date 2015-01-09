@@ -9,15 +9,12 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\RepositoryManager\Package\Collection;
+namespace Puli\RepositoryManager\Package;
 
 use ArrayAccess;
 use ArrayIterator;
 use Countable;
 use IteratorAggregate;
-use Puli\RepositoryManager\Package\NoSuchPackageException;
-use Puli\RepositoryManager\Package\Package;
-use Puli\RepositoryManager\Package\RootPackage;
 
 /**
  * A collection of Puli packages.

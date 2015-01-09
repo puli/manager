@@ -13,12 +13,10 @@ namespace Puli\RepositoryManager\Package;
 
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
-use Puli\RepositoryManager\Assert\Assert;
 use Puli\RepositoryManager\Environment\ProjectEnvironment;
 use Puli\RepositoryManager\FileNotFoundException;
 use Puli\RepositoryManager\InvalidConfigException;
 use Puli\RepositoryManager\NoDirectoryException;
-use Puli\RepositoryManager\Package\Collection\PackageCollection;
 use Puli\RepositoryManager\Package\PackageFile\PackageFile;
 use Puli\RepositoryManager\Package\PackageFile\PackageFileStorage;
 use Puli\RepositoryManager\Package\PackageFile\Reader\UnsupportedVersionException;
