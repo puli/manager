@@ -42,7 +42,7 @@ class ProviderFactory
     private static $keyValueStoreProviderClassNames = array(
         'null' => 'Puli\RepositoryManager\Generator\KeyValueStore\NullStoreRecipeProvider',
         'array' => 'Puli\RepositoryManager\Generator\KeyValueStore\ArrayStoreRecipeProvider',
-        'flintstone' => 'Puli\RepositoryManager\Generator\KeyValueStore\FlintstoneStoreRecipeProvider',
+        'json-file' => 'Puli\RepositoryManager\Generator\KeyValueStore\JsonFileStoreRecipeProvider',
         'memcache' => 'Puli\RepositoryManager\Generator\KeyValueStore\MemcacheStoreRecipeProvider',
         'memcached' => 'Puli\RepositoryManager\Generator\KeyValueStore\MemcachedStoreRecipeProvider',
     );

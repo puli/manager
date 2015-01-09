@@ -33,6 +33,9 @@ class DefaultConfig extends Config
             self::REPOSITORY_PATH => '{$puli-dir}/repository',
             self::REPOSITORY_SYMLINK => true,
             self::DISCOVERY_TYPE => 'key-value-store',
+            self::DISCOVERY_STORE_TYPE => 'json-file',
+            self::DISCOVERY_STORE_PATH => '{$puli-dir}/bindings.json',
+            self::DISCOVERY_STORE_CACHE => true,
         ));
     }
 }

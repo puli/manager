@@ -107,11 +107,7 @@ class Config
 
     const REPOSITORY_STORE_PORT = 'repository.store.port';
 
-    const REPOSITORY_STORE_GZIP = 'repository.store.gzip';
-
     const REPOSITORY_STORE_CACHE = 'repository.store.cache';
-
-    const REPOSITORY_STORE_SWAP_MEMORY_LIMIT = 'repository.store.swap-memory-limit';
 
     const DISCOVERY = 'discovery';
 
@@ -127,11 +123,7 @@ class Config
 
     const DISCOVERY_STORE_PORT = 'discovery.store.port';
 
-    const DISCOVERY_STORE_GZIP = 'discovery.store.gzip';
-
     const DISCOVERY_STORE_CACHE = 'discovery.store.cache';
-
-    const DISCOVERY_STORE_SWAP_MEMORY_LIMIT = 'discovery.store.swap-memory-limit';
 
     /**
      * The accepted config keys.
@@ -150,17 +142,13 @@ class Config
         self::REPOSITORY_STORE_PATH => true,
         self::REPOSITORY_STORE_SERVER => true,
         self::REPOSITORY_STORE_PORT => true,
-        self::REPOSITORY_STORE_GZIP => true,
         self::REPOSITORY_STORE_CACHE => true,
-        self::REPOSITORY_STORE_SWAP_MEMORY_LIMIT => true,
         self::DISCOVERY_TYPE => true,
         self::DISCOVERY_STORE_TYPE => true,
         self::DISCOVERY_STORE_PATH => true,
         self::DISCOVERY_STORE_SERVER => true,
         self::DISCOVERY_STORE_PORT => true,
-        self::DISCOVERY_STORE_GZIP => true,
         self::DISCOVERY_STORE_CACHE => true,
-        self::DISCOVERY_STORE_SWAP_MEMORY_LIMIT => true,
     );
 
     private static $compositeKeys = array(
@@ -471,17 +459,13 @@ class Config
         switch ($key) {
             case self::FACTORY_AUTO_GENERATE:
             case self::REPOSITORY_SYMLINK:
-            case self::REPOSITORY_STORE_GZIP:
             case self::REPOSITORY_STORE_CACHE:
-            case self::DISCOVERY_STORE_GZIP:
             case self::DISCOVERY_STORE_CACHE:
                 $this->assertBoolean($key, $value);
                 break;
 
             case self::REPOSITORY_STORE_PORT:
-            case self::REPOSITORY_STORE_SWAP_MEMORY_LIMIT:
             case self::DISCOVERY_STORE_PORT:
-            case self::DISCOVERY_STORE_SWAP_MEMORY_LIMIT:
                 $this->assertInteger($key, $value);
                 break;
 

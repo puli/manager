@@ -22,9 +22,6 @@
         "rhumsaa/uuid": "~2.8",
         "psr/log": "~1.0"
     },
-    "require-dev": {
-        "fire015/flintstone": "~1.8"
-    },
     "minimum-stability": "dev",
     "autoload": {
         "psr-4": {

@@ -98,7 +98,7 @@ class ProviderFactoryTest extends PHPUnit_Framework_TestCase
     public function getKeyValueStoreRecipeProviderNames()
     {
         return array(
-            array('flintstone', 'Puli\RepositoryManager\Generator\KeyValueStore\FlintstoneStoreRecipeProvider'),
+            array('json-file', 'Puli\RepositoryManager\Generator\KeyValueStore\JsonFileStoreRecipeProvider'),
             array('null', 'Puli\RepositoryManager\Generator\KeyValueStore\NullStoreRecipeProvider'),
             array('array', 'Puli\RepositoryManager\Generator\KeyValueStore\ArrayStoreRecipeProvider'),
             array('memcache', 'Puli\RepositoryManager\Generator\KeyValueStore\MemcacheStoreRecipeProvider'),
