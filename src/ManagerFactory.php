@@ -37,8 +37,9 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
  * Use this class to bootstrap the managers provided by this package:
  *
  * ```php
- * $environment = ManagerFactory::createProjectEnvironment(getcwd());
- * $packageManager = ManagerFactory::createPackageManager($environment);
+ * $factory = new ManagerFactory();
+ * $environment = $factory->createProjectEnvironment(getcwd());
+ * $packageManager = $factory->createPackageManager($environment);
  * ```
  *
  * To create one of the managers, you first need to create the environment that
@@ -76,6 +77,38 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 class ManagerFactory
 {
     /**
+     * @var ConfigFileStorage|null
+     */
+    private $configFileStorage;
+
+    /**
+     * @var PackageFileStorage[]
+     */
+    private $packageFileStorages;
+
+    /**
+     * Parses the system environment for a home directory.
+     *
+     * @return null|string Returns the path to the home directory or `null`
+     *                     if none was found.
+     */
+    private static function parseHomeDirectory()
+    {
+        try {
+            $homeDir = System::parseHomeDirectory();
+
+            System::denyWebAccess($homeDir);
+
+            return $homeDir;
+        } catch (InvalidConfigException $e) {
+            // Environment variable was not found -> no home directory
+            // This happens often on web servers where the home directory is
+            // not set manually
+            return null;
+        }
+    }
+
+    /**
      * Creates the global environment.
      *
      * The home directory is read from the environment variable "PULI_HOME".
@@ -93,7 +126,7 @@ class ManagerFactory
      *
      * @return GlobalEnvironment The global environment.
      */
-    public static function createGlobalEnvironment()
+    public function createGlobalEnvironment()
     {
         $dispatcher = new EventDispatcher();
 
@@ -101,7 +134,7 @@ class ManagerFactory
 
         return new GlobalEnvironment(
             $homeDir,
-            self::createConfigFileStorage(),
+            $this->getConfigFileStorage(),
             $dispatcher
         );
     }
@@ -129,7 +162,7 @@ class ManagerFactory
      * @throws FileNotFoundException If the path does not exist.
      * @throws NoDirectoryException If the path points to a file.
      */
-    public static function createProjectEnvironment($rootDir)
+    public function createProjectEnvironment($rootDir)
     {
         $dispatcher = new EventDispatcher();
 
@@ -138,8 +171,8 @@ class ManagerFactory
         return new ProjectEnvironment(
             $homeDir,
             $rootDir,
-            self::createConfigFileStorage(),
-            self::createPackageFileStorage($dispatcher),
+            $this->getConfigFileStorage(),
+            $this->getPackageFileStorage($dispatcher),
             $dispatcher
         );
     }
@@ -151,11 +184,11 @@ class ManagerFactory
      *
      * @return ConfigFileManager The created configuration file manager.
      */
-    public static function createConfigFileManager(GlobalEnvironment $environment)
+    public function createConfigFileManager(GlobalEnvironment $environment)
     {
         return new ConfigFileManager(
             $environment,
-            self::createConfigFileStorage()
+            $this->getConfigFileStorage()
         );
     }
 
@@ -166,12 +199,12 @@ class ManagerFactory
      *
      * @return RootPackageFileManager The created package file manager.
      */
-    public static function createRootPackageFileManager(ProjectEnvironment $environment)
+    public function createRootPackageFileManager(ProjectEnvironment $environment)
     {
         return new RootPackageFileManager(
             $environment,
-            self::createPackageFileStorage($environment->getEventDispatcher()),
-            self::createConfigFileManager($environment)
+            $this->getPackageFileStorage($environment->getEventDispatcher()),
+            $this->createConfigFileManager($environment)
         );
     }
 
@@ -182,11 +215,11 @@ class ManagerFactory
      *
      * @return PackageManager The package manager.
      */
-    public static function createPackageManager(ProjectEnvironment $environment)
+    public function createPackageManager(ProjectEnvironment $environment)
     {
         return new PackageManager(
             $environment,
-            self::createPackageFileStorage($environment->getEventDispatcher())
+            $this->getPackageFileStorage($environment->getEventDispatcher())
         );
     }
 
@@ -198,14 +231,14 @@ class ManagerFactory
      *
      * @return RepositoryManager The repository manager.
      */
-    public static function createRepositoryManager(ProjectEnvironment $environment, PackageManager $packageManager = null)
+    public function createRepositoryManager(ProjectEnvironment $environment, PackageManager $packageManager = null)
     {
-        $packageManager = $packageManager ?: self::createPackageManager($environment);
+        $packageManager = $packageManager ?: $this->createPackageManager($environment);
 
         return new RepositoryManager(
             $environment,
             $packageManager->getPackages(),
-            self::createPackageFileStorage($environment->getEventDispatcher())
+            $this->getPackageFileStorage($environment->getEventDispatcher())
         );
     }
 
@@ -218,50 +251,56 @@ class ManagerFactory
      *
      * @return DiscoveryManager The discovery manager.
      */
-    public static function createDiscoveryManager(ProjectEnvironment $environment, PackageManager $packageManager = null, LoggerInterface $logger = null)
+    public function createDiscoveryManager(ProjectEnvironment $environment, PackageManager $packageManager = null, LoggerInterface $logger = null)
     {
-        $packageManager = $packageManager ?: self::createPackageManager($environment);
+        $packageManager = $packageManager ?: $this->createPackageManager($environment);
 
         return new DiscoveryManager(
             $environment,
             $packageManager->getPackages(),
-            self::createPackageFileStorage($environment->getEventDispatcher()),
+            $this->getPackageFileStorage($environment->getEventDispatcher()),
             $logger
         );
     }
 
-    private static function createConfigFileStorage()
+    /**
+     * Returns the cached configuration file storage.
+     *
+     * @return ConfigFileStorage The file storage.
+     */
+    private function getConfigFileStorage()
     {
-        return new ConfigFileStorage(
-            new ConfigJsonReader(),
-            new ConfigJsonWriter()
-        );
-    }
-
-    private static function createPackageFileStorage(EventDispatcherInterface $dispatcher)
-    {
-        return new PackageFileStorage(
-            new PackageJsonReader(),
-            new PackageJsonWriter(),
-            $dispatcher
-        );
-    }
-
-    private static function parseHomeDirectory()
-    {
-        try {
-            $homeDir = System::parseHomeDirectory();
-
-            System::denyWebAccess($homeDir);
-
-            return $homeDir;
-        } catch (InvalidConfigException $e) {
-            // Environment variable was not found -> no home directory
-            // This happens often on web servers where the home directory is
-            // not set manually
-            return null;
+        if (!$this->configFileStorage) {
+            $this->configFileStorage = new ConfigFileStorage(
+                new ConfigJsonReader(),
+                new ConfigJsonWriter()
+            );
         }
+
+        return $this->configFileStorage;
     }
 
-    private function __construct() {}
+    /**
+     * Returns the cached package file storage.
+     *
+     * @param EventDispatcherInterface $dispatcher The event dispatcher that
+     *                                             receives the package file
+     *                                             storage events.
+     *
+     * @return PackageFileStorage The file storage.
+     */
+    private function getPackageFileStorage(EventDispatcherInterface $dispatcher)
+    {
+        $hash = spl_object_hash($dispatcher);
+
+        if (!isset($this->packageFileStorages[$hash])) {
+            $this->packageFileStorages[$hash] = new PackageFileStorage(
+                new PackageJsonReader(),
+                new PackageJsonWriter(),
+                $dispatcher
+            );
+        }
+
+        return $this->packageFileStorages[$hash];
+    }
 }

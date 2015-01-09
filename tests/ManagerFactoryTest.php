@@ -31,6 +31,11 @@ class ManagerFactoryTest extends PHPUnit_Framework_TestCase
      */
     private $tempHome;
 
+    /**
+     * @var ManagerFactory
+     */
+    private $factory;
+
     protected function setUp()
     {
         while (false === @mkdir($this->tempDir = sys_get_temp_dir().'/puli-repo-manager/ManagerFactoryTest_temp'.rand(10000, 99999), 0777, true)) {}
@@ -44,6 +49,8 @@ class ManagerFactoryTest extends PHPUnit_Framework_TestCase
 
         // Make sure "HOME" is not set
         putenv('HOME');
+
+        $this->factory = new ManagerFactory();
     }
 
     protected function tearDown()
@@ -58,7 +65,7 @@ class ManagerFactoryTest extends PHPUnit_Framework_TestCase
 
     public function testCreateGlobalEnvironment()
     {
-        $environment = ManagerFactory::createGlobalEnvironment();
+        $environment = $this->factory->createGlobalEnvironment();
 
         $this->assertInstanceOf('Puli\RepositoryManager\Environment\GlobalEnvironment', $environment);
         $this->assertInstanceOf('Puli\RepositoryManager\Config\Config', $environment->getConfig());
@@ -72,7 +79,7 @@ class ManagerFactoryTest extends PHPUnit_Framework_TestCase
     {
         $this->assertFileNotExists($this->tempHome.'/.htaccess');
 
-        ManagerFactory::createGlobalEnvironment();
+        $this->factory->createGlobalEnvironment();
 
         $this->assertFileExists($this->tempHome.'/.htaccess');
         $this->assertSame('Deny from all', file_get_contents($this->tempHome.'/.htaccess'));
@@ -83,7 +90,7 @@ class ManagerFactoryTest extends PHPUnit_Framework_TestCase
         // Unset env variable
         putenv('PULI_HOME');
 
-        $environment = ManagerFactory::createGlobalEnvironment();
+        $environment = $this->factory->createGlobalEnvironment();
 
         $this->assertInstanceOf('Puli\RepositoryManager\Environment\GlobalEnvironment', $environment);
         $this->assertInstanceOf('Puli\RepositoryManager\Config\Config', $environment->getConfig());
@@ -94,7 +101,7 @@ class ManagerFactoryTest extends PHPUnit_Framework_TestCase
 
     public function testCreateProjectEnvironment()
     {
-        $environment = ManagerFactory::createProjectEnvironment($this->tempDir);
+        $environment = $this->factory->createProjectEnvironment($this->tempDir);
 
         $this->assertInstanceOf('Puli\RepositoryManager\Environment\ProjectEnvironment', $environment);
         $this->assertInstanceOf('Puli\RepositoryManager\Config\Config', $environment->getConfig());
@@ -111,7 +118,7 @@ class ManagerFactoryTest extends PHPUnit_Framework_TestCase
     {
         $this->assertFileNotExists($this->tempHome.'/.htaccess');
 
-        ManagerFactory::createProjectEnvironment($this->tempDir);
+        $this->factory->createProjectEnvironment($this->tempDir);
 
         $this->assertFileExists($this->tempHome.'/.htaccess');
         $this->assertSame('Deny from all', file_get_contents($this->tempHome.'/.htaccess'));
@@ -122,7 +129,7 @@ class ManagerFactoryTest extends PHPUnit_Framework_TestCase
         // Unset env variable
         putenv('PULI_HOME');
 
-        $environment = ManagerFactory::createProjectEnvironment($this->tempDir);
+        $environment = $this->factory->createProjectEnvironment($this->tempDir);
 
         $this->assertInstanceOf('Puli\RepositoryManager\Environment\ProjectEnvironment', $environment);
         $this->assertInstanceOf('Puli\RepositoryManager\Config\Config', $environment->getConfig());
@@ -136,8 +143,8 @@ class ManagerFactoryTest extends PHPUnit_Framework_TestCase
 
     public function testCreateConfigFileManager()
     {
-        $environment = ManagerFactory::createGlobalEnvironment();
-        $manager = ManagerFactory::createConfigFileManager($environment);
+        $environment = $this->factory->createGlobalEnvironment();
+        $manager = $this->factory->createConfigFileManager($environment);
 
         $this->assertInstanceOf('Puli\RepositoryManager\Config\ConfigFile\ConfigFileManager', $manager);
         $this->assertSame($environment, $manager->getEnvironment());
@@ -145,8 +152,8 @@ class ManagerFactoryTest extends PHPUnit_Framework_TestCase
 
     public function testCreateConfigFileManagerWithProjectEnvironment()
     {
-        $environment = ManagerFactory::createProjectEnvironment($this->tempDir);
-        $manager = ManagerFactory::createConfigFileManager($environment);
+        $environment = $this->factory->createProjectEnvironment($this->tempDir);
+        $manager = $this->factory->createConfigFileManager($environment);
 
         $this->assertInstanceOf('Puli\RepositoryManager\Config\ConfigFile\ConfigFileManager', $manager);
         $this->assertSame($environment, $manager->getEnvironment());
@@ -154,8 +161,8 @@ class ManagerFactoryTest extends PHPUnit_Framework_TestCase
 
     public function testCreateRootPackageFileManager()
     {
-        $environment = ManagerFactory::createProjectEnvironment($this->tempDir);
-        $manager = ManagerFactory::createRootPackageFileManager($environment);
+        $environment = $this->factory->createProjectEnvironment($this->tempDir);
+        $manager = $this->factory->createRootPackageFileManager($environment);
 
         $this->assertInstanceOf('Puli\RepositoryManager\Package\PackageFile\RootPackageFileManager', $manager);
         $this->assertSame($environment, $manager->getEnvironment());
@@ -163,8 +170,8 @@ class ManagerFactoryTest extends PHPUnit_Framework_TestCase
 
     public function testCreatePackageManager()
     {
-        $environment = ManagerFactory::createProjectEnvironment($this->tempDir);
-        $manager = ManagerFactory::createPackageManager($environment);
+        $environment = $this->factory->createProjectEnvironment($this->tempDir);
+        $manager = $this->factory->createPackageManager($environment);
 
         $this->assertInstanceOf('Puli\RepositoryManager\Package\PackageManager', $manager);
         $this->assertSame($environment, $manager->getEnvironment());
@@ -179,34 +186,34 @@ class ManagerFactoryTest extends PHPUnit_Framework_TestCase
 
     public function testCreateRepositoryManager()
     {
-        $environment = ManagerFactory::createProjectEnvironment($this->tempDir);
-        $manager = ManagerFactory::createRepositoryManager($environment);
+        $environment = $this->factory->createProjectEnvironment($this->tempDir);
+        $manager = $this->factory->createRepositoryManager($environment);
 
         $this->assertInstanceOf('Puli\RepositoryManager\Repository\RepositoryManager', $manager);
     }
 
     public function testCreateRepositoryManagerWithPackageManager()
     {
-        $environment = ManagerFactory::createProjectEnvironment($this->tempDir);
-        $packageManager = ManagerFactory::createPackageManager($environment);
-        $manager = ManagerFactory::createRepositoryManager($environment, $packageManager);
+        $environment = $this->factory->createProjectEnvironment($this->tempDir);
+        $packageManager = $this->factory->createPackageManager($environment);
+        $manager = $this->factory->createRepositoryManager($environment, $packageManager);
 
         $this->assertInstanceOf('Puli\RepositoryManager\Repository\RepositoryManager', $manager);
     }
 
     public function testCreateDiscoveryManager()
     {
-        $environment = ManagerFactory::createProjectEnvironment($this->tempDir);
-        $manager = ManagerFactory::createDiscoveryManager($environment);
+        $environment = $this->factory->createProjectEnvironment($this->tempDir);
+        $manager = $this->factory->createDiscoveryManager($environment);
 
         $this->assertInstanceOf('Puli\RepositoryManager\Discovery\DiscoveryManager', $manager);
     }
 
     public function testCreateDiscoveryManagerWithPackageManager()
     {
-        $environment = ManagerFactory::createProjectEnvironment($this->tempDir);
-        $packageManager = ManagerFactory::createPackageManager($environment);
-        $manager = ManagerFactory::createDiscoveryManager($environment, $packageManager);
+        $environment = $this->factory->createProjectEnvironment($this->tempDir);
+        $packageManager = $this->factory->createPackageManager($environment);
+        $manager = $this->factory->createDiscoveryManager($environment, $packageManager);
 
         $this->assertInstanceOf('Puli\RepositoryManager\Discovery\DiscoveryManager', $manager);
     }
