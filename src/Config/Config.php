@@ -454,22 +454,31 @@ class Config
 
     private function validate($key, $value)
     {
-        $this->assertNotNull($key, $value);
-
         switch ($key) {
             case self::FACTORY_AUTO_GENERATE:
             case self::REPOSITORY_SYMLINK:
             case self::REPOSITORY_STORE_CACHE:
             case self::DISCOVERY_STORE_CACHE:
+                $this->assertNotNull($key, $value);
                 $this->assertBoolean($key, $value);
                 break;
 
             case self::REPOSITORY_STORE_PORT:
             case self::DISCOVERY_STORE_PORT:
+                $this->assertNotNull($key, $value);
                 $this->assertInteger($key, $value);
                 break;
 
+            case self::REPOSITORY_STORE_TYPE:
+            case self::DISCOVERY_STORE_TYPE:
+                if (null !== $value) {
+                    $this->assertString($key, $value);
+                    $this->assertNonEmpty($key, $value);
+                }
+                break;
+
             default:
+                $this->assertNotNull($key, $value);
                 $this->assertString($key, $value);
                 $this->assertNonEmpty($key, $value);
                 break;

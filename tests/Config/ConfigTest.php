@@ -486,6 +486,17 @@ class ConfigTest extends PHPUnit_Framework_TestCase
     }
 
     /**
+     * @dataProvider getNullableKeys
+     */
+    public function testNullValues($key)
+    {
+        $config = new Config();
+        $config->set($key, null);
+
+        $this->assertNull($config->get($key));
+    }
+
+    /**
      * @dataProvider getBooleanKeys
      */
     public function testBooleanValues($key)
@@ -757,6 +768,14 @@ class ConfigTest extends PHPUnit_Framework_TestCase
             array(Config::PULI_DIR),
             array(Config::FACTORY_CLASS),
             array(Config::FACTORY_FILE),
+        );
+    }
+
+    public function getNullableKeys()
+    {
+        return array(
+            array(Config::REPOSITORY_STORE_TYPE),
+            array(Config::DISCOVERY_STORE_TYPE),
         );
     }
 

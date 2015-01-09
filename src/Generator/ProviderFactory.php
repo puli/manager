@@ -40,6 +40,7 @@ class ProviderFactory
      * @var string[]
      */
     private static $keyValueStoreProviderClassNames = array(
+        null => 'Puli\RepositoryManager\Generator\KeyValueStore\NullStoreRecipeProvider',
         'null' => 'Puli\RepositoryManager\Generator\KeyValueStore\NullStoreRecipeProvider',
         'array' => 'Puli\RepositoryManager\Generator\KeyValueStore\ArrayStoreRecipeProvider',
         'json-file' => 'Puli\RepositoryManager\Generator\KeyValueStore\JsonFileStoreRecipeProvider',

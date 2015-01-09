@@ -54,6 +54,28 @@ EOF;
         $this->assertCode($expected, $recipe);
     }
 
+    public function testGetRecipeForTypeNull()
+    {
+        $recipe = $this->provider->getRecipe(
+            '$discovery',
+            $this->outputDir,
+            $this->rootDir,
+            array('store' => array('type' => null)),
+            $this->generatorFactory
+        );
+
+        $expected = <<<EOF
+\$store = new NullStore();
+
+\$discovery = new KeyValueStoreDiscovery(
+    \$repo,
+    \$store
+);
+EOF;
+
+        $this->assertCode($expected, $recipe);
+    }
+
     public function testRunRecipe()
     {
         $recipe = $this->provider->getRecipe(

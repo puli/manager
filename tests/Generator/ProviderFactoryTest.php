@@ -100,6 +100,7 @@ class ProviderFactoryTest extends PHPUnit_Framework_TestCase
         return array(
             array('json-file', 'Puli\RepositoryManager\Generator\KeyValueStore\JsonFileStoreRecipeProvider'),
             array('null', 'Puli\RepositoryManager\Generator\KeyValueStore\NullStoreRecipeProvider'),
+            array(null, 'Puli\RepositoryManager\Generator\KeyValueStore\NullStoreRecipeProvider'),
             array('array', 'Puli\RepositoryManager\Generator\KeyValueStore\ArrayStoreRecipeProvider'),
             array('memcache', 'Puli\RepositoryManager\Generator\KeyValueStore\MemcacheStoreRecipeProvider'),
             array('memcached', 'Puli\RepositoryManager\Generator\KeyValueStore\MemcachedStoreRecipeProvider'),
