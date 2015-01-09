@@ -24,6 +24,7 @@ use Puli\RepositoryManager\Repository\ResourceMapping;
 use Rhumsaa\Uuid\Uuid;
 use Webmozart\Json\DecodingFailedException;
 use Webmozart\Json\JsonDecoder;
+use Webmozart\Json\JsonValidator;
 use Webmozart\Json\ValidationFailedException;
 
 /**
@@ -186,7 +187,8 @@ class PackageJsonReader implements PackageFileReader
     private function decodeFile($path)
     {
         $decoder = new JsonDecoder();
-        $schema = realpath(__DIR__.'/../../../../res/schema/package-schema.json');
+        $validator = new JsonValidator();
+        $schema = realpath(__DIR__.'/../../../../res/schema/package-schema-1.0.json');
 
         if (!file_exists($path)) {
             throw new FileNotFoundException(sprintf(
@@ -196,18 +198,12 @@ class PackageJsonReader implements PackageFileReader
         }
 
         try {
-            $jsonData = $decoder->decodeFile($path, $schema);
+            $jsonData = $decoder->decodeFile($path);
         } catch (DecodingFailedException $e) {
             throw new InvalidConfigException(sprintf(
                 "The configuration in %s could not be decoded:\n%s",
                 $path,
                 $e->getMessage()
-            ), $e->getCode(), $e);
-        } catch (ValidationFailedException $e) {
-            throw new InvalidConfigException(sprintf(
-                "The configuration in %s is invalid:\n%s",
-                $path,
-                $e->getErrorsAsString()
             ), $e->getCode(), $e);
         }
 
@@ -217,6 +213,16 @@ class PackageJsonReader implements PackageFileReader
 
         if (version_compare($jsonData->version, '1.0', '>')) {
             throw UnsupportedVersionException::versionTooHigh($jsonData->version, '1.0', $path);
+        }
+
+        try {
+            $validator->validate($jsonData, $schema);
+        } catch (ValidationFailedException $e) {
+            throw new InvalidConfigException(sprintf(
+                "The configuration in %s is invalid:\n%s",
+                $path,
+                $e->getErrorsAsString()
+            ), $e->getCode(), $e);
         }
 
         return $jsonData;

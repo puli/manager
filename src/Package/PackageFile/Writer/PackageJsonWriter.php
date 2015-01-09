@@ -235,7 +235,7 @@ class PackageJsonWriter implements PackageFileWriter
         $encoder->setPrettyPrinting(true);
         $encoder->setEscapeSlash(false);
         $encoder->setTerminateWithLineFeed(true);
-        $schema = realpath(__DIR__.'/../../../../res/schema/package-schema.json');
+        $schema = realpath(__DIR__.'/../../../../res/schema/package-schema-1.0.json');
 
         if (!is_dir($dir = Path::getDirectory($path))) {
             $filesystem = new Filesystem();

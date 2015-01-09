@@ -70,7 +70,7 @@ class ConfigJsonWriter implements ConfigFileWriter
         $encoder->setEscapeSlash(false);
         $encoder->setTerminateWithLineFeed(true);
         $decoder = new JsonDecoder();
-        $schema = $decoder->decodeFile(realpath(__DIR__.'/../../../../res/schema/package-schema.json'));
+        $schema = $decoder->decodeFile(realpath(__DIR__.'/../../../../res/schema/package-schema-1.0.json'));
         $configSchema = $schema->properties->config;
 
         if (!is_dir($dir = Path::getDirectory($path))) {

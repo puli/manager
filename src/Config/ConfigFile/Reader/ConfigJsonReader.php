@@ -62,7 +62,7 @@ class ConfigJsonReader implements ConfigFileReader
     private function decodeFile($path)
     {
         $decoder = new JsonDecoder();
-        $schema = $decoder->decodeFile(realpath(__DIR__.'/../../../../res/schema/package-schema.json'));
+        $schema = $decoder->decodeFile(realpath(__DIR__.'/../../../../res/schema/package-schema-1.0.json'));
         $configSchema = $schema->properties->config;
 
         if (!file_exists($path)) {
