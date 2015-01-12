@@ -55,7 +55,7 @@ class ConfigJsonWriterTest extends JsonWriterTestCase
             Config::FACTORY_FILE => '{$puli-dir}/MyFactory.php',
             Config::REPOSITORY_TYPE => 'my-type',
             Config::REPOSITORY_PATH => '{$puli-dir}/my-repo',
-            Config::REPOSITORY_STORE_TYPE => 'my-store-type',
+            Config::DISCOVERY_STORE_TYPE => 'my-store-type',
         ));
 
         $this->writer->writeConfigFile($configFile, $this->tempFile);

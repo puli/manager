@@ -44,7 +44,7 @@ class ConfigJsonReaderTest extends PHPUnit_Framework_TestCase
         $this->assertSame('puli-dir/MyFactory.php', $config->get(Config::FACTORY_FILE));
         $this->assertSame('my-type', $config->get(Config::REPOSITORY_TYPE));
         $this->assertSame('puli-dir/my-repo', $config->get(Config::REPOSITORY_PATH));
-        $this->assertSame('my-store-type', $config->get(Config::REPOSITORY_STORE_TYPE));
+        $this->assertSame('my-store-type', $config->get(Config::DISCOVERY_STORE_TYPE));
     }
 
     public function testReadMinimalConfigFile()
@@ -60,7 +60,7 @@ class ConfigJsonReaderTest extends PHPUnit_Framework_TestCase
         $this->assertNull($config->get(Config::FACTORY_FILE));
         $this->assertNull($config->get(Config::REPOSITORY_TYPE));
         $this->assertNull($config->get(Config::REPOSITORY_PATH));
-        $this->assertNull($config->get(Config::REPOSITORY_STORE_TYPE));
+        $this->assertNull($config->get(Config::DISCOVERY_STORE_TYPE));
     }
 
     public function testReadMinimalConfigFileWithBaseConfig()

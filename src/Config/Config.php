@@ -68,9 +68,9 @@ use Puli\RepositoryManager\InvalidConfigException;
  * ```php
  * $config = new Config();
  * $config->set(Config::PULI_DIR, '.puli');
- * $config->set(Config::REGISTRY_FILE, '{$puli-dir}/PuliRegistry.php');
+ * $config->set(Config::FACTORY_FILE, '{$puli-dir}/PuliFactory.php');
  *
- * echo $config->get(Config::REGISTRY_FILE);
+ * echo $config->get(Config::FACTORY_FILE);
  * // => .puli/PuliRegistry.php
  * ```
  *
@@ -96,18 +96,6 @@ class Config
     const REPOSITORY_PATH = 'repository.path';
 
     const REPOSITORY_SYMLINK = 'repository.symlink';
-
-    const REPOSITORY_STORE = 'repository.store';
-
-    const REPOSITORY_STORE_TYPE = 'repository.store.type';
-
-    const REPOSITORY_STORE_PATH = 'repository.store.path';
-
-    const REPOSITORY_STORE_SERVER = 'repository.store.server';
-
-    const REPOSITORY_STORE_PORT = 'repository.store.port';
-
-    const REPOSITORY_STORE_CACHE = 'repository.store.cache';
 
     const DISCOVERY = 'discovery';
 
@@ -138,11 +126,6 @@ class Config
         self::REPOSITORY_TYPE => true,
         self::REPOSITORY_PATH => true,
         self::REPOSITORY_SYMLINK => true,
-        self::REPOSITORY_STORE_TYPE => true,
-        self::REPOSITORY_STORE_PATH => true,
-        self::REPOSITORY_STORE_SERVER => true,
-        self::REPOSITORY_STORE_PORT => true,
-        self::REPOSITORY_STORE_CACHE => true,
         self::DISCOVERY_TYPE => true,
         self::DISCOVERY_STORE_TYPE => true,
         self::DISCOVERY_STORE_PATH => true,
@@ -154,7 +137,6 @@ class Config
     private static $compositeKeys = array(
         self::FACTORY => true,
         self::REPOSITORY => true,
-        self::REPOSITORY_STORE => true,
         self::DISCOVERY => true,
         self::DISCOVERY_STORE => true,
     );
@@ -248,7 +230,7 @@ class Config
     public function getRaw($key, $default = null, $fallback = true)
     {
         if (isset(self::$compositeKeys[$key])) {
-            return array_replace(
+            return array_replace_recursive(
                 is_array($default) ? $default : array(),
                 $fallback && $this->baseConfig ? $this->baseConfig->getRaw($key) : array(),
                 $this->filterByKeyPrefix($key.'.')
@@ -457,19 +439,16 @@ class Config
         switch ($key) {
             case self::FACTORY_AUTO_GENERATE:
             case self::REPOSITORY_SYMLINK:
-            case self::REPOSITORY_STORE_CACHE:
             case self::DISCOVERY_STORE_CACHE:
                 $this->assertNotNull($key, $value);
                 $this->assertBoolean($key, $value);
                 break;
 
-            case self::REPOSITORY_STORE_PORT:
             case self::DISCOVERY_STORE_PORT:
                 $this->assertNotNull($key, $value);
                 $this->assertInteger($key, $value);
                 break;
 
-            case self::REPOSITORY_STORE_TYPE:
             case self::DISCOVERY_STORE_TYPE:
                 if (null !== $value) {
                     $this->assertString($key, $value);

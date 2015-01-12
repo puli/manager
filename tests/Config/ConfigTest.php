@@ -90,17 +90,15 @@ class ConfigTest extends PHPUnit_Framework_TestCase
     public function testGetRawCompositeKey()
     {
         $config = new Config();
-        $config->set(Config::REPOSITORY_TYPE, 'my-type');
-        $config->set(Config::REPOSITORY_PATH, 'my-path');
-        $config->set(Config::REPOSITORY_STORE_TYPE, 'my-store-type');
+        $config->set(Config::DISCOVERY_TYPE, 'my-type');
+        $config->set(Config::DISCOVERY_STORE_TYPE, 'my-store-type');
 
         $this->assertSame(array(
             'type' => 'my-type',
-            'path' => 'my-path',
             'store' => array(
                 'type' => 'my-store-type',
             ),
-        ), $config->getRaw(Config::REPOSITORY));
+        ), $config->getRaw(Config::DISCOVERY));
     }
 
     public function testGetRawCompositeKeyReturnsArrayIfNotSet()
@@ -141,22 +139,21 @@ class ConfigTest extends PHPUnit_Framework_TestCase
     public function testGetRawCompositeKeyIncludesFallbackKeysOfMultipleLevels()
     {
         $baseBaseConfig = new Config();
-        $baseBaseConfig->set(Config::REPOSITORY_STORE_TYPE, 'my-store');
+        $baseBaseConfig->set(Config::DISCOVERY_STORE_TYPE, 'my-store');
 
         $baseConfig = new Config($baseBaseConfig);
-        $baseConfig->set(Config::REPOSITORY_TYPE, 'fallback-type');
-        $baseConfig->set(Config::REPOSITORY_PATH, 'fallback-path');
+        $baseConfig->set(Config::DISCOVERY_TYPE, 'fallback-type');
 
         $config = new Config($baseConfig);
-        $config->set(Config::REPOSITORY_PATH, 'my-path');
+        $config->set(Config::DISCOVERY_STORE_PATH, 'my-path');
 
         $this->assertSame(array(
             'store' => array(
                 'type' => 'my-store',
+                'path' => 'my-path',
             ),
             'type' => 'fallback-type',
-            'path' => 'my-path',
-        ), $config->getRaw(Config::REPOSITORY));
+        ), $config->getRaw(Config::DISCOVERY));
     }
 
     public function testGetRawCompositeKeyPassesDefaultToFallback()
@@ -300,17 +297,15 @@ class ConfigTest extends PHPUnit_Framework_TestCase
     public function testGetCompositeKey()
     {
         $config = new Config();
-        $config->set(Config::REPOSITORY_TYPE, 'my-type');
-        $config->set(Config::REPOSITORY_PATH, 'my-path');
-        $config->set(Config::REPOSITORY_STORE_TYPE, 'my-store-type');
+        $config->set(Config::DISCOVERY_TYPE, 'my-type');
+        $config->set(Config::DISCOVERY_STORE_TYPE, 'my-store-type');
 
         $this->assertSame(array(
             'type' => 'my-type',
-            'path' => 'my-path',
             'store' => array(
                 'type' => 'my-store-type',
             ),
-        ), $config->get(Config::REPOSITORY));
+        ), $config->get(Config::DISCOVERY));
     }
 
     public function testGetCompositeKeyReturnsArrayIfNotSet()
@@ -401,24 +396,21 @@ class ConfigTest extends PHPUnit_Framework_TestCase
     public function testSetCompositeKey()
     {
         $config = new Config();
-        $config->set(Config::REPOSITORY, array(
+        $config->set(Config::DISCOVERY, array(
             'type' => 'my-type',
-            'path' => 'my-path',
             'store' => array(
                 'type' => 'my-store-type',
             ),
         ));
 
-        $this->assertSame('my-type', $config->get(Config::REPOSITORY_TYPE));
-        $this->assertSame('my-path', $config->get(Config::REPOSITORY_PATH));
-        $this->assertSame('my-store-type', $config->get(Config::REPOSITORY_STORE_TYPE));
+        $this->assertSame('my-type', $config->get(Config::DISCOVERY_TYPE));
+        $this->assertSame('my-store-type', $config->get(Config::DISCOVERY_STORE_TYPE));
         $this->assertSame(array(
             'type' => 'my-type',
-            'path' => 'my-path',
             'store' => array(
                 'type' => 'my-store-type',
             ),
-        ), $config->get(Config::REPOSITORY));
+        ), $config->get(Config::DISCOVERY));
     }
 
     public function testSetCompositeKeyRemovesPreviouslySetKeys()
@@ -774,7 +766,6 @@ class ConfigTest extends PHPUnit_Framework_TestCase
     public function getNullableKeys()
     {
         return array(
-            array(Config::REPOSITORY_STORE_TYPE),
             array(Config::DISCOVERY_STORE_TYPE),
         );
     }
@@ -802,7 +793,6 @@ class ConfigTest extends PHPUnit_Framework_TestCase
         return array(
             array(Config::FACTORY_AUTO_GENERATE),
             array(Config::REPOSITORY_SYMLINK),
-            array(Config::REPOSITORY_STORE_CACHE),
             array(Config::DISCOVERY_STORE_CACHE)
         );
     }

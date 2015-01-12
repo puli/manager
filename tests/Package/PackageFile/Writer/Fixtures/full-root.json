@@ -34,7 +34,9 @@
         },
         "repository": {
             "type": "my-type",
-            "path": "{$puli-dir}/my-repo",
+            "path": "{$puli-dir}/my-repo"
+        },
+        "discovery": {
             "store": {
                 "type": "my-store-type"
             }

@@ -202,7 +202,7 @@ class ConfigFileManagerTest extends PHPUnit_Framework_TestCase
         $this->assertSame(Config::getKeys(), array_keys($values));
         $this->assertSame('my-puli-dir', $values[Config::PULI_DIR]);
         $this->assertSame('{$puli-dir}/MyFactory.php', $values[Config::FACTORY_FILE]);
-        $this->assertNull($values[Config::REPOSITORY_STORE_PATH]);
+        $this->assertNull($values[Config::REPOSITORY_PATH]);
         $this->assertNull($values[Config::FACTORY_AUTO_GENERATE]);
     }
 
