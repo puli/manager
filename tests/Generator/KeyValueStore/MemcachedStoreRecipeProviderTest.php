@@ -11,6 +11,7 @@
 
 namespace Puli\RepositoryManager\Tests\Generator\KeyValueStore;
 
+use Memcached;
 use Puli\RepositoryManager\Generator\KeyValueStore\MemcachedStoreRecipeProvider;
 use Puli\RepositoryManager\Tests\Generator\AbstractRecipeProviderTest;
 
@@ -32,6 +33,17 @@ class MemcachedStoreRecipeProviderTest extends AbstractRecipeProviderTest
         parent::setUpBeforeClass();
 
         if (!class_exists('\Memcached')) {
+            self::$supported = false;
+
+            return;
+        }
+
+        // try to connect
+        $memcached = new Memcached();
+        $memcached->addServer('127.0.0.1', 11211);
+        $memcached->get('foobar');
+
+        if (Memcached::RES_NOTFOUND !== $memcached->getResultCode()) {
             self::$supported = false;
 
             return;
