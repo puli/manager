@@ -22,7 +22,7 @@
         "rhumsaa/uuid": "~2.8",
         "psr/log": "~1.0"
     },
-    "minimum-stability": "dev",
+    "minimum-stability": "beta",
     "autoload": {
         "psr-4": {
             "Puli\\RepositoryManager\\": "src/"
