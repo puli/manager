@@ -103,6 +103,9 @@ License
 All contents of this package are licensed under the [MIT license].
 
 [Puli]: http://puli.io
+[resource repository]: https://github.com/puli/repository
+[discovery]: https://github.com/puli/discovery
+[Composer Plugin]: https://github.com/puli/composer-plugin
 [Bernhard Schussek]: http://webmozarts.com
 [The Community Contributors]: https://github.com/puli/repository-manager/graphs/contributors
 [Getting Started]: http://docs.puli.io/en/latest/getting-started.html
