@@ -1,5 +1,5 @@
-Puli Repository Manager
-=======================
+The Puli Repository Manager Component
+=====================================
 
 [![Build Status](https://travis-ci.org/puli/repository-manager.svg?branch=master)](https://travis-ci.org/puli/repository-manager)
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/puli/repository-manager/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/puli/repository-manager/?branch=master)
@@ -12,8 +12,8 @@ Latest release: [1.0.0-alpha1](https://packagist.org/packages/puli/repository-ma
 
 PHP >= 5.3.9
 
-The Repository Manager builds [Puli] repositories from puli.json files in the
-root directory of your project or package:
+The [Puli] Repository Manager Component builds a [resource repository] and
+[discovery] from a puli.json configuration in the root of your project:
 
 ```json
 {
@@ -22,6 +22,48 @@ root directory of your project or package:
     }
 }
 ```
+
+This mapping can be loaded with the [`RepositoryManager`]:
+
+```php
+use Puli\RepositoryManager\ManagerFactory;
+
+$factory = new ManagerFactory();
+$environment = $factory->createProjectEnvironment(getcwd());
+$repoManager = $factory->createRepositoryManager($environment);
+
+$repoManager->buildRepository();
+```
+
+The [`RepositoryManager`] also supports methods to manipulate the puli.json.
+
+Packages
+--------
+
+A puli.json configuration can also be placed in any package installed in your
+project. This package needs to be registered with Puli with the 
+[`PackageManager`]:
+
+```php
+$packageManager = $factory->createPackageManager($environment);
+
+$packageManager->installPackage('path/to/package', 'vendor/package-name');
+```
+
+Usually, packages are installed automatically by Puli's [Composer Plugin].
+
+Managers
+--------
+
+The following is a table of all managers supported by this package:
+
+Class                      | Description
+-------------------------- | -------------
+[`RepositoryManager`]      | Manages resource mappings and builds [`ResourceRepository`] instances
+[`DiscoveryManager`]       | Manages bindings and binding types and builds [`ResourceDiscovery`] instances
+[`PackageManager`]         | Manages the installed packages
+[`ConfigFileManager`]      | Manages changes to a global `config.json` file
+[`RootPackageFileManager`] | Manages changes to the `puli.json` file of the project
 
 Read [Puli at a Glance] if you want to learn more about Puli.
 
@@ -70,3 +112,10 @@ All contents of this package are licensed under the [MIT license].
 [Git repository]: https://github.com/puli/repository-manager
 [@webmozart]: https://twitter.com/webmozart
 [MIT license]: LICENSE
+[`RepositoryManager`]: http://api.puli.io/latest/class-Puli.RepositoryManager.Repository.RepositoryManager.html
+[`PackageManager`]: http://api.puli.io/latest/class-Puli.RepositoryManager.Package.PackageManager.html
+[`DiscoveryManager`]: http://api.puli.io/latest/class-Puli.RepositoryManager.Discovery.DiscoveryManager.html
+[`ConfigFileManager`]: http://api.puli.io/latest/class-Puli.RepositoryManager.Config.ConfigFile.ConfigFileManager.html
+[`RootPackageFileManager`]: http://api.puli.io/latest/class-Puli.RepositoryManager.Package.PackageFile.RootPackageFileManager.html
+[`ResourceRepository`]: http://api.puli.io/latest/class-Puli.Repository.Api.ResourceRepository.html
+[`ResourceDiscovery`]: http://api.puli.io/latest/class-Puli.Discovery.Api.ResourceDiscovery.html
