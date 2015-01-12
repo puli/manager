@@ -212,14 +212,14 @@ class PackageJsonReader implements PackageFileReader
             throw UnsupportedVersionException::versionTooHigh($jsonData->version, '1.0', $path);
         }
 
-        try {
-            $validator->validate($jsonData, $schema);
-        } catch (ValidationFailedException $e) {
+        $errors = $validator->validate($jsonData, $schema);
+
+        if (count($errors) > 0) {
             throw new InvalidConfigException(sprintf(
                 "The configuration in %s is invalid:\n%s",
                 $path,
-                $e->getErrorsAsString()
-            ), $e->getCode(), $e);
+                implode("\n", $errors)
+            ));
         }
 
         return $jsonData;
