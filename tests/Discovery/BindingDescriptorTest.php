@@ -398,4 +398,20 @@ class BindingDescriptorTest extends PHPUnit_Framework_TestCase
 
         $this->assertFalse($descriptor->hasParameterValue('default', false));
     }
+
+    public function testCompare()
+    {
+        $binding1 = BindingDescriptor::create('/vendor/a', 'vendor/a-type');
+        $binding2 = BindingDescriptor::create('/vendor/a', 'vendor/b-type');
+        $binding3 = BindingDescriptor::create('/vendor/b', 'vendor/a-type');
+
+        $this->assertSame(0, BindingDescriptor::compare($binding1, $binding1));
+        $this->assertSame(0, BindingDescriptor::compare($binding2, $binding2));
+        $this->assertLessThan(0, BindingDescriptor::compare($binding1, $binding2));
+        $this->assertGreaterThan(0, BindingDescriptor::compare($binding2, $binding1));
+        $this->assertLessThan(0, BindingDescriptor::compare($binding1, $binding3));
+        $this->assertGreaterThan(0, BindingDescriptor::compare($binding3, $binding1));
+        $this->assertLessThan(0, BindingDescriptor::compare($binding2, $binding3));
+        $this->assertGreaterThan(0, BindingDescriptor::compare($binding3, $binding2));
+    }
 }

@@ -7,6 +7,8 @@ Changelog
  * package load errors are not logged anymore
  * renamed `InstallInfo::get/setInstaller()` to `get/setInstallerName()`
  * renamed `InstallInfo::DEFAULT_INSTALLER` to `DEFAULT_INSTALLER_NAME`
+ * multi-valued keys in puli.json are now sorted to avoid changed files in the
+   VCS when they haven't really changed
 
 * 1.0.0-beta (2015-01-12)
 

@@ -1,0 +1,8 @@
+{
+    "version": "1.0",
+    "resources": {
+        "/vendor/a": "foo",
+        "/vendor/b": "foo",
+        "/vendor/c": "foo"
+    }
+}

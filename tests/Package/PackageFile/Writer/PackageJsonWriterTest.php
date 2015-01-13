@@ -16,11 +16,13 @@ use Puli\RepositoryManager\Discovery\BindingDescriptor;
 use Puli\RepositoryManager\Discovery\BindingParameterDescriptor;
 use Puli\RepositoryManager\Discovery\BindingTypeDescriptor;
 use Puli\RepositoryManager\Discovery\Store\BindingTypeStore;
+use Puli\RepositoryManager\Environment\ProjectEnvironment;
 use Puli\RepositoryManager\Package\InstallInfo;
 use Puli\RepositoryManager\Package\Package;
 use Puli\RepositoryManager\Package\PackageFile\PackageFile;
 use Puli\RepositoryManager\Package\PackageFile\RootPackageFile;
 use Puli\RepositoryManager\Package\PackageFile\Writer\PackageJsonWriter;
+use Puli\RepositoryManager\Plugin\ManagerPlugin;
 use Puli\RepositoryManager\Repository\ResourceMapping;
 use Puli\RepositoryManager\Tests\JsonWriterTestCase;
 use Rhumsaa\Uuid\Uuid;
@@ -74,7 +76,7 @@ class PackageJsonWriterTest extends JsonWriterTestCase
         $this->assertJsonFileEquals(__DIR__.'/Fixtures/full.json', $this->tempFile);
     }
 
-    public function testWritePackageFileDoesWriteDefaultParameterValuesOfBindings()
+    public function testWritePackageFileWritesDefaultParameterValuesOfBindings()
     {
         $packageFile = new PackageFile();
         $typeStore = new BindingTypeStore();
@@ -114,6 +116,81 @@ class PackageJsonWriterTest extends JsonWriterTestCase
         $this->assertFileExists($this->tempFile);
 
         $this->assertJsonFileEquals(__DIR__.'/Fixtures/type-no-description.json', $this->tempFile);
+    }
+
+    public function testWritePackageFileResourceMappings()
+    {
+        $packageFile = new PackageFile();
+        $packageFile->addResourceMapping(new ResourceMapping('/vendor/c', 'foo'));
+        $packageFile->addResourceMapping(new ResourceMapping('/vendor/a', 'foo'));
+        $packageFile->addResourceMapping(new ResourceMapping('/vendor/b', 'foo'));
+
+        $this->writer->writePackageFile($packageFile, $this->tempFile);
+
+        $this->assertFileExists($this->tempFile);
+
+        $this->assertJsonFileEquals(__DIR__.'/Fixtures/sorted-mappings.json', $this->tempFile);
+    }
+
+    public function testWritePackageFileSortsTypes()
+    {
+        $packageFile = new PackageFile();
+        $packageFile->addTypeDescriptor(new BindingTypeDescriptor('vendor/c'));
+        $packageFile->addTypeDescriptor(new BindingTypeDescriptor('vendor/a'));
+        $packageFile->addTypeDescriptor(new BindingTypeDescriptor('vendor/b'));
+
+        $this->writer->writePackageFile($packageFile, $this->tempFile);
+
+        $this->assertFileExists($this->tempFile);
+
+        $this->assertJsonFileEquals(__DIR__.'/Fixtures/sorted-types.json', $this->tempFile);
+    }
+
+    public function testWritePackageFileSortsTypeParameters()
+    {
+        $packageFile = new PackageFile();
+        $packageFile->addTypeDescriptor(new BindingTypeDescriptor('vendor/type', null, array(
+            new BindingParameterDescriptor('c'),
+            new BindingParameterDescriptor('a'),
+            new BindingParameterDescriptor('b'),
+        )));
+
+        $this->writer->writePackageFile($packageFile, $this->tempFile);
+
+        $this->assertFileExists($this->tempFile);
+
+        $this->assertJsonFileEquals(__DIR__.'/Fixtures/sorted-type-params.json', $this->tempFile);
+    }
+
+    public function testWritePackageFileSortsBindings()
+    {
+        $packageFile = new PackageFile();
+        $packageFile->addBindingDescriptor(BindingDescriptor::create('/vendor/c', 'vendor/a-type'));
+        $packageFile->addBindingDescriptor(BindingDescriptor::create('/vendor/a', 'vendor/b-type'));
+        $packageFile->addBindingDescriptor(BindingDescriptor::create('/vendor/b', 'vendor/b-type'));
+        $packageFile->addBindingDescriptor(BindingDescriptor::create('/vendor/a', 'vendor/a-type'));
+
+        $this->writer->writePackageFile($packageFile, $this->tempFile);
+
+        $this->assertFileExists($this->tempFile);
+
+        $this->assertJsonFileEquals(__DIR__.'/Fixtures/sorted-bindings.json', $this->tempFile);
+    }
+
+    public function testWritePackageFileSortsBindingParameters()
+    {
+        $packageFile = new PackageFile();
+        $packageFile->addBindingDescriptor(BindingDescriptor::create('/path', 'vendor/type', array(
+            'c' => 'foo',
+            'a' => 'foo',
+            'b' => 'foo',
+        )));
+
+        $this->writer->writePackageFile($packageFile, $this->tempFile);
+
+        $this->assertFileExists($this->tempFile);
+
+        $this->assertJsonFileEquals(__DIR__.'/Fixtures/sorted-binding-params.json', $this->tempFile);
     }
 
     public function testWriteBindingParameters()
@@ -251,6 +328,40 @@ class PackageJsonWriterTest extends JsonWriterTestCase
         $this->assertJsonFileEquals(__DIR__.'/Fixtures/sorted-packages.json', $this->tempFile);
     }
 
+    public function testWriteRootPackageFileSortsPlugins()
+    {
+        $packageFile = new RootPackageFile();
+        $packageFile->addPluginClass(__NAMESPACE__.'\PluginC');
+        $packageFile->addPluginClass(__NAMESPACE__.'\PluginA');
+        $packageFile->addPluginClass(__NAMESPACE__.'\PluginB');
+
+        $this->writer->writePackageFile($packageFile, $this->tempFile);
+
+        $this->assertFileExists($this->tempFile);
+
+        $this->assertJsonFileEquals(__DIR__.'/Fixtures/sorted-plugins.json', $this->tempFile);
+    }
+
+    public function testWriteRootPackageFileSortsPackageBindings()
+    {
+        $installInfo = new InstallInfo('vendor/package1', '/path/to/package1');
+        $installInfo->addEnabledBindingUuid(Uuid::fromString('c54e5668-2b36-43f4-a32c-2d175092b77d'));
+        $installInfo->addEnabledBindingUuid(Uuid::fromString('a54e5668-2b36-43f4-a32c-2d175092b77d'));
+        $installInfo->addEnabledBindingUuid(Uuid::fromString('b54e5668-2b36-43f4-a32c-2d175092b77d'));
+        $installInfo->addDisabledBindingUuid(Uuid::fromString('6d02ee67-d845-4789-a9c1-8301351c6f5a'));
+        $installInfo->addDisabledBindingUuid(Uuid::fromString('4d02ee67-d845-4789-a9c1-8301351c6f5a'));
+        $installInfo->addDisabledBindingUuid(Uuid::fromString('5d02ee67-d845-4789-a9c1-8301351c6f5a'));
+
+        $packageFile = new RootPackageFile();
+        $packageFile->addInstallInfo($installInfo);
+
+        $this->writer->writePackageFile($packageFile, $this->tempFile);
+
+        $this->assertFileExists($this->tempFile);
+
+        $this->assertJsonFileEquals(__DIR__.'/Fixtures/sorted-package-bindings.json', $this->tempFile);
+    }
+
     public function testWriteMinimalRootPackageFile()
     {
         $baseConfig = new Config();
@@ -331,4 +442,19 @@ class PackageJsonWriterTest extends JsonWriterTestCase
 
         $this->writer->writePackageFile($packageFile, $invalidPath);
     }
+}
+
+class PluginA implements ManagerPlugin
+{
+    public function activate(ProjectEnvironment $environment) {}
+}
+
+class PluginB implements ManagerPlugin
+{
+    public function activate(ProjectEnvironment $environment) {}
+}
+
+class PluginC implements ManagerPlugin
+{
+    public function activate(ProjectEnvironment $environment) {}
 }

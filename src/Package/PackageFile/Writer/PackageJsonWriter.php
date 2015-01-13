@@ -101,6 +101,8 @@ class PackageJsonWriter implements PackageFileWriter
         }
 
         if (count($bindings) > 0) {
+            uasort($bindings, array('Puli\RepositoryManager\Discovery\BindingDescriptor', 'compare'));
+
             $jsonData['bindings'] = new stdClass();
 
             foreach ($bindings as $binding) {
@@ -116,6 +118,7 @@ class PackageJsonWriter implements PackageFileWriter
                 // Don't include the default values of the binding type
                 if ($binding->hasParameterValues(false)) {
                     $bindingData->parameters = $binding->getParameterValues(false);
+                    ksort($bindingData->parameters);
                 }
 
                 $jsonData['bindings']->{$binding->getUuid()->toString()} = $bindingData;
@@ -123,7 +126,7 @@ class PackageJsonWriter implements PackageFileWriter
         }
 
         if (count($bindingTypes) > 0) {
-            $jsonData['binding-types'] = new stdClass();
+            $bindingTypesData = array();
 
             foreach ($bindingTypes as $bindingType) {
                 $typeData = new stdClass();
@@ -133,7 +136,7 @@ class PackageJsonWriter implements PackageFileWriter
                 }
 
                 if (count($bindingType->getParameters()) > 0) {
-                    $typeData->parameters = new stdClass();
+                    $parametersData = array();
 
                     foreach ($bindingType->getParameters() as $parameter) {
                         $paramData = new stdClass();
@@ -150,12 +153,20 @@ class PackageJsonWriter implements PackageFileWriter
                             $paramData->default = $parameter->getDefaultValue();
                         }
 
-                        $typeData->parameters->{$parameter->getName()} = $paramData;
+                        $parametersData[$parameter->getName()] = $paramData;
                     }
+
+                    ksort($parametersData);
+
+                    $typeData->parameters = (object) $parametersData;
                 }
 
-                $jsonData['binding-types']->{$bindingType->getName()} = $typeData;
+                $bindingTypesData[$bindingType->getName()] = $typeData;
             }
+
+            ksort($bindingTypesData);
+
+            $jsonData['binding-types'] = (object) $bindingTypesData;
         }
 
         if (count($overrides) > 0) {
@@ -181,6 +192,8 @@ class PackageJsonWriter implements PackageFileWriter
 
         if (array() !== $packageFile->getPluginClasses(false)) {
             $jsonData['plugins'] = $packageFile->getPluginClasses();
+
+            sort($jsonData['plugins']);
         }
 
         if (count($installInfos) > 0) {
@@ -200,6 +213,8 @@ class PackageJsonWriter implements PackageFileWriter
                     foreach ($installInfo->getEnabledBindingUuids() as $uuid) {
                         $installData->{'enabled-bindings'}[] = $uuid->toString();
                     }
+
+                    sort($installData->{'enabled-bindings'});
                 }
 
                 if ($installInfo->hasDisabledBindingUuids()) {
@@ -208,6 +223,8 @@ class PackageJsonWriter implements PackageFileWriter
                     foreach ($installInfo->getDisabledBindingUuids() as $uuid) {
                         $installData->{'disabled-bindings'}[] = $uuid->toString();
                     }
+
+                    sort($installData->{'disabled-bindings'});
                 }
 
                 $packagesData[$installInfo->getPackageName()] = $installData;

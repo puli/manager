@@ -1,0 +1,12 @@
+{
+    "version": "1.0",
+    "binding-types": {
+        "vendor/type": {
+            "parameters": {
+                "a": {},
+                "b": {},
+                "c": {}
+            }
+        }
+    }
+}

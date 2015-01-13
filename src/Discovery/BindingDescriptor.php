@@ -109,6 +109,30 @@ class BindingDescriptor
     }
 
     /**
+     * Compares two binding descriptors.
+     *
+     * One binding descriptor is sorted before another if:
+     *
+     *  * its query is lexicographically smaller;
+     *  * the queries are the same but the type is lexicographically smaller.
+     *
+     * @param BindingDescriptor $a The first descriptor to compare.
+     * @param BindingDescriptor $b The second descriptor to compare.
+     *
+     * @return int Returns a negative value if `$a` is sorted before `$b` and
+     *             a positive value if `$b` is sorted before `$a`. If 0 is
+     *             returned, `$a` and `$b` are sorted to the same position.
+     */
+    public static function compare(self $a, self $b)
+    {
+        if ($a->query === $b->query) {
+            return strcmp($a->typeName, $b->typeName);
+        }
+
+        return strcmp($a->query, $b->query);
+    }
+
+    /**
      * Creates a new binding descriptor.
      *
      * @param Uuid   $uuid            The UUID of the binding.

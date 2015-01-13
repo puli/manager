@@ -1,0 +1,14 @@
+{
+    "version": "1.0",
+    "bindings": {
+        "8f5f329a-0da3-5817-bd38-53b4eeca11df": {
+            "query": "/path",
+            "type": "vendor/type",
+            "parameters": {
+                "a": "foo",
+                "b": "foo",
+                "c": "foo"
+            }
+        }
+    }
+}
