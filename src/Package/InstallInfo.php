@@ -27,7 +27,7 @@ class InstallInfo
     /**
      * The default installer of packages.
      */
-    const DEFAULT_INSTALLER = 'user';
+    const DEFAULT_INSTALLER_NAME = 'user';
 
     /**
      * @var string
@@ -42,7 +42,7 @@ class InstallInfo
     /**
      * @var string
      */
-    private $installer = self::DEFAULT_INSTALLER;
+    private $installerName = self::DEFAULT_INSTALLER_NAME;
 
     /**
      * @var BindingDescriptor[]
@@ -98,23 +98,23 @@ class InstallInfo
     }
 
     /**
-     * Returns the installer of the package.
+     * Returns the name of the installer of the package.
      *
-     * @return string The package's installer.
+     * @return string The package's installer name.
      */
-    public function getInstaller()
+    public function getInstallerName()
     {
-        return $this->installer;
+        return $this->installerName;
     }
 
     /**
-     * Sets the installer of the package.
+     * Sets the name of the installer of the package.
      *
-     * @param string $installer The package's installer.
+     * @param string $installerName The package's installer name.
      */
-    public function setInstaller($installer)
+    public function setInstallerName($installerName)
     {
-        $this->installer = $installer;
+        $this->installerName = $installerName;
     }
 
     /**

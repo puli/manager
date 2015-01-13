@@ -204,9 +204,9 @@ class PackageManagerTest extends ManagerTestCase
         $this->rootPackageFile->addInstallInfo($installInfo2 = new InstallInfo('vendor/package2', $this->packageDir2));
         $this->rootPackageFile->addInstallInfo($installInfo3 = new InstallInfo('vendor/package3', $this->packageDir3));
 
-        $installInfo1->setInstaller('composer');
-        $installInfo2->setInstaller('user');
-        $installInfo3->setInstaller('composer');
+        $installInfo1->setInstallerName('composer');
+        $installInfo2->setInstallerName('user');
+        $installInfo3->setInstallerName('composer');
 
         $this->manager = new PackageManager($this->environment, $this->packageFileStorage);
 
@@ -233,9 +233,9 @@ class PackageManagerTest extends ManagerTestCase
         $this->rootPackageFile->addInstallInfo($installInfo2 = new InstallInfo('vendor/package2', 'bar'));
         $this->rootPackageFile->addInstallInfo($installInfo3 = new InstallInfo('vendor/package3', $this->packageDir3));
 
-        $installInfo1->setInstaller('composer');
-        $installInfo2->setInstaller('user');
-        $installInfo3->setInstaller('composer');
+        $installInfo1->setInstallerName('composer');
+        $installInfo2->setInstallerName('user');
+        $installInfo3->setInstallerName('composer');
 
         $this->manager = new PackageManager($this->environment, $this->packageFileStorage);
 
@@ -420,11 +420,11 @@ class PackageManagerTest extends ManagerTestCase
 
                 PHPUnit_Framework_Assert::assertCount(3, $installInfos);
                 PHPUnit_Framework_Assert::assertSame($packageDir1, $installInfos[0]->getInstallPath());
-                PHPUnit_Framework_Assert::assertSame('user', $installInfos[0]->getInstaller());
+                PHPUnit_Framework_Assert::assertSame('user', $installInfos[0]->getInstallerName());
                 PHPUnit_Framework_Assert::assertSame($packageDir2, $installInfos[1]->getInstallPath());
-                PHPUnit_Framework_Assert::assertSame('user', $installInfos[1]->getInstaller());
+                PHPUnit_Framework_Assert::assertSame('user', $installInfos[1]->getInstallerName());
                 PHPUnit_Framework_Assert::assertSame('../package3', $installInfos[2]->getInstallPath());
-                PHPUnit_Framework_Assert::assertSame('composer', $installInfos[2]->getInstaller());
+                PHPUnit_Framework_Assert::assertSame('composer', $installInfos[2]->getInstallerName());
             }));
 
         $this->manager->installPackage($this->packageDir3, null, 'composer');

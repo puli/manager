@@ -24,11 +24,11 @@ class InstallInfoTest extends PHPUnit_Framework_TestCase
     public function testCreate()
     {
         $installInfo = new InstallInfo('vendor/package', '/path');
-        $installInfo->setInstaller('Composer');
+        $installInfo->setInstallerName('Composer');
 
         $this->assertSame('vendor/package', $installInfo->getPackageName());
         $this->assertSame('/path', $installInfo->getInstallPath());
-        $this->assertSame('Composer', $installInfo->getInstaller());
+        $this->assertSame('Composer', $installInfo->getInstallerName());
     }
     /**
      * @expectedException \InvalidArgumentException

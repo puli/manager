@@ -5,6 +5,8 @@ Changelog
 
  * removed dependency to beberlei/assert
  * package load errors are not logged anymore
+ * renamed `InstallInfo::get/setInstaller()` to `get/setInstallerName()`
+ * renamed `InstallInfo::DEFAULT_INSTALLER` to `DEFAULT_INSTALLER_NAME`
 
 * 1.0.0-beta (2015-01-12)
 

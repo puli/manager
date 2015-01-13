@@ -190,8 +190,8 @@ class PackageJsonWriter implements PackageFileWriter
                 $installData = new stdClass();
                 $installData->{'install-path'} = $installInfo->getInstallPath();
 
-                if (InstallInfo::DEFAULT_INSTALLER !== $installInfo->getInstaller()) {
-                    $installData->installer = $installInfo->getInstaller();
+                if (InstallInfo::DEFAULT_INSTALLER_NAME !== $installInfo->getInstallerName()) {
+                    $installData->installer = $installInfo->getInstallerName();
                 }
 
                 if ($installInfo->hasEnabledBindingUuids()) {

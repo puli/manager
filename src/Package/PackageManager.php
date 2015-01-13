@@ -82,16 +82,17 @@ class PackageManager
     /**
      * Installs the package at the given path in the repository.
      *
-     * @param string      $installPath The path to the package.
-     * @param string|null $name        The package name or `null` if the name
-     *                                 should be read from the package's puli.json.
-     * @param string      $installer   The name of the installer.
+     * @param string      $installPath   The path to the package.
+     * @param string|null $name          The package name or `null` if the name
+     *                                   should be read from the package's
+     *                                   puli.json.
+     * @param string      $installerName The name of the installer.
      *
      * @throws InvalidConfigException If the package is not configured correctly.
      * @throws NameConflictException If the package has the same name as another
      *                               loaded package.
      */
-    public function installPackage($installPath, $name = null, $installer = InstallInfo::DEFAULT_INSTALLER)
+    public function installPackage($installPath, $name = null, $installerName = InstallInfo::DEFAULT_INSTALLER_NAME)
     {
         Assert::nullOrPackageName($name);
 
@@ -132,7 +133,7 @@ class PackageManager
 
         $relInstallPath = Path::makeRelative($installPath, $this->rootDir);
         $installInfo = new InstallInfo($name, $relInstallPath);
-        $installInfo->setInstaller($installer);
+        $installInfo->setInstallerName($installerName);
 
         // Don't catch exceptions
         $package = $this->loadPackage($installInfo, false);
@@ -269,7 +270,7 @@ class PackageManager
             $installInfo = $package->getInstallInfo();
 
             // The root package has no install info
-            if ($installInfo && $installer === $installInfo->getInstaller() && $state === $package->getState()) {
+            if ($installInfo && $installer === $installInfo->getInstallerName() && $state === $package->getState()) {
                 $packages->add($package);
             }
         }

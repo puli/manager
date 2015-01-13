@@ -45,7 +45,7 @@
     "packages": {
         "vendor/package1": {
             "install-path": "/path/to/package1",
-            "installer": "Composer",
+            "installer": "composer",
             "enabled-bindings": [
                 "a54e5668-2b36-43f4-a32c-2d175092b77d"
             ],
