@@ -58,16 +58,10 @@ class PackageManager
     private $packages;
 
     /**
-     * @var LoggerInterface
-     */
-    private $logger;
-
-    /**
      * Loads the package repository for a given project.
      *
      * @param ProjectEnvironment $environment        The project environment.
      * @param PackageFileStorage $packageFileStorage The package file storage.
-     * @param LoggerInterface    $logger             The used logger.
      *
      * @throws FileNotFoundException If the install path of a package not exist.
      * @throws NoDirectoryException If the install path of a package points to a file.
@@ -76,15 +70,13 @@ class PackageManager
      */
     public function __construct(
         ProjectEnvironment $environment,
-        PackageFileStorage $packageFileStorage,
-        LoggerInterface $logger = null
+        PackageFileStorage $packageFileStorage
     )
     {
         $this->environment = $environment;
         $this->rootDir = $environment->getRootDirectory();
         $this->rootPackageFile = $environment->getRootPackageFile();
         $this->packageFileStorage = $packageFileStorage;
-        $this->logger = $logger ?: new NullLogger();
     }
 
     /**
@@ -141,7 +133,9 @@ class PackageManager
         $relInstallPath = Path::makeRelative($installPath, $this->rootDir);
         $installInfo = new InstallInfo($name, $relInstallPath);
         $installInfo->setInstaller($installer);
-        $package = $this->loadPackage($installInfo);
+
+        // Don't catch exceptions
+        $package = $this->loadPackage($installInfo, false);
 
         // OK, now add it
         $this->rootPackageFile->addInstallInfo($installInfo);
@@ -311,16 +305,17 @@ class PackageManager
         foreach ($this->rootPackageFile->getInstallInfos() as $installInfo) {
             // Catch and log exceptions so that single packages cannot break
             // the whole repository
-            $this->packages->add($this->loadPackage($installInfo, true));
+            $this->packages->add($this->loadPackage($installInfo));
         }
     }
 
     /**
      * Loads a package for the given install info.
      *
-     * @param InstallInfo $installInfo   The install info.
-     * @param bool        $logExceptions Whether to log exceptions occurring
-     *                                   when reading the package file.
+     * @param InstallInfo $installInfo     The install info.
+     * @param bool        $catchExceptions Whether to catch exceptions and store
+     *                                     them with the package for later
+     *                                     access.
      *
      * @return Package The package.
      *
@@ -329,26 +324,22 @@ class PackageManager
      * @throws NameConflictException If the package has the same name as another
      *                               loaded package.
      */
-    private function loadPackage(InstallInfo $installInfo, $logExceptions = false)
+    private function loadPackage(InstallInfo $installInfo, $catchExceptions = true)
     {
         $installPath = Path::makeAbsolute($installInfo->getInstallPath(), $this->rootDir);
         $packageFile = null;
         $loadError = null;
 
         try {
-            $packageFile = $this->loadPackageFile($installPath, $logExceptions);
+            $packageFile = $this->loadPackageFile($installPath, $catchExceptions);
         } catch (InvalidConfigException $loadError) {
         } catch (UnsupportedVersionException $loadError) {
         } catch (FileNotFoundException $loadError) {
         } catch (NoDirectoryException $loadError) {
         }
 
-        if ($loadError) {
-            if (!$logExceptions) {
-                throw $loadError;
-            }
-
-            $this->logger->warning($loadError->getMessage());
+        if ($loadError && !$catchExceptions) {
+            throw $loadError;
         }
 
         return new Package($packageFile, $installPath, $installInfo, $loadError);

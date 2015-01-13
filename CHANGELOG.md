@@ -4,6 +4,7 @@ Changelog
 * 1.0.0-next (@release_date@)
 
  * removed dependency to beberlei/assert
+ * package load errors are not logged anymore
 
 * 1.0.0-beta (2015-01-12)
 
