@@ -66,7 +66,7 @@ class BindingParameterDescriptor
         Assert::parameterName($name);
         Assert::boolean($required, 'The parameter "$required" must be a boolean. Got: %s');
         Assert::nullOrParameterValue($defaultValue);
-        Assert::nullOrString($description, 'The parameter description must be a string or null. Got: %2$s');
+        Assert::nullOrString($description, 'The parameter description must be a string or null. Got: %s');
         Assert::nullOrNotEmpty($description, 'The parameter description must not be empty.');
 
         if ($required && null !== $defaultValue) {

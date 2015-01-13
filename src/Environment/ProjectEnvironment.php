@@ -186,9 +186,9 @@ class ProjectEnvironment extends GlobalEnvironment
         $factoryFile = $this->getConfig()->get(Config::FACTORY_FILE);
         $factoryClass = $this->getConfig()->get(Config::FACTORY_CLASS);
 
-        Assert::string($factoryFile, 'The "'.Config::FACTORY_FILE.'" config key must contain a string. Got: %2$s');
+        Assert::string($factoryFile, 'The "'.Config::FACTORY_FILE.'" config key must contain a string. Got: %s');
         Assert::notEmpty($factoryFile, 'The "'.Config::FACTORY_FILE.'" config key must not be empty.');
-        Assert::string($factoryClass, 'The "'.Config::FACTORY_CLASS.'" config key must contain a string. Got: %2$s');
+        Assert::string($factoryClass, 'The "'.Config::FACTORY_CLASS.'" config key must contain a string. Got: %s');
         Assert::notEmpty($factoryClass, 'The "'.Config::FACTORY_CLASS.'" config key must not be empty.');
 
         if (!class_exists($factoryClass, false)) {

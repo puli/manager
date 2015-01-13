@@ -11,17 +11,15 @@
 
 namespace Puli\RepositoryManager\Assert;
 
-use Assert\Assertion;
 use Puli\RepositoryManager\Package\RootPackage;
 use Webmozart\PathUtil\Path;
 
 /**
- * Contains domain-specific assertions.
+ * Domain-specific assertions.
  *
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  *
- * @method static void nullOrPath($value, $message = null, $propertyPath = null)
  * @method static void nullOrSystemPath($value, $message = null, $propertyPath = null)
  * @method static void nullOrAbsoluteSystemPath($value, $message = null, $propertyPath = null)
  * @method static void nullOrPackageName($value, $message = null, $propertyPath = null)
@@ -30,7 +28,6 @@ use Webmozart\PathUtil\Path;
  * @method static void nullOrTypeName($value, $message = null, $propertyPath = null)
  * @method static void nullOrParameterName($value, $message = null, $propertyPath = null)
  * @method static void nullOrParameterValue($value, $message = null, $propertyPath = null)
- * @method static void allPath($value, $object, $message = null, $propertyPath = null)
  * @method static void allSystemPath($value, $object, $message = null, $propertyPath = null)
  * @method static void allAbsoluteSystemPath($value, $object, $message = null, $propertyPath = null)
  * @method static void allPackageName($value, $object, $message = null, $propertyPath = null)
@@ -40,16 +37,11 @@ use Webmozart\PathUtil\Path;
  * @method static void allParameterName($value, $message = null, $propertyPath = null)
  * @method static void allParameterValue($value, $message = null, $propertyPath = null)
  */
-class Assert extends Assertion
+class Assert extends \Puli\Repository\Assert\Assert
 {
-    public static function path($value)
-    {
-        \Puli\Repository\Assert\Assert::path($value);
-    }
-
     public static function systemPath($value)
     {
-        Assert::string($value, 'The path must be a string. Got: %2$s');
+        Assert::string($value, 'The path must be a string. Got: %s');
         Assert::notEmpty($value, 'The path must not be empty.');
     }
 
@@ -57,53 +49,52 @@ class Assert extends Assertion
     {
         Assert::systemPath($value);
         Assert::true(Path::isAbsolute($value), sprintf(
-            'The path "%s" is not absolute.',
+            'The path %s is not absolute.',
             $value
         ));
     }
 
     public static function packageName($value)
     {
-        self::string($value, 'The package name must be a string. Got: %2$s');
+        self::string($value, 'The package name must be a string. Got: %s');
         self::notEmpty($value, 'The package name must not be empty.');
 
         if (RootPackage::DEFAULT_NAME !== $value) {
-            self::contains($value, '/', 'The package name must contain a vendor name followed by a "/". Got: "%s"');
+            self::contains($value, '/', 'The package name %s must contain a vendor name followed by a "/".');
         }
     }
 
     public static function query($value)
     {
-        self::string($value, 'The query must be a string. Got: %2$s');
+        self::string($value, 'The query must be a string. Got: %s');
         self::notEmpty($value, 'The query must not be empty.');
     }
 
     public static function language($value)
     {
-        self::string($value, 'The language must be a string. Got: %2$s');
+        self::string($value, 'The language must be a string. Got: %s');
         self::notEmpty($value, 'The language must not be empty.');
     }
 
     public static function typeName($value)
     {
-        Assert::string($value, 'The type name must be a string. Got: %2$s');
+        Assert::string($value, 'The type name must be a string. Got: %s');
         Assert::notEmpty($value, 'The type name must not be empty.');
-        Assert::contains($value, '/', 'The type name must contain a vendor name followed by a "/". Got: "%s"');
-        Assert::regex($value, '~^[a-z][a-z0-9\-]*/[a-z0-9\-]+$~', 'The type name must contain lower-case characters, digits and hyphens only. Got: "%s"');
+        Assert::contains($value, '/', 'The type name %s must contain a vendor name followed by a "/".');
+        Assert::startsWithLetter($value, 'The type name %s must start with a letter.');
+        Assert::regex($value, '~^[a-z][a-z0-9\-]*/[a-z0-9\-]+$~', 'The type name %s must contain lower-case characters, digits and hyphens only.');
     }
 
     public static function parameterName($value)
     {
-        Assert::string($value, 'The parameter name must be a string. Got: %2$s');
+        Assert::string($value, 'The parameter name must be a string. Got: %s');
         Assert::notEmpty($value, 'The parameter name must not be empty.');
-        Assert::regex($value, '~^[a-z][a-z0-9\-]*$~', 'The parameter name must contain lower-case characters, digits and hyphens only and start with a letter. Got: "%s"');
+        Assert::startsWithLetter($value, 'The parameter name %s must start with a letter.');
+        Assert::regex($value, '~^[a-z][a-z0-9\-]*$~', 'The parameter %s name must contain lower-case characters, digits and hyphens only.');
     }
 
     public static function parameterValue($value)
     {
-        Assert::scalar($value, sprintf(
-            'The parameter value must be a scalar value. Got: %s',
-            is_object($value) ? get_class($value) : gettype($value)
-        ));
+        Assert::scalar($value, 'The parameter value must be a scalar. Got: %s');
     }
 }

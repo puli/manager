@@ -61,7 +61,7 @@ class BindingTypeDescriptor
     public function __construct($name, $description = null, array $parameters = array())
     {
         Assert::typeName($name);
-        Assert::nullOrString($description, 'The type description must be a string or null. Got: %2$s');
+        Assert::nullOrString($description, 'The type description must be a string or null. Got: %s');
         Assert::nullOrNotEmpty($description, 'The type description must not be empty.');
         Assert::allIsInstanceOf($parameters, __NAMESPACE__.'\BindingParameterDescriptor');
 

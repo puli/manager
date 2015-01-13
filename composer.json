@@ -11,14 +11,13 @@
     ],
     "require": {
         "php": ">=5.3.9",
-        "puli/repository": "~1.0",
+        "puli/repository": "1.0.*",
         "puli/discovery": "~1.0",
         "puli/factory": "~1.0",
         "webmozart/json": "~1.0",
         "webmozart/path-util": "~1.0",
         "symfony/event-dispatcher": "~2.3",
         "symfony/filesystem": "~2.3",
-        "beberlei/assert": "~2.3",
         "rhumsaa/uuid": "~2.8",
         "psr/log": "~1.0"
     },

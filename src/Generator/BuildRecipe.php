@@ -11,8 +11,8 @@
 
 namespace Puli\RepositoryManager\Generator;
 
-use Assert\Assertion;
 use InvalidArgumentException;
+use Puli\RepositoryManager\Assert\Assert;
 
 /**
  * Stores the build recipe of a service.
@@ -109,12 +109,12 @@ class BuildRecipe
      */
     public function addVarDeclaration($varName, $source)
     {
-        Assertion::false(isset($this->varDeclarations[$varName]), sprintf(
+        Assert::false(isset($this->varDeclarations[$varName]), sprintf(
             'The variable "%s" is already defined.',
             $varName
         ));
-        Assertion::startsWith($varName, '$', 'The variable "%s" must start with a "$".');
-        Assertion::contains($source, $varName, 'The variable "%2$s" must occur in the source code.');
+        Assert::startsWith($varName, '$', 'The variable %s must start with a "$".');
+        Assert::contains($source, $varName, 'The variable %2$s must occur in the source code.');
 
         $this->varDeclarations[$varName] = $source;
     }

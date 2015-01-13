@@ -50,7 +50,7 @@ class ResourceMapping
         $filesystemPaths = (array) $filesystemPaths;
 
         Assert::notEmpty($filesystemPaths, 'At least one local path must be passed.');
-        Assert::allString($filesystemPaths, 'The local paths must be strings. Got: %2$s');
+        Assert::allString($filesystemPaths, 'The local paths must be strings. Got: %s');
         Assert::allNotEmpty($filesystemPaths, 'The local paths must not be empty.');
 
         $this->repositoryPath = $repositoryPath;

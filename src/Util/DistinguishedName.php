@@ -51,14 +51,14 @@ class DistinguishedName
      */
     public function add($name, $value)
     {
-        Assert::string($name, 'The attribute name must be a string. Got: %2$s');
+        Assert::string($name, 'The attribute name must be a string. Got: %s');
         Assert::notEmpty($name, 'The attribute name must not be empty.');
+        Assert::startsWithLetter($name, 'The attribute name %s must start with a letter.');
         Assert::true((bool) preg_match('~^[a-zA-Z][a-zA-Z0-9\-]*$~', $name), sprintf(
-            'The attribute name must start with a letter and consist of '.
-            'letters, numbers and hyphens only. Got: "%s"',
+            'The attribute name must contain letters, numbers and hyphens only. Got: "%s"',
             $name
         ));
-        Assert::string($value, 'The attribute value must be a string. Got: %2$s');
+        Assert::string($value, 'The attribute value must be a string. Got: %s');
 
         $this->attributes[$name] = $value;
     }

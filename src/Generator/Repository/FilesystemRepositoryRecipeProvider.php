@@ -40,7 +40,7 @@ class FilesystemRepositoryRecipeProvider implements BuildRecipeProvider
             $options['path'] = $outputDir.'/repository';
         }
 
-        Assert::string($options['path'], 'The "path" option should be a string. Got: %2$s');
+        Assert::string($options['path'], 'The "path" option should be a string. Got: %s');
         Assert::boolean($options['symlink'], 'The "symlink" option should be a boolean. Got: %s');
 
         $path = Path::makeAbsolute($options['path'], $rootDir);
