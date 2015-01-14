@@ -48,6 +48,35 @@ class CompositeKeyStore
     }
 
     /**
+     * Removes a value from the store.
+     *
+     * This method ignores non-existing keys.
+     *
+     * @param int|string $primaryKey   The primary key.
+     * @param int|string $secondaryKey The secondary key.
+     */
+    public function remove($primaryKey, $secondaryKey)
+    {
+        unset($this->values[$primaryKey][$secondaryKey]);
+
+        if (isset($this->values[$primaryKey]) && 0 === count($this->values[$primaryKey])) {
+            unset($this->values[$primaryKey]);
+        }
+    }
+
+    /**
+     * Removes all values for the given primary key.
+     *
+     * This method ignores non-existing keys.
+     *
+     * @param int|string $primaryKey The primary key.
+     */
+    public function removeAll($primaryKey)
+    {
+        unset($this->values[$primaryKey]);
+    }
+
+    /**
      * Returns a value from the store.
      *
      * @param int|string $primaryKey   The primary key.
@@ -204,35 +233,6 @@ class CompositeKeyStore
     public function getPrimaryKeys()
     {
         return array_keys($this->values);
-    }
-
-    /**
-     * Removes a value from the store.
-     *
-     * This method ignores non-existing keys.
-     *
-     * @param int|string $primaryKey   The primary key.
-     * @param int|string $secondaryKey The secondary key.
-     */
-    public function remove($primaryKey, $secondaryKey)
-    {
-        unset($this->values[$primaryKey][$secondaryKey]);
-
-        if (isset($this->values[$primaryKey]) && 0 === count($this->values[$primaryKey])) {
-            unset($this->values[$primaryKey]);
-        }
-    }
-
-    /**
-     * Removes all values for the given primary key.
-     *
-     * This method ignores non-existing keys.
-     *
-     * @param int|string $primaryKey The primary key.
-     */
-    public function removeAll($primaryKey)
-    {
-        unset($this->values[$primaryKey]);
     }
 
     /**
