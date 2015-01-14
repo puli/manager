@@ -120,56 +120,6 @@ class RepositoryManager
     }
 
     /**
-     * Loads the resource mappings and override settings for the installed
-     * packages.
-     *
-     * The method processes the package configuration files and stores the
-     * following information:
-     *
-     *  * The resources mappings of each package.
-     *  * The override dependencies between the packages.
-     *
-     * Once all that information is loaded, the repository can be built by
-     * loading the resource mappings of the packages in the order determined
-     * by the override dependencies: First the resources of overridden packages
-     * are added to the repository, then the resources of the overriding ones.
-     *
-     * If two packages map the same resource path without having an override
-     * order specified between them, a conflict exception is raised. The
-     * override order can be specified either by marking one package to override
-     * the other one (see {@link PackageFile::setOverriddenPackages()} or by
-     * setting the order between the packages in the root package file
-     * (see RootPackageFile::setPackageOrder()}.
-     *
-     * This method is called automatically when necessary. You can however use
-     * it to validate the configuration files of the packages without doing any
-     * changes to them.
-     *
-     * @throws PackageConflictException If a resource conflict is detected.
-     */
-    public function loadPackages()
-    {
-        $this->overrideGraph = new OverrideGraph($this->packages->getPackageNames());
-        $this->conflictDetector = new PackageConflictDetector($this->overrideGraph);
-
-        foreach ($this->packages as $package) {
-            foreach ($package->getPackageFile()->getResourceMappings() as $mapping) {
-                if (!$absMapping = $this->getAbsoluteMapping($mapping, $package)) {
-                    continue;
-                }
-
-                $this->loadResourceMapping($absMapping, $package->getName());
-            }
-
-            $this->loadOverrideOrder($package);
-        }
-
-        if ($conflict = $this->conflictDetector->detectConflict()) {
-            throw PackageConflictException::forPathConflict($conflict);
-        }
-    }
-
-    /**
      * Adds a resource mapping to the repository.
      *
      * @param ResourceMapping $mapping The resource mapping.
@@ -281,6 +231,10 @@ class RepositoryManager
      */
     public function getResourceMappings($packageName = null)
     {
+        if (!$this->overrideGraph) {
+            $this->loadPackages();
+        }
+
         $packageNames = $packageName ? (array) $packageName : $this->packages->getPackageNames();
         $mappings = array();
 
@@ -339,6 +293,56 @@ class RepositoryManager
         }
 
         $this->repo->clear();
+    }
+
+    /**
+     * Loads the resource mappings and override settings for the installed
+     * packages.
+     *
+     * The method processes the package configuration files and stores the
+     * following information:
+     *
+     *  * The resources mappings of each package.
+     *  * The override dependencies between the packages.
+     *
+     * Once all that information is loaded, the repository can be built by
+     * loading the resource mappings of the packages in the order determined
+     * by the override dependencies: First the resources of overridden packages
+     * are added to the repository, then the resources of the overriding ones.
+     *
+     * If two packages map the same resource path without having an override
+     * order specified between them, a conflict exception is raised. The
+     * override order can be specified either by marking one package to override
+     * the other one (see {@link PackageFile::setOverriddenPackages()} or by
+     * setting the order between the packages in the root package file
+     * (see RootPackageFile::setPackageOrder()}.
+     *
+     * This method is called automatically when necessary. You can however use
+     * it to validate the configuration files of the packages without doing any
+     * changes to them.
+     *
+     * @throws PackageConflictException If a resource conflict is detected.
+     */
+    private function loadPackages()
+    {
+        $this->overrideGraph = new OverrideGraph($this->packages->getPackageNames());
+        $this->conflictDetector = new PackageConflictDetector($this->overrideGraph);
+
+        foreach ($this->packages as $package) {
+            foreach ($package->getPackageFile()->getResourceMappings() as $mapping) {
+                if (!$absMapping = $this->getAbsoluteMapping($mapping, $package)) {
+                    continue;
+                }
+
+                $this->loadResourceMapping($absMapping, $package->getName());
+            }
+
+            $this->loadOverrideOrder($package);
+        }
+
+        if ($conflict = $this->conflictDetector->detectConflict()) {
+            throw PackageConflictException::forPathConflict($conflict);
+        }
     }
 
     private function loadRepository()

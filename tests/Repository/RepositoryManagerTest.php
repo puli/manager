@@ -112,84 +112,6 @@ class RepositoryManagerTest extends ManagerTestCase
         $filesystem->remove($this->tempDir);
     }
 
-    /**
-     * @expectedException \InvalidArgumentException
-     */
-    public function testLoadPackagesFailsIfResourceNotFound()
-    {
-        $packageFile = new PackageFile('vendor/package1');
-        $packageFile->addResourceMapping(new ResourceMapping('/package', 'foobar'));
-
-        $this->packages->add(new Package($packageFile, $this->packageDir1));
-
-        $manager = new RepositoryManager($this->environment, $this->packages, $this->packageFileStorage);
-        $manager->loadPackages();
-    }
-
-    /**
-     * @expectedException \Puli\RepositoryManager\Conflict\PackageConflictException
-     */
-    public function testLoadPackagesFailsIfPathConflict()
-    {
-        $packageFile1 = new PackageFile('vendor/package1');
-        $packageFile1->addResourceMapping(new ResourceMapping('/path', 'resources'));
-
-        $packageFile2 = new PackageFile('vendor/package2');
-        $packageFile2->addResourceMapping(new ResourceMapping('/path', 'resources'));
-
-        // One of the packages  must explicitly set the other package as
-        // overridden package
-
-        $this->packages->add(new Package($packageFile1, $this->packageDir1));
-        $this->packages->add(new Package($packageFile2, $this->packageDir2));
-
-        $manager = new RepositoryManager($this->environment, $this->packages, $this->packageFileStorage);
-        $manager->loadPackages();
-    }
-
-    /**
-     * @expectedException \Puli\RepositoryManager\Conflict\PackageConflictException
-     */
-    public function testLoadPackagesFailsIfPathConflictWithNestedPath()
-    {
-        $packageFile1 = new PackageFile('vendor/package1');
-        $packageFile1->addResourceMapping(new ResourceMapping('/path', 'resources'));
-
-        $packageFile2 = new PackageFile('vendor/package2');
-        $packageFile2->addResourceMapping(new ResourceMapping('/path/config', 'override'));
-
-        // One of the packages  must explicitly set the other package as
-        // overridden package
-
-        $this->packages->add(new Package($packageFile1, $this->packageDir1));
-        $this->packages->add(new Package($packageFile2, $this->packageDir2));
-
-        $manager = new RepositoryManager($this->environment, $this->packages, $this->packageFileStorage);
-        $manager->loadPackages();
-    }
-
-    /**
-     * @expectedException \Puli\RepositoryManager\Conflict\PackageConflictException
-     */
-    public function testLoadPackagesFailsIfPathConflictAndPackageOrderInNonRootPackage()
-    {
-        $packageFile1 = new PackageFile('vendor/package1');
-        $packageFile1->addResourceMapping(new ResourceMapping('/path', 'resources'));
-
-        $packageFile2 = new PackageFile('vendor/package2');
-        $packageFile2->addResourceMapping(new ResourceMapping('/path', 'override'));
-
-        $pseudoRootConfig = new RootPackageFile('vendor/root');
-        $pseudoRootConfig->setOverrideOrder(array('vendor/package1', 'vendor/package2'));
-
-        $this->packages->add(new Package($packageFile1, $this->packageDir1));
-        $this->packages->add(new Package($packageFile2, $this->packageDir2));
-        $this->packages->add(new Package($pseudoRootConfig, $this->packageDir3));
-
-        $manager = new RepositoryManager($this->environment, $this->packages, $this->packageFileStorage);
-        $manager->loadPackages();
-    }
-
     public function testAddResourceMappingWithDirectoryPath()
     {
         $this->initDefaultManager();
@@ -560,7 +482,7 @@ class RepositoryManagerTest extends ManagerTestCase
         $this->rootPackageFile->addResourceMapping($mapping1 = new ResourceMapping('/app', 'resources'));
         $this->packageFile1->addResourceMapping($mapping2 = new ResourceMapping('/package1', 'resources'));
         $this->packageFile2->addResourceMapping($mapping3 = new ResourceMapping('/package2', 'resources'));
-        $this->packageFile3->addResourceMapping($mapping4 = new ResourceMapping('/package2', 'resources'));
+        $this->packageFile3->addResourceMapping($mapping4 = new ResourceMapping('/package3', 'resources'));
 
         $this->assertSame(array(
             $mapping1,
@@ -571,6 +493,84 @@ class RepositoryManagerTest extends ManagerTestCase
 
         $this->assertSame(array($mapping2), $this->manager->getResourceMappings('vendor/package1'));
         $this->assertSame(array($mapping2, $mapping3), $this->manager->getResourceMappings(array('vendor/package1', 'vendor/package2')));
+    }
+
+    /**
+     * @expectedException \InvalidArgumentException
+     */
+    public function testGetResourceMappingsFailsIfResourceNotFound()
+    {
+        $packageFile = new PackageFile('vendor/package1');
+        $packageFile->addResourceMapping(new ResourceMapping('/package', 'foobar'));
+
+        $this->packages->add(new Package($packageFile, $this->packageDir1));
+
+        $manager = new RepositoryManager($this->environment, $this->packages, $this->packageFileStorage);
+        $manager->getResourceMappings();
+    }
+
+    /**
+     * @expectedException \Puli\RepositoryManager\Conflict\PackageConflictException
+     */
+    public function testGetResourceMappingsFailsIfPathConflict()
+    {
+        $packageFile1 = new PackageFile('vendor/package1');
+        $packageFile1->addResourceMapping(new ResourceMapping('/path', 'resources'));
+
+        $packageFile2 = new PackageFile('vendor/package2');
+        $packageFile2->addResourceMapping(new ResourceMapping('/path', 'resources'));
+
+        // One of the packages  must explicitly set the other package as
+        // overridden package
+
+        $this->packages->add(new Package($packageFile1, $this->packageDir1));
+        $this->packages->add(new Package($packageFile2, $this->packageDir2));
+
+        $manager = new RepositoryManager($this->environment, $this->packages, $this->packageFileStorage);
+        $manager->getResourceMappings();
+    }
+
+    /**
+     * @expectedException \Puli\RepositoryManager\Conflict\PackageConflictException
+     */
+    public function testGetResourceMappingsFailsIfPathConflictWithNestedPath()
+    {
+        $packageFile1 = new PackageFile('vendor/package1');
+        $packageFile1->addResourceMapping(new ResourceMapping('/path', 'resources'));
+
+        $packageFile2 = new PackageFile('vendor/package2');
+        $packageFile2->addResourceMapping(new ResourceMapping('/path/config', 'override'));
+
+        // One of the packages  must explicitly set the other package as
+        // overridden package
+
+        $this->packages->add(new Package($packageFile1, $this->packageDir1));
+        $this->packages->add(new Package($packageFile2, $this->packageDir2));
+
+        $manager = new RepositoryManager($this->environment, $this->packages, $this->packageFileStorage);
+        $manager->getResourceMappings();
+    }
+
+    /**
+     * @expectedException \Puli\RepositoryManager\Conflict\PackageConflictException
+     */
+    public function testGetResourceMappingsFailsIfPathConflictAndPackageOrderInNonRootPackage()
+    {
+        $packageFile1 = new PackageFile('vendor/package1');
+        $packageFile1->addResourceMapping(new ResourceMapping('/path', 'resources'));
+
+        $packageFile2 = new PackageFile('vendor/package2');
+        $packageFile2->addResourceMapping(new ResourceMapping('/path', 'override'));
+
+        $pseudoRootConfig = new RootPackageFile('vendor/root');
+        $pseudoRootConfig->setOverrideOrder(array('vendor/package1', 'vendor/package2'));
+
+        $this->packages->add(new Package($packageFile1, $this->packageDir1));
+        $this->packages->add(new Package($packageFile2, $this->packageDir2));
+        $this->packages->add(new Package($pseudoRootConfig, $this->packageDir3));
+
+        $manager = new RepositoryManager($this->environment, $this->packages, $this->packageFileStorage);
+        $manager->getResourceMappings();
     }
 
     public function testGetResourceMapping()
