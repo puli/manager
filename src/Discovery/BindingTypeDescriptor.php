@@ -15,7 +15,6 @@ use InvalidArgumentException;
 use Puli\Discovery\Api\Binding\BindingType;
 use Puli\Discovery\Api\Binding\NoSuchParameterException;
 use Puli\RepositoryManager\Assert\Assert;
-use Puli\RepositoryManager\Discovery\Store\BindingTypeStore;
 
 /**
  * Describes a binding type.
@@ -276,9 +275,9 @@ class BindingTypeDescriptor
     /**
      * Refreshes the state of the binding type.
      *
-     * @param BindingTypeStore $typeStore The store with the defined types.
+     * @param BindingTypeDescriptorStore $typeStore The store with the defined types.
      */
-    public function refreshState(BindingTypeStore $typeStore)
+    public function refreshState(BindingTypeDescriptorStore $typeStore)
     {
         $this->state = BindingTypeState::detect($this, $typeStore);
     }

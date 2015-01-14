@@ -15,7 +15,7 @@ use Puli\RepositoryManager\Config\Config;
 use Puli\RepositoryManager\Discovery\BindingDescriptor;
 use Puli\RepositoryManager\Discovery\BindingParameterDescriptor;
 use Puli\RepositoryManager\Discovery\BindingTypeDescriptor;
-use Puli\RepositoryManager\Discovery\Store\BindingTypeStore;
+use Puli\RepositoryManager\Discovery\BindingTypeDescriptorStore;
 use Puli\RepositoryManager\Environment\ProjectEnvironment;
 use Puli\RepositoryManager\Package\InstallInfo;
 use Puli\RepositoryManager\Package\Package;
@@ -79,7 +79,7 @@ class PackageJsonWriterTest extends JsonWriterTestCase
     public function testWritePackageFileWritesDefaultParameterValuesOfBindings()
     {
         $packageFile = new PackageFile();
-        $typeStore = new BindingTypeStore();
+        $typeStore = new BindingTypeDescriptorStore();
         $package = new Package($packageFile, '/path', new InstallInfo('vendor/package', '/path'));
 
         // We need to create a type and a binding in state ENABLED

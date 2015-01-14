@@ -9,9 +9,8 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\RepositoryManager\Discovery\Store;
+namespace Puli\RepositoryManager\Discovery;
 
-use Puli\RepositoryManager\Discovery\BindingDescriptor;
 use Puli\RepositoryManager\Package\Package;
 use Puli\RepositoryManager\Util\CompositeKeyStore;
 use Rhumsaa\Uuid\Uuid;
@@ -20,7 +19,7 @@ use Rhumsaa\Uuid\Uuid;
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class BindingStore
+class BindingDescriptorStore
 {
     /**
      * @var CompositeKeyStore

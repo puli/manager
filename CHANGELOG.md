@@ -14,7 +14,9 @@ Changelog
  * `PackageManager::getPackages()` returns packages with any state now by default
  * `DiscoveryManager::getBindingTypes()` returns types with any state now by default
  * `DiscoveryManager::getBindings()` returns bindings with any state now by default
- * moved `CompositeKeyStore` to `Puli\RepositoryManager\Util`
+ * moved `CompositeKeyStore` to `Puli\RepositoryManager\Util` namespace
+ * moved `BindingStore` to `Puli\RepositoryManager\Discovery\BindingDescriptorStore`
+ * moved `BindingTypeStore` to `Puli\RepositoryManager\Discovery\BindingTypeDescriptorStore`
 
 * 1.0.0-beta (2015-01-12)
 
@@ -51,8 +53,8 @@ Changelog
  * added `CannotEnableBindingException`
  * added `NoSuchBindingException`
  * added `CompositeKeyStore`
- * added `BindingStore`
- * added `BindingTypeStore`
+ * added `BindingDescriptorStore`
+ * added `BindingTypeDescriptorStore`
  * added `TypeNotEnabledException`
  * added `UnsupportedVersionException`
  * added `PackageState`

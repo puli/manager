@@ -16,7 +16,6 @@ use Puli\Discovery\Api\Binding\NoSuchParameterException;
 use Puli\Discovery\Api\Validation\ConstraintViolation;
 use Puli\Discovery\Validation\SimpleParameterValidator;
 use Puli\RepositoryManager\Assert\Assert;
-use Puli\RepositoryManager\Discovery\Store\BindingTypeStore;
 use Puli\RepositoryManager\Package\Package;
 use Puli\RepositoryManager\Util\DistinguishedName;
 use Rhumsaa\Uuid\Uuid;
@@ -313,10 +312,12 @@ class BindingDescriptor
     /**
      * Refreshes the state of the binding.
      *
-     * @param Package          $package   The package that contains the binding.
-     * @param BindingTypeStore $typeStore The store with the defined types.
+     * @param Package                    $package   The package that contains
+     *                                              the binding.
+     * @param BindingTypeDescriptorStore $typeStore The store with the defined
+     *                                              types.
      */
-    public function refreshState(Package $package, BindingTypeStore $typeStore)
+    public function refreshState(Package $package, BindingTypeDescriptorStore $typeStore)
     {
         $this->type = null;
 

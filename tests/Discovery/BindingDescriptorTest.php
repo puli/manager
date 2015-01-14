@@ -15,7 +15,7 @@ use PHPUnit_Framework_TestCase;
 use Puli\RepositoryManager\Discovery\BindingDescriptor;
 use Puli\RepositoryManager\Discovery\BindingParameterDescriptor;
 use Puli\RepositoryManager\Discovery\BindingTypeDescriptor;
-use Puli\RepositoryManager\Discovery\Store\BindingTypeStore;
+use Puli\RepositoryManager\Discovery\BindingTypeDescriptorStore;
 use Puli\RepositoryManager\Package\InstallInfo;
 use Puli\RepositoryManager\Package\Package;
 use Puli\RepositoryManager\Package\PackageFile\PackageFile;
@@ -31,7 +31,7 @@ class BindingDescriptorTest extends PHPUnit_Framework_TestCase
     private $uuid;
 
     /**
-     * @var BindingTypeStore
+     * @var BindingTypeDescriptorStore
      */
     private $typeStore;
 
@@ -43,7 +43,7 @@ class BindingDescriptorTest extends PHPUnit_Framework_TestCase
     protected function setUp()
     {
         $this->uuid = Uuid::uuid4();
-        $this->typeStore = new BindingTypeStore();
+        $this->typeStore = new BindingTypeDescriptorStore();
         $this->package = new Package(new PackageFile(), '/path', new InstallInfo('vendor/package', '/path'));
     }
 

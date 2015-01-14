@@ -11,7 +11,6 @@
 
 namespace Puli\RepositoryManager\Discovery;
 
-use Puli\RepositoryManager\Discovery\Store\BindingTypeStore;
 use Puli\RepositoryManager\Package\Package;
 use Puli\RepositoryManager\Package\RootPackage;
 
@@ -79,15 +78,16 @@ final class BindingState
     /**
      * Detects the binding state of a binding.
      *
-     * @param BindingDescriptor $bindingDescriptor The binding.
-     * @param Package           $package           The package that contains the
-     *                                             binding.
-     * @param BindingTypeStore  $typeStore         The store with the defined
-     *                                             types.
+     * @param BindingDescriptor          $bindingDescriptor The binding
+     *                                                      descriptor.
+     * @param Package                    $package           The package that
+     *                                                      contains the binding.
+     * @param BindingTypeDescriptorStore $typeStore         The store with the
+     *                                                      defined types.
      *
      * @return int The binding state.
      */
-    public static function detect(BindingDescriptor $bindingDescriptor, Package $package, BindingTypeStore $typeStore)
+    public static function detect(BindingDescriptor $bindingDescriptor, Package $package, BindingTypeDescriptorStore $typeStore)
     {
         $installInfo = $package->getInstallInfo();
         $uuid = $bindingDescriptor->getUuid();

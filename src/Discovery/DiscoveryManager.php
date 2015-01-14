@@ -20,8 +20,6 @@ use Puli\Discovery\Api\DuplicateTypeException;
 use Puli\Discovery\Api\EditableDiscovery;
 use Puli\Discovery\Api\NoSuchTypeException;
 use Puli\Discovery\Api\Validation\ConstraintViolation;
-use Puli\RepositoryManager\Discovery\Store\BindingStore;
-use Puli\RepositoryManager\Discovery\Store\BindingTypeStore;
 use Puli\RepositoryManager\Environment\ProjectEnvironment;
 use Puli\RepositoryManager\Package\Package;
 use Puli\RepositoryManager\Package\PackageCollection;
@@ -72,12 +70,12 @@ class DiscoveryManager
     private $rootPackageFile;
 
     /**
-     * @var BindingTypeStore
+     * @var BindingTypeDescriptorStore
      */
     private $typeStore;
 
     /**
-     * @var BindingStore
+     * @var BindingDescriptorStore
      */
     private $bindingStore;
 
@@ -490,8 +488,8 @@ class DiscoveryManager
 
     private function loadPackages()
     {
-        $this->typeStore = new BindingTypeStore();
-        $this->bindingStore = new BindingStore();
+        $this->typeStore = new BindingTypeDescriptorStore();
+        $this->bindingStore = new BindingDescriptorStore();
 
         // First load all the types
         foreach ($this->packages as $package) {

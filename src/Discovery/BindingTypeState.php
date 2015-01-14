@@ -11,8 +11,6 @@
 
 namespace Puli\RepositoryManager\Discovery;
 
-use Puli\RepositoryManager\Discovery\Store\BindingTypeStore;
-
 /**
  * Contains constants representing the state of a binding type.
  *
@@ -53,13 +51,13 @@ final class BindingTypeState
     /**
      * Detects the state of a binding type.
      *
-     * @param BindingTypeDescriptor $typeDescriptor The binding.
-     * @param BindingTypeStore      $typeStore      The store with the defined
-     *                                              types.
+     * @param BindingTypeDescriptor      $typeDescriptor The type descriptor.
+     * @param BindingTypeDescriptorStore $typeStore      The store with the
+     *                                                   defined types.
      *
      * @return int The state.
      */
-    public static function detect(BindingTypeDescriptor $typeDescriptor, BindingTypeStore $typeStore)
+    public static function detect(BindingTypeDescriptor $typeDescriptor, BindingTypeDescriptorStore $typeStore)
     {
         $typeName = $typeDescriptor->getName();
 
