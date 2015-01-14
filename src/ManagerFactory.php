@@ -26,6 +26,7 @@ use Puli\RepositoryManager\Package\PackageFile\Reader\PackageJsonReader;
 use Puli\RepositoryManager\Package\PackageFile\RootPackageFileManager;
 use Puli\RepositoryManager\Package\PackageFile\Writer\PackageJsonWriter;
 use Puli\RepositoryManager\Package\PackageManager;
+use Puli\RepositoryManager\Package\PackageState;
 use Puli\RepositoryManager\Repository\RepositoryManager;
 use Puli\RepositoryManager\Util\System;
 use Symfony\Component\EventDispatcher\EventDispatcher;
@@ -237,7 +238,7 @@ class ManagerFactory
 
         return new RepositoryManager(
             $environment,
-            $packageManager->getPackages(),
+            $packageManager->getPackages(PackageState::ENABLED),
             $this->getPackageFileStorage($environment->getEventDispatcher())
         );
     }
@@ -257,7 +258,7 @@ class ManagerFactory
 
         return new DiscoveryManager(
             $environment,
-            $packageManager->getPackages(),
+            $packageManager->getPackages(PackageState::ENABLED),
             $this->getPackageFileStorage($environment->getEventDispatcher()),
             $logger
         );

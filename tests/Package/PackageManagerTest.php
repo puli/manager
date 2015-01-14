@@ -133,9 +133,9 @@ class PackageManagerTest extends ManagerTestCase
         $filesystem->remove($this->tempDir);
     }
 
-    public function testGetEnabledPackages()
+    public function testGetAllPackages()
     {
-        $this->rootPackageFile->addInstallInfo($installInfo1 = new InstallInfo('vendor/package1', '../package1'));
+        $this->rootPackageFile->addInstallInfo($installInfo1 = new InstallInfo('vendor/package1', '../foo'));
         $this->rootPackageFile->addInstallInfo($installInfo2 = new InstallInfo('vendor/package2', $this->packageDir2));
 
         $manager = new PackageManager($this->environment, $this->packageFileStorage);
@@ -143,11 +143,25 @@ class PackageManagerTest extends ManagerTestCase
         $packages = $manager->getPackages();
 
         $this->assertInstanceOf('Puli\RepositoryManager\Package\PackageCollection', $packages);
-        $this->assertEquals(array(
-            'vendor/root' => new RootPackage($this->rootPackageFile, $this->rootDir),
-            'vendor/package1' => new Package($this->packageFile1, $this->packageDir1, $installInfo1),
-            'vendor/package2' => new Package($this->packageFile2, $this->packageDir2, $installInfo2),
-        ), $packages->toArray());
+        $this->assertTrue($packages->contains('vendor/root'));
+        $this->assertTrue($packages->contains('vendor/package1'));
+        $this->assertTrue($packages->contains('vendor/package2'));
+        $this->assertCount(3, $packages);
+    }
+
+    public function testGetEnabledPackages()
+    {
+        $this->rootPackageFile->addInstallInfo($installInfo1 = new InstallInfo('vendor/package1', '../foo'));
+        $this->rootPackageFile->addInstallInfo($installInfo2 = new InstallInfo('vendor/package2', $this->packageDir2));
+
+        $manager = new PackageManager($this->environment, $this->packageFileStorage);
+
+        $packages = $manager->getPackages(PackageState::ENABLED);
+
+        $this->assertInstanceOf('Puli\RepositoryManager\Package\PackageCollection', $packages);
+        $this->assertTrue($packages->contains('vendor/root'));
+        $this->assertTrue($packages->contains('vendor/package2'));
+        $this->assertCount(2, $packages);
     }
 
     public function testGetNotFoundPackages()
@@ -252,35 +266,31 @@ class PackageManagerTest extends ManagerTestCase
         $this->assertCount(1, $userPackages);
     }
 
-    public function testLoadPackagesStoresExceptionIfPackageDirectoryNotFound()
+    public function testGetPackagesStoresExceptionIfPackageDirectoryNotFound()
     {
         $manager = new PackageManager($this->environment, $this->packageFileStorage);
 
         $this->rootPackageFile->addInstallInfo(new InstallInfo('vendor/package', 'foobar'));
 
-        $manager->loadPackages();
+        $packages = $manager->getPackages();
 
-        $package = $manager->getPackage('vendor/package');
-
-        $this->assertTrue($package->isNotFound());
-        $this->assertInstanceOf('Puli\RepositoryManager\FileNotFoundException', $package->getLoadError());
+        $this->assertTrue($packages['vendor/package']->isNotFound());
+        $this->assertInstanceOf('Puli\RepositoryManager\FileNotFoundException', $packages['vendor/package']->getLoadError());
     }
 
-    public function testLoadPackagesStoresExceptionIfPackageNoDirectory()
+    public function testGetPackagesStoresExceptionIfPackageNoDirectory()
     {
         $this->rootPackageFile->addInstallInfo(new InstallInfo('vendor/package', __DIR__.'/Fixtures/file'));
 
         $manager = new PackageManager($this->environment, $this->packageFileStorage);
 
-        $manager->loadPackages();
+        $packages = $manager->getPackages();
 
-        $package = $manager->getPackage('vendor/package');
-
-        $this->assertTrue($package->isNotLoadable());
-        $this->assertInstanceOf('Puli\RepositoryManager\NoDirectoryException', $package->getLoadError());
+        $this->assertTrue($packages['vendor/package']->isNotLoadable());
+        $this->assertInstanceOf('Puli\RepositoryManager\NoDirectoryException', $packages['vendor/package']->getLoadError());
     }
 
-    public function testLoadPackagesStoresExceptionIfPackageFileVersionNotSupported()
+    public function testGetPackagesStoresExceptionIfPackageFileVersionNotSupported()
     {
         $this->rootPackageFile->addInstallInfo(new InstallInfo('vendor/package', $this->packageDir1));
 
@@ -293,15 +303,13 @@ class PackageManagerTest extends ManagerTestCase
 
         $manager = new PackageManager($this->environment, $this->packageFileStorage);
 
-        $manager->loadPackages();
+        $packages = $manager->getPackages();
 
-        $package = $manager->getPackage('vendor/package');
-
-        $this->assertTrue($package->isNotLoadable());
-        $this->assertSame($exception, $package->getLoadError());
+        $this->assertTrue($packages['vendor/package']->isNotLoadable());
+        $this->assertSame($exception, $packages['vendor/package']->getLoadError());
     }
 
-    public function testLoadPackagesStoresExceptionIfPackageFileInvalid()
+    public function testGetPackagesStoresExceptionIfPackageFileInvalid()
     {
         $this->rootPackageFile->addInstallInfo(new InstallInfo('vendor/package', $this->packageDir1));
 
@@ -314,12 +322,10 @@ class PackageManagerTest extends ManagerTestCase
 
         $manager = new PackageManager($this->environment, $this->packageFileStorage);
 
-        $manager->loadPackages();
+        $packages = $manager->getPackages();
 
-        $package = $manager->getPackage('vendor/package');
-
-        $this->assertTrue($package->isNotLoadable());
-        $this->assertSame($exception, $package->getLoadError());
+        $this->assertTrue($packages['vendor/package']->isNotLoadable());
+        $this->assertSame($exception, $packages['vendor/package']->getLoadError());
     }
 
     public function testInstallPackage()
@@ -544,7 +550,7 @@ class PackageManagerTest extends ManagerTestCase
     {
         $this->initDefaultManager();
 
-        $this->manager->loadPackages();
+        $this->manager->getPackages();
 
         $this->packageFileStorage->expects($this->never())
             ->method('saveRootPackageFile');

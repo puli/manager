@@ -10,6 +10,8 @@ Changelog
  * multi-valued keys in puli.json are now sorted to avoid changed files in the
    VCS when they haven't really changed
  * made `RepositoryManager::loadPackages()` private
+ * made `PackageManager::loadPackages()` private
+ * `PackageManager::getPackages()` returns packages with any state now by default
 
 * 1.0.0-beta (2015-01-12)
 

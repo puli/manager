@@ -13,6 +13,8 @@ namespace Puli\RepositoryManager\Tests;
 
 use PHPUnit_Framework_TestCase;
 use Puli\RepositoryManager\ManagerFactory;
+use Puli\RepositoryManager\Package\PackageCollection;
+use Puli\RepositoryManager\Package\PackageState;
 use Symfony\Component\Filesystem\Filesystem;
 
 /**
@@ -194,8 +196,16 @@ class ManagerFactoryTest extends PHPUnit_Framework_TestCase
 
     public function testCreateRepositoryManagerWithPackageManager()
     {
+        $packageManager = $this->getMockBuilder('Puli\RepositoryManager\Package\PackageManager')
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $packageManager->expects($this->once())
+            ->method('getPackages')
+            ->with(PackageState::ENABLED)
+            ->willReturn(new PackageCollection());
+
         $environment = $this->factory->createProjectEnvironment($this->tempDir);
-        $packageManager = $this->factory->createPackageManager($environment);
         $manager = $this->factory->createRepositoryManager($environment, $packageManager);
 
         $this->assertInstanceOf('Puli\RepositoryManager\Repository\RepositoryManager', $manager);
@@ -211,8 +221,16 @@ class ManagerFactoryTest extends PHPUnit_Framework_TestCase
 
     public function testCreateDiscoveryManagerWithPackageManager()
     {
+        $packageManager = $this->getMockBuilder('Puli\RepositoryManager\Package\PackageManager')
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $packageManager->expects($this->once())
+            ->method('getPackages')
+            ->with(PackageState::ENABLED)
+            ->willReturn(new PackageCollection());
+
         $environment = $this->factory->createProjectEnvironment($this->tempDir);
-        $packageManager = $this->factory->createPackageManager($environment);
         $manager = $this->factory->createDiscoveryManager($environment, $packageManager);
 
         $this->assertInstanceOf('Puli\RepositoryManager\Discovery\DiscoveryManager', $manager);

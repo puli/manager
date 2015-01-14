@@ -237,14 +237,14 @@ class PackageManager
      *
      * @return PackageCollection The installed packages.
      */
-    public function getPackages($state = PackageState::ENABLED)
+    public function getPackages($state = null)
     {
         $this->assertPackagesLoaded();
 
         $packages = new PackageCollection();
 
         foreach ($this->packages as $package) {
-            if ($state === $package->getState()) {
+            if (null === $state || $state === $package->getState()) {
                 $packages[] = $package;
             }
         }
@@ -298,7 +298,7 @@ class PackageManager
      * @throws NameConflictException If a package has the same name as another
      *                               loaded package.
      */
-    public function loadPackages()
+    private function loadPackages()
     {
         $this->packages = new PackageCollection();
         $this->packages->add(new RootPackage($this->rootPackageFile, $this->rootDir));
