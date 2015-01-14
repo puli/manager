@@ -13,6 +13,7 @@ Changelog
  * made `PackageManager::loadPackages()` private
  * `PackageManager::getPackages()` returns packages with any state now by default
  * `DiscoveryManager::getBindingTypes()` returns types with any state now by default
+ * `DiscoveryManager::getBindings()` returns bindings with any state now by default
 
 * 1.0.0-beta (2015-01-12)
 

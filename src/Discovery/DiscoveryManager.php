@@ -367,7 +367,7 @@ class DiscoveryManager
      *
      * @return BindingDescriptor[] The enabled bindings.
      */
-    public function getBindings($packageName = null, $state = BindingState::ENABLED)
+    public function getBindings($packageName = null, $state = null)
     {
         $this->assertPackagesLoaded();
 
@@ -378,7 +378,7 @@ class DiscoveryManager
             $packageFile = $this->packages[$packageName]->getPackageFile();
 
             foreach ($packageFile->getBindingDescriptors() as $binding) {
-                if ($state === $binding->getState()) {
+                if (null === $state || $state === $binding->getState()) {
                     $bindings[$binding->getUuid()->toString()] = $binding;
                 }
             }
