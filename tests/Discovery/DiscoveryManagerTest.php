@@ -585,13 +585,13 @@ class DiscoveryManagerTest extends ManagerTestCase
         $this->manager->removeBindingType('my/type');
     }
 
-    public function testGetBindingTypes()
+    public function testGetAllBindingTypes()
     {
         $this->initDefaultManager();
 
         $this->rootPackageFile->addTypeDescriptor($type1 = new BindingTypeDescriptor('my/type1'));
         $this->packageFile1->addTypeDescriptor($type2 = new BindingTypeDescriptor('my/type2'));
-        $this->packageFile2->addTypeDescriptor($type3 = new BindingTypeDescriptor('my/type3'));
+        $this->packageFile2->addTypeDescriptor($type3 = clone $type2); // duplicate
         $this->packageFile3->addTypeDescriptor($type4 = new BindingTypeDescriptor('my/type4'));
 
         $this->assertSame(array(
@@ -614,10 +614,10 @@ class DiscoveryManagerTest extends ManagerTestCase
         $this->packageFile2->addTypeDescriptor($type3 = clone $type2);
         $this->packageFile2->addTypeDescriptor($type4 = new BindingTypeDescriptor('my/type3'));
 
-        $this->assertEquals(array($type1, $type4), $this->manager->getBindingTypes());
-        $this->assertEquals(array($type1), $this->manager->getBindingTypes('vendor/package1'));
-        $this->assertEquals(array($type4), $this->manager->getBindingTypes('vendor/package2'));
-        $this->assertEquals(array($type1, $type4), $this->manager->getBindingTypes(array('vendor/package1', 'vendor/package2')));
+        $this->assertEquals(array($type1, $type4), $this->manager->getBindingTypes(null, BindingTypeState::ENABLED));
+        $this->assertEquals(array($type1), $this->manager->getBindingTypes('vendor/package1', BindingTypeState::ENABLED));
+        $this->assertEquals(array($type4), $this->manager->getBindingTypes('vendor/package2', BindingTypeState::ENABLED));
+        $this->assertEquals(array($type1, $type4), $this->manager->getBindingTypes(array('vendor/package1', 'vendor/package2'), BindingTypeState::ENABLED));
     }
 
     public function testGetDuplicateBindingTypesDoesNotIncludeEnabledTypes()

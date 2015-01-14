@@ -182,7 +182,7 @@ class DiscoveryManager
      *
      * @return BindingTypeDescriptor[] The binding types.
      */
-    public function getBindingTypes($packageName = null, $state = BindingTypeState::ENABLED)
+    public function getBindingTypes($packageName = null, $state = null)
     {
         $this->assertPackagesLoaded();
 
@@ -193,7 +193,7 @@ class DiscoveryManager
             $packageFile = $this->packages[$packageName]->getPackageFile();
 
             foreach ($packageFile->getTypeDescriptors() as $type) {
-                if ($state === $type->getState()) {
+                if (null === $state || $state === $type->getState()) {
                     $types[] = $type;
                 }
             }
