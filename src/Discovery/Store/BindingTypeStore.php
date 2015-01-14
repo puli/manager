@@ -13,6 +13,7 @@ namespace Puli\RepositoryManager\Discovery\Store;
 
 use Puli\RepositoryManager\Discovery\BindingTypeDescriptor;
 use Puli\RepositoryManager\Package\Package;
+use Puli\RepositoryManager\Util\CompositeKeyStore;
 
 /**
  * @since  1.0
@@ -91,7 +92,7 @@ class BindingTypeStore
 
     public function getTypeNames()
     {
-        return $this->store->getKeys();
+        return $this->store->getPrimaryKeys();
     }
 
     public function remove($typeName, Package $package)

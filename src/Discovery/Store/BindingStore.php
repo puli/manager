@@ -13,6 +13,7 @@ namespace Puli\RepositoryManager\Discovery\Store;
 
 use Puli\RepositoryManager\Discovery\BindingDescriptor;
 use Puli\RepositoryManager\Package\Package;
+use Puli\RepositoryManager\Util\CompositeKeyStore;
 use Rhumsaa\Uuid\Uuid;
 
 /**
@@ -99,7 +100,7 @@ class BindingStore
     {
         $uuids = array();
 
-        foreach ($this->store->getKeys() as $key) {
+        foreach ($this->store->getPrimaryKeys() as $key) {
             $uuids[] = $this->store->getFirst($key)->getUuid();
         }
 
