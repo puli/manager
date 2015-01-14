@@ -17,6 +17,7 @@ Changelog
  * moved `CompositeKeyStore` to `Puli\RepositoryManager\Util` namespace
  * moved `BindingStore` to `Puli\RepositoryManager\Discovery\BindingDescriptorStore`
  * moved `BindingTypeStore` to `Puli\RepositoryManager\Discovery\BindingTypeDescriptorStore`
+ * added `ResourceMappingStore`
 
 * 1.0.0-beta (2015-01-12)
 

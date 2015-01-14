@@ -87,9 +87,9 @@ class RepositoryManager
     private $conflictDetector;
 
     /**
-     * @var ResourceMapping[][]
+     * @var ResourceMappingStore
      */
-    private $mappingsByPath = array();
+    private $mappingStore;
 
     /**
      * Creates a repository manager.
@@ -137,10 +137,10 @@ class RepositoryManager
         $this->repoUpdater->clear();
 
         $rootPackageName = $this->rootPackage->getName();
-        $absMapping = $this->getAbsoluteMapping($mapping, $this->rootPackage);
+        $absMapping = $this->makeAbsolute($mapping, $this->rootPackage);
 
         if ($absMapping) {
-            $this->loadResourceMapping($absMapping, $rootPackageName);
+            $this->loadResourceMapping($absMapping, $this->rootPackage);
             $this->repoUpdater->add($absMapping, $rootPackageName);
         }
 
@@ -179,11 +179,9 @@ class RepositoryManager
 
         $this->repoUpdater->clear();
 
-        $rootPackageName = $this->rootPackage->getName();
-
-        if (isset($this->mappingsByPath[$repositoryPath][$rootPackageName])) {
-            $absMapping = $this->mappingsByPath[$repositoryPath][$rootPackageName];
-            $this->unloadResourceMapping($absMapping, $rootPackageName);
+        if ($this->mappingStore->exists($repositoryPath, $this->rootPackage)) {
+            $absMapping = $this->mappingStore->get($repositoryPath, $this->rootPackage);
+            $this->unloadResourceMapping($absMapping, $this->rootPackage);
         }
 
         // Save config file before modifying the repository, so that the
@@ -274,8 +272,8 @@ class RepositoryManager
 
         $this->repoUpdater->clear();
 
-        foreach ($this->mappingsByPath as $repositoryPath => $mappings) {
-            foreach ($mappings as $packageName => $mapping) {
+        foreach ($this->mappingStore->getRepositoryPaths() as $repositoryPath) {
+            foreach ($this->mappingStore->getAll($repositoryPath) as $packageName => $mapping) {
                 $this->repoUpdater->add($mapping, $packageName);
             }
         }
@@ -327,14 +325,15 @@ class RepositoryManager
     {
         $this->overrideGraph = new OverrideGraph($this->packages->getPackageNames());
         $this->conflictDetector = new PackageConflictDetector($this->overrideGraph);
+        $this->mappingStore = new ResourceMappingStore();
 
         foreach ($this->packages as $package) {
             foreach ($package->getPackageFile()->getResourceMappings() as $mapping) {
-                if (!$absMapping = $this->getAbsoluteMapping($mapping, $package)) {
+                if (!$absMapping = $this->makeAbsolute($mapping, $package)) {
                     continue;
                 }
 
-                $this->loadResourceMapping($absMapping, $package->getName());
+                $this->loadResourceMapping($absMapping, $package);
             }
 
             $this->loadOverrideOrder($package);
@@ -355,36 +354,30 @@ class RepositoryManager
         $this->repoUpdater = new RepositoryUpdater($this->repo, $this->overrideGraph);
     }
 
-    /**
-     * @param ResourceMapping $mapping
-     * @param string          $packageName
-     */
-    private function loadResourceMapping(ResourceMapping $mapping, $packageName)
+    private function loadResourceMapping(ResourceMapping $mapping, Package $package)
     {
         $iterator = $this->getMappingIterator($mapping);
 
-        foreach ($iterator as $filesystemPath => $repositoryPath) {
-            if (!isset($this->mappingsByPath[$repositoryPath])) {
-                $this->mappingsByPath[$repositoryPath] = array();
-            }
-
-            $this->mappingsByPath[$repositoryPath][$packageName] = $mapping;
-
-            $this->conflictDetector->claim($repositoryPath, $packageName);
+        foreach ($iterator as $repositoryPath) {
+            $this->mappingStore->add($repositoryPath, $package, $mapping);
+            $this->conflictDetector->claim($repositoryPath, $package->getName());
         }
     }
 
-    private function unloadResourceMapping(ResourceMapping $mapping, $packageName)
+    private function unloadResourceMapping(ResourceMapping $mapping, Package $package)
     {
         $iterator = $this->getMappingIterator($mapping);
 
-        foreach ($iterator as $filesystemPath => $repositoryPath) {
-            $this->conflictDetector->release($repositoryPath, $packageName);
+        foreach ($iterator as $repositoryPath) {
+            $this->mappingStore->remove($repositoryPath, $package);
+            $this->conflictDetector->release($repositoryPath, $package->getName());
 
-            unset($this->mappingsByPath[$repositoryPath][$packageName]);
+            if (!$this->mappingStore->existsAny($repositoryPath)) {
+                continue;
+            }
 
             // Reapply any overridden mappings
-            foreach ($this->mappingsByPath[$repositoryPath] as $overriddenPackage => $overriddenMapping) {
+            foreach ($this->mappingStore->getAll($repositoryPath) as $overriddenPackage => $overriddenMapping) {
                 $this->repoUpdater->add($overriddenMapping, $overriddenPackage);
             }
         }
@@ -436,12 +429,12 @@ class RepositoryManager
      *
      * @return ResourceMapping|null
      */
-    private function getAbsoluteMapping(ResourceMapping $mapping, Package $package)
+    private function makeAbsolute(ResourceMapping $mapping, Package $package)
     {
         $filesystemPaths = array();
 
         foreach ($mapping->getFilesystemPaths() as $relativePath) {
-            $absolutePath = $this->makeAbsolute($relativePath, $package);
+            $absolutePath = $this->makeAbsolutePath($relativePath, $package);
 
             if (null === $absolutePath) {
                 continue;
@@ -470,7 +463,7 @@ class RepositoryManager
      *
      * @return null|string
      */
-    private function makeAbsolute($relativePath, Package $package)
+    private function makeAbsolutePath($relativePath, Package $package)
     {
         // Reference to install path of other package
         if ('@' !== $relativePath[0] || false === ($pos = strpos($relativePath, ':'))) {
