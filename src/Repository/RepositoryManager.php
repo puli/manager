@@ -266,7 +266,6 @@ class RepositoryManager
      *                              directory.
      * @throws PackageConflictException If two packages contain conflicting
      *                                  resource definitions.
-     * @throws ResourceDefinitionException If a resource definition is invalid.
      */
     public function buildRepository()
     {

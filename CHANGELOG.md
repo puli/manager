@@ -49,6 +49,7 @@ Changelog
    if mapped paths/packages are not found or have a conflict. Instead, you can
    access load errors and conflicts via `ResourceMapping::getLoadErrors()` and
    `ResourceMapping::getConflicts()`
+ * removed unused `ResourceDefinitionException`
 
 * 1.0.0-beta (2015-01-12)
 
