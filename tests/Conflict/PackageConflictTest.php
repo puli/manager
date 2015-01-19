@@ -22,19 +22,19 @@ class PackageConflictTest extends PHPUnit_Framework_TestCase
 {
     public function testInvolvesPackage()
     {
-        $conflict = new PackageConflict('token', 'package1', 'package2');
+        $conflict = new PackageConflict('token', array('package1', 'package2'));
 
         $this->assertTrue($conflict->involvesPackage('package1'));
         $this->assertTrue($conflict->involvesPackage('package2'));
         $this->assertFalse($conflict->involvesPackage('package3'));
     }
 
-    public function testGetOpponent()
+    public function testGetOpponents()
     {
-        $conflict = new PackageConflict('token', 'package1', 'package2');
+        $conflict = new PackageConflict('token', array('package1', 'package2'));
 
-        $this->assertSame('package2', $conflict->getOpponent('package1'));
-        $this->assertSame('package1', $conflict->getOpponent('package2'));
-        $this->assertNull($conflict->getOpponent('package3'));
+        $this->assertSame(array('package2'), $conflict->getOpponents('package1'));
+        $this->assertSame(array('package1'), $conflict->getOpponents('package2'));
+        $this->assertSame(array(), $conflict->getOpponents('package3'));
     }
 }

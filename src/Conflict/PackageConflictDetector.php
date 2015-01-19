@@ -25,13 +25,13 @@ namespace Puli\RepositoryManager\Conflict;
  * $detector->claim('/app/config', 'package1');
  * $detector->claim('/app/views', 'package2');
  *
- * $conflict = $detector->detectConflict();
- * // => null
+ * $conflicts = $detector->detectConflicts(array('/app/config', '/app/views'));
+ * // => array()
  *
  * $detector->claim('/app/config', 'package2');
  *
- * $conflict = $detector->detectConflict();
- * // => PackageConflict
+ * $conflicts = $detector->detectConflicts(array('/app/config', '/app/views'));
+ * // => array(PackageConflict)
  * ```
  *
  * You can resolve conflicts by passing an {@link OverrideGraph} to the
@@ -56,8 +56,8 @@ namespace Puli\RepositoryManager\Conflict;
  * $detector->claim('/app/config', 'package2');
  *
  * // The conflict has been resolved
- * $conflict = $detector->detectConflict();
- * // => null
+ * $conflict s= $detector->detectConflict(array('/app/config'));
+ * // => array()
  * ```
  *
  * @since  1.0
@@ -74,11 +74,6 @@ class PackageConflictDetector
      * @var bool[][]
      */
     private $tokens = array();
-
-    /**
-     * @var bool[]
-     */
-    private $uncheckedTokens = array();
 
     /**
      * Creates a new conflict detector.
@@ -105,9 +100,6 @@ class PackageConflictDetector
         }
 
         $this->tokens[$token][$packageName] = true;
-
-        // Remember that the token needs to be checked during conflict detection
-        $this->uncheckedTokens[$token] = true;
     }
 
     /**
@@ -123,24 +115,32 @@ class PackageConflictDetector
     }
 
     /**
-     * Checks the claimed tokens for conflicts.
+     * Checks the passed tokens for conflicts.
+     *
+     * If no tokens are passed, all tokens are checked.
      *
      * A conflict is returned for every token that is claimed by two packages
-     * that have no edge in the override graph. In other words, if two packages
-     * A and B claim the same token, an edge must exist from A to B (A is
-     * overridden by B) or from B to A (B is overridden by A). Otherwise a
-     * conflict is returned.
+     * that are not connected by an edge in the override graph. In other words,
+     * if two packages A and B claim the same token, an edge must exist from A
+     * to B (A is overridden by B) or from B to A (B is overridden by A).
+     * Otherwise a conflict is returned.
      *
-     * @return PackageConflict Returns the detected conflict or `null` if no
-     *                         conflict was found.
+     * @param int[]|string[] $tokens The tokens to check. If `null`, all claimed
+     *                               tokens are checked for conflicts. You are
+     *                               advised to pass tokens if possible to
+     *                               improve the performance of the conflict
+     *                               detection.
+     *
+     * @return PackageConflict[] The detected conflicts.
      */
-    public function detectConflict()
+    public function detectConflicts(array $tokens = null)
     {
-        foreach ($this->uncheckedTokens as $token => $true) {
+        $tokens = null === $tokens ? array_keys($this->tokens) : $tokens;
+        $conflicts = array();
+
+        foreach ($tokens as $token) {
             // Claim was released
             if (!isset($this->tokens[$token])) {
-                unset($this->uncheckedTokens[$token]);
-
                 continue;
             }
 
@@ -148,26 +148,27 @@ class PackageConflictDetector
 
             // Token claimed by only one package
             if (1 === count($packageNames)) {
-                unset($this->uncheckedTokens[$token]);
-
                 continue;
             }
 
             $sortedNames = $this->overrideGraph->getSortedPackageNames($packageNames);
+            $conflictingNames = array();
 
             // An edge must exist between each package pair in the sorted set,
             // otherwise the dependencies are not sufficiently defined
             for ($i = 1, $l = count($sortedNames); $i < $l; ++$i) {
                 if (!$this->overrideGraph->hasEdge($sortedNames[$i - 1], $sortedNames[$i])) {
-                    return new PackageConflict($token, $sortedNames[$i - 1], $sortedNames[$i]);
+                    $conflictingNames[$sortedNames[$i - 1]] = true;
+                    $conflictingNames[$sortedNames[$i]] = true;
                 }
             }
 
-            // Mark token as checked
-            unset($this->uncheckedTokens[$token]);
+            if (count($conflictingNames) > 0) {
+                $conflicts[] = new PackageConflict($token, array_keys($conflictingNames));
+            }
         }
 
-        return null;
+        return $conflicts;
     }
 
 }

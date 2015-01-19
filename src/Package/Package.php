@@ -65,6 +65,8 @@ class Package
      *                                      package file could not be loaded.
      * @param string           $installPath The absolute install path.
      * @param InstallInfo      $installInfo The install info of this package.
+     * @param Exception        $loadError   The error that happened during
+     *                                      loading of the package, if any.
      */
     public function __construct(PackageFile $packageFile = null, $installPath, InstallInfo $installInfo = null, Exception $loadError = null)
     {

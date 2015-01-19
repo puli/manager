@@ -46,7 +46,7 @@ class PackageConflictDetectorTest extends PHPUnit_Framework_TestCase
         $this->detector->claim('A', 'package1');
         $this->detector->claim('B', 'package2');
 
-        $this->assertNull($this->detector->detectConflict());
+        $this->assertCount(0, $this->detector->detectConflicts(array('A', 'B')));
     }
 
     public function testConflictIfSameClaim()
@@ -54,12 +54,12 @@ class PackageConflictDetectorTest extends PHPUnit_Framework_TestCase
         $this->detector->claim('A', 'package1');
         $this->detector->claim('A', 'package2');
 
-        $conflict = $this->detector->detectConflict();
+        $conflicts = $this->detector->detectConflicts(array('A'));
 
-        $this->assertInstanceOf('Puli\RepositoryManager\Conflict\PackageConflict', $conflict);
-        $this->assertSame('A', $conflict->getConflictingToken());
-        $this->assertSame('package1', $conflict->getPackageName1());
-        $this->assertSame('package2', $conflict->getPackageName2());
+        $this->assertCount(1, $conflicts);
+        $this->assertInstanceOf('Puli\RepositoryManager\Conflict\PackageConflict', $conflicts[0]);
+        $this->assertSame('A', $conflicts[0]->getConflictingToken());
+        $this->assertSame(array('package1', 'package2'), $conflicts[0]->getPackageNames());
     }
 
     public function testConflictRemains()
@@ -67,10 +67,19 @@ class PackageConflictDetectorTest extends PHPUnit_Framework_TestCase
         $this->detector->claim('A', 'package1');
         $this->detector->claim('A', 'package2');
 
-        $conflict = $this->detector->detectConflict();
+        $conflicts = $this->detector->detectConflicts(array('A'));
 
         // Call again
-        $this->assertEquals($conflict, $this->detector->detectConflict());
+        $this->assertEquals($conflicts, $this->detector->detectConflicts(array('A')));
+    }
+
+    public function testNoConflictIfConflictingPathNotPased()
+    {
+        $this->detector->claim('A', 'package1');
+        $this->detector->claim('B', 'package1');
+        $this->detector->claim('A', 'package2');
+
+        $this->assertCount(0, $this->detector->detectConflicts(array('B')));
     }
 
     public function testNoConflictIfClaimReleased()
@@ -79,7 +88,7 @@ class PackageConflictDetectorTest extends PHPUnit_Framework_TestCase
         $this->detector->claim('A', 'package2');
         $this->detector->release('A', 'package1');
 
-        $this->assertNull($this->detector->detectConflict());
+        $this->assertCount(0, $this->detector->detectConflicts(array('A')));
     }
 
     public function testNoConflictIfClaimReleasedAfterDetect()
@@ -87,11 +96,11 @@ class PackageConflictDetectorTest extends PHPUnit_Framework_TestCase
         $this->detector->claim('A', 'package1');
         $this->detector->claim('A', 'package2');
 
-        $this->assertInstanceOf('Puli\RepositoryManager\Conflict\PackageConflict', $this->detector->detectConflict());
+        $this->assertCount(1, $this->detector->detectConflicts(array('A')));
 
         $this->detector->release('A', 'package1');
 
-        $this->assertNull($this->detector->detectConflict());
+        $this->assertCount(0, $this->detector->detectConflicts(array('A')));
     }
 
     public function testNoConflictIfEdgeInOverrideGraph()
@@ -101,7 +110,7 @@ class PackageConflictDetectorTest extends PHPUnit_Framework_TestCase
 
         $this->overrideGraph->addEdge('package1', 'package2');
 
-        $this->assertNull($this->detector->detectConflict());
+        $this->assertCount(0, $this->detector->detectConflicts(array('A')));
     }
 
     public function testNoConflictIfEdgeAddedAfterDetect()
@@ -109,11 +118,11 @@ class PackageConflictDetectorTest extends PHPUnit_Framework_TestCase
         $this->detector->claim('A', 'package1');
         $this->detector->claim('A', 'package2');
 
-        $this->assertInstanceOf('Puli\RepositoryManager\Conflict\PackageConflict', $this->detector->detectConflict());
+        $this->assertCount(1, $this->detector->detectConflicts(array('A')));
 
         $this->overrideGraph->addEdge('package1', 'package2');
 
-        $this->assertNull($this->detector->detectConflict());
+        $this->assertCount(0, $this->detector->detectConflicts(array('A')));
     }
 
     public function testConflictIfTransitiveOverrideOrder()
@@ -129,11 +138,22 @@ class PackageConflictDetectorTest extends PHPUnit_Framework_TestCase
         $this->overrideGraph->addEdge('package1', 'package2');
         $this->overrideGraph->addEdge('package2', 'package3');
 
-        $conflict = $this->detector->detectConflict();
+        $conflicts = $this->detector->detectConflicts(array('A'));
 
-        $this->assertInstanceOf('Puli\RepositoryManager\Conflict\PackageConflict', $conflict);
-        $this->assertSame('A', $conflict->getConflictingToken());
-        $this->assertSame('package1', $conflict->getPackageName1());
-        $this->assertSame('package3', $conflict->getPackageName2());
+        $this->assertCount(1, $conflicts);
+        $this->assertInstanceOf('Puli\RepositoryManager\Conflict\PackageConflict', $conflicts[0]);
+        $this->assertSame('A', $conflicts[0]->getConflictingToken());
+        $this->assertSame(array('package1', 'package3'), $conflicts[0]->getPackageNames());
+    }
+
+    public function testCheckAllTokensIfNoTokensPassed()
+    {
+        $this->detector->claim('A', 'package1');
+        $this->detector->claim('A', 'package2');
+
+        $conflicts = $this->detector->detectConflicts();
+
+        $this->assertCount(1, $conflicts);
+        $this->assertInstanceOf('Puli\RepositoryManager\Conflict\PackageConflict', $conflicts[0]);
     }
 }

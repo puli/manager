@@ -18,6 +18,37 @@ Changelog
  * moved `BindingStore` to `Puli\RepositoryManager\Discovery\BindingDescriptorStore`
  * moved `BindingTypeStore` to `Puli\RepositoryManager\Discovery\BindingTypeDescriptorStore`
  * added `ResourceMappingStore`
+ * removed `PackageConflict::getPackageName1()` and `PackageConflict::getPackageName2()`
+ * added `PackageConflict::getPackageNames()`
+ * removed `PackageConflict::getOpponent()`
+ * added `PackageConflict::getOpponents()`
+ * removed `PackageConflictDetector::detectConflict()`
+ * added `PackageConflictDetector::detectConflicts()`
+ * added `MappingAlreadyLoadedException`
+ * added `MappingNotLoadedException`
+ * added optional argument `$failIfNotFound` to `RepositoryManager::addResourceMapping()`
+ * added optional argument `$state` to `RepositoryManager::getResourceMappings()`
+ * added `RepositoryPathConflict`
+ * added `ResourceMappingState`
+ * added `ResourceMapping::load()`
+ * added `ResourceMapping::unload()`
+ * added `ResourceMapping::getPathReferences()`
+ * added `ResourceMapping::getContainingPackage()`
+ * added `ResourceMapping::getLoadErrors()`
+ * added `ResourceMapping::addConflict()`
+ * added `ResourceMapping::removeConflict()`
+ * added `ResourceMapping::getConflicts()`
+ * added `ResourceMapping::getConflictingPackages()`
+ * added `ResourceMapping::getConflictingMappings()`
+ * added `ResourceMapping::getState()`
+ * added `ResourceMapping::isLoaded()`
+ * added `ResourceMapping::isEnabled()`
+ * added `ResourceMapping::isNotFound()`
+ * added `ResourceMapping::isConflicting()`
+ * `RepositoryManager::getResourceMappings()` does not throw exceptions anymore
+   if mapped paths/packages are not found or have a conflict. Instead, you can
+   access load errors and conflicts via `ResourceMapping::getLoadErrors()` and
+   `ResourceMapping::getConflicts()`
 
 * 1.0.0-beta (2015-01-12)
 
