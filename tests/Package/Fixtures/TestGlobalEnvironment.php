@@ -11,19 +11,19 @@
 
 namespace Puli\RepositoryManager\Tests\Package\Fixtures;
 
-use Puli\RepositoryManager\Config\Config;
-use Puli\RepositoryManager\Config\ConfigFile\ConfigFile;
-use Puli\RepositoryManager\Config\ConfigFile\ConfigFileStorage;
-use Puli\RepositoryManager\Config\ConfigFile\Reader\ConfigFileReader;
-use Puli\RepositoryManager\Config\ConfigFile\Writer\ConfigFileWriter;
-use Puli\RepositoryManager\Environment\GlobalEnvironment;
+use Puli\RepositoryManager\Api\Config\Config;
+use Puli\RepositoryManager\Api\Config\ConfigFile;
+use Puli\RepositoryManager\Api\Config\ConfigFileReader;
+use Puli\RepositoryManager\Api\Config\ConfigFileWriter;
+use Puli\RepositoryManager\Config\ConfigFileStorage;
+use Puli\RepositoryManager\Environment\GlobalEnvironmentImpl;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class TestGlobalEnvironment extends GlobalEnvironment implements ConfigFileReader, ConfigFileWriter
+class TestGlobalEnvironment extends GlobalEnvironmentImpl implements ConfigFileReader, ConfigFileWriter
 {
     private $configFile;
 

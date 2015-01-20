@@ -11,6 +11,8 @@
 
 namespace Puli\RepositoryManager\Config;
 
+use Puli\RepositoryManager\Api\Config\Config;
+
 /**
  * Stores default configuration values.
  *

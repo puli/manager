@@ -15,10 +15,10 @@ use PHPUnit_Framework_MockObject_MockObject;
 use PHPUnit_Framework_TestCase;
 use Puli\Discovery\Api\EditableDiscovery;
 use Puli\Repository\Api\EditableRepository;
-use Puli\RepositoryManager\Config\Config;
-use Puli\RepositoryManager\Config\ConfigFile\ConfigFile;
+use Puli\RepositoryManager\Api\Config\Config;
+use Puli\RepositoryManager\Api\Config\ConfigFile;
+use Puli\RepositoryManager\Api\Package\RootPackageFile;
 use Puli\RepositoryManager\Config\DefaultConfig;
-use Puli\RepositoryManager\Package\PackageFile\RootPackageFile;
 use Puli\RepositoryManager\Tests\Package\Fixtures\TestProjectEnvironment;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 

@@ -12,7 +12,8 @@
 namespace Puli\RepositoryManager\Discovery;
 
 use OutOfBoundsException;
-use Puli\RepositoryManager\Package\Package;
+use Puli\RepositoryManager\Api\Discovery\BindingTypeDescriptor;
+use Puli\RepositoryManager\Api\Package\Package;
 use Puli\RepositoryManager\Util\CompositeKeyStore;
 
 /**

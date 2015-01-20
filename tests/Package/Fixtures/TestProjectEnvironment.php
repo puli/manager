@@ -13,24 +13,24 @@ namespace Puli\RepositoryManager\Tests\Package\Fixtures;
 
 use Puli\Discovery\Api\EditableDiscovery;
 use Puli\Repository\Api\EditableRepository;
-use Puli\RepositoryManager\Config\Config;
-use Puli\RepositoryManager\Config\ConfigFile\ConfigFile;
-use Puli\RepositoryManager\Config\ConfigFile\ConfigFileStorage;
-use Puli\RepositoryManager\Config\ConfigFile\Reader\ConfigFileReader;
-use Puli\RepositoryManager\Config\ConfigFile\Writer\ConfigFileWriter;
-use Puli\RepositoryManager\Environment\ProjectEnvironment;
-use Puli\RepositoryManager\Package\PackageFile\PackageFile;
-use Puli\RepositoryManager\Package\PackageFile\PackageFileStorage;
-use Puli\RepositoryManager\Package\PackageFile\Reader\PackageFileReader;
-use Puli\RepositoryManager\Package\PackageFile\RootPackageFile;
-use Puli\RepositoryManager\Package\PackageFile\Writer\PackageFileWriter;
+use Puli\RepositoryManager\Api\Config\Config;
+use Puli\RepositoryManager\Api\Config\ConfigFile;
+use Puli\RepositoryManager\Api\Config\ConfigFileReader;
+use Puli\RepositoryManager\Api\Config\ConfigFileWriter;
+use Puli\RepositoryManager\Api\Package\PackageFile;
+use Puli\RepositoryManager\Api\Package\PackageFileReader;
+use Puli\RepositoryManager\Api\Package\PackageFileWriter;
+use Puli\RepositoryManager\Api\Package\RootPackageFile;
+use Puli\RepositoryManager\Config\ConfigFileStorage;
+use Puli\RepositoryManager\Environment\ProjectEnvironmentImpl;
+use Puli\RepositoryManager\Package\PackageFileStorage;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class TestProjectEnvironment extends ProjectEnvironment implements ConfigFileReader, ConfigFileWriter, PackageFileReader, PackageFileWriter
+class TestProjectEnvironment extends ProjectEnvironmentImpl implements ConfigFileReader, ConfigFileWriter, PackageFileReader, PackageFileWriter
 {
     private $configFile;
 

@@ -22,7 +22,7 @@ use Puli\RepositoryManager\Conflict\PackageConflictDetector;
 class PackageConflictDetectorTest extends PHPUnit_Framework_TestCase
 {
     /**
-     * @var \Puli\RepositoryManager\Conflict\OverrideGraph
+     * @var OverrideGraph
      */
     private $overrideGraph;
 

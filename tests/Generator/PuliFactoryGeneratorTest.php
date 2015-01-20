@@ -14,7 +14,7 @@ namespace Puli\RepositoryManager\Tests\Generator;
 use PHPUnit_Framework_MockObject_MockObject;
 use PHPUnit_Framework_TestCase;
 use Puli\Factory\PuliFactory;
-use Puli\RepositoryManager\Config\Config;
+use Puli\RepositoryManager\Api\Config\Config;
 use Puli\RepositoryManager\Generator\ProviderFactory;
 use Puli\RepositoryManager\Generator\PuliFactoryGenerator;
 use Puli\RepositoryManager\Tests\Generator\Fixtures\TestDiscoveryRecipeProvider;

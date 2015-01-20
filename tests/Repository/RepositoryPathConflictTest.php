@@ -12,11 +12,11 @@
 namespace Puli\RepositoryManager\Tests\Repository;
 
 use PHPUnit_Framework_TestCase;
-use Puli\RepositoryManager\Package\Package;
-use Puli\RepositoryManager\Package\PackageCollection;
-use Puli\RepositoryManager\Package\PackageFile\PackageFile;
-use Puli\RepositoryManager\Repository\ResourceMapping;
-use Puli\RepositoryManager\Repository\RepositoryPathConflict;
+use Puli\RepositoryManager\Api\Package\Package;
+use Puli\RepositoryManager\Api\Package\PackageCollection;
+use Puli\RepositoryManager\Api\Package\PackageFile;
+use Puli\RepositoryManager\Api\Repository\RepositoryPathConflict;
+use Puli\RepositoryManager\Api\Repository\ResourceMapping;
 
 /**
  * @since  1.0
@@ -130,7 +130,7 @@ class RepositoryPathConflictTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\RepositoryManager\Repository\MappingNotLoadedException
+     * @expectedException \Puli\RepositoryManager\Api\Repository\MappingNotLoadedException
      */
     public function testAddMappingFailsIfPackageNotLoaded()
     {
@@ -208,7 +208,7 @@ class RepositoryPathConflictTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\RepositoryManager\Repository\MappingNotLoadedException
+     * @expectedException \Puli\RepositoryManager\Api\Repository\MappingNotLoadedException
      */
     public function testRemoveMappingFailsIfPackageNotLoaded()
     {

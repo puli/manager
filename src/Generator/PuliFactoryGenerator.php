@@ -12,8 +12,8 @@
 namespace Puli\RepositoryManager\Generator;
 
 use InvalidArgumentException;
+use Puli\RepositoryManager\Api\Config\Config;
 use Puli\RepositoryManager\Assert\Assert;
-use Puli\RepositoryManager\Config\Config;
 use Webmozart\PathUtil\Path;
 
 /**

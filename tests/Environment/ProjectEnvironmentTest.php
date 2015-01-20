@@ -13,14 +13,14 @@ namespace Puli\RepositoryManager\Tests\Environment;
 
 use PHPUnit_Framework_MockObject_MockObject;
 use PHPUnit_Framework_TestCase;
-use Puli\RepositoryManager\Config\Config;
-use Puli\RepositoryManager\Config\ConfigFile\ConfigFile;
-use Puli\RepositoryManager\Config\ConfigFile\ConfigFileStorage;
+use Puli\RepositoryManager\Api\Config\Config;
+use Puli\RepositoryManager\Api\Config\ConfigFile;
+use Puli\RepositoryManager\Api\Package\RootPackageFile;
+use Puli\RepositoryManager\Config\ConfigFileStorage;
 use Puli\RepositoryManager\Config\DefaultConfig;
-use Puli\RepositoryManager\Environment\ProjectEnvironment;
-use Puli\RepositoryManager\Package\PackageFile\PackageFileStorage;
-use Puli\RepositoryManager\Package\PackageFile\RootPackageFile;
-use Puli\RepositoryManager\Tests\Package\PackageFile\Fixtures\TestPlugin;
+use Puli\RepositoryManager\Environment\ProjectEnvironmentImpl;
+use Puli\RepositoryManager\Package\PackageFileStorage;
+use Puli\RepositoryManager\Tests\Api\Package\Fixtures\TestPlugin;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Filesystem\Filesystem;
 
@@ -75,10 +75,10 @@ class ProjectEnvironmentTest extends PHPUnit_Framework_TestCase
         $this->config = new DefaultConfig();
         $this->homeDir = $this->tempDir.'/home';
         $this->rootDir = $this->tempDir.'/root';
-        $this->configFileStorage = $this->getMockBuilder('Puli\RepositoryManager\Config\ConfigFile\ConfigFileStorage')
+        $this->configFileStorage = $this->getMockBuilder('Puli\RepositoryManager\Config\ConfigFileStorage')
             ->disableOriginalConstructor()
             ->getMock();
-        $this->packageFileStorage = $this->getMockBuilder('Puli\RepositoryManager\Package\PackageFile\PackageFileStorage')
+        $this->packageFileStorage = $this->getMockBuilder('Puli\RepositoryManager\Package\PackageFileStorage')
             ->disableOriginalConstructor()
             ->getMock();
         $this->dispatcher = $this->getMock('Symfony\Component\EventDispatcher\EventDispatcherInterface');
@@ -106,7 +106,7 @@ class ProjectEnvironmentTest extends PHPUnit_Framework_TestCase
                 return new RootPackageFile('vendor/root', $path, $baseConfig);
             }));
 
-        $environment = new ProjectEnvironment(
+        $environment = new ProjectEnvironmentImpl(
             $this->homeDir,
             $this->rootDir,
             $this->configFileStorage,
@@ -117,8 +117,8 @@ class ProjectEnvironmentTest extends PHPUnit_Framework_TestCase
         $this->assertSame($this->homeDir, $environment->getHomeDirectory());
         $this->assertSame($this->rootDir, $environment->getRootDirectory());
         $this->assertInstanceOf('Puli\RepositoryManager\Config\EnvConfig', $environment->getConfig());
-        $this->assertInstanceOf('Puli\RepositoryManager\Config\ConfigFile\ConfigFile', $environment->getConfigFile());
-        $this->assertInstanceOf('Puli\RepositoryManager\Package\PackageFile\RootPackageFile', $environment->getRootPackageFile());
+        $this->assertInstanceOf('Puli\RepositoryManager\Api\Config\ConfigFile', $environment->getConfigFile());
+        $this->assertInstanceOf('Puli\RepositoryManager\Api\Package\RootPackageFile', $environment->getRootPackageFile());
         $this->assertSame($this->dispatcher, $environment->getEventDispatcher());
 
         // should be loaded from DefaultConfig
@@ -137,7 +137,7 @@ class ProjectEnvironmentTest extends PHPUnit_Framework_TestCase
                 return new RootPackageFile('vendor/root', $path, $baseConfig);
             }));
 
-        $environment = new ProjectEnvironment(
+        $environment = new ProjectEnvironmentImpl(
             null,
             $this->rootDir,
             $this->configFileStorage,
@@ -149,7 +149,7 @@ class ProjectEnvironmentTest extends PHPUnit_Framework_TestCase
         $this->assertSame($this->rootDir, $environment->getRootDirectory());
         $this->assertInstanceOf('Puli\RepositoryManager\Config\EnvConfig', $environment->getConfig());
         $this->assertNull($environment->getConfigFile());
-        $this->assertInstanceOf('Puli\RepositoryManager\Package\PackageFile\RootPackageFile', $environment->getRootPackageFile());
+        $this->assertInstanceOf('Puli\RepositoryManager\Api\Package\RootPackageFile', $environment->getRootPackageFile());
         $this->assertSame($this->dispatcher, $environment->getEventDispatcher());
 
         // should be loaded from DefaultConfig
@@ -157,12 +157,12 @@ class ProjectEnvironmentTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\RepositoryManager\FileNotFoundException
+     * @expectedException \Puli\RepositoryManager\Api\FileNotFoundException
      * @expectedExceptionMessage /foobar
      */
     public function testFailIfNonExistingRootDir()
     {
-        new ProjectEnvironment(
+        new ProjectEnvironmentImpl(
             $this->homeDir,
             __DIR__.'/foobar',
             $this->configFileStorage,
@@ -172,12 +172,12 @@ class ProjectEnvironmentTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\RepositoryManager\NoDirectoryException
+     * @expectedException \Puli\RepositoryManager\Api\NoDirectoryException
      * @expectedExceptionMessage /puli.json
      */
     public function testFailIfRootDirNoDirectory()
     {
-        new ProjectEnvironment(
+        new ProjectEnvironmentImpl(
             $this->homeDir,
             $this->rootDir.'/puli.json',
             $this->configFileStorage,
@@ -202,7 +202,7 @@ class ProjectEnvironmentTest extends PHPUnit_Framework_TestCase
                 return new RootPackageFile('vendor/root', $path, $baseConfig);
             }));
 
-        $environment = new ProjectEnvironment(
+        $environment = new ProjectEnvironmentImpl(
             $this->homeDir.'/../home',
             $this->rootDir.'/../root',
             $this->configFileStorage,
@@ -218,7 +218,7 @@ class ProjectEnvironmentTest extends PHPUnit_Framework_TestCase
     {
         $configFile = new ConfigFile();
         $rootPackageFile = new RootPackageFile();
-        $rootPackageFile->addPluginClass('Puli\RepositoryManager\Tests\Package\PackageFile\Fixtures\TestPlugin');
+        $rootPackageFile->addPluginClass('Puli\RepositoryManager\Tests\Api\Package\Fixtures\TestPlugin');
 
         $this->configFileStorage->expects($this->once())
             ->method('loadConfigFile')
@@ -230,7 +230,7 @@ class ProjectEnvironmentTest extends PHPUnit_Framework_TestCase
             ->with($this->rootDir.'/puli.json')
             ->will($this->returnValue($rootPackageFile));
 
-        $environment = new ProjectEnvironment(
+        $environment = new ProjectEnvironmentImpl(
             $this->homeDir,
             $this->rootDir,
             $this->configFileStorage,
@@ -256,7 +256,7 @@ class ProjectEnvironmentTest extends PHPUnit_Framework_TestCase
             ->with($this->rootDir.'/puli.json')
             ->will($this->returnValue(new RootPackageFile('vendor/root', $this->rootDir.'/puli.json', $this->config)));
 
-        $environment = new ProjectEnvironment(
+        $environment = new ProjectEnvironmentImpl(
             $this->homeDir,
             $this->rootDir,
             $this->configFileStorage,
@@ -282,7 +282,7 @@ class ProjectEnvironmentTest extends PHPUnit_Framework_TestCase
             ->with($this->rootDir.'/puli.json')
             ->will($this->returnValue(new RootPackageFile('vendor/root', $this->rootDir.'/puli.json', $this->config)));
 
-        $environment = new ProjectEnvironment(
+        $environment = new ProjectEnvironmentImpl(
             $this->homeDir,
             $this->rootDir,
             $this->configFileStorage,
@@ -308,7 +308,7 @@ class ProjectEnvironmentTest extends PHPUnit_Framework_TestCase
             ->with($this->rootDir.'/puli.json')
             ->will($this->returnValue(new RootPackageFile('vendor/root', $this->rootDir.'/puli.json', $this->config)));
 
-        $environment = new ProjectEnvironment(
+        $environment = new ProjectEnvironmentImpl(
             $this->homeDir,
             $this->rootDir,
             $this->configFileStorage,
@@ -349,7 +349,7 @@ class ProjectEnvironmentTest extends PHPUnit_Framework_TestCase
             ->with($this->rootDir.'/puli.json')
             ->will($this->returnValue(new RootPackageFile('vendor/root', $this->rootDir.'/puli.json', $this->config)));
 
-        $environment = new ProjectEnvironment(
+        $environment = new ProjectEnvironmentImpl(
             $this->homeDir,
             $this->rootDir,
             $this->configFileStorage,
@@ -379,7 +379,7 @@ class ProjectEnvironmentTest extends PHPUnit_Framework_TestCase
             ->with($this->rootDir.'/puli.json')
             ->will($this->returnValue(new RootPackageFile('vendor/root', $this->rootDir.'/puli.json', $this->config)));
 
-        $environment = new ProjectEnvironment(
+        $environment = new ProjectEnvironmentImpl(
             null,
             $this->rootDir,
             $this->configFileStorage,
@@ -414,7 +414,7 @@ class ProjectEnvironmentTest extends PHPUnit_Framework_TestCase
             ->with($this->rootDir.'/puli.json')
             ->will($this->returnValue(new RootPackageFile('vendor/root', $this->rootDir.'/puli.json', $this->config)));
 
-        $environment = new ProjectEnvironment(
+        $environment = new ProjectEnvironmentImpl(
             $this->homeDir,
             $this->rootDir,
             $this->configFileStorage,
@@ -455,7 +455,7 @@ class ProjectEnvironmentTest extends PHPUnit_Framework_TestCase
             ->with($this->rootDir.'/puli.json')
             ->will($this->returnValue(new RootPackageFile('vendor/root', $this->rootDir.'/puli.json', $this->config)));
 
-        $environment = new ProjectEnvironment(
+        $environment = new ProjectEnvironmentImpl(
             $this->homeDir,
             $this->rootDir,
             $this->configFileStorage,

@@ -12,7 +12,7 @@
 namespace Puli\RepositoryManager\Tests\Config;
 
 use PHPUnit_Framework_TestCase;
-use Puli\RepositoryManager\Config\Config;
+use Puli\RepositoryManager\Api\Config\Config;
 use Puli\RepositoryManager\Config\EnvConfig;
 
 /**

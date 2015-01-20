@@ -11,6 +11,8 @@
 
 namespace Puli\RepositoryManager\Config;
 
+use Puli\RepositoryManager\Api\Config\Config;
+
 /**
  * Loads configuration values from environment variables.
  *

@@ -13,10 +13,10 @@ namespace Puli\RepositoryManager\Tests\Environment;
 
 use PHPUnit_Framework_MockObject_MockObject;
 use PHPUnit_Framework_TestCase;
-use Puli\RepositoryManager\Config\Config;
-use Puli\RepositoryManager\Config\ConfigFile\ConfigFile;
-use Puli\RepositoryManager\Config\ConfigFile\ConfigFileStorage;
-use Puli\RepositoryManager\Environment\GlobalEnvironment;
+use Puli\RepositoryManager\Api\Config\Config;
+use Puli\RepositoryManager\Api\Config\ConfigFile;
+use Puli\RepositoryManager\Config\ConfigFileStorage;
+use Puli\RepositoryManager\Environment\GlobalEnvironmentImpl;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
@@ -43,7 +43,7 @@ class GlobalEnvironmentTest extends PHPUnit_Framework_TestCase
     protected function setUp()
     {
         $this->homeDir = __DIR__.'/Fixtures/home';
-        $this->configFileStorage = $this->getMockBuilder('Puli\RepositoryManager\Config\ConfigFile\ConfigFileStorage')
+        $this->configFileStorage = $this->getMockBuilder('Puli\RepositoryManager\Config\ConfigFileStorage')
             ->disableOriginalConstructor()
             ->getMock();
         $this->dispatcher = $this->getMock('Symfony\Component\EventDispatcher\EventDispatcherInterface');
@@ -58,7 +58,7 @@ class GlobalEnvironmentTest extends PHPUnit_Framework_TestCase
                 return new ConfigFile($path, $baseConfig);
             }));
 
-        $environment = new GlobalEnvironment(
+        $environment = new GlobalEnvironmentImpl(
             $this->homeDir,
             $this->configFileStorage,
             $this->dispatcher
@@ -66,7 +66,7 @@ class GlobalEnvironmentTest extends PHPUnit_Framework_TestCase
 
         $this->assertSame($this->homeDir, $environment->getHomeDirectory());
         $this->assertInstanceOf('Puli\RepositoryManager\Config\EnvConfig', $environment->getConfig());
-        $this->assertInstanceOf('Puli\RepositoryManager\Config\ConfigFile\ConfigFile', $environment->getConfigFile());
+        $this->assertInstanceOf('Puli\RepositoryManager\Api\Config\ConfigFile', $environment->getConfigFile());
         $this->assertSame($this->dispatcher, $environment->getEventDispatcher());
 
         // should be loaded from DefaultConfig
@@ -78,7 +78,7 @@ class GlobalEnvironmentTest extends PHPUnit_Framework_TestCase
         $this->configFileStorage->expects($this->never())
             ->method('loadConfigFile');
 
-        $environment = new GlobalEnvironment(
+        $environment = new GlobalEnvironmentImpl(
             null,
             $this->configFileStorage,
             $this->dispatcher
@@ -102,7 +102,7 @@ class GlobalEnvironmentTest extends PHPUnit_Framework_TestCase
                 return new ConfigFile($path, $baseConfig);
             }));
 
-        $environment = new GlobalEnvironment(
+        $environment = new GlobalEnvironmentImpl(
             $this->homeDir.'/../home',
             $this->configFileStorage,
             $this->dispatcher
@@ -112,12 +112,12 @@ class GlobalEnvironmentTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\RepositoryManager\FileNotFoundException
+     * @expectedException \Puli\RepositoryManager\Api\FileNotFoundException
      * @expectedExceptionMessage /foobar
      */
     public function testFailIfNonExistingHomeDir()
     {
-        new GlobalEnvironment(
+        new GlobalEnvironmentImpl(
             __DIR__.'/foobar',
             $this->configFileStorage,
             $this->dispatcher
@@ -125,12 +125,12 @@ class GlobalEnvironmentTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\RepositoryManager\NoDirectoryException
+     * @expectedException \Puli\RepositoryManager\Api\NoDirectoryException
      * @expectedExceptionMessage /config.json
      */
     public function testFailIfHomeDirNoDirectory()
     {
-        new GlobalEnvironment(
+        new GlobalEnvironmentImpl(
             $this->homeDir.'/config.json',
             $this->configFileStorage,
             $this->dispatcher

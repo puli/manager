@@ -11,7 +11,7 @@
 
 namespace Puli\RepositoryManager\Assert;
 
-use Puli\RepositoryManager\Package\RootPackage;
+use Puli\RepositoryManager\Api\Package\RootPackage;
 use Webmozart\PathUtil\Path;
 
 /**

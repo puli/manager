@@ -12,11 +12,11 @@
 namespace Puli\RepositoryManager\Tests\Package;
 
 use PHPUnit_Framework_TestCase;
-use Puli\RepositoryManager\Package\Package;
-use Puli\RepositoryManager\Package\PackageCollection;
-use Puli\RepositoryManager\Package\PackageFile\PackageFile;
-use Puli\RepositoryManager\Package\PackageFile\RootPackageFile;
-use Puli\RepositoryManager\Package\RootPackage;
+use Puli\RepositoryManager\Api\Package\Package;
+use Puli\RepositoryManager\Api\Package\PackageCollection;
+use Puli\RepositoryManager\Api\Package\PackageFile;
+use Puli\RepositoryManager\Api\Package\RootPackage;
+use Puli\RepositoryManager\Api\Package\RootPackageFile;
 
 /**
  * @since  1.0
@@ -45,7 +45,7 @@ class PackageCollectionTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\RepositoryManager\Package\NoSuchPackageException
+     * @expectedException \Puli\RepositoryManager\Api\Package\NoSuchPackageException
      */
     public function testGetPackageFailsIfNotFound()
     {

@@ -11,9 +11,9 @@
 
 namespace Puli\RepositoryManager\Util;
 
-use Puli\RepositoryManager\FileNotFoundException;
-use Puli\RepositoryManager\InvalidConfigException;
-use Puli\RepositoryManager\NoDirectoryException;
+use Puli\RepositoryManager\Api\FileNotFoundException;
+use Puli\RepositoryManager\Api\InvalidConfigException;
+use Puli\RepositoryManager\Api\NoDirectoryException;
 use Symfony\Component\Filesystem\Filesystem;
 
 /**

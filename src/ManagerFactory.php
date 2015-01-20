@@ -14,20 +14,30 @@ namespace Puli\RepositoryManager;
 use Psr\Log\LoggerInterface;
 use Puli\Repository\ResourceRepository;
 use Puli\Repository\ResourceRepositoryInterface;
-use Puli\RepositoryManager\Config\ConfigFile\ConfigFileManager;
-use Puli\RepositoryManager\Config\ConfigFile\ConfigFileStorage;
-use Puli\RepositoryManager\Config\ConfigFile\Reader\ConfigJsonReader;
-use Puli\RepositoryManager\Config\ConfigFile\Writer\ConfigJsonWriter;
-use Puli\RepositoryManager\Discovery\DiscoveryManager;
-use Puli\RepositoryManager\Environment\GlobalEnvironment;
-use Puli\RepositoryManager\Environment\ProjectEnvironment;
-use Puli\RepositoryManager\Package\PackageFile\PackageFileStorage;
-use Puli\RepositoryManager\Package\PackageFile\Reader\PackageJsonReader;
-use Puli\RepositoryManager\Package\PackageFile\RootPackageFileManager;
-use Puli\RepositoryManager\Package\PackageFile\Writer\PackageJsonWriter;
-use Puli\RepositoryManager\Package\PackageManager;
-use Puli\RepositoryManager\Package\PackageState;
-use Puli\RepositoryManager\Repository\RepositoryManager;
+use Puli\RepositoryManager\Api\Config\ConfigFileManager;
+use Puli\RepositoryManager\Api\Discovery\DiscoveryManager;
+use Puli\RepositoryManager\Api\Environment\GlobalEnvironment;
+use Puli\RepositoryManager\Api\Environment\ProjectEnvironment;
+use Puli\RepositoryManager\Api\FileNotFoundException;
+use Puli\RepositoryManager\Api\InvalidConfigException;
+use Puli\RepositoryManager\Api\NoDirectoryException;
+use Puli\RepositoryManager\Api\Package\PackageManager;
+use Puli\RepositoryManager\Api\Package\PackageState;
+use Puli\RepositoryManager\Api\Package\RootPackageFileManager;
+use Puli\RepositoryManager\Api\Repository\RepositoryManager;
+use Puli\RepositoryManager\Config\ConfigFileManagerImpl;
+use Puli\RepositoryManager\Config\ConfigFileStorage;
+use Puli\RepositoryManager\Config\ConfigJsonReader;
+use Puli\RepositoryManager\Config\ConfigJsonWriter;
+use Puli\RepositoryManager\Discovery\DiscoveryManagerImpl;
+use Puli\RepositoryManager\Environment\GlobalEnvironmentImpl;
+use Puli\RepositoryManager\Environment\ProjectEnvironmentImpl;
+use Puli\RepositoryManager\Package\PackageFileStorage;
+use Puli\RepositoryManager\Package\PackageJsonReader;
+use Puli\RepositoryManager\Package\PackageJsonWriter;
+use Puli\RepositoryManager\Package\PackageManagerImpl;
+use Puli\RepositoryManager\Package\RootPackageFileManagerImpl;
+use Puli\RepositoryManager\Repository\RepositoryManagerImpl;
 use Puli\RepositoryManager\Util\System;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -133,7 +143,7 @@ class ManagerFactory
 
         $homeDir = self::parseHomeDirectory();
 
-        return new GlobalEnvironment(
+        return new GlobalEnvironmentImpl(
             $homeDir,
             $this->getConfigFileStorage(),
             $dispatcher
@@ -169,7 +179,7 @@ class ManagerFactory
 
         $homeDir = self::parseHomeDirectory();
 
-        return new ProjectEnvironment(
+        return new ProjectEnvironmentImpl(
             $homeDir,
             $rootDir,
             $this->getConfigFileStorage(),
@@ -187,7 +197,7 @@ class ManagerFactory
      */
     public function createConfigFileManager(GlobalEnvironment $environment)
     {
-        return new ConfigFileManager(
+        return new ConfigFileManagerImpl(
             $environment,
             $this->getConfigFileStorage()
         );
@@ -202,7 +212,7 @@ class ManagerFactory
      */
     public function createRootPackageFileManager(ProjectEnvironment $environment)
     {
-        return new RootPackageFileManager(
+        return new RootPackageFileManagerImpl(
             $environment,
             $this->getPackageFileStorage($environment->getEventDispatcher()),
             $this->createConfigFileManager($environment)
@@ -218,7 +228,7 @@ class ManagerFactory
      */
     public function createPackageManager(ProjectEnvironment $environment)
     {
-        return new PackageManager(
+        return new PackageManagerImpl(
             $environment,
             $this->getPackageFileStorage($environment->getEventDispatcher())
         );
@@ -236,7 +246,7 @@ class ManagerFactory
     {
         $packageManager = $packageManager ?: $this->createPackageManager($environment);
 
-        return new RepositoryManager(
+        return new RepositoryManagerImpl(
             $environment,
             $packageManager->getPackages(PackageState::ENABLED),
             $this->getPackageFileStorage($environment->getEventDispatcher())
@@ -256,7 +266,7 @@ class ManagerFactory
     {
         $packageManager = $packageManager ?: $this->createPackageManager($environment);
 
-        return new DiscoveryManager(
+        return new DiscoveryManagerImpl(
             $environment,
             $packageManager->getPackages(PackageState::ENABLED),
             $this->getPackageFileStorage($environment->getEventDispatcher()),

@@ -14,6 +14,7 @@ namespace Puli\RepositoryManager\Repository;
 use Puli\Repository\Api\EditableRepository;
 use Puli\Repository\Resource\DirectoryResource;
 use Puli\Repository\Resource\FileResource;
+use Puli\RepositoryManager\Api\Repository\ResourceMapping;
 use Puli\RepositoryManager\Conflict\OverrideGraph;
 
 /**

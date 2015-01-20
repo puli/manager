@@ -3,6 +3,7 @@ Changelog
 
 * 1.0.0-next (@release_date@)
 
+ * moved public classes to `Api` sub-namespace
  * removed dependency to beberlei/assert
  * package load errors are not logged anymore
  * renamed `InstallInfo::get/setInstaller()` to `get/setInstallerName()`
@@ -14,16 +15,6 @@ Changelog
  * `PackageManager::getPackages()` returns packages with any state now by default
  * `DiscoveryManager::getBindingTypes()` returns types with any state now by default
  * `DiscoveryManager::getBindings()` returns bindings with any state now by default
- * moved `CompositeKeyStore` to `Puli\RepositoryManager\Util` namespace
- * moved `BindingStore` to `Puli\RepositoryManager\Discovery\BindingDescriptorStore`
- * moved `BindingTypeStore` to `Puli\RepositoryManager\Discovery\BindingTypeDescriptorStore`
- * added `ResourceMappingStore`
- * removed `PackageConflict::getPackageName1()` and `PackageConflict::getPackageName2()`
- * added `PackageConflict::getPackageNames()`
- * removed `PackageConflict::getOpponent()`
- * added `PackageConflict::getOpponents()`
- * removed `PackageConflictDetector::detectConflict()`
- * added `PackageConflictDetector::detectConflicts()`
  * added `MappingAlreadyLoadedException`
  * added `MappingNotLoadedException`
  * added optional argument `$failIfNotFound` to `RepositoryManager::addResourceMapping()`

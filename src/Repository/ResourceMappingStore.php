@@ -12,7 +12,8 @@
 namespace Puli\RepositoryManager\Repository;
 
 use OutOfBoundsException;
-use Puli\RepositoryManager\Package\Package;
+use Puli\RepositoryManager\Api\Package\Package;
+use Puli\RepositoryManager\Api\Repository\ResourceMapping;
 use Puli\RepositoryManager\Util\CompositeKeyStore;
 
 /**

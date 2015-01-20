@@ -13,17 +13,15 @@ namespace Puli\RepositoryManager\Tests\Package;
 
 use PHPUnit_Framework_Assert;
 use PHPUnit_Framework_MockObject_MockObject;
-use Psr\Log\LoggerInterface;
-use Puli\RepositoryManager\InvalidConfigException;
-use Puli\RepositoryManager\Package\InstallInfo;
-use Puli\RepositoryManager\Package\Package;
-use Puli\RepositoryManager\Package\PackageFile\PackageFile;
-use Puli\RepositoryManager\Package\PackageFile\PackageFileStorage;
-use Puli\RepositoryManager\Package\PackageFile\Reader\UnsupportedVersionException;
-use Puli\RepositoryManager\Package\PackageFile\RootPackageFile;
-use Puli\RepositoryManager\Package\PackageManager;
-use Puli\RepositoryManager\Package\PackageState;
-use Puli\RepositoryManager\Package\RootPackage;
+use Puli\RepositoryManager\Api\InvalidConfigException;
+use Puli\RepositoryManager\Api\Package\InstallInfo;
+use Puli\RepositoryManager\Api\Package\Package;
+use Puli\RepositoryManager\Api\Package\PackageFile;
+use Puli\RepositoryManager\Api\Package\PackageState;
+use Puli\RepositoryManager\Api\Package\RootPackageFile;
+use Puli\RepositoryManager\Api\Package\UnsupportedVersionException;
+use Puli\RepositoryManager\Package\PackageFileStorage;
+use Puli\RepositoryManager\Package\PackageManagerImpl;
 use Puli\RepositoryManager\Tests\ManagerTestCase;
 use Symfony\Component\Filesystem\Filesystem;
 
@@ -89,7 +87,7 @@ class PackageManagerTest extends ManagerTestCase
     private $packageFileStorage;
 
     /**
-     * @var PackageManager
+     * @var PackageManagerImpl
      */
     private $manager;
 
@@ -109,7 +107,7 @@ class PackageManagerTest extends ManagerTestCase
         $this->installInfo2 = new InstallInfo('vendor/package2', $this->packageDir2);
         $this->installInfo3 = new InstallInfo('vendor/package3', $this->packageDir3);
 
-        $this->packageFileStorage = $this->getMockBuilder('Puli\RepositoryManager\Package\PackageFile\PackageFileStorage')
+        $this->packageFileStorage = $this->getMockBuilder('Puli\RepositoryManager\Package\PackageFileStorage')
             ->disableOriginalConstructor()
             ->getMock();
 
@@ -138,11 +136,11 @@ class PackageManagerTest extends ManagerTestCase
         $this->rootPackageFile->addInstallInfo($installInfo1 = new InstallInfo('vendor/package1', '../foo'));
         $this->rootPackageFile->addInstallInfo($installInfo2 = new InstallInfo('vendor/package2', $this->packageDir2));
 
-        $manager = new PackageManager($this->environment, $this->packageFileStorage);
+        $manager = new PackageManagerImpl($this->environment, $this->packageFileStorage);
 
         $packages = $manager->getPackages();
 
-        $this->assertInstanceOf('Puli\RepositoryManager\Package\PackageCollection', $packages);
+        $this->assertInstanceOf('Puli\RepositoryManager\Api\Package\PackageCollection', $packages);
         $this->assertTrue($packages->contains('vendor/root'));
         $this->assertTrue($packages->contains('vendor/package1'));
         $this->assertTrue($packages->contains('vendor/package2'));
@@ -154,11 +152,11 @@ class PackageManagerTest extends ManagerTestCase
         $this->rootPackageFile->addInstallInfo($installInfo1 = new InstallInfo('vendor/package1', '../foo'));
         $this->rootPackageFile->addInstallInfo($installInfo2 = new InstallInfo('vendor/package2', $this->packageDir2));
 
-        $manager = new PackageManager($this->environment, $this->packageFileStorage);
+        $manager = new PackageManagerImpl($this->environment, $this->packageFileStorage);
 
         $packages = $manager->getPackages(PackageState::ENABLED);
 
-        $this->assertInstanceOf('Puli\RepositoryManager\Package\PackageCollection', $packages);
+        $this->assertInstanceOf('Puli\RepositoryManager\Api\Package\PackageCollection', $packages);
         $this->assertTrue($packages->contains('vendor/root'));
         $this->assertTrue($packages->contains('vendor/package2'));
         $this->assertCount(2, $packages);
@@ -170,11 +168,11 @@ class PackageManagerTest extends ManagerTestCase
         $this->rootPackageFile->addInstallInfo($installInfo2 = new InstallInfo('vendor/package2', $this->packageDir2));
         $this->rootPackageFile->addInstallInfo($installInfo3 = new InstallInfo('vendor/package3', 'bar'));
 
-        $manager = new PackageManager($this->environment, $this->packageFileStorage);
+        $manager = new PackageManagerImpl($this->environment, $this->packageFileStorage);
 
         $packages = $manager->getPackages(PackageState::NOT_FOUND);
 
-        $this->assertInstanceOf('Puli\RepositoryManager\Package\PackageCollection', $packages);
+        $this->assertInstanceOf('Puli\RepositoryManager\Api\Package\PackageCollection', $packages);
         $this->assertTrue($packages->contains('vendor/package1'));
         $this->assertTrue($packages->contains('vendor/package3'));
         $this->assertCount(2, $packages);
@@ -185,7 +183,7 @@ class PackageManagerTest extends ManagerTestCase
         $this->rootPackageFile->addInstallInfo($installInfo1 = new InstallInfo('vendor/package1', $this->packageDir1));
         $this->rootPackageFile->addInstallInfo($installInfo2 = new InstallInfo('vendor/version-too-high', '../version-too-high'));
 
-        $manager = new PackageManager($this->environment, $this->packageFileStorage);
+        $manager = new PackageManagerImpl($this->environment, $this->packageFileStorage);
         $e = new UnsupportedVersionException('The exception text.');
 
         $this->packageFileStorage->expects($this->at(0))
@@ -199,7 +197,7 @@ class PackageManagerTest extends ManagerTestCase
 
         $packages = $manager->getPackages(PackageState::NOT_LOADABLE);
 
-        $this->assertInstanceOf('Puli\RepositoryManager\Package\PackageCollection', $packages);
+        $this->assertInstanceOf('Puli\RepositoryManager\Api\Package\PackageCollection', $packages);
         $this->assertEquals(array(
             'vendor/version-too-high' => new Package(
                 null,
@@ -222,18 +220,18 @@ class PackageManagerTest extends ManagerTestCase
         $installInfo2->setInstallerName('user');
         $installInfo3->setInstallerName('composer');
 
-        $this->manager = new PackageManager($this->environment, $this->packageFileStorage);
+        $this->manager = new PackageManagerImpl($this->environment, $this->packageFileStorage);
 
         $composerPackages = $this->manager->getPackagesByInstaller('composer');
         $userPackages = $this->manager->getPackagesByInstaller('user');
 
-        $this->assertInstanceOf('Puli\RepositoryManager\Package\PackageCollection', $composerPackages);
+        $this->assertInstanceOf('Puli\RepositoryManager\Api\Package\PackageCollection', $composerPackages);
         $this->assertEquals(array(
             'vendor/package1' => new Package($this->packageFile1, $this->packageDir1, $installInfo1),
             'vendor/package3' => new Package($this->packageFile3, $this->packageDir3, $installInfo3),
         ), $composerPackages->toArray());
 
-        $this->assertInstanceOf('Puli\RepositoryManager\Package\PackageCollection', $userPackages);
+        $this->assertInstanceOf('Puli\RepositoryManager\Api\Package\PackageCollection', $userPackages);
         $this->assertEquals(array(
             'vendor/package2' => new Package($this->packageFile2, $this->packageDir2, $installInfo2),
         ), $userPackages->toArray());
@@ -251,16 +249,16 @@ class PackageManagerTest extends ManagerTestCase
         $installInfo2->setInstallerName('user');
         $installInfo3->setInstallerName('composer');
 
-        $this->manager = new PackageManager($this->environment, $this->packageFileStorage);
+        $this->manager = new PackageManagerImpl($this->environment, $this->packageFileStorage);
 
         $composerPackages = $this->manager->getPackagesByInstaller('composer', PackageState::NOT_FOUND);
         $userPackages = $this->manager->getPackagesByInstaller('user', PackageState::NOT_FOUND);
 
-        $this->assertInstanceOf('Puli\RepositoryManager\Package\PackageCollection', $composerPackages);
+        $this->assertInstanceOf('Puli\RepositoryManager\Api\Package\PackageCollection', $composerPackages);
         $this->assertTrue($composerPackages->contains('vendor/package1'));
         $this->assertCount(1, $composerPackages);
 
-        $this->assertInstanceOf('Puli\RepositoryManager\Package\PackageCollection', $userPackages);
+        $this->assertInstanceOf('Puli\RepositoryManager\Api\Package\PackageCollection', $userPackages);
 
         $this->assertTrue($userPackages->contains('vendor/package2'));
         $this->assertCount(1, $userPackages);
@@ -268,26 +266,26 @@ class PackageManagerTest extends ManagerTestCase
 
     public function testGetPackagesStoresExceptionIfPackageDirectoryNotFound()
     {
-        $manager = new PackageManager($this->environment, $this->packageFileStorage);
+        $manager = new PackageManagerImpl($this->environment, $this->packageFileStorage);
 
         $this->rootPackageFile->addInstallInfo(new InstallInfo('vendor/package', 'foobar'));
 
         $packages = $manager->getPackages();
 
         $this->assertTrue($packages['vendor/package']->isNotFound());
-        $this->assertInstanceOf('Puli\RepositoryManager\FileNotFoundException', $packages['vendor/package']->getLoadError());
+        $this->assertInstanceOf('Puli\RepositoryManager\Api\FileNotFoundException', $packages['vendor/package']->getLoadError());
     }
 
     public function testGetPackagesStoresExceptionIfPackageNoDirectory()
     {
         $this->rootPackageFile->addInstallInfo(new InstallInfo('vendor/package', __DIR__.'/Fixtures/file'));
 
-        $manager = new PackageManager($this->environment, $this->packageFileStorage);
+        $manager = new PackageManagerImpl($this->environment, $this->packageFileStorage);
 
         $packages = $manager->getPackages();
 
         $this->assertTrue($packages['vendor/package']->isNotLoadable());
-        $this->assertInstanceOf('Puli\RepositoryManager\NoDirectoryException', $packages['vendor/package']->getLoadError());
+        $this->assertInstanceOf('Puli\RepositoryManager\Api\NoDirectoryException', $packages['vendor/package']->getLoadError());
     }
 
     public function testGetPackagesStoresExceptionIfPackageFileVersionNotSupported()
@@ -301,7 +299,7 @@ class PackageManagerTest extends ManagerTestCase
             ->with($this->packageDir1.'/puli.json')
             ->willThrowException($exception);
 
-        $manager = new PackageManager($this->environment, $this->packageFileStorage);
+        $manager = new PackageManagerImpl($this->environment, $this->packageFileStorage);
 
         $packages = $manager->getPackages();
 
@@ -320,7 +318,7 @@ class PackageManagerTest extends ManagerTestCase
             ->with($this->packageDir1.'/puli.json')
             ->willThrowException($exception);
 
-        $manager = new PackageManager($this->environment, $this->packageFileStorage);
+        $manager = new PackageManagerImpl($this->environment, $this->packageFileStorage);
 
         $packages = $manager->getPackages();
 
@@ -447,7 +445,7 @@ class PackageManagerTest extends ManagerTestCase
     }
 
     /**
-     * @expectedException \Puli\RepositoryManager\Package\NameConflictException
+     * @expectedException \Puli\RepositoryManager\Api\Package\NameConflictException
      */
     public function testInstallPackageFailsIfNameConflict()
     {
@@ -462,7 +460,7 @@ class PackageManagerTest extends ManagerTestCase
     }
 
     /**
-     * @expectedException \Puli\RepositoryManager\FileNotFoundException
+     * @expectedException \Puli\RepositoryManager\Api\FileNotFoundException
      * @expectedExceptionMessage /foobar
      */
     public function testInstallPackageFailsIfDirectoryNotFound()
@@ -473,7 +471,7 @@ class PackageManagerTest extends ManagerTestCase
     }
 
     /**
-     * @expectedException \Puli\RepositoryManager\NoDirectoryException
+     * @expectedException \Puli\RepositoryManager\Api\NoDirectoryException
      * @expectedExceptionMessage /file
      */
     public function testInstallPackageFailsIfNoDirectory()
@@ -484,7 +482,7 @@ class PackageManagerTest extends ManagerTestCase
     }
 
     /**
-     * @expectedException \Puli\RepositoryManager\InvalidConfigException
+     * @expectedException \Puli\RepositoryManager\Api\InvalidConfigException
      */
     public function testInstallPackageFailsIfNoNameFound()
     {
@@ -582,21 +580,21 @@ class PackageManagerTest extends ManagerTestCase
 
         $rootPackage = $this->manager->getPackage('vendor/root');
 
-        $this->assertInstanceOf('Puli\RepositoryManager\Package\RootPackage', $rootPackage);
+        $this->assertInstanceOf('Puli\RepositoryManager\Api\Package\RootPackage', $rootPackage);
         $this->assertSame('vendor/root', $rootPackage->getName());
         $this->assertSame($this->rootDir, $rootPackage->getInstallPath());
         $this->assertSame($this->rootPackageFile, $rootPackage->getPackageFile());
 
         $package1 = $this->manager->getPackage('vendor/package1');
 
-        $this->assertInstanceOf('Puli\RepositoryManager\Package\Package', $package1);
+        $this->assertInstanceOf('Puli\RepositoryManager\Api\Package\Package', $package1);
         $this->assertSame('vendor/package1', $package1->getName());
         $this->assertSame($this->packageDir1, $package1->getInstallPath());
         $this->assertSame($this->packageFile1, $package1->getPackageFile());
     }
 
     /**
-     * @expectedException \Puli\RepositoryManager\Package\NoSuchPackageException
+     * @expectedException \Puli\RepositoryManager\Api\Package\NoSuchPackageException
      */
     public function testGetPackageFailsIfNotFound()
     {
@@ -611,7 +609,7 @@ class PackageManagerTest extends ManagerTestCase
 
         $rootPackage = $this->manager->getRootPackage();
 
-        $this->assertInstanceOf('Puli\RepositoryManager\Package\RootPackage', $rootPackage);
+        $this->assertInstanceOf('Puli\RepositoryManager\Api\Package\RootPackage', $rootPackage);
         $this->assertSame('vendor/root', $rootPackage->getName());
         $this->assertSame($this->rootDir, $rootPackage->getInstallPath());
         $this->assertSame($this->rootPackageFile, $rootPackage->getPackageFile());
@@ -622,6 +620,6 @@ class PackageManagerTest extends ManagerTestCase
         $this->rootPackageFile->addInstallInfo($this->installInfo1);
         $this->rootPackageFile->addInstallInfo($this->installInfo2);
 
-        $this->manager = new PackageManager($this->environment, $this->packageFileStorage);
+        $this->manager = new PackageManagerImpl($this->environment, $this->packageFileStorage);
     }
 }

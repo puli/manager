@@ -12,13 +12,13 @@
 namespace Puli\RepositoryManager\Tests\Repository;
 
 use PHPUnit_Framework_TestCase;
-use Puli\RepositoryManager\FileNotFoundException;
-use Puli\RepositoryManager\Package\NoSuchPackageException;
-use Puli\RepositoryManager\Package\Package;
-use Puli\RepositoryManager\Package\PackageCollection;
-use Puli\RepositoryManager\Package\PackageFile\PackageFile;
-use Puli\RepositoryManager\Repository\ResourceMapping;
-use Puli\RepositoryManager\Repository\RepositoryPathConflict;
+use Puli\RepositoryManager\Api\FileNotFoundException;
+use Puli\RepositoryManager\Api\Package\NoSuchPackageException;
+use Puli\RepositoryManager\Api\Package\Package;
+use Puli\RepositoryManager\Api\Package\PackageCollection;
+use Puli\RepositoryManager\Api\Package\PackageFile;
+use Puli\RepositoryManager\Api\Repository\RepositoryPathConflict;
+use Puli\RepositoryManager\Api\Repository\ResourceMapping;
 
 /**
  * @since  1.0
@@ -184,7 +184,7 @@ class ResourceMappingTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\RepositoryManager\Repository\MappingAlreadyLoadedException
+     * @expectedException \Puli\RepositoryManager\Api\Repository\MappingAlreadyLoadedException
      */
     public function testLoadFailsIfCalledTwice()
     {
@@ -208,7 +208,7 @@ class ResourceMappingTest extends PHPUnit_Framework_TestCase
 
         $loadErrors = $mapping->getLoadErrors();
         $this->assertCount(1, $loadErrors);
-        $this->assertInstanceOf('Puli\RepositoryManager\FileNotFoundException', $loadErrors[0]);
+        $this->assertInstanceOf('Puli\RepositoryManager\Api\FileNotFoundException', $loadErrors[0]);
     }
 
     public function testLoadStoresErrorsIfNoPathFound()
@@ -226,8 +226,8 @@ class ResourceMappingTest extends PHPUnit_Framework_TestCase
 
         $loadErrors = $mapping->getLoadErrors();
         $this->assertCount(2, $loadErrors);
-        $this->assertInstanceOf('Puli\RepositoryManager\FileNotFoundException', $loadErrors[0]);
-        $this->assertInstanceOf('Puli\RepositoryManager\FileNotFoundException', $loadErrors[1]);
+        $this->assertInstanceOf('Puli\RepositoryManager\Api\FileNotFoundException', $loadErrors[0]);
+        $this->assertInstanceOf('Puli\RepositoryManager\Api\FileNotFoundException', $loadErrors[1]);
     }
 
     public function testLoadStoresErrorIfPackageNotFound()
@@ -244,7 +244,7 @@ class ResourceMappingTest extends PHPUnit_Framework_TestCase
 
         $loadErrors = $mapping->getLoadErrors();
         $this->assertCount(1, $loadErrors);
-        $this->assertInstanceOf('Puli\RepositoryManager\Package\NoSuchPackageException', $loadErrors[0]);
+        $this->assertInstanceOf('Puli\RepositoryManager\Api\Package\NoSuchPackageException', $loadErrors[0]);
     }
 
     public function testLoadFailsIfPathNotFoundAndFailOnError()
@@ -302,7 +302,7 @@ class ResourceMappingTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\RepositoryManager\Repository\MappingNotLoadedException
+     * @expectedException \Puli\RepositoryManager\Api\Repository\MappingNotLoadedException
      */
     public function testUnloadFailsIfNotLoaded()
     {
@@ -405,7 +405,7 @@ class ResourceMappingTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\RepositoryManager\Repository\MappingNotLoadedException
+     * @expectedException \Puli\RepositoryManager\Api\Repository\MappingNotLoadedException
      */
     public function testAddConflictFailsIfNotLoaded()
     {
@@ -455,7 +455,7 @@ class ResourceMappingTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\RepositoryManager\Repository\MappingNotLoadedException
+     * @expectedException \Puli\RepositoryManager\Api\Repository\MappingNotLoadedException
      */
     public function testRemoveConflictFailsIfNotLoaded()
     {
@@ -470,7 +470,7 @@ class ResourceMappingTest extends PHPUnit_Framework_TestCase
         $mapping1 = new ResourceMapping('/path', 'resources');
         $mapping1->load($this->package1, $this->packages);
 
-        $this->assertInstanceOf('Puli\RepositoryManager\Package\PackageCollection', $mapping1->getConflictingPackages());
+        $this->assertInstanceOf('Puli\RepositoryManager\Api\Package\PackageCollection', $mapping1->getConflictingPackages());
         $this->assertCount(0, $mapping1->getConflictingPackages());
 
         $mapping2 = new ResourceMapping('/path', 'resources');
