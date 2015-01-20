@@ -43,6 +43,8 @@ Changelog
  * removed unused `ResourceDefinitionException`
  * added `Config::contains()`
  * added `ConfigFileManager::hasConfigKey()`
+ * moved `$uuid` argument to last position in `BindingDescriptor::__construct()`
+ * removed `BindingDescriptor::create()`
 
 * 1.0.0-beta (2015-01-12)
 

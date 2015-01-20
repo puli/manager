@@ -210,7 +210,7 @@ class DiscoveryManagerImpl implements DiscoveryManager
             throw TypeNotEnabledException::forTypeName($typeName);
         }
 
-        $binding = BindingDescriptor::create($query, $typeName, $parameterValues, $language);
+        $binding = new BindingDescriptor($query, $typeName, $parameterValues, $language);
 
         if ($this->rootPackageFile->hasBindingDescriptor($binding->getUuid())) {
             return;

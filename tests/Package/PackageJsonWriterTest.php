@@ -63,7 +63,7 @@ class PackageJsonWriterTest extends JsonWriterTestCase
         $packageFile = new PackageFile();
         $packageFile->setPackageName('my/application');
         $packageFile->addResourceMapping(new ResourceMapping('/app', 'res'));
-        $packageFile->addBindingDescriptor(BindingDescriptor::create('/app/config*.yml', 'my/type'));
+        $packageFile->addBindingDescriptor(new BindingDescriptor('/app/config*.yml', 'my/type'));
         $packageFile->addTypeDescriptor(new BindingTypeDescriptor('my/type', 'Description of my type.', array(
             new BindingParameterDescriptor('param', false, 1234, 'Description of the parameter.'),
         )));
@@ -90,7 +90,7 @@ class PackageJsonWriterTest extends JsonWriterTestCase
         $typeStore->add($bindingType, $package);
         $bindingType->refreshState($typeStore);
 
-        $binding = BindingDescriptor::create('/app/config*.yml', 'my/type');
+        $binding = new BindingDescriptor('/app/config*.yml', 'my/type');
         $binding->refreshState($package, $typeStore);
 
         // The default value is accessible
@@ -172,13 +172,13 @@ class PackageJsonWriterTest extends JsonWriterTestCase
     public function testWritePackageFileSortsBindings()
     {
         $packageFile = new PackageFile();
-        $packageFile->addBindingDescriptor(BindingDescriptor::create('/vendor/c',
+        $packageFile->addBindingDescriptor(new BindingDescriptor('/vendor/c',
             'vendor/a-type'));
-        $packageFile->addBindingDescriptor(BindingDescriptor::create('/vendor/a',
+        $packageFile->addBindingDescriptor(new BindingDescriptor('/vendor/a',
             'vendor/b-type'));
-        $packageFile->addBindingDescriptor(BindingDescriptor::create('/vendor/b',
+        $packageFile->addBindingDescriptor(new BindingDescriptor('/vendor/b',
             'vendor/b-type'));
-        $packageFile->addBindingDescriptor(BindingDescriptor::create('/vendor/a',
+        $packageFile->addBindingDescriptor(new BindingDescriptor('/vendor/a',
             'vendor/a-type'));
 
         $this->writer->writePackageFile($packageFile, $this->tempFile);
@@ -192,7 +192,7 @@ class PackageJsonWriterTest extends JsonWriterTestCase
     public function testWritePackageFileSortsBindingParameters()
     {
         $packageFile = new PackageFile();
-        $packageFile->addBindingDescriptor(BindingDescriptor::create('/path',
+        $packageFile->addBindingDescriptor(new BindingDescriptor('/path',
             'vendor/type', array(
                 'c' => 'foo',
                 'a' => 'foo',
@@ -211,7 +211,7 @@ class PackageJsonWriterTest extends JsonWriterTestCase
     {
         $baseConfig = new Config();
         $packageFile = new PackageFile(null, null, $baseConfig);
-        $packageFile->addBindingDescriptor(BindingDescriptor::create(
+        $packageFile->addBindingDescriptor(new BindingDescriptor(
             '/app/config*.yml',
             'my/type',
             array('param' => 'value')
@@ -229,7 +229,7 @@ class PackageJsonWriterTest extends JsonWriterTestCase
     {
         $baseConfig = new Config();
         $packageFile = new PackageFile(null, null, $baseConfig);
-        $packageFile->addBindingDescriptor(BindingDescriptor::create(
+        $packageFile->addBindingDescriptor(new BindingDescriptor(
             '//resource[name="config.yml"]',
             'my/type',
             array(),
@@ -308,7 +308,7 @@ class PackageJsonWriterTest extends JsonWriterTestCase
         $packageFile = new RootPackageFile(null, null, $baseConfig);
         $packageFile->setPackageName('my/application');
         $packageFile->addResourceMapping(new ResourceMapping('/app', 'res'));
-        $packageFile->addBindingDescriptor(BindingDescriptor::create('/app/config*.yml',
+        $packageFile->addBindingDescriptor(new BindingDescriptor('/app/config*.yml',
             'my/type'));
         $packageFile->addTypeDescriptor(new BindingTypeDescriptor('my/type',
             'Description of my type.', array(

@@ -83,11 +83,11 @@ class PackageJsonReader implements PackageFileReader
         if (isset($jsonData->bindings)) {
             foreach ($jsonData->bindings as $uuid => $bindingData) {
                 $packageFile->addBindingDescriptor(new BindingDescriptor(
-                    Uuid::fromString($uuid),
                     $bindingData->query,
                     $bindingData->type,
                     isset($bindingData->parameters) ? (array) $bindingData->parameters : array(),
-                    isset($bindingData->language) ? $bindingData->language : 'glob'
+                    isset($bindingData->language) ? $bindingData->language : 'glob',
+                    Uuid::fromString($uuid)
                 ));
             }
         }

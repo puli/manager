@@ -114,7 +114,7 @@ class PackageJsonReaderTest extends PHPUnit_Framework_TestCase
         $packageFile = $this->reader->readPackageFile(__DIR__.'/Fixtures/json/binding-params.json', $this->baseConfig);
 
         $this->assertInstanceOf('Puli\RepositoryManager\Api\Package\PackageFile', $packageFile);
-        $this->assertEquals(array(BindingDescriptor::create(
+        $this->assertEquals(array(new BindingDescriptor(
             '/app/config*.yml',
             'my/type',
             array('param' => 'value')
@@ -126,7 +126,7 @@ class PackageJsonReaderTest extends PHPUnit_Framework_TestCase
         $packageFile = $this->reader->readPackageFile(__DIR__.'/Fixtures/json/binding-language.json', $this->baseConfig);
 
         $this->assertInstanceOf('Puli\RepositoryManager\Api\Package\PackageFile', $packageFile);
-        $this->assertEquals(array(BindingDescriptor::create(
+        $this->assertEquals(array(new BindingDescriptor(
             '//resource[name="config.yml"]',
             'my/type',
             array(),
@@ -324,7 +324,7 @@ class PackageJsonReaderTest extends PHPUnit_Framework_TestCase
     {
         $this->assertSame('my/application', $packageFile->getPackageName());
         $this->assertEquals(array('/app' => new ResourceMapping('/app', array('res'))), $packageFile->getResourceMappings());
-        $this->assertEquals(array(BindingDescriptor::create('/app/config*.yml', 'my/type')), $packageFile->getBindingDescriptors());
+        $this->assertEquals(array(new BindingDescriptor('/app/config*.yml', 'my/type')), $packageFile->getBindingDescriptors());
         $this->assertEquals(array(new BindingTypeDescriptor('my/type', 'Description of my type.', array(
             new BindingParameterDescriptor('param', false, 1234, 'Description of the parameter.'),
         ))), $packageFile->getTypeDescriptors());

@@ -71,44 +71,6 @@ class BindingDescriptor
     private $violations = array();
 
     /**
-     * Creates a new binding descriptor with a generated UUID.
-     *
-     * The UUID is generated based on the given parameters.
-     *
-     * @param string $query           The query for the resources of the binding.
-     * @param string $typeName        The name of the binding type.
-     * @param array  $parameterValues The values of the binding parameters.
-     * @param string $language        The language of the query.
-     *
-     * @return static The created binding descriptor.
-     *
-     * @see ResourceBinding
-     */
-    public static function create($query, $typeName, array $parameterValues = array(), $language = 'glob')
-    {
-        Assert::query($query);
-        Assert::typeName($typeName);
-        Assert::language($language);
-        Assert::allParameterName(array_keys($parameterValues));
-        Assert::allParameterValue($parameterValues);
-
-        $dn = new DistinguishedName(array(
-            'q' => $query,
-            'l' => $language,
-            't' => $typeName,
-        ));
-
-        foreach ($parameterValues as $parameterName => $value) {
-            // Attribute values must be strings
-            $dn->add('p-'.$parameterName, serialize($value));
-        }
-
-        $uuid = Uuid::uuid5(Uuid::NAMESPACE_X500, $dn->toString());
-
-        return new static($uuid, $query, $typeName, $parameterValues, $language);
-    }
-
-    /**
      * Compares two binding descriptors.
      *
      * One binding descriptor is sorted before another if:
@@ -135,23 +97,29 @@ class BindingDescriptor
     /**
      * Creates a new binding descriptor.
      *
-     * @param Uuid   $uuid            The UUID of the binding.
      * @param string $query           The query for the resources of the binding.
      * @param string $typeName        The name of the binding type.
      * @param array  $parameterValues The values of the binding parameters.
      * @param string $language        The language of the query.
+     * @param Uuid   $uuid            The UUID of the binding. If no UUID is
+     *                                passed, a UUID is generated based on the
+     *                                given parameters.
      *
      * @throws InvalidArgumentException If any of the arguments is invalid.
      *
      * @see ResourceBinding
      */
-    public function __construct(Uuid $uuid, $query, $typeName, array $parameterValues = array(), $language = 'glob')
+    public function __construct($query, $typeName, array $parameterValues = array(), $language = 'glob', Uuid $uuid = null)
     {
         Assert::query($query);
         Assert::typeName($typeName);
         Assert::language($language);
         Assert::allParameterName(array_keys($parameterValues));
         Assert::allParameterValue($parameterValues);
+
+        if (null === $uuid) {
+            $uuid = $this->generateUuid($query, $typeName, $parameterValues, $language);
+        }
 
         $this->uuid = $uuid;
         $this->query = $query;
@@ -425,5 +393,21 @@ class BindingDescriptor
     public function isInvalid()
     {
         return BindingState::INVALID === $this->state;
+    }
+
+    private function generateUuid($query, $typeName, array $parameterValues, $language)
+    {
+        $dn = new DistinguishedName(array(
+            'q' => $query,
+            'l' => $language,
+            't' => $typeName,
+        ));
+
+        foreach ($parameterValues as $parameterName => $value) {
+            // Attribute values must be strings
+            $dn->add('p-'.$parameterName, serialize($value));
+        }
+
+        return Uuid::uuid5(Uuid::NAMESPACE_X500, $dn->toString());
     }
 }

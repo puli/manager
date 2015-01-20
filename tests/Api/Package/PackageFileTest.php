@@ -229,7 +229,7 @@ class PackageFileTest extends PHPUnit_Framework_TestCase
     public function testAddBindingDescriptor()
     {
         $packageFile = new PackageFile();
-        $packageFile->addBindingDescriptor($binding = BindingDescriptor::create('/path', 'my/type'));
+        $packageFile->addBindingDescriptor($binding = new BindingDescriptor('/path', 'my/type'));
 
         $this->assertSame($binding, $packageFile->getBindingDescriptor($binding->getUuid()));
         $this->assertSame(array($binding), $packageFile->getBindingDescriptors());
@@ -238,8 +238,8 @@ class PackageFileTest extends PHPUnit_Framework_TestCase
     public function testRemoveBindingDescriptor()
     {
         $packageFile = new PackageFile();
-        $packageFile->addBindingDescriptor($binding1 = BindingDescriptor::create('/path1', 'my/type'));
-        $packageFile->addBindingDescriptor($binding2 = BindingDescriptor::create('/path2', 'my/type'));
+        $packageFile->addBindingDescriptor($binding1 = new BindingDescriptor('/path1', 'my/type'));
+        $packageFile->addBindingDescriptor($binding2 = new BindingDescriptor('/path2', 'my/type'));
         $packageFile->removeBindingDescriptor($binding1->getUuid());
 
         $this->assertSame(array($binding2), $packageFile->getBindingDescriptors());
@@ -248,7 +248,7 @@ class PackageFileTest extends PHPUnit_Framework_TestCase
     public function testHasBindingDescriptor()
     {
         $packageFile = new PackageFile();
-        $binding = BindingDescriptor::create('/path', 'my/type');
+        $binding = new BindingDescriptor('/path', 'my/type');
 
         $this->assertFalse($packageFile->hasBindingDescriptor($binding->getUuid()));
         $packageFile->addBindingDescriptor($binding);
