@@ -114,6 +114,32 @@ class ConfigFileManagerImplTest extends PHPUnit_Framework_TestCase
         ));
     }
 
+    public function testHasConfigKey()
+    {
+        $this->assertFalse($this->manager->hasConfigKey(Config::PULI_DIR));
+
+        $this->baseConfig->set(Config::PULI_DIR, 'fallback');
+
+        $this->assertFalse($this->manager->hasConfigKey(Config::PULI_DIR));
+
+        $this->configFile->getConfig()->set(Config::PULI_DIR, 'my-puli-dir');
+
+        $this->assertTrue($this->manager->hasConfigKey(Config::PULI_DIR));
+    }
+
+    public function testHasConfigKeyWithFallback()
+    {
+        $this->assertFalse($this->manager->hasConfigKey(Config::PULI_DIR, true));
+
+        $this->baseConfig->set(Config::PULI_DIR, 'fallback');
+
+        $this->assertTrue($this->manager->hasConfigKey(Config::PULI_DIR, true));
+
+        $this->configFile->getConfig()->set(Config::PULI_DIR, 'my-puli-dir');
+
+        $this->assertTrue($this->manager->hasConfigKey(Config::PULI_DIR, true));
+    }
+
     public function testGetConfigKey()
     {
         $this->assertNull($this->manager->getConfigKey(Config::PULI_DIR));

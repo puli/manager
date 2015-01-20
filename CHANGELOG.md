@@ -42,6 +42,7 @@ Changelog
    `ResourceMapping::getConflicts()`
  * removed unused `ResourceDefinitionException`
  * added `Config::contains()`
+ * added `ConfigFileManager::hasConfigKey()`
 
 * 1.0.0-beta (2015-01-12)
 

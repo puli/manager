@@ -71,6 +71,14 @@ abstract class AbstractConfigFileManager implements ConfigFileManager
     /**
      * {@inheritdoc}
      */
+    public function hasConfigKey($key, $fallback = false)
+    {
+        return $this->getConfig()->contains($key, $fallback);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function getConfigKey($key, $default = null, $fallback = false)
     {
         return $this->getConfig()->getRaw($key, $default, $fallback);
