@@ -11,6 +11,7 @@
 
 namespace Puli\RepositoryManager\Api\Config;
 
+use Exception;
 use RuntimeException;
 
 /**
@@ -21,4 +22,20 @@ use RuntimeException;
  */
 class NoSuchConfigKeyException extends RuntimeException
 {
+    /**
+     * Creates an exception for a configuration key.
+     *
+     * @param string    $key   The configuration key that was not found.
+     * @param int       $code  The exception code.
+     * @param Exception $cause The exception that caused this exception.
+     *
+     * @return static The created exception.
+     */
+    public static function forKey($key, $code = 0, Exception $cause = null)
+    {
+        return new static(sprintf(
+            'The config key "%s" does not exist.',
+            $key
+        ), $code, $cause);
+    }
 }

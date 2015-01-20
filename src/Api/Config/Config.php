@@ -196,6 +196,7 @@ class Config
      *
      * @return mixed The value of the configuration key.
      *
+     * @throws NoSuchConfigKeyException If the configuration key is invalid.
      */
     public function get($key, $default = null, $fallback = true)
     {
@@ -226,6 +227,7 @@ class Config
      *
      * @return mixed The value of the configuration key.
      *
+     * @throws NoSuchConfigKeyException If the configuration key is invalid.
      */
     public function getRaw($key, $default = null, $fallback = true)
     {
@@ -238,10 +240,7 @@ class Config
         }
 
         if (!isset(self::$keys[$key])) {
-            throw new NoSuchConfigKeyException(sprintf(
-                'The config key "%s" does not exist.',
-                $key
-            ));
+            throw NoSuchConfigKeyException::forKey($key);
         }
 
         if (!array_key_exists($key, $this->values) && $fallback && $this->baseConfig) {
@@ -249,6 +248,38 @@ class Config
         }
 
         return isset($this->values[$key]) ? $this->values[$key] : $default;
+    }
+
+    /**
+     * Returns whether a configuration key is set.
+     *
+     * @param string $key      The configuration key to search.
+     * @param bool   $fallback Whether to check the base configuration if the
+     *                         key is not found.
+     *
+     * @return bool Returns `true` if the configuration key is set.
+     *
+     * @throws NoSuchConfigKeyException If the configuration key is invalid.
+     */
+    public function contains($key, $fallback = true)
+    {
+        if (!isset(self::$compositeKeys[$key]) && !isset(self::$keys[$key])) {
+            throw NoSuchConfigKeyException::forKey($key);
+        }
+
+        if (array_key_exists($key, $this->values)) {
+            return true;
+        }
+
+        if (isset(self::$compositeKeys[$key]) && $this->containsKeyPrefix($key.'.')) {
+            return true;
+        }
+
+        if ($fallback && $this->baseConfig) {
+            return $this->baseConfig->contains($key);
+        }
+
+        return false;
     }
 
     /**
@@ -274,10 +305,7 @@ class Config
         }
 
         if (!isset(self::$keys[$key])) {
-            throw new NoSuchConfigKeyException(sprintf(
-                'The config key "%s" does not exist.',
-                $key
-            ));
+            throw NoSuchConfigKeyException::forKey($key);
         }
 
         $this->validate($key, $value);
@@ -319,10 +347,7 @@ class Config
         }
 
         if (!isset(self::$keys[$key])) {
-            throw new NoSuchConfigKeyException(sprintf(
-                'The config key "%s" does not exist.',
-                $key
-            ));
+            throw NoSuchConfigKeyException::forKey($key);
         }
 
         unset($this->values[$key]);
@@ -564,6 +589,17 @@ class Config
         }
 
         return $values;
+    }
+
+    private function containsKeyPrefix($keyPrefix)
+    {
+        foreach ($this->values as $k => $v) {
+            if (0 === strpos($k, $keyPrefix)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private function removeByKeyPrefix($keyPrefix)

@@ -393,6 +393,107 @@ class ConfigTest extends PHPUnit_Framework_TestCase
         ), $config->get(Config::REPOSITORY, null, false));
     }
 
+    public function testContains()
+    {
+        $baseConfig = new Config();
+        $config = new Config($baseConfig);
+
+        $this->assertFalse($config->contains(Config::PULI_DIR));
+
+        $baseConfig->set(Config::PULI_DIR, 'puli-dir');
+
+        $this->assertTrue($config->contains(Config::PULI_DIR));
+
+        $config->set(Config::PULI_DIR, 'puli-dir');
+
+        $this->assertTrue($config->contains(Config::PULI_DIR));
+    }
+
+    public function testContainsWithoutFallback()
+    {
+        $baseConfig = new Config();
+        $config = new Config($baseConfig);
+
+        $this->assertFalse($config->contains(Config::PULI_DIR, false));
+
+        $baseConfig->set(Config::PULI_DIR, 'puli-dir');
+
+        $this->assertFalse($config->contains(Config::PULI_DIR, false));
+
+        $config->set(Config::PULI_DIR, 'puli-dir');
+
+        $this->assertTrue($config->contains(Config::PULI_DIR, false));
+    }
+
+    /**
+     * @expectedException \Puli\RepositoryManager\Api\Config\NoSuchConfigKeyException
+     * @expectedExceptionMessage foo
+     */
+    public function testContainsFailsIfInvalidKey()
+    {
+        $config = new Config();
+        $config->contains('foo');
+    }
+
+    public function testContainsCompositeKey()
+    {
+        $config = new Config();
+
+        $this->assertFalse($config->contains(Config::DISCOVERY));
+        $this->assertFalse($config->contains(Config::DISCOVERY_STORE));
+        $this->assertFalse($config->contains(Config::DISCOVERY_STORE_TYPE));
+
+        $config->set(Config::DISCOVERY, array(
+            'store' => array(
+                'type' => 'my-store-type',
+            ),
+        ));
+
+        $this->assertTrue($config->contains(Config::DISCOVERY));
+        $this->assertTrue($config->contains(Config::DISCOVERY_STORE));
+        $this->assertTrue($config->contains(Config::DISCOVERY_STORE_TYPE));
+    }
+
+    public function testContainsCompositeKeyWithFallback()
+    {
+        $baseConfig = new Config();
+        $config = new Config($baseConfig);
+
+        $this->assertFalse($config->contains(Config::DISCOVERY));
+        $this->assertFalse($config->contains(Config::DISCOVERY_STORE));
+        $this->assertFalse($config->contains(Config::DISCOVERY_STORE_TYPE));
+
+        $baseConfig->set(Config::DISCOVERY, array(
+            'store' => array(
+                'type' => 'my-store-type',
+            ),
+        ));
+
+        $this->assertTrue($config->contains(Config::DISCOVERY));
+        $this->assertTrue($config->contains(Config::DISCOVERY_STORE));
+        $this->assertTrue($config->contains(Config::DISCOVERY_STORE_TYPE));
+    }
+
+    public function testContainsCompositeKeyWithoutFallback()
+    {
+        $baseConfig = new Config();
+        $config = new Config($baseConfig);
+
+        $this->assertFalse($config->contains(Config::DISCOVERY, false));
+        $this->assertFalse($config->contains(Config::DISCOVERY_STORE, false));
+        $this->assertFalse($config->contains(Config::DISCOVERY_STORE_TYPE, false));
+
+        $baseConfig->set(Config::DISCOVERY, array(
+            'store' => array(
+                'type' => 'my-store-type',
+            ),
+        ));
+
+        $this->assertFalse($config->contains(Config::DISCOVERY, false));
+        $this->assertFalse($config->contains(Config::DISCOVERY_STORE, false));
+        $this->assertFalse($config->contains(Config::DISCOVERY_STORE_TYPE, false));
+    }
+
     public function testSetCompositeKey()
     {
         $config = new Config();

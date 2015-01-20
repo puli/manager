@@ -41,6 +41,7 @@ Changelog
    access load errors and conflicts via `ResourceMapping::getLoadErrors()` and
    `ResourceMapping::getConflicts()`
  * removed unused `ResourceDefinitionException`
+ * added `Config::contains()`
 
 * 1.0.0-beta (2015-01-12)
 
