@@ -640,6 +640,8 @@ class DiscoveryManagerImplTest extends ManagerTestCase
     {
         $this->initDefaultManager();
 
+        $binding = new BindingDescriptor('/path', 'my/type', array('param' => 'value'), 'xpath');
+
         $this->packageFile1->addTypeDescriptor(new BindingTypeDescriptor('my/type', null, array(
             new BindingParameterDescriptor('param'),
         )));
@@ -651,23 +653,21 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->packageFileStorage->expects($this->once())
             ->method('saveRootPackageFile')
             ->with($this->rootPackageFile)
-            ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) {
+            ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) use ($binding) {
                 $bindings = $rootPackageFile->getBindingDescriptors();
 
-                PHPUnit_Framework_Assert::assertCount(1, $bindings);
-                PHPUnit_Framework_Assert::assertSame('/path', $bindings[0]->getQuery());
-                PHPUnit_Framework_Assert::assertSame('my/type', $bindings[0]->getTypeName());
-                PHPUnit_Framework_Assert::assertSame(array('param' => 'value'), $bindings[0]->getParameterValues());
-                PHPUnit_Framework_Assert::assertSame('xpath', $bindings[0]->getLanguage());
-                PHPUnit_Framework_Assert::assertTrue($bindings[0]->isEnabled());
+                PHPUnit_Framework_Assert::assertSame(array($binding), $bindings);
+                PHPUnit_Framework_Assert::assertTrue($binding->isEnabled());
             }));
 
-        $this->manager->addBinding('/path', 'my/type', array('param' => 'value'), 'xpath');
+        $this->manager->addBinding($binding);
     }
 
     public function testAddBindingForTypeWithDefaultParameters()
     {
         $this->initDefaultManager();
+
+        $binding = new BindingDescriptor('/path', 'my/type', array(), 'xpath');
 
         $this->packageFile1->addTypeDescriptor(new BindingTypeDescriptor('my/type', null, array(
             new BindingParameterDescriptor('param', false, 'default'),
@@ -680,27 +680,25 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->packageFileStorage->expects($this->once())
             ->method('saveRootPackageFile')
             ->with($this->rootPackageFile)
-            ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) {
+            ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) use ($binding) {
                 $bindings = $rootPackageFile->getBindingDescriptors();
 
-                PHPUnit_Framework_Assert::assertCount(1, $bindings);
-                PHPUnit_Framework_Assert::assertSame('/path', $bindings[0]->getQuery());
-                PHPUnit_Framework_Assert::assertSame('my/type', $bindings[0]->getTypeName());
-                PHPUnit_Framework_Assert::assertSame(array('param' => 'default'), $bindings[0]->getParameterValues());
-                PHPUnit_Framework_Assert::assertSame('xpath', $bindings[0]->getLanguage());
-                PHPUnit_Framework_Assert::assertTrue($bindings[0]->isEnabled());
+                PHPUnit_Framework_Assert::assertSame(array($binding), $bindings);
+                PHPUnit_Framework_Assert::assertTrue($binding->isEnabled());
             }));
 
-        $this->manager->addBinding('/path', 'my/type', array(), 'xpath');
+        $this->manager->addBinding($binding);
     }
 
     public function testAddBindingDoesNotAddBindingDuplicatedInPackage()
     {
         $this->initDefaultManager();
 
+        $binding = new BindingDescriptor('/path', 'my/type');
+
         $this->packageFile1->addTypeDescriptor(new BindingTypeDescriptor('my/type'));
-        $this->packageFile1->addBindingDescriptor($binding = new BindingDescriptor('/path', 'my/type'));
-        $this->installInfo1->addEnabledBindingUuid($binding->getUuid());
+        $this->packageFile1->addBindingDescriptor($existing = new BindingDescriptor('/path', 'my/type'));
+        $this->installInfo1->addEnabledBindingUuid($existing->getUuid());
 
         $this->discovery->expects($this->never())
             ->method('bind');
@@ -708,21 +706,17 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->packageFileStorage->expects($this->once())
             ->method('saveRootPackageFile')
             ->with($this->rootPackageFile)
-            ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) {
+            ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) use ($binding) {
                 $bindings = $rootPackageFile->getBindingDescriptors();
 
-                PHPUnit_Framework_Assert::assertCount(1, $bindings);
-                PHPUnit_Framework_Assert::assertSame('/path', $bindings[0]->getQuery());
-                PHPUnit_Framework_Assert::assertSame('my/type', $bindings[0]->getTypeName());
-                PHPUnit_Framework_Assert::assertSame(array(), $bindings[0]->getParameterValues());
-                PHPUnit_Framework_Assert::assertSame('glob', $bindings[0]->getLanguage());
-                PHPUnit_Framework_Assert::assertTrue($bindings[0]->isEnabled());
+                PHPUnit_Framework_Assert::assertSame(array($binding), $bindings);
+                PHPUnit_Framework_Assert::assertTrue($binding->isEnabled());
             }));
 
-        $this->manager->addBinding('/path', 'my/type');
+        $this->manager->addBinding($binding);
 
         // The package binding is marked as duplicate, the root binding is enabled
-        $this->assertTrue($binding->isDuplicate());
+        $this->assertTrue($existing->isDuplicate());
     }
 
     public function testAddBindingDoesNotAddBindingDuplicatedInRoot()
@@ -738,7 +732,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->packageFileStorage->expects($this->never())
             ->method('saveRootPackageFile');
 
-        $this->manager->addBinding('/path', 'my/type');
+        $this->manager->addBinding(new BindingDescriptor('/path', 'my/type'));
     }
 
     /**
@@ -754,7 +748,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->packageFileStorage->expects($this->never())
             ->method('saveRootPackageFile');
 
-        $this->manager->addBinding('/path', 'my/type', array('param' => 'value'), 'xpath');
+        $this->manager->addBinding(new BindingDescriptor('/path', 'my/type'));
     }
 
     /**
@@ -773,7 +767,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->packageFileStorage->expects($this->never())
             ->method('saveRootPackageFile');
 
-        $this->manager->addBinding('/path', 'my/type', array('param' => 'value'), 'xpath');
+        $this->manager->addBinding(new BindingDescriptor('/path', 'my/type'));
     }
 
     /**
@@ -793,7 +787,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->packageFileStorage->expects($this->never())
             ->method('saveRootPackageFile');
 
-        $this->manager->addBinding('/path', 'my/type');
+        $this->manager->addBinding(new BindingDescriptor('/path', 'my/type'));
     }
 
     /**
@@ -812,12 +806,14 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->packageFileStorage->expects($this->never())
             ->method('saveRootPackageFile');
 
-        $this->manager->addBinding('/path', 'my/type');
+        $this->manager->addBinding(new BindingDescriptor('/path', 'my/type'));
     }
 
     public function testAddBindingUnbindsIfSavingFailed()
     {
         $this->initDefaultManager();
+
+        $binding = new BindingDescriptor('/path', 'my/type', array('param' => 'value'), 'xpath');
 
         $this->rootPackageFile->addBindingDescriptor($existing = new BindingDescriptor('/existing', 'my/type'));
         $this->packageFile1->addTypeDescriptor(new BindingTypeDescriptor('my/type', null, array(
@@ -838,12 +834,13 @@ class DiscoveryManagerImplTest extends ManagerTestCase
             ->willThrowException(new TestException('Some exception'));
 
         try {
-            $this->manager->addBinding('/path', 'my/type', array('param' => 'value'), 'xpath');
-            $this->fail('Expected an exception');
+            $this->manager->addBinding($binding);
+            $this->fail('Expected a TestException');
         } catch (TestException $e) {
         }
 
         $this->assertSame(array($existing), $this->rootPackageFile->getBindingDescriptors());
+        $this->assertFalse($binding->isLoaded());
     }
 
     public function testRemoveBinding()
@@ -1008,9 +1005,11 @@ class DiscoveryManagerImplTest extends ManagerTestCase
     {
         $this->initDefaultManager();
 
+        $binding = new BindingDescriptor('/path', 'my/type');
+
         $this->packageFile1->addTypeDescriptor(new BindingTypeDescriptor('my/type'));
-        $this->packageFile1->addBindingDescriptor($binding = new BindingDescriptor('/path', 'my/type'));
-        $this->installInfo1->addEnabledBindingUuid($binding->getUuid());
+        $this->packageFile1->addBindingDescriptor($existing = new BindingDescriptor('/path', 'my/type'));
+        $this->installInfo1->addEnabledBindingUuid($existing->getUuid());
 
         $this->discovery->expects($this->never())
             ->method('bind');
@@ -1023,13 +1022,14 @@ class DiscoveryManagerImplTest extends ManagerTestCase
             ->with($this->rootPackageFile);
 
         // Duplicate, not bound
-        $this->manager->addBinding('/path', 'my/type');
+        $this->manager->addBinding($binding);
 
         // Duplicate removed, not unbound
         $this->manager->removeBinding($binding->getUuid());
 
         // Duplicate is still enabled
-        $this->assertTrue($binding->isEnabled());
+        $this->assertTrue($existing->isEnabled());
+        $this->assertFalse($binding->isLoaded());
     }
 
     public function testEnableBindingBindsIfUndecided()

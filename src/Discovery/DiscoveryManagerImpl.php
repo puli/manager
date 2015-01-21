@@ -122,27 +122,27 @@ class DiscoveryManagerImpl implements DiscoveryManager
     /**
      * {@inheritdoc}
      */
-    public function addBindingType(BindingTypeDescriptor $bindingType)
+    public function addBindingType(BindingTypeDescriptor $typeDescriptor)
     {
         $this->assertDiscoveryLoaded();
         $this->assertPackagesLoaded();
         $this->emitWarningForDuplicateTypes();
 
-        if ($this->typeStore->existsAny($bindingType->getName())) {
-            throw DuplicateTypeException::forTypeName($bindingType->getName());
+        if ($this->typeStore->existsAny($typeDescriptor->getName())) {
+            throw DuplicateTypeException::forTypeName($typeDescriptor->getName());
         }
 
         try {
             // First check that the type can be added without errors
-            $this->loadAndSyncBindingType($bindingType);
+            $this->loadAndSyncBindingType($typeDescriptor);
 
             // Then save the configuration
-            $this->rootPackageFile->addTypeDescriptor($bindingType);
+            $this->rootPackageFile->addTypeDescriptor($typeDescriptor);
             $this->packageFileStorage->saveRootPackageFile($this->rootPackageFile);
         } catch (Exception $e) {
             // Clean up
-            $this->unloadAndSyncBindingType($bindingType->getName());
-            $this->rootPackageFile->removeTypeDescriptor($bindingType->getName());
+            $this->unloadAndSyncBindingType($typeDescriptor->getName());
+            $this->rootPackageFile->removeTypeDescriptor($typeDescriptor->getName());
 
             throw $e;
         }
@@ -197,10 +197,12 @@ class DiscoveryManagerImpl implements DiscoveryManager
     /**
      * {@inheritdoc}
      */
-    public function addBinding($query, $typeName, array $parameterValues = array(), $language = 'glob')
+    public function addBinding(BindingDescriptor $bindingDescriptor)
     {
         $this->assertDiscoveryLoaded();
         $this->assertPackagesLoaded();
+
+        $typeName = $bindingDescriptor->getTypeName();
 
         if (!$this->typeStore->existsAny($typeName)) {
             throw NoSuchTypeException::forTypeName($typeName);
@@ -210,23 +212,21 @@ class DiscoveryManagerImpl implements DiscoveryManager
             throw TypeNotEnabledException::forTypeName($typeName);
         }
 
-        $binding = new BindingDescriptor($query, $typeName, $parameterValues, $language);
-
-        if ($this->rootPackageFile->hasBindingDescriptor($binding->getUuid())) {
+        if ($this->rootPackageFile->hasBindingDescriptor($bindingDescriptor->getUuid())) {
             return;
         }
 
         try {
             // First check that the binding can actually be loaded and bound
-            $this->loadAndSyncBinding($binding, $this->rootPackage);
+            $this->loadAndSyncBinding($bindingDescriptor, $this->rootPackage);
 
             // If no error was detected, persist changes to the configuration
-            $this->rootPackageFile->addBindingDescriptor($binding);
+            $this->rootPackageFile->addBindingDescriptor($bindingDescriptor);
             $this->packageFileStorage->saveRootPackageFile($this->rootPackageFile);
         } catch (Exception $e) {
             // Clean up
-            $this->unloadAndSyncBinding($binding);
-            $this->rootPackageFile->removeBindingDescriptor($binding->getUuid());
+            $this->unloadAndSyncBinding($bindingDescriptor);
+            $this->rootPackageFile->removeBindingDescriptor($bindingDescriptor->getUuid());
 
             throw $e;
         }

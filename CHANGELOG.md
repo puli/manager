@@ -67,6 +67,7 @@ Changelog
  * added `BindingTypeDescriptor::markDuplicate()`
  * removed `PackageState::NOT_LOADED`
  * removed `PackageState::detect()`
+ * changed `DiscoveryManager::addBinding()` to accept a `BindingDescriptor` instance
 
 * 1.0.0-beta (2015-01-12)
 
