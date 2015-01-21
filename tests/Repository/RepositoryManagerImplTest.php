@@ -31,7 +31,7 @@ use Symfony\Component\Filesystem\Filesystem;
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class RepositoryManagerTest extends ManagerTestCase
+class RepositoryManagerImplTest extends ManagerTestCase
 {
     /**
      * @var string
@@ -85,7 +85,7 @@ class RepositoryManagerTest extends ManagerTestCase
 
     protected function setUp()
     {
-        while (false === @mkdir($this->tempDir = sys_get_temp_dir().'/puli-repo-manager/RepositoryManagerTest'.rand(10000, 99999), 0777, true)) {}
+        while (false === @mkdir($this->tempDir = sys_get_temp_dir().'/puli-repo-manager/RepositoryManagerImplTest'.rand(10000, 99999), 0777, true)) {}
 
         $filesystem = new Filesystem();
         $filesystem->mirror(__DIR__.'/Fixtures', $this->tempDir);
