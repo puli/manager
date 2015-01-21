@@ -11,6 +11,7 @@
 
 namespace Puli\RepositoryManager\Api\Repository;
 
+use ArrayIterator;
 use Exception;
 use InvalidArgumentException;
 use Puli\RepositoryManager\Api\AlreadyLoadedException;
@@ -20,6 +21,8 @@ use Puli\RepositoryManager\Api\Package\NoSuchPackageException;
 use Puli\RepositoryManager\Api\Package\Package;
 use Puli\RepositoryManager\Api\Package\PackageCollection;
 use Puli\RepositoryManager\Assert\Assert;
+use Puli\RepositoryManager\Repository\Iterator\RecursivePathsIterator;
+use RecursiveIteratorIterator;
 use Webmozart\PathUtil\Path;
 
 /**
@@ -44,14 +47,24 @@ class ResourceMapping
     private $repositoryPath;
 
     /**
-     * @var string
+     * @var string[]
      */
     private $pathReferences = array();
 
     /**
-     * @var string
+     * @var string[]
      */
     private $filesystemPaths = array();
+
+    /**
+     * @var string[]
+     */
+    private $pathMappings = array();
+
+    /**
+     * @var string[]
+     */
+    private $repositoryPaths = array();
 
     /**
      * @var Package
@@ -145,9 +158,21 @@ class ResourceMapping
             $loadErrors[] = $loadError;
         }
 
+        $iterator = new RecursiveIteratorIterator(
+            new RecursivePathsIterator(
+                new ArrayIterator($absoluteFilesystemPaths),
+                $this->repositoryPath
+            ),
+            RecursiveIteratorIterator::SELF_FIRST
+        );
+
+        $this->pathMappings = iterator_to_array($iterator);
+        $this->repositoryPaths = array_unique($this->pathMappings);
         $this->filesystemPaths = $absoluteFilesystemPaths;
         $this->loadErrors = $loadErrors;
         $this->containingPackage = $containingPackage;
+
+        sort($this->repositoryPaths);
 
         $this->refreshState();
     }
@@ -175,6 +200,8 @@ class ResourceMapping
         }
 
         $this->filesystemPaths = array();
+        $this->pathMappings = array();
+        $this->repositoryPaths = array();
         $this->loadErrors = array();
         $this->containingPackage = null;
         $this->state = null;
@@ -235,6 +262,40 @@ class ResourceMapping
         }
 
         return $this->filesystemPaths;
+    }
+
+    /**
+     * Lists all filesystem path to repository path mappings of this mapping.
+     *
+     * @return string[] An array of repository paths with their corresponding
+     *                  filesystem paths as keys. If the mapping has multiple
+     *                  filesystem paths, then repository paths may occur
+     *                  multiple times in the returned array.
+     */
+    public function listPathMappings()
+    {
+        if (null === $this->state) {
+            throw new NotLoadedException('The mapping is not loaded.');
+        }
+
+        return $this->pathMappings;
+    }
+
+    /**
+     * Lists all mapped repository paths.
+     *
+     * Contrary to {@link getRepositoryPath()}, this array also contains all
+     * nested repository paths that are mapped by this mapping.
+     *
+     * @return string[] A list of all mapped repository paths.
+     */
+    public function listRepositoryPaths()
+    {
+        if (null === $this->state) {
+            throw new NotLoadedException('The mapping is not loaded.');
+        }
+
+        return $this->repositoryPaths;
     }
 
     /**

@@ -31,11 +31,6 @@ use Puli\RepositoryManager\Conflict\OverrideGraph;
 class RepositoryUpdater
 {
     /**
-     * @var EditableRepository
-     */
-    private $repo;
-
-    /**
      * @var OverrideGraph
      */
     private $overrideGraph;
@@ -48,14 +43,11 @@ class RepositoryUpdater
     /**
      * Creates a new updater.
      *
-     * @param EditableRepository $repo          The repository to update.
-     * @param OverrideGraph      $overrideGraph The graph determining which
-     *                                          the order in which to process
-     *                                          the packages.
+     * @param OverrideGraph $overrideGraph The graph determining which the order
+     *                                     in which to process the packages.
      */
-    public function __construct(EditableRepository $repo, OverrideGraph $overrideGraph)
+    public function __construct(OverrideGraph $overrideGraph)
     {
-        $this->repo = $repo;
         $this->overrideGraph = $overrideGraph;
     }
 
@@ -79,22 +71,16 @@ class RepositoryUpdater
     }
 
     /**
-     * Clears all pending additions.
-     */
-    public function clear()
-    {
-        $this->additions = array();
-    }
-
-    /**
      * Adds all pending additions to the repository.
      *
      * The resources are added to the repository in the order determined by the
      * package graph passed to the constructor. Resources of overridden
      * packages are added to the repository before the resources of the
      * overriding packages.
+     *
+     * @param EditableRepository $repo The repository to update.
      */
-    public function commit()
+    public function updateRepository(EditableRepository $repo)
     {
         if (!$this->additions) {
             return;
@@ -110,7 +96,7 @@ class RepositoryUpdater
                         ? new DirectoryResource($filesystemPath)
                         : new FileResource($filesystemPath);
 
-                    $this->repo->add($repositoryPath, $resource);
+                    $repo->add($repositoryPath, $resource);
                 }
 
                 unset($this->additions[$packageName][$repositoryPath]);

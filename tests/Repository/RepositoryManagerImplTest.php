@@ -25,6 +25,7 @@ use Puli\RepositoryManager\Api\Repository\ResourceMappingState;
 use Puli\RepositoryManager\Package\PackageFileStorage;
 use Puli\RepositoryManager\Repository\RepositoryManagerImpl;
 use Puli\RepositoryManager\Tests\ManagerTestCase;
+use Puli\RepositoryManager\Tests\TestException;
 use Symfony\Component\Filesystem\Filesystem;
 
 /**
@@ -398,6 +399,74 @@ class RepositoryManagerImplTest extends ManagerTestCase
 
         // /override overrides /package1/resources/config
         $this->manager->addResourceMapping(new ResourceMapping('/path/config', 'override'));
+    }
+
+    public function testAddResourceMappingRestoresOverriddenResourcesIfSavingFails()
+    {
+        $this->initDefaultManager();
+
+        $mapping = new ResourceMapping('/path', 'resources');
+
+        $this->packageFile1->addResourceMapping($existing = new ResourceMapping('/path', 'resources'));
+
+        $this->repo->expects($this->at(0))
+            ->method('add')
+            ->with('/path', new DirectoryResource($this->rootDir.'/resources'));
+
+        $this->repo->expects($this->at(1))
+            ->method('remove')
+            ->with('/path');
+
+        $this->repo->expects($this->at(2))
+            ->method('add')
+            ->with('/path', new DirectoryResource($this->packageDir1.'/resources'));
+
+        $this->packageFileStorage->expects($this->once())
+            ->method('saveRootPackageFile')
+            ->willThrowException(new TestException('Cannot save'));
+
+        try {
+            $this->manager->addResourceMapping($mapping);
+            $this->fail('Expected a TestException');
+        } catch (TestException $e) {
+        }
+
+        $this->assertTrue($existing->isEnabled());
+        $this->assertFalse($mapping->isLoaded());
+    }
+
+    public function testAddResourceMappingRemovesNewConflictsIfSavingFails()
+    {
+        $this->initDefaultManager();
+
+        $mapping = new ResourceMapping('/path', 'resources');
+
+        $this->packageFile1->addResourceMapping($existing = new ResourceMapping('/path', 'resources'));
+
+        $this->repo->expects($this->at(0))
+            ->method('add')
+            ->with('/path', new DirectoryResource($this->rootDir.'/resources'));
+
+        $this->repo->expects($this->at(1))
+            ->method('remove')
+            ->with('/path');
+
+        $this->repo->expects($this->at(2))
+            ->method('add')
+            ->with('/path', new DirectoryResource($this->packageDir1.'/resources'));
+
+        $this->packageFileStorage->expects($this->once())
+            ->method('saveRootPackageFile')
+            ->willThrowException(new TestException('Cannot save'));
+
+        try {
+            $this->manager->addResourceMapping($mapping);
+            $this->fail('Expected a TestException');
+        } catch (TestException $e) {
+        }
+
+        $this->assertTrue($existing->isEnabled());
+        $this->assertFalse($mapping->isLoaded());
     }
 
     public function testRemoveResourceMapping()
