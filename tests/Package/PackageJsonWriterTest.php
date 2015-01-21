@@ -21,7 +21,6 @@ use Puli\RepositoryManager\Api\Package\PackageFile;
 use Puli\RepositoryManager\Api\Package\RootPackageFile;
 use Puli\RepositoryManager\Api\Plugin\ManagerPlugin;
 use Puli\RepositoryManager\Api\Repository\ResourceMapping;
-use Puli\RepositoryManager\Discovery\BindingTypeDescriptorStore;
 use Puli\RepositoryManager\Package\PackageJsonWriter;
 use Puli\RepositoryManager\Tests\JsonWriterTestCase;
 use Rhumsaa\Uuid\Uuid;
@@ -79,19 +78,16 @@ class PackageJsonWriterTest extends JsonWriterTestCase
     public function testWritePackageFileWritesDefaultParameterValuesOfBindings()
     {
         $packageFile = new PackageFile();
-        $typeStore = new BindingTypeDescriptorStore();
-        $package = new Package($packageFile, '/path',
-            new InstallInfo('vendor/package', '/path'));
+        $package = new Package($packageFile, '/path', new InstallInfo('vendor/package', '/path'));
 
         // We need to create a type and a binding in state ENABLED
         $bindingType = new BindingTypeDescriptor('my/type', null, array(
             new BindingParameterDescriptor('param', false, 'default'),
         ));
-        $typeStore->add($bindingType, $package);
-        $bindingType->refreshState($typeStore);
+        $bindingType->load($package);
 
         $binding = new BindingDescriptor('/app/config*.yml', 'my/type');
-        $binding->refreshState($package, $typeStore);
+        $binding->load($package, $bindingType);
 
         // The default value is accessible
         $this->assertSame('default', $binding->getParameterValue('param'));
@@ -103,8 +99,7 @@ class PackageJsonWriterTest extends JsonWriterTestCase
 
         $this->assertFileExists($this->tempFile);
 
-        $this->assertJsonFileEquals(__DIR__.'/Fixtures/json/binding-no-default-params.json',
-            $this->tempFile);
+        $this->assertJsonFileEquals(__DIR__.'/Fixtures/json/binding-no-default-params.json', $this->tempFile);
     }
 
     public function testWriteTypeWithoutDescription()
@@ -117,8 +112,7 @@ class PackageJsonWriterTest extends JsonWriterTestCase
 
         $this->assertFileExists($this->tempFile);
 
-        $this->assertJsonFileEquals(__DIR__.'/Fixtures/json/type-no-description.json',
-            $this->tempFile);
+        $this->assertJsonFileEquals(__DIR__.'/Fixtures/json/type-no-description.json', $this->tempFile);
     }
 
     public function testWritePackageFileResourceMappings()
@@ -132,8 +126,7 @@ class PackageJsonWriterTest extends JsonWriterTestCase
 
         $this->assertFileExists($this->tempFile);
 
-        $this->assertJsonFileEquals(__DIR__.'/Fixtures/json/sorted-mappings.json',
-            $this->tempFile);
+        $this->assertJsonFileEquals(__DIR__.'/Fixtures/json/sorted-mappings.json', $this->tempFile);
     }
 
     public function testWritePackageFileSortsTypes()
@@ -147,8 +140,7 @@ class PackageJsonWriterTest extends JsonWriterTestCase
 
         $this->assertFileExists($this->tempFile);
 
-        $this->assertJsonFileEquals(__DIR__.'/Fixtures/json/sorted-types.json',
-            $this->tempFile);
+        $this->assertJsonFileEquals(__DIR__.'/Fixtures/json/sorted-types.json', $this->tempFile);
     }
 
     public function testWritePackageFileSortsTypeParameters()
@@ -165,46 +157,38 @@ class PackageJsonWriterTest extends JsonWriterTestCase
 
         $this->assertFileExists($this->tempFile);
 
-        $this->assertJsonFileEquals(__DIR__.'/Fixtures/json/sorted-type-params.json',
-            $this->tempFile);
+        $this->assertJsonFileEquals(__DIR__.'/Fixtures/json/sorted-type-params.json', $this->tempFile);
     }
 
     public function testWritePackageFileSortsBindings()
     {
         $packageFile = new PackageFile();
-        $packageFile->addBindingDescriptor(new BindingDescriptor('/vendor/c',
-            'vendor/a-type'));
-        $packageFile->addBindingDescriptor(new BindingDescriptor('/vendor/a',
-            'vendor/b-type'));
-        $packageFile->addBindingDescriptor(new BindingDescriptor('/vendor/b',
-            'vendor/b-type'));
-        $packageFile->addBindingDescriptor(new BindingDescriptor('/vendor/a',
-            'vendor/a-type'));
+        $packageFile->addBindingDescriptor(new BindingDescriptor('/vendor/c', 'vendor/a-type'));
+        $packageFile->addBindingDescriptor(new BindingDescriptor('/vendor/a', 'vendor/b-type'));
+        $packageFile->addBindingDescriptor(new BindingDescriptor('/vendor/b', 'vendor/b-type'));
+        $packageFile->addBindingDescriptor(new BindingDescriptor('/vendor/a', 'vendor/a-type'));
 
         $this->writer->writePackageFile($packageFile, $this->tempFile);
 
         $this->assertFileExists($this->tempFile);
 
-        $this->assertJsonFileEquals(__DIR__.'/Fixtures/json/sorted-bindings.json',
-            $this->tempFile);
+        $this->assertJsonFileEquals(__DIR__.'/Fixtures/json/sorted-bindings.json', $this->tempFile);
     }
 
     public function testWritePackageFileSortsBindingParameters()
     {
         $packageFile = new PackageFile();
-        $packageFile->addBindingDescriptor(new BindingDescriptor('/path',
-            'vendor/type', array(
-                'c' => 'foo',
-                'a' => 'foo',
-                'b' => 'foo',
-            )));
+        $packageFile->addBindingDescriptor(new BindingDescriptor('/path', 'vendor/type', array(
+            'c' => 'foo',
+            'a' => 'foo',
+            'b' => 'foo',
+        )));
 
         $this->writer->writePackageFile($packageFile, $this->tempFile);
 
         $this->assertFileExists($this->tempFile);
 
-        $this->assertJsonFileEquals(__DIR__.'/Fixtures/json/sorted-binding-params.json',
-            $this->tempFile);
+        $this->assertJsonFileEquals(__DIR__.'/Fixtures/json/sorted-binding-params.json', $this->tempFile);
     }
 
     public function testWriteBindingParameters()
@@ -221,8 +205,7 @@ class PackageJsonWriterTest extends JsonWriterTestCase
 
         $this->assertFileExists($this->tempFile);
 
-        $this->assertJsonFileEquals(__DIR__.'/Fixtures/json/binding-params.json',
-            $this->tempFile);
+        $this->assertJsonFileEquals(__DIR__.'/Fixtures/json/binding-params.json', $this->tempFile);
     }
 
     public function testWriteBindingWithCustomLanguage()
@@ -240,60 +223,52 @@ class PackageJsonWriterTest extends JsonWriterTestCase
 
         $this->assertFileExists($this->tempFile);
 
-        $this->assertJsonFileEquals(__DIR__.'/Fixtures/json/binding-language.json',
-            $this->tempFile);
+        $this->assertJsonFileEquals(__DIR__.'/Fixtures/json/binding-language.json', $this->tempFile);
     }
 
     public function testWriteTypeParameterWithoutDescriptionNorParameters()
     {
         $baseConfig = new Config();
         $packageFile = new PackageFile(null, null, $baseConfig);
-        $packageFile->addTypeDescriptor(new BindingTypeDescriptor('my/type',
-            null, array(
-                new BindingParameterDescriptor('param', false, 1234),
-            )));
+        $packageFile->addTypeDescriptor(new BindingTypeDescriptor('my/type', null, array(
+            new BindingParameterDescriptor('param', false, 1234),
+        )));
 
         $this->writer->writePackageFile($packageFile, $this->tempFile);
 
         $this->assertFileExists($this->tempFile);
 
-        $this->assertJsonFileEquals(__DIR__.'/Fixtures/json/type-param-no-description.json',
-            $this->tempFile);
+        $this->assertJsonFileEquals(__DIR__.'/Fixtures/json/type-param-no-description.json', $this->tempFile);
     }
 
     public function testWriteTypeParameterWithoutDefaultValue()
     {
         $baseConfig = new Config();
         $packageFile = new PackageFile(null, null, $baseConfig);
-        $packageFile->addTypeDescriptor(new BindingTypeDescriptor('my/type',
-            null, array(
-                new BindingParameterDescriptor('param', false, null,
-                    'Description of the parameter.'),
-            )));
+        $packageFile->addTypeDescriptor(new BindingTypeDescriptor('my/type', null, array(
+            new BindingParameterDescriptor('param', false, null, 'Description of the parameter.'),
+        )));
 
         $this->writer->writePackageFile($packageFile, $this->tempFile);
 
         $this->assertFileExists($this->tempFile);
 
-        $this->assertJsonFileEquals(__DIR__.'/Fixtures/json/type-param-no-default.json',
-            $this->tempFile);
+        $this->assertJsonFileEquals(__DIR__.'/Fixtures/json/type-param-no-default.json', $this->tempFile);
     }
 
     public function testWriteRequiredTypeParameter()
     {
         $baseConfig = new Config();
         $packageFile = new PackageFile(null, null, $baseConfig);
-        $packageFile->addTypeDescriptor(new BindingTypeDescriptor('my/type',
-            null, array(
-                new BindingParameterDescriptor('param', true),
-            )));
+        $packageFile->addTypeDescriptor(new BindingTypeDescriptor('my/type', null, array(
+            new BindingParameterDescriptor('param', true),
+        )));
 
         $this->writer->writePackageFile($packageFile, $this->tempFile);
 
         $this->assertFileExists($this->tempFile);
 
-        $this->assertJsonFileEquals(__DIR__.'/Fixtures/json/type-param-required.json',
-            $this->tempFile);
+        $this->assertJsonFileEquals(__DIR__.'/Fixtures/json/type-param-required.json', $this->tempFile);
     }
 
     public function testWriteRootPackageFile()
@@ -308,13 +283,10 @@ class PackageJsonWriterTest extends JsonWriterTestCase
         $packageFile = new RootPackageFile(null, null, $baseConfig);
         $packageFile->setPackageName('my/application');
         $packageFile->addResourceMapping(new ResourceMapping('/app', 'res'));
-        $packageFile->addBindingDescriptor(new BindingDescriptor('/app/config*.yml',
-            'my/type'));
-        $packageFile->addTypeDescriptor(new BindingTypeDescriptor('my/type',
-            'Description of my type.', array(
-                new BindingParameterDescriptor('param', false, 1234,
-                    'Description of the parameter.'),
-            )));
+        $packageFile->addBindingDescriptor(new BindingDescriptor('/app/config*.yml', 'my/type'));
+        $packageFile->addTypeDescriptor(new BindingTypeDescriptor('my/type', 'Description of my type.', array(
+            new BindingParameterDescriptor('param', false, 1234, 'Description of the parameter.'),
+        )));
         $packageFile->setOverriddenPackages('acme/blog');
         $packageFile->setOverrideOrder(array(
             'acme/blog-extension1',
@@ -336,8 +308,7 @@ class PackageJsonWriterTest extends JsonWriterTestCase
 
         $this->assertFileExists($this->tempFile);
 
-        $this->assertJsonFileEquals(__DIR__.'/Fixtures/json/full-root.json',
-            $this->tempFile);
+        $this->assertJsonFileEquals(__DIR__.'/Fixtures/json/full-root.json', $this->tempFile);
     }
 
     public function testWriteRootPackageFileSortsPackagesByName()
@@ -355,8 +326,7 @@ class PackageJsonWriterTest extends JsonWriterTestCase
 
         $this->assertFileExists($this->tempFile);
 
-        $this->assertJsonFileEquals(__DIR__.'/Fixtures/json/sorted-packages.json',
-            $this->tempFile);
+        $this->assertJsonFileEquals(__DIR__.'/Fixtures/json/sorted-packages.json', $this->tempFile);
     }
 
     public function testWriteRootPackageFileSortsPlugins()
@@ -370,8 +340,7 @@ class PackageJsonWriterTest extends JsonWriterTestCase
 
         $this->assertFileExists($this->tempFile);
 
-        $this->assertJsonFileEquals(__DIR__.'/Fixtures/json/sorted-plugins.json',
-            $this->tempFile);
+        $this->assertJsonFileEquals(__DIR__.'/Fixtures/json/sorted-plugins.json', $this->tempFile);
     }
 
     public function testWriteRootPackageFileSortsPackageBindings()
@@ -391,8 +360,7 @@ class PackageJsonWriterTest extends JsonWriterTestCase
 
         $this->assertFileExists($this->tempFile);
 
-        $this->assertJsonFileEquals(__DIR__.'/Fixtures/json/sorted-package-bindings.json',
-            $this->tempFile);
+        $this->assertJsonFileEquals(__DIR__.'/Fixtures/json/sorted-package-bindings.json', $this->tempFile);
     }
 
     public function testWriteMinimalRootPackageFile()
@@ -403,8 +371,7 @@ class PackageJsonWriterTest extends JsonWriterTestCase
         $this->writer->writePackageFile($packageFile, $this->tempFile);
 
         $this->assertFileExists($this->tempFile);
-        $this->assertJsonFileEquals(__DIR__.'/Fixtures/json/minimal.json',
-            $this->tempFile);
+        $this->assertJsonFileEquals(__DIR__.'/Fixtures/json/minimal.json', $this->tempFile);
     }
 
     public function testWriteRootPackageFileDoesNotWriteBaseConfigValues()
@@ -416,8 +383,7 @@ class PackageJsonWriterTest extends JsonWriterTestCase
         $this->writer->writePackageFile($packageFile, $this->tempFile);
 
         $this->assertFileExists($this->tempFile);
-        $this->assertJsonFileEquals(__DIR__.'/Fixtures/json/minimal.json',
-            $this->tempFile);
+        $this->assertJsonFileEquals(__DIR__.'/Fixtures/json/minimal.json', $this->tempFile);
     }
 
     public function testWriteResourcesWithMultipleLocalPaths()
@@ -431,8 +397,7 @@ class PackageJsonWriterTest extends JsonWriterTestCase
 
         $this->assertFileExists($this->tempFile);
 
-        $this->assertJsonFileEquals(__DIR__.'/Fixtures/json/multi-resources.json',
-            $this->tempFile);
+        $this->assertJsonFileEquals(__DIR__.'/Fixtures/json/multi-resources.json', $this->tempFile);
     }
 
     public function testWriteMultipleOverriddenPackages()
@@ -445,8 +410,7 @@ class PackageJsonWriterTest extends JsonWriterTestCase
 
         $this->assertFileExists($this->tempFile);
 
-        $this->assertJsonFileEquals(__DIR__.'/Fixtures/json/multi-overrides.json',
-            $this->tempFile);
+        $this->assertJsonFileEquals(__DIR__.'/Fixtures/json/multi-overrides.json', $this->tempFile);
     }
 
     public function testCreateMissingDirectoriesOnDemand()

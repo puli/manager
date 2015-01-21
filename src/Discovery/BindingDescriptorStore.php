@@ -178,23 +178,6 @@ class BindingDescriptorStore
     }
 
     /**
-     * Returns whether more than one binding descriptor was set for the given
-     * UUID.
-     *
-     * @param Uuid $uuid The UUID of the binding.
-     *
-     * @return bool Returns `true` if more than one binding was set for the
-     *              UUID, `false` otherwise.
-     *
-     * @throws OutOfBoundsException If no binding descriptor was set for the
-     *                              given UUID.
-     */
-    public function isDuplicate(Uuid $uuid)
-    {
-        return $this->store->getCount($uuid->toString()) > 1;
-    }
-
-    /**
      * Returns the UUIDs of all binding descriptors.
      *
      * @return Uuid[] The UUIDs of the stored bindings.

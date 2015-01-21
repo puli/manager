@@ -15,8 +15,8 @@ Changelog
  * `PackageManager::getPackages()` returns packages with any state now by default
  * `DiscoveryManager::getBindingTypes()` returns types with any state now by default
  * `DiscoveryManager::getBindings()` returns bindings with any state now by default
- * added `MappingAlreadyLoadedException`
- * added `MappingNotLoadedException`
+ * added `AlreadyLoadedException`
+ * added `NotLoadedException`
  * added optional argument `$failIfNotFound` to `RepositoryManager::addResourceMapping()`
  * added optional argument `$state` to `RepositoryManager::getResourceMappings()`
  * added `RepositoryPathConflict`
@@ -45,6 +45,28 @@ Changelog
  * added `ConfigFileManager::hasConfigKey()`
  * moved `$uuid` argument to last position in `BindingDescriptor::__construct()`
  * removed `BindingDescriptor::create()`
+ * removed `BindingDescriptor::resetState()`
+ * removed `BindingDescriptor::refreshState()`
+ * removed `BindingState::NOT_LOADED`
+ * removed `BindingState::detect()`
+ * added `BindingDescriptor::load()`
+ * added `BindingDescriptor::unload()`
+ * added `BindingDescriptor::isLoaded()`
+ * added `BindingDescriptor::getContainingPackage()`
+ * added `BindingDescriptor::markDuplicate()`
+ * added `BindingDescriptor::isDuplicate()`
+ * added `BindingState::DUPLICATE`
+ * removed `BindingTypeState::NOT_LOADED`
+ * removed `BindingTypeState::detect()`
+ * removed `BindingTypeDescriptor::resetState()`
+ * removed `BindingTypeDescriptor::refreshState()`
+ * added `BindingTypeDescriptor::load()`
+ * added `BindingTypeDescriptor::unload()`
+ * added `BindingTypeDescriptor::isLoaded()`
+ * added `BindingTypeDescriptor::getContainingPackage()`
+ * added `BindingTypeDescriptor::markDuplicate()`
+ * removed `PackageState::NOT_LOADED`
+ * removed `PackageState::detect()`
 
 * 1.0.0-beta (2015-01-12)
 

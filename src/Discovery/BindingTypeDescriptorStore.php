@@ -177,22 +177,6 @@ class BindingTypeDescriptorStore
     }
 
     /**
-     * Returns whether more than one type descriptor was set for the given name.
-     *
-     * @param string $typeName The name of the type.
-     *
-     * @return bool Returns `true` if more than one type was set for the name,
-     *              `false` otherwise.
-     *
-     * @throws OutOfBoundsException If no type descriptor was set for the
-     *                              given name.
-     */
-    public function isDuplicate($typeName)
-    {
-        return $this->store->getCount($typeName) > 1;
-    }
-
-    /**
      * Returns the names of all type descriptors.
      *
      * @return string[] The names of the stored types.

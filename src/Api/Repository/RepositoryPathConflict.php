@@ -11,6 +11,7 @@
 
 namespace Puli\RepositoryManager\Api\Repository;
 
+use Puli\RepositoryManager\Api\NotLoadedException;
 use Puli\RepositoryManager\Assert\Assert;
 
 /**
@@ -58,12 +59,12 @@ class RepositoryPathConflict
      *
      * @param ResourceMapping $mapping The resource mapping to add.
      *
-     * @throws MappingNotLoadedException If the passed mapping is not loaded.
+     * @throws NotLoadedException If the passed mapping is not loaded.
      */
     public function addMapping(ResourceMapping $mapping)
     {
         if (!$mapping->isLoaded()) {
-            throw new MappingNotLoadedException('The passed mapping must be loaded.');
+            throw new NotLoadedException('The passed mapping must be loaded.');
         }
 
         $packageName = $mapping->getContainingPackage()->getName();
@@ -89,12 +90,12 @@ class RepositoryPathConflict
      *
      * @param ResourceMapping $mapping The resource mapping to remove.
      *
-     * @throws MappingNotLoadedException If the passed mapping is not loaded.
+     * @throws NotLoadedException If the passed mapping is not loaded.
      */
     public function removeMapping(ResourceMapping $mapping)
     {
         if (!$mapping->isLoaded()) {
-            throw new MappingNotLoadedException('The passed mapping must be loaded.');
+            throw new NotLoadedException('The passed mapping must be loaded.');
         }
 
         $packageName = $mapping->getContainingPackage()->getName();

@@ -130,7 +130,7 @@ class RepositoryPathConflictTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\RepositoryManager\Api\Repository\MappingNotLoadedException
+     * @expectedException \Puli\RepositoryManager\Api\NotLoadedException
      */
     public function testAddMappingFailsIfPackageNotLoaded()
     {
@@ -208,7 +208,7 @@ class RepositoryPathConflictTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\RepositoryManager\Api\Repository\MappingNotLoadedException
+     * @expectedException \Puli\RepositoryManager\Api\NotLoadedException
      */
     public function testRemoveMappingFailsIfPackageNotLoaded()
     {

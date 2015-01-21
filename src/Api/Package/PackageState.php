@@ -20,11 +20,6 @@ namespace Puli\RepositoryManager\Api\Package;
 final class PackageState
 {
     /**
-     * State: The package is not loaded.
-     */
-    const NOT_LOADED = 0;
-
-    /**
      * State: The package is enabled.
      */
     const ENABLED = 1;
@@ -47,31 +42,10 @@ final class PackageState
     public static function all()
     {
         return array(
-            self::NOT_LOADED,
             self::ENABLED,
             self::NOT_FOUND,
             self::NOT_LOADABLE,
         );
-    }
-
-    /**
-     * Detects the state of a package.
-     *
-     * @param Package $package The package.
-     *
-     * @return int The state.
-     */
-    public static function detect(Package $package)
-    {
-        if (!file_exists($package->getInstallPath())) {
-            return PackageState::NOT_FOUND;
-        }
-
-        if (null !== $package->getLoadError()) {
-            return PackageState::NOT_LOADABLE;
-        }
-
-        return PackageState::ENABLED;
     }
 
     /**

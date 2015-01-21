@@ -11,8 +11,6 @@
 
 namespace Puli\RepositoryManager\Api\Discovery;
 
-use Puli\RepositoryManager\Discovery\BindingTypeDescriptorStore;
-
 /**
  * Contains constants representing the state of a binding type.
  *
@@ -21,11 +19,6 @@ use Puli\RepositoryManager\Discovery\BindingTypeDescriptorStore;
  */
 final class BindingTypeState
 {
-    /**
-     * State: The type is not loaded.
-     */
-    const NOT_LOADED = 0;
-
     /**
      * State: The type is enabled.
      */
@@ -44,34 +37,9 @@ final class BindingTypeState
     public static function all()
     {
         return array(
-            self::NOT_LOADED,
             self::ENABLED,
             self::DUPLICATE
         );
-    }
-
-    /**
-     * Detects the state of a binding type.
-     *
-     * @param BindingTypeDescriptor $typeDescriptor The type descriptor.
-     * @param BindingTypeDescriptorStore $typeStore      The store with the
-     *                                                   defined types.
-     *
-     * @return int The state.
-     */
-    public static function detect(BindingTypeDescriptor $typeDescriptor, BindingTypeDescriptorStore $typeStore)
-    {
-        $typeName = $typeDescriptor->getName();
-
-        if (!$typeStore->existsAny($typeName)) {
-            return self::NOT_LOADED;
-        }
-
-        if ($typeStore->isDuplicate($typeName)) {
-            return self::DUPLICATE;
-        }
-
-        return self::ENABLED;
     }
 
     /**

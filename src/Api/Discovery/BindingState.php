@@ -11,10 +11,6 @@
 
 namespace Puli\RepositoryManager\Api\Discovery;
 
-use Puli\RepositoryManager\Api\Package\Package;
-use Puli\RepositoryManager\Api\Package\RootPackage;
-use Puli\RepositoryManager\Discovery\BindingTypeDescriptorStore;
-
 /**
  * Contains constants representing the state of a binding.
  *
@@ -23,11 +19,6 @@ use Puli\RepositoryManager\Discovery\BindingTypeDescriptorStore;
  */
 final class BindingState
 {
-    /**
-     * State: The binding is not loaded.
-     */
-    const NOT_LOADED = 0;
-
     /**
      * State: The binding is enabled.
      */
@@ -59,6 +50,11 @@ final class BindingState
     const INVALID = 6;
 
     /**
+     * State: The binding is a duplicate of another enabled binding.
+     */
+    const DUPLICATE = 7;
+
+    /**
      * Returns all binding states.
      *
      * @return int[] The binding states.
@@ -66,7 +62,6 @@ final class BindingState
     public static function all()
     {
         return array(
-            self::NOT_LOADED,
             self::ENABLED,
             self::DISABLED,
             self::UNDECIDED,
@@ -74,51 +69,6 @@ final class BindingState
             self::IGNORED,
             self::INVALID,
         );
-    }
-
-    /**
-     * Detects the binding state of a binding.
-     *
-     * @param BindingDescriptor          $bindingDescriptor The binding
-     *                                                      descriptor.
-     * @param Package                    $package           The package that
-     *                                                      contains the binding.
-     * @param BindingTypeDescriptorStore $typeStore         The store with the
-     *                                                      defined types.
-     *
-     * @return int The binding state.
-     */
-    public static function detect(BindingDescriptor $bindingDescriptor, Package $package, BindingTypeDescriptorStore $typeStore)
-    {
-        $installInfo = $package->getInstallInfo();
-        $uuid = $bindingDescriptor->getUuid();
-        $typeName = $bindingDescriptor->getTypeName();
-
-        if (!$typeStore->existsAny($typeName)) {
-            return self::HELD_BACK;
-        }
-
-        if ($typeStore->isDuplicate($typeName)) {
-            return self::IGNORED;
-        }
-
-        if (count($bindingDescriptor->getViolations()) > 0) {
-            return self::INVALID;
-        }
-
-        if ($package instanceof RootPackage) {
-            return self::ENABLED;
-        }
-
-        if ($installInfo->hasDisabledBindingUuid($uuid)) {
-            return self::DISABLED;
-        }
-
-        if ($installInfo->hasEnabledBindingUuid($uuid)) {
-            return self::ENABLED;
-        }
-
-        return self::UNDECIDED;
     }
 
     /**

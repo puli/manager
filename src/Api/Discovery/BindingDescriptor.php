@@ -15,14 +15,19 @@ use InvalidArgumentException;
 use Puli\Discovery\Api\Binding\NoSuchParameterException;
 use Puli\Discovery\Api\Validation\ConstraintViolation;
 use Puli\Discovery\Validation\SimpleParameterValidator;
+use Puli\RepositoryManager\Api\AlreadyLoadedException;
+use Puli\RepositoryManager\Api\NotLoadedException;
 use Puli\RepositoryManager\Api\Package\Package;
+use Puli\RepositoryManager\Api\Package\RootPackage;
 use Puli\RepositoryManager\Assert\Assert;
-use Puli\RepositoryManager\Discovery\BindingTypeDescriptorStore;
 use Puli\RepositoryManager\Util\DistinguishedName;
 use Rhumsaa\Uuid\Uuid;
 
 /**
  * Describes a resource binding.
+ *
+ * This class contains a high-level model of {@link ResourceBinding} as it is
+ * used in this package.
  *
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
@@ -58,7 +63,12 @@ class BindingDescriptor
     /**
      * @var int
      */
-    private $state = BindingState::NOT_LOADED;
+    private $state;
+
+    /**
+     * @var Package
+     */
+    private $containingPackage;
 
     /**
      * @var BindingTypeDescriptor
@@ -68,7 +78,12 @@ class BindingDescriptor
     /**
      * @var ConstraintViolation[]
      */
-    private $violations = array();
+    private $violations;
+
+    /**
+     * @var bool
+     */
+    private $duplicate = false;
 
     /**
      * Compares two binding descriptors.
@@ -126,6 +141,92 @@ class BindingDescriptor
         $this->language = $language;
         $this->typeName = $typeName;
         $this->parameterValues = $parameterValues;
+    }
+
+    /**
+     * Loads the binding descriptor.
+     *
+     * @param Package               $containingPackage The package that contains
+     *                                                 the binding.
+     * @param BindingTypeDescriptor $type              The binding type.
+     *
+     * @throws AlreadyLoadedException If the descriptor is already loaded.
+     */
+    public function load(Package $containingPackage, BindingTypeDescriptor $type = null)
+    {
+        if (null !== $this->state) {
+            throw new AlreadyLoadedException('The binding descriptor is already loaded.');
+        }
+
+        if ($type && $this->typeName !== $type->getName()) {
+            throw new InvalidArgumentException(sprintf(
+                'The passed type "%s" does not match the stored type name "%s".',
+                $type->getName(),
+                $this->typeName
+            ));
+        }
+
+        $this->violations = array();
+
+        if ($type) {
+            $validator = new SimpleParameterValidator();
+            $bindingType = $type->toBindingType();
+
+            $this->violations = $validator->validate($this->parameterValues, $bindingType);
+        }
+
+        $this->containingPackage = $containingPackage;
+        $this->type = $type;
+        $this->duplicate = false;
+
+        $this->refreshState();
+    }
+
+    /**
+     * Unloads the binding descriptor.
+     *
+     * All memory allocated during {@link load()} is freed.
+     *
+     * @throws NotLoadedException If the descriptor is not loaded.
+     */
+    public function unload()
+    {
+        if (null === $this->state) {
+            throw new NotLoadedException('The binding descriptor is not loaded.');
+        }
+
+        $this->containingPackage = null;
+        $this->type = null;
+        $this->duplicate = false;
+        $this->violations = null;
+        $this->state = null;
+    }
+
+    /**
+     * Marks or unmarks the descriptor as duplicate.
+     *
+     * If multiple descriptors exist for the same UUID, all descriptors but one
+     * are marked as duplicates.
+     *
+     * @param bool $duplicate Whether to mark the descriptor as duplicate.
+     */
+    public function markDuplicate($duplicate)
+    {
+        Assert::boolean($duplicate);
+
+        $this->duplicate = $duplicate;
+
+        $this->refreshState();
+    }
+
+    /**
+     * Returns whether the descriptor is loaded.
+     *
+     * @return bool Returns `true` if the descriptor is loaded.
+     */
+    public function isLoaded()
+    {
+        return null !== $this->state;
     }
 
     /**
@@ -259,139 +360,206 @@ class BindingDescriptor
     }
 
     /**
-     * Returns the state of the binding.
-     *
-     * @return int One of the {@link BindingState} constants.
-     */
-    public function getState()
-    {
-        return $this->state;
-    }
-
-    /**
-     * Resets the state of the binding to unloaded.
-     */
-    public function resetState()
-    {
-        $this->type = null;
-        $this->violations = array();
-        $this->state = BindingState::NOT_LOADED;
-    }
-
-    /**
-     * Refreshes the state of the binding.
-     *
-     * @param Package                    $package   The package that contains
-     *                                              the binding.
-     * @param BindingTypeDescriptorStore $typeStore The store with the defined
-     *                                              types.
-     */
-    public function refreshState(Package $package, BindingTypeDescriptorStore $typeStore)
-    {
-        $this->type = null;
-
-        if ($typeStore->existsEnabled($this->typeName)) {
-            $validator = new SimpleParameterValidator();
-
-            $this->type = $typeStore->get($this->typeName);
-            $this->violations = $validator->validate($this->parameterValues, $this->type->toBindingType());
-        }
-
-        $this->state = BindingState::detect($this, $package, $typeStore);
-    }
-
-    /**
      * Returns the violations of the binding parameters.
      *
+     * The method {@link load()} needs to be called before calling this method,
+     * otherwise an exception is thrown.
+     *
      * @return ConstraintViolation[] The violations.
+     *
+     * @throws NotLoadedException If the descriptor is not loaded.
      */
     public function getViolations()
     {
+        if (null === $this->violations) {
+            throw new NotLoadedException('The binding descriptor is not loaded.');
+        }
+
         return $this->violations;
     }
 
     /**
-     * Returns whether the binding is loaded.
+     * Returns the package that contains the descriptor.
      *
-     * @return bool Returns `true` if the state is not
-     *              {@link BindingState::NOT_LOADED}.
+     * The method {@link load()} needs to be called before calling this method,
+     * otherwise an exception is thrown.
      *
-     * @see BindingState::NOT_LOADED
+     * @return Package The containing package.
+     *
+     * @throws NotLoadedException If the descriptor is not loaded.
      */
-    public function isLoaded()
+    public function getContainingPackage()
     {
-        return BindingState::NOT_LOADED !== $this->state;
+        if (null === $this->containingPackage) {
+            throw new NotLoadedException('The binding descriptor is not loaded.');
+        }
+
+        return $this->containingPackage;
+    }
+
+    /**
+     * Returns the state of the binding.
+     *
+     * The method {@link load()} needs to be called before calling this method,
+     * otherwise an exception is thrown.
+     *
+     * @return int One of the {@link BindingState} constants.
+     *
+     * @throws NotLoadedException If the descriptor is not loaded.
+     */
+    public function getState()
+    {
+        if (null === $this->state) {
+            throw new NotLoadedException('The binding descriptor is not loaded.');
+        }
+
+        return $this->state;
     }
 
     /**
      * Returns whether the binding is enabled.
      *
+     * The method {@link load()} needs to be called before calling this method,
+     * otherwise an exception is thrown.
+     *
      * @return bool Returns `true` if the state is {@link BindingState::ENABLED}.
+     *
+     * @throws NotLoadedException If the descriptor is not loaded.
      *
      * @see BindingState::ENABLED
      */
     public function isEnabled()
     {
+        if (null === $this->state) {
+            throw new NotLoadedException('The binding descriptor is not loaded.');
+        }
+
         return BindingState::ENABLED === $this->state;
     }
 
     /**
      * Returns whether the binding is disabled.
      *
+     * The method {@link load()} needs to be called before calling this method,
+     * otherwise an exception is thrown.
+     *
      * @return bool Returns `true` if the state is {@link BindingState::DISABLED}.
+     *
+     * @throws NotLoadedException If the descriptor is not loaded.
      *
      * @see BindingState::DISABLED
      */
     public function isDisabled()
     {
+        if (null === $this->state) {
+            throw new NotLoadedException('The binding descriptor is not loaded.');
+        }
+
         return BindingState::DISABLED === $this->state;
+    }
+
+    /**
+     * Returns whether the binding is a duplicate.
+     *
+     * The method {@link load()} needs to be called before calling this method,
+     * otherwise an exception is thrown.
+     *
+     * @return bool Returns `true` if the state is {@link BindingState::DUPLICATE}.
+     *
+     * @throws NotLoadedException If the descriptor is not loaded.
+     *
+     * @see BindingState::DUPLICATE
+     */
+    public function isDuplicate()
+    {
+        if (null === $this->state) {
+            throw new NotLoadedException('The binding descriptor is not loaded.');
+        }
+
+        return BindingState::DUPLICATE === $this->state;
     }
 
     /**
      * Returns whether the binding is neither enabled nor disabled.
      *
+     * The method {@link load()} needs to be called before calling this method,
+     * otherwise an exception is thrown.
+     *
      * @return bool Returns `true` if the state is {@link BindingState::UNDECIDED}.
+     *
+     * @throws NotLoadedException If the descriptor is not loaded.
      *
      * @see BindingState::UNDECIDED
      */
     public function isUndecided()
     {
+        if (null === $this->state) {
+            throw new NotLoadedException('The binding descriptor is not loaded.');
+        }
+
         return BindingState::UNDECIDED === $this->state;
     }
 
     /**
      * Returns whether the binding is held back.
      *
+     * The method {@link load()} needs to be called before calling this method,
+     * otherwise an exception is thrown.
+     *
      * @return bool Returns `true` if the state is {@link BindingState::HELD_BACK}.
+     *
+     * @throws NotLoadedException If the descriptor is not loaded.
      *
      * @see BindingState::HELD_BACK
      */
     public function isHeldBack()
     {
+        if (null === $this->state) {
+            throw new NotLoadedException('The binding descriptor is not loaded.');
+        }
+
         return BindingState::HELD_BACK === $this->state;
     }
 
     /**
      * Returns whether the binding is ignored.
      *
+     * The method {@link load()} needs to be called before calling this method,
+     * otherwise an exception is thrown.
+     *
      * @return bool Returns `true` if the state is {@link BindingState::IGNORED}.
+     *
+     * @throws NotLoadedException If the descriptor is not loaded.
      *
      * @see BindingState::IGNORED
      */
     public function isIgnored()
     {
+        if (null === $this->state) {
+            throw new NotLoadedException('The binding descriptor is not loaded.');
+        }
+
         return BindingState::IGNORED === $this->state;
     }
 
     /**
      * Returns whether the binding is invalid.
      *
+     * The method {@link load()} needs to be called before calling this method,
+     * otherwise an exception is thrown.
+     *
      * @return bool Returns `true` if the state is {@link BindingState::INVALID}.
+     *
+     * @throws NotLoadedException If the descriptor is not loaded.
      *
      * @see BindingState::INVALID
      */
     public function isInvalid()
     {
+        if (null === $this->state) {
+            throw new NotLoadedException('The binding descriptor is not loaded.');
+        }
+
         return BindingState::INVALID === $this->state;
     }
 
@@ -409,5 +577,24 @@ class BindingDescriptor
         }
 
         return Uuid::uuid5(Uuid::NAMESPACE_X500, $dn->toString());
+    }
+
+    private function refreshState()
+    {
+        if (null === $this->type || !$this->type->isLoaded()) {
+            $this->state = BindingState::HELD_BACK;
+        } elseif ($this->type->isDuplicate()) {
+            $this->state = BindingState::IGNORED;
+        } elseif (count($this->violations) > 0) {
+            $this->state = BindingState::INVALID;
+        } elseif ($this->containingPackage instanceof RootPackage) {
+            $this->state = $this->duplicate ? BindingState::DUPLICATE : BindingState::ENABLED;
+        } elseif ($this->containingPackage->getInstallInfo()->hasDisabledBindingUuid($this->uuid)) {
+            $this->state = BindingState::DISABLED;
+        } elseif ($this->containingPackage->getInstallInfo()->hasEnabledBindingUuid($this->uuid)) {
+            $this->state = $this->duplicate ? BindingState::DUPLICATE : BindingState::ENABLED;
+        } else {
+            $this->state = BindingState::UNDECIDED;
+        }
     }
 }

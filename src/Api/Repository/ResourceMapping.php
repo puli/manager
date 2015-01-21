@@ -13,7 +13,9 @@ namespace Puli\RepositoryManager\Api\Repository;
 
 use Exception;
 use InvalidArgumentException;
+use Puli\RepositoryManager\Api\AlreadyLoadedException;
 use Puli\RepositoryManager\Api\FileNotFoundException;
+use Puli\RepositoryManager\Api\NotLoadedException;
 use Puli\RepositoryManager\Api\Package\NoSuchPackageException;
 use Puli\RepositoryManager\Api\Package\Package;
 use Puli\RepositoryManager\Api\Package\PackageCollection;
@@ -94,7 +96,7 @@ class ResourceMapping
     }
 
     /**
-     * Loads the filesystem paths for the path references.
+     * Loads the mapping.
      *
      * @param Package           $containingPackage The package that contains the
      *                                             mapping.
@@ -109,12 +111,12 @@ class ResourceMapping
      *                                             accessed by calling
      *                                             {@link getLoadErrors()}.
      *
-     * @throws MappingAlreadyLoadedException If the package has already been loaded.
+     * @throws AlreadyLoadedException If the mapping is already loaded.
      */
     public function load(Package $containingPackage, PackageCollection $packages, $failIfNotFound = false)
     {
-        if ($this->isLoaded()) {
-            throw new MappingAlreadyLoadedException('The mapping is already loaded.');
+        if (null !== $this->state) {
+            throw new AlreadyLoadedException('The mapping is already loaded.');
         }
 
         $absoluteFilesystemPaths = array();
@@ -156,12 +158,12 @@ class ResourceMapping
      * This method reverses the effects of {@link load()}. Additionally, all
      * associated conflicts are dereferenced.
      *
-     * @throws MappingNotLoadedException If the mapping is not loaded.
+     * @throws NotLoadedException If the mapping is not loaded.
      */
     public function unload()
     {
-        if (!$this->isLoaded()) {
-            throw new MappingNotLoadedException('The mapping is not loaded.');
+        if (null === $this->state) {
+            throw new NotLoadedException('The mapping is not loaded.');
         }
 
         $conflictsToRelease = $this->conflicts;
@@ -176,6 +178,16 @@ class ResourceMapping
         $this->loadErrors = array();
         $this->containingPackage = null;
         $this->state = null;
+    }
+
+    /**
+     * Returns whether the mapping is loaded.
+     *
+     * @return bool Returns `true` if {@link load()} was called.
+     */
+    public function isLoaded()
+    {
+        return null !== $this->state;
     }
 
     /**
@@ -209,17 +221,17 @@ class ResourceMapping
     /**
      * Returns the referenced filesystem paths.
      *
-     * If the mapping is not loaded with {@link load()}, an exception is
-     * thrown.
+     * The method {@link load()} needs to be called before calling this method,
+     * otherwise an exception is thrown.
      *
      * @return string[] The absolute filesystem paths.
      *
-     * @throws MappingNotLoadedException If the mapping is not loaded.
+     * @throws NotLoadedException If the mapping is not loaded.
      */
     public function getFilesystemPaths()
     {
-        if (!$this->isLoaded()) {
-            throw new MappingNotLoadedException('The mapping is not loaded.');
+        if (null === $this->state) {
+            throw new NotLoadedException('The mapping is not loaded.');
         }
 
         return $this->filesystemPaths;
@@ -228,18 +240,18 @@ class ResourceMapping
     /**
      * Returns the package that contains the mapping.
      *
-     * The method {@link load()} needs to be called before accessing the
-     * containing package, otherwise this method throws an exception.
+     * The method {@link load()} needs to be called before calling this method,
+     * otherwise an exception is thrown.
      *
      * @return Package The containing package or `null` if the mapping has not
      *                 been loaded.
      *
-     * @throws MappingNotLoadedException If the mapping is not loaded.
+     * @throws NotLoadedException If the mapping is not loaded.
      */
     public function getContainingPackage()
     {
-        if (!$this->isLoaded()) {
-            throw new MappingNotLoadedException('The mapping is not loaded.');
+        if (null === $this->state) {
+            throw new NotLoadedException('The mapping is not loaded.');
         }
 
         return $this->containingPackage;
@@ -248,16 +260,19 @@ class ResourceMapping
     /**
      * Returns the errors that occurred during loading of the mapping.
      *
+     * The method {@link load()} needs to be called before calling this method,
+     * otherwise an exception is thrown.
+     *
      * @return Exception[] The errors that occurred during loading. If the
      *                     returned array is empty, the mapping was loaded
      *                     successfully.
      *
-     * @throws MappingNotLoadedException If the mapping is not loaded.
+     * @throws NotLoadedException If the mapping is not loaded.
      */
     public function getLoadErrors()
     {
-        if (!$this->isLoaded()) {
-            throw new MappingNotLoadedException('The mapping is not loaded.');
+        if (null === $this->state) {
+            throw new NotLoadedException('The mapping is not loaded.');
         }
 
         return $this->loadErrors;
@@ -276,17 +291,20 @@ class ResourceMapping
      * of the mapping or any path within. If a conflict with a different path
      * is added, an exception is thrown.
      *
+     * The method {@link load()} needs to be called before calling this method,
+     * otherwise an exception is thrown.
+     *
      * @param RepositoryPathConflict $conflict The conflict to be added.
      *
-     * @throws MappingNotLoadedException If the mapping is not loaded.
+     * @throws NotLoadedException If the mapping is not loaded.
      * @throws InvalidArgumentException If the path of the conflict is not
      *                                  within the repository path of the
      *                                  mapping.
      */
     public function addConflict(RepositoryPathConflict $conflict)
     {
-        if (!$this->isLoaded()) {
-            throw new MappingNotLoadedException('The mapping is not loaded.');
+        if (null === $this->state) {
+            throw new NotLoadedException('The mapping is not loaded.');
         }
 
         if (!Path::isBasePath($this->repositoryPath, $conflict->getRepositoryPath())) {
@@ -318,14 +336,17 @@ class ResourceMapping
     /**
      * Removes a conflict from the mapping.
      *
+     * The method {@link load()} needs to be called before calling this method,
+     * otherwise an exception is thrown.
+     *
      * @param RepositoryPathConflict $conflict The conflict to remove.
      *
-     * @throws MappingNotLoadedException If the mapping is not loaded.
+     * @throws NotLoadedException If the mapping is not loaded.
      */
     public function removeConflict(RepositoryPathConflict $conflict)
     {
-        if (!$this->isLoaded()) {
-            throw new MappingNotLoadedException('The mapping is not loaded.');
+        if (null === $this->state) {
+            throw new NotLoadedException('The mapping is not loaded.');
         }
 
         $repositoryPath = $conflict->getRepositoryPath();
@@ -341,22 +362,40 @@ class ResourceMapping
     }
 
     /**
-     * Returns the conflicts of the mapping
+     * Returns the conflicts of the mapping.
+     *
+     * The method {@link load()} needs to be called before calling this method,
+     * otherwise an exception is thrown.
      *
      * @return RepositoryPathConflict[] The conflicts.
+     *
+     * @throws NotLoadedException If the mapping is not loaded.
      */
     public function getConflicts()
     {
+        if (null === $this->state) {
+            throw new NotLoadedException('The mapping is not loaded.');
+        }
+
         return array_values($this->conflicts);
     }
 
     /**
      * Returns all packages with conflicting resource mappings.
      *
+     * The method {@link load()} needs to be called before calling this method,
+     * otherwise an exception is thrown.
+     *
      * @return PackageCollection The conflicting packages.
+     *
+     * @throws NotLoadedException If the mapping is not loaded.
      */
     public function getConflictingPackages()
     {
+        if (null === $this->state) {
+            throw new NotLoadedException('The mapping is not loaded.');
+        }
+
         $collection = new PackageCollection();
 
         foreach ($this->conflicts as $conflict) {
@@ -375,10 +414,19 @@ class ResourceMapping
     /**
      * Returns all conflicting resource mappings.
      *
+     * The method {@link load()} needs to be called before calling this method,
+     * otherwise an exception is thrown.
+     *
      * @return ResourceMapping[] The conflicting resource mappings.
+     *
+     * @throws NotLoadedException If the mapping is not loaded.
      */
     public function getConflictingMappings()
     {
+        if (null === $this->state) {
+            throw new NotLoadedException('The mapping is not loaded.');
+        }
+
         $conflictingMappings = array();
 
         foreach ($this->conflicts as $conflict) {
@@ -397,60 +445,87 @@ class ResourceMapping
     /**
      * Returns the state of the mapping.
      *
-     * @return int|null One of the {@link ResourceMappingState} constants or
-     *                  `null` if the mapping is not loaded.
+     * The method {@link load()} needs to be called before calling this method,
+     * otherwise an exception is thrown.
+     *
+     * @return int One of the {@link ResourceMappingState} constants.
+     *
+     * @throws NotLoadedException If the mapping is not loaded.
      */
     public function getState()
     {
-        return $this->state;
-    }
+        if (null === $this->state) {
+            throw new NotLoadedException('The mapping is not loaded.');
+        }
 
-    /**
-     * Returns whether the mapping is loaded.
-     *
-     * @return bool Returns `true` if {@link load()} was called.
-     */
-    public function isLoaded()
-    {
-        return null !== $this->state;
+        return $this->state;
     }
 
     /**
      * Returns whether the mapping is enabled.
      *
+     * The method {@link load()} needs to be called before calling this method,
+     * otherwise an exception is thrown.
+     *
      * @return bool Returns `true` if the state is
      *              {@link ResourceMappingState::ENABLED}.
      *
      * @see ResourceMappingState::ENABLED
+     *
+     * @throws NotLoadedException If the mapping is not loaded.
+     *
+     * @throws NotLoadedException If the mapping is not loaded.
      */
     public function isEnabled()
     {
+        if (null === $this->state) {
+            throw new NotLoadedException('The mapping is not loaded.');
+        }
+
         return ResourceMappingState::ENABLED === $this->state;
     }
 
     /**
      * Returns whether the path referenced by the mapping was not found.
      *
+     * The method {@link load()} needs to be called before calling this method,
+     * otherwise an exception is thrown.
+     *
      * @return bool Returns `true` if the state is
      *              {@link ResourceMappingState::NOT_FOUND}.
+     *
+     * @throws NotLoadedException If the mapping is not loaded.
      *
      * @see ResourceMappingState::NOT_FOUND
      */
     public function isNotFound()
     {
+        if (null === $this->state) {
+            throw new NotLoadedException('The mapping is not loaded.');
+        }
+
         return ResourceMappingState::NOT_FOUND === $this->state;
     }
 
     /**
      * Returns whether the mapping conflicts with a mapping in another package.
      *
+     * The method {@link load()} needs to be called before calling this method,
+     * otherwise an exception is thrown.
+     *
      * @return bool Returns `true` if the state is
      *              {@link ResourceMappingState::CONFLICT}.
+     *
+     * @throws NotLoadedException If the mapping is not loaded.
      *
      * @see ResourceMappingState::CONFLICT
      */
     public function isConflicting()
     {
+        if (null === $this->state) {
+            throw new NotLoadedException('The mapping is not loaded.');
+        }
+
         return ResourceMappingState::CONFLICT === $this->state;
     }
 

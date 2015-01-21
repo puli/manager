@@ -50,7 +50,7 @@ class Package
     /**
      * @var int
      */
-    private $state = PackageState::NOT_LOADED;
+    private $state;
 
     /**
      * @var Exception|null
@@ -91,7 +91,13 @@ class Package
         $this->packageFile = $packageFile;
         $this->loadError = $loadError;
 
-        $this->state = PackageState::detect($this);
+        if (!file_exists($installPath)) {
+            $this->state = PackageState::NOT_FOUND;
+        } elseif (null !== $loadError) {
+            $this->state = PackageState::NOT_LOADABLE;
+        } else {
+            $this->state = PackageState::ENABLED;
+        }
     }
 
     /**
@@ -154,35 +160,6 @@ class Package
     public function getState()
     {
         return $this->state;
-    }
-
-    /**
-     * Resets the state of the package to unloaded.
-     */
-    public function resetState()
-    {
-        $this->state = PackageState::NOT_LOADED;
-    }
-
-    /**
-     * Refreshes the state of the package.
-     */
-    public function refreshState()
-    {
-        $this->state = PackageState::detect($this);
-    }
-
-    /**
-     * Returns whether the package is loaded.
-     *
-     * @return bool Returns `true` if the state is not
-     *              {@link PackageState::NOT_LOADED}.
-     *
-     * @see PackageState::NOT_LOADED
-     */
-    public function isLoaded()
-    {
-        return PackageState::NOT_LOADED !== $this->state;
     }
 
     /**

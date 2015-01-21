@@ -184,7 +184,7 @@ class ResourceMappingTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\RepositoryManager\Api\Repository\MappingAlreadyLoadedException
+     * @expectedException \Puli\RepositoryManager\Api\AlreadyLoadedException
      */
     public function testLoadFailsIfCalledTwice()
     {
@@ -294,15 +294,15 @@ class ResourceMappingTest extends PHPUnit_Framework_TestCase
         $mapping->addConflict($conflict = new RepositoryPathConflict('/path/conflict'));
 
         $this->assertCount(1, $mapping->getConflicts());
+        $this->assertCount(1, $conflict->getMappings());
 
         $mapping->unload();
 
-        $this->assertCount(0, $mapping->getConflicts());
         $this->assertCount(0, $conflict->getMappings());
     }
 
     /**
-     * @expectedException \Puli\RepositoryManager\Api\Repository\MappingNotLoadedException
+     * @expectedException \Puli\RepositoryManager\Api\NotLoadedException
      */
     public function testUnloadFailsIfNotLoaded()
     {
@@ -405,7 +405,7 @@ class ResourceMappingTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\RepositoryManager\Api\Repository\MappingNotLoadedException
+     * @expectedException \Puli\RepositoryManager\Api\NotLoadedException
      */
     public function testAddConflictFailsIfNotLoaded()
     {
@@ -455,7 +455,7 @@ class ResourceMappingTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\RepositoryManager\Api\Repository\MappingNotLoadedException
+     * @expectedException \Puli\RepositoryManager\Api\NotLoadedException
      */
     public function testRemoveConflictFailsIfNotLoaded()
     {

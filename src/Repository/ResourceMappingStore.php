@@ -161,23 +161,6 @@ class ResourceMappingStore
     }
 
     /**
-     * Returns whether more than one resource mapping was set for the given
-     * repository path.
-     *
-     * @param string $repositoryPath The repository path of the mapping.
-     *
-     * @return bool Returns `true` if more than one mapping was set for the
-     *              repository path, `false` otherwise.
-     *
-     * @throws OutOfBoundsException If no resource mapping was set for the
-     *                              given repository path.
-     */
-    public function isDuplicate($repositoryPath)
-    {
-        return $this->store->getCount($repositoryPath) > 1;
-    }
-
-    /**
      * Returns the repository paths of all resource mappings.
      *
      * @return string[] The repository paths of the stored mappings.

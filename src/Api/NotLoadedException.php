@@ -9,16 +9,16 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\RepositoryManager\Api\Repository;
+namespace Puli\RepositoryManager\Api;
 
 use RuntimeException;
 
 /**
- * Thrown when a resource mapping should be loaded but isn't.
+ * Thrown when an object was expected to be loaded.
  *
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class MappingNotLoadedException extends RuntimeException
+class NotLoadedException extends RuntimeException
 {
 }

@@ -18,7 +18,6 @@ use Puli\RepositoryManager\Api\Discovery\BindingTypeDescriptor;
 use Puli\RepositoryManager\Api\Package\InstallInfo;
 use Puli\RepositoryManager\Api\Package\Package;
 use Puli\RepositoryManager\Api\Package\PackageFile;
-use Puli\RepositoryManager\Discovery\BindingTypeDescriptorStore;
 use Rhumsaa\Uuid\Uuid;
 use stdClass;
 
@@ -31,11 +30,6 @@ class BindingDescriptorTest extends PHPUnit_Framework_TestCase
     private $uuid;
 
     /**
-     * @var BindingTypeDescriptorStore
-     */
-    private $typeStore;
-
-    /**
      * @var Package
      */
     private $package;
@@ -43,7 +37,6 @@ class BindingDescriptorTest extends PHPUnit_Framework_TestCase
     protected function setUp()
     {
         $this->uuid = Uuid::uuid4();
-        $this->typeStore = new BindingTypeDescriptorStore();
         $this->package = new Package(new PackageFile(), '/path', new InstallInfo('vendor/package', '/path'));
     }
 
@@ -216,11 +209,10 @@ class BindingDescriptorTest extends PHPUnit_Framework_TestCase
             new BindingParameterDescriptor('foo', false, 'bar'),
             new BindingParameterDescriptor('param', false, 'default'),
         ));
-        $this->typeStore->add($type, $this->package);
-        $type->refreshState($this->typeStore);
+        $type->load($this->package);
 
         $descriptor = new BindingDescriptor('/path', 'vendor/type', array('param' => 'value'));
-        $descriptor->refreshState($this->package, $this->typeStore);
+        $descriptor->load($this->package, $type);
 
         $this->assertSame(array('foo' => 'bar', 'param' => 'value'), $descriptor->getParameterValues());
     }
@@ -231,11 +223,10 @@ class BindingDescriptorTest extends PHPUnit_Framework_TestCase
             new BindingParameterDescriptor('foo', false, 'bar'),
             new BindingParameterDescriptor('param', false, 'default'),
         ));
-        $this->typeStore->add($type, $this->package);
-        $type->refreshState($this->typeStore);
+        $type->load($this->package);
 
         $descriptor = new BindingDescriptor('/path', 'vendor/type', array('param' => 'value'));
-        $descriptor->refreshState($this->package, $this->typeStore);
+        $descriptor->load($this->package, $type);
 
         $this->assertSame(array('param' => 'value'), $descriptor->getParameterValues(false));
     }
@@ -262,11 +253,10 @@ class BindingDescriptorTest extends PHPUnit_Framework_TestCase
         $type = new BindingTypeDescriptor('vendor/type', null, array(
             new BindingParameterDescriptor('param', false, 'default'),
         ));
-        $this->typeStore->add($type, $this->package);
-        $type->refreshState($this->typeStore);
+        $type->load($this->package);
 
         $descriptor = new BindingDescriptor('/path', 'vendor/type');
-        $descriptor->refreshState($this->package, $this->typeStore);
+        $descriptor->load($this->package, $type);
 
         $this->assertSame('default', $descriptor->getParameterValue('param'));
     }
@@ -276,11 +266,10 @@ class BindingDescriptorTest extends PHPUnit_Framework_TestCase
         $type = new BindingTypeDescriptor('vendor/type', null, array(
             new BindingParameterDescriptor('param', false, 'default'),
         ));
-        $this->typeStore->add($type, $this->package);
-        $type->refreshState($this->typeStore);
+        $type->load($this->package);
 
         $descriptor = new BindingDescriptor('/path', 'vendor/type');
-        $descriptor->refreshState($this->package, $this->typeStore);
+        $descriptor->load($this->package, $type);
 
         $this->assertNull($descriptor->getParameterValue('param', false));
     }
@@ -290,11 +279,10 @@ class BindingDescriptorTest extends PHPUnit_Framework_TestCase
         $type = new BindingTypeDescriptor('vendor/type', null, array(
             new BindingParameterDescriptor('param', false, 'default'),
         ));
-        $this->typeStore->add($type, $this->package);
-        $type->refreshState($this->typeStore);
+        $type->load($this->package);
 
         $descriptor = new BindingDescriptor('/path', 'vendor/type', array('param' => 'value'));
-        $descriptor->refreshState($this->package, $this->typeStore);
+        $descriptor->load($this->package, $type);
 
         $this->assertSame('value', $descriptor->getParameterValue('param'));
     }
@@ -305,11 +293,10 @@ class BindingDescriptorTest extends PHPUnit_Framework_TestCase
     public function testGetParameterValueWhenLoadedThrowsExceptionIfNotFound()
     {
         $type = new BindingTypeDescriptor('vendor/type');
-        $this->typeStore->add($type, $this->package);
-        $type->refreshState($this->typeStore);
+        $type->load($this->package);
 
         $descriptor = new BindingDescriptor('/path', 'vendor/type');
-        $descriptor->refreshState($this->package, $this->typeStore);
+        $descriptor->load($this->package, $type);
 
         $descriptor->getParameterValue('foo');
     }
@@ -326,11 +313,10 @@ class BindingDescriptorTest extends PHPUnit_Framework_TestCase
         $type = new BindingTypeDescriptor('vendor/type', null, array(
             new BindingParameterDescriptor('param', false, 'default'),
         ));
-        $this->typeStore->add($type, $this->package);
-        $type->refreshState($this->typeStore);
+        $type->load($this->package);
 
         $descriptor = new BindingDescriptor('/path', 'vendor/type');
-        $descriptor->refreshState($this->package, $this->typeStore);
+        $descriptor->load($this->package, $type);
 
         $this->assertTrue($descriptor->hasParameterValues());
     }
@@ -340,11 +326,10 @@ class BindingDescriptorTest extends PHPUnit_Framework_TestCase
         $type = new BindingTypeDescriptor('vendor/type', null, array(
             new BindingParameterDescriptor('param', false, 'default'),
         ));
-        $this->typeStore->add($type, $this->package);
-        $type->refreshState($this->typeStore);
+        $type->load($this->package);
 
         $descriptor = new BindingDescriptor('/path', 'vendor/type');
-        $descriptor->refreshState($this->package, $this->typeStore);
+        $descriptor->load($this->package, $type);
 
         $this->assertFalse($descriptor->hasParameterValues(false));
     }
@@ -362,11 +347,10 @@ class BindingDescriptorTest extends PHPUnit_Framework_TestCase
         $type = new BindingTypeDescriptor('vendor/type', null, array(
             new BindingParameterDescriptor('default', false, 'value'),
         ));
-        $this->typeStore->add($type, $this->package);
-        $type->refreshState($this->typeStore);
+        $type->load($this->package);
 
         $descriptor = new BindingDescriptor('/path', 'vendor/type', array('param' => 'value'));
-        $descriptor->refreshState($this->package, $this->typeStore);
+        $descriptor->load($this->package, $type);
 
         $this->assertTrue($descriptor->hasParameterValue('default'));
         $this->assertTrue($descriptor->hasParameterValue('param'));
@@ -378,11 +362,10 @@ class BindingDescriptorTest extends PHPUnit_Framework_TestCase
         $type = new BindingTypeDescriptor('vendor/type', null, array(
             new BindingParameterDescriptor('default', false, 'value'),
         ));
-        $this->typeStore->add($type, $this->package);
-        $type->refreshState($this->typeStore);
+        $type->load($this->package);
 
         $descriptor = new BindingDescriptor('/path', 'vendor/type');
-        $descriptor->refreshState($this->package, $this->typeStore);
+        $descriptor->load($this->package, $type);
 
         $this->assertFalse($descriptor->hasParameterValue('default', false));
     }

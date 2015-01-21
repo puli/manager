@@ -11,14 +11,18 @@
 
 namespace Puli\RepositoryManager\Api\Discovery;
 
-use InvalidArgumentException;
 use Puli\Discovery\Api\Binding\BindingType;
 use Puli\Discovery\Api\Binding\NoSuchParameterException;
+use Puli\RepositoryManager\Api\AlreadyLoadedException;
+use Puli\RepositoryManager\Api\NotLoadedException;
+use Puli\RepositoryManager\Api\Package\Package;
 use Puli\RepositoryManager\Assert\Assert;
-use Puli\RepositoryManager\Discovery\BindingTypeDescriptorStore;
 
 /**
  * Describes a binding type.
+ *
+ * This class contains a high-level model of {@link BindingType} as it is used
+ * in this package.
  *
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
@@ -47,6 +51,11 @@ class BindingTypeDescriptor
     private $state;
 
     /**
+     * @var Package
+     */
+    private $containingPackage;
+
+    /**
      * Creates a binding type descriptor.
      *
      * @param string                       $name        The name of the type.
@@ -54,15 +63,13 @@ class BindingTypeDescriptor
      *                                                  description of the type.
      * @param BindingParameterDescriptor[] $parameters  The parameters.
      *
-     * @throws InvalidArgumentException If any of the arguments is invalid.
-     *
      * @see BindingType
      */
     public function __construct($name, $description = null, array $parameters = array())
     {
         Assert::typeName($name);
-        Assert::nullOrString($description, 'The type description must be a string or null. Got: %s');
-        Assert::nullOrNotEmpty($description, 'The type description must not be empty.');
+        Assert::nullOrString($description, 'The description must be a string or null. Got: %s');
+        Assert::nullOrNotEmpty($description, 'The description must not be empty.');
         Assert::allIsInstanceOf($parameters, __NAMESPACE__.'\BindingParameterDescriptor');
 
         $this->name = $name;
@@ -74,9 +81,75 @@ class BindingTypeDescriptor
     }
 
     /**
-     * Returns the type name.
+     * Loads the type descriptor.
      *
-     * @return string The type name.
+     * @param Package $containingPackage The package that contains the type
+     *                                   descriptor.
+     *
+     * @throws AlreadyLoadedException If the descriptor is already loaded.
+     */
+    public function load(Package $containingPackage)
+    {
+        if (null !== $this->state) {
+            throw new AlreadyLoadedException('The type descriptor is already loaded.');
+        }
+
+        $this->containingPackage = $containingPackage;
+        $this->state = BindingTypeState::ENABLED;
+    }
+
+    /**
+     * Unloads the type descriptor.
+     *
+     * All memory allocated during {@link load()} is freed.
+     *
+     * @throws NotLoadedException If the descriptor is not loaded.
+     */
+    public function unload()
+    {
+        if (null === $this->state) {
+            throw new NotLoadedException('The type descriptor is not loaded.');
+        }
+
+        $this->containingPackage = null;
+        $this->state = null;
+    }
+
+    /**
+     * Returns whether the descriptor is loaded.
+     *
+     * @return bool Returns `true` if the descriptor is loaded.
+     */
+    public function isLoaded()
+    {
+        return null !== $this->state;
+    }
+
+    /**
+     * Marks or unmarks the type as duplicate.
+     *
+     * The method {@link load()} needs to be called before calling this method,
+     * otherwise an exception is thrown.
+     *
+     * @param bool $duplicate Whether or not the type is a duplicate.
+     *
+     * @throws NotLoadedException If the descriptor is not loaded.
+     */
+    public function markDuplicate($duplicate)
+    {
+        Assert::boolean($duplicate);
+
+        if (null === $this->state) {
+            throw new NotLoadedException('The type descriptor is not loaded.');
+        }
+
+        $this->state = $duplicate ? BindingTypeState::DUPLICATE : BindingTypeState::ENABLED;
+    }
+
+    /**
+     * Returns the type's name.
+     *
+     * @return string The name.
      */
     public function getName()
     {
@@ -256,67 +329,82 @@ class BindingTypeDescriptor
     }
 
     /**
+     * Returns the package that contains the descriptor.
+     *
+     * The method {@link load()} needs to be called before calling this method,
+     * otherwise an exception is thrown.
+     *
+     * @return Package The containing package.
+     *
+     * @throws NotLoadedException If the descriptor is not loaded.
+     */
+    public function getContainingPackage()
+    {
+        if (null === $this->containingPackage) {
+            throw new NotLoadedException('The type descriptor is not loaded.');
+        }
+
+        return $this->containingPackage;
+    }
+
+    /**
      * Returns the state of the binding type.
      *
+     * The method {@link load()} needs to be called before calling this method,
+     * otherwise an exception is thrown.
+     *
      * @return int One of the {@link BindingTypeState} constants.
+     *
+     * @throws NotLoadedException If the descriptor is not loaded.
      */
     public function getState()
     {
+        if (null === $this->state) {
+            throw new NotLoadedException('The type descriptor is not loaded.');
+        }
+
         return $this->state;
-    }
-
-    /**
-     * Resets the state of the binding type to unloaded.
-     */
-    public function resetState()
-    {
-        $this->state = BindingTypeState::NOT_LOADED;
-    }
-
-    /**
-     * Refreshes the state of the binding type.
-     *
-     * @param BindingTypeDescriptorStore $typeStore The store with the defined types.
-     */
-    public function refreshState(BindingTypeDescriptorStore $typeStore)
-    {
-        $this->state = BindingTypeState::detect($this, $typeStore);
-    }
-
-    /**
-     * Returns whether the binding type is loaded.
-     *
-     * @return bool Returns `true` if the state is not
-     *              {@link BindingTypeState::NOT_LOADED}.
-     *
-     * @see BindingTypeState::NOT_LOADED
-     */
-    public function isLoaded()
-    {
-        return BindingTypeState::NOT_LOADED !== $this->state;
     }
 
     /**
      * Returns whether the binding type is enabled.
      *
+     * The method {@link load()} needs to be called before calling this method,
+     * otherwise an exception is thrown.
+     *
      * @return bool Returns `true` if the state is {@link BindingTypeState::ENABLED}.
+     *
+     * @throws NotLoadedException If the descriptor is not loaded.
      *
      * @see BindingTypeState::ENABLED
      */
     public function isEnabled()
     {
+        if (null === $this->state) {
+            throw new NotLoadedException('The type descriptor is not loaded.');
+        }
+
         return BindingTypeState::ENABLED === $this->state;
     }
 
     /**
      * Returns whether the binding type is duplicated.
      *
+     * The method {@link load()} needs to be called before calling this method,
+     * otherwise an exception is thrown.
+     *
      * @return bool Returns `true` if the state is {@link BindingTypeState::DUPLICATE}.
+     *
+     * @throws NotLoadedException If the descriptor is not loaded.
      *
      * @see BindingTypeState::DUPLICATE
      */
     public function isDuplicate()
     {
+        if (null === $this->state) {
+            throw new NotLoadedException('The type descriptor is not loaded.');
+        }
+
         return BindingTypeState::DUPLICATE === $this->state;
     }
 }
