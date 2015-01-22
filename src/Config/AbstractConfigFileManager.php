@@ -17,6 +17,7 @@ use Puli\RepositoryManager\Api\Config\ConfigFileManager;
 use Puli\RepositoryManager\Api\InvalidConfigException;
 use Puli\RepositoryManager\Api\IOException;
 use Webmozart\Glob\Iterator\GlobFilterIterator;
+use Webmozart\Glob\Iterator\RegexFilterIterator;
 
 /**
  * Base class for configuration file managers.
@@ -109,10 +110,18 @@ abstract class AbstractConfigFileManager implements ConfigFileManager
     {
         $values = $this->getConfigKeys($includeFallback, $includeUnset);
 
-        $iterator = new GlobFilterIterator(
-            $pattern,
+        $regEx = '~^'.str_replace('\\*', '.*', preg_quote($pattern, '~')).'$~';
+        $staticPrefix = $pattern;
+
+        if (false !== $pos = strpos($staticPrefix, '*')) {
+            $staticPrefix = substr($staticPrefix, 0, $pos);
+        }
+
+        $iterator = new RegexFilterIterator(
+            $regEx,
+            $staticPrefix,
             new ArrayIterator($values),
-            GlobFilterIterator::FILTER_KEY | GlobFilterIterator::KEY_AS_KEY
+            RegexFilterIterator::FILTER_KEY | RegexFilterIterator::KEY_AS_KEY
         );
 
         return iterator_to_array($iterator);
