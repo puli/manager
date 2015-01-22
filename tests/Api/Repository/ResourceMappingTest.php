@@ -143,14 +143,14 @@ class ResourceMappingTest extends PHPUnit_Framework_TestCase
 
         $this->assertSame(array('resources'), $mapping->getPathReferences());
         $this->assertSame(array($this->packageDir1.'/resources'), $mapping->getFilesystemPaths());
-        $this->assertSame(array(
+        $this->assertSameAfterSorting(array(
             $this->packageDir1.'/resources' => '/path',
             $this->packageDir1.'/resources/config' => '/path/config',
             $this->packageDir1.'/resources/config/config.yml' => '/path/config/config.yml',
             $this->packageDir1.'/resources/css' => '/path/css',
             $this->packageDir1.'/resources/css/style.css' => '/path/css/style.css',
         ), $mapping->listPathMappings());
-        $this->assertSame(array(
+        $this->assertSameAfterSorting(array(
             '/path',
             '/path/config',
             '/path/config/config.yml',
@@ -176,7 +176,7 @@ class ResourceMappingTest extends PHPUnit_Framework_TestCase
             $this->packageDir1.'/resources',
             $this->packageDir1.'/assets',
         ), $mapping->getFilesystemPaths());
-        $this->assertSame(array(
+        $this->assertSameAfterSorting(array(
             $this->packageDir1.'/resources' => '/path',
             $this->packageDir1.'/resources/config' => '/path/config',
             $this->packageDir1.'/resources/config/config.yml' => '/path/config/config.yml',
@@ -186,7 +186,7 @@ class ResourceMappingTest extends PHPUnit_Framework_TestCase
             $this->packageDir1.'/assets/css' => '/path/css',
             $this->packageDir1.'/assets/css/style.css' => '/path/css/style.css',
         ), $mapping->listPathMappings());
-        $this->assertSame(array(
+        $this->assertSameAfterSorting(array(
             '/path',
             '/path/config',
             '/path/config/config.yml',
@@ -212,7 +212,7 @@ class ResourceMappingTest extends PHPUnit_Framework_TestCase
             $this->packageDir1.'/assets',
             $this->packageDir1.'/resources',
         ), $mapping->getFilesystemPaths());
-        $this->assertSame(array(
+        $this->assertSameAfterSorting(array(
             $this->packageDir1.'/assets' => '/path',
             $this->packageDir1.'/assets/css' => '/path/css',
             $this->packageDir1.'/assets/css/style.css' => '/path/css/style.css',
@@ -222,7 +222,7 @@ class ResourceMappingTest extends PHPUnit_Framework_TestCase
             $this->packageDir1.'/resources/css' => '/path/css',
             $this->packageDir1.'/resources/css/style.css' => '/path/css/style.css',
         ), $mapping->listPathMappings());
-        $this->assertSame(array(
+        $this->assertSameAfterSorting(array(
             '/path',
             '/path/config',
             '/path/config/config.yml',
@@ -245,14 +245,14 @@ class ResourceMappingTest extends PHPUnit_Framework_TestCase
 
         $this->assertSame(array('@vendor/package2:resources'), $mapping->getPathReferences());
         $this->assertSame(array($this->packageDir2.'/resources'), $mapping->getFilesystemPaths());
-        $this->assertSame(array(
+        $this->assertSameAfterSorting(array(
             $this->packageDir2.'/resources' => '/path',
             $this->packageDir2.'/resources/config' => '/path/config',
             $this->packageDir2.'/resources/config/config.yml' => '/path/config/config.yml',
             $this->packageDir2.'/resources/css' => '/path/css',
             $this->packageDir2.'/resources/css/style.css' => '/path/css/style.css',
         ), $mapping->listPathMappings());
-        $this->assertSame(array(
+        $this->assertSameAfterSorting(array(
             '/path',
             '/path/config',
             '/path/config/config.yml',
@@ -615,5 +615,24 @@ class ResourceMappingTest extends PHPUnit_Framework_TestCase
         $this->assertCount(2, $mapping3->getConflictingMappings());
         $this->assertContains($mapping1, $mapping3->getConflictingMappings());
         $this->assertContains($mapping2, $mapping3->getConflictingMappings());
+    }
+
+    /**
+     * Compares that an array is the same as another after sorting.
+     *
+     * This is necessary since RecursiveDirectoryIterator is not guaranteed to
+     * return sorted results on all filesystems.
+     *
+     * @param mixed  $expected
+     * @param mixed  $actual
+     * @param string $message
+     */
+    private function assertSameAfterSorting($expected, $actual, $message = '')
+    {
+        if (is_array($actual)) {
+            asort($actual);
+        }
+
+        $this->assertSame($expected, $actual, $message);
     }
 }
