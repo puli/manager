@@ -44,8 +44,6 @@ class ProviderFactory
         'null' => 'Puli\RepositoryManager\Generator\KeyValueStore\NullStoreRecipeProvider',
         'array' => 'Puli\RepositoryManager\Generator\KeyValueStore\ArrayStoreRecipeProvider',
         'json-file' => 'Puli\RepositoryManager\Generator\KeyValueStore\JsonFileStoreRecipeProvider',
-        'memcache' => 'Puli\RepositoryManager\Generator\KeyValueStore\MemcacheStoreRecipeProvider',
-        'memcached' => 'Puli\RepositoryManager\Generator\KeyValueStore\MemcachedStoreRecipeProvider',
     );
 
     /**

@@ -102,8 +102,6 @@ class ProviderFactoryTest extends PHPUnit_Framework_TestCase
             array('null', 'Puli\RepositoryManager\Generator\KeyValueStore\NullStoreRecipeProvider'),
             array(null, 'Puli\RepositoryManager\Generator\KeyValueStore\NullStoreRecipeProvider'),
             array('array', 'Puli\RepositoryManager\Generator\KeyValueStore\ArrayStoreRecipeProvider'),
-            array('memcache', 'Puli\RepositoryManager\Generator\KeyValueStore\MemcacheStoreRecipeProvider'),
-            array('memcached', 'Puli\RepositoryManager\Generator\KeyValueStore\MemcachedStoreRecipeProvider'),
             array(__NAMESPACE__.'\Fixtures\TestKeyValueStoreRecipeProvider', __NAMESPACE__.'\Fixtures\TestKeyValueStoreRecipeProvider'),
         );
     }
