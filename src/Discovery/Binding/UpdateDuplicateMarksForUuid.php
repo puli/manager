@@ -11,7 +11,6 @@
 
 namespace Puli\RepositoryManager\Discovery\Binding;
 
-use Puli\RepositoryManager\Discovery\Binding\BindingDescriptorStore;
 use Puli\RepositoryManager\Transaction\OperationInterceptor;
 use Rhumsaa\Uuid\Uuid;
 
