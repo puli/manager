@@ -132,7 +132,7 @@ class ResourceMapping
             throw new AlreadyLoadedException('The mapping is already loaded.');
         }
 
-        $absoluteFilesystemPaths = array();
+        $filesystemPaths = array();
         $loadErrors = array();
 
         foreach ($this->pathReferences as $relativePath) {
@@ -142,7 +142,7 @@ class ResourceMapping
                 $absolutePath = $this->makeAbsolute($relativePath, $containingPackage, $packages);
                 $this->assertFileExists($absolutePath, $relativePath, $containingPackage);
 
-                $absoluteFilesystemPaths[] = $absolutePath;
+                $filesystemPaths[] = $absolutePath;
             } catch (NoSuchPackageException $loadError) {
             } catch (FileNotFoundException $loadError) {
             }
@@ -158,17 +158,36 @@ class ResourceMapping
             $loadErrors[] = $loadError;
         }
 
-        $iterator = new RecursiveIteratorIterator(
-            new RecursivePathsIterator(
-                new ArrayIterator($absoluteFilesystemPaths),
-                $this->repositoryPath
-            ),
-            RecursiveIteratorIterator::SELF_FIRST
+        $iterator = new RecursivePathsIterator(
+            new ArrayIterator($filesystemPaths),
+            $this->repositoryPath
         );
 
-        $this->pathMappings = iterator_to_array($iterator);
+        foreach ($iterator as $filesystemPath => $repositoryPath) {
+            $directoryEntries = array();
+
+            // If the filesystem path is a directory, list all entries of the
+            // directory recursively
+            if ($iterator->hasChildren()) {
+                $directoryEntries = iterator_to_array(new RecursiveIteratorIterator(
+                    $iterator->getChildren(),
+                    RecursiveIteratorIterator::SELF_FIRST
+                ));
+
+                ksort($directoryEntries);
+            }
+
+            $this->pathMappings = array_merge(
+                $this->pathMappings,
+                // Append the current path
+                array($filesystemPath => $repositoryPath),
+                // Append all entries of the directory (if any)
+                $directoryEntries
+            );
+        }
+
         $this->repositoryPaths = array_unique($this->pathMappings);
-        $this->filesystemPaths = $absoluteFilesystemPaths;
+        $this->filesystemPaths = $filesystemPaths;
         $this->loadErrors = $loadErrors;
         $this->containingPackage = $containingPackage;
 
