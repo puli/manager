@@ -748,43 +748,26 @@ class DiscoveryManagerImpl implements DiscoveryManager
 
     private function loadTypeDescriptor(BindingTypeDescriptor $typeDescriptor, Package $package)
     {
+        $typeName = $typeDescriptor->getName();
+
         return new InterceptedOperation(
-            new LoadTypeDescriptor(
-                $typeDescriptor,
-                $package,
-                $this->typeStore
-            ),
+            new LoadTypeDescriptor($typeDescriptor, $package, $this->typeStore),
             array(
-                new UpdateDuplicateMarksForTypeName(
-                    $typeDescriptor->getName(),
-                    $this->typeStore
-                ),
-                new ReloadBindingDescriptorsByTypeName(
-                    $typeDescriptor->getName(),
-                    $this->bindingStore,
-                    $this->typeStore
-                )
+                new UpdateDuplicateMarksForTypeName($typeName, $this->typeStore),
+                new ReloadBindingDescriptorsByTypeName($typeName, $this->bindingStore, $this->typeStore)
             )
         );
     }
 
     private function unloadTypeDescriptor(BindingTypeDescriptor $typeDescriptor)
     {
+        $typeName = $typeDescriptor->getName();
+
         return new InterceptedOperation(
-            new UnloadTypeDescriptor(
-                $typeDescriptor,
-                $this->typeStore
-            ),
+            new UnloadTypeDescriptor($typeDescriptor, $this->typeStore),
             array(
-                new UpdateDuplicateMarksForTypeName(
-                    $typeDescriptor->getName(),
-                    $this->typeStore
-                ),
-                new ReloadBindingDescriptorsByTypeName(
-                    $typeDescriptor->getName(),
-                    $this->bindingStore,
-                    $this->typeStore
-                )
+                new UpdateDuplicateMarksForTypeName($typeName, $this->typeStore),
+                new ReloadBindingDescriptorsByTypeName($typeName, $this->bindingStore, $this->typeStore)
             )
         );
     }
@@ -812,53 +795,26 @@ class DiscoveryManagerImpl implements DiscoveryManager
     private function loadBindingDescriptor(BindingDescriptor $bindingDescriptor, Package $package)
     {
         return new InterceptedOperation(
-            new LoadBindingDescriptor(
-                $bindingDescriptor,
-                $package,
-                $this->bindingStore,
-                $this->typeStore
-            ),
-            new UpdateDuplicateMarksForUuid(
-                $bindingDescriptor->getUuid(),
-                $this->bindingStore,
-                $this->rootPackage->getName()
-            )
+            new LoadBindingDescriptor($bindingDescriptor, $package, $this->bindingStore, $this->typeStore),
+            new UpdateDuplicateMarksForUuid($bindingDescriptor->getUuid(), $this->bindingStore, $this->rootPackage->getName())
         );
     }
 
     private function unloadBindingDescriptor(BindingDescriptor $bindingDescriptor)
     {
         return new InterceptedOperation(
-            new UnloadBindingDescriptor(
-                $bindingDescriptor,
-                $this->bindingStore
-            ),
-            new UpdateDuplicateMarksForUuid(
-                $bindingDescriptor->getUuid(),
-                $this->bindingStore,
-                $this->rootPackage->getName()
-            )
+            new UnloadBindingDescriptor($bindingDescriptor, $this->bindingStore),
+            new UpdateDuplicateMarksForUuid($bindingDescriptor->getUuid(), $this->bindingStore, $this->rootPackage->getName())
         );
     }
 
     private function enableBindingUuid(Uuid $uuid, InstallInfo $installInfo)
     {
         return new InterceptedOperation(
-            new EnableBindingUuid(
-                $uuid,
-                $installInfo
-            ),
+            new EnableBindingUuid($uuid, $installInfo),
             array(
-                new ReloadBindingDescriptorsByUuid(
-                    $uuid,
-                    $this->bindingStore,
-                    $this->typeStore
-                ),
-                new UpdateDuplicateMarksForUuid(
-                    $uuid,
-                    $this->bindingStore,
-                    $this->rootPackage->getName()
-                )
+                new ReloadBindingDescriptorsByUuid($uuid, $this->bindingStore, $this->typeStore),
+                new UpdateDuplicateMarksForUuid($uuid, $this->bindingStore, $this->rootPackage->getName())
             )
         );
     }
@@ -866,21 +822,10 @@ class DiscoveryManagerImpl implements DiscoveryManager
     private function disableBindingUuid(Uuid $uuid, InstallInfo $installInfo)
     {
         return new InterceptedOperation(
-            new DisableBindingUuid(
-                $uuid,
-                $installInfo
-            ),
+            new DisableBindingUuid($uuid, $installInfo),
             array(
-                new ReloadBindingDescriptorsByUuid(
-                    $uuid,
-                    $this->bindingStore,
-                    $this->typeStore
-                ),
-                new UpdateDuplicateMarksForUuid(
-                    $uuid,
-                    $this->bindingStore,
-                    $this->rootPackage->getName()
-                )
+                new ReloadBindingDescriptorsByUuid($uuid, $this->bindingStore, $this->typeStore),
+                new UpdateDuplicateMarksForUuid($uuid, $this->bindingStore, $this->rootPackage->getName())
             )
         );
     }
