@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\RepositoryManager\Discovery;
+namespace Puli\RepositoryManager\Discovery\Type;
 
 use OutOfBoundsException;
 use Puli\RepositoryManager\Api\Discovery\BindingTypeDescriptor;

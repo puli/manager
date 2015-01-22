@@ -70,6 +70,7 @@ Changelog
  * changed `DiscoveryManager::addBinding()` to accept a `BindingDescriptor` instance
  * added `BindingDescriptor::listPathMappings()`
  * added `BindingDescriptor::listRepositoryPaths()`
+ * added `BindingDescriptor::getTypeDescriptor()`
 
 * 1.0.0-beta (2015-01-12)
 

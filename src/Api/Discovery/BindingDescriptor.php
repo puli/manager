@@ -73,7 +73,7 @@ class BindingDescriptor
     /**
      * @var BindingTypeDescriptor
      */
-    private $type;
+    private $typeDescriptor;
 
     /**
      * @var ConstraintViolation[]
@@ -147,36 +147,36 @@ class BindingDescriptor
      * Loads the binding descriptor.
      *
      * @param Package               $containingPackage The package that contains
-     *                                                 the binding.
-     * @param BindingTypeDescriptor $type              The binding type.
+     *                                                 the descriptor.
+     * @param BindingTypeDescriptor $typeDescriptor    The type descriptor.
      *
      * @throws AlreadyLoadedException If the descriptor is already loaded.
      */
-    public function load(Package $containingPackage, BindingTypeDescriptor $type = null)
+    public function load(Package $containingPackage, BindingTypeDescriptor $typeDescriptor = null)
     {
         if (null !== $this->state) {
             throw new AlreadyLoadedException('The binding descriptor is already loaded.');
         }
 
-        if ($type && $this->typeName !== $type->getName()) {
+        if ($typeDescriptor && $this->typeName !== $typeDescriptor->getName()) {
             throw new InvalidArgumentException(sprintf(
                 'The passed type "%s" does not match the stored type name "%s".',
-                $type->getName(),
+                $typeDescriptor->getName(),
                 $this->typeName
             ));
         }
 
         $this->violations = array();
 
-        if ($type) {
+        if ($typeDescriptor) {
             $validator = new SimpleParameterValidator();
-            $bindingType = $type->toBindingType();
+            $bindingType = $typeDescriptor->toBindingType();
 
             $this->violations = $validator->validate($this->parameterValues, $bindingType);
         }
 
         $this->containingPackage = $containingPackage;
-        $this->type = $type;
+        $this->typeDescriptor = $typeDescriptor;
         $this->duplicate = false;
 
         $this->refreshState();
@@ -196,7 +196,7 @@ class BindingDescriptor
         }
 
         $this->containingPackage = null;
-        $this->type = null;
+        $this->typeDescriptor = null;
         $this->duplicate = false;
         $this->violations = null;
         $this->state = null;
@@ -281,8 +281,8 @@ class BindingDescriptor
     {
         $values = $this->parameterValues;
 
-        if ($this->type && $includeDefault) {
-            $values = array_replace($this->type->getParameterValues(), $values);
+        if ($this->typeDescriptor && $includeDefault) {
+            $values = array_replace($this->typeDescriptor->getParameterValues(), $values);
         }
 
         return $values;
@@ -305,9 +305,9 @@ class BindingDescriptor
             return $this->parameterValues[$parameterName];
         }
 
-        if ($this->type) {
+        if ($this->typeDescriptor) {
             if ($includeDefault) {
-                return $this->type->getParameterValue($parameterName);
+                return $this->typeDescriptor->getParameterValue($parameterName);
             }
 
             return null;
@@ -330,8 +330,8 @@ class BindingDescriptor
             return true;
         }
 
-        if ($this->type && $includeDefault) {
-            return $this->type->hasParameterValues();
+        if ($this->typeDescriptor && $includeDefault) {
+            return $this->typeDescriptor->hasParameterValues();
         }
 
         return false;
@@ -352,8 +352,8 @@ class BindingDescriptor
             return true;
         }
 
-        if ($this->type && $includeDefault) {
-            return $this->type->hasParameterValue($parameterName);
+        if ($this->typeDescriptor && $includeDefault) {
+            return $this->typeDescriptor->hasParameterValue($parameterName);
         }
 
         return false;
@@ -395,6 +395,28 @@ class BindingDescriptor
         }
 
         return $this->containingPackage;
+    }
+
+    /**
+     * Returns the type descriptor.
+     *
+     * The method {@link load()} needs to be called before calling this method,
+     * otherwise an exception is thrown.
+     *
+     * @return BindingTypeDescriptor|null The type descriptor or null, if no
+     *                                    type descriptor exists for the
+     *                                    binding's type name.
+     *
+     * @throws NotLoadedException If the binding descriptor is not loaded.
+     */
+    public function getTypeDescriptor()
+    {
+        // Check containing package, as the type descriptor may be null
+        if (null === $this->containingPackage) {
+            throw new NotLoadedException('The binding descriptor is not loaded.');
+        }
+
+        return $this->typeDescriptor;
     }
 
     /**
@@ -581,9 +603,9 @@ class BindingDescriptor
 
     private function refreshState()
     {
-        if (null === $this->type || !$this->type->isLoaded()) {
+        if (null === $this->typeDescriptor || !$this->typeDescriptor->isLoaded()) {
             $this->state = BindingState::HELD_BACK;
-        } elseif ($this->type->isDuplicate()) {
+        } elseif ($this->typeDescriptor->isDuplicate()) {
             $this->state = BindingState::IGNORED;
         } elseif (count($this->violations) > 0) {
             $this->state = BindingState::INVALID;

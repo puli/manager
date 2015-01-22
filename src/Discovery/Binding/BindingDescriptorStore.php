@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\RepositoryManager\Discovery;
+namespace Puli\RepositoryManager\Discovery\Binding;
 
 use OutOfBoundsException;
 use Puli\RepositoryManager\Api\Discovery\BindingDescriptor;
@@ -22,7 +22,7 @@ use Rhumsaa\Uuid\Uuid;
  *
  * Each descriptor has a composite key:
  *
- *  * The UUID of the binding.
+ *  * The UUID of the binding descriptor.
  *  * The package that defines the binding.
  *
  * The store implements transparent merging of bindings defined within different
@@ -55,7 +55,7 @@ class BindingDescriptorStore
      * @param Package           $package           The package defining the
      *                                             binding descriptor.
      */
-    public function add(BindingDescriptor $bindingDescriptor, Package $package)
+    public function  add(BindingDescriptor $bindingDescriptor, Package $package)
     {
         $this->store->set($bindingDescriptor->getUuid()->toString(), $package->getName(), $bindingDescriptor);
     }
@@ -65,8 +65,8 @@ class BindingDescriptorStore
      *
      * This method ignores non-existing binding descriptors.
      *
-     * @param Uuid    $uuid    The UUID of the binding.
-     * @param Package $package The package containing the binding.
+     * @param Uuid    $uuid    The UUID of the binding descriptor.
+     * @param Package $package The package containing the descriptor.
      */
     public function remove(Uuid $uuid, Package $package)
     {
@@ -79,8 +79,8 @@ class BindingDescriptorStore
      * If no package is passed, the first descriptor set for the UUID is
      * returned.
      *
-     * @param Uuid    $uuid    The UUID of the binding.
-     * @param Package $package The package containing the binding.
+     * @param Uuid    $uuid    The UUID of the binding descriptor.
+     * @param Package $package The package containing the descriptor.
      *
      * @return BindingDescriptor The binding descriptor.
      *
@@ -97,9 +97,34 @@ class BindingDescriptorStore
     }
 
     /**
+     * Returns the enabled binding descriptor for a given UUID.
+     *
+     * If no descriptor is set or if none is enabled, `null` is returned.
+     *
+     * @param Uuid $uuid The UUID of the binding descriptor.
+     *
+     * @return BindingDescriptor|null The binding descriptor or none if no
+     *                                (enabled) descriptor could be found.
+     */
+    public function getEnabled(Uuid $uuid)
+    {
+        if (!$this->existsAny($uuid)) {
+            return null;
+        }
+
+        foreach ($this->getAll($uuid) as $bindingDescriptor) {
+            if ($bindingDescriptor->isEnabled()) {
+                return $bindingDescriptor;
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * Returns all binding descriptors set for the given UUID.
      *
-     * @param Uuid $uuid The UUID of the binding.
+     * @param Uuid $uuid The UUID of the binding descriptor.
      *
      * @return BindingDescriptor[] The binding descriptors.
      *
@@ -114,8 +139,8 @@ class BindingDescriptorStore
     /**
      * Returns whether a binding descriptor was set for the given UUID/package.
      *
-     * @param Uuid    $uuid    The UUID of the binding.
-     * @param Package $package The package containing the binding.
+     * @param Uuid    $uuid    The UUID of the binding descriptor.
+     * @param Package $package The package containing the descriptor.
      *
      * @return bool Returns `true` if a binding descriptor was set for the given
      *              UUID/package.
@@ -129,7 +154,7 @@ class BindingDescriptorStore
      * Returns whether a binding descriptor was set for the given UUID in any
      * package.
      *
-     * @param Uuid $uuid The UUID of the binding.
+     * @param Uuid $uuid The UUID of the binding descriptor.
      *
      * @return bool Returns `true` if a binding descriptor was set for the given
      *              UUID.
@@ -143,7 +168,7 @@ class BindingDescriptorStore
      * Returns whether an enabled binding descriptor was set for the given UUID
      * in any package.
      *
-     * @param Uuid $uuid The UUID of the binding.
+     * @param Uuid $uuid The UUID of the binding descriptor.
      *
      * @return bool Returns `true` if an enabled binding descriptor was set for
      *              the given UUID.
@@ -165,7 +190,7 @@ class BindingDescriptorStore
     /**
      * Returns the names of the packages defining bindings with the given UUID.
      *
-     * @param Uuid $uuid The UUID of the binding.
+     * @param Uuid $uuid The UUID of the binding descriptor.
      *
      * @return string[] The package names.
      *
