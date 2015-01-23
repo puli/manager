@@ -35,24 +35,19 @@ final class BindingState
     const UNDECIDED = 3;
 
     /**
-     * State: The binding is held back. The referenced type is not loaded.
+     * State: The binding is held back if the referenced type is not enabled.
      */
     const HELD_BACK = 4;
 
     /**
-     * State: The binding is ignored. This happens if its type is duplicated.
-     */
-    const IGNORED = 5;
-
-    /**
      * State: The binding does not match the constraints of the binding type.
      */
-    const INVALID = 6;
+    const INVALID = 5;
 
     /**
      * State: The binding is a duplicate of another enabled binding.
      */
-    const DUPLICATE = 7;
+    const DUPLICATE = 6;
 
     /**
      * Returns all binding states.
@@ -66,7 +61,6 @@ final class BindingState
             self::DISABLED,
             self::UNDECIDED,
             self::HELD_BACK,
-            self::IGNORED,
             self::INVALID,
         );
     }

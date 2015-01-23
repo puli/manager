@@ -75,6 +75,10 @@ Changelog
  * added `PackageFile::removeOverriddenPackage()`
  * added `PackageFile::hasOverriddenPackage()`
  * added `RepositoryPathConflict::addMappings()`
+ * removed `BindingDescriptor::isIgnored()` and `BindingState::IGNORED`. Bindings
+   with duplicate types have the state `BindingState::HELD_BACK` now
+ * removed `CannotDisableBindingException::duplicateType()`
+ * removed `CannotEnableBindingException::duplicateType()`
 
 * 1.0.0-beta (2015-01-12)
 

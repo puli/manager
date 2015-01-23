@@ -544,27 +544,6 @@ class BindingDescriptor
     }
 
     /**
-     * Returns whether the binding is ignored.
-     *
-     * The method {@link load()} needs to be called before calling this method,
-     * otherwise an exception is thrown.
-     *
-     * @return bool Returns `true` if the state is {@link BindingState::IGNORED}.
-     *
-     * @throws NotLoadedException If the descriptor is not loaded.
-     *
-     * @see BindingState::IGNORED
-     */
-    public function isIgnored()
-    {
-        if (null === $this->state) {
-            throw new NotLoadedException('The binding descriptor is not loaded.');
-        }
-
-        return BindingState::IGNORED === $this->state;
-    }
-
-    /**
      * Returns whether the binding is invalid.
      *
      * The method {@link load()} needs to be called before calling this method,
@@ -603,10 +582,9 @@ class BindingDescriptor
 
     private function refreshState()
     {
-        if (null === $this->typeDescriptor || !$this->typeDescriptor->isLoaded()) {
+        if (null === $this->typeDescriptor || !$this->typeDescriptor->isLoaded()
+            || !$this->typeDescriptor->isEnabled()) {
             $this->state = BindingState::HELD_BACK;
-        } elseif ($this->typeDescriptor->isDuplicate()) {
-            $this->state = BindingState::IGNORED;
         } elseif (count($this->violations) > 0) {
             $this->state = BindingState::INVALID;
         } elseif ($this->containingPackage instanceof RootPackage) {

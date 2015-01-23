@@ -527,7 +527,7 @@ class DiscoveryManagerImpl implements DiscoveryManager
 
     private function assertBindingValid(BindingDescriptor $bindingDescriptor)
     {
-        if ($bindingDescriptor->isHeldBack() || $bindingDescriptor->isIgnored()) {
+        if ($bindingDescriptor->isHeldBack()) {
             return;
         }
 
@@ -645,10 +645,6 @@ class DiscoveryManagerImpl implements DiscoveryManager
                 throw CannotEnableBindingException::typeNotLoaded($uuid, $package->getName());
             }
 
-            if ($bindingDescriptor->isIgnored()) {
-                throw CannotEnableBindingException::duplicateType($uuid, $package->getName());
-            }
-
             $installInfos[] = $installInfo;
         }
 
@@ -680,10 +676,6 @@ class DiscoveryManagerImpl implements DiscoveryManager
 
             if ($bindingDescriptor->isHeldBack()) {
                 throw CannotDisableBindingException::typeNotLoaded($uuid, $package->getName());
-            }
-
-            if ($bindingDescriptor->isIgnored()) {
-                throw CannotDisableBindingException::duplicateType($uuid, $package->getName());
             }
 
             $installInfos[] = $installInfo;
