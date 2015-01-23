@@ -20,7 +20,6 @@ use Puli\RepositoryManager\Config\ConfigFileStorage;
 use Puli\RepositoryManager\Config\DefaultConfig;
 use Puli\RepositoryManager\Environment\ProjectEnvironmentImpl;
 use Puli\RepositoryManager\Package\PackageFileStorage;
-use Puli\RepositoryManager\Tests\Api\Package\Fixtures\TestPlugin;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Filesystem\Filesystem;
 
@@ -28,7 +27,7 @@ use Symfony\Component\Filesystem\Filesystem;
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class ProjectEnvironmentTest extends PHPUnit_Framework_TestCase
+class ProjectEnvironmentImplTest extends PHPUnit_Framework_TestCase
 {
     /**
      * @var string
@@ -212,33 +211,6 @@ class ProjectEnvironmentTest extends PHPUnit_Framework_TestCase
 
         $this->assertSame($this->rootDir, $environment->getRootDirectory());
         $this->assertSame($this->homeDir, $environment->getHomeDirectory());
-    }
-
-    public function testActivatePlugins()
-    {
-        $configFile = new ConfigFile();
-        $rootPackageFile = new RootPackageFile();
-        $rootPackageFile->addPluginClass('Puli\RepositoryManager\Tests\Api\Package\Fixtures\TestPlugin');
-
-        $this->configFileStorage->expects($this->once())
-            ->method('loadConfigFile')
-            ->with($this->homeDir.'/config.json')
-            ->will($this->returnValue($configFile));
-
-        $this->packageFileStorage->expects($this->once())
-            ->method('loadRootPackageFile')
-            ->with($this->rootDir.'/puli.json')
-            ->will($this->returnValue($rootPackageFile));
-
-        $environment = new ProjectEnvironmentImpl(
-            $this->homeDir,
-            $this->rootDir,
-            $this->configFileStorage,
-            $this->packageFileStorage,
-            $this->dispatcher
-        );
-
-        $this->assertSame($environment, TestPlugin::getEnvironment());
     }
 
     /**

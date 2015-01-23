@@ -11,8 +11,8 @@
 
 namespace Puli\RepositoryManager\Tests\Api\Package\Fixtures;
 
-use Puli\RepositoryManager\Api\Environment\ProjectEnvironment;
 use Puli\RepositoryManager\Api\PuliPlugin;
+use Puli\RepositoryManager\Puli;
 
 /**
  * @since  1.0
@@ -20,7 +20,7 @@ use Puli\RepositoryManager\Api\PuliPlugin;
  */
 class TestPluginWithoutConstructor implements PuliPlugin
 {
-    public function activate(ProjectEnvironment $environment)
+    public function activate(Puli $puli)
     {
     }
 }

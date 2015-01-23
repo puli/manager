@@ -8,5 +8,8 @@
         "vendor/package2": {
             "install-path": "package2"
         }
-    }
+    },
+    "plugins": [
+        "Puli\\RepositoryManager\\Tests\\Api\\Package\\Fixtures\\TestPlugin"
+    ]
 }

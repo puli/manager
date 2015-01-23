@@ -11,8 +11,8 @@
 
 namespace Puli\RepositoryManager\Tests\Api\Package\Fixtures;
 
-use Puli\RepositoryManager\Api\Environment\ProjectEnvironment;
 use Puli\RepositoryManager\Api\PuliPlugin;
+use Puli\RepositoryManager\Puli;
 
 /**
  * @since  1.0
@@ -21,20 +21,25 @@ use Puli\RepositoryManager\Api\PuliPlugin;
 class TestPlugin implements PuliPlugin
 {
     /**
-     * @var ProjectEnvironment
+     * @var Puli
      */
-    private static $environment;
+    private static $puli;
 
-    /**
-     * @return ProjectEnvironment
-     */
-    public static function getEnvironment()
+    public static function reset()
     {
-        return self::$environment;
+        self::$puli = null;
     }
 
-    public function activate(ProjectEnvironment $environment)
+    /**
+     * @return Puli
+     */
+    public static function getPuli()
     {
-        self::$environment = $environment;
+        return self::$puli;
+    }
+
+    public function activate(Puli $puli)
+    {
+        self::$puli = $puli;
     }
 }

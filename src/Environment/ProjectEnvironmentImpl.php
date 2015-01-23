@@ -118,12 +118,6 @@ class ProjectEnvironmentImpl extends GlobalEnvironmentImpl implements ProjectEnv
 
         // Override the configuration with the one from the root package
         $this->setConfig(new EnvConfig($this->rootPackageFile->getConfig()));
-
-        foreach ($this->rootPackageFile->getPluginClasses() as $pluginClass) {
-            /** @var \Puli\RepositoryManager\Api\PuliPlugin $plugin */
-            $plugin = new $pluginClass();
-            $plugin->activate($this, $this->getEventDispatcher());
-        }
     }
 
     /**

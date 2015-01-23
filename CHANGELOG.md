@@ -83,6 +83,7 @@ Changelog
    to `null`
  * replaced `ManagerFactory` by the `Puli` class
  * renamed `ManagerPlugin` to `PuliPlugin`
+ * changed `PuliPlugin::activate()` to receive the `Puli` instance
  
 
 * 1.0.0-beta (2015-01-12)

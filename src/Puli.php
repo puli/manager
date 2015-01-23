@@ -330,9 +330,12 @@ class Puli
 
     private function resetEnvironment()
     {
-        $this->environment = $this->rootDir
-            ? $this->createProjectEnvironment($this->rootDir)
-            : $this->createGlobalEnvironment();
+        if ($this->rootDir) {
+            $this->environment = $this->createProjectEnvironment($this->rootDir);
+            $this->activatePlugins();
+        } else {
+            $this->environment = $this->createGlobalEnvironment();
+        }
 
         $this->configFileManager = null;
         $this->rootPackageFileManager = null;
@@ -340,6 +343,15 @@ class Puli
         $this->repositoryManager = null;
         $this->discoveryManager = null;
         $this->initialized = false;
+    }
+
+    private function activatePlugins()
+    {
+        foreach ($this->environment->getRootPackageFile()->getPluginClasses() as $pluginClass) {
+            /** @var \Puli\RepositoryManager\Api\PuliPlugin $plugin */
+            $plugin = new $pluginClass();
+            $plugin->activate($this);
+        }
     }
 
     private function initManagers()

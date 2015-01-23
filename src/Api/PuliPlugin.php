@@ -11,7 +11,7 @@
 
 namespace Puli\RepositoryManager\Api;
 
-use Puli\RepositoryManager\Api\Environment\ProjectEnvironment;
+use Puli\RepositoryManager\Puli;
 
 /**
  * A plugin for the repository manager.
@@ -24,7 +24,7 @@ interface PuliPlugin
     /**
      * Activates the plugin.
      *
-     * @param ProjectEnvironment $environment The project environment.
+     * @param Puli $puli The {@link Puli} instance.
      */
-    public function activate(ProjectEnvironment $environment);
+    public function activate(Puli $puli);
 }

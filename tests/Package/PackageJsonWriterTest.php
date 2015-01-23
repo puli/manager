@@ -22,6 +22,7 @@ use Puli\RepositoryManager\Api\Package\RootPackageFile;
 use Puli\RepositoryManager\Api\PuliPlugin;
 use Puli\RepositoryManager\Api\Repository\ResourceMapping;
 use Puli\RepositoryManager\Package\PackageJsonWriter;
+use Puli\RepositoryManager\Puli;
 use Puli\RepositoryManager\Tests\JsonWriterTestCase;
 use Rhumsaa\Uuid\Uuid;
 use Symfony\Component\Filesystem\Filesystem;
@@ -448,15 +449,15 @@ class PackageJsonWriterTest extends JsonWriterTestCase
 
 class PluginA implements PuliPlugin
 {
-    public function activate(ProjectEnvironment $environment) {}
+    public function activate(Puli $puli) {}
 }
 
 class PluginB implements PuliPlugin
 {
-    public function activate(ProjectEnvironment $environment) {}
+    public function activate(Puli $puli) {}
 }
 
 class PluginC implements PuliPlugin
 {
-    public function activate(ProjectEnvironment $environment) {}
+    public function activate(Puli $puli) {}
 }

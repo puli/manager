@@ -12,9 +12,12 @@
 namespace Puli\RepositoryManager\Tests;
 
 use PHPUnit_Framework_TestCase;
+use Puli\RepositoryManager\Api\Config\ConfigFile;
 use Puli\RepositoryManager\Api\Package\PackageCollection;
 use Puli\RepositoryManager\Api\Package\PackageState;
+use Puli\RepositoryManager\Api\Package\RootPackageFile;
 use Puli\RepositoryManager\Puli;
+use Puli\RepositoryManager\Tests\Api\Package\Fixtures\TestPlugin;
 use Symfony\Component\Filesystem\Filesystem;
 
 /**
@@ -41,6 +44,8 @@ class PuliTest extends PHPUnit_Framework_TestCase
         $filesystem = new Filesystem();
         $filesystem->mirror(__DIR__.'/Fixtures/root', $this->tempDir);
         $filesystem->mirror(__DIR__.'/Fixtures/home', $this->tempHome);
+
+        TestPlugin::reset();
 
         putenv('PULI_HOME='.$this->tempHome);
 
@@ -293,5 +298,19 @@ class PuliTest extends PHPUnit_Framework_TestCase
         putenv('PULI_HOME='.$this->tempHome.'/.gitkeep');
 
         new Puli();
+    }
+
+    public function testActivatePluginsInProjectEnvironment()
+    {
+        $puli = new Puli($this->tempDir);
+
+        $this->assertSame($puli, TestPlugin::getPuli());
+    }
+
+    public function testDoNotActivatePluginsInGlobalEnvironment()
+    {
+        new Puli();
+
+        $this->assertNull(TestPlugin::getPuli());
     }
 }
