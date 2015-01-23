@@ -14,14 +14,14 @@ namespace Puli\RepositoryManager\Tests;
 use PHPUnit_Framework_TestCase;
 use Puli\RepositoryManager\Api\Package\PackageCollection;
 use Puli\RepositoryManager\Api\Package\PackageState;
-use Puli\RepositoryManager\ManagerFactory;
+use Puli\RepositoryManager\Puli;
 use Symfony\Component\Filesystem\Filesystem;
 
 /**
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class ManagerFactoryTest extends PHPUnit_Framework_TestCase
+class PuliTest extends PHPUnit_Framework_TestCase
 {
     /**
      * @var string
@@ -34,9 +34,9 @@ class ManagerFactoryTest extends PHPUnit_Framework_TestCase
     private $tempHome;
 
     /**
-     * @var ManagerFactory
+     * @var Puli
      */
-    private $factory;
+    private $puli;
 
     protected function setUp()
     {
@@ -52,7 +52,7 @@ class ManagerFactoryTest extends PHPUnit_Framework_TestCase
         // Make sure "HOME" is not set
         putenv('HOME');
 
-        $this->factory = new ManagerFactory();
+        $this->puli = new Puli();
     }
 
     protected function tearDown()
@@ -65,9 +65,9 @@ class ManagerFactoryTest extends PHPUnit_Framework_TestCase
         putenv('PULI_HOME');
     }
 
-    public function testCreateGlobalEnvironment()
+    public function testGetGlobalEnvironment()
     {
-        $environment = $this->factory->createGlobalEnvironment();
+        $environment = $this->puli->getEnvironment();
 
         $this->assertInstanceOf('Puli\RepositoryManager\Api\Environment\GlobalEnvironment', $environment);
         $this->assertInstanceOf('Puli\RepositoryManager\Api\Config\Config', $environment->getConfig());
@@ -77,22 +77,22 @@ class ManagerFactoryTest extends PHPUnit_Framework_TestCase
         $this->assertSame($this->tempHome.'/config.json', $environment->getConfigFile()->getPath());
     }
 
-    public function testCreateGlobalEnvironmentProtectsHome()
+    public function testGetGlobalEnvironmentProtectsHome()
     {
         $this->assertFileNotExists($this->tempHome.'/.htaccess');
 
-        $this->factory->createGlobalEnvironment();
+        $this->puli->getEnvironment();
 
         $this->assertFileExists($this->tempHome.'/.htaccess');
         $this->assertSame('Deny from all', file_get_contents($this->tempHome.'/.htaccess'));
     }
 
-    public function testCreateGlobalEnvironmentWithoutHome()
+    public function testGetGlobalEnvironmentWithoutHome()
     {
         // Unset env variable
         putenv('PULI_HOME');
 
-        $environment = $this->factory->createGlobalEnvironment();
+        $environment = $this->puli->getEnvironment();
 
         $this->assertInstanceOf('Puli\RepositoryManager\Api\Environment\GlobalEnvironment', $environment);
         $this->assertInstanceOf('Puli\RepositoryManager\Api\Config\Config', $environment->getConfig());
@@ -101,9 +101,11 @@ class ManagerFactoryTest extends PHPUnit_Framework_TestCase
         $this->assertNull($environment->getHomeDirectory());
     }
 
-    public function testCreateProjectEnvironment()
+    public function testGetProjectEnvironment()
     {
-        $environment = $this->factory->createProjectEnvironment($this->tempDir);
+        $this->puli->setRootDir($this->tempDir);
+
+        $environment = $this->puli->getEnvironment();
 
         $this->assertInstanceOf('Puli\RepositoryManager\Api\Environment\ProjectEnvironment', $environment);
         $this->assertInstanceOf('Puli\RepositoryManager\Api\Config\Config', $environment->getConfig());
@@ -116,22 +118,25 @@ class ManagerFactoryTest extends PHPUnit_Framework_TestCase
         $this->assertSame($this->tempDir.'/puli.json', $environment->getRootPackageFile()->getPath());
     }
 
-    public function testCreateProjectEnvironmentProtectsHome()
+    public function testGetProjectEnvironmentProtectsHome()
     {
         $this->assertFileNotExists($this->tempHome.'/.htaccess');
 
-        $this->factory->createProjectEnvironment($this->tempDir);
+        $this->puli->setRootDir($this->tempDir);
+        $this->puli->getEnvironment();
 
         $this->assertFileExists($this->tempHome.'/.htaccess');
         $this->assertSame('Deny from all', file_get_contents($this->tempHome.'/.htaccess'));
     }
 
-    public function testCreateProjectEnvironmentWithoutHome()
+    public function testGetProjectEnvironmentWithoutHome()
     {
         // Unset env variable
         putenv('PULI_HOME');
 
-        $environment = $this->factory->createProjectEnvironment($this->tempDir);
+        $this->puli->setRootDir($this->tempDir);
+
+        $environment = $this->puli->getEnvironment();
 
         $this->assertInstanceOf('Puli\RepositoryManager\Api\Environment\ProjectEnvironment', $environment);
         $this->assertInstanceOf('Puli\RepositoryManager\Api\Config\Config', $environment->getConfig());
@@ -143,40 +148,45 @@ class ManagerFactoryTest extends PHPUnit_Framework_TestCase
         $this->assertSame($this->tempDir.'/puli.json', $environment->getRootPackageFile()->getPath());
     }
 
-    public function testCreateConfigFileManager()
+    public function testGetConfigFileManagerInProjectEnvironment()
     {
-        $environment = $this->factory->createGlobalEnvironment();
-        $manager = $this->factory->createConfigFileManager($environment);
+        $manager = $this->puli->getConfigFileManager();
 
         $this->assertInstanceOf('Puli\RepositoryManager\Api\Config\ConfigFileManager', $manager);
-        $this->assertSame($environment, $manager->getEnvironment());
+        $this->assertSame($this->puli->getEnvironment($this->tempDir), $manager->getEnvironment());
     }
 
-    public function testCreateConfigFileManagerWithProjectEnvironment()
+    public function testGetConfigFileManagerInGlobalEnvironment()
     {
-        $environment = $this->factory->createProjectEnvironment($this->tempDir);
-        $manager = $this->factory->createConfigFileManager($environment);
+        $manager = $this->puli->getConfigFileManager();
 
         $this->assertInstanceOf('Puli\RepositoryManager\Api\Config\ConfigFileManager', $manager);
-        $this->assertSame($environment, $manager->getEnvironment());
+        $this->assertSame($this->puli->getEnvironment(), $manager->getEnvironment());
     }
 
-    public function testCreateRootPackageFileManager()
+    public function testGetRootPackageFileManagerInProjectEnvironment()
     {
-        $environment = $this->factory->createProjectEnvironment($this->tempDir);
-        $manager = $this->factory->createRootPackageFileManager($environment);
+        $this->puli->setRootDir($this->tempDir);
+
+        $manager = $this->puli->getRootPackageFileManager();
 
         $this->assertInstanceOf('Puli\RepositoryManager\Api\Package\RootPackageFileManager', $manager);
-        $this->assertSame($environment, $manager->getEnvironment());
+        $this->assertSame($this->puli->getEnvironment(), $manager->getEnvironment());
     }
 
-    public function testCreatePackageManager()
+    public function testGetRootPackageFileManagerInGlobalEnvironment()
     {
-        $environment = $this->factory->createProjectEnvironment($this->tempDir);
-        $manager = $this->factory->createPackageManager($environment);
+        $this->assertNull($this->puli->getRootPackageFileManager());
+    }
+
+    public function testGetPackageManagerInProjectEnvironment()
+    {
+        $this->puli->setRootDir($this->tempDir);
+
+        $manager = $this->puli->getPackageManager();
 
         $this->assertInstanceOf('Puli\RepositoryManager\Api\Package\PackageManager', $manager);
-        $this->assertSame($environment, $manager->getEnvironment());
+        $this->assertSame($this->puli->getEnvironment(), $manager->getEnvironment());
 
         $packages = $manager->getPackages();
 
@@ -186,53 +196,38 @@ class ManagerFactoryTest extends PHPUnit_Framework_TestCase
         $this->assertTrue($packages->contains('vendor/package2'));
     }
 
-    public function testCreateRepositoryManager()
+    public function testGetPackageManagerInGlobalEnvironment()
     {
-        $environment = $this->factory->createProjectEnvironment($this->tempDir);
-        $manager = $this->factory->createRepositoryManager($environment);
+        $this->assertNull($this->puli->getPackageManager());
+    }
+
+    public function testGetRepositoryManagerInProjectEnvironment()
+    {
+        $this->puli->setRootDir($this->tempDir);
+
+        $manager = $this->puli->getRepositoryManager();
 
         $this->assertInstanceOf('Puli\RepositoryManager\Api\Repository\RepositoryManager', $manager);
+        $this->assertSame($this->puli->getEnvironment(), $manager->getEnvironment());
     }
 
-    public function testCreateRepositoryManagerWithPackageManager()
+    public function testGetRepositoryManagerInGlobalEnvironment()
     {
-        $packageManager = $this->getMockBuilder('Puli\RepositoryManager\Api\Package\PackageManager')
-            ->disableOriginalConstructor()
-            ->getMock();
-
-        $packageManager->expects($this->once())
-            ->method('getPackages')
-            ->with(PackageState::ENABLED)
-            ->willReturn(new PackageCollection());
-
-        $environment = $this->factory->createProjectEnvironment($this->tempDir);
-        $manager = $this->factory->createRepositoryManager($environment, $packageManager);
-
-        $this->assertInstanceOf('Puli\RepositoryManager\Api\Repository\RepositoryManager', $manager);
+        $this->assertNull($this->puli->getRepositoryManager());
     }
 
-    public function testCreateDiscoveryManager()
+    public function testGetDiscoveryManagerInProjectEnvironment()
     {
-        $environment = $this->factory->createProjectEnvironment($this->tempDir);
-        $manager = $this->factory->createDiscoveryManager($environment);
+        $this->puli->setRootDir($this->tempDir);
+
+        $manager = $this->puli->getDiscoveryManager();
 
         $this->assertInstanceOf('Puli\RepositoryManager\Api\Discovery\DiscoveryManager', $manager);
+        $this->assertSame($this->puli->getEnvironment(), $manager->getEnvironment());
     }
 
-    public function testCreateDiscoveryManagerWithPackageManager()
+    public function testGetDiscoveryManagerInGlobalEnvironment()
     {
-        $packageManager = $this->getMockBuilder('Puli\RepositoryManager\Api\Package\PackageManager')
-            ->disableOriginalConstructor()
-            ->getMock();
-
-        $packageManager->expects($this->once())
-            ->method('getPackages')
-            ->with(PackageState::ENABLED)
-            ->willReturn(new PackageCollection());
-
-        $environment = $this->factory->createProjectEnvironment($this->tempDir);
-        $manager = $this->factory->createDiscoveryManager($environment, $packageManager);
-
-        $this->assertInstanceOf('Puli\RepositoryManager\Api\Discovery\DiscoveryManager', $manager);
+        $this->assertNull($this->puli->getDiscoveryManager());
     }
 }

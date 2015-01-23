@@ -18,7 +18,7 @@ use Puli\RepositoryManager\Api\Environment\ProjectEnvironment;
 use Puli\RepositoryManager\Api\FileNotFoundException;
 use Puli\RepositoryManager\Api\NoDirectoryException;
 use Puli\RepositoryManager\Api\Package\RootPackageFile;
-use Puli\RepositoryManager\Api\Plugin\ManagerPlugin;
+use Puli\RepositoryManager\Api\Plugin\PuliPlugin;
 use Puli\RepositoryManager\Assert\Assert;
 use Puli\RepositoryManager\Config\ConfigFileStorage;
 use Puli\RepositoryManager\Config\DefaultConfig;
@@ -120,7 +120,7 @@ class ProjectEnvironmentImpl extends GlobalEnvironmentImpl implements ProjectEnv
         $this->setConfig(new EnvConfig($this->rootPackageFile->getConfig()));
 
         foreach ($this->rootPackageFile->getPluginClasses() as $pluginClass) {
-            /** @var ManagerPlugin $plugin */
+            /** @var PuliPlugin $plugin */
             $plugin = new $pluginClass();
             $plugin->activate($this, $this->getEventDispatcher());
         }

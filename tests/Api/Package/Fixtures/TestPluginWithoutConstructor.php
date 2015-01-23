@@ -12,13 +12,13 @@
 namespace Puli\RepositoryManager\Tests\Api\Package\Fixtures;
 
 use Puli\RepositoryManager\Api\Environment\ProjectEnvironment;
-use Puli\RepositoryManager\Api\Plugin\ManagerPlugin;
+use Puli\RepositoryManager\Api\Plugin\PuliPlugin;
 
 /**
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class TestPluginWithoutConstructor implements ManagerPlugin
+class TestPluginWithoutConstructor implements PuliPlugin
 {
     public function activate(ProjectEnvironment $environment)
     {

@@ -19,7 +19,7 @@ use Puli\RepositoryManager\Api\Package\InstallInfo;
 use Puli\RepositoryManager\Api\Package\Package;
 use Puli\RepositoryManager\Api\Package\PackageFile;
 use Puli\RepositoryManager\Api\Package\RootPackageFile;
-use Puli\RepositoryManager\Api\Plugin\ManagerPlugin;
+use Puli\RepositoryManager\Api\Plugin\PuliPlugin;
 use Puli\RepositoryManager\Api\Repository\ResourceMapping;
 use Puli\RepositoryManager\Package\PackageJsonWriter;
 use Puli\RepositoryManager\Tests\JsonWriterTestCase;
@@ -446,17 +446,17 @@ class PackageJsonWriterTest extends JsonWriterTestCase
     }
 }
 
-class PluginA implements ManagerPlugin
+class PluginA implements PuliPlugin
 {
     public function activate(ProjectEnvironment $environment) {}
 }
 
-class PluginB implements ManagerPlugin
+class PluginB implements PuliPlugin
 {
     public function activate(ProjectEnvironment $environment) {}
 }
 
-class PluginC implements ManagerPlugin
+class PluginC implements PuliPlugin
 {
     public function activate(ProjectEnvironment $environment) {}
 }

@@ -11,12 +11,12 @@
 
 namespace Puli\RepositoryManager\Tests\Api\Package\Fixtures;
 
-use Puli\RepositoryManager\Api\Plugin\ManagerPlugin;
+use Puli\RepositoryManager\Api\Plugin\PuliPlugin;
 
 /**
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-interface TestPluginInterface extends ManagerPlugin
+interface TestPluginInterface extends PuliPlugin
 {
 }

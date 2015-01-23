@@ -81,6 +81,9 @@ Changelog
  * removed `CannotEnableBindingException::duplicateType()`
  * changed default value of `$state` in `PackageManager::getPackagesByInstaller()`
    to `null`
+ * replaced `ManagerFactory` by the `Puli` class
+ * renamed `ManagerPlugin` to `PuliPlugin`
+ 
 
 * 1.0.0-beta (2015-01-12)
 
