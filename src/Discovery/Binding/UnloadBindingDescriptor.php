@@ -30,9 +30,9 @@ class UnloadBindingDescriptor implements AtomicOperation
     private $bindingDescriptor;
 
     /**
-     * @var BindingDescriptorStore
+     * @var BindingDescriptorCollection
      */
-    private $bindingStore;
+    private $bindingDescriptors;
 
     /**
      * @var Package
@@ -49,10 +49,10 @@ class UnloadBindingDescriptor implements AtomicOperation
      */
     private $wasRemoved = false;
 
-    public function __construct(BindingDescriptor $bindingDescriptor, BindingDescriptorStore $bindingStore)
+    public function __construct(BindingDescriptor $bindingDescriptor, BindingDescriptorCollection $bindingDescriptors)
     {
         $this->bindingDescriptor = $bindingDescriptor;
-        $this->bindingStore = $bindingStore;
+        $this->bindingDescriptors = $bindingDescriptors;
     }
 
     /**
@@ -60,21 +60,24 @@ class UnloadBindingDescriptor implements AtomicOperation
      */
     public function execute()
     {
+        // sanity check
         if (!$this->bindingDescriptor->isLoaded()) {
             return;
         }
 
-        $uuid = $this->bindingDescriptor->getUuid();
         $this->containingPackage = $this->bindingDescriptor->getContainingPackage();
         $this->typeDescriptor = $this->bindingDescriptor->getTypeDescriptor();
+
+        $uuid = $this->bindingDescriptor->getUuid();
+        $packageName = $this->containingPackage->getName();
 
         // never fails with the check in the beginning
         $this->bindingDescriptor->unload();
 
-        if ($this->bindingStore->exists($uuid, $this->containingPackage)
-            && $this->bindingDescriptor === $this->bindingStore->get($uuid, $this->containingPackage)) {
+        if ($this->bindingDescriptors->contains($uuid, $packageName)
+            && $this->bindingDescriptor === $this->bindingDescriptors->get($uuid, $packageName)) {
             // never fails
-            $this->bindingStore->remove($uuid, $this->containingPackage);
+            $this->bindingDescriptors->remove($uuid, $packageName);
             $this->wasRemoved = true;
         }
     }
@@ -84,16 +87,18 @@ class UnloadBindingDescriptor implements AtomicOperation
      */
     public function rollback()
     {
-        if (!$this->bindingDescriptor->isLoaded() && $this->containingPackage && $this->typeDescriptor) {
-            // never fails with the check before, given that the type name of
-            // the description/type didn't changed, which is impossible since
-            // they're immutable
-            $this->bindingDescriptor->load($this->containingPackage, $this->typeDescriptor);
+        if ($this->bindingDescriptor->isLoaded() || !$this->containingPackage || !$this->typeDescriptor) {
+            return;
         }
+
+        // never fails with the check before, given that the type name of
+        // the description/type didn't changed, which is impossible since
+        // they're immutable
+        $this->bindingDescriptor->load($this->containingPackage, $this->typeDescriptor);
 
         if ($this->wasRemoved) {
             // never fails
-            $this->bindingStore->add($this->bindingDescriptor, $this->containingPackage);
+            $this->bindingDescriptors->add($this->bindingDescriptor);
         }
     }
 }

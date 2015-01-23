@@ -36,7 +36,7 @@ use Puli\RepositoryManager\Api\Package\RootPackage;
 use Puli\RepositoryManager\Api\Package\RootPackageFile;
 use Puli\RepositoryManager\Discovery\Binding\AddBindingDescriptorToPackageFile;
 use Puli\RepositoryManager\Discovery\Binding\Bind;
-use Puli\RepositoryManager\Discovery\Binding\BindingDescriptorStore;
+use Puli\RepositoryManager\Discovery\Binding\BindingDescriptorCollection;
 use Puli\RepositoryManager\Discovery\Binding\DisableBindingUuid;
 use Puli\RepositoryManager\Discovery\Binding\EnableBindingUuid;
 use Puli\RepositoryManager\Discovery\Binding\LoadBindingDescriptor;
@@ -47,7 +47,7 @@ use Puli\RepositoryManager\Discovery\Binding\SyncBindingUuid;
 use Puli\RepositoryManager\Discovery\Binding\UnloadBindingDescriptor;
 use Puli\RepositoryManager\Discovery\Binding\UpdateDuplicateMarksForUuid;
 use Puli\RepositoryManager\Discovery\Type\AddTypeDescriptorToPackageFile;
-use Puli\RepositoryManager\Discovery\Type\BindingTypeDescriptorStore;
+use Puli\RepositoryManager\Discovery\Type\BindingTypeDescriptorCollection;
 use Puli\RepositoryManager\Discovery\Type\DefineType;
 use Puli\RepositoryManager\Discovery\Type\LoadTypeDescriptor;
 use Puli\RepositoryManager\Discovery\Type\RemoveTypeDescriptorFromPackageFile;
@@ -101,14 +101,14 @@ class DiscoveryManagerImpl implements DiscoveryManager
     private $rootPackageFile;
 
     /**
-     * @var BindingTypeDescriptorStore
+     * @var BindingTypeDescriptorCollection
      */
-    private $typeStore;
+    private $typeDescriptors;
 
     /**
-     * @var BindingDescriptorStore
+     * @var BindingDescriptorCollection
      */
-    private $bindingStore;
+    private $bindingDescriptors;
 
     /**
      * Creates a tag manager.
@@ -150,7 +150,7 @@ class DiscoveryManagerImpl implements DiscoveryManager
         $this->assertPackagesLoaded();
         $this->emitWarningForDuplicateTypes();
 
-        if ($this->typeStore->existsAny($typeDescriptor->getName())) {
+        if ($this->typeDescriptors->contains($typeDescriptor->getName())) {
             throw DuplicateTypeException::forTypeName($typeDescriptor->getName());
         }
 
@@ -204,8 +204,8 @@ class DiscoveryManagerImpl implements DiscoveryManager
         try {
             $tx->execute($this->removeTypeDescriptorFromPackageFile($typeName));
 
-            if ($this->typeStore->exists($typeName, $this->rootPackage)) {
-                $typeDescriptor = $this->typeStore->get($typeName, $this->rootPackage);
+            if ($this->typeDescriptors->contains($typeName, $this->rootPackage->getName())) {
+                $typeDescriptor = $this->typeDescriptors->get($typeName, $this->rootPackage->getName());
                 $syncBindingOps = array();
 
                 foreach ($this->getUuidsByTypeName($typeName) as $uuid) {
@@ -270,11 +270,11 @@ class DiscoveryManagerImpl implements DiscoveryManager
 
         $typeName = $bindingDescriptor->getTypeName();
 
-        if (!$this->typeStore->existsAny($typeName)) {
+        if (!$this->typeDescriptors->contains($typeName)) {
             throw NoSuchTypeException::forTypeName($typeName);
         }
 
-        if (!$this->typeStore->existsEnabled($typeName)) {
+        if (!$this->typeDescriptors->getEnabled($typeName)) {
             throw TypeNotEnabledException::forTypeName($typeName);
         }
 
@@ -320,8 +320,8 @@ class DiscoveryManagerImpl implements DiscoveryManager
         $tx = new Transaction();
 
         try {
-            if ($this->bindingStore->exists($uuid, $this->rootPackage)) {
-                $bindingDescriptor = $this->bindingStore->get($uuid, $this->rootPackage);
+            if ($this->bindingDescriptors->contains($uuid, $this->rootPackage->getName())) {
+                $bindingDescriptor = $this->bindingDescriptors->get($uuid, $this->rootPackage->getName());
                 $syncOp = $this->syncBindingUuid($uuid);
                 $syncOp->takeSnapshot();
 
@@ -481,15 +481,15 @@ class DiscoveryManagerImpl implements DiscoveryManager
         $tx = new Transaction();
 
         try {
-            foreach ($this->typeStore->getTypeNames() as $typeName) {
-                if ($this->typeStore->existsEnabled($typeName)) {
-                    $tx->execute($this->defineType($this->typeStore->get($typeName)));
+            foreach ($this->typeDescriptors->getTypeNames() as $typeName) {
+                if ($typeDescriptor = $this->typeDescriptors->getEnabled($typeName)) {
+                    $tx->execute($this->defineType($typeDescriptor));
                 }
             }
 
-            foreach ($this->bindingStore->getUuids() as $uuid) {
-                if ($this->bindingStore->existsEnabled($uuid)) {
-                    $tx->execute($this->bind($this->bindingStore->getEnabled($uuid)));
+            foreach ($this->bindingDescriptors->getUuids() as $uuid) {
+                if ($bindingDescriptor = $this->bindingDescriptors->getEnabled($uuid)) {
+                    $tx->execute($this->bind($bindingDescriptor));
                 }
             }
 
@@ -520,7 +520,7 @@ class DiscoveryManagerImpl implements DiscoveryManager
 
     private function assertPackagesLoaded()
     {
-        if (!$this->typeStore) {
+        if (!$this->typeDescriptors) {
             $this->loadPackages();
         }
     }
@@ -548,8 +548,8 @@ class DiscoveryManagerImpl implements DiscoveryManager
 
     private function loadPackages()
     {
-        $this->typeStore = new BindingTypeDescriptorStore();
-        $this->bindingStore = new BindingDescriptorStore();
+        $this->typeDescriptors = new BindingTypeDescriptorCollection();
+        $this->bindingDescriptors = new BindingDescriptorCollection();
 
         // First load all the types
         foreach ($this->packages as $package) {
@@ -568,9 +568,9 @@ class DiscoveryManagerImpl implements DiscoveryManager
 
     private function emitWarningForDuplicateTypes()
     {
-        foreach ($this->typeStore->getTypeNames() as $typeName) {
-            if ($this->typeStore->get($typeName)->isDuplicate()) {
-                $packageNames = $this->typeStore->getDefiningPackageNames($typeName);
+        foreach ($this->typeDescriptors->getTypeNames() as $typeName) {
+            if ($this->typeDescriptors->get($typeName)->isDuplicate()) {
+                $packageNames = $this->typeDescriptors->getPackageNames($typeName);
                 $lastPackageName = array_pop($packageNames);
 
                 $this->logger->warning(sprintf(
@@ -586,8 +586,8 @@ class DiscoveryManagerImpl implements DiscoveryManager
 
     private function emitWarningForInvalidBindings()
     {
-        foreach ($this->bindingStore->getUuids() as $uuid) {
-            foreach ($this->bindingStore->getAll($uuid) as $packageName => $binding) {
+        foreach ($this->bindingDescriptors->getUuids() as $uuid) {
+            foreach ($this->bindingDescriptors->listByUuid($uuid) as $packageName => $binding) {
                 foreach ($binding->getViolations() as $violation) {
                     switch ($violation->getCode()) {
                         case ConstraintViolation::NO_SUCH_PARAMETER:
@@ -700,12 +700,12 @@ class DiscoveryManagerImpl implements DiscoveryManager
      */
     private function getBindingsByUuid(Uuid $uuid, $packageName = null)
     {
-        if (!$this->bindingStore->existsAny($uuid)) {
+        if (!$this->bindingDescriptors->contains($uuid)) {
             return array();
         }
 
         $bindingDescriptors = array();
-        $descriptorsByPackage = $this->bindingStore->getAll($uuid);
+        $descriptorsByPackage = $this->bindingDescriptors->listByUuid($uuid);
         $packageNames = $packageName ? (array) $packageName : $this->packages->getPackageNames();
 
         foreach ($packageNames as $packageName) {
@@ -721,8 +721,8 @@ class DiscoveryManagerImpl implements DiscoveryManager
     {
         $uuids = array();
 
-        foreach ($this->bindingStore->getUuids() as $uuid) {
-            if ($typeName === $this->bindingStore->get($uuid)->getTypeName()) {
+        foreach ($this->bindingDescriptors->getUuids() as $uuid) {
+            if ($typeName === $this->bindingDescriptors->get($uuid)->getTypeName()) {
                 $uuids[$uuid->toString()] = $uuid;
             }
         }
@@ -750,10 +750,10 @@ class DiscoveryManagerImpl implements DiscoveryManager
         $typeName = $typeDescriptor->getName();
 
         return new InterceptedOperation(
-            new LoadTypeDescriptor($typeDescriptor, $package, $this->typeStore),
+            new LoadTypeDescriptor($typeDescriptor, $package, $this->typeDescriptors),
             array(
-                new UpdateDuplicateMarksForTypeName($typeName, $this->typeStore),
-                new ReloadBindingDescriptorsByTypeName($typeName, $this->bindingStore, $this->typeStore)
+                new UpdateDuplicateMarksForTypeName($typeName, $this->typeDescriptors),
+                new ReloadBindingDescriptorsByTypeName($typeName, $this->bindingDescriptors, $this->typeDescriptors)
             )
         );
     }
@@ -763,10 +763,10 @@ class DiscoveryManagerImpl implements DiscoveryManager
         $typeName = $typeDescriptor->getName();
 
         return new InterceptedOperation(
-            new UnloadTypeDescriptor($typeDescriptor, $this->typeStore),
+            new UnloadTypeDescriptor($typeDescriptor, $this->typeDescriptors),
             array(
-                new UpdateDuplicateMarksForTypeName($typeName, $this->typeStore),
-                new ReloadBindingDescriptorsByTypeName($typeName, $this->bindingStore, $this->typeStore)
+                new UpdateDuplicateMarksForTypeName($typeName, $this->typeDescriptors),
+                new ReloadBindingDescriptorsByTypeName($typeName, $this->bindingDescriptors, $this->typeDescriptors)
             )
         );
     }
@@ -778,7 +778,7 @@ class DiscoveryManagerImpl implements DiscoveryManager
 
     private function syncTypeName($typeName)
     {
-        return new SyncTypeName($typeName, $this->discovery, $this->typeStore);
+        return new SyncTypeName($typeName, $this->discovery, $this->typeDescriptors);
     }
 
     private function addBindingDescriptorToPackageFile(BindingDescriptor $bindingDescriptor)
@@ -794,16 +794,16 @@ class DiscoveryManagerImpl implements DiscoveryManager
     private function loadBindingDescriptor(BindingDescriptor $bindingDescriptor, Package $package)
     {
         return new InterceptedOperation(
-            new LoadBindingDescriptor($bindingDescriptor, $package, $this->bindingStore, $this->typeStore),
-            new UpdateDuplicateMarksForUuid($bindingDescriptor->getUuid(), $this->bindingStore, $this->rootPackage->getName())
+            new LoadBindingDescriptor($bindingDescriptor, $package, $this->bindingDescriptors, $this->typeDescriptors),
+            new UpdateDuplicateMarksForUuid($bindingDescriptor->getUuid(), $this->bindingDescriptors, $this->rootPackage->getName())
         );
     }
 
     private function unloadBindingDescriptor(BindingDescriptor $bindingDescriptor)
     {
         return new InterceptedOperation(
-            new UnloadBindingDescriptor($bindingDescriptor, $this->bindingStore),
-            new UpdateDuplicateMarksForUuid($bindingDescriptor->getUuid(), $this->bindingStore, $this->rootPackage->getName())
+            new UnloadBindingDescriptor($bindingDescriptor, $this->bindingDescriptors),
+            new UpdateDuplicateMarksForUuid($bindingDescriptor->getUuid(), $this->bindingDescriptors, $this->rootPackage->getName())
         );
     }
 
@@ -812,8 +812,8 @@ class DiscoveryManagerImpl implements DiscoveryManager
         return new InterceptedOperation(
             new EnableBindingUuid($uuid, $installInfo),
             array(
-                new ReloadBindingDescriptorsByUuid($uuid, $this->bindingStore, $this->typeStore),
-                new UpdateDuplicateMarksForUuid($uuid, $this->bindingStore, $this->rootPackage->getName())
+                new ReloadBindingDescriptorsByUuid($uuid, $this->bindingDescriptors, $this->typeDescriptors),
+                new UpdateDuplicateMarksForUuid($uuid, $this->bindingDescriptors, $this->rootPackage->getName())
             )
         );
     }
@@ -823,8 +823,8 @@ class DiscoveryManagerImpl implements DiscoveryManager
         return new InterceptedOperation(
             new DisableBindingUuid($uuid, $installInfo),
             array(
-                new ReloadBindingDescriptorsByUuid($uuid, $this->bindingStore, $this->typeStore),
-                new UpdateDuplicateMarksForUuid($uuid, $this->bindingStore, $this->rootPackage->getName())
+                new ReloadBindingDescriptorsByUuid($uuid, $this->bindingDescriptors, $this->typeDescriptors),
+                new UpdateDuplicateMarksForUuid($uuid, $this->bindingDescriptors, $this->rootPackage->getName())
             )
         );
     }
@@ -836,6 +836,6 @@ class DiscoveryManagerImpl implements DiscoveryManager
 
     private function syncBindingUuid(Uuid $uuid)
     {
-        return new SyncBindingUuid($uuid, $this->discovery, $this->bindingStore);
+        return new SyncBindingUuid($uuid, $this->discovery, $this->bindingDescriptors);
     }
 }

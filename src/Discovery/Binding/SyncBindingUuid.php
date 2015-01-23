@@ -54,20 +54,20 @@ class SyncBindingUuid implements AtomicOperation
     private $enabledBindingAfter;
 
     /**
-     * @var BindingDescriptorStore
+     * @var BindingDescriptorCollection
      */
-    private $bindingStore;
+    private $bindingDescriptors;
 
     /**
      * @var bool
      */
     private $snapshotTaken = false;
 
-    public function __construct(Uuid $uuid, EditableDiscovery $discovery, BindingDescriptorStore $bindingStore)
+    public function __construct(Uuid $uuid, EditableDiscovery $discovery, BindingDescriptorCollection $bindingDescriptors)
     {
         $this->uuid = $uuid;
         $this->discovery = $discovery;
-        $this->bindingStore = $bindingStore;
+        $this->bindingDescriptors = $bindingDescriptors;
     }
 
     /**
@@ -75,7 +75,7 @@ class SyncBindingUuid implements AtomicOperation
      */
     public function takeSnapshot()
     {
-        $bindingDescriptor = $this->bindingStore->getEnabled($this->uuid);
+        $bindingDescriptor = $this->bindingDescriptors->getEnabled($this->uuid);
 
         // Clone so that rollback() works if the binding is unloaded
         $this->enabledBindingBefore = $bindingDescriptor ? clone $bindingDescriptor : null;
@@ -92,7 +92,7 @@ class SyncBindingUuid implements AtomicOperation
         }
 
         // Remember for rollback()
-        $bindingDescriptor = $this->bindingStore->getEnabled($this->uuid);
+        $bindingDescriptor = $this->bindingDescriptors->getEnabled($this->uuid);
 
         // Clone so that rollback() works if the binding is unloaded
         $this->enabledBindingAfter = $bindingDescriptor ? clone $bindingDescriptor : null;

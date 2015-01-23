@@ -31,14 +31,14 @@ class UpdateDuplicateMarksForTypeName implements OperationInterceptor
     private $typeName;
 
     /**
-     * @var BindingTypeDescriptorStore
+     * @var BindingTypeDescriptorCollection
      */
-    private $typeStore;
+    private $typeDescriptors;
 
-    public function __construct($typeName, BindingTypeDescriptorStore $bindingStore)
+    public function __construct($typeName, BindingTypeDescriptorCollection $typeDescriptors)
     {
         $this->typeName = $typeName;
-        $this->typeStore = $bindingStore;
+        $this->typeDescriptors = $typeDescriptors;
     }
 
     /**
@@ -59,15 +59,15 @@ class UpdateDuplicateMarksForTypeName implements OperationInterceptor
 
     private function updateDuplicateMarksForTypeName($typeName)
     {
-        if (!$this->typeStore->existsAny($typeName)) {
+        if (!$this->typeDescriptors->contains($typeName)) {
             return;
         }
 
-        $types = $this->typeStore->getAll($typeName);
-        $duplicate = count($types) > 1;
+        $typeDescriptors = $this->typeDescriptors->listByTypeName($typeName);
+        $duplicate = count($typeDescriptors) > 1;
 
-        foreach ($types as $type) {
-            $type->markDuplicate($duplicate);
+        foreach ($typeDescriptors as $typeDescriptor) {
+            $typeDescriptor->markDuplicate($duplicate);
         }
     }
 }

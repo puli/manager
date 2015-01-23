@@ -11,7 +11,7 @@
 
 namespace Puli\RepositoryManager\Discovery\Binding;
 
-use Puli\RepositoryManager\Discovery\Type\BindingTypeDescriptorStore;
+use Puli\RepositoryManager\Discovery\Type\BindingTypeDescriptorCollection;
 use Rhumsaa\Uuid\Uuid;
 
 /**
@@ -28,16 +28,16 @@ class ReloadBindingDescriptorsByUuid extends AbstractReloadBindingDescriptors
     private $uuid;
 
     /**
-     * @var BindingDescriptorStore
+     * @var BindingDescriptorCollection
      */
-    private $bindingStore;
+    private $bindingDescriptors;
 
-    public function __construct(Uuid $uuid, BindingDescriptorStore $bindingStore, BindingTypeDescriptorStore $typeStore)
+    public function __construct(Uuid $uuid, BindingDescriptorCollection $bindingDescriptors, BindingTypeDescriptorCollection $typeDescriptors)
     {
-        parent::__construct($typeStore);
+        parent::__construct($typeDescriptors);
 
         $this->uuid = $uuid;
-        $this->bindingStore = $bindingStore;
+        $this->bindingDescriptors = $bindingDescriptors;
     }
 
     /**
@@ -45,7 +45,7 @@ class ReloadBindingDescriptorsByUuid extends AbstractReloadBindingDescriptors
      */
     public function postExecute()
     {
-        foreach ($this->bindingStore->getAll($this->uuid) as $bindingDescriptor) {
+        foreach ($this->bindingDescriptors->listByUuid($this->uuid) as $bindingDescriptor) {
             $this->reloadBindingDescriptor($bindingDescriptor);
         }
     }

@@ -13,7 +13,7 @@ namespace Puli\RepositoryManager\Discovery\Binding;
 
 use Puli\RepositoryManager\Api\Discovery\BindingDescriptor;
 use Puli\RepositoryManager\Api\Package\Package;
-use Puli\RepositoryManager\Discovery\Type\BindingTypeDescriptorStore;
+use Puli\RepositoryManager\Discovery\Type\BindingTypeDescriptorCollection;
 use Puli\RepositoryManager\Transaction\AtomicOperation;
 
 /**
@@ -35,26 +35,26 @@ class LoadBindingDescriptor implements AtomicOperation
     private $containingPackage;
 
     /**
-     * @var BindingDescriptorStore
+     * @var BindingDescriptorCollection
      */
-    private $bindingStore;
+    private $bindingDescriptors;
 
     /**
-     * @var BindingTypeDescriptorStore
+     * @var BindingTypeDescriptorCollection
      */
-    private $typeStore;
+    private $typeDescriptors;
 
     /**
      * @var BindingDescriptor
      */
     private $previousDescriptor;
 
-    public function __construct(BindingDescriptor $bindingDescriptor, Package $containingPackage, BindingDescriptorStore $bindingStore, BindingTypeDescriptorStore $typeStore)
+    public function __construct(BindingDescriptor $bindingDescriptor, Package $containingPackage, BindingDescriptorCollection $bindingDescriptors, BindingTypeDescriptorCollection $typeDescriptors)
     {
         $this->bindingDescriptor = $bindingDescriptor;
         $this->containingPackage = $containingPackage;
-        $this->bindingStore = $bindingStore;
-        $this->typeStore = $typeStore;
+        $this->bindingDescriptors = $bindingDescriptors;
+        $this->typeDescriptors = $typeDescriptors;
     }
 
     /**
@@ -62,22 +62,27 @@ class LoadBindingDescriptor implements AtomicOperation
      */
     public function execute()
     {
+        // sanity check
+        if ($this->bindingDescriptor->isLoaded()) {
+            return;
+        }
+
         $typeName = $this->bindingDescriptor->getTypeName();
+
+        $typeDescriptor = $this->typeDescriptors->contains($typeName)
+            ? $this->typeDescriptors->get($typeName)
+            : null;
+
+        $this->bindingDescriptor->load($this->containingPackage, $typeDescriptor);
+
         $uuid = $this->bindingDescriptor->getUuid();
+        $packageName = $this->containingPackage->getName();
 
-        if ($this->bindingStore->exists($uuid, $this->containingPackage)) {
-            $this->previousDescriptor = $this->bindingStore->get($uuid, $this->containingPackage);
+        if ($this->bindingDescriptors->contains($uuid, $packageName)) {
+            $this->previousDescriptor = $this->bindingDescriptors->get($uuid, $packageName);
         }
 
-        $this->bindingStore->add($this->bindingDescriptor, $this->containingPackage);
-
-        if (!$this->bindingDescriptor->isLoaded()) {
-            $typeDescriptor = $this->typeStore->existsAny($typeName)
-                ? $this->typeStore->get($typeName)
-                : null;
-
-            $this->bindingDescriptor->load($this->containingPackage, $typeDescriptor);
-        }
+        $this->bindingDescriptors->add($this->bindingDescriptor);
     }
 
     /**
@@ -85,19 +90,20 @@ class LoadBindingDescriptor implements AtomicOperation
      */
     public function rollback()
     {
-        $uuid = $this->bindingDescriptor->getUuid();
-
-        if ($this->bindingDescriptor->isLoaded()) {
-            // never fails with the check before
-            $this->bindingDescriptor->unload();
+        // sanity check
+        if (!$this->bindingDescriptor->isLoaded()) {
+            return;
         }
+
+        // never fails with the check before
+        $this->bindingDescriptor->unload();
 
         if ($this->previousDescriptor) {
             // never fails
-            $this->bindingStore->add($this->previousDescriptor, $this->containingPackage);
+            $this->bindingDescriptors->add($this->previousDescriptor);
         } else {
             // never fails
-            $this->bindingStore->remove($uuid, $this->containingPackage);
+            $this->bindingDescriptors->remove($this->bindingDescriptor->getUuid(), $this->containingPackage->getName());
         }
     }
 }

@@ -34,19 +34,19 @@ class UpdateDuplicateMarksForUuid implements OperationInterceptor
     private $uuid;
 
     /**
-     * @var BindingDescriptorStore
+     * @var BindingDescriptorCollection
      */
-    private $bindingStore;
+    private $bindingDescriptors;
 
     /**
      * @var string
      */
     private $rootPackageName;
 
-    public function __construct(Uuid $uuid, BindingDescriptorStore $bindingStore, $rootPackageName)
+    public function __construct(Uuid $uuid, BindingDescriptorCollection $bindingDescriptors, $rootPackageName)
     {
         $this->uuid = $uuid;
-        $this->bindingStore = $bindingStore;
+        $this->bindingDescriptors = $bindingDescriptors;
         $this->rootPackageName = $rootPackageName;
     }
 
@@ -68,11 +68,11 @@ class UpdateDuplicateMarksForUuid implements OperationInterceptor
 
     private function updateDuplicateMarksForUuid(Uuid $uuid)
     {
-        if (!$this->bindingStore->existsAny($uuid)) {
+        if (!$this->bindingDescriptors->contains($uuid)) {
             return;
         }
 
-        $bindings = $this->bindingStore->getAll($uuid);
+        $bindings = $this->bindingDescriptors->listByUuid($uuid);
 
         if (1 === count($bindings)) {
             reset($bindings)->markDuplicate(false);

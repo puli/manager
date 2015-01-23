@@ -12,7 +12,7 @@
 namespace Puli\RepositoryManager\Discovery\Binding;
 
 use Puli\RepositoryManager\Api\Discovery\BindingDescriptor;
-use Puli\RepositoryManager\Discovery\Type\BindingTypeDescriptorStore;
+use Puli\RepositoryManager\Discovery\Type\BindingTypeDescriptorCollection;
 use Puli\RepositoryManager\Transaction\OperationInterceptor;
 
 /**
@@ -24,18 +24,18 @@ use Puli\RepositoryManager\Transaction\OperationInterceptor;
 abstract class AbstractReloadBindingDescriptors implements OperationInterceptor
 {
     /**
-     * @var BindingTypeDescriptorStore
+     * @var BindingTypeDescriptorCollection
      */
-    private $typeStore;
+    private $typeDescriptors;
 
     /**
      * @var BindingDescriptor[]
      */
     private $reloadedDescriptors = array();
 
-    public function __construct(BindingTypeDescriptorStore $typeStore)
+    public function __construct(BindingTypeDescriptorCollection $typeDescriptors)
     {
-        $this->typeStore = $typeStore;
+        $this->typeDescriptors = $typeDescriptors;
     }
 
     /**
@@ -73,8 +73,8 @@ abstract class AbstractReloadBindingDescriptors implements OperationInterceptor
         $containingPackage = $bindingDescriptor->getContainingPackage();
         $typeName = $bindingDescriptor->getTypeName();
 
-        $typeDescriptor = $this->typeStore->existsAny($typeName)
-            ? $this->typeStore->get($typeName)
+        $typeDescriptor = $this->typeDescriptors->contains($typeName)
+            ? $this->typeDescriptors->get($typeName)
             : null;
 
         // never fails with the check in the beginning

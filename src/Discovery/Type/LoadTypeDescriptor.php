@@ -34,20 +34,20 @@ class LoadTypeDescriptor implements AtomicOperation
     private $containingPackage;
 
     /**
-     * @var BindingTypeDescriptorStore
+     * @var BindingTypeDescriptorCollection
      */
-    private $typeStore;
+    private $typeDescriptors;
 
     /**
      * @var BindingTypeDescriptor
      */
     private $previousDescriptor;
 
-    public function __construct(BindingTypeDescriptor $typeDescriptor, Package $containingPackage, BindingTypeDescriptorStore $typeStore)
+    public function __construct(BindingTypeDescriptor $typeDescriptor, Package $containingPackage, BindingTypeDescriptorCollection $types)
     {
         $this->typeDescriptor = $typeDescriptor;
         $this->containingPackage = $containingPackage;
-        $this->typeStore = $typeStore;
+        $this->typeDescriptors = $types;
     }
 
     /**
@@ -55,20 +55,24 @@ class LoadTypeDescriptor implements AtomicOperation
      */
     public function execute()
     {
-        if (!$this->typeDescriptor->isLoaded()) {
-            // never fails with the check before
-            $this->typeDescriptor->load($this->containingPackage);
+        // sanity check
+        if ($this->typeDescriptor->isLoaded()) {
+            return;
         }
 
-        $typeName = $this->typeDescriptor->getName();
+        // never fails with the check before
+        $this->typeDescriptor->load($this->containingPackage);
 
-        if ($this->typeStore->exists($typeName, $this->containingPackage)) {
+        $typeName = $this->typeDescriptor->getName();
+        $packageName = $this->containingPackage->getName();
+
+        if ($this->typeDescriptors->contains($typeName, $packageName)) {
             // never fails with the check before
-            $this->previousDescriptor = $this->typeStore->get($typeName, $this->containingPackage);
+            $this->previousDescriptor = $this->typeDescriptors->get($typeName, $packageName);
         }
 
         // never fails
-        $this->typeStore->add($this->typeDescriptor, $this->containingPackage);
+        $this->typeDescriptors->add($this->typeDescriptor);
     }
 
     /**
@@ -76,19 +80,22 @@ class LoadTypeDescriptor implements AtomicOperation
      */
     public function rollback()
     {
-        $typeName = $this->typeDescriptor->getName();
-
-        if ($this->typeDescriptor->isLoaded()) {
-            // never fails with the check before
-            $this->typeDescriptor->unload();
+        // sanity check
+        if (!$this->typeDescriptor->isLoaded()) {
+            return;
         }
 
-        if ($this->previousDescriptor) {
+        $typeName = $this->typeDescriptor->getName();
+
+        // never fails with the check before
+        $this->typeDescriptor->unload();
+
+        if ($this->previousDescriptor && $this->previousDescriptor->isLoaded()) {
             // never fails
-            $this->typeStore->add($this->previousDescriptor, $this->containingPackage);
+            $this->typeDescriptors->add($this->previousDescriptor);
         } else {
             // never fails
-            $this->typeStore->remove($typeName, $this->containingPackage);
+            $this->typeDescriptors->remove($typeName, $this->containingPackage->getName());
         }
     }
 }

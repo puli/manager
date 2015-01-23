@@ -13,6 +13,7 @@ namespace Puli\RepositoryManager\Discovery\Type;
 
 use LogicException;
 use Puli\Discovery\Api\EditableDiscovery;
+use Puli\RepositoryManager\Api\Discovery\BindingTypeDescriptor;
 use Puli\RepositoryManager\Transaction\AtomicOperation;
 
 /**
@@ -42,25 +43,30 @@ class SyncTypeName implements AtomicOperation
     private $discovery;
 
     /**
-     * @var bool
+     * @var BindingTypeDescriptorCollection
      */
-    private $wasEnabled;
+    private $typeDescriptors;
+
+    /**
+     * @var BindingTypeDescriptor|null
+     */
+    private $enabledTypeBefore;
+
+    /**
+     * @var BindingTypeDescriptor|null
+     */
+    private $enabledTypeAfter;
 
     /**
      * @var bool
      */
-    private $isEnabled;
+    private $snapshotTaken = false;
 
-    /**
-     * @var BindingTypeDescriptorStore
-     */
-    private $typeStore;
-
-    public function __construct($typeName, EditableDiscovery $discovery, BindingTypeDescriptorStore $typeStore)
+    public function __construct($typeName, EditableDiscovery $discovery, BindingTypeDescriptorCollection $typeDescriptors)
     {
         $this->typeName = $typeName;
         $this->discovery = $discovery;
-        $this->typeStore = $typeStore;
+        $this->typeDescriptors = $typeDescriptors;
     }
 
     /**
@@ -68,7 +74,8 @@ class SyncTypeName implements AtomicOperation
      */
     public function takeSnapshot()
     {
-        $this->wasEnabled = $this->typeStore->existsEnabled($this->typeName);
+        $this->enabledTypeBefore = $this->typeDescriptors->getEnabled($this->typeName);
+        $this->snapshotTaken = true;
     }
 
     /**
@@ -76,14 +83,14 @@ class SyncTypeName implements AtomicOperation
      */
     public function execute()
     {
-        if (null === $this->wasEnabled) {
+        if (!$this->snapshotTaken) {
             throw new LogicException('takeSnapshot() was not called');
         }
 
         // Remember for rollback()
-        $this->isEnabled = $this->typeStore->existsEnabled($this->typeName);
+        $this->enabledTypeAfter = $this->typeDescriptors->getEnabled($this->typeName);
 
-        $this->syncTypeName($this->wasEnabled, $this->isEnabled);
+        $this->syncTypeName($this->enabledTypeBefore, $this->enabledTypeAfter);
     }
 
     /**
@@ -91,16 +98,18 @@ class SyncTypeName implements AtomicOperation
      */
     public function rollback()
     {
-        $this->syncTypeName($this->isEnabled, $this->wasEnabled);
+        $this->syncTypeName($this->enabledTypeAfter, $this->enabledTypeBefore);
     }
 
-    private function syncTypeName($wasEnabled, $isEnabled)
+    private function syncTypeName(BindingTypeDescriptor $enabledTypeBefore = null, BindingTypeDescriptor $enabledTypeAfter = null)
     {
-        if ($wasEnabled && !$isEnabled) {
+        if ($enabledTypeBefore && !$enabledTypeAfter) {
             $this->discovery->undefineType($this->typeName);
-        } elseif (!$wasEnabled && $isEnabled) {
-            $bindingType = $this->typeStore->get($this->typeName);
-            $this->discovery->defineType($bindingType->toBindingType());
+        } elseif (!$enabledTypeBefore && $enabledTypeAfter) {
+            $this->discovery->defineType($enabledTypeAfter->toBindingType());
+        } elseif ($enabledTypeBefore !== $enabledTypeAfter) {
+            $this->discovery->undefineType($this->typeName);
+            $this->discovery->defineType($enabledTypeAfter->toBindingType());
         }
     }
 }

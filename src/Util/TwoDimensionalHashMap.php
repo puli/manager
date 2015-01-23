@@ -204,6 +204,15 @@ class TwoDimensionalHashMap
         return $this->values[$primaryKey];
     }
 
+    /**
+     * Returns all values set for the given secondary key.
+     *
+     * @param int|string $secondaryKey The secondary key.
+     *
+     * @return array The values indexed by their primary keys.
+     *
+     * @throws OutOfBoundsException If the secondary key does not exist.
+     */
     public function listBySecondaryKey($secondaryKey)
     {
         $list = array();

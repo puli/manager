@@ -11,7 +11,7 @@
 
 namespace Puli\RepositoryManager\Discovery\Binding;
 
-use Puli\RepositoryManager\Discovery\Type\BindingTypeDescriptorStore;
+use Puli\RepositoryManager\Discovery\Type\BindingTypeDescriptorCollection;
 
 /**
  * Reloads all binding descriptors with a given type name.
@@ -27,16 +27,16 @@ class ReloadBindingDescriptorsByTypeName extends AbstractReloadBindingDescriptor
     private $typeName;
 
     /**
-     * @var BindingDescriptorStore
+     * @var BindingDescriptorCollection
      */
-    private $bindingStore;
+    private $bindingDescriptors;
 
-    public function __construct($typeName, BindingDescriptorStore $bindingStore, BindingTypeDescriptorStore $typeStore)
+    public function __construct($typeName, BindingDescriptorCollection $bindingDescriptors, BindingTypeDescriptorCollection $typeDescriptors)
     {
-        parent::__construct($typeStore);
+        parent::__construct($typeDescriptors);
 
         $this->typeName = $typeName;
-        $this->bindingStore = $bindingStore;
+        $this->bindingDescriptors = $bindingDescriptors;
     }
 
     /**
@@ -44,8 +44,8 @@ class ReloadBindingDescriptorsByTypeName extends AbstractReloadBindingDescriptor
      */
     public function postExecute()
     {
-        foreach ($this->bindingStore->getUuids() as $uuid) {
-            foreach ($this->bindingStore->getAll($uuid) as $bindingDescriptor) {
+        foreach ($this->bindingDescriptors->getUuids() as $uuid) {
+            foreach ($this->bindingDescriptors->listByUuid($uuid) as $bindingDescriptor) {
                 if ($this->typeName === $bindingDescriptor->getTypeName()) {
                     $this->reloadBindingDescriptor($bindingDescriptor);
                 }

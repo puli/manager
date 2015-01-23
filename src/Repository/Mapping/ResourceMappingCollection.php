@@ -53,6 +53,12 @@ class ResourceMappingCollection
         $this->map->sortByPrimaryKeys();
     }
 
+    /**
+     * Sets a resource mapping for a specific repository path.
+     *
+     * @param string          $repositoryPath The repository path.
+     * @param ResourceMapping $mapping        The resource mapping.
+     */
     public function set($repositoryPath, ResourceMapping $mapping)
     {
         $this->map->set($repositoryPath, $mapping->getContainingPackage()->getName(), $mapping);

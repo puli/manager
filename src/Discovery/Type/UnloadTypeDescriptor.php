@@ -29,9 +29,9 @@ class UnloadTypeDescriptor implements AtomicOperation
     private $typeDescriptor;
 
     /**
-     * @var BindingTypeDescriptorStore
+     * @var BindingTypeDescriptorCollection
      */
-    private $typeStore;
+    private $typeDescriptors;
 
     /**
      * @var Package
@@ -43,10 +43,10 @@ class UnloadTypeDescriptor implements AtomicOperation
      */
     private $wasRemoved = false;
 
-    public function __construct($typeDescriptor, BindingTypeDescriptorStore $typeStore)
+    public function __construct($typeDescriptor, BindingTypeDescriptorCollection $typeDescriptors)
     {
         $this->typeDescriptor = $typeDescriptor;
-        $this->typeStore = $typeStore;
+        $this->typeDescriptors = $typeDescriptors;
     }
 
     /**
@@ -54,20 +54,25 @@ class UnloadTypeDescriptor implements AtomicOperation
      */
     public function execute()
     {
-        $typeName = $this->typeDescriptor->getName();
-
-        if ($this->typeDescriptor->isLoaded()) {
-            // never fails with the check before
-            $this->containingPackage = $this->typeDescriptor->getContainingPackage();
-
-            // never fails with the check before
-            $this->typeDescriptor->unload();
+        // sanity check
+        if (!$this->typeDescriptor->isLoaded()) {
+            return;
         }
 
-        if ($this->typeStore->exists($typeName, $this->containingPackage)
-            && $this->typeDescriptor === $this->typeStore->get($typeName, $this->containingPackage)) {
+
+        // never fails with the check before
+        $this->containingPackage = $this->typeDescriptor->getContainingPackage();
+
+        $typeName = $this->typeDescriptor->getName();
+        $packageName = $this->containingPackage->getName();
+
+        // never fails with the check before
+        $this->typeDescriptor->unload();
+
+        if ($this->typeDescriptors->contains($typeName, $packageName)
+            && $this->typeDescriptor === $this->typeDescriptors->get($typeName, $packageName)) {
             // never fails
-            $this->typeStore->remove($typeName, $this->containingPackage);
+            $this->typeDescriptors->remove($typeName, $packageName);
             $this->wasRemoved = true;
         }
     }
@@ -77,14 +82,17 @@ class UnloadTypeDescriptor implements AtomicOperation
      */
     public function rollback()
     {
-        if (!$this->typeDescriptor->isLoaded() && $this->containingPackage) {
-            // never fails with the check before
-            $this->typeDescriptor->load($this->containingPackage);
+        // sanity check
+        if ($this->typeDescriptor->isLoaded() || !$this->containingPackage) {
+            return;
         }
+
+        // never fails with the check before
+        $this->typeDescriptor->load($this->containingPackage);
 
         if ($this->wasRemoved) {
             // never fails
-            $this->typeStore->add($this->typeDescriptor, $this->containingPackage);
+            $this->typeDescriptors->add($this->typeDescriptor);
         }
     }
 }

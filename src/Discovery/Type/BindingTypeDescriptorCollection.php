@@ -32,7 +32,7 @@ use Puli\RepositoryManager\Util\TwoDimensionalHashMap;
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class BindingTypeDescriptorStore
+class BindingTypeDescriptorCollection
 {
     /**
      * @var TwoDimensionalHashMap
@@ -51,12 +51,10 @@ class BindingTypeDescriptorStore
      * Adds a type descriptor.
      *
      * @param BindingTypeDescriptor $typeDescriptor The type descriptor.
-     * @param Package               $package        The package defining the
-     *                                              type descriptor.
      */
-    public function add(BindingTypeDescriptor $typeDescriptor, Package $package)
+    public function add(BindingTypeDescriptor $typeDescriptor)
     {
-        $this->map->set($typeDescriptor->getName(), $package->getName(), $typeDescriptor);
+        $this->map->set($typeDescriptor->getName(), $typeDescriptor->getContainingPackage()->getName(), $typeDescriptor);
     }
 
     /**
@@ -64,12 +62,12 @@ class BindingTypeDescriptorStore
      *
      * This method ignores non-existing type descriptors.
      *
-     * @param string  $typeName The name of the type.
-     * @param Package $package  The package containing the type.
+     * @param string $typeName    The name of the type.
+     * @param string $packageName The name of the package containing the type.
      */
-    public function remove($typeName, Package $package)
+    public function remove($typeName, $packageName)
     {
-        $this->map->remove($typeName, $package->getName());
+        $this->map->remove($typeName, $packageName);
     }
 
     /**
@@ -78,21 +76,44 @@ class BindingTypeDescriptorStore
      * If no package is passed, the first descriptor set for the type name is
      * returned.
      *
-     * @param string  $typeName The name of the type.
-     * @param Package $package  The package containing the type.
+     * @param string $typeName    The name of the type.
+     * @param string $packageName The name of the package containing the type.
      *
      * @return BindingTypeDescriptor The type descriptor.
      *
      * @throws OutOfBoundsException If no type descriptor was set for the
      *                              given name/package.
      */
-    public function get($typeName, Package $package = null)
+    public function get($typeName, $packageName = null)
     {
-        if (null !== $package) {
-            return $this->map->get($typeName, $package->getName());
+        if (null !== $packageName) {
+            return $this->map->get($typeName, $packageName);
         }
 
         return $this->map->getFirst($typeName);
+    }
+
+    /**
+     * Returns the enabled type descriptor for a given type name.
+     *
+     * @param string $typeName The name of the type.
+     *
+     * @return BindingTypeDescriptor|null The enabled type descriptor or `null`
+     *                                    if no enabled descriptor was found.
+     */
+    public function getEnabled($typeName)
+    {
+        if (!$this->contains($typeName)) {
+            return null;
+        }
+
+        foreach ($this->listByTypeName($typeName) as $typeDescriptor) {
+            if ($typeDescriptor->isEnabled()) {
+                return $typeDescriptor;
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -105,7 +126,7 @@ class BindingTypeDescriptorStore
      * @throws OutOfBoundsException If no type descriptor was set for the
      *                              given name.
      */
-    public function getAll($typeName)
+    public function listByTypeName($typeName)
     {
         return $this->map->listByPrimaryKey($typeName);
     }
@@ -113,52 +134,15 @@ class BindingTypeDescriptorStore
     /**
      * Returns whether a type descriptor was set for the given name/package.
      *
-     * @param string  $typeName The name of the type.
-     * @param Package $package  The package containing the type.
+     * @param string $typeName    The name of the type.
+     * @param string $packageName The name of the package containing the type.
      *
      * @return bool Returns `true` if a type descriptor was set for the given
      *              name/package.
      */
-    public function exists($typeName, Package $package)
+    public function contains($typeName, $packageName = null)
     {
-        return $this->map->contains($typeName, $package->getName());
-    }
-
-    /**
-     * Returns whether a type descriptor was set for the given name in any
-     * package.
-     *
-     * @param string $typeName The name of the type.
-     *
-     * @return bool Returns `true` if a type descriptor was set for the given
-     *              name.
-     */
-    public function existsAny($typeName)
-    {
-        return $this->map->contains($typeName);
-    }
-
-    /**
-     * Returns whether an enabled type descriptor was set for the given name
-     * in any package.
-     *
-     * @param string $typeName The name of the type.
-     *
-     * @return bool Returns `true` if an enabled type descriptor was set for
-     *              the given name.
-     */
-    public function existsEnabled($typeName)
-    {
-        try {
-            foreach ($this->getAll($typeName) as $typeDescriptor) {
-                if ($typeDescriptor->isEnabled()) {
-                    return true;
-                }
-            }
-        } catch (OutOfBoundsException $e) {
-        }
-
-        return false;
+        return $this->map->contains($typeName, $packageName);
     }
 
     /**
@@ -171,7 +155,7 @@ class BindingTypeDescriptorStore
      * @throws OutOfBoundsException If no type descriptor was set for the
      *                              given name.
      */
-    public function getDefiningPackageNames($typeName)
+    public function getPackageNames($typeName = null)
     {
         return $this->map->getSecondaryKeys($typeName);
     }
