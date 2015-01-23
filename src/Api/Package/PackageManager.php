@@ -97,7 +97,7 @@ interface PackageManager
      *
      * @return PackageCollection The packages.
      */
-    public function getPackagesByInstaller($installer, $state = PackageState::ENABLED);
+    public function getPackagesByInstaller($installer, $state = null);
 
     /**
      * Returns the manager's environment.

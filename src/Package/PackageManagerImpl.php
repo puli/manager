@@ -227,7 +227,7 @@ class PackageManagerImpl implements PackageManager
     /**
      * {@inheritdoc}
      */
-    public function getPackagesByInstaller($installer, $state = PackageState::ENABLED)
+    public function getPackagesByInstaller($installer, $state = null)
     {
         $this->assertPackagesLoaded();
 
@@ -237,7 +237,8 @@ class PackageManagerImpl implements PackageManager
             $installInfo = $package->getInstallInfo();
 
             // The root package has no install info
-            if ($installInfo && $installer === $installInfo->getInstallerName() && $state === $package->getState()) {
+            if ($installInfo && $installer === $installInfo->getInstallerName()
+                && (null === $state || $state === $package->getState())) {
                 $packages->add($package);
             }
         }

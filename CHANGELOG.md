@@ -79,6 +79,8 @@ Changelog
    with duplicate types have the state `BindingState::HELD_BACK` now
  * removed `CannotDisableBindingException::duplicateType()`
  * removed `CannotEnableBindingException::duplicateType()`
+ * changed default value of `$state` in `PackageManager::getPackagesByInstaller()`
+   to `null`
 
 * 1.0.0-beta (2015-01-12)
 

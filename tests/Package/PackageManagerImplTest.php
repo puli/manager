@@ -29,7 +29,7 @@ use Symfony\Component\Filesystem\Filesystem;
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class PackageManagerTest extends ManagerTestCase
+class PackageManagerImplTest extends ManagerTestCase
 {
     /**
      * @var string
@@ -208,13 +208,13 @@ class PackageManagerTest extends ManagerTestCase
         ), $packages->toArray());
     }
 
-    public function testGetEnabledPackagesByInstaller()
+    public function testGetAllPackagesByInstaller()
     {
         $this->initDefaultManager();
 
         $this->rootPackageFile->addInstallInfo($installInfo1 = new InstallInfo('vendor/package1', $this->packageDir1));
         $this->rootPackageFile->addInstallInfo($installInfo2 = new InstallInfo('vendor/package2', $this->packageDir2));
-        $this->rootPackageFile->addInstallInfo($installInfo3 = new InstallInfo('vendor/package3', $this->packageDir3));
+        $this->rootPackageFile->addInstallInfo($installInfo3 = new InstallInfo('vendor/package3', 'foo'));
 
         $installInfo1->setInstallerName('composer');
         $installInfo2->setInstallerName('user');
@@ -226,15 +226,41 @@ class PackageManagerTest extends ManagerTestCase
         $userPackages = $this->manager->getPackagesByInstaller('user');
 
         $this->assertInstanceOf('Puli\RepositoryManager\Api\Package\PackageCollection', $composerPackages);
-        $this->assertEquals(array(
-            'vendor/package1' => new Package($this->packageFile1, $this->packageDir1, $installInfo1),
-            'vendor/package3' => new Package($this->packageFile3, $this->packageDir3, $installInfo3),
-        ), $composerPackages->toArray());
+        $this->assertTrue($composerPackages->contains('vendor/package1'));
+        $this->assertTrue($composerPackages->contains('vendor/package3'));
+        $this->assertCount(2, $composerPackages);
 
         $this->assertInstanceOf('Puli\RepositoryManager\Api\Package\PackageCollection', $userPackages);
-        $this->assertEquals(array(
-            'vendor/package2' => new Package($this->packageFile2, $this->packageDir2, $installInfo2),
-        ), $userPackages->toArray());
+        $this->assertTrue($userPackages->contains('vendor/package2'));
+        $this->assertCount(1, $userPackages);
+    }
+
+    public function testGetEnabledPackagesByInstaller()
+    {
+        $this->initDefaultManager();
+
+        $this->rootPackageFile->addInstallInfo($installInfo1 = new InstallInfo('vendor/package1', $this->packageDir1));
+        $this->rootPackageFile->addInstallInfo($installInfo2 = new InstallInfo('vendor/package2', $this->packageDir2));
+        $this->rootPackageFile->addInstallInfo($installInfo3 = new InstallInfo('vendor/package3', $this->packageDir3));
+        $this->rootPackageFile->addInstallInfo($installInfo4 = new InstallInfo('vendor/package4', 'foo'));
+
+        $installInfo1->setInstallerName('composer');
+        $installInfo2->setInstallerName('user');
+        $installInfo3->setInstallerName('composer');
+
+        $this->manager = new PackageManagerImpl($this->environment, $this->packageFileStorage);
+
+        $composerPackages = $this->manager->getPackagesByInstaller('composer', PackageState::ENABLED);
+        $userPackages = $this->manager->getPackagesByInstaller('user', PackageState::ENABLED);
+
+        $this->assertInstanceOf('Puli\RepositoryManager\Api\Package\PackageCollection', $composerPackages);
+        $this->assertTrue($composerPackages->contains('vendor/package1'));
+        $this->assertTrue($composerPackages->contains('vendor/package3'));
+        $this->assertCount(2, $composerPackages);
+
+        $this->assertInstanceOf('Puli\RepositoryManager\Api\Package\PackageCollection', $userPackages);
+        $this->assertTrue($userPackages->contains('vendor/package2'));
+        $this->assertCount(1, $userPackages);
     }
 
     public function testGetNotFoundPackagesByInstaller()
@@ -259,7 +285,6 @@ class PackageManagerTest extends ManagerTestCase
         $this->assertCount(1, $composerPackages);
 
         $this->assertInstanceOf('Puli\RepositoryManager\Api\Package\PackageCollection', $userPackages);
-
         $this->assertTrue($userPackages->contains('vendor/package2'));
         $this->assertCount(1, $userPackages);
     }
