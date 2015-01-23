@@ -361,6 +361,8 @@ class Puli
         } else {
             $this->initGlobalManagers();
         }
+
+        $this->initialized = true;
     }
 
     private function initGlobalManagers()
@@ -372,7 +374,6 @@ class Puli
         $this->packageManager = null;
         $this->repositoryManager = null;
         $this->discoveryManager = null;
-        $this->initialized = true;
     }
 
     private function initProjectManagers()
