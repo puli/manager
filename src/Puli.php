@@ -74,6 +74,19 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
  *    project.
  *  * The "discovery manager" manages the resource discovery of a Puli project.
  *
+ * The home directory is read from the environment variable "PULI_HOME".
+ * If this variable is not set, the home directory defaults to:
+ *
+ *  * `$HOME/.puli` on Linux, where `$HOME` is the environment variable
+ *    "HOME".
+ *  * `$APPDATA/Puli` on Windows, where `$APPDATA` is the environment
+ *    variable "APPDATA".
+ *
+ * If none of these variables can be found, an exception is thrown.
+ *
+ * A .htaccess file is put into the home directory to protect it from web
+ * access.
+ *
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
@@ -130,6 +143,11 @@ class Puli
     private $logger;
 
     /**
+     * @var bool
+     */
+    private $initialized = false;
+
+    /**
      * Parses the system environment for a home directory.
      *
      * @return null|string Returns the path to the home directory or `null`
@@ -159,13 +177,13 @@ class Puli
      *                        environment. You can set or switch root
      *                        directories anytime by calling {@link setRootDir()}.
      *
-     * @see Puli, setRootDir()
+     * @see Puli, setRootDirectory()
      */
     public function __construct($rootDir = null)
     {
         Assert::nullOrString($rootDir, 'The root directory must be a string or null. Got: %s');
 
-        $this->setRootDir($rootDir);
+        $this->setRootDirectory($rootDir);
     }
 
     /**
@@ -178,14 +196,16 @@ class Puli
      *                             you pass `null`, the object operates in the
      *                             global environment. You can set or switch
      *                             root directories anytime.
+     *
+     * @throws FileNotFoundException If the path does not exist.
+     * @throws NoDirectoryException If the path points to a file.
      */
-    public function setRootDir($rootDir)
+    public function setRootDirectory($rootDir)
     {
         Assert::nullOrString($rootDir, 'The root directory must be a string or null. Got: %s');
 
-        if ($rootDir !== $this->rootDir) {
+        if ($rootDir !== $this->rootDir || !$this->environment) {
             $this->rootDir = $rootDir;
-
             $this->resetEnvironment();
         }
     }
@@ -198,16 +218,31 @@ class Puli
      * @return string|null The root directory of the managed Puli project or
      *                     `null` if none is set.
      */
-    public function getRootDir()
+    public function getRootDirectory()
     {
         return $this->rootDir;
     }
 
+    /**
+     * Sets the logger to use.
+     *
+     * All managers are reloaded after calling this method.
+     *
+     * @param LoggerInterface $logger The logger to use.
+     */
     public function setLogger(LoggerInterface $logger)
     {
-        $this->logger = $logger;
+        if ($logger !== $this->logger) {
+            $this->logger = $logger;
+            $this->resetEnvironment();
+        }
     }
 
+    /**
+     * Returns the used logger.
+     *
+     * @return LoggerInterface The used logger.
+     */
     public function getLogger()
     {
         return $this->logger;
@@ -216,39 +251,22 @@ class Puli
     /**
      * Returns the environment.
      *
-     * The home directory is read from the environment variable "PULI_HOME".
-     * If this variable is not set, the home directory defaults to:
-     *
-     *  * `$HOME/.puli` on Linux, where `$HOME` is the environment variable
-     *    "HOME".
-     *  * `$APPDATA/Puli` on Windows, where `$APPDATA` is the environment
-     *    variable "APPDATA".
-     *
-     * If none of these variables can be found, an exception is thrown.
-     *
-     * A .htaccess file is put into the home directory to protect it from web
-     * access.
-     *
      * @return GlobalEnvironment|ProjectEnvironment The environment.
      */
     public function getEnvironment()
     {
-        if (!$this->environment) {
-            $this->initEnvironment();
-        }
-
         return $this->environment;
     }
 
     /**
      * Returns the configuration file manager.
      *
-     * @return ConfigFileManager The created configuration file manager.
+     * @return ConfigFileManager The configuration file manager.
      */
     public function getConfigFileManager()
     {
-        if (!$this->environment) {
-            $this->initEnvironment();
+        if (!$this->initialized) {
+            $this->initManagers();
         }
 
         return $this->configFileManager;
@@ -257,12 +275,12 @@ class Puli
     /**
      * Returns the root package file manager.
      *
-     * @return RootPackageFileManager The created package file manager.
+     * @return RootPackageFileManager The package file manager.
      */
     public function getRootPackageFileManager()
     {
-        if (!$this->environment) {
-            $this->initEnvironment();
+        if (!$this->initialized) {
+            $this->initManagers();
         }
 
         return $this->rootPackageFileManager;
@@ -275,8 +293,8 @@ class Puli
      */
     public function getPackageManager()
     {
-        if (!$this->environment) {
-            $this->initEnvironment();
+        if (!$this->initialized) {
+            $this->initManagers();
         }
 
         return $this->packageManager;
@@ -289,8 +307,8 @@ class Puli
      */
     public function getRepositoryManager()
     {
-        if (!$this->environment) {
-            $this->initEnvironment();
+        if (!$this->initialized) {
+            $this->initManagers();
         }
 
         return $this->repositoryManager;
@@ -303,8 +321,8 @@ class Puli
      */
     public function getDiscoveryManager()
     {
-        if (!$this->environment) {
-            $this->initEnvironment();
+        if (!$this->initialized) {
+            $this->initManagers();
         }
 
         return $this->discoveryManager;
@@ -312,26 +330,29 @@ class Puli
 
     private function resetEnvironment()
     {
-        $this->environment = null;
+        $this->environment = $this->rootDir
+            ? $this->createProjectEnvironment($this->rootDir)
+            : $this->createGlobalEnvironment();
+
         $this->configFileManager = null;
         $this->rootPackageFileManager = null;
         $this->packageManager = null;
         $this->repositoryManager = null;
         $this->discoveryManager = null;
+        $this->initialized = false;
     }
 
-    private function initEnvironment()
+    private function initManagers()
     {
         if ($this->rootDir) {
-            $this->initProjectEnvironment($this->rootDir);
+            $this->initProjectManagers();
         } else {
-            $this->initGlobalEnvironment();
+            $this->initGlobalManagers();
         }
     }
 
-    private function initGlobalEnvironment()
+    private function initGlobalManagers()
     {
-        $this->environment = $this->createGlobalEnvironment();
         $this->configFileManager = $this->environment->getHomeDirectory()
             ? $this->createConfigFileManager($this->environment)
             : null;
@@ -339,12 +360,12 @@ class Puli
         $this->packageManager = null;
         $this->repositoryManager = null;
         $this->discoveryManager = null;
+        $this->initialized = true;
     }
 
-    private function initProjectEnvironment($rootDir)
+    private function initProjectManagers()
     {
         // Create all managers and bind them to the event dispatcher
-        $this->environment = $this->createProjectEnvironment($rootDir);
         $this->configFileManager = $this->environment->getHomeDirectory()
             ? $this->createConfigFileManager($this->environment)
             : null;
@@ -354,24 +375,6 @@ class Puli
         $this->discoveryManager = $this->createDiscoveryManager($this->environment, $this->packageManager, $this->logger);
     }
 
-    /**
-     * Creates the global environment.
-     *
-     * The home directory is read from the environment variable "PULI_HOME".
-     * If this variable is not set, the home directory defaults to:
-     *
-     *  * `$HOME/.puli` on Linux, where `$HOME` is the environment variable
-     *    "HOME".
-     *  * `$APPDATA/Puli` on Windows, where `$APPDATA` is the environment
-     *    variable "APPDATA".
-     *
-     * If none of these variables can be found, an exception is thrown.
-     *
-     * A .htaccess file is put into the home directory to protect it from web
-     * access.
-     *
-     * @return GlobalEnvironment The global environment.
-     */
     private function createGlobalEnvironment()
     {
         $dispatcher = new EventDispatcher();
@@ -404,9 +407,6 @@ class Puli
      * @param string $rootDir The path to the project.
      *
      * @return ProjectEnvironment The project environment.
-     *
-     * @throws FileNotFoundException If the path does not exist.
-     * @throws NoDirectoryException If the path points to a file.
      */
     private function createProjectEnvironment($rootDir)
     {
