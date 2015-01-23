@@ -19,7 +19,7 @@ use Puli\RepositoryManager\Api\Package\InstallInfo;
 use Puli\RepositoryManager\Api\Package\Package;
 use Puli\RepositoryManager\Api\Package\PackageFile;
 use Puli\RepositoryManager\Api\Package\RootPackageFile;
-use Puli\RepositoryManager\Api\Plugin\PuliPlugin;
+use Puli\RepositoryManager\Api\PuliPlugin;
 use Puli\RepositoryManager\Api\Repository\ResourceMapping;
 use Puli\RepositoryManager\Package\PackageJsonWriter;
 use Puli\RepositoryManager\Tests\JsonWriterTestCase;

@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\RepositoryManager\Api\Plugin;
+namespace Puli\RepositoryManager\Api;
 
 use Puli\RepositoryManager\Api\Environment\ProjectEnvironment;
 

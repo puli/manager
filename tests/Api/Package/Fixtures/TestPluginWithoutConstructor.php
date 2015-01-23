@@ -12,7 +12,7 @@
 namespace Puli\RepositoryManager\Tests\Api\Package\Fixtures;
 
 use Puli\RepositoryManager\Api\Environment\ProjectEnvironment;
-use Puli\RepositoryManager\Api\Plugin\PuliPlugin;
+use Puli\RepositoryManager\Api\PuliPlugin;
 
 /**
  * @since  1.0

@@ -201,7 +201,7 @@ class RootPackageFile extends PackageFile
      * Sets the plugin classes.
      *
      * The plugin classes must be fully-qualified class names that implement
-     * {@link Puli\RepositoryManager\Api\Plugin\PuliPlugin}. If a class is not
+     * {@link Puli\RepositoryManager\Api\PuliPlugin}. If a class is not
      * found or does not implement that interface, an exception is thrown.
      *
      * The plugin classes must not have required parameters in their constructor
@@ -269,7 +269,7 @@ class RootPackageFile extends PackageFile
             ));
         }
 
-        if (!$reflClass->implementsInterface('\Puli\RepositoryManager\Api\Plugin\PuliPlugin')) {
+        if (!$reflClass->implementsInterface('\Puli\RepositoryManager\Api\PuliPlugin')) {
             throw new InvalidConfigException(sprintf(
                 'The plugin class %s must implement PuliPlugin.',
                 $pluginClass
