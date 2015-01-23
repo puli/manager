@@ -54,7 +54,7 @@ class PackageFile
     private $typeDescriptors = array();
 
     /**
-     * @var string[]
+     * @var bool[]
      */
     private $overriddenPackages = array();
 
@@ -119,29 +119,54 @@ class PackageFile
      */
     public function getOverriddenPackages()
     {
-        return $this->overriddenPackages;
+        return array_keys($this->overriddenPackages);
     }
 
     /**
      * Sets the names of the packages this package overrides.
      *
-     * @param string|string[] $overriddenPackages The names of the overridden packages.
+     * @param string[] $packageNames The names of the overridden packages.
      */
-    public function setOverriddenPackages($overriddenPackages)
+    public function setOverriddenPackages(array $packageNames)
     {
-        $this->overriddenPackages = (array) $overriddenPackages;
+        $this->overriddenPackages = array();
+
+        foreach ($packageNames as $packageName) {
+            $this->overriddenPackages[$packageName] = true;
+        }
     }
 
     /**
      * Adds an overridden package.
      *
-     * @param string $overriddenPackage The name of the overridden package.
+     * @param string $packageName The name of the overridden package.
      */
-    public function addOverriddenPackage($overriddenPackage)
+    public function addOverriddenPackage($packageName)
     {
-        if (!in_array($overriddenPackage, $this->overriddenPackages)) {
-            $this->overriddenPackages[] = $overriddenPackage;
-        }
+        $this->overriddenPackages[$packageName] = true;
+    }
+
+    /**
+     * Adds an overridden package.
+     *
+     * @param string $packageName The name of the overridden package.
+     */
+    public function removeOverriddenPackage($packageName)
+    {
+        unset($this->overriddenPackages[$packageName]);
+    }
+
+    /**
+     * Returns whether a package is overridden.
+     *
+     * @param string $packageName The name of the package.
+     *
+     * @return bool Returns `true` if the package is overridden in the package
+     *              file.
+     */
+    public function hasOverriddenPackage($packageName)
+    {
+        return isset($this->overriddenPackages[$packageName]);
     }
 
     /**

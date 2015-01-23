@@ -12,7 +12,7 @@
 namespace Puli\RepositoryManager\Tests\Util;
 
 use PHPUnit_Framework_TestCase;
-use Puli\RepositoryManager\Util\CompositeKeyStore;
+use Puli\RepositoryManager\Util\TwoDimensionalHashMap;
 
 /**
  * @since  1.0
@@ -21,13 +21,13 @@ use Puli\RepositoryManager\Util\CompositeKeyStore;
 class CompositeKeyStoreTest extends PHPUnit_Framework_TestCase
 {
     /**
-     * @var CompositeKeyStore
+     * @var TwoDimensionalHashMap
      */
     private $store;
 
     protected function setUp()
     {
-        $this->store = new CompositeKeyStore();
+        $this->store = new TwoDimensionalHashMap();
     }
 
     public function testGet()
@@ -104,7 +104,7 @@ class CompositeKeyStoreTest extends PHPUnit_Framework_TestCase
             'bar' => 'value1',
             'baz' => 'value2',
             'bam' => 'value3',
-        ), $this->store->getAll('foo'));
+        ), $this->store->listByPrimaryKey('foo'));
     }
 
     /**
@@ -112,7 +112,7 @@ class CompositeKeyStoreTest extends PHPUnit_Framework_TestCase
      */
     public function testGetAllFailsIfUnknownPrimaryKey()
     {
-        $this->store->getAll('foo');
+        $this->store->listByPrimaryKey('foo');
     }
 
     public function testGetCount()
@@ -194,7 +194,7 @@ class CompositeKeyStoreTest extends PHPUnit_Framework_TestCase
 
         $this->setExpectedException('\OutOfBoundsException');
 
-        $this->store->getAll('foo');
+        $this->store->listByPrimaryKey('foo');
     }
 
     public function testRemoveAll()
@@ -213,7 +213,7 @@ class CompositeKeyStoreTest extends PHPUnit_Framework_TestCase
 
         $this->setExpectedException('\OutOfBoundsException');
 
-        $this->store->getAll('foo');
+        $this->store->listByPrimaryKey('foo');
     }
 
 }

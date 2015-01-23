@@ -83,6 +83,20 @@ class RepositoryPathConflict
     }
 
     /**
+     * Adds resource mappings involved in the conflict.
+     *
+     * @param ResourceMapping[] $mappings The resource mappings to add.
+     *
+     * @throws NotLoadedException If a passed mapping is not loaded.
+     */
+    public function addMappings(array $mappings)
+    {
+        foreach ($mappings as $mapping) {
+            $this->addMapping($mapping);
+        }
+    }
+
+    /**
      * Removes a resource mapping from the conflict.
      *
      * If only one resource mapping is left after removing this mapping, that

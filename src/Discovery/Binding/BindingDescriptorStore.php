@@ -14,7 +14,7 @@ namespace Puli\RepositoryManager\Discovery\Binding;
 use OutOfBoundsException;
 use Puli\RepositoryManager\Api\Discovery\BindingDescriptor;
 use Puli\RepositoryManager\Api\Package\Package;
-use Puli\RepositoryManager\Util\CompositeKeyStore;
+use Puli\RepositoryManager\Util\TwoDimensionalHashMap;
 use Rhumsaa\Uuid\Uuid;
 
 /**
@@ -36,16 +36,16 @@ use Rhumsaa\Uuid\Uuid;
 class BindingDescriptorStore
 {
     /**
-     * @var CompositeKeyStore
+     * @var TwoDimensionalHashMap
      */
-    private $store;
+    private $map;
 
     /**
      * Creates the store.
      */
     public function __construct()
     {
-        $this->store = new CompositeKeyStore();
+        $this->map = new TwoDimensionalHashMap();
     }
 
     /**
@@ -57,7 +57,7 @@ class BindingDescriptorStore
      */
     public function  add(BindingDescriptor $bindingDescriptor, Package $package)
     {
-        $this->store->set($bindingDescriptor->getUuid()->toString(), $package->getName(), $bindingDescriptor);
+        $this->map->set($bindingDescriptor->getUuid()->toString(), $package->getName(), $bindingDescriptor);
     }
 
     /**
@@ -70,7 +70,7 @@ class BindingDescriptorStore
      */
     public function remove(Uuid $uuid, Package $package)
     {
-        $this->store->remove($uuid->toString(), $package->getName());
+        $this->map->remove($uuid->toString(), $package->getName());
     }
 
     /**
@@ -90,10 +90,10 @@ class BindingDescriptorStore
     public function get(Uuid $uuid, Package $package = null)
     {
         if (null !== $package) {
-            return $this->store->get($uuid->toString(), $package->getName());
+            return $this->map->get($uuid->toString(), $package->getName());
         }
 
-        return $this->store->getFirst($uuid->toString());
+        return $this->map->getFirst($uuid->toString());
     }
 
     /**
@@ -133,7 +133,7 @@ class BindingDescriptorStore
      */
     public function getAll(Uuid $uuid)
     {
-        return $this->store->getAll($uuid->toString());
+        return $this->map->listByPrimaryKey($uuid->toString());
     }
 
     /**
@@ -147,7 +147,7 @@ class BindingDescriptorStore
      */
     public function exists(Uuid $uuid, Package $package)
     {
-        return $this->store->contains($uuid->toString(), $package->getName());
+        return $this->map->contains($uuid->toString(), $package->getName());
     }
 
     /**
@@ -161,7 +161,7 @@ class BindingDescriptorStore
      */
     public function existsAny(Uuid $uuid)
     {
-        return $this->store->contains($uuid->toString());
+        return $this->map->contains($uuid->toString());
     }
 
     /**
@@ -199,7 +199,7 @@ class BindingDescriptorStore
      */
     public function getDefiningPackageNames(Uuid $uuid)
     {
-        return $this->store->getSecondaryKeys($uuid->toString());
+        return $this->map->getSecondaryKeys($uuid->toString());
     }
 
     /**
@@ -211,8 +211,8 @@ class BindingDescriptorStore
     {
         $uuids = array();
 
-        foreach ($this->store->getPrimaryKeys() as $key) {
-            $uuids[] = $this->store->getFirst($key)->getUuid();
+        foreach ($this->map->getPrimaryKeys() as $key) {
+            $uuids[] = $this->map->getFirst($key)->getUuid();
         }
 
         return $uuids;

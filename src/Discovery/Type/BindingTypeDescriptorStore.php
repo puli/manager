@@ -14,7 +14,7 @@ namespace Puli\RepositoryManager\Discovery\Type;
 use OutOfBoundsException;
 use Puli\RepositoryManager\Api\Discovery\BindingTypeDescriptor;
 use Puli\RepositoryManager\Api\Package\Package;
-use Puli\RepositoryManager\Util\CompositeKeyStore;
+use Puli\RepositoryManager\Util\TwoDimensionalHashMap;
 
 /**
  * A store for binding type descriptors.
@@ -35,16 +35,16 @@ use Puli\RepositoryManager\Util\CompositeKeyStore;
 class BindingTypeDescriptorStore
 {
     /**
-     * @var CompositeKeyStore
+     * @var TwoDimensionalHashMap
      */
-    private $store;
+    private $map;
 
     /**
      * Creates the store.
      */
     public function __construct()
     {
-        $this->store = new CompositeKeyStore();
+        $this->map = new TwoDimensionalHashMap();
     }
 
     /**
@@ -56,7 +56,7 @@ class BindingTypeDescriptorStore
      */
     public function add(BindingTypeDescriptor $typeDescriptor, Package $package)
     {
-        $this->store->set($typeDescriptor->getName(), $package->getName(), $typeDescriptor);
+        $this->map->set($typeDescriptor->getName(), $package->getName(), $typeDescriptor);
     }
 
     /**
@@ -69,7 +69,7 @@ class BindingTypeDescriptorStore
      */
     public function remove($typeName, Package $package)
     {
-        $this->store->remove($typeName, $package->getName());
+        $this->map->remove($typeName, $package->getName());
     }
 
     /**
@@ -89,10 +89,10 @@ class BindingTypeDescriptorStore
     public function get($typeName, Package $package = null)
     {
         if (null !== $package) {
-            return $this->store->get($typeName, $package->getName());
+            return $this->map->get($typeName, $package->getName());
         }
 
-        return $this->store->getFirst($typeName);
+        return $this->map->getFirst($typeName);
     }
 
     /**
@@ -107,7 +107,7 @@ class BindingTypeDescriptorStore
      */
     public function getAll($typeName)
     {
-        return $this->store->getAll($typeName);
+        return $this->map->listByPrimaryKey($typeName);
     }
 
     /**
@@ -121,7 +121,7 @@ class BindingTypeDescriptorStore
      */
     public function exists($typeName, Package $package)
     {
-        return $this->store->contains($typeName, $package->getName());
+        return $this->map->contains($typeName, $package->getName());
     }
 
     /**
@@ -135,7 +135,7 @@ class BindingTypeDescriptorStore
      */
     public function existsAny($typeName)
     {
-        return $this->store->contains($typeName);
+        return $this->map->contains($typeName);
     }
 
     /**
@@ -173,7 +173,7 @@ class BindingTypeDescriptorStore
      */
     public function getDefiningPackageNames($typeName)
     {
-        return $this->store->getSecondaryKeys($typeName);
+        return $this->map->getSecondaryKeys($typeName);
     }
 
     /**
@@ -183,6 +183,6 @@ class BindingTypeDescriptorStore
      */
     public function getTypeNames()
     {
-        return $this->store->getPrimaryKeys();
+        return $this->map->getPrimaryKeys();
     }
 }

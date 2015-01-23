@@ -66,7 +66,7 @@ class PackageJsonWriterTest extends JsonWriterTestCase
         $packageFile->addTypeDescriptor(new BindingTypeDescriptor('my/type', 'Description of my type.', array(
             new BindingParameterDescriptor('param', false, 1234, 'Description of the parameter.'),
         )));
-        $packageFile->setOverriddenPackages('acme/blog');
+        $packageFile->setOverriddenPackages(array('acme/blog'));
 
         $this->writer->writePackageFile($packageFile, $this->tempFile);
 
@@ -287,7 +287,7 @@ class PackageJsonWriterTest extends JsonWriterTestCase
         $packageFile->addTypeDescriptor(new BindingTypeDescriptor('my/type', 'Description of my type.', array(
             new BindingParameterDescriptor('param', false, 1234, 'Description of the parameter.'),
         )));
-        $packageFile->setOverriddenPackages('acme/blog');
+        $packageFile->setOverriddenPackages(array('acme/blog'));
         $packageFile->setOverrideOrder(array(
             'acme/blog-extension1',
             'acme/blog-extension2'

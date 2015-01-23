@@ -117,16 +117,10 @@ class ResourceMapping
      *                                             be referenced using
      *                                             `@vendor/package:` prefixes
      *                                             in the path references.
-     * @param bool              $failIfNotFound    Whether to fail when a path
-     *                                             or package is not found. By
-     *                                             default, errors are stored
-     *                                             in the mapping and can be
-     *                                             accessed by calling
-     *                                             {@link getLoadErrors()}.
      *
      * @throws AlreadyLoadedException If the mapping is already loaded.
      */
-    public function load(Package $containingPackage, PackageCollection $packages, $failIfNotFound = false)
+    public function load(Package $containingPackage, PackageCollection $packages)
     {
         if (null !== $this->state) {
             throw new AlreadyLoadedException('The mapping is already loaded.');
@@ -147,15 +141,9 @@ class ResourceMapping
             } catch (FileNotFoundException $loadError) {
             }
 
-            if (!$loadError) {
-                continue;
+            if ($loadError) {
+                $loadErrors[] = $loadError;
             }
-
-            if ($failIfNotFound) {
-                throw $loadError;
-            }
-
-            $loadErrors[] = $loadError;
         }
 
         $iterator = new RecursivePathsIterator(

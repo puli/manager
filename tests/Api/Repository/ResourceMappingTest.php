@@ -328,34 +328,6 @@ class ResourceMappingTest extends PHPUnit_Framework_TestCase
         $this->assertInstanceOf('Puli\RepositoryManager\Api\Package\NoSuchPackageException', $loadErrors[0]);
     }
 
-    public function testLoadFailsIfPathNotFoundAndFailOnError()
-    {
-        $mapping = new ResourceMapping('/path', array('assets', 'foo'));
-
-        try {
-            $mapping->load($this->package1, $this->packages, true);
-            $this->fail('Expected a FileNotFoundException');
-        } catch (FileNotFoundException $e) {
-        }
-
-        $this->assertSame(array('assets', 'foo'), $mapping->getPathReferences());
-        $this->assertFalse($mapping->isLoaded());
-    }
-
-    public function testLoadFailsIfPackageNotFoundAndFailOnError()
-    {
-        $mapping = new ResourceMapping('/path', array('assets', '@foo:resources'));
-
-        try {
-            $mapping->load($this->package1, $this->packages, true);
-            $this->fail('Expected a NoSuchPackageException');
-        } catch (NoSuchPackageException $e) {
-        }
-
-        $this->assertSame(array('assets', '@foo:resources'), $mapping->getPathReferences());
-        $this->assertFalse($mapping->isLoaded());
-    }
-
     public function testUnload()
     {
         $mapping = new ResourceMapping('/path', 'resources');

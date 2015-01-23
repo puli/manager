@@ -14,7 +14,7 @@ namespace Puli\RepositoryManager\Util;
 use OutOfBoundsException;
 
 /**
- * An in-memory store for values identified by a composite key.
+ * An hash-map for values identified by a two-dimensional key.
  *
  * Every value in the store has a primary key and a secondary key. When adding
  * values to the store, both keys need to be defined. When retrieving values
@@ -24,7 +24,7 @@ use OutOfBoundsException;
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class CompositeKeyStore
+class TwoDimensionalHashMap
 {
     /**
      * @var array[]
@@ -163,27 +163,6 @@ class CompositeKeyStore
     }
 
     /**
-     * Returns all values set for the given primary key.
-     *
-     * @param int|string $primaryKey The primary key.
-     *
-     * @return array The values indexed by their secondary keys.
-     *
-     * @throws OutOfBoundsException If the primary key does not exist.
-     */
-    public function getAll($primaryKey)
-    {
-        if (!isset($this->values[$primaryKey])) {
-            throw new OutOfBoundsException(sprintf(
-                'The key "%s" does not exist.',
-                $primaryKey
-            ));
-        }
-
-        return $this->values[$primaryKey];
-    }
-
-    /**
      * Returns the number of secondary keys set for the given primary key.
      *
      * @param int|string $primaryKey The primary key.
@@ -205,15 +184,15 @@ class CompositeKeyStore
     }
 
     /**
-     * Returns the secondary keys for the given primary key.
+     * Returns all values set for the given primary key.
      *
      * @param int|string $primaryKey The primary key.
      *
-     * @return array The secondary keys.
+     * @return array The values indexed by their secondary keys.
      *
      * @throws OutOfBoundsException If the primary key does not exist.
      */
-    public function getSecondaryKeys($primaryKey)
+    public function listByPrimaryKey($primaryKey)
     {
         if (!isset($this->values[$primaryKey])) {
             throw new OutOfBoundsException(sprintf(
@@ -222,7 +201,60 @@ class CompositeKeyStore
             ));
         }
 
-        return array_keys($this->values[$primaryKey]);
+        return $this->values[$primaryKey];
+    }
+
+    public function listBySecondaryKey($secondaryKey)
+    {
+        $list = array();
+
+        foreach ($this->values as $primaryKey => $valuesBySecondaryKey) {
+            if (isset($valuesBySecondaryKey[$secondaryKey])) {
+                $list[$primaryKey] = $valuesBySecondaryKey[$secondaryKey];
+            }
+        }
+
+        if (!$list) {
+            throw new OutOfBoundsException(sprintf(
+                'The key "%s" does not exist.',
+                $secondaryKey
+            ));
+        }
+
+        return $list;
+    }
+
+    /**
+     * Returns the secondary keys for the given primary key.
+     *
+     * @param int|string $primaryKey The primary key.
+     *
+     * @return array The secondary keys.
+     *
+     * @throws OutOfBoundsException If the primary key does not exist.
+     */
+    public function getSecondaryKeys($primaryKey = null)
+    {
+        if ($primaryKey) {
+            if (!isset($this->values[$primaryKey])) {
+                throw new OutOfBoundsException(sprintf(
+                    'The key "%s" does not exist.',
+                    $primaryKey
+                ));
+            }
+
+            return array_keys($this->values[$primaryKey]);
+        }
+
+        $allSecondaryKeys = array();
+
+        foreach ($this->values as $primaryKey => $valuesBySecondaryKey) {
+            foreach ($valuesBySecondaryKey as $secondaryKey => $values) {
+                $allSecondaryKeys[$secondaryKey] = true;
+            }
+        }
+
+        return array_keys($allSecondaryKeys);
     }
 
     /**
@@ -244,5 +276,10 @@ class CompositeKeyStore
     public function toArray()
     {
         return $this->values;
+    }
+
+    public function sortByPrimaryKeys()
+    {
+        ksort($this->values);
     }
 }

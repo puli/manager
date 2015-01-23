@@ -179,6 +179,11 @@ class OverrideGraph
         $this->edges[$to][$from] = true;
     }
 
+    public function removeEdge($from, $to)
+    {
+        unset($this->edges[$to][$from]);
+    }
+
     /**
      * Returns whether an edge exists between two packages.
      *

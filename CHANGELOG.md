@@ -71,6 +71,10 @@ Changelog
  * added `BindingDescriptor::listPathMappings()`
  * added `BindingDescriptor::listRepositoryPaths()`
  * added `BindingDescriptor::getTypeDescriptor()`
+ * changed `PackageFile::setOverriddenPackages()` to only accept arrays
+ * added `PackageFile::removeOverriddenPackage()`
+ * added `PackageFile::hasOverriddenPackage()`
+ * added `RepositoryPathConflict::addMappings()`
 
 * 1.0.0-beta (2015-01-12)
 
@@ -106,7 +110,7 @@ Changelog
  * added `CannotDisableBindingException`
  * added `CannotEnableBindingException`
  * added `NoSuchBindingException`
- * added `CompositeKeyStore`
+ * added `TwoDimensionalHashMap`
  * added `BindingDescriptorStore`
  * added `BindingTypeDescriptorStore`
  * added `TypeNotEnabledException`
@@ -115,7 +119,7 @@ Changelog
  * added `RecursivePathIterator`
  * added `RecursivePathsIterator`
  * added `NoSuchMappingException`
- * added `RepositoryUpdater`
+ * added `UpdateRepository`
  * added `DistinguishedName`
  * added `Config::FACTORY`
  * added `Config::FACTORY_AUTO_GENERATE`

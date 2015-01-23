@@ -118,6 +118,9 @@ class RepositoryManagerImplTest extends ManagerTestCase
     {
         $this->initDefaultManager();
 
+        $this->repo->expects($this->never())
+            ->method('remove');
+
         $this->repo->expects($this->once())
             ->method('add')
             ->with('/path', new DirectoryResource($this->rootDir.'/resources'));
@@ -141,6 +144,9 @@ class RepositoryManagerImplTest extends ManagerTestCase
     {
         $this->initDefaultManager();
 
+        $this->repo->expects($this->never())
+            ->method('remove');
+
         $this->repo->expects($this->once())
             ->method('add')
             ->with('/path/file', new FileResource($this->rootDir.'/resources/file'));
@@ -163,6 +169,9 @@ class RepositoryManagerImplTest extends ManagerTestCase
     public function testAddResourceMappingWithMultiplePaths()
     {
         $this->initDefaultManager();
+
+        $this->repo->expects($this->never())
+            ->method('remove');
 
         $this->repo->expects($this->at(0))
             ->method('add')
@@ -190,6 +199,9 @@ class RepositoryManagerImplTest extends ManagerTestCase
     public function testAddResourceMappingWithReferenceToOtherPackage()
     {
         $this->initDefaultManager();
+
+        $this->repo->expects($this->never())
+            ->method('remove');
 
         $this->repo->expects($this->once())
             ->method('add')
@@ -219,6 +231,9 @@ class RepositoryManagerImplTest extends ManagerTestCase
         $this->initDefaultManager();
 
         $this->repo->expects($this->never())
+            ->method('remove');
+
+        $this->repo->expects($this->never())
             ->method('add');
 
         $this->packageFileStorage->expects($this->never())
@@ -230,6 +245,9 @@ class RepositoryManagerImplTest extends ManagerTestCase
     public function testAddResourceMappingDoesNotFailIfReferencedPackageNotFoundAndNotFailIfNotFound()
     {
         $this->initDefaultManager();
+
+        $this->repo->expects($this->never())
+            ->method('remove');
 
         $this->repo->expects($this->never())
             ->method('add');
@@ -253,6 +271,9 @@ class RepositoryManagerImplTest extends ManagerTestCase
     {
         $this->initDefaultManager();
 
+        $this->repo->expects($this->never())
+            ->method('remove');
+
         $this->repo->expects($this->once())
             ->method('add')
             ->with('/path', new DirectoryResource($this->rootDir.'/override'));
@@ -272,7 +293,7 @@ class RepositoryManagerImplTest extends ManagerTestCase
                 PHPUnit_Framework_Assert::assertSame(array('vendor/package1', 'vendor/package2'), $rootPackageFile->getOverriddenPackages());
             }));
 
-        $this->rootPackageFile->setOverriddenPackages('vendor/package1');
+        $this->rootPackageFile->setOverriddenPackages(array('vendor/package1'));
         $this->packageFile2->addResourceMapping(new ResourceMapping('/path', 'resources'));
 
         $this->manager->addResourceMapping(new ResourceMapping('/path', 'override'));
@@ -284,6 +305,9 @@ class RepositoryManagerImplTest extends ManagerTestCase
     public function testAddResourceMappingOverridesMultipleConflictingPackages()
     {
         $this->initDefaultManager();
+
+        $this->repo->expects($this->never())
+            ->method('remove');
 
         $this->repo->expects($this->once())
             ->method('add')
@@ -307,7 +331,7 @@ class RepositoryManagerImplTest extends ManagerTestCase
 
         $this->packageFile1->addResourceMapping(new ResourceMapping('/path', 'resources'));
         $this->packageFile2->addResourceMapping(new ResourceMapping('/path', 'resources'));
-        $this->packageFile2->setOverriddenPackages('vendor/package1');
+        $this->packageFile2->setOverriddenPackages(array('vendor/package1'));
 
         $this->manager->addResourceMapping(new ResourceMapping('/path', 'resources'));
     }
@@ -315,6 +339,9 @@ class RepositoryManagerImplTest extends ManagerTestCase
     public function testAddResourceMappingWithConflictDoesNotChangeExistingConflicts()
     {
         $this->initDefaultManager();
+
+        $this->repo->expects($this->never())
+            ->method('remove');
 
         $this->repo->expects($this->once())
             ->method('add')
@@ -351,6 +378,9 @@ class RepositoryManagerImplTest extends ManagerTestCase
     {
         $this->initDefaultManager();
 
+        $this->repo->expects($this->never())
+            ->method('remove');
+
         $this->repo->expects($this->once())
             ->method('add')
             ->with('/path', new DirectoryResource($this->rootDir.'/override'));
@@ -377,6 +407,9 @@ class RepositoryManagerImplTest extends ManagerTestCase
     public function testAddResourceMappingOverridesNestedPath2()
     {
         $this->initDefaultManager();
+
+        $this->repo->expects($this->never())
+            ->method('remove');
 
         $this->repo->expects($this->once())
             ->method('add')
@@ -529,7 +562,7 @@ class RepositoryManagerImplTest extends ManagerTestCase
 
         $this->packageFile1->addResourceMapping(new ResourceMapping('/package1', 'resources'));
         $this->rootPackageFile->addResourceMapping(new ResourceMapping('/package1', 'resources'));
-        $this->rootPackageFile->setOverriddenPackages('vendor/package1');
+        $this->rootPackageFile->setOverriddenPackages(array('vendor/package1'));
 
         $this->manager->removeResourceMapping('/package1');
     }
@@ -540,7 +573,7 @@ class RepositoryManagerImplTest extends ManagerTestCase
 
         $this->repo->expects($this->at(0))
             ->method('remove')
-            ->with('/path/config');
+            ->with('/path');
 
         $this->repo->expects($this->at(1))
             ->method('add')
@@ -558,7 +591,7 @@ class RepositoryManagerImplTest extends ManagerTestCase
         // /override overrides /package1/resources/config
         $this->packageFile1->addResourceMapping(new ResourceMapping('/path', 'resources'));
         $this->rootPackageFile->addResourceMapping(new ResourceMapping('/path/config', 'override'));
-        $this->rootPackageFile->setOverriddenPackages('vendor/package1');
+        $this->rootPackageFile->setOverriddenPackages(array('vendor/package1'));
 
         $this->manager->removeResourceMapping('/path/config');
     }
@@ -587,7 +620,7 @@ class RepositoryManagerImplTest extends ManagerTestCase
         // /override/config overrides /package1/resources
         $this->packageFile1->addResourceMapping(new ResourceMapping('/path/config', 'resources'));
         $this->rootPackageFile->addResourceMapping(new ResourceMapping('/path', 'override'));
-        $this->rootPackageFile->setOverriddenPackages('vendor/package1');
+        $this->rootPackageFile->setOverriddenPackages(array('vendor/package1'));
 
         $this->manager->removeResourceMapping('/path');
     }
@@ -616,7 +649,7 @@ class RepositoryManagerImplTest extends ManagerTestCase
         $this->packageFile1->addResourceMapping(new ResourceMapping('/path', 'resources'));
         $this->packageFile2->addResourceMapping(new ResourceMapping('/path', 'resources'));
         $this->rootPackageFile->addResourceMapping(new ResourceMapping('/path/config', 'override'));
-        $this->rootPackageFile->setOverriddenPackages('vendor/package1');
+        $this->rootPackageFile->setOverriddenPackages(array('vendor/package1'));
 
         $this->manager->removeResourceMapping('/path/config');
     }
@@ -899,7 +932,7 @@ class RepositoryManagerImplTest extends ManagerTestCase
         $this->packageFile1->addResourceMapping(new ResourceMapping('/package1/css', 'assets/css'));
         $this->packageFile2->addResourceMapping(new ResourceMapping('/package1', 'override'));
         $this->packageFile2->addResourceMapping(new ResourceMapping('/package1/css', 'css-override'));
-        $this->packageFile2->setOverriddenPackages('vendor/package1');
+        $this->packageFile2->setOverriddenPackages(array('vendor/package1'));
 
         $this->repo->expects($this->at(1))
             ->method('add')
@@ -926,9 +959,9 @@ class RepositoryManagerImplTest extends ManagerTestCase
 
         $this->packageFile1->addResourceMapping(new ResourceMapping('/package1', 'resources'));
         $this->packageFile2->addResourceMapping(new ResourceMapping('/package1', 'override'));
-        $this->packageFile2->setOverriddenPackages('vendor/package1');
+        $this->packageFile2->setOverriddenPackages(array('vendor/package1'));
         $this->packageFile3->addResourceMapping(new ResourceMapping('/package1', 'override2'));
-        $this->packageFile3->setOverriddenPackages('vendor/package2');
+        $this->packageFile3->setOverriddenPackages(array('vendor/package2'));
 
         $this->repo->expects($this->at(1))
             ->method('add')
@@ -979,7 +1012,7 @@ class RepositoryManagerImplTest extends ManagerTestCase
         $this->initDefaultManager();
 
         $this->packageFile1->addResourceMapping(new ResourceMapping('/package', 'resources'));
-        $this->packageFile1->setOverriddenPackages('foobar');
+        $this->packageFile1->setOverriddenPackages(array('foobar'));
 
         $this->repo->expects($this->at(1))
             ->method('add')
@@ -994,7 +1027,7 @@ class RepositoryManagerImplTest extends ManagerTestCase
 
         $this->packageFile1->addResourceMapping(new ResourceMapping('/package1', 'resources'));
         $this->packageFile2->addResourceMapping(new ResourceMapping('/package1', array('override', 'css-override')));
-        $this->packageFile2->setOverriddenPackages('vendor/package1');
+        $this->packageFile2->setOverriddenPackages(array('vendor/package1'));
 
         $this->repo->expects($this->at(1))
             ->method('add')
