@@ -381,6 +381,22 @@ class ConfigFileManagerImplTest extends PHPUnit_Framework_TestCase
         ), $this->manager->findConfigKeys('factory.*', true, true));
     }
 
+    /**
+     * @expectedException \InvalidArgumentException
+     */
+    public function testFindConfigKeysFailsIfPatternNoString()
+    {
+        $this->manager->findConfigKeys(1234);
+    }
+
+    /**
+     * @expectedException \InvalidArgumentException
+     */
+    public function testFindConfigKeysFailsIfIncludeFallbackNoBool()
+    {
+        $this->manager->findConfigKeys('factory.*', 'true');
+    }
+
     public function testRemoveConfigKey()
     {
         $this->configFile->getConfig()->set(Config::PULI_DIR, 'my-puli-dir');

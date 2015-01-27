@@ -92,12 +92,12 @@ interface PackageManager
     /**
      * Returns all packages installed by the given installer.
      *
-     * @param string $installer The installer name.
+     * @param string $installerName The installer name.
      * @param int    $state     The state of the packages to return.
      *
      * @return PackageCollection The packages.
      */
-    public function getPackagesByInstaller($installer, $state = null);
+    public function getPackagesByInstaller($installerName, $state = null);
 
     /**
      * Returns the manager's environment.

@@ -21,7 +21,9 @@ use Puli\Discovery\Api\EditableDiscovery;
 use Puli\Discovery\Api\NoSuchTypeException;
 use Puli\Discovery\Api\Validation\ConstraintViolation;
 use Puli\RepositoryManager\Api\Discovery\BindingDescriptor;
+use Puli\RepositoryManager\Api\Discovery\BindingState;
 use Puli\RepositoryManager\Api\Discovery\BindingTypeDescriptor;
+use Puli\RepositoryManager\Api\Discovery\BindingTypeState;
 use Puli\RepositoryManager\Api\Discovery\CannotDisableBindingException;
 use Puli\RepositoryManager\Api\Discovery\CannotEnableBindingException;
 use Puli\RepositoryManager\Api\Discovery\DiscoveryManager;
@@ -34,6 +36,7 @@ use Puli\RepositoryManager\Api\Package\Package;
 use Puli\RepositoryManager\Api\Package\PackageCollection;
 use Puli\RepositoryManager\Api\Package\RootPackage;
 use Puli\RepositoryManager\Api\Package\RootPackageFile;
+use Puli\RepositoryManager\Assert\Assert;
 use Puli\RepositoryManager\Discovery\Binding\AddBindingDescriptorToPackageFile;
 use Puli\RepositoryManager\Discovery\Binding\Bind;
 use Puli\RepositoryManager\Discovery\Binding\BindingDescriptorCollection;
@@ -192,6 +195,10 @@ class DiscoveryManagerImpl implements DiscoveryManager
      */
     public function removeBindingType($typeName)
     {
+        // Only check that this is a string. The error message "not found" is
+        // more helpful than e.g. "type name must contain /".
+        Assert::string($typeName, 'The type name must be a string');
+
         $this->assertDiscoveryLoaded();
         $this->assertPackagesLoaded();
 
@@ -242,10 +249,14 @@ class DiscoveryManagerImpl implements DiscoveryManager
      */
     public function getBindingTypes($packageName = null, $state = null)
     {
+        Assert::nullOrOneOf($state, BindingTypeState::all(), 'Expected a valid binding type state. Got: %s');
+
         $this->assertPackagesLoaded();
 
         $packageNames = $packageName ? (array) $packageName : $this->packages->getPackageNames();
         $types = array();
+
+        Assert::allString($packageNames, 'The package names must be strings. Got: %s');
 
         foreach ($packageNames as $packageName) {
             $packageFile = $this->packages[$packageName]->getPackageFile();
@@ -349,7 +360,11 @@ class DiscoveryManagerImpl implements DiscoveryManager
         $this->assertDiscoveryLoaded();
         $this->assertPackagesLoaded();
 
-        if (!$bindingDescriptors = $this->getBindingsByUuid($uuid, $packageName)) {
+        $packageNames = $packageName ? (array) $packageName : $this->packages->getPackageNames();
+
+        Assert::allString($packageNames, 'The package names must be strings. Got: %s');
+
+        if (!$bindingDescriptors = $this->getBindingsByUuid($uuid, $packageNames)) {
             throw NoSuchBindingException::forUuid($uuid);
         }
 
@@ -387,7 +402,11 @@ class DiscoveryManagerImpl implements DiscoveryManager
         $this->assertDiscoveryLoaded();
         $this->assertPackagesLoaded();
 
-        if (!$bindingDescriptors = $this->getBindingsByUuid($uuid, $packageName)) {
+        $packageNames = $packageName ? (array) $packageName : $this->packages->getPackageNames();
+
+        Assert::allString($packageNames, 'The package names must be strings. Got: %s');
+
+        if (!$bindingDescriptors = $this->getBindingsByUuid($uuid, $packageNames)) {
             throw NoSuchBindingException::forUuid($uuid);
         }
 
@@ -422,10 +441,14 @@ class DiscoveryManagerImpl implements DiscoveryManager
      */
     public function getBindings($packageName = null, $state = null)
     {
+        Assert::nullOrOneOf($state, BindingState::all(), 'Expected a valid binding state. Got: %s');
+
         $this->assertPackagesLoaded();
 
         $packageNames = $packageName ? (array) $packageName : $this->packages->getPackageNames();
         $bindings = array();
+
+        Assert::allString($packageNames, 'The package names must be strings. Got: %s');
 
         foreach ($packageNames as $packageName) {
             $packageFile = $this->packages[$packageName]->getPackageFile();
@@ -448,6 +471,8 @@ class DiscoveryManagerImpl implements DiscoveryManager
         $packageNames = $packageName ? (array) $packageName : $this->packages->getPackageNames();
         $bindings = array();
         $uuid = $uuid instanceof Uuid ? $uuid->toString() : $uuid;
+
+        Assert::allString($packageNames, 'The package names must be strings. Got: %s');
 
         foreach ($packageNames as $packageName) {
             $packageFile = $this->packages[$packageName]->getPackageFile();
@@ -686,11 +711,11 @@ class DiscoveryManagerImpl implements DiscoveryManager
 
     /**
      * @param Uuid  $uuid
-     * @param array $packageName
+     * @param array $packageNames
      *
      * @return BindingDescriptor[]
      */
-    private function getBindingsByUuid(Uuid $uuid, $packageName = null)
+    private function getBindingsByUuid(Uuid $uuid, array $packageNames)
     {
         if (!$this->bindingDescriptors->contains($uuid)) {
             return array();
@@ -698,7 +723,6 @@ class DiscoveryManagerImpl implements DiscoveryManager
 
         $bindingDescriptors = array();
         $descriptorsByPackage = $this->bindingDescriptors->listByUuid($uuid);
-        $packageNames = $packageName ? (array) $packageName : $this->packages->getPackageNames();
 
         foreach ($packageNames as $packageName) {
             if (isset($descriptorsByPackage[$packageName])) {

@@ -22,6 +22,7 @@ use Puli\RepositoryManager\Api\Package\Package;
 use Puli\RepositoryManager\Api\Package\PackageCollection;
 use Puli\RepositoryManager\Api\Package\PackageFile;
 use Puli\RepositoryManager\Api\Package\PackageManager;
+use Puli\RepositoryManager\Api\Package\PackageState;
 use Puli\RepositoryManager\Api\Package\RootPackage;
 use Puli\RepositoryManager\Api\Package\RootPackageFile;
 use Puli\RepositoryManager\Api\Package\UnsupportedVersionException;
@@ -85,6 +86,8 @@ class PackageManagerImpl implements PackageManager
      */
     public function installPackage($installPath, $name = null, $installerName = InstallInfo::DEFAULT_INSTALLER_NAME)
     {
+        Assert::string($installPath, 'The install path must be a string.');
+        Assert::string($installerName, 'The installer name must be a string.');
         Assert::nullOrPackageName($name);
 
         $this->assertPackagesLoaded();
@@ -148,6 +151,8 @@ class PackageManagerImpl implements PackageManager
      */
     public function isPackageInstalled($installPath)
     {
+        Assert::string($installPath, 'The install path must be a string.');
+
         $this->assertPackagesLoaded();
 
         $installPath = Path::makeAbsolute($installPath, $this->rootDir);
@@ -166,6 +171,10 @@ class PackageManagerImpl implements PackageManager
      */
     public function removePackage($name)
     {
+        // Only check that this is a string. The error message "not found" is
+        // more helpful than e.g. "package name must contain /".
+        Assert::string($name, 'The package name must be a string');
+
         $this->assertPackagesLoaded();
 
         if ($this->rootPackageFile->hasInstallInfo($name)) {
@@ -189,6 +198,8 @@ class PackageManagerImpl implements PackageManager
      */
     public function hasPackage($name)
     {
+        Assert::string($name, 'The package name must be a string');
+
         $this->assertPackagesLoaded();
 
         return $this->packages->contains($name);
@@ -199,6 +210,8 @@ class PackageManagerImpl implements PackageManager
      */
     public function getPackage($name)
     {
+        Assert::string($name, 'The package name must be a string');
+
         $this->assertPackagesLoaded();
 
         return $this->packages->get($name);
@@ -219,6 +232,8 @@ class PackageManagerImpl implements PackageManager
      */
     public function getPackages($state = null)
     {
+        Assert::nullOrOneOf($state, PackageState::all(), 'Expected a valid package state. Got: %s');
+
         $this->assertPackagesLoaded();
 
         $packages = new PackageCollection();
@@ -235,8 +250,11 @@ class PackageManagerImpl implements PackageManager
     /**
      * {@inheritdoc}
      */
-    public function getPackagesByInstaller($installer, $state = null)
+    public function getPackagesByInstaller($installerName, $state = null)
     {
+        Assert::string($installerName, 'The installer name must be a string.');
+        Assert::nullOrOneOf($state, PackageState::all(), 'Expected a valid package state. Got: %s');
+
         $this->assertPackagesLoaded();
 
         $packages = new PackageCollection();
@@ -245,7 +263,7 @@ class PackageManagerImpl implements PackageManager
             $installInfo = $package->getInstallInfo();
 
             // The root package has no install info
-            if ($installInfo && $installer === $installInfo->getInstallerName()
+            if ($installInfo && $installerName === $installInfo->getInstallerName()
                 && (null === $state || $state === $package->getState())) {
                 $packages->add($package);
             }

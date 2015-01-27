@@ -17,6 +17,7 @@ use Puli\RepositoryManager\Api\Config\Config;
 use Puli\RepositoryManager\Api\Config\ConfigFileManager;
 use Puli\RepositoryManager\Api\InvalidConfigException;
 use Puli\RepositoryManager\Api\IOException;
+use Puli\RepositoryManager\Assert\Assert;
 use Webmozart\Glob\Iterator\RegexFilterIterator;
 
 /**
@@ -142,6 +143,8 @@ abstract class AbstractConfigFileManager implements ConfigFileManager
      */
     public function hasConfigKey($key, $fallback = false)
     {
+        Assert::boolean($fallback, 'The argument $fallback must be a boolean.');
+
         return $this->getConfig()->contains($key, $fallback);
     }
 
@@ -150,6 +153,8 @@ abstract class AbstractConfigFileManager implements ConfigFileManager
      */
     public function getConfigKey($key, $default = null, $fallback = false)
     {
+        Assert::boolean($fallback, 'The argument $fallback must be a boolean.');
+
         return $this->getConfig()->getRaw($key, $default, $fallback);
     }
 
@@ -158,6 +163,9 @@ abstract class AbstractConfigFileManager implements ConfigFileManager
      */
     public function getConfigKeys($includeFallback = false, $includeUnset = false)
     {
+        Assert::boolean($includeFallback, 'The argument $includeFallback must be a boolean.');
+        Assert::boolean($includeUnset, 'The argument $includeUnset must be a boolean.');
+
         $values = $this->getConfig()->toFlatRawArray($includeFallback);
 
         // Reorder the returned values
@@ -176,6 +184,10 @@ abstract class AbstractConfigFileManager implements ConfigFileManager
      */
     public function findConfigKeys($pattern, $includeFallback = false, $includeUnset = false)
     {
+        Assert::string($pattern, 'The pattern must be a string.');
+        Assert::boolean($includeFallback, 'The argument $includeFallback must be a boolean.');
+        Assert::boolean($includeUnset, 'The argument $includeUnset must be a boolean.');
+
         $values = $this->getConfigKeys($includeFallback, $includeUnset);
 
         $regEx = '~^'.str_replace('\\*', '.*', preg_quote($pattern, '~')).'$~';

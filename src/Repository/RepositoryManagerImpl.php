@@ -21,6 +21,8 @@ use Puli\RepositoryManager\Api\Package\RootPackage;
 use Puli\RepositoryManager\Api\Package\RootPackageFile;
 use Puli\RepositoryManager\Api\Repository\RepositoryManager;
 use Puli\RepositoryManager\Api\Repository\ResourceMapping;
+use Puli\RepositoryManager\Api\Repository\ResourceMappingState;
+use Puli\RepositoryManager\Assert\Assert;
 use Puli\RepositoryManager\Conflict\OverrideGraph;
 use Puli\RepositoryManager\Conflict\PackageConflictDetector;
 use Puli\RepositoryManager\Conflict\PackageConflictException;
@@ -131,6 +133,8 @@ class RepositoryManagerImpl implements  RepositoryManager
      */
     public function addResourceMapping(ResourceMapping $mapping, $failIfNotFound = true)
     {
+        Assert::boolean($failIfNotFound, 'The argument $failIfNotFound must be a boolean.');
+
         $this->assertMappingsLoaded();
         $this->assertRepositoryLoaded();
 
@@ -167,6 +171,8 @@ class RepositoryManagerImpl implements  RepositoryManager
      */
     public function removeResourceMapping($repositoryPath)
     {
+        Assert::path($repositoryPath);
+
         if (!$this->rootPackageFile->hasResourceMapping($repositoryPath)) {
             return;
         }
@@ -203,6 +209,8 @@ class RepositoryManagerImpl implements  RepositoryManager
      */
     public function hasResourceMapping($repositoryPath)
     {
+        Assert::path($repositoryPath);
+
         return $this->rootPackageFile->hasResourceMapping($repositoryPath);
     }
 
@@ -211,6 +219,8 @@ class RepositoryManagerImpl implements  RepositoryManager
      */
     public function getResourceMapping($repositoryPath)
     {
+        Assert::path($repositoryPath);
+
         return $this->rootPackageFile->getResourceMapping($repositoryPath);
     }
 
@@ -219,10 +229,14 @@ class RepositoryManagerImpl implements  RepositoryManager
      */
     public function getResourceMappings($packageName = null, $state = null)
     {
+        Assert::nullOrOneOf($state, ResourceMappingState::all(), 'Expected a valid resource mapping state. Got: %s');
+
         $this->assertMappingsLoaded();
 
         $packageNames = $packageName ? (array) $packageName : $this->packages->getPackageNames();
         $mappings = array();
+
+        Assert::allString($packageNames, 'The package names must be strings. Got: %s');
 
         foreach ($packageNames as $packageName) {
             $packageFile = $this->packages[$packageName]->getPackageFile();
