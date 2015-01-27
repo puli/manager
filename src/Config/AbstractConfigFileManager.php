@@ -12,6 +12,7 @@
 namespace Puli\RepositoryManager\Config;
 
 use ArrayIterator;
+use Exception;
 use Puli\RepositoryManager\Api\Config\Config;
 use Puli\RepositoryManager\Api\Config\ConfigFileManager;
 use Puli\RepositoryManager\Api\InvalidConfigException;
@@ -32,9 +33,27 @@ abstract class AbstractConfigFileManager implements ConfigFileManager
      */
     public function setConfigKey($key, $value)
     {
-        $this->getConfig()->set($key, $value);
+        $config = $this->getConfig();
+        $previouslySet = $config->contains($key);
+        $previousValue = $config->get($key);
 
-        $this->saveConfigFile();
+        if ($previouslySet && $previousValue === $value) {
+            return;
+        }
+
+        $config->set($key, $value);
+
+        try {
+            $this->saveConfigFile();
+        } catch (Exception $e) {
+            if ($previouslySet) {
+                $config->set($key, $previousValue);
+            } else {
+                $config->remove($key);
+            }
+
+            throw $e;
+        }
     }
 
     /**
@@ -42,9 +61,32 @@ abstract class AbstractConfigFileManager implements ConfigFileManager
      */
     public function setConfigKeys(array $values)
     {
-        $this->getConfig()->merge($values);
+        $config = $this->getConfig();
+        $previouslyUnset = array();
+        $previousValues = array();
 
-        $this->saveConfigFile();
+        foreach ($values as $key => $value) {
+            if ($config->contains($key)) {
+                $previousValues[$key] = $config->get($key);
+            } else {
+                $previouslyUnset[] = $key;
+            }
+        }
+
+        $config->merge($values);
+
+        try {
+            $this->saveConfigFile();
+        } catch (Exception $e) {
+            foreach ($previousValues as $key => $previousValue) {
+                $config->set($key, $previousValue);
+            }
+            foreach ($previouslyUnset as $key) {
+                $config->remove($key);
+            }
+
+            throw $e;
+        }
     }
 
     /**
@@ -52,9 +94,22 @@ abstract class AbstractConfigFileManager implements ConfigFileManager
      */
     public function removeConfigKey($key)
     {
-        $this->getConfig()->remove($key);
+        $config = $this->getConfig();
 
-        $this->saveConfigFile();
+        if (!$config->contains($key)) {
+            return;
+        }
+
+        $previousValue = $config->get($key);
+        $config->remove($key);
+
+        try {
+            $this->saveConfigFile();
+        } catch (Exception $e) {
+            $config->set($key, $previousValue);
+
+            throw $e;
+        }
     }
 
     /**
@@ -62,11 +117,25 @@ abstract class AbstractConfigFileManager implements ConfigFileManager
      */
     public function removeConfigKeys(array $keys)
     {
+        $config = $this->getConfig();
+        $previousValues = array();
+
         foreach ($keys as $key) {
-            $this->getConfig()->remove($key);
+            if ($config->contains($key)) {
+                $previousValues[$key] = $config->get($key);
+                $config->remove($key);
+            }
         }
 
-        $this->saveConfigFile();
+        try {
+            $this->saveConfigFile();
+        } catch (Exception $e) {
+            foreach ($previousValues as $key => $previousValue) {
+                $config->set($key, $previousValue);
+            }
+
+            throw $e;
+        }
     }
 
     /**

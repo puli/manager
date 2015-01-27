@@ -19,6 +19,7 @@ use Puli\RepositoryManager\Api\Config\ConfigFile;
 use Puli\RepositoryManager\Config\ConfigFileManagerImpl;
 use Puli\RepositoryManager\Config\ConfigFileStorage;
 use Puli\RepositoryManager\Tests\Package\Fixtures\TestGlobalEnvironment;
+use Puli\RepositoryManager\Tests\TestException;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
@@ -96,6 +97,76 @@ class ConfigFileManagerImplTest extends PHPUnit_Framework_TestCase
         $this->manager->setConfigKey(Config::PULI_DIR, 'my-puli-dir');
     }
 
+    public function testSetConfigKeyRevertsIfSavingNotPossible()
+    {
+        $this->configFileStorage->expects($this->once())
+            ->method('saveConfigFile')
+            ->willThrowException(new TestException());
+
+        try {
+            $this->manager->setConfigKey(Config::PULI_DIR, 'my-puli-dir');
+            $this->fail('Expected a TestException');
+        } catch (TestException $e) {
+        }
+
+        $this->assertFalse($this->configFile->getConfig()->contains(Config::PULI_DIR));
+    }
+
+    public function testSetConfigKeyResetsToPreviousValueIfSavingNotPossible()
+    {
+        $this->configFileStorage->expects($this->once())
+            ->method('saveConfigFile')
+            ->willThrowException(new TestException());
+
+        $this->configFile->getConfig()->set(Config::PULI_DIR, 'previous-value');
+
+        try {
+            $this->manager->setConfigKey(Config::PULI_DIR, 'my-puli-dir');
+            $this->fail('Expected a TestException');
+        } catch (TestException $e) {
+        }
+
+        $this->assertSame('previous-value', $this->configFile->getConfig()->get(Config::PULI_DIR));
+    }
+
+    public function testSetConfigKeyIgnoresUnchangedValues()
+    {
+        $this->configFile->getConfig()->set(Config::PULI_DIR, 'my-puli-dir');
+
+        $this->configFileStorage->expects($this->never())
+            ->method('saveConfigFile');
+
+        $this->manager->setConfigKey(Config::PULI_DIR, 'my-puli-dir');
+    }
+
+    public function testSetConfigKeyAcceptsNewFalseValue()
+    {
+        $this->configFileStorage->expects($this->once())
+            ->method('saveConfigFile')
+            ->with($this->configFile)
+            ->will($this->returnCallback(function (ConfigFile $configFile) {
+                $config = $configFile->getConfig();
+
+                PHPUnit_Framework_Assert::assertFalse($config->get(Config::FACTORY_AUTO_GENERATE));
+            }));
+
+        $this->manager->setConfigKey(Config::FACTORY_AUTO_GENERATE, false);
+    }
+
+    public function testSetConfigKeyAcceptsNewNullValue()
+    {
+        $this->configFileStorage->expects($this->once())
+            ->method('saveConfigFile')
+            ->with($this->configFile)
+            ->will($this->returnCallback(function (ConfigFile $configFile) {
+                $config = $configFile->getConfig();
+
+                PHPUnit_Framework_Assert::assertNull($config->get(Config::DISCOVERY_STORE_TYPE));
+            }));
+
+        $this->manager->setConfigKey(Config::DISCOVERY_STORE_TYPE, null);
+    }
+
     public function testSetConfigKeys()
     {
         $this->configFileStorage->expects($this->once())
@@ -112,6 +183,27 @@ class ConfigFileManagerImplTest extends PHPUnit_Framework_TestCase
             Config::PULI_DIR => 'my-puli-dir',
             Config::FACTORY_FILE => '{$puli-dir}/MyFactory.php',
         ));
+    }
+
+    public function testSetConfigKeysRevertsIfSavingNotPossible()
+    {
+        $this->configFileStorage->expects($this->once())
+            ->method('saveConfigFile')
+            ->willThrowException(new TestException());
+
+        $this->configFile->getConfig()->set(Config::PULI_DIR, 'previous-value');
+
+        try {
+            $this->manager->setConfigKeys(array(
+                Config::PULI_DIR => 'my-puli-dir',
+                Config::FACTORY_FILE => '{$puli-dir}/MyFactory.php',
+            ));
+            $this->fail('Expected a TestException');
+        } catch (TestException $e) {
+        }
+
+        $this->assertSame('previous-value', $this->configFile->getConfig()->get(Config::PULI_DIR));
+        $this->assertFalse($this->configFile->getConfig()->contains(Config::FACTORY_FILE));
     }
 
     public function testHasConfigKey()
@@ -307,6 +399,34 @@ class ConfigFileManagerImplTest extends PHPUnit_Framework_TestCase
         $this->manager->removeConfigKey(Config::PULI_DIR);
     }
 
+    public function testRemoveConfigKeyRevertsIfSavingNotPossible()
+    {
+        $this->configFile->getConfig()->set(Config::PULI_DIR, 'my-puli-dir');
+        $this->configFile->getConfig()->set(Config::FACTORY_FILE, 'MyServiceRegistry.php');
+
+        $this->configFileStorage->expects($this->once())
+            ->method('saveConfigFile')
+            ->willThrowException(new TestException());
+
+        try {
+            $this->manager->removeConfigKey(Config::PULI_DIR);
+            $this->fail('Expected a TestException');
+        } catch (TestException $e) {
+        }
+
+        $this->assertTrue($this->configFile->getConfig()->contains(Config::PULI_DIR));
+        $this->assertTrue($this->configFile->getConfig()->contains(Config::FACTORY_FILE));
+        $this->assertSame('my-puli-dir', $this->configFile->getConfig()->get(Config::PULI_DIR));
+    }
+
+    public function testRemoveConfigKeyIgnoresUnsetValues()
+    {
+        $this->configFileStorage->expects($this->never())
+            ->method('saveConfigFile');
+
+        $this->manager->removeConfigKey(Config::PULI_DIR);
+    }
+
     public function testRemoveConfigKeys()
     {
         $this->configFile->getConfig()->set(Config::PULI_DIR, 'my-puli-dir');
@@ -323,5 +443,24 @@ class ConfigFileManagerImplTest extends PHPUnit_Framework_TestCase
             }));
 
         $this->manager->removeConfigKeys(array(Config::PULI_DIR, Config::FACTORY_FILE));
+    }
+
+    public function testRemoveConfigKeysRevertsIfSavingNotPossible()
+    {
+        $this->configFile->getConfig()->set(Config::PULI_DIR, 'my-puli-dir');
+
+        $this->configFileStorage->expects($this->once())
+            ->method('saveConfigFile')
+            ->willThrowException(new TestException());
+
+        try {
+            $this->manager->removeConfigKeys(array(Config::PULI_DIR, Config::FACTORY_FILE));
+            $this->fail('Expected a TestException');
+        } catch (TestException $e) {
+        }
+
+        $this->assertTrue($this->configFile->getConfig()->contains(Config::PULI_DIR));
+        $this->assertFalse($this->configFile->getConfig()->contains(Config::FACTORY_FILE));
+        $this->assertSame('my-puli-dir', $this->configFile->getConfig()->get(Config::PULI_DIR));
     }
 }
