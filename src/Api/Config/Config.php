@@ -180,6 +180,16 @@ class Config
     }
 
     /**
+     * Returns the base configuration.
+     *
+     * @return Config The base configuration or `null` if none is set.
+     */
+    public function getBaseConfig()
+    {
+        return $this->baseConfig;
+    }
+
+    /**
      * Returns the value of a configuration key.
      *
      * If fallback is enabled, the value of the base configuration is returned
