@@ -115,10 +115,10 @@ All contents of this package are licensed under the [MIT license].
 [Git repository]: https://github.com/puli/repository-manager
 [@webmozart]: https://twitter.com/webmozart
 [MIT license]: LICENSE
-[`RepositoryManager`]: http://api.puli.io/latest/class-Puli.RepositoryManager.Repository.RepositoryManager.html
-[`PackageManager`]: http://api.puli.io/latest/class-Puli.RepositoryManager.Package.PackageManager.html
-[`DiscoveryManager`]: http://api.puli.io/latest/class-Puli.RepositoryManager.Discovery.DiscoveryManager.html
-[`ConfigFileManager`]: http://api.puli.io/latest/class-Puli.RepositoryManager.Config.ConfigFile.ConfigFileManager.html
-[`RootPackageFileManager`]: http://api.puli.io/latest/class-Puli.RepositoryManager.Package.PackageFile.RootPackageFileManager.html
+[`RepositoryManager`]: http://api.puli.io/latest/class-Puli.RepositoryManager.Api.Repository.RepositoryManager.html
+[`PackageManager`]: http://api.puli.io/latest/class-Puli.RepositoryManager.Api.Package.PackageManager.html
+[`DiscoveryManager`]: http://api.puli.io/latest/class-Puli.RepositoryManager.Api.Discovery.DiscoveryManager.html
+[`ConfigFileManager`]: http://api.puli.io/latest/class-Puli.RepositoryManager.Api.Config.ConfigFileManager.html
+[`RootPackageFileManager`]: http://api.puli.io/latest/class-Puli.RepositoryManager.Api.Package.RootPackageFileManager.html
 [`ResourceRepository`]: http://api.puli.io/latest/class-Puli.Repository.Api.ResourceRepository.html
 [`ResourceDiscovery`]: http://api.puli.io/latest/class-Puli.Discovery.Api.ResourceDiscovery.html
