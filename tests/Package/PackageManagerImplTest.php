@@ -530,6 +530,23 @@ class PackageManagerImplTest extends ManagerTestCase
         $this->manager->installPackage($this->packageDir3);
     }
 
+    /**
+     * @expectedException \Puli\RepositoryManager\Api\Package\UnsupportedVersionException
+     * @expectedExceptionMessage The exception text
+     */
+    public function testInstallPackageFailsIfPackageNotLoadableAndCustomNameSet()
+    {
+        $manager = new PackageManagerImpl($this->environment, $this->packageFileStorage);
+        $e = new UnsupportedVersionException('The exception text.');
+
+        $this->packageFileStorage->expects($this->once())
+            ->method('loadPackageFile')
+            ->with(__DIR__.'/Fixtures/version-too-high/puli.json')
+            ->willThrowException($e);
+
+        $manager->installPackage(__DIR__.'/Fixtures/version-too-high', 'vendor/my-package');
+    }
+
     public function testInstallPackageRevertsIfSavingNotPossible()
     {
         $this->initDefaultManager();

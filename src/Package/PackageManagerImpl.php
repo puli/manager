@@ -360,11 +360,11 @@ class PackageManagerImpl implements PackageManager
 
     private function assertNoLoadErrors(Package $package)
     {
-        $loadError = $package->getLoadErrors();
+        $loadErrors = $package->getLoadErrors();
 
-        if ($loadError) {
-            // Rethrow error
-            throw $loadError;
+        if (count($loadErrors) > 0) {
+            // Rethrow first error
+            throw reset($loadErrors);
         }
     }
 }
