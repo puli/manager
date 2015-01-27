@@ -1,7 +1,7 @@
 Changelog
 =========
 
-* 1.0.0-next (@release_date@)
+* 1.0.0-beta2 (2015-01-27)
 
  * moved public classes to `Api` sub-namespace
  * removed dependency to beberlei/assert
@@ -89,7 +89,6 @@ Changelog
  * added "discovery.store.type" values "php-redis", "predis" and "riak"
  * renamed `Config::DISCOVERY_STORE_SERVER` to `DISCOVERY_STORE_HOST`
  * added `Config::DISCOVERY_STORE_BUCKET`
- 
 
 * 1.0.0-beta (2015-01-12)
 
