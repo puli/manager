@@ -55,7 +55,7 @@ class Package
     /**
      * @var Exception|null
      */
-    private $loadError;
+    private $loadErrors;
 
     /**
      * Creates a new package.
@@ -64,13 +64,14 @@ class Package
      *                                      package file could not be loaded.
      * @param string           $installPath The absolute install path.
      * @param InstallInfo      $installInfo The install info of this package.
-     * @param Exception        $loadError   The error that happened during
+     * @param Exception[]      $loadErrors  The errors that happened during
      *                                      loading of the package, if any.
      */
-    public function __construct(PackageFile $packageFile = null, $installPath, InstallInfo $installInfo = null, Exception $loadError = null)
+    public function __construct(PackageFile $packageFile = null, $installPath, InstallInfo $installInfo = null, array $loadErrors = array())
     {
         Assert::absoluteSystemPath($installPath);
-        Assert::true($packageFile || $loadError, 'The load error must be passed if the package file is null.');
+        Assert::true($packageFile || $loadErrors, 'The load errors must be passed if the package file is null.');
+        Assert::allIsInstanceOf($loadErrors, 'Exception');
 
         // If a package name was set during installation, that name wins over
         // the predefined name in the puli.json file (if any)
@@ -89,11 +90,11 @@ class Package
         $this->installPath = $installPath;
         $this->installInfo = $installInfo;
         $this->packageFile = $packageFile;
-        $this->loadError = $loadError;
+        $this->loadErrors = $loadErrors;
 
         if (!file_exists($installPath)) {
             $this->state = PackageState::NOT_FOUND;
-        } elseif (null !== $loadError) {
+        } elseif (count($loadErrors) > 0) {
             $this->state = PackageState::NOT_LOADABLE;
         } else {
             $this->state = PackageState::ENABLED;
@@ -144,12 +145,12 @@ class Package
     /**
      * Returns the error that occurred during loading of the package.
      *
-     * @return Exception|null The exception or `null` if the package was loaded
-     *                        successfully.
+     * @return Exception[] The errors or an empty array if the package was
+     *                     loaded successfully.
      */
-    public function getLoadError()
+    public function getLoadErrors()
     {
-        return $this->loadError;
+        return $this->loadErrors;
     }
 
     /**

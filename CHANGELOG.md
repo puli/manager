@@ -84,6 +84,7 @@ Changelog
  * replaced `ManagerFactory` by the `Puli` class
  * renamed `ManagerPlugin` to `PuliPlugin`
  * changed `PuliPlugin::activate()` to receive the `Puli` instance
+ * renamed `Package::getLoadError()` to `getLoadErrors()`
  
 
 * 1.0.0-beta (2015-01-12)

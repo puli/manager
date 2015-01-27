@@ -11,6 +11,7 @@
 
 namespace Puli\RepositoryManager\Package;
 
+use Exception;
 use Puli\RepositoryManager\Api\Environment\ProjectEnvironment;
 use Puli\RepositoryManager\Api\FileNotFoundException;
 use Puli\RepositoryManager\Api\InvalidConfigException;
@@ -72,10 +73,7 @@ class PackageManagerImpl implements PackageManager
      * @throws InvalidConfigException If a configuration file contains invalid configuration.
      * @throws NameConflictException If a package has the same name as another loaded package.
      */
-    public function __construct(
-        ProjectEnvironment $environment,
-        PackageFileStorage $packageFileStorage
-    )
+    public function __construct(ProjectEnvironment $environment, PackageFileStorage $packageFileStorage)
     {
         $this->environment = $environment;
         $this->rootDir = $environment->getRootDirectory();
@@ -129,14 +127,21 @@ class PackageManagerImpl implements PackageManager
         $installInfo = new InstallInfo($name, $relInstallPath);
         $installInfo->setInstallerName($installerName);
 
-        // Don't catch exceptions
-        $package = $this->loadPackage($installInfo, false);
+        $package = $this->loadPackage($installInfo);
 
-        // OK, now add it
+        $this->assertNoLoadErrors($package);
         $this->rootPackageFile->addInstallInfo($installInfo);
+
+        try {
+            $this->packageFileStorage->saveRootPackageFile($this->rootPackageFile);
+        } catch (Exception $e) {
+            $this->rootPackageFile->removeInstallInfo($name);
+
+            throw $e;
+        }
+
         $this->packages->add($package);
 
-        $this->packageFileStorage->saveRootPackageFile($this->rootPackageFile);
     }
 
     /**
@@ -164,16 +169,20 @@ class PackageManagerImpl implements PackageManager
     {
         $this->assertPackagesLoaded();
 
-        if (!$this->packages->contains($name)) {
-            return;
+        if ($this->rootPackageFile->hasInstallInfo($name)) {
+            $installInfo = $this->rootPackageFile->getInstallInfo($name);
+            $this->rootPackageFile->removeInstallInfo($name);
+
+            try {
+                $this->packageFileStorage->saveRootPackageFile($this->rootPackageFile);
+            } catch (Exception $e) {
+                $this->rootPackageFile->addInstallInfo($installInfo);
+
+                throw $e;
+            }
         }
 
         $this->packages->remove($name);
-
-        if ($this->rootPackageFile->hasInstallInfo($name)) {
-            $this->rootPackageFile->removeInstallInfo($name);
-            $this->packageFileStorage->saveRootPackageFile($this->rootPackageFile);
-        }
     }
 
     /**
@@ -279,37 +288,27 @@ class PackageManagerImpl implements PackageManager
     /**
      * Loads a package for the given install info.
      *
-     * @param InstallInfo $installInfo     The install info.
-     * @param bool        $catchExceptions Whether to catch exceptions and store
-     *                                     them with the package for later
-     *                                     access.
+     * @param InstallInfo $installInfo The install info.
      *
      * @return Package The package.
-     *
-     * @throws FileNotFoundException If the install path does not exist.
-     * @throws NoDirectoryException If the install path points to a file.
-     * @throws NameConflictException If the package has the same name as another
-     *                               loaded package.
      */
-    private function loadPackage(InstallInfo $installInfo, $catchExceptions = true)
+    private function loadPackage(InstallInfo $installInfo)
     {
         $installPath = Path::makeAbsolute($installInfo->getInstallPath(), $this->rootDir);
         $packageFile = null;
         $loadError = null;
 
         try {
-            $packageFile = $this->loadPackageFile($installPath, $catchExceptions);
+            $packageFile = $this->loadPackageFile($installPath);
         } catch (InvalidConfigException $loadError) {
         } catch (UnsupportedVersionException $loadError) {
         } catch (FileNotFoundException $loadError) {
         } catch (NoDirectoryException $loadError) {
         }
 
-        if ($loadError && !$catchExceptions) {
-            throw $loadError;
-        }
+        $loadErrors = $loadError ? array($loadError) : array();
 
-        return new Package($packageFile, $installPath, $installInfo, $loadError);
+        return new Package($packageFile, $installPath, $installInfo, $loadErrors);
     }
 
     /**
@@ -339,6 +338,16 @@ class PackageManagerImpl implements PackageManager
     {
         if (!$this->packages) {
             $this->loadPackages();
+        }
+    }
+
+    private function assertNoLoadErrors(Package $package)
+    {
+        $loadError = $package->getLoadErrors();
+
+        if ($loadError) {
+            // Rethrow error
+            throw $loadError;
         }
     }
 }

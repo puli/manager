@@ -23,6 +23,7 @@ use Puli\RepositoryManager\Api\Package\UnsupportedVersionException;
 use Puli\RepositoryManager\Package\PackageFileStorage;
 use Puli\RepositoryManager\Package\PackageManagerImpl;
 use Puli\RepositoryManager\Tests\ManagerTestCase;
+use Puli\RepositoryManager\Tests\TestException;
 use Symfony\Component\Filesystem\Filesystem;
 
 /**
@@ -203,7 +204,7 @@ class PackageManagerImplTest extends ManagerTestCase
                 null,
                 __DIR__.'/Fixtures/version-too-high',
                 $installInfo2,
-                $e
+                array($e)
             ),
         ), $packages->toArray());
     }
@@ -298,7 +299,11 @@ class PackageManagerImplTest extends ManagerTestCase
         $packages = $manager->getPackages();
 
         $this->assertTrue($packages['vendor/package']->isNotFound());
-        $this->assertInstanceOf('Puli\RepositoryManager\Api\FileNotFoundException', $packages['vendor/package']->getLoadError());
+
+        $loadErrors = $packages['vendor/package']->getLoadErrors();
+
+        $this->assertCount(1, $loadErrors);
+        $this->assertInstanceOf('Puli\RepositoryManager\Api\FileNotFoundException', $loadErrors[0]);
     }
 
     public function testGetPackagesStoresExceptionIfPackageNoDirectory()
@@ -310,7 +315,11 @@ class PackageManagerImplTest extends ManagerTestCase
         $packages = $manager->getPackages();
 
         $this->assertTrue($packages['vendor/package']->isNotLoadable());
-        $this->assertInstanceOf('Puli\RepositoryManager\Api\NoDirectoryException', $packages['vendor/package']->getLoadError());
+
+        $loadErrors = $packages['vendor/package']->getLoadErrors();
+
+        $this->assertCount(1, $loadErrors);
+        $this->assertInstanceOf('Puli\RepositoryManager\Api\NoDirectoryException', $loadErrors[0]);
     }
 
     public function testGetPackagesStoresExceptionIfPackageFileVersionNotSupported()
@@ -329,7 +338,7 @@ class PackageManagerImplTest extends ManagerTestCase
         $packages = $manager->getPackages();
 
         $this->assertTrue($packages['vendor/package']->isNotLoadable());
-        $this->assertSame($exception, $packages['vendor/package']->getLoadError());
+        $this->assertSame(array($exception), $packages['vendor/package']->getLoadErrors());
     }
 
     public function testGetPackagesStoresExceptionIfPackageFileInvalid()
@@ -348,7 +357,7 @@ class PackageManagerImplTest extends ManagerTestCase
         $packages = $manager->getPackages();
 
         $this->assertTrue($packages['vendor/package']->isNotLoadable());
-        $this->assertSame($exception, $packages['vendor/package']->getLoadError());
+        $this->assertSame(array($exception), $packages['vendor/package']->getLoadErrors());
     }
 
     public function testInstallPackage()
@@ -521,6 +530,25 @@ class PackageManagerImplTest extends ManagerTestCase
         $this->manager->installPackage($this->packageDir3);
     }
 
+    public function testInstallPackageRevertsIfSavingNotPossible()
+    {
+        $this->initDefaultManager();
+
+        $this->packageFileStorage->expects($this->once())
+            ->method('saveRootPackageFile')
+            ->willThrowException(new TestException());
+
+        try {
+            $this->manager->installPackage($this->packageDir3);
+            $this->fail('Expected a TestException');
+        } catch (TestException $e) {
+        }
+
+        $this->assertFalse($this->manager->isPackageInstalled($this->packageDir3));
+        $this->assertCount(3, $this->manager->getPackages());
+        $this->assertCount(2, $this->rootPackageFile->getInstallInfos());
+    }
+
     public function testIsPackageInstalled()
     {
         $this->initDefaultManager();
@@ -587,6 +615,25 @@ class PackageManagerImplTest extends ManagerTestCase
 
         $this->assertFalse($this->rootPackageFile->hasInstallInfo('vendor/package1'));
         $this->assertFalse($this->manager->hasPackage('vendor/package1'));
+    }
+
+    public function testRemovePackageRevertsIfSavingNotPossible()
+    {
+        $this->initDefaultManager();
+
+        $this->packageFileStorage->expects($this->once())
+            ->method('saveRootPackageFile')
+            ->willThrowException(new TestException());
+
+        try {
+            $this->manager->removePackage('vendor/package1');
+            $this->fail('Expected a TestException');
+        } catch (TestException $e) {
+        }
+
+        $this->assertTrue($this->rootPackageFile->hasInstallInfo('vendor/package1'));
+        $this->assertTrue($this->manager->hasPackage('vendor/package1'));
+        $this->assertTrue($this->manager->getPackages()->contains('vendor/package1'));
     }
 
     public function testHasPackage()
