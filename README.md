@@ -28,9 +28,8 @@ This mapping can be loaded with the [`RepositoryManager`]:
 ```php
 use Puli\RepositoryManager\Puli;
 
-$factory = new Puli();
-$environment = $factory->createProjectEnvironment(getcwd());
-$repoManager = $factory->createRepositoryManager($environment);
+$puli = new Puli(getcwd());
+$repoManager = $puli->getRepositoryManager();
 
 $repoManager->buildRepository();
 ```
@@ -45,7 +44,7 @@ project. This package needs to be registered with Puli with the
 [`PackageManager`]:
 
 ```php
-$packageManager = $factory->createPackageManager($environment);
+$packageManager = $puli->getPackageManager();
 
 $packageManager->installPackage('path/to/package', 'vendor/package-name');
 ```
