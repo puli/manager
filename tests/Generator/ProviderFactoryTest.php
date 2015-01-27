@@ -102,6 +102,9 @@ class ProviderFactoryTest extends PHPUnit_Framework_TestCase
             array('null', 'Puli\RepositoryManager\Generator\KeyValueStore\NullStoreRecipeProvider'),
             array(null, 'Puli\RepositoryManager\Generator\KeyValueStore\NullStoreRecipeProvider'),
             array('array', 'Puli\RepositoryManager\Generator\KeyValueStore\ArrayStoreRecipeProvider'),
+            array('php-redis', 'Puli\RepositoryManager\Generator\KeyValueStore\PhpRedisStoreRecipeProvider'),
+            array('predis', 'Puli\RepositoryManager\Generator\KeyValueStore\PredisStoreRecipeProvider'),
+            array('riak', 'Puli\RepositoryManager\Generator\KeyValueStore\RiakStoreRecipeProvider'),
             array(__NAMESPACE__.'\Fixtures\TestKeyValueStoreRecipeProvider', __NAMESPACE__.'\Fixtures\TestKeyValueStoreRecipeProvider'),
         );
     }

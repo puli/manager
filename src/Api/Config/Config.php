@@ -107,9 +107,11 @@ class Config
 
     const DISCOVERY_STORE_PATH = 'discovery.store.path';
 
-    const DISCOVERY_STORE_SERVER = 'discovery.store.server';
+    const DISCOVERY_STORE_HOST = 'discovery.store.host';
 
     const DISCOVERY_STORE_PORT = 'discovery.store.port';
+
+    const DISCOVERY_STORE_BUCKET = 'discovery.store.bucket';
 
     const DISCOVERY_STORE_CACHE = 'discovery.store.cache';
 
@@ -129,8 +131,9 @@ class Config
         self::DISCOVERY_TYPE => true,
         self::DISCOVERY_STORE_TYPE => true,
         self::DISCOVERY_STORE_PATH => true,
-        self::DISCOVERY_STORE_SERVER => true,
+        self::DISCOVERY_STORE_HOST => true,
         self::DISCOVERY_STORE_PORT => true,
+        self::DISCOVERY_STORE_BUCKET => true,
         self::DISCOVERY_STORE_CACHE => true,
     );
 

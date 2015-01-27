@@ -86,6 +86,9 @@ Changelog
  * changed `PuliPlugin::activate()` to receive the `Puli` instance
  * renamed `Package::getLoadError()` to `getLoadErrors()`
  * added `Config::getBaseConfig()`
+ * added "discovery.store.type" values "php-redis", "predis" and "riak"
+ * renamed `Config::DISCOVERY_STORE_SERVER` to `DISCOVERY_STORE_HOST`
+ * added `Config::DISCOVERY_STORE_BUCKET`
  
 
 * 1.0.0-beta (2015-01-12)

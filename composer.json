@@ -21,6 +21,11 @@
         "rhumsaa/uuid": "~2.8",
         "psr/log": "~1.0"
     },
+    "require-dev": {
+        "predis/predis": "~1.0",
+        "basho/riak": "~1.4",
+        "doctrine/cache": "~1.4"
+    },
     "minimum-stability": "dev",
     "autoload": {
         "psr-4": {

@@ -44,6 +44,9 @@ class ProviderFactory
         'null' => 'Puli\RepositoryManager\Generator\KeyValueStore\NullStoreRecipeProvider',
         'array' => 'Puli\RepositoryManager\Generator\KeyValueStore\ArrayStoreRecipeProvider',
         'json-file' => 'Puli\RepositoryManager\Generator\KeyValueStore\JsonFileStoreRecipeProvider',
+        'php-redis' => 'Puli\RepositoryManager\Generator\KeyValueStore\PhpRedisStoreRecipeProvider',
+        'predis' => 'Puli\RepositoryManager\Generator\KeyValueStore\PredisStoreRecipeProvider',
+        'riak' => 'Puli\RepositoryManager\Generator\KeyValueStore\RiakStoreRecipeProvider',
     );
 
     /**

@@ -861,6 +861,7 @@ class ConfigTest extends PHPUnit_Framework_TestCase
             array(Config::PULI_DIR),
             array(Config::FACTORY_CLASS),
             array(Config::FACTORY_FILE),
+            array(Config::DISCOVERY_STORE_BUCKET),
         );
     }
 
@@ -877,6 +878,7 @@ class ConfigTest extends PHPUnit_Framework_TestCase
             array(Config::PULI_DIR),
             array(Config::FACTORY_CLASS),
             array(Config::FACTORY_FILE),
+            array(Config::DISCOVERY_STORE_BUCKET),
         );
     }
 
@@ -886,6 +888,7 @@ class ConfigTest extends PHPUnit_Framework_TestCase
             array(Config::PULI_DIR),
             array(Config::FACTORY_CLASS),
             array(Config::FACTORY_FILE),
+            array(Config::DISCOVERY_STORE_BUCKET),
         );
     }
 
