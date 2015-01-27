@@ -13,7 +13,6 @@ namespace Puli\RepositoryManager\Discovery\Type;
 
 use OutOfBoundsException;
 use Puli\RepositoryManager\Api\Discovery\BindingTypeDescriptor;
-use Puli\RepositoryManager\Api\Package\Package;
 use Puli\RepositoryManager\Util\TwoDimensionalHashMap;
 
 /**

@@ -12,10 +12,6 @@
 namespace Puli\RepositoryManager\Tests;
 
 use PHPUnit_Framework_TestCase;
-use Puli\RepositoryManager\Api\Config\ConfigFile;
-use Puli\RepositoryManager\Api\Package\PackageCollection;
-use Puli\RepositoryManager\Api\Package\PackageState;
-use Puli\RepositoryManager\Api\Package\RootPackageFile;
 use Puli\RepositoryManager\Puli;
 use Puli\RepositoryManager\Tests\Api\Package\Fixtures\TestPlugin;
 use Symfony\Component\Filesystem\Filesystem;

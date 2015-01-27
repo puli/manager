@@ -13,7 +13,6 @@ namespace Puli\RepositoryManager\Discovery\Binding;
 
 use OutOfBoundsException;
 use Puli\RepositoryManager\Api\Discovery\BindingDescriptor;
-use Puli\RepositoryManager\Api\Package\Package;
 use Puli\RepositoryManager\Util\TwoDimensionalHashMap;
 use Rhumsaa\Uuid\Uuid;
 

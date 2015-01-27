@@ -12,8 +12,6 @@
 namespace Puli\RepositoryManager\Tests\Api\Repository;
 
 use PHPUnit_Framework_TestCase;
-use Puli\RepositoryManager\Api\FileNotFoundException;
-use Puli\RepositoryManager\Api\Package\NoSuchPackageException;
 use Puli\RepositoryManager\Api\Package\Package;
 use Puli\RepositoryManager\Api\Package\PackageCollection;
 use Puli\RepositoryManager\Api\Package\PackageFile;

@@ -18,7 +18,6 @@ use Puli\RepositoryManager\Api\Environment\ProjectEnvironment;
 use Puli\RepositoryManager\Api\FileNotFoundException;
 use Puli\RepositoryManager\Api\NoDirectoryException;
 use Puli\RepositoryManager\Api\Package\RootPackageFile;
-use Puli\RepositoryManager\Api\PuliPlugin;
 use Puli\RepositoryManager\Assert\Assert;
 use Puli\RepositoryManager\Config\ConfigFileStorage;
 use Puli\RepositoryManager\Config\DefaultConfig;

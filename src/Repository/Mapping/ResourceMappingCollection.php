@@ -12,7 +12,6 @@
 namespace Puli\RepositoryManager\Repository\Mapping;
 
 use OutOfBoundsException;
-use Puli\RepositoryManager\Api\Package\Package;
 use Puli\RepositoryManager\Api\Repository\ResourceMapping;
 use Puli\RepositoryManager\Util\TwoDimensionalHashMap;
 
