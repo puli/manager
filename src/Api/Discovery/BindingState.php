@@ -60,6 +60,7 @@ final class BindingState
             self::ENABLED,
             self::DISABLED,
             self::UNDECIDED,
+            self::DUPLICATE,
             self::HELD_BACK,
             self::INVALID,
         );
