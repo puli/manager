@@ -42,10 +42,10 @@ class ConfigJsonWriter implements ConfigFileWriter
             $jsonData->$key = $value;
         }
 
-        $this->encodeFile($path, $jsonData);
+        $this->encodeFile($jsonData, $path);
     }
 
-    private function encodeFile($path, $jsonData)
+    private function encodeFile($jsonData, $path)
     {
         if (!Path::isAbsolute($path)) {
             throw new IOException(sprintf(
@@ -74,6 +74,6 @@ class ConfigJsonWriter implements ConfigFileWriter
             $filesystem->mkdir($dir);
         }
 
-        $encoder->encodeFile($path, $jsonData, $configSchema);
+        $encoder->encodeFile($jsonData, $path, $configSchema);
     }
 }

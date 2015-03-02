@@ -66,7 +66,7 @@ class PackageJsonWriter implements PackageFileWriter
         $orderedKeys = array_intersect_key(array_flip(self::$keyOrder), $jsonData);
         $jsonData = array_replace($orderedKeys, $jsonData);
 
-        $this->encodeFile($path, (object) $jsonData);
+        $this->encodeFile((object) $jsonData, $path);
     }
 
     private function addConfig(array &$jsonData, PackageFile $packageFile)
@@ -229,7 +229,7 @@ class PackageJsonWriter implements PackageFileWriter
         }
     }
 
-    private function encodeFile($path, \stdClass $jsonData)
+    private function encodeFile(stdClass $jsonData, $path)
     {
         if (!Path::isAbsolute($path)) {
             throw new IOException(sprintf(
@@ -256,6 +256,6 @@ class PackageJsonWriter implements PackageFileWriter
             $filesystem->mkdir($dir);
         }
 
-        $encoder->encodeFile($path, $jsonData, $schema);
+        $encoder->encodeFile($jsonData, $path, $schema);
     }
 }
