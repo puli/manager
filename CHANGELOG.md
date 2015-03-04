@@ -6,6 +6,9 @@ Changelog
  * added `BindingState::DUPLICATE` to output of `BindingState::all()`
  * renamed `ManagerEvents` to `PuliEvents` and moved to 
    `Puli\RepositoryManager\Api\Event\` namespace
+ * added `Puli::getRepository()` shortcut
+ * added `Puli::getDiscovery()` shortcut
+ * added `Puli::getEventDispatcher()` shortcut
 
 * 1.0.0-beta2 (2015-01-27)
 

@@ -11,7 +11,10 @@
 
 namespace Puli\RepositoryManager;
 
+use LogicException;
 use Psr\Log\LoggerInterface;
+use Puli\Discovery\Api\EditableDiscovery;
+use Puli\Repository\Api\EditableRepository;
 use Puli\RepositoryManager\Api\Config\ConfigFileManager;
 use Puli\RepositoryManager\Api\Discovery\DiscoveryManager;
 use Puli\RepositoryManager\Api\Environment\GlobalEnvironment;
@@ -256,6 +259,44 @@ class Puli
     public function getEnvironment()
     {
         return $this->environment;
+    }
+
+    /**
+     * Returns the resource repository of the project.
+     *
+     * @return EditableRepository The resource repository.
+     */
+    public function getRepository()
+    {
+        if (!$this->environment instanceof ProjectEnvironment) {
+            throw new LogicException('Cannot access the repository in the global environment.');
+        }
+
+        return $this->environment->getRepository();
+    }
+
+    /**
+     * Returns the resource discovery of the project.
+     *
+     * @return EditableDiscovery The resource discovery.
+     */
+    public function getDiscovery()
+    {
+        if (!$this->environment instanceof ProjectEnvironment) {
+            throw new LogicException('Cannot access the discovery in the global environment.');
+        }
+
+        return $this->environment->getDiscovery();
+    }
+
+    /**
+     * Returns the event dispatcher.
+     *
+     * @return EventDispatcherInterface The event dispatcher.
+     */
+    public function getEventDispatcher()
+    {
+        return $this->environment->getEventDispatcher();
     }
 
     /**
