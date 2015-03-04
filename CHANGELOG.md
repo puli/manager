@@ -9,6 +9,10 @@ Changelog
  * added `Puli::getRepository()` shortcut
  * added `Puli::getDiscovery()` shortcut
  * added `Puli::getEventDispatcher()` shortcut
+ * added `BindingCriteria`
+ * removed the arguments of `DiscoveryManager::getBindings()`
+ * changed the arguments of `DiscoveryManager::findBindings()` to `BindingCriteria`
+ * added `BindingDescriptor::match()`
 
 * 1.0.0-beta2 (2015-01-27)
 

@@ -28,6 +28,7 @@ use Puli\RepositoryManager\Api\Discovery\CannotDisableBindingException;
 use Puli\RepositoryManager\Api\Discovery\CannotEnableBindingException;
 use Puli\RepositoryManager\Api\Discovery\DiscoveryManager;
 use Puli\RepositoryManager\Api\Discovery\DiscoveryNotEmptyException;
+use Puli\RepositoryManager\Api\Discovery\BindingCriteria;
 use Puli\RepositoryManager\Api\Discovery\NoSuchBindingException;
 use Puli\RepositoryManager\Api\Discovery\TypeNotEnabledException;
 use Puli\RepositoryManager\Api\Environment\ProjectEnvironment;
@@ -439,24 +440,16 @@ class DiscoveryManagerImpl implements DiscoveryManager
     /**
      * {@inheritdoc}
      */
-    public function getBindings($packageName = null, $state = null)
+    public function getBindings()
     {
-        Assert::nullOrOneOf($state, BindingState::all(), 'Expected a valid binding state. Got: %s');
-
         $this->assertPackagesLoaded();
 
-        $packageNames = $packageName ? (array) $packageName : $this->packages->getPackageNames();
         $bindings = array();
 
-        Assert::allString($packageNames, 'The package names must be strings. Got: %s');
-
-        foreach ($packageNames as $packageName) {
-            $packageFile = $this->packages[$packageName]->getPackageFile();
-
-            foreach ($packageFile->getBindingDescriptors() as $binding) {
-                if (null === $state || $state === $binding->getState()) {
-                    $bindings[$binding->getUuid()->toString()] = $binding;
-                }
+        foreach ($this->packages as $package) {
+            foreach ($package->getPackageFile()->getBindingDescriptors() as $binding) {
+                // Resolve duplicates
+                $bindings[$binding->getUuid()->toString()] = $binding;
             }
         }
 
@@ -466,22 +459,24 @@ class DiscoveryManagerImpl implements DiscoveryManager
     /**
      * {@inheritdoc}
      */
-    public function findBindings($uuid, $packageName = null)
+    public function findBindings(BindingCriteria $criteria)
     {
-        $packageNames = $packageName ? (array) $packageName : $this->packages->getPackageNames();
-        $bindings = array();
-        $uuid = $uuid instanceof Uuid ? $uuid->toString() : $uuid;
+        $this->assertPackagesLoaded();
 
-        Assert::allString($packageNames, 'The package names must be strings. Got: %s');
+        $packageNames = $criteria->getPackageNames() ?: $this->packages->getPackageNames();
+        $bindings = array();
+
+        // No need to match the package names again
+        $criteria = clone $criteria;
+        $criteria->clearPackageNames();
 
         foreach ($packageNames as $packageName) {
             $packageFile = $this->packages[$packageName]->getPackageFile();
 
             foreach ($packageFile->getBindingDescriptors() as $binding) {
-                $uuidString = $binding->getUuid()->toString();
-
-                if (0 === strpos($uuidString, $uuid)) {
-                    $bindings[$uuidString] = $binding;
+                if ($binding->match($criteria)) {
+                    // Resolve duplicates
+                    $bindings[$binding->getUuid()->toString()] = $binding;
                 }
             }
         }

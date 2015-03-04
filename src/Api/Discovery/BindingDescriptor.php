@@ -564,6 +564,26 @@ class BindingDescriptor
         return BindingState::INVALID === $this->state;
     }
 
+    /**
+     * Returns whether the binding matches the given criteria.
+     *
+     * @param BindingCriteria $criteria The search criteria.
+     *
+     * @return bool Returns `true` if the binding matches the criteria and
+     *              `false` otherwise.
+     *
+     * @see BindingCriteria
+     */
+    public function match(BindingCriteria $criteria)
+    {
+        return $criteria->matchPackageName($this->containingPackage->getName())
+            && $criteria->matchState($this->state)
+            && $criteria->matchUuid($this->uuid)
+            && $criteria->matchTypeName($this->typeName)
+            && $criteria->matchQuery($this->query)
+            && $criteria->matchLanguage($this->language);
+    }
+
     private function generateUuid($query, $typeName, array $parameterValues, $language)
     {
         $dn = new DistinguishedName(array(

@@ -14,10 +14,14 @@ namespace Puli\RepositoryManager\Tests\Api\Discovery;
 use PHPUnit_Framework_TestCase;
 use Puli\RepositoryManager\Api\Discovery\BindingDescriptor;
 use Puli\RepositoryManager\Api\Discovery\BindingParameterDescriptor;
+use Puli\RepositoryManager\Api\Discovery\BindingState;
 use Puli\RepositoryManager\Api\Discovery\BindingTypeDescriptor;
+use Puli\RepositoryManager\Api\Discovery\BindingCriteria;
 use Puli\RepositoryManager\Api\Package\InstallInfo;
 use Puli\RepositoryManager\Api\Package\Package;
 use Puli\RepositoryManager\Api\Package\PackageFile;
+use Puli\RepositoryManager\Api\Package\RootPackage;
+use Puli\RepositoryManager\Api\Package\RootPackageFile;
 use Rhumsaa\Uuid\Uuid;
 use stdClass;
 
@@ -34,10 +38,16 @@ class BindingDescriptorTest extends PHPUnit_Framework_TestCase
      */
     private $package;
 
+    /**
+     * @var Package
+     */
+    private $rootPackage;
+
     protected function setUp()
     {
         $this->uuid = Uuid::uuid4();
         $this->package = new Package(new PackageFile(), '/path', new InstallInfo('vendor/package', '/path'));
+        $this->rootPackage = new RootPackage(new RootPackageFile(), '/root');
     }
 
     public function testCreate()
@@ -370,6 +380,151 @@ class BindingDescriptorTest extends PHPUnit_Framework_TestCase
         $this->assertFalse($descriptor->hasParameterValue('default', false));
     }
 
+    public function testHeldBackIfTypeIsNull()
+    {
+        $binding = new BindingDescriptor('/path', 'vendor/type');
+        $binding->load($this->package);
+
+        $this->assertSame(BindingState::HELD_BACK, $binding->getState());
+    }
+
+    public function testHeldBackIfTypeIsNotLoaded()
+    {
+        $type = new BindingTypeDescriptor('vendor/type');
+
+        $binding = new BindingDescriptor('/path', 'vendor/type');
+        $binding->load($this->package, $type);
+
+        $this->assertSame(BindingState::HELD_BACK, $binding->getState());
+    }
+
+    public function testHeldBackIfTypeIsNotEnabled()
+    {
+        $type = new BindingTypeDescriptor('vendor/type');
+        $type->load($this->package);
+        $type->markDuplicate(true);
+
+        $binding = new BindingDescriptor('/path', 'vendor/type');
+        $binding->load($this->package, $type);
+
+        $this->assertSame(BindingState::HELD_BACK, $binding->getState());
+    }
+
+    public function testInvalidIfInvalidParameter()
+    {
+        $type = new BindingTypeDescriptor('vendor/type', null, array(
+            new BindingParameterDescriptor('param', true),
+        ));
+        $type->load($this->package);
+
+        // Parameter is missing
+        $binding = new BindingDescriptor('/path', 'vendor/type');
+        $binding->load($this->package, $type);
+
+        $this->assertSame(BindingState::INVALID, $binding->getState());
+        $this->assertCount(1, $binding->getViolations());
+    }
+
+    public function testEnabledInRootPackage()
+    {
+        $type = new BindingTypeDescriptor('vendor/type');
+        $type->load($this->package);
+
+        $binding = new BindingDescriptor('/path', 'vendor/type');
+        $binding->load($this->rootPackage, $type);
+
+        $this->assertSame(BindingState::ENABLED, $binding->getState());
+    }
+
+    public function testDuplicateIfMarkedDuplicateInRootPackage()
+    {
+        $type = new BindingTypeDescriptor('vendor/type');
+        $type->load($this->package);
+
+        $binding = new BindingDescriptor('/path', 'vendor/type');
+        $binding->load($this->rootPackage, $type);
+        $binding->markDuplicate(true);
+
+        $this->assertSame(BindingState::DUPLICATE, $binding->getState());
+    }
+
+    public function testEnabledIfEnabled()
+    {
+        $type = new BindingTypeDescriptor('vendor/type');
+        $type->load($this->package);
+
+        $this->package->getInstallInfo()->addEnabledBindingUuid($this->uuid);
+
+        $binding = new BindingDescriptor('/path', 'vendor/type', array(), 'glob', $this->uuid);
+        $binding->load($this->package, $type);
+
+        $this->assertSame(BindingState::ENABLED, $binding->getState());
+    }
+
+    public function testDuplicateIfMarkedDuplicateAndEnabled()
+    {
+        $type = new BindingTypeDescriptor('vendor/type');
+        $type->load($this->package);
+
+        $this->package->getInstallInfo()->addEnabledBindingUuid($this->uuid);
+
+        $binding = new BindingDescriptor('/path', 'vendor/type', array(), 'glob', $this->uuid);
+        $binding->load($this->package, $type);
+        $binding->markDuplicate(true);
+
+        $this->assertSame(BindingState::DUPLICATE, $binding->getState());
+    }
+
+    public function testDisabledIfDisabled()
+    {
+        $type = new BindingTypeDescriptor('vendor/type');
+        $type->load($this->package);
+
+        $this->package->getInstallInfo()->addDisabledBindingUuid($this->uuid);
+
+        $binding = new BindingDescriptor('/path', 'vendor/type', array(), 'glob', $this->uuid);
+        $binding->load($this->package, $type);
+
+        $this->assertSame(BindingState::DISABLED, $binding->getState());
+    }
+
+    public function testDisabledIfMarkedDuplicateAndDisabled()
+    {
+        $type = new BindingTypeDescriptor('vendor/type');
+        $type->load($this->package);
+
+        $this->package->getInstallInfo()->addDisabledBindingUuid($this->uuid);
+
+        $binding = new BindingDescriptor('/path', 'vendor/type', array(), 'glob', $this->uuid);
+        $binding->load($this->package, $type);
+        $binding->markDuplicate(true);
+
+        $this->assertSame(BindingState::DISABLED, $binding->getState());
+    }
+
+    public function testUndecidedIfNeitherEnabledNorDisabled()
+    {
+        $type = new BindingTypeDescriptor('vendor/type');
+        $type->load($this->package);
+
+        $binding = new BindingDescriptor('/path', 'vendor/type', array(), 'glob', $this->uuid);
+        $binding->load($this->package, $type);
+
+        $this->assertSame(BindingState::UNDECIDED, $binding->getState());
+    }
+
+    public function testUndecidedIfMarkedDuplicateAndNeitherEnabledNorDisabled()
+    {
+        $type = new BindingTypeDescriptor('vendor/type');
+        $type->load($this->package);
+
+        $binding = new BindingDescriptor('/path', 'vendor/type', array(), 'glob', $this->uuid);
+        $binding->load($this->package, $type);
+        $binding->markDuplicate(true);
+
+        $this->assertSame(BindingState::UNDECIDED, $binding->getState());
+    }
+
     public function testCompare()
     {
         $binding1 = new BindingDescriptor('/vendor/a', 'vendor/a-type');
@@ -384,5 +539,55 @@ class BindingDescriptorTest extends PHPUnit_Framework_TestCase
         $this->assertGreaterThan(0, BindingDescriptor::compare($binding3, $binding1));
         $this->assertLessThan(0, BindingDescriptor::compare($binding2, $binding3));
         $this->assertGreaterThan(0, BindingDescriptor::compare($binding3, $binding2));
+    }
+
+    public function testMatch()
+    {
+        $type = new BindingTypeDescriptor('vendor/type');
+        $type->load($this->package);
+
+        $uuid = Uuid::fromString('abcdb814-9dad-11d1-80b4-00c04fd430c8');
+        $this->package->getInstallInfo()->addEnabledBindingUuid($uuid);
+        $binding = new BindingDescriptor('/path', 'vendor/type', array(), 'glob', $uuid);
+        $binding->load($this->package, $type);
+
+        $criteria = new BindingCriteria();
+        $this->assertTrue($binding->match($criteria));
+
+        $criteria->setPackageNames(array('foobar'));
+        $this->assertFalse($binding->match($criteria));
+
+        $criteria->setPackageNames(array($this->package->getName()));
+        $this->assertTrue($binding->match($criteria));
+
+        $criteria->setStates(array(BindingState::DISABLED));
+        $this->assertFalse($binding->match($criteria));
+
+        $criteria->setStates(array(BindingState::ENABLED));
+        $this->assertTrue($binding->match($criteria));
+
+        $criteria->setUuidPrefix('abce');
+        $this->assertFalse($binding->match($criteria));
+
+        $criteria->setUuidPrefix('abcd');
+        $this->assertTrue($binding->match($criteria));
+
+        $criteria->setQuery('/path/nested');
+        $this->assertFalse($binding->match($criteria));
+
+        $criteria->setQuery('/path');
+        $this->assertTrue($binding->match($criteria));
+
+        $criteria->setLanguage('xpath');
+        $this->assertFalse($binding->match($criteria));
+
+        $criteria->setLanguage('glob');
+        $this->assertTrue($binding->match($criteria));
+
+        $criteria->setTypeName('vendor/other');
+        $this->assertFalse($binding->match($criteria));
+
+        $criteria->setTypeName('vendor/type');
+        $this->assertTrue($binding->match($criteria));
     }
 }

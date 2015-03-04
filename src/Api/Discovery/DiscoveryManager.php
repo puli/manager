@@ -99,24 +99,18 @@ interface DiscoveryManager
     /**
      * Returns all bindings.
      *
-     * You can optionally filter types by one or multiple package names.
-     *
-     * @param string|string[] $packageName The package name(s) to filter by.
-     * @param int             $state       The state of the bindings to return.
-     *
-     * @return BindingDescriptor[] The enabled bindings.
-     */
-    public function getBindings($packageName = null, $state = null);
-
-    /**
-     * Returns all bindings with the given UUID (prefix).
-     *
-     * @param Uuid|string     $uuid        The UUID (prefix) to search.
-     * @param string|string[] $packageName The package name(s) to filter by.
-     *
      * @return BindingDescriptor[] The bindings.
      */
-    public function findBindings($uuid, $packageName = null);
+    public function getBindings();
+
+    /**
+     * Returns all bindings matching the given criteria.
+     *
+     * @param BindingCriteria $criteria The search criteria.
+     *
+     * @return BindingDescriptor[] The bindings matching the criteria.
+     */
+    public function findBindings(BindingCriteria $criteria);
 
     /**
      * Builds the resource discovery.
