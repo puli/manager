@@ -16,7 +16,7 @@ use Puli\RepositoryManager\Api\Event\PackageFileEvent;
 use Puli\RepositoryManager\Api\FileNotFoundException;
 use Puli\RepositoryManager\Api\InvalidConfigException;
 use Puli\RepositoryManager\Api\IOException;
-use Puli\RepositoryManager\Api\ManagerEvents;
+use Puli\RepositoryManager\Api\Event\PuliEvents;
 use Puli\RepositoryManager\Api\Package\PackageFile;
 use Puli\RepositoryManager\Api\Package\PackageFileReader;
 use Puli\RepositoryManager\Api\Package\PackageFileWriter;
@@ -31,8 +31,8 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
  * saving of package configuration, but not directly related to the
  * reading/writing of a specific file format, is executed by this class.
  *
- * The events {@link ManagerEvents::LOAD_PACKAGE_FILE} and
- * {@link ManagerEvents::SAVE_PACKAGE_FILE} are dispatched when a package file
+ * The events {@link PuliEvents::LOAD_PACKAGE_FILE} and
+ * {@link PuliEvents::SAVE_PACKAGE_FILE} are dispatched when a package file
  * is loaded/saved.
  *
  * @since  1.0
@@ -74,7 +74,7 @@ class PackageFileStorage
      *
      * If the file does not exist, an empty configuration is returned.
      *
-     * The event {@link ManagerEvents::LOAD_PACKAGE_FILE} is dispatched after
+     * The event {@link PuliEvents::LOAD_PACKAGE_FILE} is dispatched after
      * loading the file. You can attach listeners to this event to modify the
      * loaded file.
      *
@@ -96,9 +96,9 @@ class PackageFileStorage
             $packageFile = new PackageFile(null, $path);
         }
 
-        if ($this->dispatcher->hasListeners(ManagerEvents::LOAD_PACKAGE_FILE)) {
+        if ($this->dispatcher->hasListeners(PuliEvents::LOAD_PACKAGE_FILE)) {
             $event = new PackageFileEvent($packageFile);
-            $this->dispatcher->dispatch(ManagerEvents::LOAD_PACKAGE_FILE, $event);
+            $this->dispatcher->dispatch(PuliEvents::LOAD_PACKAGE_FILE, $event);
         }
 
         return $packageFile;
@@ -109,7 +109,7 @@ class PackageFileStorage
      *
      * The package file is saved to the same path that it was read from.
      *
-     * The event {@link ManagerEvents::SAVE_PACKAGE_FILE} is dispatched just
+     * The event {@link PuliEvents::SAVE_PACKAGE_FILE} is dispatched just
      * before saving the file. You can attach listeners to this event to modify
      * the saved file.
      *
@@ -119,9 +119,9 @@ class PackageFileStorage
      */
     public function savePackageFile(PackageFile $packageFile)
     {
-        if ($this->dispatcher->hasListeners(ManagerEvents::SAVE_PACKAGE_FILE)) {
+        if ($this->dispatcher->hasListeners(PuliEvents::SAVE_PACKAGE_FILE)) {
             $event = new PackageFileEvent($packageFile);
-            $this->dispatcher->dispatch(ManagerEvents::SAVE_PACKAGE_FILE, $event);
+            $this->dispatcher->dispatch(PuliEvents::SAVE_PACKAGE_FILE, $event);
         }
 
         $this->writer->writePackageFile($packageFile, $packageFile->getPath());
@@ -132,7 +132,7 @@ class PackageFileStorage
      *
      * If the file does not exist, an empty configuration is returned.
      *
-     * The event {@link ManagerEvents::LOAD_PACKAGE_FILE} is dispatched after
+     * The event {@link PuliEvents::LOAD_PACKAGE_FILE} is dispatched after
      * loading the file. You can attach listeners to this event to modify the
      * loaded file.
      *
@@ -153,9 +153,9 @@ class PackageFileStorage
             $packageFile = new RootPackageFile(null, $path, $baseConfig);
         }
 
-        if ($this->dispatcher->hasListeners(ManagerEvents::LOAD_PACKAGE_FILE)) {
+        if ($this->dispatcher->hasListeners(PuliEvents::LOAD_PACKAGE_FILE)) {
             $event = new PackageFileEvent($packageFile);
-            $this->dispatcher->dispatch(ManagerEvents::LOAD_PACKAGE_FILE, $event);
+            $this->dispatcher->dispatch(PuliEvents::LOAD_PACKAGE_FILE, $event);
         }
 
         return $packageFile;
@@ -166,7 +166,7 @@ class PackageFileStorage
      *
      * The package file is saved to the same path that it was read from.
      *
-     * The event {@link ManagerEvents::SAVE_PACKAGE_FILE} is dispatched just
+     * The event {@link PuliEvents::SAVE_PACKAGE_FILE} is dispatched just
      * before saving the file. You can attach listeners to this event to modify
      * the saved file.
      *
@@ -176,9 +176,9 @@ class PackageFileStorage
      */
     public function saveRootPackageFile(RootPackageFile $packageFile)
     {
-        if ($this->dispatcher->hasListeners(ManagerEvents::SAVE_PACKAGE_FILE)) {
+        if ($this->dispatcher->hasListeners(PuliEvents::SAVE_PACKAGE_FILE)) {
             $event = new PackageFileEvent($packageFile);
-            $this->dispatcher->dispatch(ManagerEvents::SAVE_PACKAGE_FILE, $event);
+            $this->dispatcher->dispatch(PuliEvents::SAVE_PACKAGE_FILE, $event);
         }
 
         $this->writer->writePackageFile($packageFile, $packageFile->getPath());

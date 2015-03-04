@@ -17,7 +17,7 @@ use PHPUnit_Framework_TestCase;
 use Puli\RepositoryManager\Api\Config\Config;
 use Puli\RepositoryManager\Api\Event\PackageFileEvent;
 use Puli\RepositoryManager\Api\FileNotFoundException;
-use Puli\RepositoryManager\Api\ManagerEvents;
+use Puli\RepositoryManager\Api\Event\PuliEvents;
 use Puli\RepositoryManager\Api\Package\PackageFile;
 use Puli\RepositoryManager\Api\Package\PackageFileReader;
 use Puli\RepositoryManager\Api\Package\PackageFileWriter;
@@ -83,12 +83,12 @@ class PackageFileStorageTest extends PHPUnit_Framework_TestCase
 
         $this->dispatcher->expects($this->once())
             ->method('hasListeners')
-            ->with(ManagerEvents::LOAD_PACKAGE_FILE)
+            ->with(PuliEvents::LOAD_PACKAGE_FILE)
             ->will($this->returnValue(true));
 
         $this->dispatcher->expects($this->once())
             ->method('dispatch')
-            ->with(ManagerEvents::LOAD_PACKAGE_FILE, $this->isInstanceOf('Puli\RepositoryManager\Api\Event\PackageFileEvent'))
+            ->with(PuliEvents::LOAD_PACKAGE_FILE, $this->isInstanceOf('Puli\RepositoryManager\Api\Event\PackageFileEvent'))
             ->will($this->returnCallback(function ($eventName, PackageFileEvent $event) use ($packageFile) {
                 PHPUnit_Framework_Assert::assertSame($packageFile, $event->getPackageFile());
             }));
@@ -105,12 +105,12 @@ class PackageFileStorageTest extends PHPUnit_Framework_TestCase
 
         $this->dispatcher->expects($this->once())
             ->method('hasListeners')
-            ->with(ManagerEvents::LOAD_PACKAGE_FILE)
+            ->with(PuliEvents::LOAD_PACKAGE_FILE)
             ->will($this->returnValue(true));
 
         $this->dispatcher->expects($this->once())
             ->method('dispatch')
-            ->with(ManagerEvents::LOAD_PACKAGE_FILE, $this->isInstanceOf('Puli\RepositoryManager\Api\Event\PackageFileEvent'))
+            ->with(PuliEvents::LOAD_PACKAGE_FILE, $this->isInstanceOf('Puli\RepositoryManager\Api\Event\PackageFileEvent'))
             ->will($this->returnCallback(function ($eventName, PackageFileEvent $event) {
                 $event->getPackageFile()->setPackageName('vendor/package');
             }));
@@ -141,12 +141,12 @@ class PackageFileStorageTest extends PHPUnit_Framework_TestCase
 
         $this->dispatcher->expects($this->once())
             ->method('hasListeners')
-            ->with(ManagerEvents::SAVE_PACKAGE_FILE)
+            ->with(PuliEvents::SAVE_PACKAGE_FILE)
             ->will($this->returnValue(true));
 
         $this->dispatcher->expects($this->once())
             ->method('dispatch')
-            ->with(ManagerEvents::SAVE_PACKAGE_FILE, $this->isInstanceOf('Puli\RepositoryManager\Api\Event\PackageFileEvent'))
+            ->with(PuliEvents::SAVE_PACKAGE_FILE, $this->isInstanceOf('Puli\RepositoryManager\Api\Event\PackageFileEvent'))
             ->will($this->returnCallback(function ($eventName, PackageFileEvent $event) use ($packageFile) {
                 PHPUnit_Framework_Assert::assertSame($packageFile, $event->getPackageFile());
             }));
@@ -167,12 +167,12 @@ class PackageFileStorageTest extends PHPUnit_Framework_TestCase
 
         $this->dispatcher->expects($this->once())
             ->method('hasListeners')
-            ->with(ManagerEvents::SAVE_PACKAGE_FILE)
+            ->with(PuliEvents::SAVE_PACKAGE_FILE)
             ->will($this->returnValue(true));
 
         $this->dispatcher->expects($this->once())
             ->method('dispatch')
-            ->with(ManagerEvents::SAVE_PACKAGE_FILE, $this->isInstanceOf('Puli\RepositoryManager\Api\Event\PackageFileEvent'))
+            ->with(PuliEvents::SAVE_PACKAGE_FILE, $this->isInstanceOf('Puli\RepositoryManager\Api\Event\PackageFileEvent'))
             ->will($this->returnCallback(function ($eventName, PackageFileEvent $event) {
                 $event->getPackageFile()->setPackageName(null);
             }));
@@ -205,12 +205,12 @@ class PackageFileStorageTest extends PHPUnit_Framework_TestCase
 
         $this->dispatcher->expects($this->once())
             ->method('hasListeners')
-            ->with(ManagerEvents::LOAD_PACKAGE_FILE)
+            ->with(PuliEvents::LOAD_PACKAGE_FILE)
             ->will($this->returnValue(true));
 
         $this->dispatcher->expects($this->once())
             ->method('dispatch')
-            ->with(ManagerEvents::LOAD_PACKAGE_FILE, $this->isInstanceOf('Puli\RepositoryManager\Api\Event\PackageFileEvent'))
+            ->with(PuliEvents::LOAD_PACKAGE_FILE, $this->isInstanceOf('Puli\RepositoryManager\Api\Event\PackageFileEvent'))
             ->will($this->returnCallback(function ($eventName, PackageFileEvent $event) use ($packageFile) {
                 PHPUnit_Framework_Assert::assertSame($packageFile, $event->getPackageFile());
             }));
@@ -241,12 +241,12 @@ class PackageFileStorageTest extends PHPUnit_Framework_TestCase
 
         $this->dispatcher->expects($this->once())
             ->method('hasListeners')
-            ->with(ManagerEvents::SAVE_PACKAGE_FILE)
+            ->with(PuliEvents::SAVE_PACKAGE_FILE)
             ->will($this->returnValue(true));
 
         $this->dispatcher->expects($this->once())
             ->method('dispatch')
-            ->with(ManagerEvents::SAVE_PACKAGE_FILE, $this->isInstanceOf('Puli\RepositoryManager\Api\Event\PackageFileEvent'))
+            ->with(PuliEvents::SAVE_PACKAGE_FILE, $this->isInstanceOf('Puli\RepositoryManager\Api\Event\PackageFileEvent'))
             ->will($this->returnCallback(function ($eventName, PackageFileEvent $event) use ($packageFile) {
                 PHPUnit_Framework_Assert::assertSame($packageFile, $event->getPackageFile());
             }));
@@ -268,12 +268,12 @@ class PackageFileStorageTest extends PHPUnit_Framework_TestCase
 
         $this->dispatcher->expects($this->once())
             ->method('hasListeners')
-            ->with(ManagerEvents::SAVE_PACKAGE_FILE)
+            ->with(PuliEvents::SAVE_PACKAGE_FILE)
             ->will($this->returnValue(true));
 
         $this->dispatcher->expects($this->once())
             ->method('dispatch')
-            ->with(ManagerEvents::SAVE_PACKAGE_FILE, $this->isInstanceOf('Puli\RepositoryManager\Api\Event\PackageFileEvent'))
+            ->with(PuliEvents::SAVE_PACKAGE_FILE, $this->isInstanceOf('Puli\RepositoryManager\Api\Event\PackageFileEvent'))
             ->will($this->returnCallback(function ($eventName, PackageFileEvent $event) {
                 $event->getPackageFile()->setPackageName(null);
             }));

@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\RepositoryManager\Api;
+namespace Puli\RepositoryManager\Api\Event;
 
 /**
  * Contains the events triggered by this package.
@@ -17,15 +17,15 @@ namespace Puli\RepositoryManager\Api;
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-interface ManagerEvents
+interface PuliEvents
 {
     /**
      * Dispatched when a package file is loaded.
      */
-    const LOAD_PACKAGE_FILE = 'package-file.load';
+    const LOAD_PACKAGE_FILE = 'puli.load-package-file';
 
     /**
      * Dispatched when a package file is saved.
      */
-    const SAVE_PACKAGE_FILE = 'package-file.save';
+    const SAVE_PACKAGE_FILE = 'puli.save-package-file';
 }
