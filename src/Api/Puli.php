@@ -220,6 +220,17 @@ class Puli
     }
 
     /**
+     * Returns whether the service container is started.
+     *
+     * @return bool Returns `true` if the container is started and `false`
+     *              otherwise.
+     */
+    public function isStarted()
+    {
+        return $this->started;
+    }
+
+    /**
      * Returns the root directory of the managed Puli project.
      *
      * If no Puli project is managed at the moment, `null` is returned.

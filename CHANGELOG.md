@@ -30,6 +30,7 @@ Changelog
  * added `Puli::enablePlugins()`
  * added `Puli::disablePlugins()`
  * added `Puli::arePluginsEnabled()`
+ * added `Puli::isStarted()`
 
 * 1.0.0-beta2 (2015-01-27)
 
