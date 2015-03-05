@@ -152,11 +152,6 @@ class Puli
     /**
      * @var bool
      */
-    private $initialized = false;
-
-    /**
-     * @var bool
-     */
     private $pluginsEnabled = true;
 
     /**
@@ -222,7 +217,6 @@ class Puli
         $this->repositoryManager = null;
         $this->discoveryManager = null;
         $this->started = true;
-        $this->initialized = false;
     }
 
     /**
@@ -328,11 +322,7 @@ class Puli
             throw new LogicException('Puli was not started');
         }
 
-        if (!$this->environment instanceof ProjectEnvironment) {
-            throw new LogicException('Cannot access the repository in the global environment.');
-        }
-
-        return $this->environment->getRepository();
+        return $this->rootDir ? $this->environment->getRepository() : null;
     }
 
     /**
@@ -346,11 +336,7 @@ class Puli
             throw new LogicException('Puli was not started');
         }
 
-        if (!$this->environment instanceof ProjectEnvironment) {
-            throw new LogicException('Cannot access the discovery in the global environment.');
-        }
-
-        return $this->environment->getDiscovery();
+        return $this->rootDir ? $this->environment->getDiscovery() : null;
     }
 
     /**
@@ -378,8 +364,10 @@ class Puli
             throw new LogicException('Puli was not started');
         }
 
-        if (!$this->initialized) {
-            $this->initManagers();
+        if (!$this->configFileManager) {
+            $this->configFileManager = $this->environment->getHomeDirectory()
+                ? $this->createConfigFileManager($this->environment)
+                : null;
         }
 
         return $this->configFileManager;
@@ -396,8 +384,8 @@ class Puli
             throw new LogicException('Puli was not started');
         }
 
-        if (!$this->initialized) {
-            $this->initManagers();
+        if (!$this->rootPackageFileManager && $this->rootDir) {
+            $this->rootPackageFileManager = $this->createRootPackageFileManager($this->environment);
         }
 
         return $this->rootPackageFileManager;
@@ -414,8 +402,8 @@ class Puli
             throw new LogicException('Puli was not started');
         }
 
-        if (!$this->initialized) {
-            $this->initManagers();
+        if (!$this->packageManager && $this->rootDir) {
+            $this->packageManager = $this->createPackageManager($this->environment);
         }
 
         return $this->packageManager;
@@ -432,8 +420,8 @@ class Puli
             throw new LogicException('Puli was not started');
         }
 
-        if (!$this->initialized) {
-            $this->initManagers();
+        if (!$this->repositoryManager && $this->rootDir) {
+            $this->repositoryManager = $this->createRepositoryManager($this->environment, $this->getPackageManager());
         }
 
         return $this->repositoryManager;
@@ -450,8 +438,8 @@ class Puli
             throw new LogicException('Puli was not started');
         }
 
-        if (!$this->initialized) {
-            $this->initManagers();
+        if (!$this->discoveryManager && $this->rootDir) {
+            $this->discoveryManager = $this->discoveryManager = $this->createDiscoveryManager($this->environment, $this->getPackageManager(), $this->logger);
         }
 
         return $this->discoveryManager;
@@ -464,40 +452,6 @@ class Puli
             $plugin = new $pluginClass();
             $plugin->activate($this);
         }
-    }
-
-    private function initManagers()
-    {
-        if ($this->rootDir) {
-            $this->initProjectManagers();
-        } else {
-            $this->initGlobalManagers();
-        }
-
-        $this->initialized = true;
-    }
-
-    private function initGlobalManagers()
-    {
-        $this->configFileManager = $this->environment->getHomeDirectory()
-            ? $this->createConfigFileManager($this->environment)
-            : null;
-        $this->rootPackageFileManager = null;
-        $this->packageManager = null;
-        $this->repositoryManager = null;
-        $this->discoveryManager = null;
-    }
-
-    private function initProjectManagers()
-    {
-        // Create all managers and bind them to the event dispatcher
-        $this->configFileManager = $this->environment->getHomeDirectory()
-            ? $this->createConfigFileManager($this->environment)
-            : null;
-        $this->rootPackageFileManager = $this->createRootPackageFileManager($this->environment);
-        $this->packageManager = $this->createPackageManager($this->environment);
-        $this->repositoryManager = $this->createRepositoryManager($this->environment, $this->packageManager);
-        $this->discoveryManager = $this->createDiscoveryManager($this->environment, $this->packageManager, $this->logger);
     }
 
     private function createGlobalEnvironment()
