@@ -13,6 +13,10 @@ Changelog
  * removed the arguments of `DiscoveryManager::getBindings()`
  * changed the arguments of `DiscoveryManager::findBindings()` to `BindingCriteria`
  * added `BindingDescriptor::match()`
+ * removed the arguments of `DiscoveryManager::getBindingTypes()`
+ * changed the arguments of `DiscoveryManager::findBindingTypes()` to 
+   `BindingTypeCriteria`
+ * added `BindingTypeDescriptor::match()`
  * added `DiscoveryManager::getBinding()`
  * added `DiscoveryManager::hasBinding()`
  * added `DiscoveryManager::hasBindings()`
