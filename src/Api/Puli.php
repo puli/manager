@@ -38,6 +38,8 @@ use Puli\RepositoryManager\Package\PackageManagerImpl;
 use Puli\RepositoryManager\Package\RootPackageFileManagerImpl;
 use Puli\RepositoryManager\Repository\RepositoryManagerImpl;
 use Puli\RepositoryManager\Util\System;
+use ReflectionClass;
+use ReflectionException;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
@@ -459,6 +461,8 @@ class Puli
     private function activatePlugins()
     {
         foreach ($this->environment->getRootPackageFile()->getPluginClasses() as $pluginClass) {
+            $this->validatePluginClass($pluginClass);
+
             /** @var \Puli\RepositoryManager\Api\PuliPlugin $plugin */
             $plugin = new $pluginClass();
             $plugin->activate($this);
@@ -634,5 +638,27 @@ class Puli
         }
 
         return $this->packageFileStorages[$hash];
+    }
+
+    /**
+     * Validates the given plugin class name.
+     *
+     * @param string $pluginClass The fully qualified name of a plugin class.
+     */
+    private function validatePluginClass($pluginClass)
+    {
+        if (!class_exists($pluginClass)) {
+            throw new InvalidConfigException(sprintf(
+                'The plugin class %s does not exist.',
+                $pluginClass
+            ));
+        }
+
+        if (!in_array('Puli\RepositoryManager\Api\PuliPlugin', class_implements($pluginClass))) {
+            throw new InvalidConfigException(sprintf(
+                'The plugin class %s must implement PuliPlugin.',
+                $pluginClass
+            ));
+        }
     }
 }

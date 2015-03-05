@@ -246,46 +246,6 @@ class RootPackageFile extends PackageFile
      */
     public function addPluginClass($pluginClass)
     {
-        try {
-            $reflClass = new ReflectionClass($pluginClass);
-        } catch (ReflectionException $e) {
-            throw new InvalidConfigException(sprintf(
-                'The plugin class %s does not exist.',
-                $pluginClass
-            ), 0, $e);
-        }
-
-        if ($reflClass->isInterface()) {
-            throw new InvalidConfigException(sprintf(
-                'The plugin class %s should be a class, but is an interface.',
-                $pluginClass
-            ));
-        }
-
-        if (version_compare(PHP_VERSION, '5.4.0', '>=') && $reflClass->isTrait()) {
-            throw new InvalidConfigException(sprintf(
-                'The plugin class %s should be a class, but is a trait.',
-                $pluginClass
-            ));
-        }
-
-        if (!$reflClass->implementsInterface('\Puli\RepositoryManager\Api\PuliPlugin')) {
-            throw new InvalidConfigException(sprintf(
-                'The plugin class %s must implement PuliPlugin.',
-                $pluginClass
-            ));
-        }
-
-        $constructor = $reflClass->getConstructor();
-
-        if (null !== $constructor && $constructor->getNumberOfRequiredParameters() > 0) {
-            throw new InvalidConfigException(sprintf(
-                'The constructor of the plugin class %s must not have required '.
-                'parameters.',
-                $pluginClass
-            ));
-        }
-
         $this->pluginClasses[ltrim($pluginClass, '\\')] = true;
     }
 

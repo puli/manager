@@ -335,4 +335,28 @@ class PuliTest extends PHPUnit_Framework_TestCase
 
         $this->assertNull(TestPlugin::getPuli());
     }
+
+    /**
+     * @expectedException \Puli\RepositoryManager\Api\InvalidConfigException
+     */
+    public function testFailIfPluginClassNotFound()
+    {
+        $filesystem = new Filesystem();
+        $filesystem->copy($this->tempDir.'/puli-no-such-plugin.json', $this->tempDir.'/puli.json', true);
+
+        $this->puli->setRootDirectory($this->tempDir);
+        $this->puli->start();
+    }
+
+    /**
+     * @expectedException \Puli\RepositoryManager\Api\InvalidConfigException
+     */
+    public function testFailIfPluginClassNotInstanceOfPuliPlugin()
+    {
+        $filesystem = new Filesystem();
+        $filesystem->copy($this->tempDir.'/puli-not-a-plugin.json', $this->tempDir.'/puli.json', true);
+
+        $this->puli->setRootDirectory($this->tempDir);
+        $this->puli->start();
+    }
 }

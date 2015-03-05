@@ -48,60 +48,6 @@ class RootPackageFileTest extends PHPUnit_Framework_TestCase
         $this->assertSame('puli-dir', $packageFile->getConfig()->get(Config::PULI_DIR));
     }
 
-    /**
-     * @expectedException \Puli\RepositoryManager\Api\InvalidConfigException
-     */
-    public function testPluginClassMustBeExistingClass()
-    {
-        $this->packageFile->addPluginClass('\Puli\Foobar');
-    }
-
-    /**
-     * @expectedException \Puli\RepositoryManager\Api\InvalidConfigException
-     */
-    public function testPluginClassMustImplementPluginInterface()
-    {
-        $this->packageFile->addPluginClass('\stdClass');
-    }
-
-    /**
-     * @expectedException \Puli\RepositoryManager\Api\InvalidConfigException
-     */
-    public function testPluginClassMustHaveNoArgConstructor()
-    {
-        $this->packageFile->addPluginClass(__NAMESPACE__.'\Fixtures\TestPluginWithoutNoArgConstructor');
-    }
-
-    public function testPluginClassMayHaveNoConstructor()
-    {
-        $this->packageFile->addPluginClass(__NAMESPACE__.'\Fixtures\TestPluginWithoutConstructor');
-
-        $this->assertSame(array(__NAMESPACE__.'\Fixtures\TestPluginWithoutConstructor'), $this->packageFile->getPluginClasses());
-    }
-
-    /**
-     * @expectedException \Puli\RepositoryManager\Api\InvalidConfigException
-     */
-    public function testPluginClassMustNotBeInterface()
-    {
-        $this->packageFile->addPluginClass(__NAMESPACE__.'\Fixtures\TestPluginInterface');
-    }
-
-    /**
-     * @expectedException \Puli\RepositoryManager\Api\InvalidConfigException
-     * @expectedExceptionMessage trait
-     */
-    public function testPluginClassMustNotBeTrait()
-    {
-        if (version_compare(PHP_VERSION, '5.4.0', '<')) {
-            $this->markTestSkipped('PHP >= 5.4.0 only');
-
-            return;
-        }
-
-        $this->packageFile->addPluginClass(__NAMESPACE__.'\Fixtures\TestPluginTrait');
-    }
-
     public function testDuplicatePluginClassesIgnored()
     {
         $this->packageFile->addPluginClass(self::PLUGIN_CLASS);
