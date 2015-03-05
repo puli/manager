@@ -25,6 +25,11 @@ Changelog
  * added `DiscoveryManager::hasBindingTypes()`
  * added support for arbitrary config keys prefixed by "extra."
  * moved `Puli` to `Api` namespace
+ * added `Puli::start()` which must be called explicitly to start the service
+   container
+ * added `Puli::enablePlugins()`
+ * added `Puli::disablePlugins()`
+ * added `Puli::arePluginsEnabled()`
 
 * 1.0.0-beta2 (2015-01-27)
 

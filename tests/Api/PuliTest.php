@@ -32,6 +32,11 @@ class PuliTest extends PHPUnit_Framework_TestCase
      */
     private $tempHome;
 
+    /**
+     * @var Puli
+     */
+    private $puli;
+
     protected function setUp()
     {
         while (false === @mkdir($this->tempDir = sys_get_temp_dir().'/puli-repo-manager/ManagerFactoryTest_temp'.rand(10000, 99999), 0777, true)) {}
@@ -47,6 +52,8 @@ class PuliTest extends PHPUnit_Framework_TestCase
 
         // Make sure "HOME" is not set
         putenv('HOME');
+
+        $this->puli = new Puli();
     }
 
     protected function tearDown()
@@ -63,7 +70,7 @@ class PuliTest extends PHPUnit_Framework_TestCase
     {
         $this->assertFileNotExists($this->tempHome.'/.htaccess');
 
-        new Puli();
+        $this->puli->start();
 
         $this->assertFileExists($this->tempHome.'/.htaccess');
         $this->assertSame('Deny from all', file_get_contents($this->tempHome.'/.htaccess'));
@@ -73,7 +80,8 @@ class PuliTest extends PHPUnit_Framework_TestCase
     {
         $this->assertFileNotExists($this->tempHome.'/.htaccess');
 
-        new Puli($this->tempDir);
+        $this->puli->setRootDirectory($this->tempDir);
+        $this->puli->start();
 
         $this->assertFileExists($this->tempHome.'/.htaccess');
         $this->assertSame('Deny from all', file_get_contents($this->tempHome.'/.htaccess'));
@@ -81,8 +89,8 @@ class PuliTest extends PHPUnit_Framework_TestCase
 
     public function testGetGlobalEnvironment()
     {
-        $puli = new Puli();
-        $environment = $puli->getEnvironment();
+        $this->puli->start();
+        $environment = $this->puli->getEnvironment();
 
         $this->assertInstanceOf('Puli\RepositoryManager\Api\Environment\GlobalEnvironment', $environment);
         $this->assertInstanceOf('Puli\RepositoryManager\Api\Config\Config', $environment->getConfig());
@@ -97,8 +105,8 @@ class PuliTest extends PHPUnit_Framework_TestCase
         // Unset env variable
         putenv('PULI_HOME');
 
-        $puli = new Puli();
-        $environment = $puli->getEnvironment();
+        $this->puli->start();
+        $environment = $this->puli->getEnvironment();
 
         $this->assertInstanceOf('Puli\RepositoryManager\Api\Environment\GlobalEnvironment', $environment);
         $this->assertInstanceOf('Puli\RepositoryManager\Api\Config\Config', $environment->getConfig());
@@ -109,8 +117,9 @@ class PuliTest extends PHPUnit_Framework_TestCase
 
     public function testGetProjectEnvironment()
     {
-        $puli = new Puli($this->tempDir);
-        $environment = $puli->getEnvironment();
+        $this->puli->setRootDirectory($this->tempDir);
+        $this->puli->start();
+        $environment = $this->puli->getEnvironment();
 
         $this->assertInstanceOf('Puli\RepositoryManager\Api\Environment\ProjectEnvironment', $environment);
         $this->assertInstanceOf('Puli\RepositoryManager\Api\Config\Config', $environment->getConfig());
@@ -128,9 +137,9 @@ class PuliTest extends PHPUnit_Framework_TestCase
         // Unset env variable
         putenv('PULI_HOME');
 
-        $puli = new Puli($this->tempDir);
-
-        $environment = $puli->getEnvironment();
+        $this->puli->setRootDirectory($this->tempDir);
+        $this->puli->start();
+        $environment = $this->puli->getEnvironment();
 
         $this->assertInstanceOf('Puli\RepositoryManager\Api\Environment\ProjectEnvironment', $environment);
         $this->assertInstanceOf('Puli\RepositoryManager\Api\Config\Config', $environment->getConfig());
@@ -144,45 +153,48 @@ class PuliTest extends PHPUnit_Framework_TestCase
 
     public function testGetConfigFileManagerInProjectEnvironment()
     {
-        $puli = new Puli($this->tempDir);
-        $manager = $puli->getConfigFileManager();
+        $this->puli->setRootDirectory($this->tempDir);
+        $this->puli->start();
+        $manager = $this->puli->getConfigFileManager();
 
         $this->assertInstanceOf('Puli\RepositoryManager\Api\Config\ConfigFileManager', $manager);
-        $this->assertSame($puli->getEnvironment($this->tempDir), $manager->getEnvironment());
+        $this->assertSame($this->puli->getEnvironment($this->tempDir), $manager->getEnvironment());
     }
 
     public function testGetConfigFileManagerInGlobalEnvironment()
     {
-        $puli = new Puli();
-        $manager = $puli->getConfigFileManager();
+        $this->puli->start();
+        $manager = $this->puli->getConfigFileManager();
 
         $this->assertInstanceOf('Puli\RepositoryManager\Api\Config\ConfigFileManager', $manager);
-        $this->assertSame($puli->getEnvironment(), $manager->getEnvironment());
+        $this->assertSame($this->puli->getEnvironment(), $manager->getEnvironment());
     }
 
     public function testGetRootPackageFileManagerInProjectEnvironment()
     {
-        $puli = new Puli($this->tempDir);
-        $manager = $puli->getRootPackageFileManager();
+        $this->puli->setRootDirectory($this->tempDir);
+        $this->puli->start();
+        $manager = $this->puli->getRootPackageFileManager();
 
         $this->assertInstanceOf('Puli\RepositoryManager\Api\Package\RootPackageFileManager', $manager);
-        $this->assertSame($puli->getEnvironment(), $manager->getEnvironment());
+        $this->assertSame($this->puli->getEnvironment(), $manager->getEnvironment());
     }
 
     public function testGetRootPackageFileManagerInGlobalEnvironment()
     {
-        $puli = new Puli();
+        $this->puli->start();
 
-        $this->assertNull($puli->getRootPackageFileManager());
+        $this->assertNull($this->puli->getRootPackageFileManager());
     }
 
     public function testGetPackageManagerInProjectEnvironment()
     {
-        $puli = new Puli($this->tempDir);
-        $manager = $puli->getPackageManager();
+        $this->puli->setRootDirectory($this->tempDir);
+        $this->puli->start();
+        $manager = $this->puli->getPackageManager();
 
         $this->assertInstanceOf('Puli\RepositoryManager\Api\Package\PackageManager', $manager);
-        $this->assertSame($puli->getEnvironment(), $manager->getEnvironment());
+        $this->assertSame($this->puli->getEnvironment(), $manager->getEnvironment());
 
         $packages = $manager->getPackages();
 
@@ -194,95 +206,99 @@ class PuliTest extends PHPUnit_Framework_TestCase
 
     public function testGetPackageManagerInGlobalEnvironment()
     {
-        $puli = new Puli();
+        $this->puli->start();
 
-        $this->assertNull($puli->getPackageManager());
+        $this->assertNull($this->puli->getPackageManager());
     }
 
     public function testGetRepositoryManagerInProjectEnvironment()
     {
-        $puli = new Puli($this->tempDir);
-        $manager = $puli->getRepositoryManager();
+        $this->puli->setRootDirectory($this->tempDir);
+        $this->puli->start();
+        $manager = $this->puli->getRepositoryManager();
 
         $this->assertInstanceOf('Puli\RepositoryManager\Api\Repository\RepositoryManager', $manager);
-        $this->assertSame($puli->getEnvironment(), $manager->getEnvironment());
+        $this->assertSame($this->puli->getEnvironment(), $manager->getEnvironment());
     }
 
     public function testGetRepositoryManagerInGlobalEnvironment()
     {
-        $puli = new Puli();
+        $this->puli->start();
 
-        $this->assertNull($puli->getRepositoryManager());
+        $this->assertNull($this->puli->getRepositoryManager());
     }
 
     public function testGetDiscoveryManagerInProjectEnvironment()
     {
-        $puli = new Puli($this->tempDir);
-        $manager = $puli->getDiscoveryManager();
+        $this->puli->setRootDirectory($this->tempDir);
+        $this->puli->start();
+        $manager = $this->puli->getDiscoveryManager();
 
         $this->assertInstanceOf('Puli\RepositoryManager\Api\Discovery\DiscoveryManager', $manager);
-        $this->assertSame($puli->getEnvironment(), $manager->getEnvironment());
+        $this->assertSame($this->puli->getEnvironment(), $manager->getEnvironment());
     }
 
     public function testGetDiscoveryManagerInGlobalEnvironment()
     {
-        $puli = new Puli();
+        $this->puli->start();
 
-        $this->assertNull($puli->getDiscoveryManager());
+        $this->assertNull($this->puli->getDiscoveryManager());
     }
 
     public function testPassRootDirToConstructor()
     {
-        $puli = new Puli($this->tempDir);
+        $this->puli->setRootDirectory($this->tempDir);
+        $this->puli->start();
 
-        $this->assertSame($this->tempDir, $puli->getRootDirectory());
-        $this->assertInstanceOf('Puli\RepositoryManager\Api\Environment\ProjectEnvironment', $puli->getEnvironment());
-        $this->assertSame($this->tempDir, $puli->getEnvironment()->getRootDirectory());
+        $this->assertSame($this->tempDir, $this->puli->getRootDirectory());
+        $this->assertInstanceOf('Puli\RepositoryManager\Api\Environment\ProjectEnvironment', $this->puli->getEnvironment());
+        $this->assertSame($this->tempDir, $this->puli->getEnvironment()->getRootDirectory());
     }
 
     public function testPassNoRootDirToConstructor()
     {
-        $puli = new Puli();
+        $this->puli->start();
 
-        $this->assertNull($puli->getRootDirectory());
-        $this->assertInstanceOf('Puli\RepositoryManager\Api\Environment\GlobalEnvironment', $puli->getEnvironment());
+        $this->assertNull($this->puli->getRootDirectory());
+        $this->assertInstanceOf('Puli\RepositoryManager\Api\Environment\GlobalEnvironment', $this->puli->getEnvironment());
     }
 
     public function testSetRootDirectory()
     {
-        $puli = new Puli();
-        $puli->setRootDirectory($this->tempDir);
+        $this->puli->setRootDirectory($this->tempDir);
+        $this->puli->start();
 
-        $this->assertSame($this->tempDir, $puli->getRootDirectory());
-        $this->assertInstanceOf('Puli\RepositoryManager\Api\Environment\ProjectEnvironment', $puli->getEnvironment());
-        $this->assertSame($this->tempDir, $puli->getEnvironment()->getRootDirectory());
+        $this->assertSame($this->tempDir, $this->puli->getRootDirectory());
+        $this->assertInstanceOf('Puli\RepositoryManager\Api\Environment\ProjectEnvironment', $this->puli->getEnvironment());
+        $this->assertSame($this->tempDir, $this->puli->getEnvironment()->getRootDirectory());
     }
 
     public function testPassNoRootDirToSetRootDirectory()
     {
-        $puli = new Puli($this->tempDir);
-        $puli->setRootDirectory(null);
+        $this->puli->setRootDirectory($this->tempDir);
+        $this->puli->setRootDirectory(null);
+        $this->puli->start();
 
-        $this->assertNull($puli->getRootDirectory());
-        $this->assertInstanceOf('Puli\RepositoryManager\Api\Environment\GlobalEnvironment', $puli->getEnvironment());
+        $this->assertNull($this->puli->getRootDirectory());
+        $this->assertInstanceOf('Puli\RepositoryManager\Api\Environment\GlobalEnvironment', $this->puli->getEnvironment());
     }
 
     /**
-     * @expectedException \Puli\RepositoryManager\Api\FileNotFoundException
+     * @expectedException \InvalidArgumentException
      * @expectedExceptionMessage foobar
      */
     public function testFailIfRootDirNotFound()
     {
-        new Puli($this->tempDir.'/foobar');
+        $this->puli->setRootDirectory($this->tempDir.'/foobar');
     }
 
     /**
-     * @expectedException \Puli\RepositoryManager\Api\NoDirectoryException
+     * @expectedException \InvalidArgumentException
      * @expectedExceptionMessage puli.json
      */
     public function testFailIfRootDirNoDirectory()
     {
-        new Puli($this->tempDir.'/puli.json');
+        $this->puli->setRootDirectory($this->tempDir.'/puli.json');
     }
 
     /**
@@ -293,19 +309,29 @@ class PuliTest extends PHPUnit_Framework_TestCase
     {
         putenv('PULI_HOME='.$this->tempHome.'/.gitkeep');
 
-        new Puli();
+        $this->puli->start();
     }
 
     public function testActivatePluginsInProjectEnvironment()
     {
-        $puli = new Puli($this->tempDir);
+        $this->puli->setRootDirectory($this->tempDir);
+        $this->puli->start();
 
-        $this->assertSame($puli, TestPlugin::getPuli());
+        $this->assertSame($this->puli, TestPlugin::getPuli());
     }
 
     public function testDoNotActivatePluginsInGlobalEnvironment()
     {
-        new Puli();
+        $this->puli->start();
+
+        $this->assertNull(TestPlugin::getPuli());
+    }
+
+    public function testDoNotActivatePluginsIfDisabled()
+    {
+        $this->puli->setRootDirectory($this->tempDir);
+        $this->puli->disablePlugins();
+        $this->puli->start();
 
         $this->assertNull(TestPlugin::getPuli());
     }

@@ -42,12 +42,14 @@ use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
- * Provides access to the Puli managers.
+ * The Puli service locator.
  *
  * Use this class to access the managers provided by this package:
  *
  * ```php
  * $puli = new Puli(getcwd());
+ * $puli->start();
+ *
  * $packageManager = $puli->getPackageManager();
  * ```
  *
@@ -60,8 +62,8 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
  *    environment, only the global config file manager is available.
  *  * The "project environment" is tied to a specific Puli project. You need to
  *    pass the path to the project's root directory to the constructor or to
- *    {@link setRootDir()}. The configuration of the "puli.json" file in the
- *    root directory is used to configure the managers.
+ *    {@link setRootDirectory()}. The configuration of the "puli.json" file in
+ *    the root directory is used to configure the managers.
  *
  * The `Puli` class creates four kinds of managers:
  *
@@ -145,7 +147,17 @@ class Puli
     /**
      * @var bool
      */
+    private $started = false;
+
+    /**
+     * @var bool
+     */
     private $initialized = false;
+
+    /**
+     * @var bool
+     */
+    private $pluginsEnabled = true;
 
     /**
      * Parses the system environment for a home directory.
@@ -172,42 +184,61 @@ class Puli
     /**
      * Creates a new instance for the given Puli project.
      *
-     * @param string $rootDir The root directory of the Puli project. If none
-     *                        is passed, the object operates in the global
-     *                        environment. You can set or switch root
-     *                        directories anytime by calling {@link setRootDir()}.
+     * @param string $rootDir The root directory of the Puli project. If none is
+     *                        passed, the object operates in the global
+     *                        environment. You can set or switch the root
+     *                        directories later on by calling
+     *                        {@link setRootDirectory()}.
      *
-     * @see Puli, setRootDirectory()
+     * @see Puli, start()
      */
     public function __construct($rootDir = null)
     {
-        Assert::nullOrString($rootDir, 'The root directory must be a string or null. Got: %s');
-
         $this->setRootDirectory($rootDir);
     }
 
     /**
-     * Sets the managed Puli project.
+     * Starts the service container.
+     */
+    public function start()
+    {
+        if ($this->started) {
+            throw new LogicException('Puli is already started');
+        }
+
+        if ($this->rootDir) {
+            $this->environment = $this->createProjectEnvironment($this->rootDir);
+
+            if ($this->pluginsEnabled) {
+                $this->activatePlugins();
+            }
+        } else {
+            $this->environment = $this->createGlobalEnvironment();
+        }
+
+        $this->configFileManager = null;
+        $this->rootPackageFileManager = null;
+        $this->packageManager = null;
+        $this->repositoryManager = null;
+        $this->discoveryManager = null;
+        $this->started = true;
+        $this->initialized = false;
+    }
+
+    /**
+     * Returns the root directory of the managed Puli project.
      *
-     * If a previous project was set, all managers are discarded. You can also
-     * switch to the global environment by passing `null`.
+     * If no Puli project is managed at the moment, `null` is returned.
      *
-     * @param string|null $rootDir The root directory of the Puli project. If
-     *                             you pass `null`, the object operates in the
-     *                             global environment. You can set or switch
-     *                             root directories anytime.
-     *
-     * @throws FileNotFoundException If the path does not exist.
-     * @throws NoDirectoryException If the path points to a file.
+     * @param string|null $rootDir The root directory of the managed Puli
+     *                             project or `null` to start Puli in the
+     *                             global environment.
      */
     public function setRootDirectory($rootDir)
     {
-        Assert::nullOrString($rootDir, 'The root directory must be a string or null. Got: %s');
+        Assert::nullOrDirectory($rootDir);
 
-        if ($rootDir !== $this->rootDir || !$this->environment) {
-            $this->rootDir = $rootDir;
-            $this->resetEnvironment();
-        }
+        $this->rootDir = $rootDir;
     }
 
     /**
@@ -232,10 +263,7 @@ class Puli
      */
     public function setLogger(LoggerInterface $logger)
     {
-        if ($logger !== $this->logger) {
-            $this->logger = $logger;
-            $this->resetEnvironment();
-        }
+        $this->logger = $logger;
     }
 
     /**
@@ -249,12 +277,43 @@ class Puli
     }
 
     /**
+     * Enables all Puli plugins.
+     */
+    public function enablePlugins()
+    {
+        $this->pluginsEnabled = true;
+    }
+
+    /**
+     * Disables all Puli plugins.
+     */
+    public function disablePlugins()
+    {
+        $this->pluginsEnabled = false;
+    }
+
+    /**
+     * Returns whether Puli plugins are enabled.
+     *
+     * @return bool Returns `true` if Puli plugins will be loaded and `false`
+     *              otherwise.
+     */
+    public function arePluginsEnabled()
+    {
+        return $this->pluginsEnabled;
+    }
+
+    /**
      * Returns the environment.
      *
      * @return GlobalEnvironment|ProjectEnvironment The environment.
      */
     public function getEnvironment()
     {
+        if (!$this->started) {
+            throw new LogicException('Puli was not started');
+        }
+
         return $this->environment;
     }
 
@@ -265,6 +324,10 @@ class Puli
      */
     public function getRepository()
     {
+        if (!$this->started) {
+            throw new LogicException('Puli was not started');
+        }
+
         if (!$this->environment instanceof ProjectEnvironment) {
             throw new LogicException('Cannot access the repository in the global environment.');
         }
@@ -279,6 +342,10 @@ class Puli
      */
     public function getDiscovery()
     {
+        if (!$this->started) {
+            throw new LogicException('Puli was not started');
+        }
+
         if (!$this->environment instanceof ProjectEnvironment) {
             throw new LogicException('Cannot access the discovery in the global environment.');
         }
@@ -293,6 +360,10 @@ class Puli
      */
     public function getEventDispatcher()
     {
+        if (!$this->started) {
+            throw new LogicException('Puli was not started');
+        }
+
         return $this->environment->getEventDispatcher();
     }
 
@@ -303,6 +374,10 @@ class Puli
      */
     public function getConfigFileManager()
     {
+        if (!$this->started) {
+            throw new LogicException('Puli was not started');
+        }
+
         if (!$this->initialized) {
             $this->initManagers();
         }
@@ -317,6 +392,10 @@ class Puli
      */
     public function getRootPackageFileManager()
     {
+        if (!$this->started) {
+            throw new LogicException('Puli was not started');
+        }
+
         if (!$this->initialized) {
             $this->initManagers();
         }
@@ -331,6 +410,10 @@ class Puli
      */
     public function getPackageManager()
     {
+        if (!$this->started) {
+            throw new LogicException('Puli was not started');
+        }
+
         if (!$this->initialized) {
             $this->initManagers();
         }
@@ -345,6 +428,10 @@ class Puli
      */
     public function getRepositoryManager()
     {
+        if (!$this->started) {
+            throw new LogicException('Puli was not started');
+        }
+
         if (!$this->initialized) {
             $this->initManagers();
         }
@@ -359,28 +446,15 @@ class Puli
      */
     public function getDiscoveryManager()
     {
+        if (!$this->started) {
+            throw new LogicException('Puli was not started');
+        }
+
         if (!$this->initialized) {
             $this->initManagers();
         }
 
         return $this->discoveryManager;
-    }
-
-    private function resetEnvironment()
-    {
-        if ($this->rootDir) {
-            $this->environment = $this->createProjectEnvironment($this->rootDir);
-            $this->activatePlugins();
-        } else {
-            $this->environment = $this->createGlobalEnvironment();
-        }
-
-        $this->configFileManager = null;
-        $this->rootPackageFileManager = null;
-        $this->packageManager = null;
-        $this->repositoryManager = null;
-        $this->discoveryManager = null;
-        $this->initialized = false;
     }
 
     private function activatePlugins()
