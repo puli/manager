@@ -115,6 +115,8 @@ class Config
 
     const DISCOVERY_STORE_CACHE = 'discovery.store.cache';
 
+    const EXTRA = 'extra';
+
     /**
      * The accepted config keys.
      *
@@ -142,6 +144,7 @@ class Config
         self::REPOSITORY => true,
         self::DISCOVERY => true,
         self::DISCOVERY_STORE => true,
+        self::EXTRA => true,
     );
 
     /**
@@ -252,7 +255,7 @@ class Config
             );
         }
 
-        if (!isset(self::$keys[$key])) {
+        if (!isset(self::$keys[$key]) && 0 !== strpos($key, self::EXTRA.'.')) {
             throw NoSuchConfigKeyException::forKey($key);
         }
 
@@ -276,7 +279,7 @@ class Config
      */
     public function contains($key, $fallback = true)
     {
-        if (!isset(self::$compositeKeys[$key]) && !isset(self::$keys[$key])) {
+        if (!isset(self::$compositeKeys[$key]) && !isset(self::$keys[$key]) && 0 !== strpos($key, self::EXTRA.'.')) {
             throw NoSuchConfigKeyException::forKey($key);
         }
 
@@ -317,7 +320,7 @@ class Config
             return;
         }
 
-        if (!isset(self::$keys[$key])) {
+        if (!isset(self::$keys[$key]) && 0 !== strpos($key, self::EXTRA.'.')) {
             throw NoSuchConfigKeyException::forKey($key);
         }
 
@@ -359,7 +362,7 @@ class Config
             return;
         }
 
-        if (!isset(self::$keys[$key])) {
+        if (!isset(self::$keys[$key]) && 0 !== strpos($key, self::EXTRA.'.')) {
             throw NoSuchConfigKeyException::forKey($key);
         }
 

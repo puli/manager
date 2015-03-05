@@ -23,6 +23,7 @@ Changelog
  * added `DiscoveryManager::getBindingType()`
  * added `DiscoveryManager::hasBindingType()`
  * added `DiscoveryManager::hasBindingTypes()`
+ * added support for arbitrary config keys prefixed by "extra."
 
 * 1.0.0-beta2 (2015-01-27)
 

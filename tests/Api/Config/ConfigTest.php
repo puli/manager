@@ -77,6 +77,21 @@ class ConfigTest extends PHPUnit_Framework_TestCase
         $this->assertSame('{$puli-dir}/ServiceRegistry.php', $config->getRaw(Config::FACTORY_FILE));
     }
 
+    public function testGetRawReturnsExtraKey()
+    {
+        $config = new Config();
+        $config->set('extra.my-key', 'value');
+
+        $this->assertSame('value', $config->getRaw('extra.my-key'));
+    }
+
+    public function testGetRawReturnsNullIfExtraKeyNotSet()
+    {
+        $config = new Config();
+
+        $this->assertNull($config->getRaw('extra.my-key'));
+    }
+
     /**
      * @expectedException \Puli\RepositoryManager\Api\Config\NoSuchConfigKeyException
      * @expectedExceptionMessage foo
@@ -99,6 +114,18 @@ class ConfigTest extends PHPUnit_Framework_TestCase
                 'type' => 'my-store-type',
             ),
         ), $config->getRaw(Config::DISCOVERY));
+    }
+
+    public function testGetRawCompositeExtraKey()
+    {
+        $config = new Config();
+        $config->set('extra.key1', 'value1');
+        $config->set('extra.key2', 'value2');
+
+        $this->assertSame(array(
+            'key1' => 'value1',
+            'key2' => 'value2',
+        ), $config->getRaw(Config::EXTRA));
     }
 
     public function testGetRawCompositeKeyReturnsArrayIfNotSet()
@@ -425,6 +452,17 @@ class ConfigTest extends PHPUnit_Framework_TestCase
         $this->assertTrue($config->contains(Config::PULI_DIR, false));
     }
 
+    public function testContainsExtraKey()
+    {
+        $config = new Config();
+
+        $this->assertFalse($config->contains('extra.my-key'));
+
+        $config->set('extra.my-key', 'puli-dir');
+
+        $this->assertTrue($config->contains('extra.my-key'));
+    }
+
     /**
      * @expectedException \Puli\RepositoryManager\Api\Config\NoSuchConfigKeyException
      * @expectedExceptionMessage foo
@@ -634,6 +672,17 @@ class ConfigTest extends PHPUnit_Framework_TestCase
 
         $this->assertSame('ServiceRegistry.php', $config->get(Config::FACTORY_FILE));
         $this->assertNull($config->get(Config::FACTORY_CLASS));
+    }
+
+    public function testRemoveExtraKey()
+    {
+        $config = new Config();
+        $config->set('extra.key1', 'value1');
+        $config->set('extra.key2', 'value2');
+        $config->remove('extra.key1');
+
+        $this->assertNull($config->get('extra.key1'));
+        $this->assertSame('value2', $config->get('extra.key2'));
     }
 
     public function testRemoveCompositeKey()
