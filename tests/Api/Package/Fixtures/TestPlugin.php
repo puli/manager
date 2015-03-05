@@ -25,21 +25,32 @@ class TestPlugin implements PuliPlugin
      */
     private static $puli;
 
+    private static $environment;
+
     public static function reset()
     {
         self::$puli = null;
+        self::$environment = null;
     }
 
     /**
-     * @return \Puli\RepositoryManager\Api\Puli
+     * @return Puli
      */
     public static function getPuli()
     {
         return self::$puli;
     }
 
+    public static function getEnvironment()
+    {
+        return self::$environment;
+    }
+
     public function activate(Puli $puli)
     {
         self::$puli = $puli;
+
+        // Test that Puli is started and the services are accessible
+        self::$environment = $puli->getEnvironment();
     }
 }

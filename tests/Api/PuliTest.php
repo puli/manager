@@ -318,6 +318,7 @@ class PuliTest extends PHPUnit_Framework_TestCase
         $this->puli->start();
 
         $this->assertSame($this->puli, TestPlugin::getPuli());
+        $this->assertSame($this->puli->getEnvironment(), TestPlugin::getEnvironment());
     }
 
     public function testDoNotActivatePluginsInGlobalEnvironment()
@@ -325,6 +326,7 @@ class PuliTest extends PHPUnit_Framework_TestCase
         $this->puli->start();
 
         $this->assertNull(TestPlugin::getPuli());
+        $this->assertNull(TestPlugin::getEnvironment());
     }
 
     public function testDoNotActivatePluginsIfDisabled()
@@ -334,6 +336,7 @@ class PuliTest extends PHPUnit_Framework_TestCase
         $this->puli->start();
 
         $this->assertNull(TestPlugin::getPuli());
+        $this->assertNull(TestPlugin::getEnvironment());
     }
 
     /**

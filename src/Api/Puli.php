@@ -205,10 +205,6 @@ class Puli
 
         if ($this->rootDir) {
             $this->environment = $this->createProjectEnvironment($this->rootDir);
-
-            if ($this->pluginsEnabled) {
-                $this->activatePlugins();
-            }
         } else {
             $this->environment = $this->createGlobalEnvironment();
         }
@@ -219,6 +215,11 @@ class Puli
         $this->repositoryManager = null;
         $this->discoveryManager = null;
         $this->started = true;
+
+        // Start plugins once the container is running
+        if ($this->rootDir && $this->pluginsEnabled) {
+            $this->activatePlugins();
+        }
     }
 
     /**
