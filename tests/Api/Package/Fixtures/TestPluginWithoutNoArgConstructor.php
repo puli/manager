@@ -11,8 +11,8 @@
 
 namespace Puli\RepositoryManager\Tests\Api\Package\Fixtures;
 
+use Puli\RepositoryManager\Api\Puli;
 use Puli\RepositoryManager\Api\PuliPlugin;
-use Puli\RepositoryManager\Puli;
 
 /**
  * @since  1.0

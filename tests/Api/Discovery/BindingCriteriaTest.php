@@ -12,8 +12,8 @@
 namespace Puli\RepositoryManager\Tests\Api\Discovery;
 
 use PHPUnit_Framework_TestCase;
-use Puli\RepositoryManager\Api\Discovery\BindingState;
 use Puli\RepositoryManager\Api\Discovery\BindingCriteria;
+use Puli\RepositoryManager\Api\Discovery\BindingState;
 use Rhumsaa\Uuid\Uuid;
 
 /**

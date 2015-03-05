@@ -26,7 +26,7 @@ The [Puli] Repository Manager Component builds a [resource repository] and
 This mapping can be loaded with the [`RepositoryManager`]:
 
 ```php
-use Puli\RepositoryManager\Puli;
+use Puli\RepositoryManager\Api\Puli;
 
 $puli = new Puli(getcwd());
 $repoManager = $puli->getRepositoryManager();

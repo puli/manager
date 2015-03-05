@@ -24,6 +24,7 @@ Changelog
  * added `DiscoveryManager::hasBindingType()`
  * added `DiscoveryManager::hasBindingTypes()`
  * added support for arbitrary config keys prefixed by "extra."
+ * moved `Puli` to `Api` namespace
 
 * 1.0.0-beta2 (2015-01-27)
 

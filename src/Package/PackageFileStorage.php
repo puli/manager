@@ -13,10 +13,10 @@ namespace Puli\RepositoryManager\Package;
 
 use Puli\RepositoryManager\Api\Config\Config;
 use Puli\RepositoryManager\Api\Event\PackageFileEvent;
+use Puli\RepositoryManager\Api\Event\PuliEvents;
 use Puli\RepositoryManager\Api\FileNotFoundException;
 use Puli\RepositoryManager\Api\InvalidConfigException;
 use Puli\RepositoryManager\Api\IOException;
-use Puli\RepositoryManager\Api\Event\PuliEvents;
 use Puli\RepositoryManager\Api\Package\PackageFile;
 use Puli\RepositoryManager\Api\Package\PackageFileReader;
 use Puli\RepositoryManager\Api\Package\PackageFileWriter;

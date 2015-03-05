@@ -9,10 +9,10 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\RepositoryManager\Tests;
+namespace Puli\RepositoryManager\Tests\Api;
 
 use PHPUnit_Framework_TestCase;
-use Puli\RepositoryManager\Puli;
+use Puli\RepositoryManager\Api\Puli;
 use Puli\RepositoryManager\Tests\Api\Package\Fixtures\TestPlugin;
 use Symfony\Component\Filesystem\Filesystem;
 

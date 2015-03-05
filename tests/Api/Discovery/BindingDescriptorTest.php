@@ -12,11 +12,11 @@
 namespace Puli\RepositoryManager\Tests\Api\Discovery;
 
 use PHPUnit_Framework_TestCase;
+use Puli\RepositoryManager\Api\Discovery\BindingCriteria;
 use Puli\RepositoryManager\Api\Discovery\BindingDescriptor;
 use Puli\RepositoryManager\Api\Discovery\BindingParameterDescriptor;
 use Puli\RepositoryManager\Api\Discovery\BindingState;
 use Puli\RepositoryManager\Api\Discovery\BindingTypeDescriptor;
-use Puli\RepositoryManager\Api\Discovery\BindingCriteria;
 use Puli\RepositoryManager\Api\Package\InstallInfo;
 use Puli\RepositoryManager\Api\Package\Package;
 use Puli\RepositoryManager\Api\Package\PackageFile;

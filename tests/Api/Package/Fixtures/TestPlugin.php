@@ -11,8 +11,8 @@
 
 namespace Puli\RepositoryManager\Tests\Api\Package\Fixtures;
 
+use Puli\RepositoryManager\Api\Puli;
 use Puli\RepositoryManager\Api\PuliPlugin;
-use Puli\RepositoryManager\Puli;
 
 /**
  * @since  1.0
@@ -31,7 +31,7 @@ class TestPlugin implements PuliPlugin
     }
 
     /**
-     * @return Puli
+     * @return \Puli\RepositoryManager\Api\Puli
      */
     public static function getPuli()
     {

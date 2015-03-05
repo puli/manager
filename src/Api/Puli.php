@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\RepositoryManager;
+namespace Puli\RepositoryManager\Api;
 
 use LogicException;
 use Psr\Log\LoggerInterface;
@@ -19,9 +19,6 @@ use Puli\RepositoryManager\Api\Config\ConfigFileManager;
 use Puli\RepositoryManager\Api\Discovery\DiscoveryManager;
 use Puli\RepositoryManager\Api\Environment\GlobalEnvironment;
 use Puli\RepositoryManager\Api\Environment\ProjectEnvironment;
-use Puli\RepositoryManager\Api\FileNotFoundException;
-use Puli\RepositoryManager\Api\InvalidConfigException;
-use Puli\RepositoryManager\Api\NoDirectoryException;
 use Puli\RepositoryManager\Api\Package\PackageManager;
 use Puli\RepositoryManager\Api\Package\PackageState;
 use Puli\RepositoryManager\Api\Package\RootPackageFileManager;

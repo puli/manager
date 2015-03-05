@@ -11,8 +11,6 @@
 
 namespace Puli\RepositoryManager\Api;
 
-use Puli\RepositoryManager\Puli;
-
 /**
  * A plugin for the repository manager.
  *
