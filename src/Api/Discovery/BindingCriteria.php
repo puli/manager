@@ -11,7 +11,7 @@
 
 namespace Puli\RepositoryManager\Api\Discovery;
 
-use Puli\Repository\Assert\Assert;
+use Puli\RepositoryManager\Assert\Assert;
 use Rhumsaa\Uuid\Uuid;
 
 /**
@@ -308,7 +308,7 @@ class BindingCriteria
      * A binding state matches if:
      *
      *  * The criteria defines no binding states.
-     *  * The binding states is one of the defined states.
+     *  * The binding state is one of the defined states.
      *
      * @param int $state The {@link BindingState} constant to test.
      *

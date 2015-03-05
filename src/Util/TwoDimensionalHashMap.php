@@ -287,6 +287,16 @@ class TwoDimensionalHashMap
         return $this->values;
     }
 
+    /**
+     * Returns whether the map is empty.
+     *
+     * @return bool Returns `true` if the map is empty and `false` otherwise.
+     */
+    public function isEmpty()
+    {
+        return 0 === count($this->values);
+    }
+
     public function sortByPrimaryKeys()
     {
         ksort($this->values);

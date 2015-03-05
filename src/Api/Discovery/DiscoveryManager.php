@@ -12,6 +12,7 @@
 namespace Puli\RepositoryManager\Api\Discovery;
 
 use Puli\Discovery\Api\DuplicateTypeException;
+use Puli\Discovery\Api\NoSuchTypeException;
 use Puli\RepositoryManager\Api\Environment\ProjectEnvironment;
 use Rhumsaa\Uuid\Uuid;
 
@@ -45,16 +46,61 @@ interface DiscoveryManager
     public function removeBindingType($typeName);
 
     /**
+     * Returns the binding type with the given name.
+     *
+     * @param string $typeName    The name of the type.
+     * @param string $packageName The name of the package to check. Useful if
+     *                            types with the same name exist in multiple
+     *                            packages.
+     *
+     * @return BindingTypeDescriptor The binding type.
+     *
+     * @throws NoSuchTypeException If the type does not exist.
+     */
+    public function getBindingType($typeName, $packageName = null);
+
+    /**
      * Returns all binding types.
-     *
-     * You can optionally filter types by one or multiple package names.
-     *
-     * @param string|string[] $packageName The package name(s) to filter by.
-     * @param int             $state       The state of the types to return.
      *
      * @return BindingTypeDescriptor[] The binding types.
      */
-    public function getBindingTypes($packageName = null, $state = null);
+    public function getBindingTypes();
+
+    /**
+     * Returns all binding types matching the given criteria.
+     *
+     * @param BindingTypeCriteria $criteria The search criteria.
+     *
+     * @return BindingTypeDescriptor[] The binding types matching the criteria.
+     */
+    public function findBindingTypes(BindingTypeCriteria $criteria);
+
+    /**
+     * Returns whether the type with the given name exists.
+     *
+     * @param string $typeName    The name of the type.
+     * @param string $packageName The name of the package to check. Useful if
+     *                            types with the same name exist in multiple
+     *                            packages.
+     *
+     * @return bool Returns `true` if the type exists and `false` otherwise.
+     */
+    public function hasBindingType($typeName, $packageName = null);
+
+    /**
+     * Returns whether the manager has any binding types.
+     *
+     * You can optionally pass criteria to check whether the manager has types
+     * matching the given criteria.
+     *
+     * @param BindingTypeCriteria $criteria The search criteria.
+     *
+     * @return bool Returns `true` if the manager has binding types and `false`
+     *              otherwise. If a criteria was passed, this method only
+     *              returns `true` if the manager has binding types matching the
+     *              criteria.
+     */
+    public function hasBindingTypes(BindingTypeCriteria $criteria = null);
 
     /**
      * Adds a new binding.
@@ -75,10 +121,11 @@ interface DiscoveryManager
      *
      * @param Uuid            $uuid        The UUID of the binding.
      * @param string|string[] $packageName The package name to enable the
-     *                                     binding in. Useful if the same
-     *                                     binding exists in multiple packages.
+     *                                     binding in. Useful if bindings with
+     *                                     the same UUID exist in multiple
+     *                                     packages.
      *
-     * @throws NoSuchBindingException If the binding could not be found.
+     * @throws NoSuchBindingException If the binding does not exist.
      * @throws CannotEnableBindingException If the binding could not be enabled.
      */
     public function enableBinding(Uuid $uuid, $packageName = null);
@@ -88,13 +135,28 @@ interface DiscoveryManager
      *
      * @param Uuid            $uuid        The UUID of the binding.
      * @param string|string[] $packageName The package name to disable the
-     *                                     binding in. Useful if the same
-     *                                     binding exists in multiple packages.
+     *                                     binding in. Useful if bindings with
+     *                                     the same UUID exist in multiple
+     *                                     packages.
      *
-     * @throws NoSuchBindingException If the binding could not be found.
+     * @throws NoSuchBindingException If the binding does not exist.
      * @throws CannotDisableBindingException If the binding could not be disabled.
      */
     public function disableBinding(Uuid $uuid, $packageName = null);
+
+    /**
+     * Returns the binding with the given UUID.
+     *
+     * @param Uuid   $uuid        The UUID of the binding.
+     * @param string $packageName The name of the package to check. Useful if
+     *                            bindings with the same UUID exist in multiple
+     *                            packages.
+     *
+     * @return BindingDescriptor The binding.
+     *
+     * @throws NoSuchBindingException If the binding does not exist.
+     */
+    public function getBinding(Uuid $uuid, $packageName = null);
 
     /**
      * Returns all bindings.
@@ -111,6 +173,33 @@ interface DiscoveryManager
      * @return BindingDescriptor[] The bindings matching the criteria.
      */
     public function findBindings(BindingCriteria $criteria);
+
+    /**
+     * Returns whether the binding with the given UUID exists.
+     *
+     * @param Uuid   $uuid        The UUID of the binding.
+     * @param string $packageName The name of the package to check. Useful if
+     *                            bindings with the same UUID exist in multiple
+     *                            packages.
+     *
+     * @return bool Returns `true` if the binding exists and `false` otherwise.
+     */
+    public function hasBinding(Uuid $uuid, $packageName = null);
+
+    /**
+     * Returns whether the manager has any bindings.
+     *
+     * You can optionally pass criteria to check whether the manager has
+     * bindings matching the given criteria.
+     *
+     * @param BindingCriteria $criteria The search criteria.
+     *
+     * @return bool Returns `true` if the manager has bindings and `false`
+     *              otherwise. If a criteria was passed, this method only
+     *              returns `true` if the manager has bindings matching the
+     *              criteria.
+     */
+    public function hasBindings(BindingCriteria $criteria = null);
 
     /**
      * Builds the resource discovery.

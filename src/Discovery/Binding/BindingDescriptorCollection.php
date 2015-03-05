@@ -172,4 +172,26 @@ class BindingDescriptorCollection
 
         return $uuids;
     }
+
+    /**
+     * Returns the contents of the collection as array.
+     *
+     * @return array[] A multi-dimensional array containing all bindings indexed
+     *                 first by UUID, then by package name.
+     */
+    public function toArray()
+    {
+        return $this->map->toArray();
+    }
+
+    /**
+     * Returns whether the collection is empty.
+     *
+     * @return bool Returns `true` if the collection is empty and `false`
+     *              otherwise.
+     */
+    public function isEmpty()
+    {
+        return $this->map->isEmpty();
+    }
 }

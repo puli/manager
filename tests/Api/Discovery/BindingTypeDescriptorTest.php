@@ -13,7 +13,12 @@ namespace Puli\RepositoryManager\Tests\Api\Discovery;
 
 use PHPUnit_Framework_TestCase;
 use Puli\RepositoryManager\Api\Discovery\BindingParameterDescriptor;
+use Puli\RepositoryManager\Api\Discovery\BindingTypeCriteria;
 use Puli\RepositoryManager\Api\Discovery\BindingTypeDescriptor;
+use Puli\RepositoryManager\Api\Discovery\BindingTypeState;
+use Puli\RepositoryManager\Api\Package\InstallInfo;
+use Puli\RepositoryManager\Api\Package\Package;
+use Puli\RepositoryManager\Api\Package\PackageFile;
 
 /**
  * @since  1.0
@@ -21,6 +26,16 @@ use Puli\RepositoryManager\Api\Discovery\BindingTypeDescriptor;
  */
 class BindingTypeDescriptorTest extends PHPUnit_Framework_TestCase
 {
+    /**
+     * @var Package
+     */
+    private $package;
+
+    protected function setUp()
+    {
+        $this->package = new Package(new PackageFile(), '/path', new InstallInfo('vendor/package', '/path'));
+    }
+
     public function testCreate()
     {
         $descriptor = new BindingTypeDescriptor('vendor/type', 'The description.', array(
@@ -268,5 +283,43 @@ class BindingTypeDescriptorTest extends PHPUnit_Framework_TestCase
         $this->assertSame($name, $type->getName());
         $this->assertCount(1, $type->getParameters());
         $this->assertInstanceOf('Puli\Discovery\Api\Binding\BindingParameter', $type->getParameter('param'));
+    }
+
+    public function testEnabledIfLoaded()
+    {
+        $type = new BindingTypeDescriptor('vendor/type');
+        $type->load($this->package);
+
+        $this->assertSame(BindingTypeState::ENABLED, $type->getState());
+    }
+
+    public function testDuplicateIfMarkedDuplicate()
+    {
+        $type = new BindingTypeDescriptor('vendor/type');
+        $type->load($this->package);
+        $type->markDuplicate(true);
+
+        $this->assertSame(BindingTypeState::DUPLICATE, $type->getState());
+    }
+
+    public function testMatch()
+    {
+        $type = new BindingTypeDescriptor('vendor/type');
+        $type->load($this->package);
+
+        $criteria = new BindingTypeCriteria();
+        $this->assertTrue($type->match($criteria));
+
+        $criteria->setPackageNames(array('foobar'));
+        $this->assertFalse($type->match($criteria));
+
+        $criteria->setPackageNames(array($this->package->getName()));
+        $this->assertTrue($type->match($criteria));
+
+        $criteria->setStates(array(BindingTypeState::DUPLICATE));
+        $this->assertFalse($type->match($criteria));
+
+        $criteria->setStates(array(BindingTypeState::ENABLED));
+        $this->assertTrue($type->match($criteria));
     }
 }

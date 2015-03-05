@@ -407,4 +407,20 @@ class BindingTypeDescriptor
 
         return BindingTypeState::DUPLICATE === $this->state;
     }
+
+    /**
+     * Returns whether the binding type matches the given criteria.
+     *
+     * @param BindingTypeCriteria $criteria The search criteria.
+     *
+     * @return bool Returns `true` if the binding type matches the criteria and
+     *              `false` otherwise.
+     *
+     * @see BindingTypeCriteria
+     */
+    public function match(BindingTypeCriteria $criteria)
+    {
+        return $criteria->matchPackageName($this->containingPackage->getName())
+            && $criteria->matchState($this->state);
+    }
 }

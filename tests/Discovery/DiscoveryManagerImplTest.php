@@ -20,6 +20,7 @@ use Puli\RepositoryManager\Api\Discovery\BindingCriteria;
 use Puli\RepositoryManager\Api\Discovery\BindingDescriptor;
 use Puli\RepositoryManager\Api\Discovery\BindingParameterDescriptor;
 use Puli\RepositoryManager\Api\Discovery\BindingState;
+use Puli\RepositoryManager\Api\Discovery\BindingTypeCriteria;
 use Puli\RepositoryManager\Api\Discovery\BindingTypeDescriptor;
 use Puli\RepositoryManager\Api\Discovery\BindingTypeState;
 use Puli\RepositoryManager\Api\Package\InstallInfo;
@@ -41,6 +42,7 @@ use Symfony\Component\Filesystem\Filesystem;
  */
 class DiscoveryManagerImplTest extends ManagerTestCase
 {
+    const NOT_FOUND_UUID = 'fa1a334b-35ba-4662-ab5e-d64394f3081e';
     /**
      * @var string
      */
@@ -587,7 +589,41 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->manager->removeBindingType('my/type');
     }
 
-    public function testGetAllBindingTypes()
+    public function testGetBindingType()
+    {
+        $this->initDefaultManager();
+
+        $this->rootPackageFile->addTypeDescriptor($type1 = new BindingTypeDescriptor('my/type1'));
+        $this->packageFile1->addTypeDescriptor($type2 = new BindingTypeDescriptor('my/type2'));
+        $this->packageFile2->addTypeDescriptor($type3 = clone $type2); // duplicate
+
+        $this->assertSame($type1, $this->manager->getBindingType('my/type1'));
+        $this->assertSame($type2, $this->manager->getBindingType('my/type2'));
+        $this->assertSame($type2, $this->manager->getBindingType('my/type2', 'vendor/package1'));
+        $this->assertSame($type3, $this->manager->getBindingType('my/type2', 'vendor/package2'));
+    }
+
+    /**
+     * @expectedException \Puli\Discovery\Api\NoSuchTypeException
+     */
+    public function testGetBindingTypeFailsIfNotFound()
+    {
+        $this->initDefaultManager();
+
+        $this->manager->getBindingType('my/type');
+    }
+
+    /**
+     * @expectedException \InvalidArgumentException
+     */
+    public function testGetBindingTypeFailsIfPackageNoString()
+    {
+        $this->initDefaultManager();
+
+        $this->manager->getBindingType('my/type', 1234);
+    }
+
+    public function testGetBindingTypes()
     {
         $this->initDefaultManager();
 
@@ -602,39 +638,81 @@ class DiscoveryManagerImplTest extends ManagerTestCase
             $type3,
             $type4,
         ), $this->manager->getBindingTypes());
-
-        $this->assertSame(array($type2), $this->manager->getBindingTypes('vendor/package1'));
-        $this->assertSame(array($type2, $type3), $this->manager->getBindingTypes(array('vendor/package1', 'vendor/package2')));
     }
 
-    public function testGetEnabledBindingTypesDoesNotIncludeDuplicateTypes()
+    public function testFindBindingTypes()
     {
         $this->initDefaultManager();
 
-        $this->packageFile1->addTypeDescriptor($type1 = new BindingTypeDescriptor('my/type1'));
+        $this->rootPackageFile->addTypeDescriptor($type1 = new BindingTypeDescriptor('my/type1'));
         $this->packageFile1->addTypeDescriptor($type2 = new BindingTypeDescriptor('my/type2'));
-        $this->packageFile2->addTypeDescriptor($type3 = clone $type2);
-        $this->packageFile2->addTypeDescriptor($type4 = new BindingTypeDescriptor('my/type3'));
+        $this->packageFile2->addTypeDescriptor($type3 = clone $type2); // duplicate
+        $this->packageFile3->addTypeDescriptor($type4 = new BindingTypeDescriptor('my/type4'));
 
-        $this->assertEquals(array($type1, $type4), $this->manager->getBindingTypes(null, BindingTypeState::ENABLED));
-        $this->assertEquals(array($type1), $this->manager->getBindingTypes('vendor/package1', BindingTypeState::ENABLED));
-        $this->assertEquals(array($type4), $this->manager->getBindingTypes('vendor/package2', BindingTypeState::ENABLED));
-        $this->assertEquals(array($type1, $type4), $this->manager->getBindingTypes(array('vendor/package1', 'vendor/package2'), BindingTypeState::ENABLED));
+        $criteria1 = BindingTypeCriteria::create()
+            ->addPackageName('vendor/package1');
+
+        $criteria2 = BindingTypeCriteria::create()
+            ->addState(BindingTypeState::DUPLICATE);
+
+        $criteria3 = BindingTypeCriteria::create()
+            ->addPackageName('vendor/package2')
+            ->addState(BindingTypeState::DUPLICATE);
+
+        $this->assertSame(array($type2), $this->manager->findBindingTypes($criteria1));
+        $this->assertSame(array($type2, $type3), $this->manager->findBindingTypes($criteria2));
+        $this->assertSame(array($type3), $this->manager->findBindingTypes($criteria3));
     }
 
-    public function testGetDuplicateBindingTypesDoesNotIncludeEnabledTypes()
+    public function testHasBindingType()
     {
         $this->initDefaultManager();
 
-        $this->packageFile1->addTypeDescriptor($type1 = new BindingTypeDescriptor('my/type1'));
-        $this->packageFile1->addTypeDescriptor($type2 = new BindingTypeDescriptor('my/type2'));
-        $this->packageFile2->addTypeDescriptor($type3 = clone $type2);
-        $this->packageFile2->addTypeDescriptor($type4 = new BindingTypeDescriptor('my/type3'));
+        $this->rootPackageFile->addTypeDescriptor(new BindingTypeDescriptor('my/type1'));
+        $this->packageFile1->addTypeDescriptor(new BindingTypeDescriptor('my/type2'));
 
-        $this->assertEquals(array($type2, $type3), $this->manager->getBindingTypes(null, BindingTypeState::DUPLICATE));
-        $this->assertEquals(array($type2), $this->manager->getBindingTypes('vendor/package1', BindingTypeState::DUPLICATE));
-        $this->assertEquals(array($type3), $this->manager->getBindingTypes('vendor/package2', BindingTypeState::DUPLICATE));
-        $this->assertEquals(array($type2, $type3), $this->manager->getBindingTypes(array('vendor/package1', 'vendor/package2'), BindingTypeState::DUPLICATE));
+        $this->assertTrue($this->manager->hasBindingType('my/type1'));
+        $this->assertTrue($this->manager->hasBindingType('my/type2', 'vendor/package1'));
+        $this->assertFalse($this->manager->hasBindingType('my/type2', 'vendor/package2'));
+        $this->assertFalse($this->manager->hasBindingType('my/type3'));
+    }
+
+    /**
+     * @expectedException \InvalidArgumentException
+     */
+    public function testHasBindingTypeFailsIfPackageNoString()
+    {
+        $this->initDefaultManager();
+
+        $this->manager->hasBindingType('my/type', 1234);
+    }
+
+    public function testHasBindingTypes()
+    {
+        $this->initDefaultManager();
+
+        $this->rootPackageFile->addTypeDescriptor($type1 = new BindingTypeDescriptor('my/type1'));
+        $this->packageFile1->addTypeDescriptor($type2 = new BindingTypeDescriptor('my/type2'));
+        $this->packageFile1->addTypeDescriptor($type3 = clone $type2);
+
+        $criteria1 = BindingTypeCriteria::create()
+            ->addPackageName('vendor/package1')
+            ->addState(BindingTypeState::ENABLED);
+
+        $criteria2 = BindingTypeCriteria::create()
+            ->addPackageName('vendor/package2')
+            ->addState(BindingTypeState::DUPLICATE);
+
+        $this->assertTrue($this->manager->hasBindingTypes());
+        $this->assertTrue($this->manager->hasBindingTypes($criteria1));
+        $this->assertFalse($this->manager->hasBindingTypes($criteria2));
+    }
+
+    public function testHasNoBindingTypes()
+    {
+        $this->initDefaultManager();
+
+        $this->assertFalse($this->manager->hasBindingTypes());
     }
 
     public function testAddBinding()
@@ -1709,14 +1787,48 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->assertSame(array($binding->getUuid()), $this->installInfo1->getEnabledBindingUuids());
     }
 
-    public function testGetAllBindings()
+    public function testGetBinding()
     {
         $this->initDefaultManager();
 
         $this->rootPackageFile->addTypeDescriptor(new BindingTypeDescriptor('my/type'));
         $this->rootPackageFile->addBindingDescriptor($binding1 = new BindingDescriptor('/path1', 'my/type'));
         $this->packageFile1->addBindingDescriptor($binding2 = new BindingDescriptor('/path2', 'my/type'));
-        $this->packageFile2->addBindingDescriptor($binding3 = new BindingDescriptor('/path3', 'my/type'));
+        $this->packageFile2->addBindingDescriptor($binding3 = clone $binding2);
+
+        $this->assertSame($binding1, $this->manager->getBinding($binding1->getUuid()));
+        $this->assertSame($binding2, $this->manager->getBinding($binding2->getUuid()));
+        $this->assertSame($binding3, $this->manager->getBinding($binding2->getUuid(), 'vendor/package2'));
+    }
+
+    /**
+     * @expectedException \Puli\RepositoryManager\Api\Discovery\NoSuchBindingException
+     */
+    public function testGetBindingFailsIfNotFound()
+    {
+        $this->initDefaultManager();
+
+        $this->manager->getBinding(Uuid::fromString(self::NOT_FOUND_UUID));
+    }
+
+    /**
+     * @expectedException \InvalidArgumentException
+     */
+    public function testGetBindingFailsIfPackageNoString()
+    {
+        $this->initDefaultManager();
+
+        $this->manager->getBinding(Uuid::fromString(self::NOT_FOUND_UUID), 1234);
+    }
+
+    public function testGetBindings()
+    {
+        $this->initDefaultManager();
+
+        $this->rootPackageFile->addTypeDescriptor(new BindingTypeDescriptor('my/type'));
+        $this->rootPackageFile->addBindingDescriptor($binding1 = new BindingDescriptor('/path1', 'my/type'));
+        $this->packageFile1->addBindingDescriptor($binding2 = new BindingDescriptor('/path2', 'my/type'));
+        $this->packageFile2->addBindingDescriptor($binding3 = clone $binding2);
         $this->packageFile3->addBindingDescriptor($binding4 = new BindingDescriptor('/path4', 'my/type'));
         $this->installInfo1->addDisabledBindingUuid($binding2->getUuid());
         $this->installInfo3->addEnabledBindingUuid($binding4->getUuid());
@@ -1727,18 +1839,6 @@ class DiscoveryManagerImplTest extends ManagerTestCase
             $binding3,
             $binding4,
         ), $this->manager->getBindings());
-    }
-
-    public function testGetAllBindingsMergesDuplicates()
-    {
-        $this->initDefaultManager();
-
-        $this->rootPackageFile->addTypeDescriptor(new BindingTypeDescriptor('my/type'));
-        $this->rootPackageFile->addBindingDescriptor($binding1 = new BindingDescriptor('/path', 'my/type'));
-        $this->packageFile1->addBindingDescriptor($binding2 = clone $binding1);
-        $this->installInfo1->addEnabledBindingUuid($binding1->getUuid());
-
-        $this->assertCount(1, $this->manager->getBindings());
     }
 
     public function testFindBindings()
@@ -1786,6 +1886,63 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->assertSame(array($binding2, $binding3), $this->manager->findBindings($criteria1));
         $this->assertSame(array($binding2), $this->manager->findBindings($criteria2));
         $this->assertSame(array(), $this->manager->findBindings($criteria3));
+    }
+
+    public function testHasBinding()
+    {
+        $this->initDefaultManager();
+
+        $this->rootPackageFile->addTypeDescriptor(new BindingTypeDescriptor('my/type'));
+        $this->rootPackageFile->addBindingDescriptor($binding1 = new BindingDescriptor('/path1', 'my/type'));
+        $this->packageFile1->addBindingDescriptor($binding2 = new BindingDescriptor('/path2', 'my/type'));
+
+        $this->assertTrue($this->manager->hasBinding($binding1->getUuid()));
+        $this->assertTrue($this->manager->hasBinding($binding2->getUuid(), 'vendor/package1'));
+        $this->assertFalse($this->manager->hasBinding($binding2->getUuid(), 'vendor/package2'));
+        $this->assertFalse($this->manager->hasBinding(Uuid::fromString(self::NOT_FOUND_UUID)));
+    }
+
+    /**
+     * @expectedException \InvalidArgumentException
+     */
+    public function testHasBindingFailsIfPackageNoString()
+    {
+        $this->initDefaultManager();
+
+        $this->manager->hasBinding(Uuid::fromString(self::NOT_FOUND_UUID), 1234);
+    }
+
+    public function testHasBindings()
+    {
+        $this->initDefaultManager();
+
+        $this->rootPackageFile->addTypeDescriptor(new BindingTypeDescriptor('my/type'));
+        $this->rootPackageFile->addBindingDescriptor($binding1 = new BindingDescriptor('/path1', 'my/type'));
+        $this->packageFile1->addBindingDescriptor($binding2 = new BindingDescriptor('/path2', 'my/type'));
+        $this->packageFile2->addBindingDescriptor($binding3 = clone $binding2);
+
+        $criteria1 = BindingCriteria::create()
+            ->addPackageName('vendor/package1');
+
+        $criteria2 = BindingCriteria::create()
+            ->addPackageName('vendor/package1')
+            ->addState(BindingState::ENABLED);
+
+        $criteria3 = BindingCriteria::create()
+            ->addState(BindingState::ENABLED);
+
+
+        $this->assertTrue($this->manager->hasBindings());
+        $this->assertTrue($this->manager->hasBindings($criteria1));
+        $this->assertFalse($this->manager->hasBindings($criteria2));
+        $this->assertTrue($this->manager->hasBindings($criteria3));
+    }
+
+    public function testHasNoBindings()
+    {
+        $this->initDefaultManager();
+
+        $this->assertFalse($this->manager->hasBindings());
     }
 
     public function testBuildDiscovery()

@@ -22,6 +22,7 @@ use Puli\Discovery\Api\NoSuchTypeException;
 use Puli\Discovery\Api\Validation\ConstraintViolation;
 use Puli\RepositoryManager\Api\Discovery\BindingDescriptor;
 use Puli\RepositoryManager\Api\Discovery\BindingState;
+use Puli\RepositoryManager\Api\Discovery\BindingTypeCriteria;
 use Puli\RepositoryManager\Api\Discovery\BindingTypeDescriptor;
 use Puli\RepositoryManager\Api\Discovery\BindingTypeState;
 use Puli\RepositoryManager\Api\Discovery\CannotDisableBindingException;
@@ -248,28 +249,104 @@ class DiscoveryManagerImpl implements DiscoveryManager
     /**
      * {@inheritdoc}
      */
-    public function getBindingTypes($packageName = null, $state = null)
+    public function getBindingType($typeName, $packageName = null)
     {
-        Assert::nullOrOneOf($state, BindingTypeState::all(), 'Expected a valid binding type state. Got: %s');
+        Assert::nullOrString($packageName, 'The package name must be a string or null. Got: %s');
 
         $this->assertPackagesLoaded();
 
-        $packageNames = $packageName ? (array) $packageName : $this->packages->getPackageNames();
+        if (!$this->typeDescriptors->contains($typeName, $packageName)) {
+            throw NoSuchTypeException::forTypeName($typeName);
+        }
+
+        return $this->typeDescriptors->get($typeName, $packageName);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getBindingTypes()
+    {
+        $this->assertPackagesLoaded();
+
         $types = array();
 
-        Assert::allString($packageNames, 'The package names must be strings. Got: %s');
+        foreach ($this->typeDescriptors->toArray() as $typeName => $typesByPackage) {
+            foreach ($typesByPackage as $type) {
+                $types[] = $type;
+            }
+        }
+
+        return $types;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function findBindingTypes(BindingTypeCriteria $criteria)
+    {
+        $this->assertPackagesLoaded();
+
+        $packageNames = $criteria->getPackageNames() ?: $this->packages->getPackageNames();
+        $types = array();
+
+        // No need to match the package names again
+        $criteria = clone $criteria;
+        $criteria->clearPackageNames();
 
         foreach ($packageNames as $packageName) {
             $packageFile = $this->packages[$packageName]->getPackageFile();
 
             foreach ($packageFile->getTypeDescriptors() as $type) {
-                if (null === $state || $state === $type->getState()) {
+                if ($type->match($criteria)) {
                     $types[] = $type;
                 }
             }
         }
 
-        return array_values($types);
+        return $types;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function hasBindingType($typeName, $packageName = null)
+    {
+        Assert::nullOrString($packageName, 'The package name must be a string or null. Got: %s');
+
+        $this->assertPackagesLoaded();
+
+        return $this->typeDescriptors->contains($typeName, $packageName);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function hasBindingTypes(BindingTypeCriteria $criteria = null)
+    {
+        $this->assertPackagesLoaded();
+
+        if (!$criteria) {
+            return !$this->typeDescriptors->isEmpty();
+        }
+
+        $packageNames = $criteria->getPackageNames() ?: $this->packages->getPackageNames();
+
+        // No need to match the package names again
+        $criteria = clone $criteria;
+        $criteria->clearPackageNames();
+
+        foreach ($packageNames as $packageName) {
+            $packageFile = $this->packages[$packageName]->getPackageFile();
+
+            foreach ($packageFile->getTypeDescriptors() as $type) {
+                if ($type->match($criteria)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -440,20 +517,35 @@ class DiscoveryManagerImpl implements DiscoveryManager
     /**
      * {@inheritdoc}
      */
+    public function getBinding(Uuid $uuid, $packageName = null)
+    {
+        Assert::nullOrString($packageName, 'The package name must be a string or null. Got: %s');
+
+        $this->assertPackagesLoaded();
+
+        if (!$this->bindingDescriptors->contains($uuid, $packageName)) {
+            throw NoSuchBindingException::forUuid($uuid);
+        }
+
+        return $this->bindingDescriptors->get($uuid, $packageName);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function getBindings()
     {
         $this->assertPackagesLoaded();
 
         $bindings = array();
 
-        foreach ($this->packages as $package) {
-            foreach ($package->getPackageFile()->getBindingDescriptors() as $binding) {
-                // Resolve duplicates
-                $bindings[$binding->getUuid()->toString()] = $binding;
+        foreach ($this->bindingDescriptors->toArray() as $uuidString => $bindingsByPackage) {
+            foreach ($bindingsByPackage as $binding) {
+                $bindings[] = $binding;
             }
         }
 
-        return array_values($bindings);
+        return $bindings;
     }
 
     /**
@@ -482,6 +574,48 @@ class DiscoveryManagerImpl implements DiscoveryManager
         }
 
         return array_values($bindings);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function hasBinding(Uuid $uuid, $packageName = null)
+    {
+        Assert::nullOrString($packageName, 'The package name must be a string or null. Got: %s');
+
+        $this->assertPackagesLoaded();
+
+        return $this->bindingDescriptors->contains($uuid, $packageName);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function hasBindings(BindingCriteria $criteria = null)
+    {
+        $this->assertPackagesLoaded();
+
+        if (!$criteria) {
+            return !$this->bindingDescriptors->isEmpty();
+        }
+
+        $packageNames = $criteria->getPackageNames() ?: $this->packages->getPackageNames();
+
+        // No need to match the package names again
+        $criteria = clone $criteria;
+        $criteria->clearPackageNames();
+
+        foreach ($packageNames as $packageName) {
+            $packageFile = $this->packages[$packageName]->getPackageFile();
+
+            foreach ($packageFile->getBindingDescriptors() as $binding) {
+                if ($binding->match($criteria)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     /**
