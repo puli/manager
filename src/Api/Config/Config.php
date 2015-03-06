@@ -499,10 +499,16 @@ class Config
 
             default:
                 $this->assertNotNull($key, $value);
-                $this->assertString($key, $value);
                 $this->assertNonEmpty($key, $value);
+
+                // Extra keys are not validated
+                if (0 !== strpos($key, self::EXTRA.'.')) {
+                    $this->assertString($key, $value);
+                }
+
                 break;
         }
+
     }
 
     private function assertArray($key, $value)

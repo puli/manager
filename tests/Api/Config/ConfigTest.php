@@ -80,9 +80,11 @@ class ConfigTest extends PHPUnit_Framework_TestCase
     public function testGetRawReturnsExtraKey()
     {
         $config = new Config();
-        $config->set('extra.my-key', 'value');
+        $config->set('extra.my-key1', 'value');
+        $config->set('extra.my-key2', array('param' => 'value'));
 
-        $this->assertSame('value', $config->getRaw('extra.my-key'));
+        $this->assertSame('value', $config->getRaw('extra.my-key1'));
+        $this->assertSame(array('param' => 'value'), $config->getRaw('extra.my-key2'));
     }
 
     public function testGetRawReturnsNullIfExtraKeyNotSet()
@@ -309,6 +311,15 @@ class ConfigTest extends PHPUnit_Framework_TestCase
         $config->set(Config::FACTORY_FILE, '{$puli-dir}/ServiceRegistry.php');
 
         $this->assertSame('/ServiceRegistry.php', $config->get(Config::FACTORY_FILE, null, false));
+    }
+
+    public function testGetReplacesPlaceholdersInCompositeExtraKeys()
+    {
+        $config = new Config();
+        $config->set(Config::PULI_DIR, 'my-puli-dir');
+        $config->set('extra.my-key', array('param' => '{$puli-dir}/value'));
+
+        $this->assertSame(array('param' => 'my-puli-dir/value'), $config->get('extra.my-key'));
     }
 
     /**
