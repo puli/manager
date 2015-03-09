@@ -19,6 +19,7 @@ use Puli\RepositoryManager\Api\Config\ConfigFileManager;
 use Puli\RepositoryManager\Api\Discovery\DiscoveryManager;
 use Puli\RepositoryManager\Api\Environment\GlobalEnvironment;
 use Puli\RepositoryManager\Api\Environment\ProjectEnvironment;
+use Puli\RepositoryManager\Api\Package\Package;
 use Puli\RepositoryManager\Api\Package\PackageManager;
 use Puli\RepositoryManager\Api\Package\PackageState;
 use Puli\RepositoryManager\Api\Package\RootPackageFileManager;
@@ -42,6 +43,7 @@ use ReflectionClass;
 use ReflectionException;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Webmozart\Criteria\Criterion;
 
 /**
  * The Puli service locator.
@@ -576,7 +578,7 @@ class Puli
     {
         return new RepositoryManagerImpl(
             $environment,
-            $packageManager->getPackages(PackageState::ENABLED),
+            $packageManager->findPackages(Criterion::same(Package::STATE, PackageState::ENABLED)),
             $this->getPackageFileStorage($environment->getEventDispatcher())
         );
     }
@@ -594,7 +596,7 @@ class Puli
     {
         return new DiscoveryManagerImpl(
             $environment,
-            $packageManager->getPackages(PackageState::ENABLED),
+            $packageManager->findPackages(Criterion::same(Package::STATE, PackageState::ENABLED)),
             $this->getPackageFileStorage($environment->getEventDispatcher()),
             $logger
         );
