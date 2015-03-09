@@ -9,20 +9,23 @@ Changelog
  * added `Puli::getRepository()` shortcut
  * added `Puli::getDiscovery()` shortcut
  * added `Puli::getEventDispatcher()` shortcut
- * added `BindingCriteria`
  * removed the arguments of `DiscoveryManager::getBindings()`
- * changed the arguments of `DiscoveryManager::findBindings()` to `BindingCriteria`
+ * changed the arguments of `DiscoveryManager::findBindings()` to `Criteria`
  * added `BindingDescriptor::match()`
- * removed the arguments of `DiscoveryManager::getBindingTypes()`
- * changed the arguments of `DiscoveryManager::findBindingTypes()` to 
-   `BindingTypeCriteria`
- * added `BindingTypeDescriptor::match()`
  * added `DiscoveryManager::getBinding()`
  * added `DiscoveryManager::hasBinding()`
  * added `DiscoveryManager::hasBindings()`
+ * removed the arguments of `DiscoveryManager::getBindingTypes()`
+ * changed the arguments of `DiscoveryManager::findBindingTypes()` to `Criteria`
+ * added `BindingTypeDescriptor::match()`
  * added `DiscoveryManager::getBindingType()`
  * added `DiscoveryManager::hasBindingType()`
  * added `DiscoveryManager::hasBindingTypes()`
+ * removed the arguments of `PackageManager::getPackages()`
+ * removed `PackageManager::getPackagesByInstaller()`
+ * added `Package::match()`
+ * added `PackageManager::findPackages()`
+ * added `PackageManager::hasPackages()`
  * added support for arbitrary config keys prefixed by "extra."
  * moved `Puli` to `Api` namespace
  * added `Puli::start()` which must be called explicitly to start the service

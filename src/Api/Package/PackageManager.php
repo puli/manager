@@ -13,6 +13,7 @@ namespace Puli\RepositoryManager\Api\Package;
 
 use Puli\RepositoryManager\Api\Environment\ProjectEnvironment;
 use Puli\RepositoryManager\Api\InvalidConfigException;
+use Webmozart\Criteria\Criteria;
 
 /**
  * Manages the package repository of a Puli project.
@@ -54,15 +55,6 @@ interface PackageManager
     public function removePackage($name);
 
     /**
-     * Returns whether the manager has the package with the given name.
-     *
-     * @param string $name The package name.
-     *
-     * @return bool Whether the manager has a package with that name.
-     */
-    public function hasPackage($name);
-
-    /**
      * Returns a package by name.
      *
      * @param string $name The package name.
@@ -83,21 +75,42 @@ interface PackageManager
     /**
      * Returns all installed packages.
      *
-     * @param int $state The state of the packages to return.
-     *
      * @return PackageCollection The installed packages.
      */
-    public function getPackages($state = null);
+    public function getPackages();
 
     /**
-     * Returns all packages installed by the given installer.
+     * Returns all packages matching the given criteria.
      *
-     * @param string $installerName The installer name.
-     * @param int    $state     The state of the packages to return.
+     * @param Criteria $criteria The search criteria.
      *
-     * @return PackageCollection The packages.
+     * @return PackageCollection The packages matching the criteria.
      */
-    public function getPackagesByInstaller($installerName, $state = null);
+    public function findPackages(Criteria $criteria);
+
+    /**
+     * Returns whether the manager has the package with the given name.
+     *
+     * @param string $name The package name.
+     *
+     * @return bool Whether the manager has a package with that name.
+     */
+    public function hasPackage($name);
+
+    /**
+     * Returns whether the manager has any packages.
+     *
+     * You can optionally pass criteria to check whether the manager has
+     * packages matching the given criteria.
+     *
+     * @param Criteria $criteria The search criteria.
+     *
+     * @return bool Returns `true` if the manager has packages and `false`
+     *              otherwise. If a criteria was passed, this method only
+     *              returns `true` if the manager has packages matching the
+     *              criteria.
+     */
+    public function hasPackages(Criteria $criteria = null);
 
     /**
      * Returns the manager's environment.

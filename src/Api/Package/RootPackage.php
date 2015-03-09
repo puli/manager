@@ -20,11 +20,6 @@ namespace Puli\RepositoryManager\Api\Package;
 class RootPackage extends Package
 {
     /**
-     * The default name of the root package.
-     */
-    const DEFAULT_NAME = '__root__';
-
-    /**
      * Creates a new root package.
      *
      * @param RootPackageFile $packageFile The package file.
@@ -43,5 +38,13 @@ class RootPackage extends Package
     public function getPackageFile()
     {
         return parent::getPackageFile();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function getDefaultName()
+    {
+        return '__root__';
     }
 }

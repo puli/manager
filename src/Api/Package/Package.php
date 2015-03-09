@@ -13,6 +13,7 @@ namespace Puli\RepositoryManager\Api\Package;
 
 use Exception;
 use Puli\RepositoryManager\Assert\Assert;
+use Webmozart\Criteria\Criteria;
 
 /**
  * A configured package.
@@ -23,9 +24,24 @@ use Puli\RepositoryManager\Assert\Assert;
 class Package
 {
     /**
-     * The name given to packages by default.
+     * The name field in {@link Criteria} expressions.
      */
-    const DEFAULT_NAME = null;
+    const NAME = 'name';
+
+    /**
+     * The install path field in {@link Criteria} expressions.
+     */
+    const INSTALL_PATH = 'installPath';
+
+    /**
+     * The state field in {@link Criteria} expressions.
+     */
+    const STATE = 'state';
+
+    /**
+     * The installer field in {@link Criteria} expressions.
+     */
+    const INSTALLER = 'installer';
 
     /**
      * @var string
@@ -80,7 +96,7 @@ class Package
             : $packageFile->getPackageName();
 
         if (null === $this->name) {
-            $this->name = static::DEFAULT_NAME;
+            $this->name = $this->getDefaultName();
         }
 
         // The path is stored both here and in the install info. While the
@@ -197,5 +213,35 @@ class Package
     public function isNotLoadable()
     {
         return PackageState::NOT_LOADABLE === $this->state;
+    }
+
+    /**
+     * Returns whether the package matches the given criteria.
+     *
+     * @param Criteria $criteria The search criteria. You can use the fields
+     *                           {@link NAME}, {@link INSTALL_PATH} and
+     *                           {@link STATE} in the criteria.
+     *
+     * @return bool Returns `true` if the package matches the criteria and
+     *              `false` otherwise.
+     */
+    public function match(Criteria $criteria)
+    {
+        return $criteria->match(array(
+            self::NAME => $this->name,
+            self::INSTALL_PATH => $this->installPath,
+            self::STATE => $this->state,
+            self::INSTALLER => $this->installInfo ? $this->installInfo->getInstallerName() : null,
+        ));
+    }
+
+    /**
+     * Returns the default name of a package.
+     *
+     * @return string The default name.
+     */
+    protected function getDefaultName()
+    {
+        return null;
     }
 }

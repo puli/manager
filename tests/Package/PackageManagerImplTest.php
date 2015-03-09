@@ -16,6 +16,7 @@ use PHPUnit_Framework_MockObject_MockObject;
 use Puli\RepositoryManager\Api\InvalidConfigException;
 use Puli\RepositoryManager\Api\Package\InstallInfo;
 use Puli\RepositoryManager\Api\Package\Package;
+use Puli\RepositoryManager\Api\Package\PackageCollection;
 use Puli\RepositoryManager\Api\Package\PackageFile;
 use Puli\RepositoryManager\Api\Package\PackageState;
 use Puli\RepositoryManager\Api\Package\RootPackageFile;
@@ -25,6 +26,7 @@ use Puli\RepositoryManager\Package\PackageManagerImpl;
 use Puli\RepositoryManager\Tests\ManagerTestCase;
 use Puli\RepositoryManager\Tests\TestException;
 use Symfony\Component\Filesystem\Filesystem;
+use Webmozart\Criteria\Criterion;
 
 /**
  * @since  1.0
@@ -132,7 +134,7 @@ class PackageManagerImplTest extends ManagerTestCase
         $filesystem->remove($this->tempDir);
     }
 
-    public function testGetAllPackages()
+    public function testGetPackages()
     {
         $this->rootPackageFile->addInstallInfo($installInfo1 = new InstallInfo('vendor/package1', '../foo'));
         $this->rootPackageFile->addInstallInfo($installInfo2 = new InstallInfo('vendor/package2', $this->packageDir2));
@@ -148,146 +150,38 @@ class PackageManagerImplTest extends ManagerTestCase
         $this->assertCount(3, $packages);
     }
 
-    public function testGetEnabledPackages()
+    public function testFindPackages()
     {
         $this->rootPackageFile->addInstallInfo($installInfo1 = new InstallInfo('vendor/package1', '../foo'));
         $this->rootPackageFile->addInstallInfo($installInfo2 = new InstallInfo('vendor/package2', $this->packageDir2));
 
+        $installInfo1->setInstallerName('webmozart');
+
         $manager = new PackageManagerImpl($this->environment, $this->packageFileStorage);
 
-        $packages = $manager->getPackages(PackageState::ENABLED);
+        $criteria1 = Criterion::same(Package::STATE, PackageState::ENABLED);
+
+        $criteria2 = Criterion::same(Package::INSTALLER, 'webmozart');
+
+        $criteria3 = $criteria1->andX($criteria2);
+
+        $packages = $manager->findPackages($criteria1);
 
         $this->assertInstanceOf('Puli\RepositoryManager\Api\Package\PackageCollection', $packages);
         $this->assertTrue($packages->contains('vendor/root'));
         $this->assertTrue($packages->contains('vendor/package2'));
         $this->assertCount(2, $packages);
-    }
 
-    public function testGetNotFoundPackages()
-    {
-        $this->rootPackageFile->addInstallInfo($installInfo1 = new InstallInfo('vendor/package1', 'foo'));
-        $this->rootPackageFile->addInstallInfo($installInfo2 = new InstallInfo('vendor/package2', $this->packageDir2));
-        $this->rootPackageFile->addInstallInfo($installInfo3 = new InstallInfo('vendor/package3', 'bar'));
-
-        $manager = new PackageManagerImpl($this->environment, $this->packageFileStorage);
-
-        $packages = $manager->getPackages(PackageState::NOT_FOUND);
+        $packages = $manager->findPackages($criteria2);
 
         $this->assertInstanceOf('Puli\RepositoryManager\Api\Package\PackageCollection', $packages);
         $this->assertTrue($packages->contains('vendor/package1'));
-        $this->assertTrue($packages->contains('vendor/package3'));
-        $this->assertCount(2, $packages);
-    }
+        $this->assertCount(1, $packages);
 
-    public function testGetNotLoadablePackages()
-    {
-        $this->rootPackageFile->addInstallInfo($installInfo1 = new InstallInfo('vendor/package1', $this->packageDir1));
-        $this->rootPackageFile->addInstallInfo($installInfo2 = new InstallInfo('vendor/version-too-high', '../version-too-high'));
-
-        $manager = new PackageManagerImpl($this->environment, $this->packageFileStorage);
-        $e = new UnsupportedVersionException('The exception text.');
-
-        $this->packageFileStorage->expects($this->at(0))
-            ->method('loadPackageFile')
-            ->with($this->packageDir1.'/puli.json')
-            ->willReturn($this->packageFile1);
-        $this->packageFileStorage->expects($this->at(1))
-            ->method('loadPackageFile')
-            ->with(__DIR__.'/Fixtures/version-too-high/puli.json')
-            ->willThrowException($e);
-
-        $packages = $manager->getPackages(PackageState::NOT_LOADABLE);
+        $packages = $manager->findPackages($criteria3);
 
         $this->assertInstanceOf('Puli\RepositoryManager\Api\Package\PackageCollection', $packages);
-        $this->assertEquals(array(
-            'vendor/version-too-high' => new Package(
-                null,
-                __DIR__.'/Fixtures/version-too-high',
-                $installInfo2,
-                array($e)
-            ),
-        ), $packages->toArray());
-    }
-
-    public function testGetAllPackagesByInstaller()
-    {
-        $this->initDefaultManager();
-
-        $this->rootPackageFile->addInstallInfo($installInfo1 = new InstallInfo('vendor/package1', $this->packageDir1));
-        $this->rootPackageFile->addInstallInfo($installInfo2 = new InstallInfo('vendor/package2', $this->packageDir2));
-        $this->rootPackageFile->addInstallInfo($installInfo3 = new InstallInfo('vendor/package3', 'foo'));
-
-        $installInfo1->setInstallerName('composer');
-        $installInfo2->setInstallerName('user');
-        $installInfo3->setInstallerName('composer');
-
-        $this->manager = new PackageManagerImpl($this->environment, $this->packageFileStorage);
-
-        $composerPackages = $this->manager->getPackagesByInstaller('composer');
-        $userPackages = $this->manager->getPackagesByInstaller('user');
-
-        $this->assertInstanceOf('Puli\RepositoryManager\Api\Package\PackageCollection', $composerPackages);
-        $this->assertTrue($composerPackages->contains('vendor/package1'));
-        $this->assertTrue($composerPackages->contains('vendor/package3'));
-        $this->assertCount(2, $composerPackages);
-
-        $this->assertInstanceOf('Puli\RepositoryManager\Api\Package\PackageCollection', $userPackages);
-        $this->assertTrue($userPackages->contains('vendor/package2'));
-        $this->assertCount(1, $userPackages);
-    }
-
-    public function testGetEnabledPackagesByInstaller()
-    {
-        $this->initDefaultManager();
-
-        $this->rootPackageFile->addInstallInfo($installInfo1 = new InstallInfo('vendor/package1', $this->packageDir1));
-        $this->rootPackageFile->addInstallInfo($installInfo2 = new InstallInfo('vendor/package2', $this->packageDir2));
-        $this->rootPackageFile->addInstallInfo($installInfo3 = new InstallInfo('vendor/package3', $this->packageDir3));
-        $this->rootPackageFile->addInstallInfo($installInfo4 = new InstallInfo('vendor/package4', 'foo'));
-
-        $installInfo1->setInstallerName('composer');
-        $installInfo2->setInstallerName('user');
-        $installInfo3->setInstallerName('composer');
-
-        $this->manager = new PackageManagerImpl($this->environment, $this->packageFileStorage);
-
-        $composerPackages = $this->manager->getPackagesByInstaller('composer', PackageState::ENABLED);
-        $userPackages = $this->manager->getPackagesByInstaller('user', PackageState::ENABLED);
-
-        $this->assertInstanceOf('Puli\RepositoryManager\Api\Package\PackageCollection', $composerPackages);
-        $this->assertTrue($composerPackages->contains('vendor/package1'));
-        $this->assertTrue($composerPackages->contains('vendor/package3'));
-        $this->assertCount(2, $composerPackages);
-
-        $this->assertInstanceOf('Puli\RepositoryManager\Api\Package\PackageCollection', $userPackages);
-        $this->assertTrue($userPackages->contains('vendor/package2'));
-        $this->assertCount(1, $userPackages);
-    }
-
-    public function testGetNotFoundPackagesByInstaller()
-    {
-        $this->initDefaultManager();
-
-        $this->rootPackageFile->addInstallInfo($installInfo1 = new InstallInfo('vendor/package1', 'foo'));
-        $this->rootPackageFile->addInstallInfo($installInfo2 = new InstallInfo('vendor/package2', 'bar'));
-        $this->rootPackageFile->addInstallInfo($installInfo3 = new InstallInfo('vendor/package3', $this->packageDir3));
-
-        $installInfo1->setInstallerName('composer');
-        $installInfo2->setInstallerName('user');
-        $installInfo3->setInstallerName('composer');
-
-        $this->manager = new PackageManagerImpl($this->environment, $this->packageFileStorage);
-
-        $composerPackages = $this->manager->getPackagesByInstaller('composer', PackageState::NOT_FOUND);
-        $userPackages = $this->manager->getPackagesByInstaller('user', PackageState::NOT_FOUND);
-
-        $this->assertInstanceOf('Puli\RepositoryManager\Api\Package\PackageCollection', $composerPackages);
-        $this->assertTrue($composerPackages->contains('vendor/package1'));
-        $this->assertCount(1, $composerPackages);
-
-        $this->assertInstanceOf('Puli\RepositoryManager\Api\Package\PackageCollection', $userPackages);
-        $this->assertTrue($userPackages->contains('vendor/package2'));
-        $this->assertCount(1, $userPackages);
+        $this->assertCount(0, $packages);
     }
 
     public function testGetPackagesStoresExceptionIfPackageDirectoryNotFound()
@@ -358,6 +252,25 @@ class PackageManagerImplTest extends ManagerTestCase
 
         $this->assertTrue($packages['vendor/package']->isNotLoadable());
         $this->assertSame(array($exception), $packages['vendor/package']->getLoadErrors());
+    }
+
+    public function testHasPackage()
+    {
+        $this->initDefaultManager();
+
+        $this->assertTrue($this->manager->hasPackage('vendor/root'));
+        $this->assertTrue($this->manager->hasPackage('vendor/package1'));
+        $this->assertTrue($this->manager->hasPackage('vendor/package2'));
+        $this->assertFalse($this->manager->hasPackage('vendor/package3'));
+    }
+
+    public function testHasPackages()
+    {
+        $this->initDefaultManager();
+
+        $this->assertTrue($this->manager->hasPackages());
+        $this->assertTrue($this->manager->hasPackages(Criterion::same(Package::NAME, 'vendor/root')));
+        $this->assertFalse($this->manager->hasPackages(Criterion::same(Package::NAME, 'foobar')));
     }
 
     public function testInstallPackage()
@@ -651,16 +564,6 @@ class PackageManagerImplTest extends ManagerTestCase
         $this->assertTrue($this->rootPackageFile->hasInstallInfo('vendor/package1'));
         $this->assertTrue($this->manager->hasPackage('vendor/package1'));
         $this->assertTrue($this->manager->getPackages()->contains('vendor/package1'));
-    }
-
-    public function testHasPackage()
-    {
-        $this->initDefaultManager();
-
-        $this->assertTrue($this->manager->hasPackage('vendor/root'));
-        $this->assertTrue($this->manager->hasPackage('vendor/package1'));
-        $this->assertTrue($this->manager->hasPackage('vendor/package2'));
-        $this->assertFalse($this->manager->hasPackage('vendor/package3'));
     }
 
     public function testGetPackage()

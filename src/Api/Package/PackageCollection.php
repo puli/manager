@@ -177,6 +177,17 @@ class PackageCollection implements IteratorAggregate, Countable, ArrayAccess
     }
 
     /**
+     * Returns whether the collection is empty.
+     *
+     * @return bool Returns `true` if the collection is empty and `false`
+     *              otherwise.
+     */
+    public function isEmpty()
+    {
+        return 0 === count($this->packages);
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function getIterator()

@@ -15,6 +15,9 @@ use PHPUnit_Framework_TestCase;
 use Puli\RepositoryManager\Api\Package\InstallInfo;
 use Puli\RepositoryManager\Api\Package\Package;
 use Puli\RepositoryManager\Api\Package\PackageFile;
+use Puli\RepositoryManager\Api\Package\PackageState;
+use RuntimeException;
+use Webmozart\Criteria\Criterion;
 
 /**
  * @since  1.0
@@ -54,5 +57,55 @@ class PackageTest extends PHPUnit_Framework_TestCase
         $package = new Package($packageFile, '/path');
 
         $this->assertNull($package->getName());
+    }
+
+    public function testEnabledIfFound()
+    {
+        $packageFile = new PackageFile('vendor/name');
+        $package = new Package($packageFile, __DIR__);
+
+        $this->assertSame(PackageState::ENABLED, $package->getState());
+    }
+
+    public function testNotFoundIfNotFound()
+    {
+        $packageFile = new PackageFile('vendor/name');
+        $package = new Package($packageFile, __DIR__.'/foobar');
+
+        $this->assertSame(PackageState::NOT_FOUND, $package->getState());
+    }
+
+    public function testNotLoadableIfLoadErrors()
+    {
+        $packageFile = new PackageFile('vendor/name');
+        $package = new Package($packageFile, __DIR__, null, array(
+            new RuntimeException('Could not load package'),
+        ));
+
+        $this->assertSame(PackageState::NOT_LOADABLE, $package->getState());
+    }
+
+    public function testMatch()
+    {
+        $packageFile = new PackageFile('vendor/name');
+        $package = new Package($packageFile, __DIR__);
+
+        $this->assertFalse($package->match(Criterion::same(Package::NAME, 'foobar')));
+        $this->assertTrue($package->match(Criterion::same(Package::NAME, 'vendor/name')));
+
+        $this->assertFalse($package->match(Criterion::same(Package::INSTALL_PATH, '/path/foo')));
+        $this->assertTrue($package->match(Criterion::same(Package::INSTALL_PATH, __DIR__)));
+
+        $this->assertFalse($package->match(Criterion::same(Package::STATE, PackageState::NOT_LOADABLE)));
+        $this->assertTrue($package->match(Criterion::same(Package::STATE, PackageState::ENABLED)));
+
+        $this->assertFalse($package->match(Criterion::same(Package::INSTALLER, 'webmozart')));
+
+        $installInfo = new InstallInfo('vendor/install-info', '/path');
+        $installInfo->setInstallerName('webmozart');
+        $packageWithInstallInfo = new Package($packageFile, __DIR__, $installInfo);
+
+        $this->assertFalse($packageWithInstallInfo->match(Criterion::same(Package::INSTALLER, 'foobar')));
+        $this->assertTrue($packageWithInstallInfo->match(Criterion::same(Package::INSTALLER, 'webmozart')));
     }
 }

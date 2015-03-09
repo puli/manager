@@ -598,7 +598,10 @@ class BindingDescriptor
     /**
      * Returns whether the binding matches the given criteria.
      *
-     * @param Criteria $criteria The search criteria.
+     * @param Criteria $criteria The search criteria. You can use the fields
+     *                           {@link UUID}, {@link QUERY}, {@link LANGUAGE},
+     *                           {@link TYPE_NAME}, {@link STATE} and
+     *                           {@link CONTAINING_PACKAGE} in the criteria.
      *
      * @return bool Returns `true` if the binding matches the criteria and
      *              `false` otherwise.

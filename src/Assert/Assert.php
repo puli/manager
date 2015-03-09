@@ -59,7 +59,7 @@ class Assert extends \Puli\Repository\Assert\Assert
         self::string($value, 'The package name must be a string. Got: %s');
         self::notEmpty($value, 'The package name must not be empty.');
 
-        if (RootPackage::DEFAULT_NAME !== $value) {
+        if ('__root__' !== $value) {
             self::contains($value, '/', 'The package name %s must contain a vendor name followed by a "/".');
         }
     }

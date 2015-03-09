@@ -27,6 +27,7 @@ use Puli\RepositoryManager\Api\Package\RootPackage;
 use Puli\RepositoryManager\Api\Package\RootPackageFile;
 use Puli\RepositoryManager\Api\Package\UnsupportedVersionException;
 use Puli\RepositoryManager\Assert\Assert;
+use Webmozart\Criteria\Criteria;
 use Webmozart\PathUtil\Path;
 
 /**
@@ -196,18 +197,6 @@ class PackageManagerImpl implements PackageManager
     /**
      * {@inheritdoc}
      */
-    public function hasPackage($name)
-    {
-        Assert::string($name, 'The package name must be a string');
-
-        $this->assertPackagesLoaded();
-
-        return $this->packages->contains($name);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
     public function getPackage($name)
     {
         Assert::string($name, 'The package name must be a string');
@@ -230,17 +219,26 @@ class PackageManagerImpl implements PackageManager
     /**
      * {@inheritdoc}
      */
-    public function getPackages($state = null)
+    public function getPackages()
     {
-        Assert::nullOrOneOf($state, PackageState::all(), 'Expected a valid package state. Got: %s');
+        $this->assertPackagesLoaded();
 
+        // Never return he original collection
+        return clone $this->packages;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function findPackages(Criteria $criteria)
+    {
         $this->assertPackagesLoaded();
 
         $packages = new PackageCollection();
 
         foreach ($this->packages as $package) {
-            if (null === $state || $state === $package->getState()) {
-                $packages[] = $package;
+            if ($package->match($criteria)) {
+                $packages->add($package);
             }
         }
 
@@ -250,26 +248,33 @@ class PackageManagerImpl implements PackageManager
     /**
      * {@inheritdoc}
      */
-    public function getPackagesByInstaller($installerName, $state = null)
+    public function hasPackage($name)
     {
-        Assert::string($installerName, 'The installer name must be a string.');
-        Assert::nullOrOneOf($state, PackageState::all(), 'Expected a valid package state. Got: %s');
+        Assert::string($name, 'The package name must be a string');
 
         $this->assertPackagesLoaded();
 
-        $packages = new PackageCollection();
+        return $this->packages->contains($name);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function hasPackages(Criteria $criteria = null)
+    {
+        $this->assertPackagesLoaded();
+
+        if (!$criteria) {
+            return !$this->packages->isEmpty();
+        }
 
         foreach ($this->packages as $package) {
-            $installInfo = $package->getInstallInfo();
-
-            // The root package has no install info
-            if ($installInfo && $installerName === $installInfo->getInstallerName()
-                && (null === $state || $state === $package->getState())) {
-                $packages->add($package);
+            if ($package->match($criteria)) {
+                return true;
             }
         }
 
-        return $packages;
+        return false;
     }
 
     /**
