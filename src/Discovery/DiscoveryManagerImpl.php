@@ -20,9 +20,7 @@ use Puli\Discovery\Api\DuplicateTypeException;
 use Puli\Discovery\Api\EditableDiscovery;
 use Puli\Discovery\Api\NoSuchTypeException;
 use Puli\Discovery\Api\Validation\ConstraintViolation;
-use Puli\RepositoryManager\Api\Discovery\BindingCriteria;
 use Puli\RepositoryManager\Api\Discovery\BindingDescriptor;
-use Puli\RepositoryManager\Api\Discovery\BindingTypeCriteria;
 use Puli\RepositoryManager\Api\Discovery\BindingTypeDescriptor;
 use Puli\RepositoryManager\Api\Discovery\CannotDisableBindingException;
 use Puli\RepositoryManager\Api\Discovery\CannotEnableBindingException;
@@ -61,6 +59,7 @@ use Puli\RepositoryManager\Package\PackageFileStorage;
 use Puli\RepositoryManager\Transaction\InterceptedOperation;
 use Puli\RepositoryManager\Transaction\Transaction;
 use Rhumsaa\Uuid\Uuid;
+use Webmozart\Criteria\Criteria;
 
 /**
  * @since  1.0
@@ -281,21 +280,14 @@ class DiscoveryManagerImpl implements DiscoveryManager
     /**
      * {@inheritdoc}
      */
-    public function findBindingTypes(BindingTypeCriteria $criteria)
+    public function findBindingTypes(Criteria $criteria)
     {
         $this->assertPackagesLoaded();
 
-        $packageNames = $criteria->getPackageNames() ?: $this->packages->getPackageNames();
         $types = array();
 
-        // No need to match the package names again
-        $criteria = clone $criteria;
-        $criteria->clearPackageNames();
-
-        foreach ($packageNames as $packageName) {
-            $packageFile = $this->packages[$packageName]->getPackageFile();
-
-            foreach ($packageFile->getTypeDescriptors() as $type) {
+        foreach ($this->typeDescriptors->toArray() as $typeName => $typesByPackage) {
+            foreach ($typesByPackage as $type) {
                 if ($type->match($criteria)) {
                     $types[] = $type;
                 }
@@ -320,7 +312,7 @@ class DiscoveryManagerImpl implements DiscoveryManager
     /**
      * {@inheritdoc}
      */
-    public function hasBindingTypes(BindingTypeCriteria $criteria = null)
+    public function hasBindingTypes(Criteria $criteria = null)
     {
         $this->assertPackagesLoaded();
 
@@ -328,16 +320,10 @@ class DiscoveryManagerImpl implements DiscoveryManager
             return !$this->typeDescriptors->isEmpty();
         }
 
-        $packageNames = $criteria->getPackageNames() ?: $this->packages->getPackageNames();
+        $types = array();
 
-        // No need to match the package names again
-        $criteria = clone $criteria;
-        $criteria->clearPackageNames();
-
-        foreach ($packageNames as $packageName) {
-            $packageFile = $this->packages[$packageName]->getPackageFile();
-
-            foreach ($packageFile->getTypeDescriptors() as $type) {
+        foreach ($this->typeDescriptors->toArray() as $typeName => $typesByPackage) {
+            foreach ($typesByPackage as $type) {
                 if ($type->match($criteria)) {
                     return true;
                 }
@@ -549,29 +535,21 @@ class DiscoveryManagerImpl implements DiscoveryManager
     /**
      * {@inheritdoc}
      */
-    public function findBindings(BindingCriteria $criteria)
+    public function findBindings(Criteria $criteria)
     {
         $this->assertPackagesLoaded();
 
-        $packageNames = $criteria->getPackageNames() ?: $this->packages->getPackageNames();
         $bindings = array();
 
-        // No need to match the package names again
-        $criteria = clone $criteria;
-        $criteria->clearPackageNames();
-
-        foreach ($packageNames as $packageName) {
-            $packageFile = $this->packages[$packageName]->getPackageFile();
-
-            foreach ($packageFile->getBindingDescriptors() as $binding) {
+        foreach ($this->bindingDescriptors->toArray() as $uuidString => $bindingsByPackage) {
+            foreach ($bindingsByPackage as $binding) {
                 if ($binding->match($criteria)) {
-                    // Resolve duplicates
-                    $bindings[$binding->getUuid()->toString()] = $binding;
+                    $bindings[] = $binding;
                 }
             }
         }
 
-        return array_values($bindings);
+        return $bindings;
     }
 
     /**
@@ -589,7 +567,7 @@ class DiscoveryManagerImpl implements DiscoveryManager
     /**
      * {@inheritdoc}
      */
-    public function hasBindings(BindingCriteria $criteria = null)
+    public function hasBindings(Criteria $criteria = null)
     {
         $this->assertPackagesLoaded();
 
@@ -597,16 +575,8 @@ class DiscoveryManagerImpl implements DiscoveryManager
             return !$this->bindingDescriptors->isEmpty();
         }
 
-        $packageNames = $criteria->getPackageNames() ?: $this->packages->getPackageNames();
-
-        // No need to match the package names again
-        $criteria = clone $criteria;
-        $criteria->clearPackageNames();
-
-        foreach ($packageNames as $packageName) {
-            $packageFile = $this->packages[$packageName]->getPackageFile();
-
-            foreach ($packageFile->getBindingDescriptors() as $binding) {
+        foreach ($this->bindingDescriptors->toArray() as $uuidString => $bindingsByPackage) {
+            foreach ($bindingsByPackage as $binding) {
                 if ($binding->match($criteria)) {
                     return true;
                 }

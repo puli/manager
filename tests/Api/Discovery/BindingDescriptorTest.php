@@ -12,7 +12,6 @@
 namespace Puli\RepositoryManager\Tests\Api\Discovery;
 
 use PHPUnit_Framework_TestCase;
-use Puli\RepositoryManager\Api\Discovery\BindingCriteria;
 use Puli\RepositoryManager\Api\Discovery\BindingDescriptor;
 use Puli\RepositoryManager\Api\Discovery\BindingParameterDescriptor;
 use Puli\RepositoryManager\Api\Discovery\BindingState;
@@ -24,6 +23,7 @@ use Puli\RepositoryManager\Api\Package\RootPackage;
 use Puli\RepositoryManager\Api\Package\RootPackageFile;
 use Rhumsaa\Uuid\Uuid;
 use stdClass;
+use Webmozart\Criteria\Criterion;
 
 /**
  * @since  1.0
@@ -551,43 +551,22 @@ class BindingDescriptorTest extends PHPUnit_Framework_TestCase
         $binding = new BindingDescriptor('/path', 'vendor/type', array(), 'glob', $uuid);
         $binding->load($this->package, $type);
 
-        $criteria = new BindingCriteria();
-        $this->assertTrue($binding->match($criteria));
+        $this->assertFalse($binding->match(Criterion::same(BindingDescriptor::CONTAINING_PACKAGE, 'foobar')));
+        $this->assertTrue($binding->match(Criterion::same(BindingDescriptor::CONTAINING_PACKAGE, $this->package->getName())));
 
-        $criteria->setPackageNames(array('foobar'));
-        $this->assertFalse($binding->match($criteria));
+        $this->assertFalse($binding->match(Criterion::same(BindingDescriptor::STATE, BindingState::DISABLED)));
+        $this->assertTrue($binding->match(Criterion::same(BindingDescriptor::STATE, BindingState::ENABLED)));
 
-        $criteria->setPackageNames(array($this->package->getName()));
-        $this->assertTrue($binding->match($criteria));
+        $this->assertFalse($binding->match(Criterion::startsWith(BindingDescriptor::UUID, 'abce')));
+        $this->assertTrue($binding->match(Criterion::startsWith(BindingDescriptor::UUID, 'abcd')));
 
-        $criteria->setStates(array(BindingState::DISABLED));
-        $this->assertFalse($binding->match($criteria));
+        $this->assertFalse($binding->match(Criterion::same(BindingDescriptor::QUERY, '/path/nested')));
+        $this->assertTrue($binding->match(Criterion::same(BindingDescriptor::QUERY, '/path')));
 
-        $criteria->setStates(array(BindingState::ENABLED));
-        $this->assertTrue($binding->match($criteria));
+        $this->assertFalse($binding->match(Criterion::same(BindingDescriptor::LANGUAGE, 'xpath')));
+        $this->assertTrue($binding->match(Criterion::same(BindingDescriptor::LANGUAGE, 'glob')));
 
-        $criteria->setUuidPrefix('abce');
-        $this->assertFalse($binding->match($criteria));
-
-        $criteria->setUuidPrefix('abcd');
-        $this->assertTrue($binding->match($criteria));
-
-        $criteria->setQuery('/path/nested');
-        $this->assertFalse($binding->match($criteria));
-
-        $criteria->setQuery('/path');
-        $this->assertTrue($binding->match($criteria));
-
-        $criteria->setLanguage('xpath');
-        $this->assertFalse($binding->match($criteria));
-
-        $criteria->setLanguage('glob');
-        $this->assertTrue($binding->match($criteria));
-
-        $criteria->setTypeName('vendor/other');
-        $this->assertFalse($binding->match($criteria));
-
-        $criteria->setTypeName('vendor/type');
-        $this->assertTrue($binding->match($criteria));
+        $this->assertFalse($binding->match(Criterion::same(BindingDescriptor::TYPE_NAME, 'vendor/other')));
+        $this->assertTrue($binding->match(Criterion::same(BindingDescriptor::TYPE_NAME, 'vendor/type')));
     }
 }

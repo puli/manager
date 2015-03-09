@@ -17,6 +17,7 @@ use Puli\RepositoryManager\Api\AlreadyLoadedException;
 use Puli\RepositoryManager\Api\NotLoadedException;
 use Puli\RepositoryManager\Api\Package\Package;
 use Puli\RepositoryManager\Assert\Assert;
+use Webmozart\Criteria\Criteria;
 
 /**
  * Describes a binding type.
@@ -30,6 +31,21 @@ use Puli\RepositoryManager\Assert\Assert;
  */
 class BindingTypeDescriptor
 {
+    /**
+     * The name field in {@link Criteria} expressions.
+     */
+    const NAME = 'name';
+
+    /**
+     * The state field in {@link Criteria} expressions.
+     */
+    const STATE = 'state';
+
+    /**
+     * The package field in {@link Criteria} expressions.
+     */
+    const CONTAINING_PACKAGE = 'containingPackage';
+
     /**
      * @var string
      */
@@ -411,16 +427,20 @@ class BindingTypeDescriptor
     /**
      * Returns whether the binding type matches the given criteria.
      *
-     * @param BindingTypeCriteria $criteria The search criteria.
+     * @param Criteria $criteria The search criteria. You can use the fields
+     *                           {@link NAME}, {@link PARAMETERS},
+     *                           {@link STATE} and {@link CONTAINING_PACKAGE}
+     *                           in the criteria.
      *
      * @return bool Returns `true` if the binding type matches the criteria and
      *              `false` otherwise.
-     *
-     * @see BindingTypeCriteria
      */
-    public function match(BindingTypeCriteria $criteria)
+    public function match(Criteria $criteria)
     {
-        return $criteria->matchPackageName($this->containingPackage->getName())
-            && $criteria->matchState($this->state);
+        return $criteria->match(array(
+            self::NAME => $this->name,
+            self::STATE => $this->state,
+            self::CONTAINING_PACKAGE => $this->containingPackage->getName(),
+        ));
     }
 }

@@ -22,6 +22,7 @@ use Puli\RepositoryManager\Api\Package\RootPackage;
 use Puli\RepositoryManager\Assert\Assert;
 use Puli\RepositoryManager\Util\DistinguishedName;
 use Rhumsaa\Uuid\Uuid;
+use Webmozart\Criteria\Criteria;
 
 /**
  * Describes a resource binding.
@@ -35,6 +36,36 @@ use Rhumsaa\Uuid\Uuid;
  */
 class BindingDescriptor
 {
+    /**
+     * The UUID field in {@link Criteria} expressions.
+     */
+    const UUID = 'uuid';
+
+    /**
+     * The query field in {@link Criteria} expressions.
+     */
+    const QUERY = 'query';
+
+    /**
+     * The language field in {@link Criteria} expressions.
+     */
+    const LANGUAGE = 'language';
+
+    /**
+     * The type name field in {@link Criteria} expressions.
+     */
+    const TYPE_NAME = 'typeName';
+
+    /**
+     * The state field in {@link Criteria} expressions.
+     */
+    const STATE = 'state';
+
+    /**
+     * The package field in {@link Criteria} expressions.
+     */
+    const CONTAINING_PACKAGE = 'containingPackage';
+
     /**
      * @var Uuid
      */
@@ -567,21 +598,21 @@ class BindingDescriptor
     /**
      * Returns whether the binding matches the given criteria.
      *
-     * @param BindingCriteria $criteria The search criteria.
+     * @param Criteria $criteria The search criteria.
      *
      * @return bool Returns `true` if the binding matches the criteria and
      *              `false` otherwise.
-     *
-     * @see BindingCriteria
      */
-    public function match(BindingCriteria $criteria)
+    public function match(Criteria $criteria)
     {
-        return $criteria->matchPackageName($this->containingPackage->getName())
-            && $criteria->matchState($this->state)
-            && $criteria->matchUuid($this->uuid)
-            && $criteria->matchTypeName($this->typeName)
-            && $criteria->matchQuery($this->query)
-            && $criteria->matchLanguage($this->language);
+        return $criteria->match(array(
+            self::UUID => $this->uuid->toString(),
+            self::QUERY => $this->query,
+            self::LANGUAGE => $this->language,
+            self::TYPE_NAME => $this->typeName,
+            self::STATE => $this->state,
+            self::CONTAINING_PACKAGE => $this->containingPackage->getName(),
+        ));
     }
 
     private function generateUuid($query, $typeName, array $parameterValues, $language)

@@ -172,8 +172,9 @@ class BindingTypeDescriptorCollection
     /**
      * Returns the contents of the collection as array.
      *
-     * @return array[] A multi-dimensional array containing all types indexed
-     *                 first by name, then by package name.
+     * @return BindingTypeDescriptor[][] A multi-dimensional array containing
+     *                                   all types indexed first by name, then
+     *                                   by package name.
      */
     public function toArray()
     {
