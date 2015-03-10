@@ -43,7 +43,7 @@ use ReflectionClass;
 use ReflectionException;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use Webmozart\Criteria\Criterion;
+use Webmozart\Expression\Expr;
 
 /**
  * The Puli service locator.
@@ -578,7 +578,7 @@ class Puli
     {
         return new RepositoryManagerImpl(
             $environment,
-            $packageManager->findPackages(Criterion::same(Package::STATE, PackageState::ENABLED)),
+            $packageManager->findPackages(Expr::same(Package::STATE, PackageState::ENABLED)),
             $this->getPackageFileStorage($environment->getEventDispatcher())
         );
     }
@@ -596,7 +596,7 @@ class Puli
     {
         return new DiscoveryManagerImpl(
             $environment,
-            $packageManager->findPackages(Criterion::same(Package::STATE, PackageState::ENABLED)),
+            $packageManager->findPackages(Expr::same(Package::STATE, PackageState::ENABLED)),
             $this->getPackageFileStorage($environment->getEventDispatcher()),
             $logger
         );

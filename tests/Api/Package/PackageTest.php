@@ -17,7 +17,7 @@ use Puli\RepositoryManager\Api\Package\Package;
 use Puli\RepositoryManager\Api\Package\PackageFile;
 use Puli\RepositoryManager\Api\Package\PackageState;
 use RuntimeException;
-use Webmozart\Criteria\Criterion;
+use Webmozart\Expression\Expr;
 
 /**
  * @since  1.0
@@ -90,22 +90,22 @@ class PackageTest extends PHPUnit_Framework_TestCase
         $packageFile = new PackageFile('vendor/name');
         $package = new Package($packageFile, __DIR__);
 
-        $this->assertFalse($package->match(Criterion::same(Package::NAME, 'foobar')));
-        $this->assertTrue($package->match(Criterion::same(Package::NAME, 'vendor/name')));
+        $this->assertFalse($package->match(Expr::same(Package::NAME, 'foobar')));
+        $this->assertTrue($package->match(Expr::same(Package::NAME, 'vendor/name')));
 
-        $this->assertFalse($package->match(Criterion::same(Package::INSTALL_PATH, '/path/foo')));
-        $this->assertTrue($package->match(Criterion::same(Package::INSTALL_PATH, __DIR__)));
+        $this->assertFalse($package->match(Expr::same(Package::INSTALL_PATH, '/path/foo')));
+        $this->assertTrue($package->match(Expr::same(Package::INSTALL_PATH, __DIR__)));
 
-        $this->assertFalse($package->match(Criterion::same(Package::STATE, PackageState::NOT_LOADABLE)));
-        $this->assertTrue($package->match(Criterion::same(Package::STATE, PackageState::ENABLED)));
+        $this->assertFalse($package->match(Expr::same(Package::STATE, PackageState::NOT_LOADABLE)));
+        $this->assertTrue($package->match(Expr::same(Package::STATE, PackageState::ENABLED)));
 
-        $this->assertFalse($package->match(Criterion::same(Package::INSTALLER, 'webmozart')));
+        $this->assertFalse($package->match(Expr::same(Package::INSTALLER, 'webmozart')));
 
         $installInfo = new InstallInfo('vendor/install-info', '/path');
         $installInfo->setInstallerName('webmozart');
         $packageWithInstallInfo = new Package($packageFile, __DIR__, $installInfo);
 
-        $this->assertFalse($packageWithInstallInfo->match(Criterion::same(Package::INSTALLER, 'foobar')));
-        $this->assertTrue($packageWithInstallInfo->match(Criterion::same(Package::INSTALLER, 'webmozart')));
+        $this->assertFalse($packageWithInstallInfo->match(Expr::same(Package::INSTALLER, 'foobar')));
+        $this->assertTrue($packageWithInstallInfo->match(Expr::same(Package::INSTALLER, 'webmozart')));
     }
 }

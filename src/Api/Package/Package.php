@@ -13,7 +13,7 @@ namespace Puli\RepositoryManager\Api\Package;
 
 use Exception;
 use Puli\RepositoryManager\Assert\Assert;
-use Webmozart\Criteria\Criteria;
+use Webmozart\Expression\Expression;
 
 /**
  * A configured package.
@@ -216,18 +216,18 @@ class Package
     }
 
     /**
-     * Returns whether the package matches the given criteria.
+     * Returns whether the package matches the given expression.
      *
-     * @param Criteria $criteria The search criteria. You can use the fields
-     *                           {@link NAME}, {@link INSTALL_PATH} and
-     *                           {@link STATE} in the criteria.
+     * @param Expression $expr The search criteria. You can use the fields
+     *                         {@link NAME}, {@link INSTALL_PATH} and
+     *                         {@link STATE} in the expression.
      *
-     * @return bool Returns `true` if the package matches the criteria and
+     * @return bool Returns `true` if the package matches the expression and
      *              `false` otherwise.
      */
-    public function match(Criteria $criteria)
+    public function match(Expression $expr)
     {
-        return $criteria->match(array(
+        return $expr->evaluate(array(
             self::NAME => $this->name,
             self::INSTALL_PATH => $this->installPath,
             self::STATE => $this->state,

@@ -16,7 +16,7 @@
         "puli/factory": "~1.0",
         "webmozart/json": "~1.0",
         "webmozart/path-util": "~1.0",
-        "webmozart/criteria": "~1.0",
+        "webmozart/expression": "~1.0",
         "symfony/event-dispatcher": "~2.3",
         "symfony/filesystem": "~2.3",
         "rhumsaa/uuid": "~2.8",

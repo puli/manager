@@ -27,7 +27,7 @@ use Puli\RepositoryManager\Api\Package\RootPackage;
 use Puli\RepositoryManager\Api\Package\RootPackageFile;
 use Puli\RepositoryManager\Api\Package\UnsupportedVersionException;
 use Puli\RepositoryManager\Assert\Assert;
-use Webmozart\Criteria\Criteria;
+use Webmozart\Expression\Expression;
 use Webmozart\PathUtil\Path;
 
 /**
@@ -230,14 +230,14 @@ class PackageManagerImpl implements PackageManager
     /**
      * {@inheritdoc}
      */
-    public function findPackages(Criteria $criteria)
+    public function findPackages(Expression $expr)
     {
         $this->assertPackagesLoaded();
 
         $packages = new PackageCollection();
 
         foreach ($this->packages as $package) {
-            if ($package->match($criteria)) {
+            if ($package->match($expr)) {
                 $packages->add($package);
             }
         }
@@ -260,16 +260,16 @@ class PackageManagerImpl implements PackageManager
     /**
      * {@inheritdoc}
      */
-    public function hasPackages(Criteria $criteria = null)
+    public function hasPackages(Expression $expr = null)
     {
         $this->assertPackagesLoaded();
 
-        if (!$criteria) {
+        if (!$expr) {
             return !$this->packages->isEmpty();
         }
 
         foreach ($this->packages as $package) {
-            if ($package->match($criteria)) {
+            if ($package->match($expr)) {
                 return true;
             }
         }

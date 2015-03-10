@@ -33,7 +33,7 @@ use Puli\RepositoryManager\Tests\ManagerTestCase;
 use Puli\RepositoryManager\Tests\TestException;
 use Rhumsaa\Uuid\Uuid;
 use Symfony\Component\Filesystem\Filesystem;
-use Webmozart\Criteria\Criterion;
+use Webmozart\Expression\Expr;
 
 /**
  * @since  1.0
@@ -648,15 +648,15 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->packageFile2->addTypeDescriptor($type3 = clone $type2); // duplicate
         $this->packageFile3->addTypeDescriptor($type4 = new BindingTypeDescriptor('my/type4'));
 
-        $criteria1 = Criterion::same(BindingTypeDescriptor::CONTAINING_PACKAGE, 'vendor/package1');
+        $expr1 = Expr::same(BindingTypeDescriptor::CONTAINING_PACKAGE, 'vendor/package1');
 
-        $criteria2 = Criterion::same(BindingTypeDescriptor::STATE, BindingTypeState::DUPLICATE);
+        $expr2 = Expr::same(BindingTypeDescriptor::STATE, BindingTypeState::DUPLICATE);
 
-        $criteria3 = $criteria1->andX($criteria2);
+        $expr3 = $expr1->andX($expr2);
 
-        $this->assertSame(array($type2), $this->manager->findBindingTypes($criteria1));
-        $this->assertSame(array($type2, $type3), $this->manager->findBindingTypes($criteria2));
-        $this->assertSame(array($type2), $this->manager->findBindingTypes($criteria3));
+        $this->assertSame(array($type2), $this->manager->findBindingTypes($expr1));
+        $this->assertSame(array($type2, $type3), $this->manager->findBindingTypes($expr2));
+        $this->assertSame(array($type2), $this->manager->findBindingTypes($expr3));
     }
 
     public function testHasBindingType()
@@ -690,15 +690,15 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->packageFile1->addTypeDescriptor($type2 = new BindingTypeDescriptor('my/type2'));
         $this->packageFile1->addTypeDescriptor($type3 = clone $type2);
 
-        $criteria1 = Criterion::same(BindingTypeDescriptor::CONTAINING_PACKAGE, 'vendor/package1')
+        $expr1 = Expr::same(BindingTypeDescriptor::CONTAINING_PACKAGE, 'vendor/package1')
             ->andSame(BindingTypeDescriptor::STATE, BindingTypeState::ENABLED);
 
-        $criteria2 = Criterion::same(BindingTypeDescriptor::CONTAINING_PACKAGE, 'vendor/package2')
+        $expr2 = Expr::same(BindingTypeDescriptor::CONTAINING_PACKAGE, 'vendor/package2')
             ->andSame(BindingTypeDescriptor::STATE, BindingTypeState::DUPLICATE);
 
         $this->assertTrue($this->manager->hasBindingTypes());
-        $this->assertTrue($this->manager->hasBindingTypes($criteria1));
-        $this->assertFalse($this->manager->hasBindingTypes($criteria2));
+        $this->assertTrue($this->manager->hasBindingTypes($expr1));
+        $this->assertFalse($this->manager->hasBindingTypes($expr2));
     }
 
     public function testHasNoBindingTypes()
@@ -1865,15 +1865,15 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->packageFile1->addBindingDescriptor($binding2);
         $this->packageFile2->addBindingDescriptor($binding3);
 
-        $criteria1 = Criterion::startsWith(BindingDescriptor::UUID, 'ecc');
+        $expr1 = Expr::startsWith(BindingDescriptor::UUID, 'ecc');
 
-        $criteria2 = $criteria1->andSame(BindingDescriptor::CONTAINING_PACKAGE, 'vendor/package1');
+        $expr2 = $expr1->andSame(BindingDescriptor::CONTAINING_PACKAGE, 'vendor/package1');
 
-        $criteria3 = $criteria1->andSame(BindingDescriptor::CONTAINING_PACKAGE, 'vendor/root');
+        $expr3 = $expr1->andSame(BindingDescriptor::CONTAINING_PACKAGE, 'vendor/root');
 
-        $this->assertSame(array($binding2, $binding3), $this->manager->findBindings($criteria1));
-        $this->assertSame(array($binding2), $this->manager->findBindings($criteria2));
-        $this->assertSame(array(), $this->manager->findBindings($criteria3));
+        $this->assertSame(array($binding2, $binding3), $this->manager->findBindings($expr1));
+        $this->assertSame(array($binding2), $this->manager->findBindings($expr2));
+        $this->assertSame(array(), $this->manager->findBindings($expr3));
     }
 
     public function testHasBinding()
@@ -1909,16 +1909,16 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->packageFile1->addBindingDescriptor($binding2 = new BindingDescriptor('/path2', 'my/type'));
         $this->packageFile2->addBindingDescriptor($binding3 = clone $binding2);
 
-        $criteria1 = Criterion::same(BindingDescriptor::CONTAINING_PACKAGE, 'vendor/package1');
+        $expr1 = Expr::same(BindingDescriptor::CONTAINING_PACKAGE, 'vendor/package1');
 
-        $criteria2 = Criterion::same(BindingDescriptor::STATE, BindingState::ENABLED);
+        $expr2 = Expr::same(BindingDescriptor::STATE, BindingState::ENABLED);
 
-        $criteria3 = $criteria1->andX($criteria2);
+        $expr3 = $expr1->andX($expr2);
 
         $this->assertTrue($this->manager->hasBindings());
-        $this->assertTrue($this->manager->hasBindings($criteria1));
-        $this->assertTrue($this->manager->hasBindings($criteria2));
-        $this->assertFalse($this->manager->hasBindings($criteria3));
+        $this->assertTrue($this->manager->hasBindings($expr1));
+        $this->assertTrue($this->manager->hasBindings($expr2));
+        $this->assertFalse($this->manager->hasBindings($expr3));
     }
 
     public function testHasNoBindings()

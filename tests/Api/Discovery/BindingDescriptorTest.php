@@ -23,7 +23,7 @@ use Puli\RepositoryManager\Api\Package\RootPackage;
 use Puli\RepositoryManager\Api\Package\RootPackageFile;
 use Rhumsaa\Uuid\Uuid;
 use stdClass;
-use Webmozart\Criteria\Criterion;
+use Webmozart\Expression\Expr;
 
 /**
  * @since  1.0
@@ -551,22 +551,22 @@ class BindingDescriptorTest extends PHPUnit_Framework_TestCase
         $binding = new BindingDescriptor('/path', 'vendor/type', array(), 'glob', $uuid);
         $binding->load($this->package, $type);
 
-        $this->assertFalse($binding->match(Criterion::same(BindingDescriptor::CONTAINING_PACKAGE, 'foobar')));
-        $this->assertTrue($binding->match(Criterion::same(BindingDescriptor::CONTAINING_PACKAGE, $this->package->getName())));
+        $this->assertFalse($binding->match(Expr::same(BindingDescriptor::CONTAINING_PACKAGE, 'foobar')));
+        $this->assertTrue($binding->match(Expr::same(BindingDescriptor::CONTAINING_PACKAGE, $this->package->getName())));
 
-        $this->assertFalse($binding->match(Criterion::same(BindingDescriptor::STATE, BindingState::DISABLED)));
-        $this->assertTrue($binding->match(Criterion::same(BindingDescriptor::STATE, BindingState::ENABLED)));
+        $this->assertFalse($binding->match(Expr::same(BindingDescriptor::STATE, BindingState::DISABLED)));
+        $this->assertTrue($binding->match(Expr::same(BindingDescriptor::STATE, BindingState::ENABLED)));
 
-        $this->assertFalse($binding->match(Criterion::startsWith(BindingDescriptor::UUID, 'abce')));
-        $this->assertTrue($binding->match(Criterion::startsWith(BindingDescriptor::UUID, 'abcd')));
+        $this->assertFalse($binding->match(Expr::startsWith(BindingDescriptor::UUID, 'abce')));
+        $this->assertTrue($binding->match(Expr::startsWith(BindingDescriptor::UUID, 'abcd')));
 
-        $this->assertFalse($binding->match(Criterion::same(BindingDescriptor::QUERY, '/path/nested')));
-        $this->assertTrue($binding->match(Criterion::same(BindingDescriptor::QUERY, '/path')));
+        $this->assertFalse($binding->match(Expr::same(BindingDescriptor::QUERY, '/path/nested')));
+        $this->assertTrue($binding->match(Expr::same(BindingDescriptor::QUERY, '/path')));
 
-        $this->assertFalse($binding->match(Criterion::same(BindingDescriptor::LANGUAGE, 'xpath')));
-        $this->assertTrue($binding->match(Criterion::same(BindingDescriptor::LANGUAGE, 'glob')));
+        $this->assertFalse($binding->match(Expr::same(BindingDescriptor::LANGUAGE, 'xpath')));
+        $this->assertTrue($binding->match(Expr::same(BindingDescriptor::LANGUAGE, 'glob')));
 
-        $this->assertFalse($binding->match(Criterion::same(BindingDescriptor::TYPE_NAME, 'vendor/other')));
-        $this->assertTrue($binding->match(Criterion::same(BindingDescriptor::TYPE_NAME, 'vendor/type')));
+        $this->assertFalse($binding->match(Expr::same(BindingDescriptor::TYPE_NAME, 'vendor/other')));
+        $this->assertTrue($binding->match(Expr::same(BindingDescriptor::TYPE_NAME, 'vendor/type')));
     }
 }

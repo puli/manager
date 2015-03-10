@@ -17,7 +17,7 @@ use Puli\RepositoryManager\Api\AlreadyLoadedException;
 use Puli\RepositoryManager\Api\NotLoadedException;
 use Puli\RepositoryManager\Api\Package\Package;
 use Puli\RepositoryManager\Assert\Assert;
-use Webmozart\Criteria\Criteria;
+use Webmozart\Expression\Expression;
 
 /**
  * Describes a binding type.
@@ -425,19 +425,19 @@ class BindingTypeDescriptor
     }
 
     /**
-     * Returns whether the binding type matches the given criteria.
+     * Returns whether the binding type matches the given expression.
      *
-     * @param Criteria $criteria The search criteria. You can use the fields
-     *                           {@link NAME}, {@link PARAMETERS},
-     *                           {@link STATE} and {@link CONTAINING_PACKAGE}
-     *                           in the criteria.
+     * @param Expression $expr The search criteria. You can use the fields
+     *                         {@link NAME}, {@link PARAMETERS},
+     *                         {@link STATE} and {@link CONTAINING_PACKAGE}
+     *                         in the expression.
      *
-     * @return bool Returns `true` if the binding type matches the criteria and
-     *              `false` otherwise.
+     * @return bool Returns `true` if the binding type matches the expression
+     *              and `false` otherwise.
      */
-    public function match(Criteria $criteria)
+    public function match(Expression $expr)
     {
-        return $criteria->match(array(
+        return $expr->evaluate(array(
             self::NAME => $this->name,
             self::STATE => $this->state,
             self::CONTAINING_PACKAGE => $this->containingPackage->getName(),

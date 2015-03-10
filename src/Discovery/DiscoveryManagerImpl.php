@@ -59,7 +59,7 @@ use Puli\RepositoryManager\Package\PackageFileStorage;
 use Puli\RepositoryManager\Transaction\InterceptedOperation;
 use Puli\RepositoryManager\Transaction\Transaction;
 use Rhumsaa\Uuid\Uuid;
-use Webmozart\Criteria\Criteria;
+use Webmozart\Expression\Expression;
 
 /**
  * @since  1.0
@@ -280,7 +280,7 @@ class DiscoveryManagerImpl implements DiscoveryManager
     /**
      * {@inheritdoc}
      */
-    public function findBindingTypes(Criteria $criteria)
+    public function findBindingTypes(Expression $expr)
     {
         $this->assertPackagesLoaded();
 
@@ -288,7 +288,7 @@ class DiscoveryManagerImpl implements DiscoveryManager
 
         foreach ($this->typeDescriptors->toArray() as $typeName => $typesByPackage) {
             foreach ($typesByPackage as $type) {
-                if ($type->match($criteria)) {
+                if ($type->match($expr)) {
                     $types[] = $type;
                 }
             }
@@ -312,11 +312,11 @@ class DiscoveryManagerImpl implements DiscoveryManager
     /**
      * {@inheritdoc}
      */
-    public function hasBindingTypes(Criteria $criteria = null)
+    public function hasBindingTypes(Expression $expr = null)
     {
         $this->assertPackagesLoaded();
 
-        if (!$criteria) {
+        if (!$expr) {
             return !$this->typeDescriptors->isEmpty();
         }
 
@@ -324,7 +324,7 @@ class DiscoveryManagerImpl implements DiscoveryManager
 
         foreach ($this->typeDescriptors->toArray() as $typeName => $typesByPackage) {
             foreach ($typesByPackage as $type) {
-                if ($type->match($criteria)) {
+                if ($type->match($expr)) {
                     return true;
                 }
             }
@@ -535,7 +535,7 @@ class DiscoveryManagerImpl implements DiscoveryManager
     /**
      * {@inheritdoc}
      */
-    public function findBindings(Criteria $criteria)
+    public function findBindings(Expression $expr)
     {
         $this->assertPackagesLoaded();
 
@@ -543,7 +543,7 @@ class DiscoveryManagerImpl implements DiscoveryManager
 
         foreach ($this->bindingDescriptors->toArray() as $uuidString => $bindingsByPackage) {
             foreach ($bindingsByPackage as $binding) {
-                if ($binding->match($criteria)) {
+                if ($binding->match($expr)) {
                     $bindings[] = $binding;
                 }
             }
@@ -567,17 +567,17 @@ class DiscoveryManagerImpl implements DiscoveryManager
     /**
      * {@inheritdoc}
      */
-    public function hasBindings(Criteria $criteria = null)
+    public function hasBindings(Expression $expr = null)
     {
         $this->assertPackagesLoaded();
 
-        if (!$criteria) {
+        if (!$expr) {
             return !$this->bindingDescriptors->isEmpty();
         }
 
         foreach ($this->bindingDescriptors->toArray() as $uuidString => $bindingsByPackage) {
             foreach ($bindingsByPackage as $binding) {
-                if ($binding->match($criteria)) {
+                if ($binding->match($expr)) {
                     return true;
                 }
             }

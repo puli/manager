@@ -26,7 +26,7 @@ use Puli\RepositoryManager\Package\PackageManagerImpl;
 use Puli\RepositoryManager\Tests\ManagerTestCase;
 use Puli\RepositoryManager\Tests\TestException;
 use Symfony\Component\Filesystem\Filesystem;
-use Webmozart\Criteria\Criterion;
+use Webmozart\Expression\Expr;
 
 /**
  * @since  1.0
@@ -159,26 +159,26 @@ class PackageManagerImplTest extends ManagerTestCase
 
         $manager = new PackageManagerImpl($this->environment, $this->packageFileStorage);
 
-        $criteria1 = Criterion::same(Package::STATE, PackageState::ENABLED);
+        $expr1 = Expr::same(Package::STATE, PackageState::ENABLED);
 
-        $criteria2 = Criterion::same(Package::INSTALLER, 'webmozart');
+        $expr2 = Expr::same(Package::INSTALLER, 'webmozart');
 
-        $criteria3 = $criteria1->andX($criteria2);
+        $expr3 = $expr1->andX($expr2);
 
-        $packages = $manager->findPackages($criteria1);
+        $packages = $manager->findPackages($expr1);
 
         $this->assertInstanceOf('Puli\RepositoryManager\Api\Package\PackageCollection', $packages);
         $this->assertTrue($packages->contains('vendor/root'));
         $this->assertTrue($packages->contains('vendor/package2'));
         $this->assertCount(2, $packages);
 
-        $packages = $manager->findPackages($criteria2);
+        $packages = $manager->findPackages($expr2);
 
         $this->assertInstanceOf('Puli\RepositoryManager\Api\Package\PackageCollection', $packages);
         $this->assertTrue($packages->contains('vendor/package1'));
         $this->assertCount(1, $packages);
 
-        $packages = $manager->findPackages($criteria3);
+        $packages = $manager->findPackages($expr3);
 
         $this->assertInstanceOf('Puli\RepositoryManager\Api\Package\PackageCollection', $packages);
         $this->assertCount(0, $packages);
@@ -269,8 +269,8 @@ class PackageManagerImplTest extends ManagerTestCase
         $this->initDefaultManager();
 
         $this->assertTrue($this->manager->hasPackages());
-        $this->assertTrue($this->manager->hasPackages(Criterion::same(Package::NAME, 'vendor/root')));
-        $this->assertFalse($this->manager->hasPackages(Criterion::same(Package::NAME, 'foobar')));
+        $this->assertTrue($this->manager->hasPackages(Expr::same(Package::NAME, 'vendor/root')));
+        $this->assertFalse($this->manager->hasPackages(Expr::same(Package::NAME, 'foobar')));
     }
 
     public function testInstallPackage()

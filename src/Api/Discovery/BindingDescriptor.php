@@ -22,7 +22,7 @@ use Puli\RepositoryManager\Api\Package\RootPackage;
 use Puli\RepositoryManager\Assert\Assert;
 use Puli\RepositoryManager\Util\DistinguishedName;
 use Rhumsaa\Uuid\Uuid;
-use Webmozart\Criteria\Criteria;
+use Webmozart\Expression\Expression;
 
 /**
  * Describes a resource binding.
@@ -596,19 +596,19 @@ class BindingDescriptor
     }
 
     /**
-     * Returns whether the binding matches the given criteria.
+     * Returns whether the binding matches the given expression.
      *
-     * @param Criteria $criteria The search criteria. You can use the fields
-     *                           {@link UUID}, {@link QUERY}, {@link LANGUAGE},
-     *                           {@link TYPE_NAME}, {@link STATE} and
-     *                           {@link CONTAINING_PACKAGE} in the criteria.
+     * @param Expression $expr The search criteria. You can use the fields
+     *                         {@link UUID}, {@link QUERY}, {@link LANGUAGE},
+     *                         {@link TYPE_NAME}, {@link STATE} and
+     *                         {@link CONTAINING_PACKAGE} in the expression.
      *
-     * @return bool Returns `true` if the binding matches the criteria and
+     * @return bool Returns `true` if the binding matches the expression and
      *              `false` otherwise.
      */
-    public function match(Criteria $criteria)
+    public function match(Expression $expr)
     {
-        return $criteria->match(array(
+        return $expr->evaluate(array(
             self::UUID => $this->uuid->toString(),
             self::QUERY => $this->query,
             self::LANGUAGE => $this->language,

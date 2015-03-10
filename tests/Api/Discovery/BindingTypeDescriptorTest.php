@@ -18,7 +18,7 @@ use Puli\RepositoryManager\Api\Discovery\BindingTypeState;
 use Puli\RepositoryManager\Api\Package\InstallInfo;
 use Puli\RepositoryManager\Api\Package\Package;
 use Puli\RepositoryManager\Api\Package\PackageFile;
-use Webmozart\Criteria\Criterion;
+use Webmozart\Expression\Expr;
 
 /**
  * @since  1.0
@@ -307,13 +307,13 @@ class BindingTypeDescriptorTest extends PHPUnit_Framework_TestCase
         $type = new BindingTypeDescriptor('vendor/type');
         $type->load($this->package);
 
-        $this->assertFalse($type->match(Criterion::same(BindingTypeDescriptor::NAME, 'foobar')));
-        $this->assertTrue($type->match(Criterion::same(BindingTypeDescriptor::NAME, 'vendor/type')));
+        $this->assertFalse($type->match(Expr::same(BindingTypeDescriptor::NAME, 'foobar')));
+        $this->assertTrue($type->match(Expr::same(BindingTypeDescriptor::NAME, 'vendor/type')));
 
-        $this->assertFalse($type->match(Criterion::same(BindingTypeDescriptor::CONTAINING_PACKAGE, 'foobar')));
-        $this->assertTrue($type->match(Criterion::same(BindingTypeDescriptor::CONTAINING_PACKAGE, $this->package->getName())));
+        $this->assertFalse($type->match(Expr::same(BindingTypeDescriptor::CONTAINING_PACKAGE, 'foobar')));
+        $this->assertTrue($type->match(Expr::same(BindingTypeDescriptor::CONTAINING_PACKAGE, $this->package->getName())));
 
-        $this->assertFalse($type->match(Criterion::same(BindingTypeDescriptor::STATE, BindingTypeState::DUPLICATE)));
-        $this->assertTrue($type->match(Criterion::same(BindingTypeDescriptor::STATE, BindingTypeState::ENABLED)));
+        $this->assertFalse($type->match(Expr::same(BindingTypeDescriptor::STATE, BindingTypeState::DUPLICATE)));
+        $this->assertTrue($type->match(Expr::same(BindingTypeDescriptor::STATE, BindingTypeState::ENABLED)));
     }
 }

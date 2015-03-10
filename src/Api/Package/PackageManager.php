@@ -13,7 +13,7 @@ namespace Puli\RepositoryManager\Api\Package;
 
 use Puli\RepositoryManager\Api\Environment\ProjectEnvironment;
 use Puli\RepositoryManager\Api\InvalidConfigException;
-use Webmozart\Criteria\Criteria;
+use Webmozart\Expression\Expression;
 
 /**
  * Manages the package repository of a Puli project.
@@ -80,13 +80,13 @@ interface PackageManager
     public function getPackages();
 
     /**
-     * Returns all packages matching the given criteria.
+     * Returns all packages matching the given expression.
      *
-     * @param Criteria $criteria The search criteria.
+     * @param Expression $expr The search criteria.
      *
-     * @return PackageCollection The packages matching the criteria.
+     * @return PackageCollection The packages matching the expression.
      */
-    public function findPackages(Criteria $criteria);
+    public function findPackages(Expression $expr);
 
     /**
      * Returns whether the manager has the package with the given name.
@@ -100,17 +100,17 @@ interface PackageManager
     /**
      * Returns whether the manager has any packages.
      *
-     * You can optionally pass criteria to check whether the manager has
-     * packages matching the given criteria.
+     * You can optionally pass an expression to check whether the manager has
+     * packages matching the expression.
      *
-     * @param Criteria $criteria The search criteria.
+     * @param Expression $expr The search criteria.
      *
      * @return bool Returns `true` if the manager has packages and `false`
-     *              otherwise. If a criteria was passed, this method only
+     *              otherwise. If an expression was passed, this method only
      *              returns `true` if the manager has packages matching the
-     *              criteria.
+     *              expression.
      */
-    public function hasPackages(Criteria $criteria = null);
+    public function hasPackages(Expression $expr = null);
 
     /**
      * Returns the manager's environment.

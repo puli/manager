@@ -15,7 +15,7 @@ use Puli\Discovery\Api\DuplicateTypeException;
 use Puli\Discovery\Api\NoSuchTypeException;
 use Puli\RepositoryManager\Api\Environment\ProjectEnvironment;
 use Rhumsaa\Uuid\Uuid;
-use Webmozart\Criteria\Criteria;
+use Webmozart\Expression\Expression;
 
 /**
  * @since  1.0
@@ -68,13 +68,13 @@ interface DiscoveryManager
     public function getBindingTypes();
 
     /**
-     * Returns all binding types matching the given criteria.
+     * Returns all binding types matching the given expression.
      *
-     * @param Criteria $criteria The search criteria.
+     * @param Expression $expr The search criteria.
      *
-     * @return BindingTypeDescriptor[] The binding types matching the criteria.
+     * @return BindingTypeDescriptor[] The binding types matching the expression.
      */
-    public function findBindingTypes(Criteria $criteria);
+    public function findBindingTypes(Expression $expr);
 
     /**
      * Returns whether the type with the given name exists.
@@ -91,17 +91,17 @@ interface DiscoveryManager
     /**
      * Returns whether the manager has any binding types.
      *
-     * You can optionally pass criteria to check whether the manager has types
-     * matching the given criteria.
+     * You can optionally pass an expression to check whether the manager has
+     * types matching the expression.
      *
-     * @param Criteria $criteria The search criteria.
+     * @param Expression $expr The search criteria.
      *
      * @return bool Returns `true` if the manager has binding types and `false`
-     *              otherwise. If a criteria was passed, this method only
+     *              otherwise. If an expression was passed, this method only
      *              returns `true` if the manager has binding types matching the
-     *              criteria.
+     *              expression.
      */
-    public function hasBindingTypes(Criteria $criteria = null);
+    public function hasBindingTypes(Expression $expr = null);
 
     /**
      * Adds a new binding.
@@ -167,13 +167,13 @@ interface DiscoveryManager
     public function getBindings();
 
     /**
-     * Returns all bindings matching the given criteria.
+     * Returns all bindings matching the given expression.
      *
-     * @param Criteria $criteria The search criteria.
+     * @param Expression $expr The search criteria.
      *
-     * @return BindingDescriptor[] The bindings matching the criteria.
+     * @return BindingDescriptor[] The bindings matching the expression.
      */
-    public function findBindings(Criteria $criteria);
+    public function findBindings(Expression $expr);
 
     /**
      * Returns whether the binding with the given UUID exists.
@@ -190,17 +190,17 @@ interface DiscoveryManager
     /**
      * Returns whether the manager has any bindings.
      *
-     * You can optionally pass criteria to check whether the manager has
-     * bindings matching the given criteria.
+     * You can optionally pass an expression to check whether the manager has
+     * bindings matching the expression.
      *
-     * @param Criteria $criteria The search criteria.
+     * @param Expression $expr The search criteria.
      *
      * @return bool Returns `true` if the manager has bindings and `false`
-     *              otherwise. If a criteria was passed, this method only
+     *              otherwise. If an expression was passed, this method only
      *              returns `true` if the manager has bindings matching the
-     *              criteria.
+     *              expression.
      */
-    public function hasBindings(Criteria $criteria = null);
+    public function hasBindings(Expression $expr = null);
 
     /**
      * Builds the resource discovery.
