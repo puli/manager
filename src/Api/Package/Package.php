@@ -24,22 +24,22 @@ use Webmozart\Expression\Expression;
 class Package
 {
     /**
-     * The name field in {@link Criteria} expressions.
+     * The name field in {@link Expression} instances.
      */
     const NAME = 'name';
 
     /**
-     * The install path field in {@link Criteria} expressions.
+     * The install path field in {@link Expression} instances.
      */
     const INSTALL_PATH = 'installPath';
 
     /**
-     * The state field in {@link Criteria} expressions.
+     * The state field in {@link Expression} instances.
      */
     const STATE = 'state';
 
     /**
-     * The installer field in {@link Criteria} expressions.
+     * The installer field in {@link Expression} instances.
      */
     const INSTALLER = 'installer';
 

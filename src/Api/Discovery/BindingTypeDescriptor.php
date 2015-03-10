@@ -32,17 +32,17 @@ use Webmozart\Expression\Expression;
 class BindingTypeDescriptor
 {
     /**
-     * The name field in {@link Criteria} expressions.
+     * The name field in {@link Expression} instances.
      */
     const NAME = 'name';
 
     /**
-     * The state field in {@link Criteria} expressions.
+     * The state field in {@link Expression} instances.
      */
     const STATE = 'state';
 
     /**
-     * The package field in {@link Criteria} expressions.
+     * The package field in {@link Expression} instances.
      */
     const CONTAINING_PACKAGE = 'containingPackage';
 

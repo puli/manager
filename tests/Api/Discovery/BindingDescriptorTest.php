@@ -543,12 +543,16 @@ class BindingDescriptorTest extends PHPUnit_Framework_TestCase
 
     public function testMatch()
     {
-        $type = new BindingTypeDescriptor('vendor/type');
+        $type = new BindingTypeDescriptor('vendor/type', null, array(
+            new BindingParameterDescriptor('param'),
+        ));
         $type->load($this->package);
 
         $uuid = Uuid::fromString('abcdb814-9dad-11d1-80b4-00c04fd430c8');
         $this->package->getInstallInfo()->addEnabledBindingUuid($uuid);
-        $binding = new BindingDescriptor('/path', 'vendor/type', array(), 'glob', $uuid);
+        $binding = new BindingDescriptor('/path', 'vendor/type', array(
+            'param' => 'value',
+        ), 'glob', $uuid);
         $binding->load($this->package, $type);
 
         $this->assertFalse($binding->match(Expr::same(BindingDescriptor::CONTAINING_PACKAGE, 'foobar')));
@@ -568,5 +572,8 @@ class BindingDescriptorTest extends PHPUnit_Framework_TestCase
 
         $this->assertFalse($binding->match(Expr::same(BindingDescriptor::TYPE_NAME, 'vendor/other')));
         $this->assertTrue($binding->match(Expr::same(BindingDescriptor::TYPE_NAME, 'vendor/type')));
+
+        $this->assertFalse($binding->match(Expr::keySame(BindingDescriptor::PARAMETER_VALUES, 'param', 'foobar')));
+        $this->assertTrue($binding->match(Expr::keySame(BindingDescriptor::PARAMETER_VALUES, 'param', 'value')));
     }
 }

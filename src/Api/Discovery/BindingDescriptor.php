@@ -37,32 +37,37 @@ use Webmozart\Expression\Expression;
 class BindingDescriptor
 {
     /**
-     * The UUID field in {@link Criteria} expressions.
+     * The UUID field in {@link Expression} instances.
      */
     const UUID = 'uuid';
 
     /**
-     * The query field in {@link Criteria} expressions.
+     * The query field in {@link Expression} instances.
      */
     const QUERY = 'query';
 
     /**
-     * The language field in {@link Criteria} expressions.
+     * The language field in {@link Expression} instances.
      */
     const LANGUAGE = 'language';
 
     /**
-     * The type name field in {@link Criteria} expressions.
+     * The type name field in {@link Expression} instances.
      */
     const TYPE_NAME = 'typeName';
 
     /**
-     * The state field in {@link Criteria} expressions.
+     * The parameter values in {@link Expression} instances.
+     */
+    const PARAMETER_VALUES = 'parameterValues';
+
+    /**
+     * The state field in {@link Expression} instances.
      */
     const STATE = 'state';
 
     /**
-     * The package field in {@link Criteria} expressions.
+     * The package field in {@link Expression} instances.
      */
     const CONTAINING_PACKAGE = 'containingPackage';
 
@@ -613,6 +618,7 @@ class BindingDescriptor
             self::QUERY => $this->query,
             self::LANGUAGE => $this->language,
             self::TYPE_NAME => $this->typeName,
+            self::PARAMETER_VALUES => $this->parameterValues,
             self::STATE => $this->state,
             self::CONTAINING_PACKAGE => $this->containingPackage->getName(),
         ));
