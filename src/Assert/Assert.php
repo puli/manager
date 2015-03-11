@@ -11,7 +11,6 @@
 
 namespace Puli\RepositoryManager\Assert;
 
-use Puli\RepositoryManager\Api\Package\RootPackage;
 use Webmozart\PathUtil\Path;
 
 /**
@@ -37,18 +36,23 @@ use Webmozart\PathUtil\Path;
  * @method static void allParameterName($value, $message = null, $propertyPath = null)
  * @method static void allParameterValue($value, $message = null, $propertyPath = null)
  */
-class Assert extends \Puli\Repository\Assert\Assert
+class Assert extends \Webmozart\Assert\Assert
 {
+    public static function path($value)
+    {
+        self::stringNotEmpty($value, 'The path must be a non-empty string. Got: %s');
+        self::startsWith($value, '/', 'The path %s is not absolute.');
+    }
+
     public static function systemPath($value)
     {
-        Assert::string($value, 'The path must be a string. Got: %s');
-        Assert::notEmpty($value, 'The path must not be empty.');
+        self::stringNotEmpty($value, 'The path must be a non-empty string. Got: %s');
     }
 
     public static function absoluteSystemPath($value)
     {
-        Assert::systemPath($value);
-        Assert::true(Path::isAbsolute($value), sprintf(
+        self::stringNotEmpty($value, 'The path must be a non-empty string. Got: %s');
+        self::true(Path::isAbsolute($value), sprintf(
             'The path %s is not absolute.',
             $value
         ));
@@ -56,8 +60,7 @@ class Assert extends \Puli\Repository\Assert\Assert
 
     public static function packageName($value)
     {
-        self::string($value, 'The package name must be a string. Got: %s');
-        self::notEmpty($value, 'The package name must not be empty.');
+        self::stringNotEmpty($value, 'The package name must be a non-empty string. Got: %s');
 
         if ('__root__' !== $value) {
             self::contains($value, '/', 'The package name %s must contain a vendor name followed by a "/".');
@@ -66,35 +69,31 @@ class Assert extends \Puli\Repository\Assert\Assert
 
     public static function query($value)
     {
-        self::string($value, 'The query must be a string. Got: %s');
-        self::notEmpty($value, 'The query must not be empty.');
+        self::stringNotEmpty($value, 'The query must be a non-empty string. Got: %s');
     }
 
     public static function language($value)
     {
-        self::string($value, 'The language must be a string. Got: %s');
-        self::notEmpty($value, 'The language must not be empty.');
+        self::stringNotEmpty($value, 'The language must be a non-empty string. Got: %s');
     }
 
     public static function typeName($value)
     {
-        Assert::string($value, 'The type name must be a string. Got: %s');
-        Assert::notEmpty($value, 'The type name must not be empty.');
-        Assert::contains($value, '/', 'The type name %s must contain a vendor name followed by a "/".');
-        Assert::startsWithLetter($value, 'The type name %s must start with a letter.');
-        Assert::regex($value, '~^[a-z][a-z0-9\-]*/[a-z0-9\-]+$~', 'The type name %s must contain lower-case characters, digits and hyphens only.');
+        self::stringNotEmpty($value, 'The type name must be a non-empty string. Got: %s');
+        self::contains($value, '/', 'The type name %s must contain a vendor name followed by a "/".');
+        self::startsWithLetter($value, 'The type name %s must start with a letter.');
+        self::regex($value, '~^[a-z][a-z0-9\-]*/[a-z0-9\-]+$~', 'The type name %s must contain lower-case characters, digits and hyphens only.');
     }
 
     public static function parameterName($value)
     {
-        Assert::string($value, 'The parameter name must be a string. Got: %s');
-        Assert::notEmpty($value, 'The parameter name must not be empty.');
-        Assert::startsWithLetter($value, 'The parameter name %s must start with a letter.');
-        Assert::regex($value, '~^[a-z][a-z0-9\-]*$~', 'The parameter %s name must contain lower-case characters, digits and hyphens only.');
+        self::stringNotEmpty($value, 'The parameter name must be a non-empty string. Got: %s');
+        self::startsWithLetter($value, 'The parameter name %s must start with a letter.');
+        self::regex($value, '~^[a-z][a-z0-9\-]*$~', 'The parameter %s name must contain lower-case characters, digits and hyphens only.');
     }
 
     public static function parameterValue($value)
     {
-        Assert::scalar($value, 'The parameter value must be a scalar. Got: %s');
+        self::scalar($value, 'The parameter value must be a scalar. Got: %s');
     }
 }
