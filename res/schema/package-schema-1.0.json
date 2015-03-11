@@ -82,6 +82,10 @@
                 "type": "string"
             }
         },
+        "extra": {
+            "type": "object",
+            "additionalProperties": true
+        },
         "packages": {
             "type": "object",
             "additionalProperties": {

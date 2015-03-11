@@ -46,7 +46,9 @@ class PackageJsonWriter implements PackageFileWriter
         'override',
         'override-order',
         'config',
-        'plugins'
+        'plugins',
+        'extra',
+        'packages',
     );
 
     /**
@@ -75,6 +77,7 @@ class PackageJsonWriter implements PackageFileWriter
         $bindings = $packageFile->getBindingDescriptors();
         $bindingTypes = $packageFile->getTypeDescriptors();
         $overrides = $packageFile->getOverriddenPackages();
+        $extra = $packageFile->getExtraKeys();
 
         $jsonData['version'] = '1.0';
 
@@ -164,6 +167,10 @@ class PackageJsonWriter implements PackageFileWriter
 
         if (count($overrides) > 0) {
             $jsonData['override'] = count($overrides) > 1 ? $overrides : reset($overrides);
+        }
+
+        if (count($extra) > 0) {
+            $jsonData['extra'] = (object) $extra;
         }
     }
 

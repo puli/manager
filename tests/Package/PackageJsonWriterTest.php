@@ -67,6 +67,10 @@ class PackageJsonWriterTest extends JsonWriterTestCase
             new BindingParameterDescriptor('param', false, 1234, 'Description of the parameter.'),
         )));
         $packageFile->setOverriddenPackages(array('acme/blog'));
+        $packageFile->setExtraKeys(array(
+            'extra1' => 'value',
+            'extra2' => array('key' => 'value'),
+        ));
 
         $this->writer->writePackageFile($packageFile, $this->tempFile);
 
@@ -303,6 +307,10 @@ class PackageJsonWriterTest extends JsonWriterTestCase
         ));
         $packageFile->addInstallInfo($installInfo1);
         $packageFile->addInstallInfo($installInfo2);
+        $packageFile->setExtraKeys(array(
+            'extra1' => 'value',
+            'extra2' => array('key' => 'value'),
+        ));
 
         $this->writer->writePackageFile($packageFile, $this->tempFile);
 

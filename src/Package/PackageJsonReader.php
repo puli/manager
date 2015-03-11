@@ -118,6 +118,10 @@ class PackageJsonReader implements PackageFileReader
         if (isset($jsonData->override)) {
             $packageFile->setOverriddenPackages((array) $jsonData->override);
         }
+
+        if (isset($jsonData->extra)) {
+            $packageFile->setExtraKeys($this->objectsToArrays($jsonData->extra));
+        }
     }
 
     private function populateRootConfig(RootPackageFile $packageFile, \stdClass $jsonData)

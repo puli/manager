@@ -21,5 +21,11 @@
             }
         }
     },
-    "override": "acme/blog"
+    "override": "acme/blog",
+    "extra": {
+        "extra1": "value",
+        "extra2": {
+            "key": "value"
+        }
+    }
 }

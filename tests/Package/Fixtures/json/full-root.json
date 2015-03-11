@@ -45,6 +45,12 @@
     "plugins": [
         "Puli\\RepositoryManager\\Tests\\Api\\Package\\Fixtures\\TestPlugin"
     ],
+    "extra": {
+        "extra1": "value",
+        "extra2": {
+            "key": "value"
+        }
+    },
     "packages": {
         "vendor/package1": {
             "install-path": "/path/to/package1",
