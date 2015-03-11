@@ -264,4 +264,97 @@ class PackageFileTest extends PHPUnit_Framework_TestCase
         $packageFile = new PackageFile();
         $packageFile->getBindingDescriptor(Uuid::fromString('8546da2c-dfec-48be-8cd3-93798c41b72f'));
     }
+
+    public function testSetExtraKey()
+    {
+        $packageFile = new PackageFile();
+        $packageFile->setExtraKey('key1', 'value1');
+        $packageFile->setExtraKey('key2', 'value2');
+
+        $this->assertSame(array('key1' => 'value1', 'key2' => 'value2'), $packageFile->getExtraKeys());
+    }
+
+    public function testSetExtraKeys()
+    {
+        $packageFile = new PackageFile();
+        $packageFile->setExtraKey('key1', 'value1');
+        $packageFile->setExtraKeys(array(
+            'key2' => 'value2',
+            'key3' => 'value3',
+        ));
+
+        $this->assertSame(array('key2' => 'value2', 'key3' => 'value3'), $packageFile->getExtraKeys());
+    }
+
+    public function testAddExtraKeys()
+    {
+        $packageFile = new PackageFile();
+        $packageFile->setExtraKey('key1', 'value1');
+        $packageFile->addExtraKeys(array(
+            'key2' => 'value2',
+            'key3' => 'value3',
+        ));
+
+        $this->assertSame(array('key1' => 'value1', 'key2' => 'value2', 'key3' => 'value3'), $packageFile->getExtraKeys());
+    }
+
+    public function testRemoveExtraKey()
+    {
+        $packageFile = new PackageFile();
+        $packageFile->setExtraKey('key1', 'value1');
+        $packageFile->setExtraKey('key2', 'value2');
+        $packageFile->removeExtraKey('key1');
+
+        $this->assertSame(array('key2' => 'value2'), $packageFile->getExtraKeys());
+    }
+
+    public function testClearExtraKeys()
+    {
+        $packageFile = new PackageFile();
+        $packageFile->setExtraKey('key1', 'value1');
+        $packageFile->setExtraKey('key2', 'value2');
+        $packageFile->clearExtraKeys();
+
+        $this->assertSame(array(), $packageFile->getExtraKeys());
+    }
+
+    public function testGetExtraKey()
+    {
+        $packageFile = new PackageFile();
+        $packageFile->setExtraKey('key1', 'value1');
+        $packageFile->setExtraKey('key2', 'value2');
+
+        $this->assertSame('value1', $packageFile->getExtraKey('key1'));
+        $this->assertSame('value2', $packageFile->getExtraKey('key2'));
+    }
+
+    /**
+     * @expectedException \OutOfBoundsException
+     * @expectedExceptionMessage foobar
+     */
+    public function testGetExtraKeyFailsIfNotFound()
+    {
+        $packageFile = new PackageFile();
+
+        $packageFile->getExtraKey('foobar');
+    }
+
+    public function testHasExtraKey()
+    {
+        $packageFile = new PackageFile();
+        $packageFile->setExtraKey('key', 'value');
+
+        $this->assertTrue($packageFile->hasExtraKey('key'));
+        $this->assertFalse($packageFile->hasExtraKey('foobar'));
+    }
+
+    public function testHasExtraKeys()
+    {
+        $packageFile = new PackageFile();
+        $this->assertFalse($packageFile->hasExtraKeys());
+        $packageFile->setExtraKey('key', null);
+        $this->assertTrue($packageFile->hasExtraKey('key'));
+        $packageFile->clearExtraKeys();
+        $this->assertFalse($packageFile->hasExtraKeys());
+    }
 }

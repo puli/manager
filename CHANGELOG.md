@@ -33,6 +33,7 @@ Changelog
  * added `Puli::disablePlugins()`
  * added `Puli::arePluginsEnabled()`
  * added `Puli::isStarted()`
+ * added support for extra keys in `PackageFile`
 
 * 1.0.0-beta2 (2015-01-27)
 
