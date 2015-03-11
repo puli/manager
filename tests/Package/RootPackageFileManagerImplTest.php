@@ -18,12 +18,14 @@ use Puli\RepositoryManager\Api\Package\RootPackageFile;
 use Puli\RepositoryManager\Package\PackageFileStorage;
 use Puli\RepositoryManager\Package\RootPackageFileManagerImpl;
 use Puli\RepositoryManager\Tests\ManagerTestCase;
+use Puli\RepositoryManager\Tests\TestException;
+use RuntimeException;
 
 /**
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class RootPackageFileManagerTest extends ManagerTestCase
+class RootPackageFileManagerImplTest extends ManagerTestCase
 {
     const PLUGIN_CLASS = 'Puli\RepositoryManager\Tests\Api\Package\Fixtures\TestPlugin';
 
@@ -273,7 +275,7 @@ class RootPackageFileManagerTest extends ManagerTestCase
             ->method('saveRootPackageFile')
             ->with($this->rootPackageFile)
             ->will($this->returnCallback(function (RootPackageFile $packageFile) {
-                PHPUnit_Framework_Assert::assertSame(array(RootPackageFileManagerTest::PLUGIN_CLASS), $packageFile->getPluginClasses());
+                PHPUnit_Framework_Assert::assertSame(array(RootPackageFileManagerImplTest::PLUGIN_CLASS), $packageFile->getPluginClasses());
             }));
 
         $this->manager->installPluginClass(self::PLUGIN_CLASS);
@@ -338,5 +340,279 @@ class RootPackageFileManagerTest extends ManagerTestCase
         $this->manager->setPackageName('vendor/package');
 
         $this->assertSame('vendor/package', $this->manager->getPackageName());
+    }
+
+    public function testSetExtraKey()
+    {
+        $this->packageFileStorage->expects($this->once())
+            ->method('saveRootPackageFile')
+            ->with($this->rootPackageFile)
+            ->will($this->returnCallback(function (RootPackageFile $packageFile) {
+                PHPUnit_Framework_Assert::assertSame('value', $packageFile->getExtraKey('key'));
+            }));
+
+        $this->manager->setExtraKey('key', 'value');
+    }
+
+    public function testSetExtraKeyIgnoresDuplicates()
+    {
+        $this->rootPackageFile->setExtraKey('key', 'value');
+
+        $this->packageFileStorage->expects($this->never())
+            ->method('saveRootPackageFile');
+
+        $this->manager->setExtraKey('key', 'value');
+    }
+
+    public function testSetExtraKeyRestoresPreviousValueIfSavingFails()
+    {
+        $this->rootPackageFile->setExtraKey('key', 'previous');
+
+        $this->packageFileStorage->expects($this->once())
+            ->method('saveRootPackageFile')
+            ->with($this->rootPackageFile)
+            ->will($this->throwException(new TestException()));
+
+        try {
+            $this->manager->setExtraKey('key', 'value');
+            $this->fail('Expected a TestException');
+        } catch (TestException $e) {
+        }
+
+        $this->assertSame('previous', $this->rootPackageFile->getExtraKey('key'));
+    }
+
+    public function testSetExtraKeyRemovesPreviouslyUnsetKeysIfSavingFails()
+    {
+        $this->packageFileStorage->expects($this->once())
+            ->method('saveRootPackageFile')
+            ->with($this->rootPackageFile)
+            ->will($this->throwException(new TestException()));
+
+        try {
+            $this->manager->setExtraKey('key', 'value');
+            $this->fail('Expected a TestException');
+        } catch (TestException $e) {
+        }
+
+        $this->assertFalse($this->rootPackageFile->hasExtraKey('key'));
+    }
+
+    public function testSetExtraKeys()
+    {
+        $this->packageFileStorage->expects($this->once())
+            ->method('saveRootPackageFile')
+            ->with($this->rootPackageFile)
+            ->will($this->returnCallback(function (RootPackageFile $packageFile) {
+                PHPUnit_Framework_Assert::assertSame(array(
+                    'key1' => 'value1',
+                    'key2' => 'value2',
+                ), $packageFile->getExtraKeys());
+            }));
+
+        $this->manager->setExtraKeys(array(
+            'key1' => 'value1',
+            'key2' => 'value2',
+        ));
+    }
+
+    public function testSetExtraKeysIgnoresIfNoneChanged()
+    {
+        $this->rootPackageFile->setExtraKey('key1', 'value1');
+        $this->rootPackageFile->setExtraKey('key2', 'value2');
+
+        $this->packageFileStorage->expects($this->never())
+            ->method('saveRootPackageFile');
+
+        $this->manager->setExtraKeys(array(
+            'key1' => 'value1',
+            'key2' => 'value2',
+        ));
+    }
+
+    public function testSetExtraKeysRestoresStateIfSavingFails()
+    {
+        $this->rootPackageFile->setExtraKey('key1', 'previous');
+
+        $this->packageFileStorage->expects($this->once())
+            ->method('saveRootPackageFile')
+            ->with($this->rootPackageFile)
+            ->will($this->throwException(new TestException()));
+
+        try {
+            $this->manager->setExtraKeys(array(
+                'key1' => 'value1',
+                'key2' => 'value2',
+            ));
+            $this->fail('Expected a TestException');
+        } catch (TestException $e) {
+        }
+
+        $this->assertSame('previous', $this->rootPackageFile->getExtraKey('key1'));
+        $this->assertFalse($this->rootPackageFile->hasExtraKey('key2'));
+    }
+
+    public function testRemoveExtraKey()
+    {
+        $this->rootPackageFile->setExtraKey('key1', 'value1');
+        $this->rootPackageFile->setExtraKey('key2', 'value2');
+
+        $this->packageFileStorage->expects($this->once())
+            ->method('saveRootPackageFile')
+            ->with($this->rootPackageFile)
+            ->will($this->returnCallback(function (RootPackageFile $packageFile) {
+                PHPUnit_Framework_Assert::assertSame(array(
+                    'key2' => 'value2',
+                ), $packageFile->getExtraKeys());
+            }));
+
+        $this->manager->removeExtraKey('key1');
+    }
+
+    public function testRemoveExtraKeyIgnoresNonExisting()
+    {
+        $this->packageFileStorage->expects($this->never())
+            ->method('saveRootPackageFile');
+
+        $this->manager->removeExtraKey('foobar');
+    }
+
+    public function testRemoveExtraKeyRestoresValueIfSavingFails()
+    {
+        $this->rootPackageFile->setExtraKey('key1', 'previous');
+
+        $this->packageFileStorage->expects($this->once())
+            ->method('saveRootPackageFile')
+            ->with($this->rootPackageFile)
+            ->will($this->throwException(new TestException()));
+
+        try {
+            $this->manager->removeExtraKey('key1');
+            $this->fail('Expected a TestException');
+        } catch (TestException $e) {
+        }
+
+        $this->assertSame('previous', $this->rootPackageFile->getExtraKey('key1'));
+    }
+
+    public function testRemoveExtraKeys()
+    {
+        $this->rootPackageFile->setExtraKey('key1', 'value1');
+        $this->rootPackageFile->setExtraKey('key2', 'value2');
+        $this->rootPackageFile->setExtraKey('key3', 'value3');
+
+        $this->packageFileStorage->expects($this->once())
+            ->method('saveRootPackageFile')
+            ->with($this->rootPackageFile)
+            ->will($this->returnCallback(function (RootPackageFile $packageFile) {
+                PHPUnit_Framework_Assert::assertSame(array(
+                    'key2' => 'value2',
+                ), $packageFile->getExtraKeys());
+            }));
+
+        $this->manager->removeExtraKeys(array('key1', 'key3'));
+    }
+
+    public function testRemoveExtraKeysIgnoresIfNoneRemoved()
+    {
+        $this->packageFileStorage->expects($this->never())
+            ->method('saveRootPackageFile');
+
+        $this->manager->removeExtraKeys(array('key1', 'key3'));
+    }
+
+    public function testRemoveExtraKeysRestoresPreviousValuesIfSavingFails()
+    {
+        $this->rootPackageFile->setExtraKey('key1', 'previous');
+
+        $this->packageFileStorage->expects($this->once())
+            ->method('saveRootPackageFile')
+            ->with($this->rootPackageFile)
+            ->will($this->throwException(new TestException()));
+
+        try {
+            $this->manager->removeExtraKeys(array('key1', 'key2'));
+            $this->fail('Expected a TestException');
+        } catch (TestException $e) {
+        }
+
+        $this->assertSame('previous', $this->rootPackageFile->getExtraKey('key1'));
+        $this->assertFalse($this->rootPackageFile->hasExtraKey('key2'));
+    }
+
+    public function testClearExtraKeys()
+    {
+        $this->rootPackageFile->setExtraKey('key1', 'value1');
+        $this->rootPackageFile->setExtraKey('key2', 'value2');
+
+        $this->packageFileStorage->expects($this->once())
+            ->method('saveRootPackageFile')
+            ->with($this->rootPackageFile)
+            ->will($this->returnCallback(function (RootPackageFile $packageFile) {
+                PHPUnit_Framework_Assert::assertSame(array(), $packageFile->getExtraKeys());
+            }));
+
+        $this->manager->clearExtraKeys();
+    }
+
+    public function testClearExtraKeysDoesNothingIfNoneSet()
+    {
+        $this->packageFileStorage->expects($this->never())
+            ->method('saveRootPackageFile');
+
+        $this->manager->clearExtraKeys();
+    }
+
+    public function testRemoveExtraKeyRestoresValuesIfSavingFails()
+    {
+        $this->rootPackageFile->setExtraKey('key1', 'value1');
+        $this->rootPackageFile->setExtraKey('key2', 'value2');
+
+        $this->packageFileStorage->expects($this->once())
+            ->method('saveRootPackageFile')
+            ->with($this->rootPackageFile)
+            ->will($this->throwException(new TestException()));
+
+        try {
+            $this->manager->clearExtraKeys();
+            $this->fail('Expected a TestException');
+        } catch (TestException $e) {
+        }
+
+        $this->assertSame('value1', $this->rootPackageFile->getExtraKey('key1'));
+        $this->assertSame('value2', $this->rootPackageFile->getExtraKey('key2'));
+    }
+
+    public function testHasExtraKey()
+    {
+        $this->assertFalse($this->manager->hasExtraKey('key'));
+        $this->rootPackageFile->setExtraKey('key', 'value');
+        $this->assertTrue($this->manager->hasExtraKey('key'));
+    }
+
+    public function testHasExtraKeys()
+    {
+        $this->assertFalse($this->manager->hasExtraKeys());
+        $this->rootPackageFile->setExtraKey('key', 'value');
+        $this->assertTrue($this->manager->hasExtraKeys());
+    }
+
+    public function testGetExtraKey()
+    {
+        $this->assertNull($this->manager->getExtraKey('key'));
+        $this->assertSame('default', $this->manager->getExtraKey('key', 'default'));
+        $this->rootPackageFile->setExtraKey('key', 'value');
+        $this->assertSame('value', $this->manager->getExtraKey('key'));
+    }
+
+    public function testGetExtraKeys()
+    {
+        $this->assertSame(array(), $this->manager->getExtraKeys());
+        $this->rootPackageFile->setExtraKey('key1', 'value1');
+        $this->rootPackageFile->setExtraKey('key2', 'value2');
+        $this->assertSame(array(
+            'key1' => 'value1',
+            'key2' => 'value2',
+        ), $this->manager->getExtraKeys());
     }
 }

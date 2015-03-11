@@ -14,6 +14,7 @@ namespace Puli\RepositoryManager\Api\Package;
 use Puli\RepositoryManager\Api\Config\ConfigFileManager;
 use Puli\RepositoryManager\Api\Environment\ProjectEnvironment;
 use Puli\RepositoryManager\Api\InvalidConfigException;
+use Puli\RepositoryManager\Api\IOException;
 
 /**
  * Manages changes to the root package file.
@@ -101,4 +102,93 @@ interface RootPackageFileManager extends ConfigFileManager
      * @see installPluginClass()
      */
     public function getPluginClasses($includeGlobal = true);
+
+    /**
+     * Sets an extra key in the file.
+     *
+     * The file is saved directly after setting the key.
+     *
+     * @param string $key   The key name.
+     * @param mixed  $value The stored value.
+     *
+     * @throws IOException If the file cannot be written.
+     */
+    public function setExtraKey($key, $value);
+
+    /**
+     * Sets the extra keys in the file.
+     *
+     * The file is saved directly after setting the keys.
+     *
+     * @param string[] $values A list of values indexed by their key names.
+     *
+     * @throws IOException If the file cannot be written.
+     */
+    public function setExtraKeys(array $values);
+
+    /**
+     * Removes an extra key from the file.
+     *
+     * The file is saved directly after removing the key.
+     *
+     * @param string $key The name of the removed extra key.
+     *
+     * @throws IOException If the file cannot be written.
+     */
+    public function removeExtraKey($key);
+
+    /**
+     * Removes multiple extra keys from the file.
+     *
+     * The file is saved directly after removing the keys.
+     *
+     * @param string[] $keys The names of the removed extra keys.
+     *
+     * @throws IOException If the file cannot be written.
+     */
+    public function removeExtraKeys(array $keys);
+
+    /**
+     * Removes all extra keys from the file.
+     *
+     * The file is saved directly after removing the keys.
+     *
+     * @throws IOException If the file cannot be written.
+     */
+    public function clearExtraKeys();
+
+    /**
+     * Returns whether an extra key exists.
+     *
+     * @param string $key The extra key to search.
+     *
+     * @return bool Returns `true` if the file contains the key and `false`
+     *              otherwise.
+     */
+    public function hasExtraKey($key);
+
+    /**
+     * Returns whether the file contains any extra keys.
+     *
+     * @return bool Returns `true` if the file contains extra keys and `false`
+     *              otherwise.
+     */
+    public function hasExtraKeys();
+
+    /**
+     * Returns the value of a configuration key.
+     *
+     * @param string $key     The name of the extra key.
+     * @param mixed  $default The value to return if the key was not set.
+     *
+     * @return mixed The value of the key or the default value, if none is set.
+     */
+    public function getExtraKey($key, $default = null);
+
+    /**
+     * Returns the values of all extra keys set in the file.
+     *
+     * @return array A mapping of configuration keys to values.
+     */
+    public function getExtraKeys();
 }

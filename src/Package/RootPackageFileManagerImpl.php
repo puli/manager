@@ -11,7 +11,9 @@
 
 namespace Puli\RepositoryManager\Package;
 
+use Exception;
 use Puli\RepositoryManager\Api\Environment\ProjectEnvironment;
+use Puli\RepositoryManager\Api\IOException;
 use Puli\RepositoryManager\Api\Package\RootPackageFile;
 use Puli\RepositoryManager\Api\Package\RootPackageFileManager;
 use Puli\RepositoryManager\Config\AbstractConfigFileManager;
@@ -119,6 +121,176 @@ class RootPackageFileManagerImpl extends AbstractConfigFileManager implements Ro
     public function getPluginClasses($includeGlobal = true)
     {
         return $this->rootPackageFile->getPluginClasses($includeGlobal);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function setExtraKey($key, $value)
+    {
+        $previouslySet = $this->rootPackageFile->hasExtraKey($key);
+        $previousValue = $this->rootPackageFile->getExtraKey($key);
+
+        if ($value === $previousValue) {
+            return;
+        }
+
+        $this->rootPackageFile->setExtraKey($key, $value);
+
+        try {
+            $this->packageFileStorage->saveRootPackageFile($this->rootPackageFile);
+        } catch (Exception $e) {
+            if ($previouslySet) {
+                $this->rootPackageFile->setExtraKey($key, $previousValue);
+            } else {
+                $this->rootPackageFile->removeExtraKey($key);
+            }
+
+            throw $e;
+        }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function setExtraKeys(array $values)
+    {
+        $previousValues = array();
+        $previouslyUnset = array();
+
+        foreach ($values as $key => $value) {
+            if ($this->rootPackageFile->hasExtraKey($key)) {
+                if ($value !== $previous = $this->rootPackageFile->getExtraKey($key)) {
+                    $previousValues[$key] = $previous;
+                }
+            } else {
+                $previouslyUnset[$key] = true;
+            }
+        }
+
+        if (!$previousValues && !$previouslyUnset) {
+            return;
+        }
+
+        $this->rootPackageFile->setExtraKeys($values);
+
+        try {
+            $this->packageFileStorage->saveRootPackageFile($this->rootPackageFile);
+        } catch (Exception $e) {
+            foreach ($values as $key => $value) {
+                if (isset($previouslyUnset[$key])) {
+                    $this->rootPackageFile->removeExtraKey($key);
+                } else {
+                    $this->rootPackageFile->setExtraKey($key, $previousValues[$key]);
+                }
+            }
+
+            throw $e;
+        }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function removeExtraKey($key)
+    {
+        if (!$this->rootPackageFile->hasExtraKey($key)) {
+            return;
+        }
+
+        $previousValue = $this->rootPackageFile->getExtraKey($key);
+
+        $this->rootPackageFile->removeExtraKey($key);
+
+        try {
+            $this->packageFileStorage->saveRootPackageFile($this->rootPackageFile);
+        } catch (Exception $e) {
+            $this->rootPackageFile->setExtraKey($key, $previousValue);
+
+            throw $e;
+        }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function removeExtraKeys(array $keys)
+    {
+        $previousValues = array();
+
+        foreach ($keys as $key) {
+            if ($this->rootPackageFile->hasExtraKey($key)) {
+                $previousValues[$key] = $this->rootPackageFile->getExtraKey($key);
+            }
+
+            $this->rootPackageFile->removeExtraKey($key);
+        }
+
+        if (!$previousValues) {
+            return;
+        }
+
+        try {
+            $this->packageFileStorage->saveRootPackageFile($this->rootPackageFile);
+        } catch (Exception $e) {
+            $this->rootPackageFile->addExtraKeys($previousValues);
+
+            throw $e;
+        }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function clearExtraKeys()
+    {
+        $previousValues = $this->rootPackageFile->getExtraKeys();
+
+        if (!$previousValues) {
+            return;
+        }
+
+        $this->rootPackageFile->clearExtraKeys();
+
+        try {
+            $this->packageFileStorage->saveRootPackageFile($this->rootPackageFile);
+        } catch (Exception $e) {
+            $this->rootPackageFile->setExtraKeys($previousValues);
+
+            throw $e;
+        }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function hasExtraKey($key)
+    {
+        return $this->rootPackageFile->hasExtraKey($key);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function hasExtraKeys()
+    {
+        return $this->rootPackageFile->hasExtraKeys();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getExtraKey($key, $default = null)
+    {
+        return $this->rootPackageFile->getExtraKey($key, $default);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getExtraKeys()
+    {
+        return $this->rootPackageFile->getExtraKeys();
     }
 
     /**

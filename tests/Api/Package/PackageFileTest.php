@@ -328,15 +328,20 @@ class PackageFileTest extends PHPUnit_Framework_TestCase
         $this->assertSame('value2', $packageFile->getExtraKey('key2'));
     }
 
-    /**
-     * @expectedException \OutOfBoundsException
-     * @expectedExceptionMessage foobar
-     */
-    public function testGetExtraKeyFailsIfNotFound()
+    public function testGetExtraKeyReturnsDefaultIfNotFound()
     {
         $packageFile = new PackageFile();
 
-        $packageFile->getExtraKey('foobar');
+        $this->assertNull($packageFile->getExtraKey('foobar'));
+        $this->assertSame('default', $packageFile->getExtraKey('foobar', 'default'));
+    }
+
+    public function testGetExtraKeyDoesNotReturnDefaultIfNull()
+    {
+        $packageFile = new PackageFile();
+        $packageFile->setExtraKey('key', null);
+
+        $this->assertNull($packageFile->getExtraKey('key', 'default'));
     }
 
     public function testHasExtraKey()

@@ -504,24 +504,16 @@ class PackageFile
     /**
      * Returns the value of an extra key.
      *
-     * @param string $key The name of the key.
+     * @param string $key     The name of the key.
+     * @param mixed  $default The value to return if the key was not set.
      *
      * @return mixed The value stored for the key.
      *
-     * @throws OutOfBoundsException If the key does not exist.
-     *
      * @see setExtraKey()
      */
-    public function getExtraKey($key)
+    public function getExtraKey($key, $default = null)
     {
-        if (!array_key_exists($key, $this->extra)) {
-            throw new OutOfBoundsException(sprintf(
-                'The extra key "%s" does not exist.',
-                $key
-            ));
-        }
-
-        return $this->extra[$key];
+        return array_key_exists($key, $this->extra) ? $this->extra[$key] : $default;
     }
 
     /**

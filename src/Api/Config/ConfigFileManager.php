@@ -112,7 +112,7 @@ interface ConfigFileManager
     public function getConfigKey($key, $default = null, $fallback = false);
 
     /**
-     * Returns the value of all configuration keys set in the file.
+     * Returns the values of all configuration keys set in the file.
      *
      * The values are returned raw as they are written in the file.
      *
