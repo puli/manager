@@ -26,7 +26,6 @@ Changelog
  * added `Package::match()`
  * added `PackageManager::findPackages()`
  * added `PackageManager::hasPackages()`
- * added support for arbitrary config keys prefixed by "extra."
  * moved `Puli` to `Api` namespace
  * added `Puli::start()` which must be called explicitly to start the service
    container
