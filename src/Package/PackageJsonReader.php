@@ -120,7 +120,7 @@ class PackageJsonReader implements PackageFileReader
         }
 
         if (isset($jsonData->extra)) {
-            $packageFile->setExtraKeys($this->objectsToArrays($jsonData->extra));
+            $packageFile->setExtraKeys((array) $jsonData->extra);
         }
     }
 

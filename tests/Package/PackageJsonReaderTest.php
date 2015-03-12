@@ -329,9 +329,9 @@ class PackageJsonReaderTest extends PHPUnit_Framework_TestCase
             new BindingParameterDescriptor('param', false, 1234, 'Description of the parameter.'),
         ))), $packageFile->getTypeDescriptors());
         $this->assertSame(array('acme/blog'), $packageFile->getOverriddenPackages());
-        $this->assertSame(array(
+        $this->assertEquals(array(
             'extra1' => 'value',
-            'extra2' => array('key' => 'value'),
+            'extra2' => (object) array('key' => 'value'),
         ), $packageFile->getExtraKeys());
     }
 
