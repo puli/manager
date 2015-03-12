@@ -49,7 +49,7 @@ class ResourceMappingCollection
     public function add(ResourceMapping $mapping)
     {
         $this->map->set($mapping->getRepositoryPath(), $mapping->getContainingPackage()->getName(), $mapping);
-        $this->map->sortByPrimaryKeys();
+        $this->map->sortPrimaryKeys();
     }
 
     /**
@@ -61,7 +61,7 @@ class ResourceMappingCollection
     public function set($repositoryPath, ResourceMapping $mapping)
     {
         $this->map->set($repositoryPath, $mapping->getContainingPackage()->getName(), $mapping);
-        $this->map->sortByPrimaryKeys();
+        $this->map->sortPrimaryKeys();
     }
 
     /**

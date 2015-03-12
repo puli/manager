@@ -297,8 +297,47 @@ class TwoDimensionalHashMap
         return 0 === count($this->values);
     }
 
-    public function sortByPrimaryKeys()
+    /**
+     * Sorts the primary keys of the map.
+     *
+     * @param array $order The keys in the desired order.
+     */
+    public function sortPrimaryKeys(array $order = null)
     {
-        ksort($this->values);
+        if (!$order) {
+            ksort($this->values);
+
+            return;
+        }
+
+        $orderedKeys = array_intersect_key(array_flip($order), $this->values);
+
+        $this->values = array_replace($orderedKeys, $this->values);
+    }
+
+    /**
+     * Sorts the secondary keys of a map entry.
+     *
+     * @param int|string $primaryKey The primary key.
+     * @param array      $order      The keys in the desired order.
+     */
+    public function sortSecondaryKeys($primaryKey, array $order = null)
+    {
+        if (!isset($this->values[$primaryKey])) {
+            throw new OutOfBoundsException(sprintf(
+                'The key "%s" does not exist.',
+                $primaryKey
+            ));
+        }
+
+        if (!$order) {
+            ksort($this->values[$primaryKey]);
+
+            return;
+        }
+
+        $orderedKeys = array_intersect_key(array_flip($order), $this->values[$primaryKey]);
+
+        $this->values[$primaryKey] = array_replace($orderedKeys, $this->values[$primaryKey]);
     }
 }
