@@ -11,6 +11,7 @@
 
 namespace Puli\RepositoryManager\Conflict;
 
+use Puli\RepositoryManager\Api\Package\PackageCollection;
 use RuntimeException;
 
 /**
@@ -79,6 +80,41 @@ class OverrideGraph
      * @var array
      */
     private $edges = array();
+
+    /**
+     * Creates an override graph for the given packages.
+     *
+     * @param PackageCollection $packages The packages to load.
+     *
+     * @return static The created override graph.
+     */
+    public static function forPackages(PackageCollection $packages)
+    {
+        $graph = new static($packages->getPackageNames());
+
+        foreach ($packages as $package) {
+            foreach ($package->getPackageFile()->getOverriddenPackages() as $overriddenPackage) {
+                if ($graph->hasPackageName($overriddenPackage)) {
+                    $graph->addEdge($overriddenPackage, $package->getName());
+                }
+            }
+        }
+
+        // Make sure we have numeric, ascending keys here
+        $packageOrder = array_values($packages->getRootPackage()->getPackageFile()->getOverrideOrder());
+
+        // Each package overrides the previous one in the list
+        for ($i = 1, $l = count($packageOrder); $i < $l; ++$i) {
+            $overriddenPackage = $packageOrder[$i - 1];
+            $overridingPackage = $packageOrder[$i];
+
+            if ($graph->hasPackageName($overriddenPackage)) {
+                $graph->addEdge($overriddenPackage, $overridingPackage);
+            }
+        }
+
+        return $graph;
+    }
 
     /**
      * Creates a new graph.

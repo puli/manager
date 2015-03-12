@@ -289,30 +289,6 @@ class RepositoryManagerImpl implements  RepositoryManager
         $this->repo = $this->environment->getRepository();
     }
 
-    private function loadOverrideOrder(Package $package)
-    {
-        foreach ($package->getPackageFile()->getOverriddenPackages() as $overriddenPackage) {
-            if ($this->overrideGraph->hasPackageName($overriddenPackage)) {
-                $this->overrideGraph->addEdge($overriddenPackage, $package->getName());
-            }
-        }
-
-        if ($package instanceof RootPackage) {
-            // Make sure we have numeric, ascending keys here
-            $packageOrder = array_values($package->getPackageFile()->getOverrideOrder());
-
-            // Each package overrides the previous one in the list
-            for ($i = 1, $l = count($packageOrder); $i < $l; ++$i) {
-                $overriddenPackage = $packageOrder[$i - 1];
-                $overridingPackage = $packageOrder[$i];
-
-                if ($this->overrideGraph->hasPackageName($overriddenPackage)) {
-                    $this->overrideGraph->addEdge($overriddenPackage, $overridingPackage);
-                }
-            }
-        }
-    }
-
     /**
      * Loads the resource mappings and override settings for the installed
      * packages.
@@ -343,15 +319,10 @@ class RepositoryManagerImpl implements  RepositoryManager
      */
     private function loadResourceMappings()
     {
-        $this->overrideGraph = new OverrideGraph($this->packages->getPackageNames());
+        $this->overrideGraph = OverrideGraph::forPackages($this->packages);
         $this->conflictDetector = new PackageConflictDetector($this->overrideGraph);
         $this->mappings = new ResourceMappingCollection();
         $this->conflicts = new ConflictCollection();
-
-        // Prepare override graph
-        foreach ($this->packages as $package) {
-            $this->loadOverrideOrder($package);
-        }
 
         // Load mappings
         foreach ($this->packages as $package) {

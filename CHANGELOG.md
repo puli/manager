@@ -34,6 +34,7 @@ Changelog
  * added `Puli::arePluginsEnabled()`
  * added `Puli::isStarted()`
  * added support for extra keys
+ * added `OverrideGraph::forPackages()`
 
 * 1.0.0-beta2 (2015-01-27)
 
