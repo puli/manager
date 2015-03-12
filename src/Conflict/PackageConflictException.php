@@ -24,6 +24,9 @@ class PackageConflictException extends RuntimeException
 {
     public static function forPathConflict(PackageConflict $conflict, $code = 0, Exception $cause = null)
     {
+        $packageNames = $conflict->getPackageNames();
+        $lastPackageName = array_pop($packageNames);
+
         return new static(sprintf(
             "The packages \"%s\" and \"%s\" add resources for the same path ".
             "\"%s\", but have no override order defined between them.\n\n".
@@ -31,8 +34,8 @@ class PackageConflictException extends RuntimeException
             "of one package and set its value to the other package name.\n(2) ".
             "Add the key \"override-order\" to the puli.json of the root ".
             "package and define the order of the packages there.",
-            $conflict->getPackageName1(),
-            $conflict->getPackageName2(),
+            implode('", "', $packageNames),
+            $lastPackageName,
             $conflict->getConflictingToken()
         ), $code, $cause);
     }
