@@ -460,41 +460,6 @@ class PackageManagerImplTest extends ManagerTestCase
         $manager->installPackage(__DIR__.'/Fixtures/version-too-high', 'vendor/my-package');
     }
 
-    public function testInstallPackageRevertsIfSavingNotPossible()
-    {
-        $this->initDefaultManager();
-
-        $this->packageFileStorage->expects($this->once())
-            ->method('saveRootPackageFile')
-            ->willThrowException(new TestException());
-
-        try {
-            $this->manager->installPackage($this->packageDir3);
-            $this->fail('Expected a TestException');
-        } catch (TestException $e) {
-        }
-
-        $this->assertFalse($this->manager->isPackageInstalled($this->packageDir3));
-        $this->assertCount(3, $this->manager->getPackages());
-        $this->assertCount(2, $this->rootPackageFile->getInstallInfos());
-    }
-
-    public function testIsPackageInstalled()
-    {
-        $this->initDefaultManager();
-
-        $this->assertTrue($this->manager->isPackageInstalled($this->packageDir1));
-        $this->assertFalse($this->manager->isPackageInstalled($this->packageDir3));
-    }
-
-    public function testIsPackageInstalledAcceptsRelativePath()
-    {
-        $this->initDefaultManager();
-
-        $this->assertTrue($this->manager->isPackageInstalled('../package1'));
-        $this->assertFalse($this->manager->isPackageInstalled('../package3'));
-    }
-
     public function testRemovePackage()
     {
         $this->initDefaultManager();

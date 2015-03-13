@@ -22,7 +22,6 @@ use Puli\RepositoryManager\Api\Package\Package;
 use Puli\RepositoryManager\Api\Package\PackageCollection;
 use Puli\RepositoryManager\Api\Package\PackageFile;
 use Puli\RepositoryManager\Api\Package\PackageManager;
-use Puli\RepositoryManager\Api\Package\PackageState;
 use Puli\RepositoryManager\Api\Package\RootPackage;
 use Puli\RepositoryManager\Api\Package\RootPackageFile;
 use Puli\RepositoryManager\Api\Package\UnsupportedVersionException;
@@ -95,8 +94,10 @@ class PackageManagerImpl implements PackageManager
 
         $installPath = Path::makeAbsolute($installPath, $this->rootDir);
 
-        if ($this->isPackageInstalled($installPath)) {
-            return;
+        foreach ($this->packages as $package) {
+            if ($installPath === $package->getInstallPath()) {
+                return;
+            }
         }
 
         if (null === $name) {
@@ -145,26 +146,6 @@ class PackageManagerImpl implements PackageManager
 
         $this->packages->add($package);
 
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function isPackageInstalled($installPath)
-    {
-        Assert::string($installPath, 'The install path must be a string.');
-
-        $this->assertPackagesLoaded();
-
-        $installPath = Path::makeAbsolute($installPath, $this->rootDir);
-
-        foreach ($this->packages as $package) {
-            if ($installPath === $package->getInstallPath()) {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     /**

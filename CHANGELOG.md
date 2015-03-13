@@ -35,6 +35,8 @@ Changelog
  * added `Puli::isStarted()`
  * added support for extra keys
  * added `OverrideGraph::forPackages()`
+ * removed superfluous `PackageManager::isPackageInstalled()`. Use
+   `PackageManager::hasPackages()` with an `Expression` instead
 
 * 1.0.0-beta2 (2015-01-27)
 

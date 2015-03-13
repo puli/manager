@@ -39,15 +39,6 @@ interface PackageManager
     public function installPackage($installPath, $name = null, $installerName = InstallInfo::DEFAULT_INSTALLER_NAME);
 
     /**
-     * Returns whether the package with the given path is installed.
-     *
-     * @param string $installPath The install path of the package.
-     *
-     * @return bool Whether that package is installed.
-     */
-    public function isPackageInstalled($installPath);
-
-    /**
      * Removes the package with the given name.
      *
      * @param string $name The package name.
