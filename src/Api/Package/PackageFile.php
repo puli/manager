@@ -12,7 +12,6 @@
 namespace Puli\RepositoryManager\Api\Package;
 
 use InvalidArgumentException;
-use OutOfBoundsException;
 use Puli\RepositoryManager\Api\Discovery\BindingDescriptor;
 use Puli\RepositoryManager\Api\Discovery\BindingTypeDescriptor;
 use Puli\RepositoryManager\Api\Discovery\NoSuchBindingException;

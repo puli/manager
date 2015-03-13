@@ -19,7 +19,6 @@ use Puli\RepositoryManager\Package\PackageFileStorage;
 use Puli\RepositoryManager\Package\RootPackageFileManagerImpl;
 use Puli\RepositoryManager\Tests\ManagerTestCase;
 use Puli\RepositoryManager\Tests\TestException;
-use RuntimeException;
 
 /**
  * @since  1.0

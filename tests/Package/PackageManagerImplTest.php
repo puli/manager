@@ -16,7 +16,6 @@ use PHPUnit_Framework_MockObject_MockObject;
 use Puli\RepositoryManager\Api\InvalidConfigException;
 use Puli\RepositoryManager\Api\Package\InstallInfo;
 use Puli\RepositoryManager\Api\Package\Package;
-use Puli\RepositoryManager\Api\Package\PackageCollection;
 use Puli\RepositoryManager\Api\Package\PackageFile;
 use Puli\RepositoryManager\Api\Package\PackageState;
 use Puli\RepositoryManager\Api\Package\RootPackageFile;

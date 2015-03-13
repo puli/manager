@@ -13,8 +13,6 @@ namespace Puli\RepositoryManager\Api\Package;
 
 use Puli\RepositoryManager\Api\Config\Config;
 use Puli\RepositoryManager\Api\InvalidConfigException;
-use ReflectionClass;
-use ReflectionException;
 
 /**
  * The package file of the root package.

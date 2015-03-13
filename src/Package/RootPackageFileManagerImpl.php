@@ -13,7 +13,6 @@ namespace Puli\RepositoryManager\Package;
 
 use Exception;
 use Puli\RepositoryManager\Api\Environment\ProjectEnvironment;
-use Puli\RepositoryManager\Api\IOException;
 use Puli\RepositoryManager\Api\Package\RootPackageFile;
 use Puli\RepositoryManager\Api\Package\RootPackageFileManager;
 use Puli\RepositoryManager\Config\AbstractConfigFileManager;

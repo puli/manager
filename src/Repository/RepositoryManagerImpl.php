@@ -17,7 +17,6 @@ use Puli\RepositoryManager\Api\Config\Config;
 use Puli\RepositoryManager\Api\Environment\ProjectEnvironment;
 use Puli\RepositoryManager\Api\Package\Package;
 use Puli\RepositoryManager\Api\Package\PackageCollection;
-use Puli\RepositoryManager\Api\Package\RootPackage;
 use Puli\RepositoryManager\Api\Package\RootPackageFile;
 use Puli\RepositoryManager\Api\Repository\RepositoryManager;
 use Puli\RepositoryManager\Api\Repository\ResourceMapping;

@@ -39,8 +39,6 @@ use Puli\RepositoryManager\Package\PackageManagerImpl;
 use Puli\RepositoryManager\Package\RootPackageFileManagerImpl;
 use Puli\RepositoryManager\Repository\RepositoryManagerImpl;
 use Puli\RepositoryManager\Util\System;
-use ReflectionClass;
-use ReflectionException;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Webmozart\Expression\Expr;
