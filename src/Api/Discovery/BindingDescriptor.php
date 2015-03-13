@@ -119,7 +119,7 @@ class BindingDescriptor
     /**
      * @var bool
      */
-    private $duplicate = false;
+    private $overridden = false;
 
     /**
      * Compares two binding descriptors.
@@ -213,7 +213,7 @@ class BindingDescriptor
 
         $this->containingPackage = $containingPackage;
         $this->typeDescriptor = $typeDescriptor;
-        $this->duplicate = false;
+        $this->overridden = false;
 
         $this->refreshState();
     }
@@ -233,24 +233,24 @@ class BindingDescriptor
 
         $this->containingPackage = null;
         $this->typeDescriptor = null;
-        $this->duplicate = false;
+        $this->overridden = false;
         $this->violations = null;
         $this->state = null;
     }
 
     /**
-     * Marks or unmarks the descriptor as duplicate.
+     * Marks or unmarks the descriptor as overridden.
      *
      * If multiple descriptors exist for the same UUID, all descriptors but one
-     * are marked as duplicates.
+     * are marked as overridden.
      *
-     * @param bool $duplicate Whether to mark the descriptor as duplicate.
+     * @param bool $overridden Whether to mark the descriptor as overridden.
      */
-    public function markDuplicate($duplicate)
+    public function markOverridden($overridden)
     {
-        Assert::boolean($duplicate);
+        Assert::boolean($overridden);
 
-        $this->duplicate = $duplicate;
+        $this->overridden = $overridden;
 
         $this->refreshState();
     }
@@ -517,24 +517,24 @@ class BindingDescriptor
     }
 
     /**
-     * Returns whether the binding is a duplicate.
+     * Returns whether the binding is overridden.
      *
      * The method {@link load()} needs to be called before calling this method,
      * otherwise an exception is thrown.
      *
-     * @return bool Returns `true` if the state is {@link BindingState::DUPLICATE}.
+     * @return bool Returns `true` if the state is {@link BindingState::OVERRIDDEN}.
      *
      * @throws NotLoadedException If the descriptor is not loaded.
      *
-     * @see BindingState::DUPLICATE
+     * @see BindingState::OVERRIDDEN
      */
-    public function isDuplicate()
+    public function isOverridden()
     {
         if (null === $this->state) {
             throw new NotLoadedException('The binding descriptor is not loaded.');
         }
 
-        return BindingState::DUPLICATE === $this->state;
+        return BindingState::OVERRIDDEN === $this->state;
     }
 
     /**
@@ -648,11 +648,11 @@ class BindingDescriptor
         } elseif (count($this->violations) > 0) {
             $this->state = BindingState::INVALID;
         } elseif ($this->containingPackage instanceof RootPackage) {
-            $this->state = $this->duplicate ? BindingState::DUPLICATE : BindingState::ENABLED;
+            $this->state = $this->overridden ? BindingState::OVERRIDDEN : BindingState::ENABLED;
         } elseif ($this->containingPackage->getInstallInfo()->hasDisabledBindingUuid($this->uuid)) {
             $this->state = BindingState::DISABLED;
         } elseif ($this->containingPackage->getInstallInfo()->hasEnabledBindingUuid($this->uuid)) {
-            $this->state = $this->duplicate ? BindingState::DUPLICATE : BindingState::ENABLED;
+            $this->state = $this->overridden ? BindingState::OVERRIDDEN : BindingState::ENABLED;
         } else {
             $this->state = BindingState::UNDECIDED;
         }

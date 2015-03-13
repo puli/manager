@@ -436,16 +436,16 @@ class BindingDescriptorTest extends PHPUnit_Framework_TestCase
         $this->assertSame(BindingState::ENABLED, $binding->getState());
     }
 
-    public function testDuplicateIfMarkedDuplicateInRootPackage()
+    public function testOverriddenIfMarkedOverriddenInRootPackage()
     {
         $type = new BindingTypeDescriptor('vendor/type');
         $type->load($this->package);
 
         $binding = new BindingDescriptor('/path', 'vendor/type');
         $binding->load($this->rootPackage, $type);
-        $binding->markDuplicate(true);
+        $binding->markOverridden(true);
 
-        $this->assertSame(BindingState::DUPLICATE, $binding->getState());
+        $this->assertSame(BindingState::OVERRIDDEN, $binding->getState());
     }
 
     public function testEnabledIfEnabled()
@@ -461,7 +461,7 @@ class BindingDescriptorTest extends PHPUnit_Framework_TestCase
         $this->assertSame(BindingState::ENABLED, $binding->getState());
     }
 
-    public function testDuplicateIfMarkedDuplicateAndEnabled()
+    public function testOverriddenIfMarkedOverriddenAndEnabled()
     {
         $type = new BindingTypeDescriptor('vendor/type');
         $type->load($this->package);
@@ -470,9 +470,9 @@ class BindingDescriptorTest extends PHPUnit_Framework_TestCase
 
         $binding = new BindingDescriptor('/path', 'vendor/type', array(), 'glob', $this->uuid);
         $binding->load($this->package, $type);
-        $binding->markDuplicate(true);
+        $binding->markOverridden(true);
 
-        $this->assertSame(BindingState::DUPLICATE, $binding->getState());
+        $this->assertSame(BindingState::OVERRIDDEN, $binding->getState());
     }
 
     public function testDisabledIfDisabled()
@@ -488,7 +488,7 @@ class BindingDescriptorTest extends PHPUnit_Framework_TestCase
         $this->assertSame(BindingState::DISABLED, $binding->getState());
     }
 
-    public function testDisabledIfMarkedDuplicateAndDisabled()
+    public function testDisabledIfMarkedOverriddenAndDisabled()
     {
         $type = new BindingTypeDescriptor('vendor/type');
         $type->load($this->package);
@@ -497,7 +497,7 @@ class BindingDescriptorTest extends PHPUnit_Framework_TestCase
 
         $binding = new BindingDescriptor('/path', 'vendor/type', array(), 'glob', $this->uuid);
         $binding->load($this->package, $type);
-        $binding->markDuplicate(true);
+        $binding->markOverridden(true);
 
         $this->assertSame(BindingState::DISABLED, $binding->getState());
     }
@@ -513,14 +513,14 @@ class BindingDescriptorTest extends PHPUnit_Framework_TestCase
         $this->assertSame(BindingState::UNDECIDED, $binding->getState());
     }
 
-    public function testUndecidedIfMarkedDuplicateAndNeitherEnabledNorDisabled()
+    public function testUndecidedIfMarkedOverriddenAndNeitherEnabledNorDisabled()
     {
         $type = new BindingTypeDescriptor('vendor/type');
         $type->load($this->package);
 
         $binding = new BindingDescriptor('/path', 'vendor/type', array(), 'glob', $this->uuid);
         $binding->load($this->package, $type);
-        $binding->markDuplicate(true);
+        $binding->markOverridden(true);
 
         $this->assertSame(BindingState::UNDECIDED, $binding->getState());
     }

@@ -15,10 +15,10 @@ use Puli\RepositoryManager\Transaction\OperationInterceptor;
 use Rhumsaa\Uuid\Uuid;
 
 /**
- * Updates the duplicate marks of all bindings with the given UUID.
+ * Updates the overridden marks of all bindings with the given UUID.
  *
  * If more than one enabled binding exists for the given UUID, all but one are
- * marked as duplicates.
+ * marked as overridden.
  *
  * If the UUID is defined in the root package, the binding of the root package
  * is left enabled. Otherwise the enabled binding is chosen randomly.
@@ -26,7 +26,7 @@ use Rhumsaa\Uuid\Uuid;
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class UpdateDuplicateMarksForUuid implements OperationInterceptor
+class UpdateOverriddenMarksForUuid implements OperationInterceptor
 {
     /**
      * @var Uuid
@@ -55,7 +55,7 @@ class UpdateDuplicateMarksForUuid implements OperationInterceptor
      */
     public function postExecute()
     {
-        $this->updateDuplicateMarksForUuid($this->uuid);
+        $this->updateOverriddenMarksForUuid($this->uuid);
     }
 
     /**
@@ -63,10 +63,10 @@ class UpdateDuplicateMarksForUuid implements OperationInterceptor
      */
     public function postRollback()
     {
-        $this->updateDuplicateMarksForUuid($this->uuid);
+        $this->updateOverriddenMarksForUuid($this->uuid);
     }
 
-    private function updateDuplicateMarksForUuid(Uuid $uuid)
+    private function updateOverriddenMarksForUuid(Uuid $uuid)
     {
         if (!$this->bindingDescriptors->contains($uuid)) {
             return;
@@ -75,15 +75,15 @@ class UpdateDuplicateMarksForUuid implements OperationInterceptor
         $bindings = $this->bindingDescriptors->listByUuid($uuid);
 
         if (1 === count($bindings)) {
-            reset($bindings)->markDuplicate(false);
+            reset($bindings)->markOverridden(false);
 
             return;
         }
 
         $oneEnabled = false;
 
-        // Mark all bindings but one as duplicates
-        // Don't mark root bindings as duplicates if possible
+        // Mark all bindings but one as overridden
+        // Don't mark root bindings as overridden if possible
         if (isset($bindings[$this->rootPackageName])) {
             // Move root binding to front
             array_unshift($bindings, $bindings[$this->rootPackageName]);
@@ -91,11 +91,11 @@ class UpdateDuplicateMarksForUuid implements OperationInterceptor
         }
 
         foreach ($bindings as $binding) {
-            if (!$oneEnabled && ($binding->isEnabled() || $binding->isDuplicate())) {
-                $binding->markDuplicate(false);
+            if (!$oneEnabled && ($binding->isEnabled() || $binding->isOverridden())) {
+                $binding->markOverridden(false);
                 $oneEnabled = true;
             } else {
-                $binding->markDuplicate(true);
+                $binding->markOverridden(true);
             }
         }
     }

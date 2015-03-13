@@ -788,7 +788,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->manager->addBinding($binding);
 
         // The package binding is marked as duplicate, the root binding is enabled
-        $this->assertTrue($existing->isDuplicate());
+        $this->assertTrue($existing->isOverridden());
     }
 
     public function testAddBindingDoesNotAddBindingDuplicatedInRoot()
@@ -1210,7 +1210,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->manager->enableBinding($binding1->getUuid());
 
         $this->assertTrue($binding1->isEnabled());
-        $this->assertTrue($binding2->isDuplicate());
+        $this->assertTrue($binding2->isOverridden());
     }
 
     public function testEnableBindingForOnePackage()

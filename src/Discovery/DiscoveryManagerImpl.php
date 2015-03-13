@@ -46,7 +46,7 @@ use Puli\RepositoryManager\Discovery\Binding\ReloadBindingDescriptorsByUuid;
 use Puli\RepositoryManager\Discovery\Binding\RemoveBindingDescriptorFromPackageFile;
 use Puli\RepositoryManager\Discovery\Binding\SyncBindingUuid;
 use Puli\RepositoryManager\Discovery\Binding\UnloadBindingDescriptor;
-use Puli\RepositoryManager\Discovery\Binding\UpdateDuplicateMarksForUuid;
+use Puli\RepositoryManager\Discovery\Binding\UpdateOverriddenMarksForUuid;
 use Puli\RepositoryManager\Discovery\Type\AddTypeDescriptorToPackageFile;
 use Puli\RepositoryManager\Discovery\Type\BindingTypeDescriptorCollection;
 use Puli\RepositoryManager\Discovery\Type\DefineType;
@@ -908,7 +908,7 @@ class DiscoveryManagerImpl implements DiscoveryManager
     {
         return new InterceptedOperation(
             new LoadBindingDescriptor($bindingDescriptor, $package, $this->bindingDescriptors, $this->typeDescriptors),
-            new UpdateDuplicateMarksForUuid($bindingDescriptor->getUuid(), $this->bindingDescriptors, $this->rootPackage->getName())
+            new UpdateOverriddenMarksForUuid($bindingDescriptor->getUuid(), $this->bindingDescriptors, $this->rootPackage->getName())
         );
     }
 
@@ -916,7 +916,7 @@ class DiscoveryManagerImpl implements DiscoveryManager
     {
         return new InterceptedOperation(
             new UnloadBindingDescriptor($bindingDescriptor, $this->bindingDescriptors),
-            new UpdateDuplicateMarksForUuid($bindingDescriptor->getUuid(), $this->bindingDescriptors, $this->rootPackage->getName())
+            new UpdateOverriddenMarksForUuid($bindingDescriptor->getUuid(), $this->bindingDescriptors, $this->rootPackage->getName())
         );
     }
 
@@ -926,7 +926,7 @@ class DiscoveryManagerImpl implements DiscoveryManager
             new EnableBindingUuid($uuid, $installInfo),
             array(
                 new ReloadBindingDescriptorsByUuid($uuid, $this->bindingDescriptors, $this->typeDescriptors),
-                new UpdateDuplicateMarksForUuid($uuid, $this->bindingDescriptors, $this->rootPackage->getName())
+                new UpdateOverriddenMarksForUuid($uuid, $this->bindingDescriptors, $this->rootPackage->getName())
             )
         );
     }
@@ -937,7 +937,7 @@ class DiscoveryManagerImpl implements DiscoveryManager
             new DisableBindingUuid($uuid, $installInfo),
             array(
                 new ReloadBindingDescriptorsByUuid($uuid, $this->bindingDescriptors, $this->typeDescriptors),
-                new UpdateDuplicateMarksForUuid($uuid, $this->bindingDescriptors, $this->rootPackage->getName())
+                new UpdateOverriddenMarksForUuid($uuid, $this->bindingDescriptors, $this->rootPackage->getName())
             )
         );
     }

@@ -45,9 +45,9 @@ final class BindingState
     const INVALID = 5;
 
     /**
-     * State: The binding is a duplicate of another enabled binding.
+     * State: The binding is a overridden by another binding.
      */
-    const DUPLICATE = 6;
+    const OVERRIDDEN = 6;
 
     /**
      * Returns all binding states.
@@ -60,7 +60,7 @@ final class BindingState
             self::ENABLED,
             self::DISABLED,
             self::UNDECIDED,
-            self::DUPLICATE,
+            self::OVERRIDDEN,
             self::HELD_BACK,
             self::INVALID,
         );
