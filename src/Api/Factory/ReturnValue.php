@@ -40,7 +40,7 @@ class ReturnValue
      * Creates a new return value.
      *
      * @param string $sourceCode  The source code of the value.
-     * @param string $type        The type listed in the doc block.
+     * @param string $type        The type shown in the doc block.
      * @param string $description The doc block description.
      */
     public function __construct($sourceCode, $type, $description)
