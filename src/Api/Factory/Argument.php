@@ -14,12 +14,12 @@ namespace Puli\RepositoryManager\Api\Factory;
 use Webmozart\Assert\Assert;
 
 /**
- * An argument of a {@link FactoryMethod}.
+ * An argument of a {@link Method}.
  *
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class MethodArgument
+class Argument
 {
     /**
      * @var string

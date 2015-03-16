@@ -14,7 +14,7 @@ namespace Puli\RepositoryManager\Api\Factory;
 use Webmozart\Assert\Assert;
 
 /**
- * The return value of a {@link FactoryMethod}.
+ * The return value of a {@link Method}.
  *
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>

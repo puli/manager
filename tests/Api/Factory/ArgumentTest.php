@@ -12,17 +12,17 @@
 namespace Puli\RepositoryManager\Tests\Api\Factory;
 
 use PHPUnit_Framework_TestCase;
-use Puli\RepositoryManager\Api\Factory\MethodArgument;
+use Puli\RepositoryManager\Api\Factory\Argument;
 
 /**
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class MethodArgumentTest extends PHPUnit_Framework_TestCase
+class ArgumentTest extends PHPUnit_Framework_TestCase
 {
     public function testCreate()
     {
-        $argument = new MethodArgument('argument', null, 'int', 'The description');
+        $argument = new Argument('argument', null, 'int', 'The description');
 
         $this->assertSame('argument', $argument->getName());
         $this->assertNull($argument->getTypeHint());
@@ -32,7 +32,7 @@ class MethodArgumentTest extends PHPUnit_Framework_TestCase
 
     public function testCreateWithTypeHint()
     {
-        $argument = new MethodArgument('argument', 'stdClass', 'stdClass', 'The description');
+        $argument = new Argument('argument', 'stdClass', 'stdClass', 'The description');
 
         $this->assertSame('stdClass', $argument->getTypeHint());
         $this->assertSame('stdClass', $argument->getType());
@@ -43,7 +43,7 @@ class MethodArgumentTest extends PHPUnit_Framework_TestCase
      */
     public function testCreateFailsIfNameNull()
     {
-        new MethodArgument(null, null, 'int', 'The description');
+        new Argument(null, null, 'int', 'The description');
     }
 
     /**
@@ -51,7 +51,7 @@ class MethodArgumentTest extends PHPUnit_Framework_TestCase
      */
     public function testCreateFailsIfNameEmpty()
     {
-        new MethodArgument('', null, 'int', 'The description');
+        new Argument('', null, 'int', 'The description');
     }
 
     /**
@@ -59,12 +59,12 @@ class MethodArgumentTest extends PHPUnit_Framework_TestCase
      */
     public function testCreateFailsIfNameNoString()
     {
-        new MethodArgument(1234, null, 'int', 'The description');
+        new Argument(1234, null, 'int', 'The description');
     }
 
     public function testSetTypeHint()
     {
-        $argument = new MethodArgument('argument', null, 'int', 'The description');
+        $argument = new Argument('argument', null, 'int', 'The description');
 
         $argument->setTypeHint('stdClass');
 
@@ -76,7 +76,7 @@ class MethodArgumentTest extends PHPUnit_Framework_TestCase
      */
     public function testSetTypeHintFailsIfNull()
     {
-        $argument = new MethodArgument('argument', 'stdClass', 'int', 'The description');
+        $argument = new Argument('argument', 'stdClass', 'int', 'The description');
 
         $argument->setTypeHint(null);
     }
@@ -86,7 +86,7 @@ class MethodArgumentTest extends PHPUnit_Framework_TestCase
      */
     public function testSetTypeHintFailsIfEmpty()
     {
-        $argument = new MethodArgument('argument', 'stdClass', 'int', 'The description');
+        $argument = new Argument('argument', 'stdClass', 'int', 'The description');
 
         $argument->setTypeHint('');
     }
@@ -96,14 +96,14 @@ class MethodArgumentTest extends PHPUnit_Framework_TestCase
      */
     public function testSetTypeHintFailsIfNoString()
     {
-        $argument = new MethodArgument('argument', 'stdClass', 'int', 'The description');
+        $argument = new Argument('argument', 'stdClass', 'int', 'The description');
 
         $argument->setTypeHint(1234);
     }
 
     public function testRemoveTypeHint()
     {
-        $argument = new MethodArgument('argument', 'stdClass', 'int', 'The description');
+        $argument = new Argument('argument', 'stdClass', 'int', 'The description');
 
         $argument->removeTypeHint();
 
@@ -112,7 +112,7 @@ class MethodArgumentTest extends PHPUnit_Framework_TestCase
 
     public function testHasTypeHint()
     {
-        $argument = new MethodArgument('argument', 'stdClass', 'int', 'The description');
+        $argument = new Argument('argument', 'stdClass', 'int', 'The description');
 
         $this->assertTrue($argument->hasTypeHint());
 
@@ -123,7 +123,7 @@ class MethodArgumentTest extends PHPUnit_Framework_TestCase
 
     public function testSetType()
     {
-        $argument = new MethodArgument('argument', 'stdClass', 'int', 'The description');
+        $argument = new Argument('argument', 'stdClass', 'int', 'The description');
 
         $argument->setType('string');
 
@@ -135,7 +135,7 @@ class MethodArgumentTest extends PHPUnit_Framework_TestCase
      */
     public function testSetTypeFailsIfNull()
     {
-        $argument = new MethodArgument('argument', 'stdClass', 'int', 'The description');
+        $argument = new Argument('argument', 'stdClass', 'int', 'The description');
 
         $argument->setType(null);
     }
@@ -145,7 +145,7 @@ class MethodArgumentTest extends PHPUnit_Framework_TestCase
      */
     public function testSetTypeFailsIfEmpty()
     {
-        $argument = new MethodArgument('argument', 'stdClass', 'int', 'The description');
+        $argument = new Argument('argument', 'stdClass', 'int', 'The description');
 
         $argument->setType('');
     }
@@ -155,14 +155,14 @@ class MethodArgumentTest extends PHPUnit_Framework_TestCase
      */
     public function testSetTypeFailsIfNoString()
     {
-        $argument = new MethodArgument('argument', 'stdClass', 'int', 'The description');
+        $argument = new Argument('argument', 'stdClass', 'int', 'The description');
 
         $argument->setType(1234);
     }
 
     public function testSetDescription()
     {
-        $argument = new MethodArgument('argument', 'stdClass', 'int', 'The description');
+        $argument = new Argument('argument', 'stdClass', 'int', 'The description');
 
         $argument->setDescription('New description');
 
@@ -174,7 +174,7 @@ class MethodArgumentTest extends PHPUnit_Framework_TestCase
      */
     public function testSetDescriptionFailsIfNull()
     {
-        $argument = new MethodArgument('argument', 'stdClass', 'int', 'The description');
+        $argument = new Argument('argument', 'stdClass', 'int', 'The description');
 
         $argument->setDescription(null);
     }
@@ -184,7 +184,7 @@ class MethodArgumentTest extends PHPUnit_Framework_TestCase
      */
     public function testSetDescriptionFailsIfEmpty()
     {
-        $argument = new MethodArgument('argument', 'stdClass', 'int', 'The description');
+        $argument = new Argument('argument', 'stdClass', 'int', 'The description');
 
         $argument->setDescription('');
     }
@@ -194,7 +194,7 @@ class MethodArgumentTest extends PHPUnit_Framework_TestCase
      */
     public function testSetDescriptionFailsIfNoString()
     {
-        $argument = new MethodArgument('argument', 'stdClass', 'int', 'The description');
+        $argument = new Argument('argument', 'stdClass', 'int', 'The description');
 
         $argument->setDescription(1234);
     }
