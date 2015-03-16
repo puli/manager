@@ -20,22 +20,14 @@ use Puli\RepositoryManager\Api\Factory\Argument;
  */
 class ArgumentTest extends PHPUnit_Framework_TestCase
 {
-    public function testCreate()
+    /**
+     * @var Argument
+     */
+    private $argument;
+
+    protected function setUp()
     {
-        $argument = new Argument('argument', null, 'int', 'The description');
-
-        $this->assertSame('argument', $argument->getName());
-        $this->assertNull($argument->getTypeHint());
-        $this->assertSame('int', $argument->getType());
-        $this->assertSame('The description', $argument->getDescription());
-    }
-
-    public function testCreateWithTypeHint()
-    {
-        $argument = new Argument('argument', 'stdClass', 'stdClass', 'The description');
-
-        $this->assertSame('stdClass', $argument->getTypeHint());
-        $this->assertSame('stdClass', $argument->getType());
+        $this->argument = new Argument('argument');
     }
 
     /**
@@ -43,7 +35,7 @@ class ArgumentTest extends PHPUnit_Framework_TestCase
      */
     public function testCreateFailsIfNameNull()
     {
-        new Argument(null, null, 'int', 'The description');
+        new Argument(null);
     }
 
     /**
@@ -51,7 +43,7 @@ class ArgumentTest extends PHPUnit_Framework_TestCase
      */
     public function testCreateFailsIfNameEmpty()
     {
-        new Argument('', null, 'int', 'The description');
+        new Argument('');
     }
 
     /**
@@ -59,16 +51,19 @@ class ArgumentTest extends PHPUnit_Framework_TestCase
      */
     public function testCreateFailsIfNameNoString()
     {
-        new Argument(1234, null, 'int', 'The description');
+        new Argument(1234);
+    }
+
+    public function testGetName()
+    {
+        $this->assertSame('argument', $this->argument->getName());
     }
 
     public function testSetTypeHint()
     {
-        $argument = new Argument('argument', null, 'int', 'The description');
+        $this->argument->setTypeHint('stdClass');
 
-        $argument->setTypeHint('stdClass');
-
-        $this->assertSame('stdClass', $argument->getTypeHint());
+        $this->assertSame('stdClass', $this->argument->getTypeHint());
     }
 
     /**
@@ -76,9 +71,7 @@ class ArgumentTest extends PHPUnit_Framework_TestCase
      */
     public function testSetTypeHintFailsIfNull()
     {
-        $argument = new Argument('argument', 'stdClass', 'int', 'The description');
-
-        $argument->setTypeHint(null);
+        $this->argument->setTypeHint(null);
     }
 
     /**
@@ -86,9 +79,7 @@ class ArgumentTest extends PHPUnit_Framework_TestCase
      */
     public function testSetTypeHintFailsIfEmpty()
     {
-        $argument = new Argument('argument', 'stdClass', 'int', 'The description');
-
-        $argument->setTypeHint('');
+        $this->argument->setTypeHint('');
     }
 
     /**
@@ -96,38 +87,35 @@ class ArgumentTest extends PHPUnit_Framework_TestCase
      */
     public function testSetTypeHintFailsIfNoString()
     {
-        $argument = new Argument('argument', 'stdClass', 'int', 'The description');
-
-        $argument->setTypeHint(1234);
+        $this->argument->setTypeHint(1234);
     }
 
     public function testRemoveTypeHint()
     {
-        $argument = new Argument('argument', 'stdClass', 'int', 'The description');
+        $this->argument->setTypeHint('stdClass');
+        $this->argument->removeTypeHint();
 
-        $argument->removeTypeHint();
-
-        $this->assertNull($argument->getTypeHint());
+        $this->assertNull($this->argument->getTypeHint());
     }
 
     public function testHasTypeHint()
     {
-        $argument = new Argument('argument', 'stdClass', 'int', 'The description');
+        $this->assertFalse($this->argument->hasTypeHint());
 
-        $this->assertTrue($argument->hasTypeHint());
+        $this->argument->setTypeHint('stdClass');
 
-        $argument->removeTypeHint();
+        $this->assertTrue($this->argument->hasTypeHint());
 
-        $this->assertFalse($argument->hasTypeHint());
+        $this->argument->removeTypeHint();
+
+        $this->assertFalse($this->argument->hasTypeHint());
     }
 
     public function testSetType()
     {
-        $argument = new Argument('argument', 'stdClass', 'int', 'The description');
+        $this->argument->setType('string');
 
-        $argument->setType('string');
-
-        $this->assertSame('string', $argument->getType());
+        $this->assertSame('string', $this->argument->getType());
     }
 
     /**
@@ -135,9 +123,7 @@ class ArgumentTest extends PHPUnit_Framework_TestCase
      */
     public function testSetTypeFailsIfNull()
     {
-        $argument = new Argument('argument', 'stdClass', 'int', 'The description');
-
-        $argument->setType(null);
+        $this->argument->setType(null);
     }
 
     /**
@@ -145,9 +131,7 @@ class ArgumentTest extends PHPUnit_Framework_TestCase
      */
     public function testSetTypeFailsIfEmpty()
     {
-        $argument = new Argument('argument', 'stdClass', 'int', 'The description');
-
-        $argument->setType('');
+        $this->argument->setType('');
     }
 
     /**
@@ -155,18 +139,14 @@ class ArgumentTest extends PHPUnit_Framework_TestCase
      */
     public function testSetTypeFailsIfNoString()
     {
-        $argument = new Argument('argument', 'stdClass', 'int', 'The description');
-
-        $argument->setType(1234);
+        $this->argument->setType(1234);
     }
 
     public function testSetDescription()
     {
-        $argument = new Argument('argument', 'stdClass', 'int', 'The description');
+        $this->argument->setDescription('New description');
 
-        $argument->setDescription('New description');
-
-        $this->assertSame('New description', $argument->getDescription());
+        $this->assertSame('New description', $this->argument->getDescription());
     }
 
     /**
@@ -174,9 +154,7 @@ class ArgumentTest extends PHPUnit_Framework_TestCase
      */
     public function testSetDescriptionFailsIfNull()
     {
-        $argument = new Argument('argument', 'stdClass', 'int', 'The description');
-
-        $argument->setDescription(null);
+        $this->argument->setDescription(null);
     }
 
     /**
@@ -184,9 +162,7 @@ class ArgumentTest extends PHPUnit_Framework_TestCase
      */
     public function testSetDescriptionFailsIfEmpty()
     {
-        $argument = new Argument('argument', 'stdClass', 'int', 'The description');
-
-        $argument->setDescription('');
+        $this->argument->setDescription('');
     }
 
     /**
@@ -194,8 +170,6 @@ class ArgumentTest extends PHPUnit_Framework_TestCase
      */
     public function testSetDescriptionFailsIfNoString()
     {
-        $argument = new Argument('argument', 'stdClass', 'int', 'The description');
-
-        $argument->setDescription(1234);
+        $this->argument->setDescription(1234);
     }
 }

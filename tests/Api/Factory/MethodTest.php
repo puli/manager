@@ -106,8 +106,8 @@ class MethodTest extends PHPUnit_Framework_TestCase
 
     public function testAddArgument()
     {
-        $this->method->addArgument($arg1 = new Argument('arg1', null, 'string', 'The description'));
-        $this->method->addArgument($arg2 = new Argument('arg2', null, 'int', 'The description'));
+        $this->method->addArgument($arg1 = new Argument('arg1'));
+        $this->method->addArgument($arg2 = new Argument('arg2'));
 
         $this->assertSame(array(
             'arg1' => $arg1,
@@ -117,10 +117,10 @@ class MethodTest extends PHPUnit_Framework_TestCase
 
     public function testAddArguments()
     {
-        $this->method->addArgument($arg1 = new Argument('arg1', null, 'string', 'The description'));
+        $this->method->addArgument($arg1 = new Argument('arg1'));
         $this->method->addArguments(array(
-            $arg2 = new Argument('arg2', null, 'int', 'The description'),
-            $arg3 = new Argument('arg3', null, 'float', 'The description'),
+            $arg2 = new Argument('arg2'),
+            $arg3 = new Argument('arg3'),
         ));
 
         $this->assertSame(array(
@@ -132,10 +132,10 @@ class MethodTest extends PHPUnit_Framework_TestCase
 
     public function testSetArguments()
     {
-        $this->method->addArgument($arg1 = new Argument('arg1', null, 'string', 'The description'));
+        $this->method->addArgument($arg1 = new Argument('arg1'));
         $this->method->setArguments(array(
-            $arg2 = new Argument('arg2', null, 'int', 'The description'),
-            $arg3 = new Argument('arg3', null, 'float', 'The description'),
+            $arg2 = new Argument('arg2'),
+            $arg3 = new Argument('arg3'),
         ));
 
         $this->assertSame(array(
@@ -146,8 +146,8 @@ class MethodTest extends PHPUnit_Framework_TestCase
 
     public function testRemoveArgument()
     {
-        $this->method->addArgument($arg1 = new Argument('arg1', null, 'string', 'The description'));
-        $this->method->addArgument($arg2 = new Argument('arg2', null, 'int', 'The description'));
+        $this->method->addArgument($arg1 = new Argument('arg1'));
+        $this->method->addArgument($arg2 = new Argument('arg2'));
         $this->method->removeArgument('arg1');
 
         $this->assertSame(array(
@@ -157,8 +157,8 @@ class MethodTest extends PHPUnit_Framework_TestCase
 
     public function testRemoveArgumentIgnoresUnknownArguments()
     {
-        $this->method->addArgument($arg1 = new Argument('arg1', null, 'string', 'The description'));
-        $this->method->addArgument($arg2 = new Argument('arg2', null, 'int', 'The description'));
+        $this->method->addArgument($arg1 = new Argument('arg1'));
+        $this->method->addArgument($arg2 = new Argument('arg2'));
 
         $this->method->removeArgument('foobar');
 
@@ -170,8 +170,8 @@ class MethodTest extends PHPUnit_Framework_TestCase
 
     public function testClearArgument()
     {
-        $this->method->addArgument($arg1 = new Argument('arg1', null, 'string', 'The description'));
-        $this->method->addArgument($arg2 = new Argument('arg2', null, 'int', 'The description'));
+        $this->method->addArgument($arg1 = new Argument('arg1'));
+        $this->method->addArgument($arg2 = new Argument('arg2'));
         $this->method->clearArguments();
 
         $this->assertSame(array(), $this->method->getArguments());
@@ -179,8 +179,8 @@ class MethodTest extends PHPUnit_Framework_TestCase
 
     public function testGetArgument()
     {
-        $this->method->addArgument($arg1 = new Argument('arg1', null, 'string', 'The description'));
-        $this->method->addArgument($arg2 = new Argument('arg2', null, 'int', 'The description'));
+        $this->method->addArgument($arg1 = new Argument('arg1'));
+        $this->method->addArgument($arg2 = new Argument('arg2'));
 
         $this->assertSame($arg1, $this->method->getArgument('arg1'));
         $this->assertSame($arg2, $this->method->getArgument('arg2'));
@@ -199,7 +199,7 @@ class MethodTest extends PHPUnit_Framework_TestCase
     {
         $this->assertFalse($this->method->hasArgument('arg'));
 
-        $this->method->addArgument(new Argument('arg', null, 'string', 'The description'));
+        $this->method->addArgument(new Argument('arg'));
 
         $this->assertTrue($this->method->hasArgument('arg'));
     }
@@ -208,7 +208,7 @@ class MethodTest extends PHPUnit_Framework_TestCase
     {
         $this->assertFalse($this->method->hasArguments());
 
-        $this->method->addArgument(new Argument('arg', null, 'string', 'The description'));
+        $this->method->addArgument(new Argument('arg'));
 
         $this->assertTrue($this->method->hasArguments());
     }

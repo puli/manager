@@ -29,120 +29,75 @@ class ReturnValueTest extends PHPUnit_Framework_TestCase
         $this->assertSame('The description', $returnValue->getDescription());
     }
 
-    public function testSetSourceCode()
+    /**
+     * @expectedException \InvalidArgumentException
+     */
+    public function testCreateFailsIfSourceCodeNull()
     {
-        $returnValue = new ReturnValue('12', 'int', 'The description');
-
-        $returnValue->setSourceCode('"foobar"');
-
-        $this->assertSame('"foobar"', $returnValue->getSourceCode());
+        new ReturnValue(null, 'int', 'The description');
     }
 
     /**
      * @expectedException \InvalidArgumentException
      */
-    public function testSetSourceCodeFailsIfNull()
+    public function testCreateFailsIfSourceCodeEmpty()
     {
-        $returnValue = new ReturnValue('12', 'int', 'The description');
-
-        $returnValue->setSourceCode(null);
+        new ReturnValue('', 'int', 'The description');
     }
 
     /**
      * @expectedException \InvalidArgumentException
      */
-    public function testSetSourceCodeFailsIfEmpty()
+    public function testCreateFailsIfSourceCodeNoString()
     {
-        $returnValue = new ReturnValue('12', 'int', 'The description');
-
-        $returnValue->setSourceCode('');
+        new ReturnValue(1234, 'int', 'The description');
     }
 
     /**
      * @expectedException \InvalidArgumentException
      */
-    public function testSetSourceCodeFailsIfNoString()
+    public function testCreateFailsIfTypeNull()
     {
-        $returnValue = new ReturnValue('12', 'int', 'The description');
-
-        $returnValue->setSourceCode(1234);
-    }
-
-    public function testSetType()
-    {
-        $returnValue = new ReturnValue('12', 'int', 'The description');
-
-        $returnValue->setType('stdClass');
-
-        $this->assertSame('stdClass', $returnValue->getType());
+        new ReturnValue('42', null, 'The description');
     }
 
     /**
      * @expectedException \InvalidArgumentException
      */
-    public function testSetTypeFailsIfNull()
+    public function testCreateFailsIfTypeEmpty()
     {
-        $returnValue = new ReturnValue('12', 'int', 'The description');
-
-        $returnValue->setType(null);
+        new ReturnValue('42', '', 'The description');
     }
 
     /**
      * @expectedException \InvalidArgumentException
      */
-    public function testSetTypeFailsIfEmpty()
+    public function testCreateFailsIfTypeNoString()
     {
-        $returnValue = new ReturnValue('12', 'int', 'The description');
-
-        $returnValue->setType('');
+        new ReturnValue('42', 1234, 'The description');
     }
 
     /**
      * @expectedException \InvalidArgumentException
      */
-    public function testSetTypeFailsIfNoString()
+    public function testCreateFailsIfDescriptionNull()
     {
-        $returnValue = new ReturnValue('12', 'int', 'The description');
-
-        $returnValue->setType(1234);
-    }
-
-    public function testSetDescription()
-    {
-        $returnValue = new ReturnValue('12', 'int', 'The description');
-
-        $returnValue->setDescription('New description');
-
-        $this->assertSame('New description', $returnValue->getDescription());
+        new ReturnValue('42', 'int', null);
     }
 
     /**
      * @expectedException \InvalidArgumentException
      */
-    public function testSetDescriptionFailsIfNull()
+    public function testCreateFailsIfDescriptionEmpty()
     {
-        $returnValue = new ReturnValue('12', 'int', 'The description');
-
-        $returnValue->setDescription(null);
+        new ReturnValue('42', 'int', '');
     }
 
     /**
      * @expectedException \InvalidArgumentException
      */
-    public function testSetDescriptionFailsIfEmpty()
+    public function testCreateFailsIfDescriptionNoString()
     {
-        $returnValue = new ReturnValue('12', 'int', 'The description');
-
-        $returnValue->setDescription('');
-    }
-
-    /**
-     * @expectedException \InvalidArgumentException
-     */
-    public function testSetDescriptionFailsIfNoString()
-    {
-        $returnValue = new ReturnValue('12', 'int', 'The description');
-
-        $returnValue->setDescription(1234);
+        new ReturnValue('42', 'int', 1234);
     }
 }

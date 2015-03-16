@@ -45,6 +45,10 @@ class ReturnValue
      */
     public function __construct($sourceCode, $type, $description)
     {
+        Assert::stringNotEmpty($sourceCode, 'The return value source must be a non-empty string. Got: %s');
+        Assert::stringNotEmpty($type, 'The return value type must be a non-empty string. Got: %s');
+        Assert::stringNotEmpty($description, 'The return value description must be a non-empty string. Got: %s');
+
         $this->sourceCode = $sourceCode;
         $this->type = $type;
         $this->description = $description;
@@ -61,22 +65,6 @@ class ReturnValue
     }
 
     /**
-     * Sets the source code of the value.
-     *
-     * @param string $sourceCode The source code.
-     *
-     * @return static The current instance.
-     */
-    public function setSourceCode($sourceCode)
-    {
-        Assert::stringNotEmpty($sourceCode, 'The return value source must be a non-empty string. Got: %s');
-
-        $this->sourceCode = $sourceCode;
-
-        return $this;
-    }
-
-    /**
      * Returns the type of the return value.
      *
      * @return string The return type.
@@ -87,22 +75,6 @@ class ReturnValue
     }
 
     /**
-     * Sets the type of the return value.
-     *
-     * @param string $type The return type.
-     *
-     * @return static The current instance.
-     */
-    public function setType($type)
-    {
-        Assert::stringNotEmpty($type, 'The return value type must be a non-empty string. Got: %s');
-
-        $this->type = $type;
-
-        return $this;
-    }
-
-    /**
      * Returns the description of the return value.
      *
      * @return string The return value description.
@@ -110,21 +82,5 @@ class ReturnValue
     public function getDescription()
     {
         return $this->description;
-    }
-
-    /**
-     * Sets the description of the return value.
-     *
-     * @param string $description The return value description.
-     *
-     * @return static The current instance.
-     */
-    public function setDescription($description)
-    {
-        Assert::stringNotEmpty($description, 'The return value description must be a non-empty string. Got: %s');
-
-        $this->description = $description;
-
-        return $this;
     }
 }

@@ -44,23 +44,13 @@ class Argument
     /**
      * Creates a new argument.
      *
-     * @param string      $name        The name of the argument.
-     * @param string|null $typeHint    The type hint of the argument.
-     * @param string      $type        The type shown in the doc block.
-     * @param string      $description The doc block description.
+     * @param string $name The name of the argument.
      */
-    public function __construct($name, $typeHint, $type, $description)
+    public function __construct($name)
     {
         Assert::stringNotEmpty($name, 'The argument name must be a non-empty string. Got: %s');
 
         $this->name = $name;
-
-        if (null !== $typeHint) {
-            $this->setTypeHint($typeHint);
-        }
-
-        $this->setType($type);
-        $this->setDescription($description);
     }
 
     /**
