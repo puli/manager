@@ -12,9 +12,9 @@
 namespace Puli\RepositoryManager\Tests\Api\Factory;
 
 use PHPUnit_Framework_TestCase;
+use Puli\RepositoryManager\Api\Factory\Argument;
 use Puli\RepositoryManager\Api\Factory\FactoryClass;
 use Puli\RepositoryManager\Api\Factory\Method;
-use Puli\RepositoryManager\Api\Factory\Argument;
 use Puli\RepositoryManager\Api\Factory\ReturnValue;
 
 /**

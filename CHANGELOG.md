@@ -36,8 +36,9 @@ Changelog
  * added support for extra keys
  * added `OverrideGraph::forPackages()`
  * removed superfluous `PackageManager::isPackageInstalled()`. Use
-   `PackageManager::hasPackages()` with an `Expression` instea
+   `PackageManager::hasPackages()` with an `Expression` instead
  * renamed `BindingState::DUPLICATE` to `OVERRIDDEN`
+ * renamed `Generator` namespace to `Factory`
 
 * 1.0.0-beta2 (2015-01-27)
 

@@ -22,7 +22,7 @@ use Puli\RepositoryManager\Assert\Assert;
 use Puli\RepositoryManager\Config\ConfigFileStorage;
 use Puli\RepositoryManager\Config\DefaultConfig;
 use Puli\RepositoryManager\Config\EnvConfig;
-use Puli\RepositoryManager\Generator\PuliFactoryGenerator;
+use Puli\RepositoryManager\Factory\PuliFactoryGenerator;
 use Puli\RepositoryManager\Package\PackageFileStorage;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Webmozart\PathUtil\Path;
