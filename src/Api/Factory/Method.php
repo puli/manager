@@ -25,7 +25,7 @@ class Method
     /**
      * @var FactoryClass
      */
-    private $factoryClass;
+    private $class;
 
     /**
      * @var string
@@ -55,14 +55,12 @@ class Method
     /**
      * Creates a new method.
      *
-     * @param FactoryClass $factoryClass The class this method belongs to.
-     * @param string       $name         The method name.
+     * @param string $name The method name.
      */
-    public function __construct(FactoryClass $factoryClass, $name)
+    public function __construct($name)
     {
         Assert::stringNotEmpty($name, 'The method name must be a non-empty string. Got: %s');
 
-        $this->factoryClass = $factoryClass;
         $this->name = $name;
     }
 
@@ -71,9 +69,23 @@ class Method
      *
      * @return FactoryClass The factory class.
      */
-    public function getFactoryClass()
+    public function getClass()
     {
-        return $this->factoryClass;
+        return $this->class;
+    }
+
+    /**
+     * Sets the class this method belongs to.
+     *
+     * @param FactoryClass $class The factory class.
+     *
+     * @return static The current instance.
+     */
+    public function setClass(FactoryClass $class)
+    {
+        $this->class = $class;
+
+        return $this;
     }
 
     /**

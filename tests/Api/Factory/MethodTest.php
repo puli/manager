@@ -35,13 +35,8 @@ class MethodTest extends PHPUnit_Framework_TestCase
 
     protected function setUp()
     {
-        $this->class = new FactoryClass('GeneratedClass', __DIR__, __DIR__, 'GeneratedClass.php');
-        $this->method = new Method($this->class, 'doSomething');
-    }
-
-    public function testGetFactoryClass()
-    {
-        $this->assertSame($this->class, $this->method->getFactoryClass());
+        $this->class = new FactoryClass('GeneratedClass');
+        $this->method = new Method('doSomething');
     }
 
     public function testGetName()
@@ -54,7 +49,7 @@ class MethodTest extends PHPUnit_Framework_TestCase
      */
     public function testCreateFailsIfNameNull()
     {
-        new Method($this->class, null);
+        new Method(null);
     }
 
     /**
@@ -62,7 +57,7 @@ class MethodTest extends PHPUnit_Framework_TestCase
      */
     public function testCreateFailsIfNameEmpty()
     {
-        new Method($this->class, '');
+        new Method('');
     }
 
     /**
@@ -70,7 +65,14 @@ class MethodTest extends PHPUnit_Framework_TestCase
      */
     public function testCreateFailsIfNameNoString()
     {
-        new Method($this->class, 1234);
+        new Method(1234);
+    }
+
+    public function testSetFactoryClass()
+    {
+        $this->method->setClass($this->class);
+
+        $this->assertSame($this->class, $this->method->getClass());
     }
 
     public function testSetDescription()
