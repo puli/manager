@@ -108,7 +108,9 @@ class FactoryManagerImpl implements FactoryManager
 
         $this->refreshFactoryClass($path, $className);
 
-        require_once $path;
+        if (!class_exists($className, false)) {
+            require_once $path;
+        }
 
         return new $className;
     }
@@ -165,6 +167,18 @@ EOF
     /**
      * {@inheritdoc}
      */
+    public function autoGenerateFactoryClass($path = null, $className = null)
+    {
+        if (!$this->environment->getConfig()->get(Config::FACTORY_AUTO_GENERATE)) {
+            return;
+        }
+
+        $this->generateFactoryClass($path, $className);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function refreshFactoryClass($path = null, $className = null)
     {
         Assert::nullOrStringNotEmpty($path, 'The path to the generated factory file must be a non-empty string or null. Got: %s');
@@ -173,17 +187,13 @@ EOF
         $path = $path ? Path::makeAbsolute($path, $this->rootDir) : $this->factoryFile;
         $className = $className ?: $this->factoryClass;
 
-        if (class_exists($className, false)) {
+        if (!$this->environment->getConfig()->get(Config::FACTORY_AUTO_GENERATE)) {
             return;
         }
 
         if (!file_exists($path)) {
             $this->generateFactoryClass($path, $className);
 
-            return;
-        }
-
-        if (!$this->environment->getConfig()->get(Config::FACTORY_AUTO_GENERATE)) {
             return;
         }
 
