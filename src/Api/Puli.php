@@ -36,8 +36,6 @@ use Puli\RepositoryManager\Config\ConfigJsonWriter;
 use Puli\RepositoryManager\Config\DefaultConfig;
 use Puli\RepositoryManager\Config\EnvConfig;
 use Puli\RepositoryManager\Discovery\DiscoveryManagerImpl;
-use Puli\RepositoryManager\Environment\GlobalEnvironmentImpl;
-use Puli\RepositoryManager\Environment\ProjectEnvironmentImpl;
 use Puli\RepositoryManager\Factory\FactoryManagerImpl;
 use Puli\RepositoryManager\Factory\Generator\DefaultGeneratorRegistry;
 use Puli\RepositoryManager\Package\PackageFileStorage;
@@ -458,7 +456,8 @@ class Puli
         if (!$this->configFileManager && $this->environment->getHomeDirectory()) {
             $this->configFileManager = new ConfigFileManagerImpl(
                 $this->environment,
-                $this->getConfigFileStorage()
+                $this->getConfigFileStorage(),
+                $this->getFactoryManager()
             );
         }
 
@@ -479,7 +478,8 @@ class Puli
         if (!$this->rootPackageFileManager && $this->rootDir) {
             $this->rootPackageFileManager = new RootPackageFileManagerImpl(
                 $this->environment,
-                $this->getPackageFileStorage()
+                $this->getPackageFileStorage(),
+                $this->getFactoryManager()
             );
         }
 

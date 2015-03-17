@@ -17,6 +17,7 @@ use PHPUnit_Framework_TestCase;
 use Puli\RepositoryManager\Api\Config\Config;
 use Puli\RepositoryManager\Api\Config\ConfigFile;
 use Puli\RepositoryManager\Api\Environment\GlobalEnvironment;
+use Puli\RepositoryManager\Api\Factory\FactoryManager;
 use Puli\RepositoryManager\Config\ConfigFileManagerImpl;
 use Puli\RepositoryManager\Config\ConfigFileStorage;
 use Puli\RepositoryManager\Tests\TestException;
@@ -59,6 +60,11 @@ class ConfigFileManagerImplTest extends PHPUnit_Framework_TestCase
     private $configFileStorage;
 
     /**
+     * @var PHPUnit_Framework_MockObject_MockObject|FactoryManager
+     */
+    private $factoryManager;
+
+    /**
      * @var ConfigFileManagerImpl
      */
     private $manager;
@@ -81,7 +87,9 @@ class ConfigFileManagerImplTest extends PHPUnit_Framework_TestCase
             ->disableOriginalConstructor()
             ->getMock();
 
-        $this->manager = new ConfigFileManagerImpl($this->environment, $this->configFileStorage);
+        $this->factoryManager = $this->getMock('Puli\RepositoryManager\Api\Factory\FactoryManager');
+
+        $this->manager = new ConfigFileManagerImpl($this->environment, $this->configFileStorage, $this->factoryManager);
     }
 
     public function testSetConfigKey()
@@ -95,6 +103,9 @@ class ConfigFileManagerImplTest extends PHPUnit_Framework_TestCase
                 PHPUnit_Framework_Assert::assertSame('my-puli-dir', $config->get(Config::PULI_DIR));
             }));
 
+        $this->factoryManager->expects($this->once())
+            ->method('autoGenerateFactoryClass');
+
         $this->manager->setConfigKey(Config::PULI_DIR, 'my-puli-dir');
     }
 
@@ -103,6 +114,9 @@ class ConfigFileManagerImplTest extends PHPUnit_Framework_TestCase
         $this->configFileStorage->expects($this->once())
             ->method('saveConfigFile')
             ->willThrowException(new TestException());
+
+        $this->factoryManager->expects($this->never())
+            ->method('autoGenerateFactoryClass');
 
         try {
             $this->manager->setConfigKey(Config::PULI_DIR, 'my-puli-dir');
@@ -118,6 +132,9 @@ class ConfigFileManagerImplTest extends PHPUnit_Framework_TestCase
         $this->configFileStorage->expects($this->once())
             ->method('saveConfigFile')
             ->willThrowException(new TestException());
+
+        $this->factoryManager->expects($this->never())
+            ->method('autoGenerateFactoryClass');
 
         $this->configFile->getConfig()->set(Config::PULI_DIR, 'previous-value');
 
@@ -137,6 +154,9 @@ class ConfigFileManagerImplTest extends PHPUnit_Framework_TestCase
         $this->configFileStorage->expects($this->never())
             ->method('saveConfigFile');
 
+        $this->factoryManager->expects($this->never())
+            ->method('autoGenerateFactoryClass');
+
         $this->manager->setConfigKey(Config::PULI_DIR, 'my-puli-dir');
     }
 
@@ -151,6 +171,9 @@ class ConfigFileManagerImplTest extends PHPUnit_Framework_TestCase
                 PHPUnit_Framework_Assert::assertFalse($config->get(Config::FACTORY_AUTO_GENERATE));
             }));
 
+        $this->factoryManager->expects($this->once())
+            ->method('autoGenerateFactoryClass');
+
         $this->manager->setConfigKey(Config::FACTORY_AUTO_GENERATE, false);
     }
 
@@ -164,6 +187,9 @@ class ConfigFileManagerImplTest extends PHPUnit_Framework_TestCase
 
                 PHPUnit_Framework_Assert::assertNull($config->get(Config::DISCOVERY_STORE_TYPE));
             }));
+
+        $this->factoryManager->expects($this->once())
+            ->method('autoGenerateFactoryClass');
 
         $this->manager->setConfigKey(Config::DISCOVERY_STORE_TYPE, null);
     }
@@ -180,6 +206,9 @@ class ConfigFileManagerImplTest extends PHPUnit_Framework_TestCase
                 PHPUnit_Framework_Assert::assertSame('my-puli-dir/MyFactory.php', $config->get(Config::FACTORY_FILE));
             }));
 
+        $this->factoryManager->expects($this->once())
+            ->method('autoGenerateFactoryClass');
+
         $this->manager->setConfigKeys(array(
             Config::PULI_DIR => 'my-puli-dir',
             Config::FACTORY_FILE => '{$puli-dir}/MyFactory.php',
@@ -191,6 +220,9 @@ class ConfigFileManagerImplTest extends PHPUnit_Framework_TestCase
         $this->configFileStorage->expects($this->once())
             ->method('saveConfigFile')
             ->willThrowException(new TestException());
+
+        $this->factoryManager->expects($this->never())
+            ->method('autoGenerateFactoryClass');
 
         $this->configFile->getConfig()->set(Config::PULI_DIR, 'previous-value');
 
@@ -413,6 +445,9 @@ class ConfigFileManagerImplTest extends PHPUnit_Framework_TestCase
                 PHPUnit_Framework_Assert::assertSame('MyServiceRegistry.php', $config->get(Config::FACTORY_FILE, null, false));
             }));
 
+        $this->factoryManager->expects($this->once())
+            ->method('autoGenerateFactoryClass');
+
         $this->manager->removeConfigKey(Config::PULI_DIR);
     }
 
@@ -424,6 +459,9 @@ class ConfigFileManagerImplTest extends PHPUnit_Framework_TestCase
         $this->configFileStorage->expects($this->once())
             ->method('saveConfigFile')
             ->willThrowException(new TestException());
+
+        $this->factoryManager->expects($this->never())
+            ->method('autoGenerateFactoryClass');
 
         try {
             $this->manager->removeConfigKey(Config::PULI_DIR);
@@ -440,6 +478,9 @@ class ConfigFileManagerImplTest extends PHPUnit_Framework_TestCase
     {
         $this->configFileStorage->expects($this->never())
             ->method('saveConfigFile');
+
+        $this->factoryManager->expects($this->never())
+            ->method('autoGenerateFactoryClass');
 
         $this->manager->removeConfigKey(Config::PULI_DIR);
     }
@@ -459,6 +500,9 @@ class ConfigFileManagerImplTest extends PHPUnit_Framework_TestCase
                 PHPUnit_Framework_Assert::assertNull($config->get(Config::FACTORY_FILE, null, false));
             }));
 
+        $this->factoryManager->expects($this->once())
+            ->method('autoGenerateFactoryClass');
+
         $this->manager->removeConfigKeys(array(Config::PULI_DIR, Config::FACTORY_FILE));
     }
 
@@ -469,6 +513,9 @@ class ConfigFileManagerImplTest extends PHPUnit_Framework_TestCase
         $this->configFileStorage->expects($this->once())
             ->method('saveConfigFile')
             ->willThrowException(new TestException());
+
+        $this->factoryManager->expects($this->never())
+            ->method('autoGenerateFactoryClass');
 
         try {
             $this->manager->removeConfigKeys(array(Config::PULI_DIR, Config::FACTORY_FILE));

@@ -14,6 +14,7 @@ namespace Puli\RepositoryManager\Tests\Package;
 use PHPUnit_Framework_Assert;
 use PHPUnit_Framework_MockObject_MockObject;
 use Puli\RepositoryManager\Api\Config\Config;
+use Puli\RepositoryManager\Api\Factory\FactoryManager;
 use Puli\RepositoryManager\Api\Package\RootPackageFile;
 use Puli\RepositoryManager\Package\PackageFileStorage;
 use Puli\RepositoryManager\Package\RootPackageFileManagerImpl;
@@ -36,6 +37,11 @@ class RootPackageFileManagerImplTest extends ManagerTestCase
     private $packageFileStorage;
 
     /**
+     * @var PHPUnit_Framework_MockObject_MockObject|FactoryManager
+     */
+    private $factoryManager;
+
+    /**
      * @var RootPackageFileManagerImpl
      */
     private $manager;
@@ -50,7 +56,9 @@ class RootPackageFileManagerImplTest extends ManagerTestCase
 
         $this->initEnvironment(__DIR__.'/Fixtures/home', __DIR__.'/Fixtures/root');
 
-        $this->manager = new RootPackageFileManagerImpl($this->environment, $this->packageFileStorage);
+        $this->factoryManager = $this->getMock('Puli\RepositoryManager\Api\Factory\FactoryManager');
+
+        $this->manager = new RootPackageFileManagerImpl($this->environment, $this->packageFileStorage, $this->factoryManager);
     }
 
     public function testSetConfigKey()
@@ -63,6 +71,9 @@ class RootPackageFileManagerImplTest extends ManagerTestCase
 
                 PHPUnit_Framework_Assert::assertSame('my-puli-dir', $config->get(Config::PULI_DIR));
             }));
+
+        $this->factoryManager->expects($this->once())
+            ->method('autoGenerateFactoryClass');
 
         $this->manager->setConfigKey(Config::PULI_DIR, 'my-puli-dir');
     }
@@ -78,6 +89,9 @@ class RootPackageFileManagerImplTest extends ManagerTestCase
                 PHPUnit_Framework_Assert::assertSame('my-puli-dir', $config->get(Config::PULI_DIR));
                 PHPUnit_Framework_Assert::assertSame('my-puli-dir/MyFactory.php', $config->get(Config::FACTORY_FILE));
             }));
+
+        $this->factoryManager->expects($this->once())
+            ->method('autoGenerateFactoryClass');
 
         $this->manager->setConfigKeys(array(
             Config::PULI_DIR => 'my-puli-dir',
@@ -247,6 +261,9 @@ class RootPackageFileManagerImplTest extends ManagerTestCase
                 PHPUnit_Framework_Assert::assertSame('MyFactory.php', $config->get(Config::FACTORY_FILE, null, false));
             }));
 
+        $this->factoryManager->expects($this->once())
+            ->method('autoGenerateFactoryClass');
+
         $this->manager->removeConfigKey(Config::PULI_DIR);
     }
 
@@ -265,6 +282,9 @@ class RootPackageFileManagerImplTest extends ManagerTestCase
                 PHPUnit_Framework_Assert::assertNull($config->get(Config::FACTORY_FILE, null, false));
             }));
 
+        $this->factoryManager->expects($this->once())
+            ->method('autoGenerateFactoryClass');
+
         $this->manager->removeConfigKeys(array(Config::PULI_DIR, Config::FACTORY_FILE));
     }
 
@@ -277,6 +297,9 @@ class RootPackageFileManagerImplTest extends ManagerTestCase
                 PHPUnit_Framework_Assert::assertSame(array(RootPackageFileManagerImplTest::PLUGIN_CLASS), $packageFile->getPluginClasses());
             }));
 
+        $this->factoryManager->expects($this->once())
+            ->method('autoGenerateFactoryClass');
+
         $this->manager->installPluginClass(self::PLUGIN_CLASS);
 
         $this->assertSame(array(self::PLUGIN_CLASS), $this->manager->getPluginClasses());
@@ -287,6 +310,9 @@ class RootPackageFileManagerImplTest extends ManagerTestCase
     {
         $this->packageFileStorage->expects($this->never())
             ->method('saveRootPackageFile');
+
+        $this->factoryManager->expects($this->never())
+            ->method('autoGenerateFactoryClass');
 
         $this->rootPackageFile->addPluginClass(self::PLUGIN_CLASS);
 
@@ -324,6 +350,9 @@ class RootPackageFileManagerImplTest extends ManagerTestCase
                 PHPUnit_Framework_Assert::assertSame('vendor/package', $packageFile->getPackageName());
             }));
 
+        $this->factoryManager->expects($this->once())
+            ->method('autoGenerateFactoryClass');
+
         $this->manager->setPackageName('vendor/package');
 
         $this->assertSame('vendor/package', $this->manager->getPackageName());
@@ -335,6 +364,9 @@ class RootPackageFileManagerImplTest extends ManagerTestCase
 
         $this->packageFileStorage->expects($this->never())
             ->method('saveRootPackageFile');
+
+        $this->factoryManager->expects($this->never())
+            ->method('autoGenerateFactoryClass');
 
         $this->manager->setPackageName('vendor/package');
 
@@ -350,6 +382,9 @@ class RootPackageFileManagerImplTest extends ManagerTestCase
                 PHPUnit_Framework_Assert::assertSame('value', $packageFile->getExtraKey('key'));
             }));
 
+        $this->factoryManager->expects($this->once())
+            ->method('autoGenerateFactoryClass');
+
         $this->manager->setExtraKey('key', 'value');
     }
 
@@ -359,6 +394,9 @@ class RootPackageFileManagerImplTest extends ManagerTestCase
 
         $this->packageFileStorage->expects($this->never())
             ->method('saveRootPackageFile');
+
+        $this->factoryManager->expects($this->never())
+            ->method('autoGenerateFactoryClass');
 
         $this->manager->setExtraKey('key', 'value');
     }
@@ -371,6 +409,9 @@ class RootPackageFileManagerImplTest extends ManagerTestCase
             ->method('saveRootPackageFile')
             ->with($this->rootPackageFile)
             ->will($this->throwException(new TestException()));
+
+        $this->factoryManager->expects($this->never())
+            ->method('autoGenerateFactoryClass');
 
         try {
             $this->manager->setExtraKey('key', 'value');
@@ -387,6 +428,9 @@ class RootPackageFileManagerImplTest extends ManagerTestCase
             ->method('saveRootPackageFile')
             ->with($this->rootPackageFile)
             ->will($this->throwException(new TestException()));
+
+        $this->factoryManager->expects($this->never())
+            ->method('autoGenerateFactoryClass');
 
         try {
             $this->manager->setExtraKey('key', 'value');
@@ -409,6 +453,9 @@ class RootPackageFileManagerImplTest extends ManagerTestCase
                 ), $packageFile->getExtraKeys());
             }));
 
+        $this->factoryManager->expects($this->once())
+            ->method('autoGenerateFactoryClass');
+
         $this->manager->setExtraKeys(array(
             'key1' => 'value1',
             'key2' => 'value2',
@@ -422,6 +469,9 @@ class RootPackageFileManagerImplTest extends ManagerTestCase
 
         $this->packageFileStorage->expects($this->never())
             ->method('saveRootPackageFile');
+
+        $this->factoryManager->expects($this->never())
+            ->method('autoGenerateFactoryClass');
 
         $this->manager->setExtraKeys(array(
             'key1' => 'value1',
@@ -437,6 +487,9 @@ class RootPackageFileManagerImplTest extends ManagerTestCase
             ->method('saveRootPackageFile')
             ->with($this->rootPackageFile)
             ->will($this->throwException(new TestException()));
+
+        $this->factoryManager->expects($this->never())
+            ->method('autoGenerateFactoryClass');
 
         try {
             $this->manager->setExtraKeys(array(
@@ -465,6 +518,9 @@ class RootPackageFileManagerImplTest extends ManagerTestCase
                 ), $packageFile->getExtraKeys());
             }));
 
+        $this->factoryManager->expects($this->once())
+            ->method('autoGenerateFactoryClass');
+
         $this->manager->removeExtraKey('key1');
     }
 
@@ -472,6 +528,9 @@ class RootPackageFileManagerImplTest extends ManagerTestCase
     {
         $this->packageFileStorage->expects($this->never())
             ->method('saveRootPackageFile');
+
+        $this->factoryManager->expects($this->never())
+            ->method('autoGenerateFactoryClass');
 
         $this->manager->removeExtraKey('foobar');
     }
@@ -484,6 +543,9 @@ class RootPackageFileManagerImplTest extends ManagerTestCase
             ->method('saveRootPackageFile')
             ->with($this->rootPackageFile)
             ->will($this->throwException(new TestException()));
+
+        $this->factoryManager->expects($this->never())
+            ->method('autoGenerateFactoryClass');
 
         try {
             $this->manager->removeExtraKey('key1');
@@ -509,6 +571,9 @@ class RootPackageFileManagerImplTest extends ManagerTestCase
                 ), $packageFile->getExtraKeys());
             }));
 
+        $this->factoryManager->expects($this->once())
+            ->method('autoGenerateFactoryClass');
+
         $this->manager->removeExtraKeys(array('key1', 'key3'));
     }
 
@@ -516,6 +581,9 @@ class RootPackageFileManagerImplTest extends ManagerTestCase
     {
         $this->packageFileStorage->expects($this->never())
             ->method('saveRootPackageFile');
+
+        $this->factoryManager->expects($this->never())
+            ->method('autoGenerateFactoryClass');
 
         $this->manager->removeExtraKeys(array('key1', 'key3'));
     }
@@ -528,6 +596,9 @@ class RootPackageFileManagerImplTest extends ManagerTestCase
             ->method('saveRootPackageFile')
             ->with($this->rootPackageFile)
             ->will($this->throwException(new TestException()));
+
+        $this->factoryManager->expects($this->never())
+            ->method('autoGenerateFactoryClass');
 
         try {
             $this->manager->removeExtraKeys(array('key1', 'key2'));
@@ -551,6 +622,9 @@ class RootPackageFileManagerImplTest extends ManagerTestCase
                 PHPUnit_Framework_Assert::assertSame(array(), $packageFile->getExtraKeys());
             }));
 
+        $this->factoryManager->expects($this->once())
+            ->method('autoGenerateFactoryClass');
+
         $this->manager->clearExtraKeys();
     }
 
@@ -559,10 +633,13 @@ class RootPackageFileManagerImplTest extends ManagerTestCase
         $this->packageFileStorage->expects($this->never())
             ->method('saveRootPackageFile');
 
+        $this->factoryManager->expects($this->never())
+            ->method('autoGenerateFactoryClass');
+
         $this->manager->clearExtraKeys();
     }
 
-    public function testRemoveExtraKeyRestoresValuesIfSavingFails()
+    public function testClearExtraKeyRestoresValuesIfSavingFails()
     {
         $this->rootPackageFile->setExtraKey('key1', 'value1');
         $this->rootPackageFile->setExtraKey('key2', 'value2');
@@ -571,6 +648,9 @@ class RootPackageFileManagerImplTest extends ManagerTestCase
             ->method('saveRootPackageFile')
             ->with($this->rootPackageFile)
             ->will($this->throwException(new TestException()));
+
+        $this->factoryManager->expects($this->never())
+            ->method('autoGenerateFactoryClass');
 
         try {
             $this->manager->clearExtraKeys();

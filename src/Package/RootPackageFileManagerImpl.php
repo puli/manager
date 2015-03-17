@@ -13,6 +13,7 @@ namespace Puli\RepositoryManager\Package;
 
 use Exception;
 use Puli\RepositoryManager\Api\Environment\ProjectEnvironment;
+use Puli\RepositoryManager\Api\Factory\FactoryManager;
 use Puli\RepositoryManager\Api\Package\RootPackageFile;
 use Puli\RepositoryManager\Api\Package\RootPackageFileManager;
 use Puli\RepositoryManager\Config\AbstractConfigFileManager;
@@ -44,16 +45,27 @@ class RootPackageFileManagerImpl extends AbstractConfigFileManager implements Ro
     private $packageFileStorage;
 
     /**
+     * @var FactoryManager
+     */
+    private $factoryManager;
+
+    /**
      * Creates a new package file manager.
      *
      * @param ProjectEnvironment $environment        The project environment
      * @param PackageFileStorage $packageFileStorage The package file storage.
+     * @param FactoryManager     $factoryManager     The manager used to regenerate
+     *                                               the Puli factory class after
+     *                                               changing the configuration.
      */
-    public function __construct(ProjectEnvironment $environment, PackageFileStorage $packageFileStorage)
+    public function __construct(ProjectEnvironment $environment, PackageFileStorage $packageFileStorage, FactoryManager $factoryManager)
     {
+        parent::__construct($factoryManager);
+
         $this->environment = $environment;
         $this->rootPackageFile = $environment->getRootPackageFile();
         $this->packageFileStorage = $packageFileStorage;
+        $this->factoryManager = $factoryManager;
     }
 
     /**
@@ -85,10 +97,13 @@ class RootPackageFileManagerImpl extends AbstractConfigFileManager implements Ro
      */
     public function setPackageName($packageName)
     {
-        if ($packageName !== $this->rootPackageFile->getPackageName()) {
-            $this->rootPackageFile->setPackageName($packageName);
-            $this->packageFileStorage->saveRootPackageFile($this->rootPackageFile);
+        if ($packageName === $this->rootPackageFile->getPackageName()) {
+            return;
         }
+
+        $this->rootPackageFile->setPackageName($packageName);
+        $this->packageFileStorage->saveRootPackageFile($this->rootPackageFile);
+        $this->factoryManager->autoGenerateFactoryClass();
     }
 
     /**
@@ -104,6 +119,7 @@ class RootPackageFileManagerImpl extends AbstractConfigFileManager implements Ro
         $this->rootPackageFile->addPluginClass($pluginClass);
 
         $this->packageFileStorage->saveRootPackageFile($this->rootPackageFile);
+        $this->factoryManager->autoGenerateFactoryClass();
     }
 
     /**
@@ -147,6 +163,8 @@ class RootPackageFileManagerImpl extends AbstractConfigFileManager implements Ro
 
             throw $e;
         }
+
+        $this->factoryManager->autoGenerateFactoryClass();
     }
 
     /**
@@ -186,6 +204,8 @@ class RootPackageFileManagerImpl extends AbstractConfigFileManager implements Ro
 
             throw $e;
         }
+
+        $this->factoryManager->autoGenerateFactoryClass();
     }
 
     /**
@@ -208,6 +228,8 @@ class RootPackageFileManagerImpl extends AbstractConfigFileManager implements Ro
 
             throw $e;
         }
+
+        $this->factoryManager->autoGenerateFactoryClass();
     }
 
     /**
@@ -236,6 +258,8 @@ class RootPackageFileManagerImpl extends AbstractConfigFileManager implements Ro
 
             throw $e;
         }
+
+        $this->factoryManager->autoGenerateFactoryClass();
     }
 
     /**
@@ -258,6 +282,8 @@ class RootPackageFileManagerImpl extends AbstractConfigFileManager implements Ro
 
             throw $e;
         }
+
+        $this->factoryManager->autoGenerateFactoryClass();
     }
 
     /**

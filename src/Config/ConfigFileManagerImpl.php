@@ -13,6 +13,7 @@ namespace Puli\RepositoryManager\Config;
 
 use Puli\RepositoryManager\Api\Config\ConfigFile;
 use Puli\RepositoryManager\Api\Environment\GlobalEnvironment;
+use Puli\RepositoryManager\Api\Factory\FactoryManager;
 
 /**
  * Manages changes to the global configuration file.
@@ -45,9 +46,14 @@ class ConfigFileManagerImpl extends AbstractConfigFileManager
      *
      * @param GlobalEnvironment $environment       The global environment.
      * @param ConfigFileStorage $configFileStorage The configuration file storage.
+     * @param FactoryManager    $factoryManager    The manager used to regenerate
+     *                                             the Puli factory class after
+     *                                             changing the configuration.
      */
-    public function __construct(GlobalEnvironment $environment, ConfigFileStorage $configFileStorage)
+    public function __construct(GlobalEnvironment $environment, ConfigFileStorage $configFileStorage, FactoryManager $factoryManager = null)
     {
+        parent::__construct($factoryManager);
+
         $this->environment = $environment;
         $this->configFileStorage = $configFileStorage;
         $this->configFile = $environment->getConfigFile();

@@ -15,6 +15,7 @@ use ArrayIterator;
 use Exception;
 use Puli\RepositoryManager\Api\Config\Config;
 use Puli\RepositoryManager\Api\Config\ConfigFileManager;
+use Puli\RepositoryManager\Api\Factory\FactoryManager;
 use Puli\RepositoryManager\Api\InvalidConfigException;
 use Puli\RepositoryManager\Api\IOException;
 use Puli\RepositoryManager\Assert\Assert;
@@ -28,6 +29,23 @@ use Webmozart\Glob\Iterator\RegexFilterIterator;
  */
 abstract class AbstractConfigFileManager implements ConfigFileManager
 {
+    /**
+     * @var FactoryManager
+     */
+    private $factoryManager;
+
+    /**
+     * Creates the manager.
+     *
+     * @param FactoryManager $factoryManager The manager used to regenerate the
+     *                                       Puli factory class after changing
+     *                                       the configuration.
+     */
+    public function __construct(FactoryManager $factoryManager = null)
+    {
+        $this->factoryManager = $factoryManager;
+    }
+
     /**
      * {@inheritdoc}
      */
@@ -53,6 +71,10 @@ abstract class AbstractConfigFileManager implements ConfigFileManager
             }
 
             throw $e;
+        }
+
+        if ($this->factoryManager) {
+            $this->factoryManager->autoGenerateFactoryClass();
         }
     }
 
@@ -87,6 +109,10 @@ abstract class AbstractConfigFileManager implements ConfigFileManager
 
             throw $e;
         }
+
+        if ($this->factoryManager) {
+            $this->factoryManager->autoGenerateFactoryClass();
+        }
     }
 
     /**
@@ -109,6 +135,10 @@ abstract class AbstractConfigFileManager implements ConfigFileManager
             $config->set($key, $previousValue);
 
             throw $e;
+        }
+
+        if ($this->factoryManager) {
+            $this->factoryManager->autoGenerateFactoryClass();
         }
     }
 
@@ -135,6 +165,10 @@ abstract class AbstractConfigFileManager implements ConfigFileManager
             }
 
             throw $e;
+        }
+
+        if ($this->factoryManager) {
+            $this->factoryManager->autoGenerateFactoryClass();
         }
     }
 
