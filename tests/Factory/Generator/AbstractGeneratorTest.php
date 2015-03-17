@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the puli/repository-manager package.
+ * This file is part of the puli/manager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,16 +9,16 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\RepositoryManager\Tests\Factory\Generator;
+namespace Puli\Manager\Tests\Factory\Generator;
 
 use PHPUnit_Framework_TestCase;
-use Puli\RepositoryManager\Api\Factory\Generator\GeneratorRegistry;
-use Puli\RepositoryManager\Api\Php\Clazz;
-use Puli\RepositoryManager\Api\Php\Method;
-use Puli\RepositoryManager\Factory\Generator\BuildRecipe;
-use Puli\RepositoryManager\Factory\Generator\DefaultGeneratorRegistry;
-use Puli\RepositoryManager\Factory\Generator\ProviderFactory;
-use Puli\RepositoryManager\Php\ClassWriter;
+use Puli\Manager\Api\Factory\Generator\GeneratorRegistry;
+use Puli\Manager\Api\Php\Clazz;
+use Puli\Manager\Api\Php\Method;
+use Puli\Manager\Factory\Generator\BuildRecipe;
+use Puli\Manager\Factory\Generator\DefaultGeneratorRegistry;
+use Puli\Manager\Factory\Generator\ProviderFactory;
+use Puli\Manager\Php\ClassWriter;
 use Symfony\Component\Filesystem\Filesystem;
 
 /**

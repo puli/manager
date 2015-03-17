@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the puli/repository-manager package.
+ * This file is part of the puli/manager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,9 +9,9 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\RepositoryManager\Api\Event;
+namespace Puli\Manager\Api\Event;
 
-use Puli\RepositoryManager\Api\Php\Clazz;
+use Puli\Manager\Api\Php\Clazz;
 use Symfony\Component\EventDispatcher\Event;
 
 /**

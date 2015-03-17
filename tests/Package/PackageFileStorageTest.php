@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the puli/repository-manager package.
+ * This file is part of the puli/manager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,21 +9,17 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\RepositoryManager\Tests\Package;
+namespace Puli\Manager\Tests\Package;
 
-use PHPUnit_Framework_Assert;
 use PHPUnit_Framework_MockObject_MockObject;
 use PHPUnit_Framework_TestCase;
-use Puli\RepositoryManager\Api\Config\Config;
-use Puli\RepositoryManager\Api\Event\PackageFileEvent;
-use Puli\RepositoryManager\Api\Event\PuliEvents;
-use Puli\RepositoryManager\Api\FileNotFoundException;
-use Puli\RepositoryManager\Api\Package\PackageFile;
-use Puli\RepositoryManager\Api\Package\PackageFileReader;
-use Puli\RepositoryManager\Api\Package\PackageFileWriter;
-use Puli\RepositoryManager\Api\Package\RootPackageFile;
-use Puli\RepositoryManager\Package\PackageFileStorage;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Puli\Manager\Api\Config\Config;
+use Puli\Manager\Api\Event\PackageFileEvent;
+use Puli\Manager\Api\Package\PackageFile;
+use Puli\Manager\Api\Package\PackageFileReader;
+use Puli\Manager\Api\Package\PackageFileWriter;
+use Puli\Manager\Api\Package\RootPackageFile;
+use Puli\Manager\Package\PackageFileStorage;
 
 /**
  * @since  1.0
@@ -48,8 +44,8 @@ class PackageFileStorageTest extends PHPUnit_Framework_TestCase
 
     protected function setUp()
     {
-        $this->reader = $this->getMock('Puli\RepositoryManager\Api\Package\PackageFileReader');
-        $this->writer = $this->getMock('Puli\RepositoryManager\Api\Package\PackageFileWriter');
+        $this->reader = $this->getMock('Puli\Manager\Api\Package\PackageFileReader');
+        $this->writer = $this->getMock('Puli\Manager\Api\Package\PackageFileWriter');
 
         $this->storage = new PackageFileStorage($this->reader, $this->writer);
     }

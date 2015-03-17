@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the puli/repository-manager package.
+ * This file is part of the puli/manager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,12 +9,12 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\RepositoryManager\Tests\Api\Package;
+namespace Puli\Manager\Tests\Api\Package;
 
 use PHPUnit_Framework_TestCase;
-use Puli\RepositoryManager\Api\Discovery\BindingDescriptor;
-use Puli\RepositoryManager\Api\Package\PackageFile;
-use Puli\RepositoryManager\Api\Repository\ResourceMapping;
+use Puli\Manager\Api\Discovery\BindingDescriptor;
+use Puli\Manager\Api\Package\PackageFile;
+use Puli\Manager\Api\Repository\ResourceMapping;
 use Rhumsaa\Uuid\Uuid;
 
 /**
@@ -161,7 +161,7 @@ class PackageFileTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\RepositoryManager\Api\Repository\NoSuchMappingException
+     * @expectedException \Puli\Manager\Api\Repository\NoSuchMappingException
      * @expectedExceptionMessage foobar
      */
     public function testGetResourceMappingFailsIfPathNotFound()
@@ -256,7 +256,7 @@ class PackageFileTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\RepositoryManager\Api\Discovery\NoSuchBindingException
+     * @expectedException \Puli\Manager\Api\Discovery\NoSuchBindingException
      * @expectedExceptionMessage 8546da2c-dfec-48be-8cd3-93798c41b72f
      */
     public function testGetBindingDescriptorFailsIfUnknownUuid()

@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the puli/repository-manager package.
+ * This file is part of the puli/manager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,10 +9,10 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\RepositoryManager\Api\Package;
+namespace Puli\Manager\Api\Package;
 
-use Puli\RepositoryManager\Api\Config\Config;
-use Puli\RepositoryManager\Api\InvalidConfigException;
+use Puli\Manager\Api\Config\Config;
+use Puli\Manager\Api\InvalidConfigException;
 
 /**
  * The package file of the root package.
@@ -199,7 +199,7 @@ class RootPackageFile extends PackageFile
      * Sets the plugin classes.
      *
      * The plugin classes must be fully-qualified class names that implement
-     * {@link Puli\RepositoryManager\Api\PuliPlugin}. If a class is not
+     * {@link Puli\Manager\Api\PuliPlugin}. If a class is not
      * found or does not implement that interface, an exception is thrown.
      *
      * The plugin classes must not have required parameters in their constructor

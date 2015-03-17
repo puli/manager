@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the puli/repository-manager package.
+ * This file is part of the puli/manager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,34 +9,34 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\RepositoryManager\Repository;
+namespace Puli\Manager\Repository;
 
 use Exception;
+use Puli\Manager\Api\Config\Config;
+use Puli\Manager\Api\Environment\ProjectEnvironment;
+use Puli\Manager\Api\Package\Package;
+use Puli\Manager\Api\Package\PackageCollection;
+use Puli\Manager\Api\Package\RootPackageFile;
+use Puli\Manager\Api\Repository\RepositoryManager;
+use Puli\Manager\Api\Repository\ResourceMapping;
+use Puli\Manager\Api\Repository\ResourceMappingState;
+use Puli\Manager\Assert\Assert;
+use Puli\Manager\Conflict\OverrideGraph;
+use Puli\Manager\Conflict\PackageConflictDetector;
+use Puli\Manager\Conflict\PackageConflictException;
+use Puli\Manager\Package\PackageFileStorage;
+use Puli\Manager\Repository\Mapping\AddMappingToPackageFile;
+use Puli\Manager\Repository\Mapping\ConflictCollection;
+use Puli\Manager\Repository\Mapping\InsertAll;
+use Puli\Manager\Repository\Mapping\LoadMapping;
+use Puli\Manager\Repository\Mapping\OverrideConflictingPackages;
+use Puli\Manager\Repository\Mapping\RemoveMappingFromPackageFile;
+use Puli\Manager\Repository\Mapping\ResourceMappingCollection;
+use Puli\Manager\Repository\Mapping\SyncRepositoryPath;
+use Puli\Manager\Repository\Mapping\UnloadMapping;
+use Puli\Manager\Repository\Mapping\UpdateConflicts;
+use Puli\Manager\Transaction\Transaction;
 use Puli\Repository\Api\EditableRepository;
-use Puli\RepositoryManager\Api\Config\Config;
-use Puli\RepositoryManager\Api\Environment\ProjectEnvironment;
-use Puli\RepositoryManager\Api\Package\Package;
-use Puli\RepositoryManager\Api\Package\PackageCollection;
-use Puli\RepositoryManager\Api\Package\RootPackageFile;
-use Puli\RepositoryManager\Api\Repository\RepositoryManager;
-use Puli\RepositoryManager\Api\Repository\ResourceMapping;
-use Puli\RepositoryManager\Api\Repository\ResourceMappingState;
-use Puli\RepositoryManager\Assert\Assert;
-use Puli\RepositoryManager\Conflict\OverrideGraph;
-use Puli\RepositoryManager\Conflict\PackageConflictDetector;
-use Puli\RepositoryManager\Conflict\PackageConflictException;
-use Puli\RepositoryManager\Package\PackageFileStorage;
-use Puli\RepositoryManager\Repository\Mapping\AddMappingToPackageFile;
-use Puli\RepositoryManager\Repository\Mapping\ConflictCollection;
-use Puli\RepositoryManager\Repository\Mapping\InsertAll;
-use Puli\RepositoryManager\Repository\Mapping\LoadMapping;
-use Puli\RepositoryManager\Repository\Mapping\OverrideConflictingPackages;
-use Puli\RepositoryManager\Repository\Mapping\RemoveMappingFromPackageFile;
-use Puli\RepositoryManager\Repository\Mapping\ResourceMappingCollection;
-use Puli\RepositoryManager\Repository\Mapping\SyncRepositoryPath;
-use Puli\RepositoryManager\Repository\Mapping\UnloadMapping;
-use Puli\RepositoryManager\Repository\Mapping\UpdateConflicts;
-use Puli\RepositoryManager\Transaction\Transaction;
 
 /**
  * Manages the resource repository of a Puli project.

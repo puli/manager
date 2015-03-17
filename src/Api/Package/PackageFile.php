@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the puli/repository-manager package.
+ * This file is part of the puli/manager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,15 +9,15 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\RepositoryManager\Api\Package;
+namespace Puli\Manager\Api\Package;
 
 use InvalidArgumentException;
-use Puli\RepositoryManager\Api\Discovery\BindingDescriptor;
-use Puli\RepositoryManager\Api\Discovery\BindingTypeDescriptor;
-use Puli\RepositoryManager\Api\Discovery\NoSuchBindingException;
-use Puli\RepositoryManager\Api\Repository\NoSuchMappingException;
-use Puli\RepositoryManager\Api\Repository\ResourceMapping;
-use Puli\RepositoryManager\Assert\Assert;
+use Puli\Manager\Api\Discovery\BindingDescriptor;
+use Puli\Manager\Api\Discovery\BindingTypeDescriptor;
+use Puli\Manager\Api\Discovery\NoSuchBindingException;
+use Puli\Manager\Api\Repository\NoSuchMappingException;
+use Puli\Manager\Api\Repository\ResourceMapping;
+use Puli\Manager\Assert\Assert;
 use Rhumsaa\Uuid\Uuid;
 
 /**

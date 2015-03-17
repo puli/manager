@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the puli/repository-manager package.
+ * This file is part of the puli/manager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,11 +9,11 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\RepositoryManager\Tests\Conflict;
+namespace Puli\Manager\Tests\Conflict;
 
 use PHPUnit_Framework_TestCase;
-use Puli\RepositoryManager\Conflict\OverrideGraph;
-use Puli\RepositoryManager\Conflict\PackageConflictDetector;
+use Puli\Manager\Conflict\OverrideGraph;
+use Puli\Manager\Conflict\PackageConflictDetector;
 
 /**
  * @since  1.0
@@ -57,7 +57,7 @@ class PackageConflictDetectorTest extends PHPUnit_Framework_TestCase
         $conflicts = $this->detector->detectConflicts(array('A'));
 
         $this->assertCount(1, $conflicts);
-        $this->assertInstanceOf('Puli\RepositoryManager\Conflict\PackageConflict', $conflicts[0]);
+        $this->assertInstanceOf('Puli\Manager\Conflict\PackageConflict', $conflicts[0]);
         $this->assertSame('A', $conflicts[0]->getConflictingToken());
         $this->assertSame(array('package1', 'package2'), $conflicts[0]->getPackageNames());
     }
@@ -141,7 +141,7 @@ class PackageConflictDetectorTest extends PHPUnit_Framework_TestCase
         $conflicts = $this->detector->detectConflicts(array('A'));
 
         $this->assertCount(1, $conflicts);
-        $this->assertInstanceOf('Puli\RepositoryManager\Conflict\PackageConflict', $conflicts[0]);
+        $this->assertInstanceOf('Puli\Manager\Conflict\PackageConflict', $conflicts[0]);
         $this->assertSame('A', $conflicts[0]->getConflictingToken());
         $this->assertSame(array('package1', 'package3'), $conflicts[0]->getPackageNames());
     }
@@ -154,6 +154,6 @@ class PackageConflictDetectorTest extends PHPUnit_Framework_TestCase
         $conflicts = $this->detector->detectConflicts();
 
         $this->assertCount(1, $conflicts);
-        $this->assertInstanceOf('Puli\RepositoryManager\Conflict\PackageConflict', $conflicts[0]);
+        $this->assertInstanceOf('Puli\Manager\Conflict\PackageConflict', $conflicts[0]);
     }
 }

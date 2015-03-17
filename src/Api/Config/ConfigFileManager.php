@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the puli/repository-manager package.
+ * This file is part of the puli/manager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,11 +9,11 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\RepositoryManager\Api\Config;
+namespace Puli\Manager\Api\Config;
 
-use Puli\RepositoryManager\Api\Environment\GlobalEnvironment;
-use Puli\RepositoryManager\Api\InvalidConfigException;
-use Puli\RepositoryManager\Api\IOException;
+use Puli\Manager\Api\Environment\GlobalEnvironment;
+use Puli\Manager\Api\InvalidConfigException;
+use Puli\Manager\Api\IOException;
 
 /**
  * Manages changes to the global configuration file.

@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the puli/repository-manager package.
+ * This file is part of the puli/manager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,20 +9,20 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\RepositoryManager\Package;
+namespace Puli\Manager\Package;
 
-use Puli\RepositoryManager\Api\Config\Config;
-use Puli\RepositoryManager\Api\Discovery\BindingDescriptor;
-use Puli\RepositoryManager\Api\Discovery\BindingParameterDescriptor;
-use Puli\RepositoryManager\Api\Discovery\BindingTypeDescriptor;
-use Puli\RepositoryManager\Api\FileNotFoundException;
-use Puli\RepositoryManager\Api\InvalidConfigException;
-use Puli\RepositoryManager\Api\Package\InstallInfo;
-use Puli\RepositoryManager\Api\Package\PackageFile;
-use Puli\RepositoryManager\Api\Package\PackageFileReader;
-use Puli\RepositoryManager\Api\Package\RootPackageFile;
-use Puli\RepositoryManager\Api\Package\UnsupportedVersionException;
-use Puli\RepositoryManager\Api\Repository\ResourceMapping;
+use Puli\Manager\Api\Config\Config;
+use Puli\Manager\Api\Discovery\BindingDescriptor;
+use Puli\Manager\Api\Discovery\BindingParameterDescriptor;
+use Puli\Manager\Api\Discovery\BindingTypeDescriptor;
+use Puli\Manager\Api\FileNotFoundException;
+use Puli\Manager\Api\InvalidConfigException;
+use Puli\Manager\Api\Package\InstallInfo;
+use Puli\Manager\Api\Package\PackageFile;
+use Puli\Manager\Api\Package\PackageFileReader;
+use Puli\Manager\Api\Package\RootPackageFile;
+use Puli\Manager\Api\Package\UnsupportedVersionException;
+use Puli\Manager\Api\Repository\ResourceMapping;
 use Rhumsaa\Uuid\Uuid;
 use Webmozart\Json\DecodingFailedException;
 use Webmozart\Json\JsonDecoder;

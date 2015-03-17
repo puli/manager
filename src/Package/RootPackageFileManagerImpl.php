@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the puli/repository-manager package.
+ * This file is part of the puli/manager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,14 +9,14 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\RepositoryManager\Package;
+namespace Puli\Manager\Package;
 
 use Exception;
-use Puli\RepositoryManager\Api\Environment\ProjectEnvironment;
-use Puli\RepositoryManager\Api\Factory\FactoryManager;
-use Puli\RepositoryManager\Api\Package\RootPackageFile;
-use Puli\RepositoryManager\Api\Package\RootPackageFileManager;
-use Puli\RepositoryManager\Config\AbstractConfigFileManager;
+use Puli\Manager\Api\Environment\ProjectEnvironment;
+use Puli\Manager\Api\Factory\FactoryManager;
+use Puli\Manager\Api\Package\RootPackageFile;
+use Puli\Manager\Api\Package\RootPackageFileManager;
+use Puli\Manager\Config\AbstractConfigFileManager;
 
 /**
  * Manages changes to the root package file.

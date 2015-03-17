@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the puli/repository-manager package.
+ * This file is part of the puli/manager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,11 +9,11 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\RepositoryManager\Discovery\Type;
+namespace Puli\Manager\Discovery\Type;
 
 use OutOfBoundsException;
-use Puli\RepositoryManager\Api\Discovery\BindingTypeDescriptor;
-use Puli\RepositoryManager\Util\TwoDimensionalHashMap;
+use Puli\Manager\Api\Discovery\BindingTypeDescriptor;
+use Puli\Manager\Util\TwoDimensionalHashMap;
 
 /**
  * A store for binding type descriptors.

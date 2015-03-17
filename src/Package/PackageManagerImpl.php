@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the puli/repository-manager package.
+ * This file is part of the puli/manager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,23 +9,23 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\RepositoryManager\Package;
+namespace Puli\Manager\Package;
 
 use Exception;
-use Puli\RepositoryManager\Api\Environment\ProjectEnvironment;
-use Puli\RepositoryManager\Api\FileNotFoundException;
-use Puli\RepositoryManager\Api\InvalidConfigException;
-use Puli\RepositoryManager\Api\NoDirectoryException;
-use Puli\RepositoryManager\Api\Package\InstallInfo;
-use Puli\RepositoryManager\Api\Package\NameConflictException;
-use Puli\RepositoryManager\Api\Package\Package;
-use Puli\RepositoryManager\Api\Package\PackageCollection;
-use Puli\RepositoryManager\Api\Package\PackageFile;
-use Puli\RepositoryManager\Api\Package\PackageManager;
-use Puli\RepositoryManager\Api\Package\RootPackage;
-use Puli\RepositoryManager\Api\Package\RootPackageFile;
-use Puli\RepositoryManager\Api\Package\UnsupportedVersionException;
-use Puli\RepositoryManager\Assert\Assert;
+use Puli\Manager\Api\Environment\ProjectEnvironment;
+use Puli\Manager\Api\FileNotFoundException;
+use Puli\Manager\Api\InvalidConfigException;
+use Puli\Manager\Api\NoDirectoryException;
+use Puli\Manager\Api\Package\InstallInfo;
+use Puli\Manager\Api\Package\NameConflictException;
+use Puli\Manager\Api\Package\Package;
+use Puli\Manager\Api\Package\PackageCollection;
+use Puli\Manager\Api\Package\PackageFile;
+use Puli\Manager\Api\Package\PackageManager;
+use Puli\Manager\Api\Package\RootPackage;
+use Puli\Manager\Api\Package\RootPackageFile;
+use Puli\Manager\Api\Package\UnsupportedVersionException;
+use Puli\Manager\Assert\Assert;
 use Webmozart\Expression\Expression;
 use Webmozart\PathUtil\Path;
 

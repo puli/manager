@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the puli/repository-manager package.
+ * This file is part of the puli/manager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,10 +9,10 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\RepositoryManager\Api\Repository;
+namespace Puli\Manager\Api\Repository;
 
-use Puli\RepositoryManager\Api\NotLoadedException;
-use Puli\RepositoryManager\Assert\Assert;
+use Puli\Manager\Api\NotLoadedException;
+use Puli\Manager\Assert\Assert;
 
 /**
  * A conflict when different resource mappings map the same repository path.

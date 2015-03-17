@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the puli/repository-manager package.
+ * This file is part of the puli/manager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,12 +9,12 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\RepositoryManager\Tests\Api\Php;
+namespace Puli\Manager\Tests\Api\Php;
 
 use PHPUnit_Framework_TestCase;
-use Puli\RepositoryManager\Api\Php\Clazz;
-use Puli\RepositoryManager\Api\Php\Import;
-use Puli\RepositoryManager\Api\Php\Method;
+use Puli\Manager\Api\Php\Clazz;
+use Puli\Manager\Api\Php\Import;
+use Puli\Manager\Api\Php\Method;
 use Webmozart\PathUtil\Path;
 
 /**

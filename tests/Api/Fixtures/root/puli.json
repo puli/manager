@@ -10,6 +10,6 @@
         }
     },
     "plugins": [
-        "Puli\\RepositoryManager\\Tests\\Api\\Package\\Fixtures\\TestPlugin"
+        "Puli\\Manager\\Tests\\Api\\Package\\Fixtures\\TestPlugin"
     ]
 }

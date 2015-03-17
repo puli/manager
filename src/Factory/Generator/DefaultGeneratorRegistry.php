@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the puli/repository-manager package.
+ * This file is part of the puli/manager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,9 +9,9 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\RepositoryManager\Factory\Generator;
+namespace Puli\Manager\Factory\Generator;
 
-use Puli\RepositoryManager\Api\Factory\Generator\GeneratorRegistry;
+use Puli\Manager\Api\Factory\Generator\GeneratorRegistry;
 use RuntimeException;
 
 /**
@@ -27,19 +27,19 @@ class DefaultGeneratorRegistry implements GeneratorRegistry
      */
     private static $classNames = array(
         self::REPOSITORY => array(
-            'filesystem' => 'Puli\RepositoryManager\Factory\Generator\Repository\FilesystemRepositoryGenerator',
+            'filesystem' => 'Puli\Manager\Factory\Generator\Repository\FilesystemRepositoryGenerator',
         ),
         self::DISCOVERY => array(
-            'key-value-store' => 'Puli\RepositoryManager\Factory\Generator\Discovery\KeyValueStoreDiscoveryGenerator',
+            'key-value-store' => 'Puli\Manager\Factory\Generator\Discovery\KeyValueStoreDiscoveryGenerator',
         ),
         self::KEY_VALUE_STORE => array(
-            null => 'Puli\RepositoryManager\Factory\Generator\KeyValueStore\NullStoreGenerator',
-            'null' => 'Puli\RepositoryManager\Factory\Generator\KeyValueStore\NullStoreGenerator',
-            'array' => 'Puli\RepositoryManager\Factory\Generator\KeyValueStore\ArrayStoreGenerator',
-            'json-file' => 'Puli\RepositoryManager\Factory\Generator\KeyValueStore\JsonFileStoreGenerator',
-            'php-redis' => 'Puli\RepositoryManager\Factory\Generator\KeyValueStore\PhpRedisStoreGenerator',
-            'predis' => 'Puli\RepositoryManager\Factory\Generator\KeyValueStore\PredisStoreGenerator',
-            'riak' => 'Puli\RepositoryManager\Factory\Generator\KeyValueStore\RiakStoreGenerator',
+            null => 'Puli\Manager\Factory\Generator\KeyValueStore\NullStoreGenerator',
+            'null' => 'Puli\Manager\Factory\Generator\KeyValueStore\NullStoreGenerator',
+            'array' => 'Puli\Manager\Factory\Generator\KeyValueStore\ArrayStoreGenerator',
+            'json-file' => 'Puli\Manager\Factory\Generator\KeyValueStore\JsonFileStoreGenerator',
+            'php-redis' => 'Puli\Manager\Factory\Generator\KeyValueStore\PhpRedisStoreGenerator',
+            'predis' => 'Puli\Manager\Factory\Generator\KeyValueStore\PredisStoreGenerator',
+            'riak' => 'Puli\Manager\Factory\Generator\KeyValueStore\RiakStoreGenerator',
         ),
     );
 

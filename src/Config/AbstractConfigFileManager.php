@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the puli/repository-manager package.
+ * This file is part of the puli/manager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,16 +9,16 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\RepositoryManager\Config;
+namespace Puli\Manager\Config;
 
 use ArrayIterator;
 use Exception;
-use Puli\RepositoryManager\Api\Config\Config;
-use Puli\RepositoryManager\Api\Config\ConfigFileManager;
-use Puli\RepositoryManager\Api\Factory\FactoryManager;
-use Puli\RepositoryManager\Api\InvalidConfigException;
-use Puli\RepositoryManager\Api\IOException;
-use Puli\RepositoryManager\Assert\Assert;
+use Puli\Manager\Api\Config\Config;
+use Puli\Manager\Api\Config\ConfigFileManager;
+use Puli\Manager\Api\Factory\FactoryManager;
+use Puli\Manager\Api\InvalidConfigException;
+use Puli\Manager\Api\IOException;
+use Puli\Manager\Assert\Assert;
 use Webmozart\Glob\Iterator\RegexFilterIterator;
 
 /**

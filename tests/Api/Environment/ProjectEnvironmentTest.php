@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the puli/repository-manager package.
+ * This file is part of the puli/manager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,13 +9,13 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\RepositoryManager\Tests\Api\Environment;
+namespace Puli\Manager\Tests\Api\Environment;
 
 use PHPUnit_Framework_TestCase;
-use Puli\RepositoryManager\Api\Config\Config;
-use Puli\RepositoryManager\Api\Config\ConfigFile;
-use Puli\RepositoryManager\Api\Environment\ProjectEnvironment;
-use Puli\RepositoryManager\Api\Package\RootPackageFile;
+use Puli\Manager\Api\Config\Config;
+use Puli\Manager\Api\Config\ConfigFile;
+use Puli\Manager\Api\Environment\ProjectEnvironment;
+use Puli\Manager\Api\Package\RootPackageFile;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
 /**

@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the puli/repository-manager package.
+ * This file is part of the puli/manager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,11 +9,11 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\RepositoryManager\Tests\Config;
+namespace Puli\Manager\Tests\Config;
 
 use PHPUnit_Framework_TestCase;
-use Puli\RepositoryManager\Api\Config\Config;
-use Puli\RepositoryManager\Config\ConfigJsonReader;
+use Puli\Manager\Api\Config\Config;
+use Puli\Manager\Config\ConfigJsonReader;
 
 /**
  * @since  1.0
@@ -35,7 +35,7 @@ class ConfigJsonReaderTest extends PHPUnit_Framework_TestCase
     {
         $configFile = $this->reader->readConfigFile(__DIR__.'/Fixtures/config.json');
 
-        $this->assertInstanceOf('Puli\RepositoryManager\Api\Config\ConfigFile', $configFile);
+        $this->assertInstanceOf('Puli\Manager\Api\Config\ConfigFile', $configFile);
         $this->assertSame(__DIR__.'/Fixtures/config.json', $configFile->getPath());
 
         $config = $configFile->getConfig();
@@ -51,7 +51,7 @@ class ConfigJsonReaderTest extends PHPUnit_Framework_TestCase
     {
         $configFile = $this->reader->readConfigFile(__DIR__.'/Fixtures/minimal.json');
 
-        $this->assertInstanceOf('Puli\RepositoryManager\Api\Config\ConfigFile', $configFile);
+        $this->assertInstanceOf('Puli\Manager\Api\Config\ConfigFile', $configFile);
 
         // default values
         $config = $configFile->getConfig();
@@ -78,7 +78,7 @@ class ConfigJsonReaderTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\RepositoryManager\Api\FileNotFoundException
+     * @expectedException \Puli\Manager\Api\FileNotFoundException
      * @expectedExceptionMessage bogus.json
      */
     public function testReadConfigFileFailsIfNotFound()
@@ -87,7 +87,7 @@ class ConfigJsonReaderTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\RepositoryManager\Api\InvalidConfigException
+     * @expectedException \Puli\Manager\Api\InvalidConfigException
      * @expectedExceptionMessage win-1258.json
      */
     public function testReadConfigFileFailsIfDecodingNotPossible()

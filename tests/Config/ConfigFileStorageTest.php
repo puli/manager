@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the puli/repository-manager package.
+ * This file is part of the puli/manager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,16 +9,16 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\RepositoryManager\Tests\Config;
+namespace Puli\Manager\Tests\Config;
 
 use PHPUnit_Framework_MockObject_MockObject;
 use PHPUnit_Framework_TestCase;
-use Puli\RepositoryManager\Api\Config\Config;
-use Puli\RepositoryManager\Api\Config\ConfigFile;
-use Puli\RepositoryManager\Api\Config\ConfigFileReader;
-use Puli\RepositoryManager\Api\Config\ConfigFileWriter;
-use Puli\RepositoryManager\Api\FileNotFoundException;
-use Puli\RepositoryManager\Config\ConfigFileStorage;
+use Puli\Manager\Api\Config\Config;
+use Puli\Manager\Api\Config\ConfigFile;
+use Puli\Manager\Api\Config\ConfigFileReader;
+use Puli\Manager\Api\Config\ConfigFileWriter;
+use Puli\Manager\Api\FileNotFoundException;
+use Puli\Manager\Config\ConfigFileStorage;
 
 /**
  * @since  1.0
@@ -43,8 +43,8 @@ class ConfigFileStorageTest extends PHPUnit_Framework_TestCase
 
     protected function setUp()
     {
-        $this->reader = $this->getMock('Puli\RepositoryManager\Api\Config\ConfigFileReader');
-        $this->writer = $this->getMock('Puli\RepositoryManager\Api\Config\ConfigFileWriter');
+        $this->reader = $this->getMock('Puli\Manager\Api\Config\ConfigFileReader');
+        $this->writer = $this->getMock('Puli\Manager\Api\Config\ConfigFileWriter');
 
         $this->storage = new ConfigFileStorage($this->reader, $this->writer);
     }

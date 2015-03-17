@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the puli/repository-manager package.
+ * This file is part of the puli/manager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,9 +9,9 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\RepositoryManager\Conflict;
+namespace Puli\Manager\Conflict;
 
-use Puli\RepositoryManager\Api\Package\PackageCollection;
+use Puli\Manager\Api\Package\PackageCollection;
 use RuntimeException;
 
 /**

@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the puli/repository-manager package.
+ * This file is part of the puli/manager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,19 +9,17 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\RepositoryManager\Package;
+namespace Puli\Manager\Package;
 
-use Puli\RepositoryManager\Api\Config\Config;
-use Puli\RepositoryManager\Api\Event\PackageFileEvent;
-use Puli\RepositoryManager\Api\Event\PuliEvents;
-use Puli\RepositoryManager\Api\FileNotFoundException;
-use Puli\RepositoryManager\Api\InvalidConfigException;
-use Puli\RepositoryManager\Api\IOException;
-use Puli\RepositoryManager\Api\Package\PackageFile;
-use Puli\RepositoryManager\Api\Package\PackageFileReader;
-use Puli\RepositoryManager\Api\Package\PackageFileWriter;
-use Puli\RepositoryManager\Api\Package\RootPackageFile;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Puli\Manager\Api\Config\Config;
+use Puli\Manager\Api\Event\PackageFileEvent;
+use Puli\Manager\Api\FileNotFoundException;
+use Puli\Manager\Api\InvalidConfigException;
+use Puli\Manager\Api\IOException;
+use Puli\Manager\Api\Package\PackageFile;
+use Puli\Manager\Api\Package\PackageFileReader;
+use Puli\Manager\Api\Package\PackageFileWriter;
+use Puli\Manager\Api\Package\RootPackageFile;
 
 /**
  * Loads and saves package files.

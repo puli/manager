@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the puli/repository-manager package.
+ * This file is part of the puli/manager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,12 +9,12 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\RepositoryManager\Discovery\Binding;
+namespace Puli\Manager\Discovery\Binding;
 
-use Puli\RepositoryManager\Api\Discovery\BindingDescriptor;
-use Puli\RepositoryManager\Api\Package\Package;
-use Puli\RepositoryManager\Discovery\Type\BindingTypeDescriptorCollection;
-use Puli\RepositoryManager\Transaction\AtomicOperation;
+use Puli\Manager\Api\Discovery\BindingDescriptor;
+use Puli\Manager\Api\Package\Package;
+use Puli\Manager\Discovery\Type\BindingTypeDescriptorCollection;
+use Puli\Manager\Transaction\AtomicOperation;
 
 /**
  * Loads a binding descriptor.

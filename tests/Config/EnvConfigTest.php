@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the puli/repository-manager package.
+ * This file is part of the puli/manager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,11 +9,11 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\RepositoryManager\Tests\Config;
+namespace Puli\Manager\Tests\Config;
 
 use PHPUnit_Framework_TestCase;
-use Puli\RepositoryManager\Api\Config\Config;
-use Puli\RepositoryManager\Config\EnvConfig;
+use Puli\Manager\Api\Config\Config;
+use Puli\Manager\Config\EnvConfig;
 
 /**
  * @since  1.0

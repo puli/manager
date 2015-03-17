@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the puli/repository-manager package.
+ * This file is part of the puli/manager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,13 +9,13 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\RepositoryManager\Repository\Mapping;
+namespace Puli\Manager\Repository\Mapping;
 
-use Puli\RepositoryManager\Api\Repository\RepositoryPathConflict;
-use Puli\RepositoryManager\Api\Repository\ResourceMapping;
-use Puli\RepositoryManager\Conflict\PackageConflict;
-use Puli\RepositoryManager\Conflict\PackageConflictDetector;
-use Puli\RepositoryManager\Transaction\AtomicOperation;
+use Puli\Manager\Api\Repository\RepositoryPathConflict;
+use Puli\Manager\Api\Repository\ResourceMapping;
+use Puli\Manager\Conflict\PackageConflict;
+use Puli\Manager\Conflict\PackageConflictDetector;
+use Puli\Manager\Transaction\AtomicOperation;
 use Webmozart\PathUtil\Path;
 
 /**

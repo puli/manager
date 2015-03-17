@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the puli/repository-manager package.
+ * This file is part of the puli/manager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,15 +9,15 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\RepositoryManager\Discovery\Type;
+namespace Puli\Manager\Discovery\Type;
 
-use Puli\RepositoryManager\Api\Discovery\BindingTypeDescriptor;
-use Puli\RepositoryManager\Api\Package\RootPackageFile;
-use Puli\RepositoryManager\Transaction\AtomicOperation;
+use Puli\Manager\Api\Discovery\BindingTypeDescriptor;
+use Puli\Manager\Api\Package\RootPackageFile;
+use Puli\Manager\Transaction\AtomicOperation;
 
 /**
  * Adds a type descriptor to the root package file.
- * 
+ *
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */

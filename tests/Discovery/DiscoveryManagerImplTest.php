@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the puli/repository-manager package.
+ * This file is part of the puli/manager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,28 +9,28 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\RepositoryManager\Tests\Discovery;
+namespace Puli\Manager\Tests\Discovery;
 
 use PHPUnit_Framework_Assert;
 use PHPUnit_Framework_MockObject_MockObject;
 use Psr\Log\LoggerInterface;
 use Puli\Discovery\Api\Binding\BindingType;
 use Puli\Discovery\Api\NoQueryMatchesException;
-use Puli\RepositoryManager\Api\Discovery\BindingDescriptor;
-use Puli\RepositoryManager\Api\Discovery\BindingParameterDescriptor;
-use Puli\RepositoryManager\Api\Discovery\BindingState;
-use Puli\RepositoryManager\Api\Discovery\BindingTypeDescriptor;
-use Puli\RepositoryManager\Api\Discovery\BindingTypeState;
-use Puli\RepositoryManager\Api\Package\InstallInfo;
-use Puli\RepositoryManager\Api\Package\Package;
-use Puli\RepositoryManager\Api\Package\PackageCollection;
-use Puli\RepositoryManager\Api\Package\PackageFile;
-use Puli\RepositoryManager\Api\Package\RootPackage;
-use Puli\RepositoryManager\Api\Package\RootPackageFile;
-use Puli\RepositoryManager\Discovery\DiscoveryManagerImpl;
-use Puli\RepositoryManager\Package\PackageFileStorage;
-use Puli\RepositoryManager\Tests\ManagerTestCase;
-use Puli\RepositoryManager\Tests\TestException;
+use Puli\Manager\Api\Discovery\BindingDescriptor;
+use Puli\Manager\Api\Discovery\BindingParameterDescriptor;
+use Puli\Manager\Api\Discovery\BindingState;
+use Puli\Manager\Api\Discovery\BindingTypeDescriptor;
+use Puli\Manager\Api\Discovery\BindingTypeState;
+use Puli\Manager\Api\Package\InstallInfo;
+use Puli\Manager\Api\Package\Package;
+use Puli\Manager\Api\Package\PackageCollection;
+use Puli\Manager\Api\Package\PackageFile;
+use Puli\Manager\Api\Package\RootPackage;
+use Puli\Manager\Api\Package\RootPackageFile;
+use Puli\Manager\Discovery\DiscoveryManagerImpl;
+use Puli\Manager\Package\PackageFileStorage;
+use Puli\Manager\Tests\ManagerTestCase;
+use Puli\Manager\Tests\TestException;
 use Rhumsaa\Uuid\Uuid;
 use Symfony\Component\Filesystem\Filesystem;
 use Webmozart\Expression\Expr;
@@ -136,7 +136,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
 
         $this->logger = $this->getMock('Psr\Log\LoggerInterface');
 
-        $this->packageFileStorage = $this->getMockBuilder('Puli\RepositoryManager\Package\PackageFileStorage')
+        $this->packageFileStorage = $this->getMockBuilder('Puli\Manager\Package\PackageFileStorage')
             ->disableOriginalConstructor()
             ->getMock();
 
@@ -825,7 +825,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
     }
 
     /**
-     * @expectedException \Puli\RepositoryManager\Api\Discovery\TypeNotEnabledException
+     * @expectedException \Puli\Manager\Api\Discovery\TypeNotEnabledException
      */
     public function testAddBindingFailsIfTypeNotEnabled()
     {
@@ -1282,7 +1282,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
     }
 
     /**
-     * @expectedException \Puli\RepositoryManager\Api\Discovery\NoSuchBindingException
+     * @expectedException \Puli\Manager\Api\Discovery\NoSuchBindingException
      * @expectedExceptionMessage 8546da2c-dfec-48be-8cd3-93798c41b72f
      */
     public function testEnableBindingFailsIfBindingNotFound()
@@ -1299,7 +1299,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
     }
 
     /**
-     * @expectedException \Puli\RepositoryManager\Api\Discovery\CannotEnableBindingException
+     * @expectedException \Puli\Manager\Api\Discovery\CannotEnableBindingException
      */
     public function testEnableBindingFailsIfBindingInRootPackageOnly()
     {
@@ -1318,7 +1318,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
     }
 
     /**
-     * @expectedException \Puli\RepositoryManager\Api\Discovery\CannotEnableBindingException
+     * @expectedException \Puli\Manager\Api\Discovery\CannotEnableBindingException
      */
     public function testEnableBindingFailsIfBindingInRootPackage()
     {
@@ -1338,7 +1338,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
     }
 
     /**
-     * @expectedException \Puli\RepositoryManager\Api\Discovery\CannotEnableBindingException
+     * @expectedException \Puli\Manager\Api\Discovery\CannotEnableBindingException
      */
     public function testEnableBindingFailsIfBindingHeldBack()
     {
@@ -1356,7 +1356,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
     }
 
     /**
-     * @expectedException \Puli\RepositoryManager\Api\Discovery\CannotEnableBindingException
+     * @expectedException \Puli\Manager\Api\Discovery\CannotEnableBindingException
      */
     public function testEnableBindingFailsIfBindingIgnored()
     {
@@ -1620,7 +1620,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
     }
 
     /**
-     * @expectedException \Puli\RepositoryManager\Api\Discovery\NoSuchBindingException
+     * @expectedException \Puli\Manager\Api\Discovery\NoSuchBindingException
      * @expectedExceptionMessage 8546da2c-dfec-48be-8cd3-93798c41b72f
      */
     public function testDisableBindingFailsIfBindingNotFound()
@@ -1637,7 +1637,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
     }
 
     /**
-     * @expectedException \Puli\RepositoryManager\Api\Discovery\CannotDisableBindingException
+     * @expectedException \Puli\Manager\Api\Discovery\CannotDisableBindingException
      */
     public function testDisableBindingFailsIfBindingInRootPackageOnly()
     {
@@ -1656,7 +1656,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
     }
 
     /**
-     * @expectedException \Puli\RepositoryManager\Api\Discovery\CannotDisableBindingException
+     * @expectedException \Puli\Manager\Api\Discovery\CannotDisableBindingException
      */
     public function testDisableBindingFailsIfBindingInRootPackage()
     {
@@ -1676,7 +1676,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
     }
 
     /**
-     * @expectedException \Puli\RepositoryManager\Api\Discovery\CannotDisableBindingException
+     * @expectedException \Puli\Manager\Api\Discovery\CannotDisableBindingException
      */
     public function testDisableBindingFailsIfBindingHeldBack()
     {
@@ -1694,7 +1694,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
     }
 
     /**
-     * @expectedException \Puli\RepositoryManager\Api\Discovery\CannotDisableBindingException
+     * @expectedException \Puli\Manager\Api\Discovery\CannotDisableBindingException
      */
     public function testDisableBindingFailsIfBindingIgnored()
     {
@@ -1796,7 +1796,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
     }
 
     /**
-     * @expectedException \Puli\RepositoryManager\Api\Discovery\NoSuchBindingException
+     * @expectedException \Puli\Manager\Api\Discovery\NoSuchBindingException
      */
     public function testGetBindingFailsIfNotFound()
     {
@@ -2060,7 +2060,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
     }
 
     /**
-     * @expectedException \Puli\RepositoryManager\Api\Discovery\DiscoveryNotEmptyException
+     * @expectedException \Puli\Manager\Api\Discovery\DiscoveryNotEmptyException
      */
     public function testBuildDiscoveryFailsIfDiscoveryContainsBindings()
     {
@@ -2077,7 +2077,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
     }
 
     /**
-     * @expectedException \Puli\RepositoryManager\Api\Discovery\DiscoveryNotEmptyException
+     * @expectedException \Puli\Manager\Api\Discovery\DiscoveryNotEmptyException
      */
     public function testBuildDiscoveryFailsIfDiscoveryContainsTypes()
     {

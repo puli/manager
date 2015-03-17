@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the puli/repository-manager package.
+ * This file is part of the puli/manager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\RepositoryManager\Repository\Mapping;
+namespace Puli\Manager\Repository\Mapping;
 
 use ArrayAccess;
 use ArrayIterator;
@@ -17,7 +17,7 @@ use Countable;
 use InvalidArgumentException;
 use IteratorAggregate;
 use OutOfBoundsException;
-use Puli\RepositoryManager\Api\Repository\RepositoryPathConflict;
+use Puli\Manager\Api\Repository\RepositoryPathConflict;
 
 /**
  * A collection of resource path conflicts.

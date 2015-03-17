@@ -9,9 +9,9 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\RepositoryManager\Api\Config;
+namespace Puli\Manager\Api\Config;
 
-use Puli\RepositoryManager\Api\InvalidConfigException;
+use Puli\Manager\Api\InvalidConfigException;
 
 /**
  * Stores configuration values.

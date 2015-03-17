@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the puli/repository-manager package.
+ * This file is part of the puli/manager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,19 +9,19 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\RepositoryManager\Tests\Factory;
+namespace Puli\Manager\Tests\Factory;
 
 use PHPUnit_Framework_Assert;
 use PHPUnit_Framework_MockObject_MockObject;
-use Puli\RepositoryManager\Api\Config\Config;
-use Puli\RepositoryManager\Api\Event\GenerateFactoryEvent;
-use Puli\RepositoryManager\Api\Event\PuliEvents;
-use Puli\RepositoryManager\Api\Php\Clazz;
-use Puli\RepositoryManager\Api\Php\Method;
-use Puli\RepositoryManager\Factory\FactoryManagerImpl;
-use Puli\RepositoryManager\Factory\Generator\DefaultGeneratorRegistry;
-use Puli\RepositoryManager\Php\ClassWriter;
-use Puli\RepositoryManager\Tests\ManagerTestCase;
+use Puli\Manager\Api\Config\Config;
+use Puli\Manager\Api\Event\GenerateFactoryEvent;
+use Puli\Manager\Api\Event\PuliEvents;
+use Puli\Manager\Api\Php\Clazz;
+use Puli\Manager\Api\Php\Method;
+use Puli\Manager\Factory\FactoryManagerImpl;
+use Puli\Manager\Factory\Generator\DefaultGeneratorRegistry;
+use Puli\Manager\Php\ClassWriter;
+use Puli\Manager\Tests\ManagerTestCase;
 use Symfony\Component\Filesystem\Filesystem;
 
 /**
@@ -69,7 +69,7 @@ class FactoryManagerImplTest extends ManagerTestCase
 
         $this->registry = new DefaultGeneratorRegistry();
         $this->realWriter = new ClassWriter();
-        $this->fakeWriter = $this->getMockBuilder('Puli\RepositoryManager\Php\ClassWriter')
+        $this->fakeWriter = $this->getMockBuilder('Puli\Manager\Php\ClassWriter')
             ->disableOriginalConstructor()
             ->getMock();
         $this->manager = new FactoryManagerImpl($this->environment, $this->registry, $this->realWriter);

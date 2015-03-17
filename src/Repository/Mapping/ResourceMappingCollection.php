@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the puli/repository-manager package.
+ * This file is part of the puli/manager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,11 +9,11 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\RepositoryManager\Repository\Mapping;
+namespace Puli\Manager\Repository\Mapping;
 
 use OutOfBoundsException;
-use Puli\RepositoryManager\Api\Repository\ResourceMapping;
-use Puli\RepositoryManager\Util\TwoDimensionalHashMap;
+use Puli\Manager\Api\Repository\ResourceMapping;
+use Puli\Manager\Util\TwoDimensionalHashMap;
 
 /**
  * A collection of resource mappings.

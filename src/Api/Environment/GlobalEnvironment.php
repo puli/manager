@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the puli/repository-manager package.
+ * This file is part of the puli/manager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,11 +9,11 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\RepositoryManager\Api\Environment;
+namespace Puli\Manager\Api\Environment;
 
-use Puli\RepositoryManager\Api\Config\Config;
-use Puli\RepositoryManager\Api\Config\ConfigFile;
-use Puli\RepositoryManager\Assert\Assert;
+use Puli\Manager\Api\Config\Config;
+use Puli\Manager\Api\Config\ConfigFile;
+use Puli\Manager\Assert\Assert;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Webmozart\PathUtil\Path;

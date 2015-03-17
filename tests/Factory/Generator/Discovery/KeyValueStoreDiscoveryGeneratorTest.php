@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the puli/repository-manager package.
+ * This file is part of the puli/manager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,12 +9,12 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\RepositoryManager\Tests\Factory\Generator\Discovery;
+namespace Puli\Manager\Tests\Factory\Generator\Discovery;
 
-use Puli\RepositoryManager\Api\Php\Import;
-use Puli\RepositoryManager\Api\Php\Method;
-use Puli\RepositoryManager\Factory\Generator\Discovery\KeyValueStoreDiscoveryGenerator;
-use Puli\RepositoryManager\Tests\Factory\Generator\AbstractGeneratorTest;
+use Puli\Manager\Api\Php\Import;
+use Puli\Manager\Api\Php\Method;
+use Puli\Manager\Factory\Generator\Discovery\KeyValueStoreDiscoveryGenerator;
+use Puli\Manager\Tests\Factory\Generator\AbstractGeneratorTest;
 
 /**
  * @since  1.0
@@ -38,7 +38,7 @@ class KeyValueStoreDiscoveryGeneratorTest extends AbstractGeneratorTest
     {
         // In the generated class, the repository is passed as argument.
         // Create a repository here so that we can run the code successfully.
-        $method->getClass()->addImport(new Import('Puli\RepositoryManager\Tests\Factory\Generator\Fixtures\TestRepository'));
+        $method->getClass()->addImport(new Import('Puli\Manager\Tests\Factory\Generator\Fixtures\TestRepository'));
 
         $method->setBody(
 <<<EOF

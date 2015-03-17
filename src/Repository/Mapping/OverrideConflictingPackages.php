@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the puli/repository-manager package.
+ * This file is part of the puli/manager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,12 +9,12 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\RepositoryManager\Repository\Mapping;
+namespace Puli\Manager\Repository\Mapping;
 
-use Puli\RepositoryManager\Api\Package\RootPackage;
-use Puli\RepositoryManager\Api\Repository\ResourceMapping;
-use Puli\RepositoryManager\Conflict\OverrideGraph;
-use Puli\RepositoryManager\Transaction\AtomicOperation;
+use Puli\Manager\Api\Package\RootPackage;
+use Puli\Manager\Api\Repository\ResourceMapping;
+use Puli\Manager\Conflict\OverrideGraph;
+use Puli\Manager\Transaction\AtomicOperation;
 
 /**
  * Adds an override statement for each package conflicting with the root package.

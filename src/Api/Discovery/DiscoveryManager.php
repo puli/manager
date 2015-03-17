@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the puli/repository-manager package.
+ * This file is part of the puli/manager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,11 +9,11 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\RepositoryManager\Api\Discovery;
+namespace Puli\Manager\Api\Discovery;
 
 use Puli\Discovery\Api\DuplicateTypeException;
 use Puli\Discovery\Api\NoSuchTypeException;
-use Puli\RepositoryManager\Api\Environment\ProjectEnvironment;
+use Puli\Manager\Api\Environment\ProjectEnvironment;
 use Rhumsaa\Uuid\Uuid;
 use Webmozart\Expression\Expression;
 

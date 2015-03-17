@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the puli/repository-manager package.
+ * This file is part of the puli/manager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,11 +9,11 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\RepositoryManager\Util;
+namespace Puli\Manager\Util;
 
-use Puli\RepositoryManager\Api\FileNotFoundException;
-use Puli\RepositoryManager\Api\InvalidConfigException;
-use Puli\RepositoryManager\Api\NoDirectoryException;
+use Puli\Manager\Api\FileNotFoundException;
+use Puli\Manager\Api\InvalidConfigException;
+use Puli\Manager\Api\NoDirectoryException;
 use Symfony\Component\Filesystem\Filesystem;
 
 /**

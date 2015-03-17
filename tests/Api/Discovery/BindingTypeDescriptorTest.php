@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the puli/repository-manager package.
+ * This file is part of the puli/manager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,15 +9,15 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\RepositoryManager\Tests\Api\Discovery;
+namespace Puli\Manager\Tests\Api\Discovery;
 
 use PHPUnit_Framework_TestCase;
-use Puli\RepositoryManager\Api\Discovery\BindingParameterDescriptor;
-use Puli\RepositoryManager\Api\Discovery\BindingTypeDescriptor;
-use Puli\RepositoryManager\Api\Discovery\BindingTypeState;
-use Puli\RepositoryManager\Api\Package\InstallInfo;
-use Puli\RepositoryManager\Api\Package\Package;
-use Puli\RepositoryManager\Api\Package\PackageFile;
+use Puli\Manager\Api\Discovery\BindingParameterDescriptor;
+use Puli\Manager\Api\Discovery\BindingTypeDescriptor;
+use Puli\Manager\Api\Discovery\BindingTypeState;
+use Puli\Manager\Api\Package\InstallInfo;
+use Puli\Manager\Api\Package\Package;
+use Puli\Manager\Api\Package\PackageFile;
 use Webmozart\Expression\Expr;
 
 /**

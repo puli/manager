@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the puli/repository-manager package.
+ * This file is part of the puli/manager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,9 +9,9 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\RepositoryManager\Discovery\Type;
+namespace Puli\Manager\Discovery\Type;
 
-use Puli\RepositoryManager\Transaction\OperationInterceptor;
+use Puli\Manager\Transaction\OperationInterceptor;
 use Rhumsaa\Uuid\Uuid;
 
 /**

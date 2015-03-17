@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the puli/repository-manager package.
+ * This file is part of the puli/manager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\RepositoryManager\Conflict;
+namespace Puli\Manager\Conflict;
 
 /**
  * Detects configuration conflicts between packages.
@@ -19,7 +19,7 @@ namespace Puli\RepositoryManager\Conflict;
  * raised:
  *
  * ```php
- * use Puli\RepositoryManager\Conflict\PackageConflictDetector;
+ * use Puli\Manager\Conflict\PackageConflictDetector;
  *
  * $detector = new PackageConflictDetector();
  * $detector->claim('/app/config', 'package1');
@@ -41,8 +41,8 @@ namespace Puli\RepositoryManager\Conflict;
  * not result in conflicts for these packages:
  *
  * ```php
- * use Puli\RepositoryManager\Conflict\OverrideGraph;
- * use Puli\RepositoryManager\Conflict\PackageConflictDetector;
+ * use Puli\Manager\Conflict\OverrideGraph;
+ * use Puli\Manager\Conflict\PackageConflictDetector;
  *
  * $graph = new OverrideGraph();
  * $graph->addPackageName('package1');

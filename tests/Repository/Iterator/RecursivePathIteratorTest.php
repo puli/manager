@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the puli/repository-manager package.
+ * This file is part of the puli/manager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,10 +9,10 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\RepositoryManager\Tests\Repository\Iterator;
+namespace Puli\Manager\Tests\Repository\Iterator;
 
 use PHPUnit_Framework_TestCase;
-use Puli\RepositoryManager\Repository\Iterator\RecursivePathIterator;
+use Puli\Manager\Repository\Iterator\RecursivePathIterator;
 use RecursiveIteratorIterator;
 use Symfony\Component\Filesystem\Filesystem;
 

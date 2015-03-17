@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the puli/repository-manager package.
+ * This file is part of the puli/manager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,14 +9,14 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\RepositoryManager\Tests\Repository;
+namespace Puli\Manager\Tests\Repository;
 
 use PHPUnit_Framework_TestCase;
-use Puli\RepositoryManager\Api\Package\Package;
-use Puli\RepositoryManager\Api\Package\PackageCollection;
-use Puli\RepositoryManager\Api\Package\PackageFile;
-use Puli\RepositoryManager\Api\Repository\RepositoryPathConflict;
-use Puli\RepositoryManager\Api\Repository\ResourceMapping;
+use Puli\Manager\Api\Package\Package;
+use Puli\Manager\Api\Package\PackageCollection;
+use Puli\Manager\Api\Package\PackageFile;
+use Puli\Manager\Api\Repository\RepositoryPathConflict;
+use Puli\Manager\Api\Repository\ResourceMapping;
 
 /**
  * @since  1.0
@@ -130,7 +130,7 @@ class RepositoryPathConflictTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\RepositoryManager\Api\NotLoadedException
+     * @expectedException \Puli\Manager\Api\NotLoadedException
      */
     public function testAddMappingFailsIfPackageNotLoaded()
     {
@@ -208,7 +208,7 @@ class RepositoryPathConflictTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\RepositoryManager\Api\NotLoadedException
+     * @expectedException \Puli\Manager\Api\NotLoadedException
      */
     public function testRemoveMappingFailsIfPackageNotLoaded()
     {

@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the puli/repository-manager package.
+ * This file is part of the puli/manager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,10 +9,10 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\RepositoryManager\Tests\Factory\Generator\KeyValueStore;
+namespace Puli\Manager\Tests\Factory\Generator\KeyValueStore;
 
-use Puli\RepositoryManager\Factory\Generator\KeyValueStore\NullStoreGenerator;
-use Puli\RepositoryManager\Tests\Factory\Generator\AbstractGeneratorTest;
+use Puli\Manager\Factory\Generator\KeyValueStore\NullStoreGenerator;
+use Puli\Manager\Tests\Factory\Generator\AbstractGeneratorTest;
 
 /**
  * @since  1.0

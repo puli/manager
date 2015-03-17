@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the puli/repository-manager package.
+ * This file is part of the puli/manager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,43 +9,43 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\RepositoryManager\Api;
+namespace Puli\Manager\Api;
 
 use LogicException;
 use Psr\Log\LoggerInterface;
 use Puli\Discovery\Api\EditableDiscovery;
 use Puli\Discovery\Api\ResourceDiscovery;
 use Puli\Factory\PuliFactory;
+use Puli\Manager\Api\Config\ConfigFileManager;
+use Puli\Manager\Api\Discovery\DiscoveryManager;
+use Puli\Manager\Api\Environment\GlobalEnvironment;
+use Puli\Manager\Api\Environment\ProjectEnvironment;
+use Puli\Manager\Api\Factory\FactoryManager;
+use Puli\Manager\Api\Package\Package;
+use Puli\Manager\Api\Package\PackageManager;
+use Puli\Manager\Api\Package\PackageState;
+use Puli\Manager\Api\Package\RootPackageFileManager;
+use Puli\Manager\Api\Repository\RepositoryManager;
+use Puli\Manager\Assert\Assert;
+use Puli\Manager\Config\ConfigFileManagerImpl;
+use Puli\Manager\Config\ConfigFileStorage;
+use Puli\Manager\Config\ConfigJsonReader;
+use Puli\Manager\Config\ConfigJsonWriter;
+use Puli\Manager\Config\DefaultConfig;
+use Puli\Manager\Config\EnvConfig;
+use Puli\Manager\Discovery\DiscoveryManagerImpl;
+use Puli\Manager\Factory\FactoryManagerImpl;
+use Puli\Manager\Factory\Generator\DefaultGeneratorRegistry;
+use Puli\Manager\Package\PackageFileStorage;
+use Puli\Manager\Package\PackageJsonReader;
+use Puli\Manager\Package\PackageJsonWriter;
+use Puli\Manager\Package\PackageManagerImpl;
+use Puli\Manager\Package\RootPackageFileManagerImpl;
+use Puli\Manager\Php\ClassWriter;
+use Puli\Manager\Repository\RepositoryManagerImpl;
+use Puli\Manager\Util\System;
 use Puli\Repository\Api\EditableRepository;
 use Puli\Repository\Api\ResourceRepository;
-use Puli\RepositoryManager\Api\Config\ConfigFileManager;
-use Puli\RepositoryManager\Api\Discovery\DiscoveryManager;
-use Puli\RepositoryManager\Api\Environment\GlobalEnvironment;
-use Puli\RepositoryManager\Api\Environment\ProjectEnvironment;
-use Puli\RepositoryManager\Api\Factory\FactoryManager;
-use Puli\RepositoryManager\Api\Package\Package;
-use Puli\RepositoryManager\Api\Package\PackageManager;
-use Puli\RepositoryManager\Api\Package\PackageState;
-use Puli\RepositoryManager\Api\Package\RootPackageFileManager;
-use Puli\RepositoryManager\Api\Repository\RepositoryManager;
-use Puli\RepositoryManager\Assert\Assert;
-use Puli\RepositoryManager\Config\ConfigFileManagerImpl;
-use Puli\RepositoryManager\Config\ConfigFileStorage;
-use Puli\RepositoryManager\Config\ConfigJsonReader;
-use Puli\RepositoryManager\Config\ConfigJsonWriter;
-use Puli\RepositoryManager\Config\DefaultConfig;
-use Puli\RepositoryManager\Config\EnvConfig;
-use Puli\RepositoryManager\Discovery\DiscoveryManagerImpl;
-use Puli\RepositoryManager\Factory\FactoryManagerImpl;
-use Puli\RepositoryManager\Factory\Generator\DefaultGeneratorRegistry;
-use Puli\RepositoryManager\Package\PackageFileStorage;
-use Puli\RepositoryManager\Package\PackageJsonReader;
-use Puli\RepositoryManager\Package\PackageJsonWriter;
-use Puli\RepositoryManager\Package\PackageManagerImpl;
-use Puli\RepositoryManager\Package\RootPackageFileManagerImpl;
-use Puli\RepositoryManager\Php\ClassWriter;
-use Puli\RepositoryManager\Repository\RepositoryManagerImpl;
-use Puli\RepositoryManager\Util\System;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Webmozart\Expression\Expr;
@@ -682,7 +682,7 @@ class Puli
             ));
         }
 
-        if (!in_array('Puli\RepositoryManager\Api\PuliPlugin', class_implements($pluginClass))) {
+        if (!in_array('Puli\Manager\Api\PuliPlugin', class_implements($pluginClass))) {
             throw new InvalidConfigException(sprintf(
                 'The plugin class %s must implement PuliPlugin.',
                 $pluginClass

@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the puli/repository-manager package.
+ * This file is part of the puli/manager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,17 +9,17 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\RepositoryManager\Tests\Package;
+namespace Puli\Manager\Tests\Package;
 
 use PHPUnit_Framework_TestCase;
-use Puli\RepositoryManager\Api\Config\Config;
-use Puli\RepositoryManager\Api\Discovery\BindingDescriptor;
-use Puli\RepositoryManager\Api\Discovery\BindingParameterDescriptor;
-use Puli\RepositoryManager\Api\Discovery\BindingTypeDescriptor;
-use Puli\RepositoryManager\Api\Package\InstallInfo;
-use Puli\RepositoryManager\Api\Package\PackageFile;
-use Puli\RepositoryManager\Api\Repository\ResourceMapping;
-use Puli\RepositoryManager\Package\PackageJsonReader;
+use Puli\Manager\Api\Config\Config;
+use Puli\Manager\Api\Discovery\BindingDescriptor;
+use Puli\Manager\Api\Discovery\BindingParameterDescriptor;
+use Puli\Manager\Api\Discovery\BindingTypeDescriptor;
+use Puli\Manager\Api\Package\InstallInfo;
+use Puli\Manager\Api\Package\PackageFile;
+use Puli\Manager\Api\Repository\ResourceMapping;
+use Puli\Manager\Package\PackageJsonReader;
 use Rhumsaa\Uuid\Uuid;
 
 /**
@@ -48,8 +48,8 @@ class PackageJsonReaderTest extends PHPUnit_Framework_TestCase
     {
         $packageFile = $this->reader->readPackageFile(__DIR__.'/Fixtures/json/full.json');
 
-        $this->assertInstanceOf('Puli\RepositoryManager\Api\Package\PackageFile', $packageFile);
-        $this->assertNotInstanceOf('Puli\RepositoryManager\Api\Package\RootPackageFile', $packageFile);
+        $this->assertInstanceOf('Puli\Manager\Api\Package\PackageFile', $packageFile);
+        $this->assertNotInstanceOf('Puli\Manager\Api\Package\RootPackageFile', $packageFile);
         $this->assertSame(__DIR__.'/Fixtures/json/full.json', $packageFile->getPath());
         $this->assertFullConfig($packageFile);
     }
@@ -64,7 +64,7 @@ class PackageJsonReaderTest extends PHPUnit_Framework_TestCase
         $installInfo1->addDisabledBindingUuid(Uuid::fromString('4d02ee67-d845-4789-a9c1-8301351c6f5a'));
         $installInfo2 = new InstallInfo('vendor/package2', '/path/to/package2');
 
-        $this->assertInstanceOf('Puli\RepositoryManager\Api\Package\RootPackageFile', $packageFile);
+        $this->assertInstanceOf('Puli\Manager\Api\Package\RootPackageFile', $packageFile);
         $this->assertSame(__DIR__.'/Fixtures/json/full-root.json', $packageFile->getPath());
         $this->assertFullConfig($packageFile);
         $this->assertSame(array('acme/blog-extension1', 'acme/blog-extension2'), $packageFile->getOverrideOrder());
@@ -83,8 +83,8 @@ class PackageJsonReaderTest extends PHPUnit_Framework_TestCase
     {
         $packageFile = $this->reader->readPackageFile(__DIR__.'/Fixtures/json/minimal.json');
 
-        $this->assertInstanceOf('Puli\RepositoryManager\Api\Package\PackageFile', $packageFile);
-        $this->assertNotInstanceOf('Puli\RepositoryManager\Api\Package\RootPackageFile', $packageFile);
+        $this->assertInstanceOf('Puli\Manager\Api\Package\PackageFile', $packageFile);
+        $this->assertNotInstanceOf('Puli\Manager\Api\Package\RootPackageFile', $packageFile);
         $this->assertMinimalConfig($packageFile);
     }
 
@@ -92,7 +92,7 @@ class PackageJsonReaderTest extends PHPUnit_Framework_TestCase
     {
         $packageFile = $this->reader->readRootPackageFile(__DIR__.'/Fixtures/json/minimal.json', $this->baseConfig);
 
-        $this->assertInstanceOf('Puli\RepositoryManager\Api\Package\RootPackageFile', $packageFile);
+        $this->assertInstanceOf('Puli\Manager\Api\Package\RootPackageFile', $packageFile);
         $this->assertMinimalConfig($packageFile);
         $this->assertSame(array(), $packageFile->getOverrideOrder());
     }
@@ -101,7 +101,7 @@ class PackageJsonReaderTest extends PHPUnit_Framework_TestCase
     {
         $packageFile = $this->reader->readPackageFile(__DIR__.'/Fixtures/json/type-param-required.json', $this->baseConfig);
 
-        $this->assertInstanceOf('Puli\RepositoryManager\Api\Package\PackageFile', $packageFile);
+        $this->assertInstanceOf('Puli\Manager\Api\Package\PackageFile', $packageFile);
         $this->assertEquals(array(
             new BindingTypeDescriptor('my/type', null, array(
                 new BindingParameterDescriptor('param', true),
@@ -113,7 +113,7 @@ class PackageJsonReaderTest extends PHPUnit_Framework_TestCase
     {
         $packageFile = $this->reader->readPackageFile(__DIR__.'/Fixtures/json/binding-params.json', $this->baseConfig);
 
-        $this->assertInstanceOf('Puli\RepositoryManager\Api\Package\PackageFile', $packageFile);
+        $this->assertInstanceOf('Puli\Manager\Api\Package\PackageFile', $packageFile);
         $this->assertEquals(array(new BindingDescriptor(
             '/app/config*.yml',
             'my/type',
@@ -125,7 +125,7 @@ class PackageJsonReaderTest extends PHPUnit_Framework_TestCase
     {
         $packageFile = $this->reader->readPackageFile(__DIR__.'/Fixtures/json/binding-language.json', $this->baseConfig);
 
-        $this->assertInstanceOf('Puli\RepositoryManager\Api\Package\PackageFile', $packageFile);
+        $this->assertInstanceOf('Puli\Manager\Api\Package\PackageFile', $packageFile);
         $this->assertEquals(array(new BindingDescriptor(
             '//resource[name="config.yml"]',
             'my/type',
@@ -144,7 +144,7 @@ class PackageJsonReaderTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\RepositoryManager\Api\InvalidConfigException
+     * @expectedException \Puli\Manager\Api\InvalidConfigException
      * @expectedExceptionMessage extra-prop.json
      */
     public function testReadPackageFileValidatesSchema()
@@ -153,7 +153,7 @@ class PackageJsonReaderTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\RepositoryManager\Api\InvalidConfigException
+     * @expectedException \Puli\Manager\Api\InvalidConfigException
      * @expectedExceptionMessage extra-prop.json
      */
     public function testReadRootPackageFileValidatesSchema()
@@ -162,7 +162,7 @@ class PackageJsonReaderTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\RepositoryManager\Api\FileNotFoundException
+     * @expectedException \Puli\Manager\Api\FileNotFoundException
      * @expectedExceptionMessage bogus.json
      */
     public function testReadPackageFileFailsIfNotFound()
@@ -171,7 +171,7 @@ class PackageJsonReaderTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\RepositoryManager\Api\FileNotFoundException
+     * @expectedException \Puli\Manager\Api\FileNotFoundException
      * @expectedExceptionMessage bogus.json
      */
     public function testReadRootPackageFileFailsIfNotFound()
@@ -180,7 +180,7 @@ class PackageJsonReaderTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\RepositoryManager\Api\InvalidConfigException
+     * @expectedException \Puli\Manager\Api\InvalidConfigException
      * @expectedExceptionMessage win-1258.json
      */
     public function testReadPackageFileFailsIfDecodingNotPossible()
@@ -195,7 +195,7 @@ class PackageJsonReaderTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\RepositoryManager\Api\InvalidConfigException
+     * @expectedException \Puli\Manager\Api\InvalidConfigException
      * @expectedExceptionMessage win-1258.json
      */
     public function testReadRootPackageFileFailsIfDecodingNotPossible()
@@ -210,7 +210,7 @@ class PackageJsonReaderTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\RepositoryManager\Api\Package\UnsupportedVersionException
+     * @expectedException \Puli\Manager\Api\Package\UnsupportedVersionException
      * @expectedExceptionMessage lowest readable version
      */
     public function testReadPackageFileVersionTooLow()
@@ -219,7 +219,7 @@ class PackageJsonReaderTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\RepositoryManager\Api\Package\UnsupportedVersionException
+     * @expectedException \Puli\Manager\Api\Package\UnsupportedVersionException
      * @expectedExceptionMessage highest readable version
      */
     public function testReadPackageFileVersionTooHigh()
@@ -228,7 +228,7 @@ class PackageJsonReaderTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\RepositoryManager\Api\Package\UnsupportedVersionException
+     * @expectedException \Puli\Manager\Api\Package\UnsupportedVersionException
      * @expectedExceptionMessage lowest readable version
      */
     public function testReadRootPackageFileVersionTooLow()
@@ -237,7 +237,7 @@ class PackageJsonReaderTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\RepositoryManager\Api\Package\UnsupportedVersionException
+     * @expectedException \Puli\Manager\Api\Package\UnsupportedVersionException
      * @expectedExceptionMessage highest readable version
      */
     public function testReadRootPackageFileVersionTooHigh()
@@ -250,7 +250,7 @@ class PackageJsonReaderTest extends PHPUnit_Framework_TestCase
     ////////////////////////////////////////////////////////////////////////////
 
     /**
-     * @expectedException \Puli\RepositoryManager\Api\InvalidConfigException
+     * @expectedException \Puli\Manager\Api\InvalidConfigException
      */
     public function testNameMustBeString()
     {
@@ -258,7 +258,7 @@ class PackageJsonReaderTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\RepositoryManager\Api\InvalidConfigException
+     * @expectedException \Puli\Manager\Api\InvalidConfigException
      */
     public function testResourcesMustBeObject()
     {
@@ -266,7 +266,7 @@ class PackageJsonReaderTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\RepositoryManager\Api\InvalidConfigException
+     * @expectedException \Puli\Manager\Api\InvalidConfigException
      */
     public function testBindingTypesMustBeObject()
     {
@@ -274,7 +274,7 @@ class PackageJsonReaderTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\RepositoryManager\Api\InvalidConfigException
+     * @expectedException \Puli\Manager\Api\InvalidConfigException
      */
     public function testBindingsMustBeObject()
     {
@@ -289,7 +289,7 @@ class PackageJsonReaderTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\RepositoryManager\Api\InvalidConfigException
+     * @expectedException \Puli\Manager\Api\InvalidConfigException
      */
     public function testOverrideMustBeStringOrArray()
     {
@@ -297,7 +297,7 @@ class PackageJsonReaderTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\RepositoryManager\Api\InvalidConfigException
+     * @expectedException \Puli\Manager\Api\InvalidConfigException
      */
     public function testOverrideEntriesMustBeStrings()
     {
@@ -305,7 +305,7 @@ class PackageJsonReaderTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\RepositoryManager\Api\InvalidConfigException
+     * @expectedException \Puli\Manager\Api\InvalidConfigException
      */
     public function testPackageOrderMustBeArray()
     {
@@ -313,7 +313,7 @@ class PackageJsonReaderTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\RepositoryManager\Api\InvalidConfigException
+     * @expectedException \Puli\Manager\Api\InvalidConfigException
      */
     public function testPackageOrderEntriesMustBeStrings()
     {

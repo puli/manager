@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the puli/repository-manager package.
+ * This file is part of the puli/manager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,9 +9,9 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\RepositoryManager\Api\Factory\Generator;
+namespace Puli\Manager\Api\Factory\Generator;
 
-use Puli\RepositoryManager\Api\Php\Method;
+use Puli\Manager\Api\Php\Method;
 
 /**
  * Generates the instantiation code for a service.

@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the puli/repository-manager package.
+ * This file is part of the puli/manager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,18 +9,18 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\RepositoryManager\Tests\Config;
+namespace Puli\Manager\Tests\Config;
 
 use PHPUnit_Framework_Assert;
 use PHPUnit_Framework_MockObject_MockObject;
 use PHPUnit_Framework_TestCase;
-use Puli\RepositoryManager\Api\Config\Config;
-use Puli\RepositoryManager\Api\Config\ConfigFile;
-use Puli\RepositoryManager\Api\Environment\GlobalEnvironment;
-use Puli\RepositoryManager\Api\Factory\FactoryManager;
-use Puli\RepositoryManager\Config\ConfigFileManagerImpl;
-use Puli\RepositoryManager\Config\ConfigFileStorage;
-use Puli\RepositoryManager\Tests\TestException;
+use Puli\Manager\Api\Config\Config;
+use Puli\Manager\Api\Config\ConfigFile;
+use Puli\Manager\Api\Environment\GlobalEnvironment;
+use Puli\Manager\Api\Factory\FactoryManager;
+use Puli\Manager\Config\ConfigFileManagerImpl;
+use Puli\Manager\Config\ConfigFileStorage;
+use Puli\Manager\Tests\TestException;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
@@ -83,11 +83,11 @@ class ConfigFileManagerImplTest extends PHPUnit_Framework_TestCase
             $this->dispatcher
         );
 
-        $this->configFileStorage = $this->getMockBuilder('Puli\RepositoryManager\Config\ConfigFileStorage')
+        $this->configFileStorage = $this->getMockBuilder('Puli\Manager\Config\ConfigFileStorage')
             ->disableOriginalConstructor()
             ->getMock();
 
-        $this->factoryManager = $this->getMock('Puli\RepositoryManager\Api\Factory\FactoryManager');
+        $this->factoryManager = $this->getMock('Puli\Manager\Api\Factory\FactoryManager');
 
         $this->manager = new ConfigFileManagerImpl($this->environment, $this->configFileStorage, $this->factoryManager);
     }

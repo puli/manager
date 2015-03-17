@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the puli/repository-manager package.
+ * This file is part of the puli/manager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,10 +9,10 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\RepositoryManager\Tests\Api\Package;
+namespace Puli\Manager\Tests\Api\Package;
 
 use PHPUnit_Framework_TestCase;
-use Puli\RepositoryManager\Api\Package\InstallInfo;
+use Puli\Manager\Api\Package\InstallInfo;
 use Rhumsaa\Uuid\Uuid;
 
 /**

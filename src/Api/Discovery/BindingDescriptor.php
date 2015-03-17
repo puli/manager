@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the puli/repository-manager package.
+ * This file is part of the puli/manager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,18 +9,18 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\RepositoryManager\Api\Discovery;
+namespace Puli\Manager\Api\Discovery;
 
 use InvalidArgumentException;
 use Puli\Discovery\Api\Binding\NoSuchParameterException;
 use Puli\Discovery\Api\Validation\ConstraintViolation;
 use Puli\Discovery\Validation\SimpleParameterValidator;
-use Puli\RepositoryManager\Api\AlreadyLoadedException;
-use Puli\RepositoryManager\Api\NotLoadedException;
-use Puli\RepositoryManager\Api\Package\Package;
-use Puli\RepositoryManager\Api\Package\RootPackage;
-use Puli\RepositoryManager\Assert\Assert;
-use Puli\RepositoryManager\Util\DistinguishedName;
+use Puli\Manager\Api\AlreadyLoadedException;
+use Puli\Manager\Api\NotLoadedException;
+use Puli\Manager\Api\Package\Package;
+use Puli\Manager\Api\Package\RootPackage;
+use Puli\Manager\Assert\Assert;
+use Puli\Manager\Util\DistinguishedName;
 use Rhumsaa\Uuid\Uuid;
 use Webmozart\Expression\Expression;
 

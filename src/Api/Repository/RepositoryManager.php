@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the puli/repository-manager package.
+ * This file is part of the puli/manager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,12 +9,12 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\RepositoryManager\Api\Repository;
+namespace Puli\Manager\Api\Repository;
 
-use Puli\RepositoryManager\Api\Environment\ProjectEnvironment;
-use Puli\RepositoryManager\Api\NoDirectoryException;
-use Puli\RepositoryManager\Config\Config;
-use Puli\RepositoryManager\Conflict\PackageConflictException;
+use Puli\Manager\Api\Environment\ProjectEnvironment;
+use Puli\Manager\Api\NoDirectoryException;
+use Puli\Manager\Config\Config;
+use Puli\Manager\Conflict\PackageConflictException;
 
 /**
  * Manages the resource repository of a Puli project.

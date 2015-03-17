@@ -1,8 +1,8 @@
 {
     "version": "1.0",
     "plugins": [
-        "Puli\\RepositoryManager\\Tests\\Package\\PluginA",
-        "Puli\\RepositoryManager\\Tests\\Package\\PluginB",
-        "Puli\\RepositoryManager\\Tests\\Package\\PluginC"
+        "Puli\\Manager\\Tests\\Package\\PluginA",
+        "Puli\\Manager\\Tests\\Package\\PluginB",
+        "Puli\\Manager\\Tests\\Package\\PluginC"
     ]
 }

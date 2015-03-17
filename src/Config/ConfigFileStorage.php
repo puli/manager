@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the puli/repository-manager package.
+ * This file is part of the puli/manager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,15 +9,15 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\RepositoryManager\Config;
+namespace Puli\Manager\Config;
 
-use Puli\RepositoryManager\Api\Config\Config;
-use Puli\RepositoryManager\Api\Config\ConfigFile;
-use Puli\RepositoryManager\Api\Config\ConfigFileReader;
-use Puli\RepositoryManager\Api\Config\ConfigFileWriter;
-use Puli\RepositoryManager\Api\FileNotFoundException;
-use Puli\RepositoryManager\Api\InvalidConfigException;
-use Puli\RepositoryManager\Api\IOException;
+use Puli\Manager\Api\Config\Config;
+use Puli\Manager\Api\Config\ConfigFile;
+use Puli\Manager\Api\Config\ConfigFileReader;
+use Puli\Manager\Api\Config\ConfigFileWriter;
+use Puli\Manager\Api\FileNotFoundException;
+use Puli\Manager\Api\InvalidConfigException;
+use Puli\Manager\Api\IOException;
 
 /**
  * Loads and saves configuration files.

@@ -1,4 +1,4 @@
-<?php /** @var \Puli\RepositoryManager\Api\Php\Clazz $class */ ?>
+<?php /** @var \Puli\Manager\Api\Php\Clazz $class */ ?>
 
 <?php if ($class->getNamespaceName()): ?>
 namespace <?php echo $class->getNamespaceName() ?>;

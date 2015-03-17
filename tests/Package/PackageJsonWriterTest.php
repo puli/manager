@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the puli/repository-manager package.
+ * This file is part of the puli/manager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,21 +9,21 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\RepositoryManager\Tests\Package;
+namespace Puli\Manager\Tests\Package;
 
-use Puli\RepositoryManager\Api\Config\Config;
-use Puli\RepositoryManager\Api\Discovery\BindingDescriptor;
-use Puli\RepositoryManager\Api\Discovery\BindingParameterDescriptor;
-use Puli\RepositoryManager\Api\Discovery\BindingTypeDescriptor;
-use Puli\RepositoryManager\Api\Package\InstallInfo;
-use Puli\RepositoryManager\Api\Package\Package;
-use Puli\RepositoryManager\Api\Package\PackageFile;
-use Puli\RepositoryManager\Api\Package\RootPackageFile;
-use Puli\RepositoryManager\Api\Puli;
-use Puli\RepositoryManager\Api\PuliPlugin;
-use Puli\RepositoryManager\Api\Repository\ResourceMapping;
-use Puli\RepositoryManager\Package\PackageJsonWriter;
-use Puli\RepositoryManager\Tests\JsonWriterTestCase;
+use Puli\Manager\Api\Config\Config;
+use Puli\Manager\Api\Discovery\BindingDescriptor;
+use Puli\Manager\Api\Discovery\BindingParameterDescriptor;
+use Puli\Manager\Api\Discovery\BindingTypeDescriptor;
+use Puli\Manager\Api\Package\InstallInfo;
+use Puli\Manager\Api\Package\Package;
+use Puli\Manager\Api\Package\PackageFile;
+use Puli\Manager\Api\Package\RootPackageFile;
+use Puli\Manager\Api\Puli;
+use Puli\Manager\Api\PuliPlugin;
+use Puli\Manager\Api\Repository\ResourceMapping;
+use Puli\Manager\Package\PackageJsonWriter;
+use Puli\Manager\Tests\JsonWriterTestCase;
 use Rhumsaa\Uuid\Uuid;
 use Symfony\Component\Filesystem\Filesystem;
 
@@ -297,7 +297,7 @@ class PackageJsonWriterTest extends JsonWriterTestCase
             'acme/blog-extension1',
             'acme/blog-extension2'
         ));
-        $packageFile->addPluginClass('Puli\RepositoryManager\Tests\Api\Package\Fixtures\TestPlugin');
+        $packageFile->addPluginClass('Puli\Manager\Tests\Api\Package\Fixtures\TestPlugin');
         $packageFile->getConfig()->merge(array(
             Config::PULI_DIR => 'puli-dir',
             Config::FACTORY_CLASS => 'Puli\MyFactory',
@@ -444,7 +444,7 @@ class PackageJsonWriterTest extends JsonWriterTestCase
 
     /**
      * @dataProvider provideInvalidPaths
-     * @expectedException \Puli\RepositoryManager\Api\IOException
+     * @expectedException \Puli\Manager\Api\IOException
      */
     public function testWriteConfigExpectsValidPath($invalidPath)
     {

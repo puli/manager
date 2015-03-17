@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the puli/repository-manager package.
+ * This file is part of the puli/manager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,13 +9,13 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\RepositoryManager\Package;
+namespace Puli\Manager\Package;
 
-use Puli\RepositoryManager\Api\IOException;
-use Puli\RepositoryManager\Api\Package\InstallInfo;
-use Puli\RepositoryManager\Api\Package\PackageFile;
-use Puli\RepositoryManager\Api\Package\PackageFileWriter;
-use Puli\RepositoryManager\Api\Package\RootPackageFile;
+use Puli\Manager\Api\IOException;
+use Puli\Manager\Api\Package\InstallInfo;
+use Puli\Manager\Api\Package\PackageFile;
+use Puli\Manager\Api\Package\PackageFileWriter;
+use Puli\Manager\Api\Package\RootPackageFile;
 use stdClass;
 use Symfony\Component\Filesystem\Filesystem;
 use Webmozart\Json\JsonEncoder;
@@ -97,7 +97,7 @@ class PackageJsonWriter implements PackageFileWriter
         }
 
         if (count($bindings) > 0) {
-            uasort($bindings, array('Puli\RepositoryManager\Api\Discovery\BindingDescriptor', 'compare'));
+            uasort($bindings, array('Puli\Manager\Api\Discovery\BindingDescriptor', 'compare'));
 
             $jsonData['bindings'] = new stdClass();
 

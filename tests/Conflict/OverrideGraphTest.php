@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the puli/repository-manager package.
+ * This file is part of the puli/manager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,10 +9,10 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\RepositoryManager\Tests\Conflict;
+namespace Puli\Manager\Tests\Conflict;
 
 use PHPUnit_Framework_TestCase;
-use Puli\RepositoryManager\Conflict\OverrideGraph;
+use Puli\Manager\Conflict\OverrideGraph;
 
 /**
  * @since  1.0
@@ -128,7 +128,7 @@ class OverrideGraphTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\RepositoryManager\Conflict\CyclicDependencyException
+     * @expectedException \Puli\Manager\Conflict\CyclicDependencyException
      */
     public function testAddEdgeFailsIfCycle()
     {

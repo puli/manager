@@ -1,14 +1,14 @@
-The Puli Repository Manager Component
-=====================================
+The Puli Manager Component
+==========================
 
-[![Build Status](https://travis-ci.org/puli/repository-manager.svg?branch=master)](https://travis-ci.org/puli/repository-manager)
-[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/puli/repository-manager/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/puli/repository-manager/?branch=master)
+[![Build Status](https://travis-ci.org/puli/manager.svg?branch=master)](https://travis-ci.org/puli/manager)
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/puli/manager/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/puli/manager/?branch=master)
 [![SensioLabsInsight](https://insight.sensiolabs.com/projects/6505ed38-0d0f-4c8d-ac85-f343f8e135a9/mini.png)](https://insight.sensiolabs.com/projects/6505ed38-0d0f-4c8d-ac85-f343f8e135a9)
-[![Latest Stable Version](https://poser.pugx.org/puli/repository-manager/v/stable.svg)](https://packagist.org/packages/puli/repository-manager)
-[![Total Downloads](https://poser.pugx.org/puli/repository-manager/downloads.svg)](https://packagist.org/packages/puli/repository-manager)
-[![Dependency Status](https://www.versioneye.com/php/puli:repository-manager/1.0.0/badge.svg)](https://www.versioneye.com/php/puli:repository-manager/1.0.0)
+[![Latest Stable Version](https://poser.pugx.org/puli/manager/v/stable.svg)](https://packagist.org/packages/puli/manager)
+[![Total Downloads](https://poser.pugx.org/puli/manager/downloads.svg)](https://packagist.org/packages/puli/manager)
+[![Dependency Status](https://www.versioneye.com/php/puli:manager/1.0.0/badge.svg)](https://www.versioneye.com/php/puli:manager/1.0.0)
 
-Latest release: [1.0.0-beta2](https://packagist.org/packages/puli/repository-manager#1.0.0-beta2)
+Latest release: [1.0.0-beta2](https://packagist.org/packages/puli/manager#1.0.0-beta2)
 
 PHP >= 5.3.9
 
@@ -26,7 +26,7 @@ The [Puli] Repository Manager Component builds a [resource repository] and
 This mapping can be loaded with the [`RepositoryManager`]:
 
 ```php
-use Puli\RepositoryManager\Api\Puli;
+use Puli\Manager\Api\Puli;
 
 $puli = new Puli(getcwd());
 $repoManager = $puli->getRepositoryManager();
@@ -106,18 +106,18 @@ All contents of this package are licensed under the [MIT license].
 [discovery]: https://github.com/puli/discovery
 [Composer Plugin]: https://github.com/puli/composer-plugin
 [Bernhard Schussek]: http://webmozarts.com
-[The Community Contributors]: https://github.com/puli/repository-manager/graphs/contributors
+[The Community Contributors]: https://github.com/puli/manager/graphs/contributors
 [Getting Started]: http://docs.puli.io/en/latest/getting-started.html
 [Puli Documentation]: http://docs.puli.io/en/latest/index.html
 [Puli at a Glance]: http://docs.puli.io/en/latest/at-a-glance.html
 [issue tracker]: https://github.com/puli/issues/issues
-[Git repository]: https://github.com/puli/repository-manager
+[Git repository]: https://github.com/puli/manager
 [@webmozart]: https://twitter.com/webmozart
 [MIT license]: LICENSE
-[`RepositoryManager`]: http://api.puli.io/latest/class-Puli.RepositoryManager.Api.Repository.RepositoryManager.html
-[`PackageManager`]: http://api.puli.io/latest/class-Puli.RepositoryManager.Api.Package.PackageManager.html
-[`DiscoveryManager`]: http://api.puli.io/latest/class-Puli.RepositoryManager.Api.Discovery.DiscoveryManager.html
-[`ConfigFileManager`]: http://api.puli.io/latest/class-Puli.RepositoryManager.Api.Config.ConfigFileManager.html
-[`RootPackageFileManager`]: http://api.puli.io/latest/class-Puli.RepositoryManager.Api.Package.RootPackageFileManager.html
+[`RepositoryManager`]: http://api.puli.io/latest/class-Puli.Manager.Api.Repository.RepositoryManager.html
+[`PackageManager`]: http://api.puli.io/latest/class-Puli.Manager.Api.Package.PackageManager.html
+[`DiscoveryManager`]: http://api.puli.io/latest/class-Puli.Manager.Api.Discovery.DiscoveryManager.html
+[`ConfigFileManager`]: http://api.puli.io/latest/class-Puli.Manager.Api.Config.ConfigFileManager.html
+[`RootPackageFileManager`]: http://api.puli.io/latest/class-Puli.Manager.Api.Package.RootPackageFileManager.html
 [`ResourceRepository`]: http://api.puli.io/latest/class-Puli.Repository.Api.ResourceRepository.html
 [`ResourceDiscovery`]: http://api.puli.io/latest/class-Puli.Discovery.Api.ResourceDiscovery.html

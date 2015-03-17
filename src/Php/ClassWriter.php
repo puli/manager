@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the puli/repository-manager package.
+ * This file is part of the puli/manager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,10 +9,10 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\RepositoryManager\Php;
+namespace Puli\Manager\Php;
 
-use Puli\RepositoryManager\Api\Php\Clazz;
-use Puli\RepositoryManager\Assert\Assert;
+use Puli\Manager\Api\Php\Clazz;
+use Puli\Manager\Assert\Assert;
 
 /**
  * Writes {@link Clazz} instances to files.

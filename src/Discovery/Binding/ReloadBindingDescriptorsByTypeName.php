@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the puli/repository-manager package.
+ * This file is part of the puli/manager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,9 +9,9 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\RepositoryManager\Discovery\Binding;
+namespace Puli\Manager\Discovery\Binding;
 
-use Puli\RepositoryManager\Discovery\Type\BindingTypeDescriptorCollection;
+use Puli\Manager\Discovery\Type\BindingTypeDescriptorCollection;
 
 /**
  * Reloads all binding descriptors with a given type name.

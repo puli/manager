@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the puli/repository-manager package.
+ * This file is part of the puli/manager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,10 +9,10 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\RepositoryManager\Tests\Api\Config;
+namespace Puli\Manager\Tests\Api\Config;
 
 use PHPUnit_Framework_TestCase;
-use Puli\RepositoryManager\Api\Config\Config;
+use Puli\Manager\Api\Config\Config;
 
 /**
  * @since  1.0
@@ -78,7 +78,7 @@ class ConfigTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\RepositoryManager\Api\Config\NoSuchConfigKeyException
+     * @expectedException \Puli\Manager\Api\Config\NoSuchConfigKeyException
      * @expectedExceptionMessage foo
      */
     public function testGetRawFailsIfInvalidKey()
@@ -285,7 +285,7 @@ class ConfigTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\RepositoryManager\Api\Config\NoSuchConfigKeyException
+     * @expectedException \Puli\Manager\Api\Config\NoSuchConfigKeyException
      * @expectedExceptionMessage foo
      */
     public function testGetFailsIfInvalidKey()
@@ -426,7 +426,7 @@ class ConfigTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\RepositoryManager\Api\Config\NoSuchConfigKeyException
+     * @expectedException \Puli\Manager\Api\Config\NoSuchConfigKeyException
      * @expectedExceptionMessage foo
      */
     public function testContainsFailsIfInvalidKey()
@@ -528,7 +528,7 @@ class ConfigTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\RepositoryManager\Api\Config\NoSuchConfigKeyException
+     * @expectedException \Puli\Manager\Api\Config\NoSuchConfigKeyException
      * @expectedExceptionMessage foo
      */
     public function testSetFailsIfInvalidKey()
@@ -539,7 +539,7 @@ class ConfigTest extends PHPUnit_Framework_TestCase
 
     /**
      * @dataProvider getNotNullKeys
-     * @expectedException \Puli\RepositoryManager\Api\InvalidConfigException
+     * @expectedException \Puli\Manager\Api\InvalidConfigException
      */
     public function testSetFailsIfValueIsNull($key)
     {
@@ -560,7 +560,7 @@ class ConfigTest extends PHPUnit_Framework_TestCase
 
     /**
      * @dataProvider getStringKeys
-     * @expectedException \Puli\RepositoryManager\Api\InvalidConfigException
+     * @expectedException \Puli\Manager\Api\InvalidConfigException
      */
     public function testSetFailsIfValueIsNotString($key)
     {
@@ -570,7 +570,7 @@ class ConfigTest extends PHPUnit_Framework_TestCase
 
     /**
      * @dataProvider getNonEmptyKeys
-     * @expectedException \Puli\RepositoryManager\Api\InvalidConfigException
+     * @expectedException \Puli\Manager\Api\InvalidConfigException
      */
     public function testSetFailsIfValueIsEmptyString($key)
     {
@@ -602,7 +602,7 @@ class ConfigTest extends PHPUnit_Framework_TestCase
 
     /**
      * @dataProvider getBooleanKeys
-     * @expectedException \Puli\RepositoryManager\Api\InvalidConfigException
+     * @expectedException \Puli\Manager\Api\InvalidConfigException
      */
     public function testSetFailsIfValueIsNotBoolean($key)
     {
@@ -649,7 +649,7 @@ class ConfigTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\RepositoryManager\Api\Config\NoSuchConfigKeyException
+     * @expectedException \Puli\Manager\Api\Config\NoSuchConfigKeyException
      * @expectedExceptionMessage foo
      */
     public function testRemoveFailsIfInvalidKey()

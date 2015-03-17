@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the puli/repository-manager package.
+ * This file is part of the puli/manager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\RepositoryManager\Discovery;
+namespace Puli\Manager\Discovery;
 
 use Exception;
 use Psr\Log\LoggerInterface;
@@ -20,44 +20,44 @@ use Puli\Discovery\Api\DuplicateTypeException;
 use Puli\Discovery\Api\EditableDiscovery;
 use Puli\Discovery\Api\NoSuchTypeException;
 use Puli\Discovery\Api\Validation\ConstraintViolation;
-use Puli\RepositoryManager\Api\Discovery\BindingDescriptor;
-use Puli\RepositoryManager\Api\Discovery\BindingTypeDescriptor;
-use Puli\RepositoryManager\Api\Discovery\CannotDisableBindingException;
-use Puli\RepositoryManager\Api\Discovery\CannotEnableBindingException;
-use Puli\RepositoryManager\Api\Discovery\DiscoveryManager;
-use Puli\RepositoryManager\Api\Discovery\DiscoveryNotEmptyException;
-use Puli\RepositoryManager\Api\Discovery\NoSuchBindingException;
-use Puli\RepositoryManager\Api\Discovery\TypeNotEnabledException;
-use Puli\RepositoryManager\Api\Environment\ProjectEnvironment;
-use Puli\RepositoryManager\Api\Package\InstallInfo;
-use Puli\RepositoryManager\Api\Package\Package;
-use Puli\RepositoryManager\Api\Package\PackageCollection;
-use Puli\RepositoryManager\Api\Package\RootPackage;
-use Puli\RepositoryManager\Api\Package\RootPackageFile;
-use Puli\RepositoryManager\Assert\Assert;
-use Puli\RepositoryManager\Discovery\Binding\AddBindingDescriptorToPackageFile;
-use Puli\RepositoryManager\Discovery\Binding\Bind;
-use Puli\RepositoryManager\Discovery\Binding\BindingDescriptorCollection;
-use Puli\RepositoryManager\Discovery\Binding\DisableBindingUuid;
-use Puli\RepositoryManager\Discovery\Binding\EnableBindingUuid;
-use Puli\RepositoryManager\Discovery\Binding\LoadBindingDescriptor;
-use Puli\RepositoryManager\Discovery\Binding\ReloadBindingDescriptorsByTypeName;
-use Puli\RepositoryManager\Discovery\Binding\ReloadBindingDescriptorsByUuid;
-use Puli\RepositoryManager\Discovery\Binding\RemoveBindingDescriptorFromPackageFile;
-use Puli\RepositoryManager\Discovery\Binding\SyncBindingUuid;
-use Puli\RepositoryManager\Discovery\Binding\UnloadBindingDescriptor;
-use Puli\RepositoryManager\Discovery\Binding\UpdateOverriddenMarksForUuid;
-use Puli\RepositoryManager\Discovery\Type\AddTypeDescriptorToPackageFile;
-use Puli\RepositoryManager\Discovery\Type\BindingTypeDescriptorCollection;
-use Puli\RepositoryManager\Discovery\Type\DefineType;
-use Puli\RepositoryManager\Discovery\Type\LoadTypeDescriptor;
-use Puli\RepositoryManager\Discovery\Type\RemoveTypeDescriptorFromPackageFile;
-use Puli\RepositoryManager\Discovery\Type\SyncTypeName;
-use Puli\RepositoryManager\Discovery\Type\UnloadTypeDescriptor;
-use Puli\RepositoryManager\Discovery\Type\UpdateDuplicateMarksForTypeName;
-use Puli\RepositoryManager\Package\PackageFileStorage;
-use Puli\RepositoryManager\Transaction\InterceptedOperation;
-use Puli\RepositoryManager\Transaction\Transaction;
+use Puli\Manager\Api\Discovery\BindingDescriptor;
+use Puli\Manager\Api\Discovery\BindingTypeDescriptor;
+use Puli\Manager\Api\Discovery\CannotDisableBindingException;
+use Puli\Manager\Api\Discovery\CannotEnableBindingException;
+use Puli\Manager\Api\Discovery\DiscoveryManager;
+use Puli\Manager\Api\Discovery\DiscoveryNotEmptyException;
+use Puli\Manager\Api\Discovery\NoSuchBindingException;
+use Puli\Manager\Api\Discovery\TypeNotEnabledException;
+use Puli\Manager\Api\Environment\ProjectEnvironment;
+use Puli\Manager\Api\Package\InstallInfo;
+use Puli\Manager\Api\Package\Package;
+use Puli\Manager\Api\Package\PackageCollection;
+use Puli\Manager\Api\Package\RootPackage;
+use Puli\Manager\Api\Package\RootPackageFile;
+use Puli\Manager\Assert\Assert;
+use Puli\Manager\Discovery\Binding\AddBindingDescriptorToPackageFile;
+use Puli\Manager\Discovery\Binding\Bind;
+use Puli\Manager\Discovery\Binding\BindingDescriptorCollection;
+use Puli\Manager\Discovery\Binding\DisableBindingUuid;
+use Puli\Manager\Discovery\Binding\EnableBindingUuid;
+use Puli\Manager\Discovery\Binding\LoadBindingDescriptor;
+use Puli\Manager\Discovery\Binding\ReloadBindingDescriptorsByTypeName;
+use Puli\Manager\Discovery\Binding\ReloadBindingDescriptorsByUuid;
+use Puli\Manager\Discovery\Binding\RemoveBindingDescriptorFromPackageFile;
+use Puli\Manager\Discovery\Binding\SyncBindingUuid;
+use Puli\Manager\Discovery\Binding\UnloadBindingDescriptor;
+use Puli\Manager\Discovery\Binding\UpdateOverriddenMarksForUuid;
+use Puli\Manager\Discovery\Type\AddTypeDescriptorToPackageFile;
+use Puli\Manager\Discovery\Type\BindingTypeDescriptorCollection;
+use Puli\Manager\Discovery\Type\DefineType;
+use Puli\Manager\Discovery\Type\LoadTypeDescriptor;
+use Puli\Manager\Discovery\Type\RemoveTypeDescriptorFromPackageFile;
+use Puli\Manager\Discovery\Type\SyncTypeName;
+use Puli\Manager\Discovery\Type\UnloadTypeDescriptor;
+use Puli\Manager\Discovery\Type\UpdateDuplicateMarksForTypeName;
+use Puli\Manager\Package\PackageFileStorage;
+use Puli\Manager\Transaction\InterceptedOperation;
+use Puli\Manager\Transaction\Transaction;
 use Rhumsaa\Uuid\Uuid;
 use Webmozart\Expression\Expression;
 

@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the puli/repository-manager package.
+ * This file is part of the puli/manager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,13 +9,13 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\RepositoryManager\Factory\Generator\KeyValueStore;
+namespace Puli\Manager\Factory\Generator\KeyValueStore;
 
-use Puli\RepositoryManager\Api\Factory\Generator\GeneratorRegistry;
-use Puli\RepositoryManager\Api\Factory\Generator\ServiceGenerator;
-use Puli\RepositoryManager\Api\Php\Import;
-use Puli\RepositoryManager\Api\Php\Method;
-use Puli\RepositoryManager\Assert\Assert;
+use Puli\Manager\Api\Factory\Generator\GeneratorRegistry;
+use Puli\Manager\Api\Factory\Generator\ServiceGenerator;
+use Puli\Manager\Api\Php\Import;
+use Puli\Manager\Api\Php\Method;
+use Puli\Manager\Assert\Assert;
 use Webmozart\PathUtil\Path;
 
 /**

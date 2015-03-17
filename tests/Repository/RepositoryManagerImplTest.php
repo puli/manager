@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the puli/repository-manager package.
+ * This file is part of the puli/manager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,23 +9,23 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\RepositoryManager\Tests\Repository;
+namespace Puli\Manager\Tests\Repository;
 
 use PHPUnit_Framework_Assert;
 use PHPUnit_Framework_MockObject_MockObject;
+use Puli\Manager\Api\Package\Package;
+use Puli\Manager\Api\Package\PackageCollection;
+use Puli\Manager\Api\Package\PackageFile;
+use Puli\Manager\Api\Package\RootPackage;
+use Puli\Manager\Api\Package\RootPackageFile;
+use Puli\Manager\Api\Repository\ResourceMapping;
+use Puli\Manager\Api\Repository\ResourceMappingState;
+use Puli\Manager\Package\PackageFileStorage;
+use Puli\Manager\Repository\RepositoryManagerImpl;
+use Puli\Manager\Tests\ManagerTestCase;
+use Puli\Manager\Tests\TestException;
 use Puli\Repository\Resource\DirectoryResource;
 use Puli\Repository\Resource\FileResource;
-use Puli\RepositoryManager\Api\Package\Package;
-use Puli\RepositoryManager\Api\Package\PackageCollection;
-use Puli\RepositoryManager\Api\Package\PackageFile;
-use Puli\RepositoryManager\Api\Package\RootPackage;
-use Puli\RepositoryManager\Api\Package\RootPackageFile;
-use Puli\RepositoryManager\Api\Repository\ResourceMapping;
-use Puli\RepositoryManager\Api\Repository\ResourceMappingState;
-use Puli\RepositoryManager\Package\PackageFileStorage;
-use Puli\RepositoryManager\Repository\RepositoryManagerImpl;
-use Puli\RepositoryManager\Tests\ManagerTestCase;
-use Puli\RepositoryManager\Tests\TestException;
 use Symfony\Component\Filesystem\Filesystem;
 
 /**
@@ -101,7 +101,7 @@ class RepositoryManagerImplTest extends ManagerTestCase
 
         $this->packages = new PackageCollection();
 
-        $this->packageFileStorage = $this->getMockBuilder('Puli\RepositoryManager\Package\PackageFileStorage')
+        $this->packageFileStorage = $this->getMockBuilder('Puli\Manager\Package\PackageFileStorage')
             ->disableOriginalConstructor()
             ->getMock();
 
@@ -223,7 +223,7 @@ class RepositoryManagerImplTest extends ManagerTestCase
     }
 
     /**
-     * @expectedException \Puli\RepositoryManager\Api\Package\NoSuchPackageException
+     * @expectedException \Puli\Manager\Api\Package\NoSuchPackageException
      * @expectedExceptionMessage foobar
      */
     public function testAddResourceMappingFailsIfReferencedPackageNotFound()
@@ -804,12 +804,12 @@ class RepositoryManagerImplTest extends ManagerTestCase
         $conflicts = $this->manager->getPathConflicts();
 
         $this->assertCount(2, $conflicts);
-        $this->assertInstanceOf('Puli\RepositoryManager\Api\Repository\RepositoryPathConflict', $conflicts[0]);
+        $this->assertInstanceOf('Puli\Manager\Api\Repository\RepositoryPathConflict', $conflicts[0]);
         $this->assertSame(array(
             'vendor/package1' => $mapping2,
             'vendor/root' => $mapping1,
         ), $conflicts[0]->getMappings());
-        $this->assertInstanceOf('Puli\RepositoryManager\Api\Repository\RepositoryPathConflict', $conflicts[1]);
+        $this->assertInstanceOf('Puli\Manager\Api\Repository\RepositoryPathConflict', $conflicts[1]);
         $this->assertSame(array(
             'vendor/package2' => $mapping3,
             'vendor/package3' => $mapping4,
@@ -826,7 +826,7 @@ class RepositoryManagerImplTest extends ManagerTestCase
         $conflicts = $this->manager->getPathConflicts();
 
         $this->assertCount(1, $conflicts);
-        $this->assertInstanceOf('Puli\RepositoryManager\Api\Repository\RepositoryPathConflict', $conflicts[0]);
+        $this->assertInstanceOf('Puli\Manager\Api\Repository\RepositoryPathConflict', $conflicts[0]);
         $this->assertSame(array(
             'vendor/package1' => $mapping1,
             'vendor/package2' => $mapping2,
@@ -846,7 +846,7 @@ class RepositoryManagerImplTest extends ManagerTestCase
         $conflicts = $this->manager->getPathConflicts();
 
         $this->assertCount(1, $conflicts);
-        $this->assertInstanceOf('Puli\RepositoryManager\Api\Repository\RepositoryPathConflict', $conflicts[0]);
+        $this->assertInstanceOf('Puli\Manager\Api\Repository\RepositoryPathConflict', $conflicts[0]);
         $this->assertSame(array(
             'vendor/package1' => $mapping2,
             'vendor/root' => $mapping1,
@@ -1101,7 +1101,7 @@ class RepositoryManagerImplTest extends ManagerTestCase
     }
 
     /**
-     * @expectedException \Puli\RepositoryManager\Api\Repository\RepositoryNotEmptyException
+     * @expectedException \Puli\Manager\Api\Repository\RepositoryNotEmptyException
      */
     public function testBuildRepositoryFailsIfNotEmpty()
     {

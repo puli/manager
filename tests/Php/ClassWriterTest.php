@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the puli/repository-manager package.
+ * This file is part of the puli/manager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,15 +9,15 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\RepositoryManager\Tests\Php;
+namespace Puli\Manager\Tests\Php;
 
 use PHPUnit_Framework_TestCase;
-use Puli\RepositoryManager\Api\Php\Argument;
-use Puli\RepositoryManager\Api\Php\Clazz;
-use Puli\RepositoryManager\Api\Php\Import;
-use Puli\RepositoryManager\Api\Php\Method;
-use Puli\RepositoryManager\Api\Php\ReturnValue;
-use Puli\RepositoryManager\Php\ClassWriter;
+use Puli\Manager\Api\Php\Argument;
+use Puli\Manager\Api\Php\Clazz;
+use Puli\Manager\Api\Php\Import;
+use Puli\Manager\Api\Php\Method;
+use Puli\Manager\Api\Php\ReturnValue;
+use Puli\Manager\Php\ClassWriter;
 use Symfony\Component\Filesystem\Filesystem;
 
 /**

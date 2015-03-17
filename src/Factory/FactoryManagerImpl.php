@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the puli/repository-manager package.
+ * This file is part of the puli/manager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,21 +9,21 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\RepositoryManager\Factory;
+namespace Puli\Manager\Factory;
 
-use Puli\RepositoryManager\Api\Config\Config;
-use Puli\RepositoryManager\Api\Environment\ProjectEnvironment;
-use Puli\RepositoryManager\Api\Event\GenerateFactoryEvent;
-use Puli\RepositoryManager\Api\Event\PuliEvents;
-use Puli\RepositoryManager\Api\Factory\FactoryManager;
-use Puli\RepositoryManager\Api\Factory\Generator\GeneratorRegistry;
-use Puli\RepositoryManager\Api\Php\Argument;
-use Puli\RepositoryManager\Api\Php\Clazz;
-use Puli\RepositoryManager\Api\Php\Import;
-use Puli\RepositoryManager\Api\Php\Method;
-use Puli\RepositoryManager\Api\Php\ReturnValue;
-use Puli\RepositoryManager\Assert\Assert;
-use Puli\RepositoryManager\Php\ClassWriter;
+use Puli\Manager\Api\Config\Config;
+use Puli\Manager\Api\Environment\ProjectEnvironment;
+use Puli\Manager\Api\Event\GenerateFactoryEvent;
+use Puli\Manager\Api\Event\PuliEvents;
+use Puli\Manager\Api\Factory\FactoryManager;
+use Puli\Manager\Api\Factory\Generator\GeneratorRegistry;
+use Puli\Manager\Api\Php\Argument;
+use Puli\Manager\Api\Php\Clazz;
+use Puli\Manager\Api\Php\Import;
+use Puli\Manager\Api\Php\Method;
+use Puli\Manager\Api\Php\ReturnValue;
+use Puli\Manager\Assert\Assert;
+use Puli\Manager\Php\ClassWriter;
 use Webmozart\PathUtil\Path;
 
 /**

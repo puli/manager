@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the puli/repository-manager package.
+ * This file is part of the puli/manager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,17 +9,17 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\RepositoryManager\Tests\Package;
+namespace Puli\Manager\Tests\Package;
 
 use PHPUnit_Framework_Assert;
 use PHPUnit_Framework_MockObject_MockObject;
-use Puli\RepositoryManager\Api\Config\Config;
-use Puli\RepositoryManager\Api\Factory\FactoryManager;
-use Puli\RepositoryManager\Api\Package\RootPackageFile;
-use Puli\RepositoryManager\Package\PackageFileStorage;
-use Puli\RepositoryManager\Package\RootPackageFileManagerImpl;
-use Puli\RepositoryManager\Tests\ManagerTestCase;
-use Puli\RepositoryManager\Tests\TestException;
+use Puli\Manager\Api\Config\Config;
+use Puli\Manager\Api\Factory\FactoryManager;
+use Puli\Manager\Api\Package\RootPackageFile;
+use Puli\Manager\Package\PackageFileStorage;
+use Puli\Manager\Package\RootPackageFileManagerImpl;
+use Puli\Manager\Tests\ManagerTestCase;
+use Puli\Manager\Tests\TestException;
 
 /**
  * @since  1.0
@@ -27,9 +27,9 @@ use Puli\RepositoryManager\Tests\TestException;
  */
 class RootPackageFileManagerImplTest extends ManagerTestCase
 {
-    const PLUGIN_CLASS = 'Puli\RepositoryManager\Tests\Api\Package\Fixtures\TestPlugin';
+    const PLUGIN_CLASS = 'Puli\Manager\Tests\Api\Package\Fixtures\TestPlugin';
 
-    const OTHER_PLUGIN_CLASS = 'Puli\RepositoryManager\Tests\Api\Package\Fixtures\OtherPlugin';
+    const OTHER_PLUGIN_CLASS = 'Puli\Manager\Tests\Api\Package\Fixtures\OtherPlugin';
 
     /**
      * @var PHPUnit_Framework_MockObject_MockObject|PackageFileStorage
@@ -48,7 +48,7 @@ class RootPackageFileManagerImplTest extends ManagerTestCase
 
     protected function setUp()
     {
-        $this->packageFileStorage = $this->getMockBuilder('Puli\RepositoryManager\Package\PackageFileStorage')
+        $this->packageFileStorage = $this->getMockBuilder('Puli\Manager\Package\PackageFileStorage')
             ->disableOriginalConstructor()
             ->getMock();
 
@@ -56,7 +56,7 @@ class RootPackageFileManagerImplTest extends ManagerTestCase
 
         $this->initEnvironment(__DIR__.'/Fixtures/home', __DIR__.'/Fixtures/root');
 
-        $this->factoryManager = $this->getMock('Puli\RepositoryManager\Api\Factory\FactoryManager');
+        $this->factoryManager = $this->getMock('Puli\Manager\Api\Factory\FactoryManager');
 
         $this->manager = new RootPackageFileManagerImpl($this->environment, $this->packageFileStorage, $this->factoryManager);
     }

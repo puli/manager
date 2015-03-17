@@ -10,6 +10,6 @@
         }
     },
     "plugins": [
-        "Puli\\RepositoryManager\\Tests\\Api\\Package\\Fixtures\\Foobar"
+        "Puli\\Manager\\Tests\\Api\\Package\\Fixtures\\Foobar"
     ]
 }

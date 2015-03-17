@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the puli/repository-manager package.
+ * This file is part of the puli/manager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,10 +9,10 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\RepositoryManager\Tests\Util;
+namespace Puli\Manager\Tests\Util;
 
 use PHPUnit_Framework_TestCase;
-use Puli\RepositoryManager\Util\DistinguishedName;
+use Puli\Manager\Util\DistinguishedName;
 use stdClass;
 
 /**
