@@ -17,9 +17,9 @@ use Puli\Discovery\Api\EditableDiscovery;
 use Puli\Repository\Api\EditableRepository;
 use Puli\RepositoryManager\Api\Config\Config;
 use Puli\RepositoryManager\Api\Config\ConfigFile;
+use Puli\RepositoryManager\Api\Environment\ProjectEnvironment;
 use Puli\RepositoryManager\Api\Package\RootPackageFile;
 use Puli\RepositoryManager\Config\DefaultConfig;
-use Puli\RepositoryManager\Tests\Package\Fixtures\TestProjectEnvironment;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
@@ -69,7 +69,7 @@ abstract class ManagerTestCase extends PHPUnit_Framework_TestCase
     protected $discovery;
 
     /**
-     * @var TestProjectEnvironment
+     * @var ProjectEnvironment
      */
     protected $environment;
 
@@ -81,20 +81,19 @@ abstract class ManagerTestCase extends PHPUnit_Framework_TestCase
 
         $this->homeDir = $homeDir;
         $this->rootDir = $rootDir;
-        $this->configFile = new ConfigFile(null, $this->baseConfig);
-        $this->rootPackageFile = new RootPackageFile('vendor/root', null, $this->baseConfig);
+        $this->configFile = new ConfigFile($homeDir.'/config.json', $this->baseConfig);
+        $this->rootPackageFile = new RootPackageFile('vendor/root', $rootDir.'/puli.json', $this->baseConfig);
         $this->dispatcher = $this->getMock('Symfony\Component\EventDispatcher\EventDispatcherInterface');
         $this->repo = $this->getMock('Puli\Repository\Api\EditableRepository');
         $this->discovery = $this->getMock('Puli\Discovery\Api\EditableDiscovery');
 
-        $this->environment = new TestProjectEnvironment(
+        $this->environment = new ProjectEnvironment(
             $this->homeDir,
             $this->rootDir,
-            $this->configFile,
+            $this->rootPackageFile->getConfig(),
             $this->rootPackageFile,
-            $this->dispatcher,
-            $this->repo,
-            $this->discovery
+            $this->configFile,
+            $this->dispatcher
         );
     }
 }

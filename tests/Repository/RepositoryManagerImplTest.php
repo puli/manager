@@ -1135,6 +1135,6 @@ class RepositoryManagerImplTest extends ManagerTestCase
         $this->packages->add(new Package($this->packageFile2, $this->packageDir2));
         $this->packages->add(new Package($this->packageFile3, $this->packageDir3));
 
-        $this->manager = new RepositoryManagerImpl($this->environment, $this->packages, $this->packageFileStorage);
+        $this->manager = new RepositoryManagerImpl($this->environment, $this->repo, $this->packages, $this->packageFileStorage);
     }
 }

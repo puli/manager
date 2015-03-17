@@ -116,18 +116,21 @@ class DiscoveryManagerImpl implements DiscoveryManager
      * Creates a tag manager.
      *
      * @param ProjectEnvironment $environment
+     * @param EditableDiscovery  $discovery
      * @param PackageCollection  $packages
      * @param PackageFileStorage $packageFileStorage
      * @param LoggerInterface    $logger
      */
     public function __construct(
         ProjectEnvironment $environment,
+        EditableDiscovery $discovery,
         PackageCollection $packages,
         PackageFileStorage $packageFileStorage,
         LoggerInterface $logger = null
     )
     {
         $this->environment = $environment;
+        $this->discovery = $discovery;
         $this->packages = $packages;
         $this->packageFileStorage = $packageFileStorage;
         $this->rootPackage = $packages->getRootPackage();
@@ -148,7 +151,6 @@ class DiscoveryManagerImpl implements DiscoveryManager
      */
     public function addBindingType(BindingTypeDescriptor $typeDescriptor)
     {
-        $this->assertDiscoveryLoaded();
         $this->assertPackagesLoaded();
         $this->emitWarningForDuplicateTypes();
 
@@ -198,7 +200,6 @@ class DiscoveryManagerImpl implements DiscoveryManager
         // more helpful than e.g. "type name must contain /".
         Assert::string($typeName, 'The type name must be a string');
 
-        $this->assertDiscoveryLoaded();
         $this->assertPackagesLoaded();
 
         if (!$this->rootPackageFile->hasTypeDescriptor($typeName)) {
@@ -338,7 +339,6 @@ class DiscoveryManagerImpl implements DiscoveryManager
      */
     public function addBinding(BindingDescriptor $bindingDescriptor)
     {
-        $this->assertDiscoveryLoaded();
         $this->assertPackagesLoaded();
 
         $typeName = $bindingDescriptor->getTypeName();
@@ -383,7 +383,6 @@ class DiscoveryManagerImpl implements DiscoveryManager
      */
     public function removeBinding(Uuid $uuid)
     {
-        $this->assertDiscoveryLoaded();
         $this->assertPackagesLoaded();
 
         if (!$this->rootPackageFile->hasBindingDescriptor($uuid)) {
@@ -419,7 +418,6 @@ class DiscoveryManagerImpl implements DiscoveryManager
      */
     public function enableBinding(Uuid $uuid, $packageName = null)
     {
-        $this->assertDiscoveryLoaded();
         $this->assertPackagesLoaded();
 
         $packageNames = $packageName ? (array) $packageName : $this->packages->getPackageNames();
@@ -461,7 +459,6 @@ class DiscoveryManagerImpl implements DiscoveryManager
      */
     public function disableBinding(Uuid $uuid, $packageName = null)
     {
-        $this->assertDiscoveryLoaded();
         $this->assertPackagesLoaded();
 
         $packageNames = $packageName ? (array) $packageName : $this->packages->getPackageNames();
@@ -591,7 +588,6 @@ class DiscoveryManagerImpl implements DiscoveryManager
      */
     public function buildDiscovery()
     {
-        $this->assertDiscoveryLoaded();
         $this->assertPackagesLoaded();
         $this->emitWarningForDuplicateTypes();
         $this->emitWarningForInvalidBindings();
@@ -628,16 +624,7 @@ class DiscoveryManagerImpl implements DiscoveryManager
      */
     public function clearDiscovery()
     {
-        $this->assertDiscoveryLoaded();
-
         $this->discovery->clear();
-    }
-
-    private function assertDiscoveryLoaded()
-    {
-        if (!$this->discovery) {
-            $this->loadDiscovery();
-        }
     }
 
     private function assertPackagesLoaded()
@@ -661,11 +648,6 @@ class DiscoveryManagerImpl implements DiscoveryManager
                     throw MissingParameterException::forParameterName($violation->getParameterName(), $violation->getTypeName());
             }
         }
-    }
-
-    private function loadDiscovery()
-    {
-        $this->discovery = $this->environment->getDiscovery();
     }
 
     private function loadPackages()

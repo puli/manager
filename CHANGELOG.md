@@ -39,6 +39,13 @@ Changelog
    `PackageManager::hasPackages()` with an `Expression` instead
  * renamed `BindingState::DUPLICATE` to `OVERRIDDEN`
  * renamed `Generator` namespace to `Factory`
+ * turned `GlobalEnvironment` and `ProjectEnvironment` interfaces into classes
+ * removed `ProjectEnvironment::getRepository()` and `ProjectEnvironment::getDiscovery()`
+ * added `FactoryManager`
+ * added `Puli::getFactory()`
+ * added `Puli::getFactoryManager()`
+ * added `PuliEvents::GENERATE_FACTORY` which is thrown whenever the factory
+   class is generated
 
 * 1.0.0-beta2 (2015-01-27)
 

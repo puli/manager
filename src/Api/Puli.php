@@ -14,11 +14,15 @@ namespace Puli\RepositoryManager\Api;
 use LogicException;
 use Psr\Log\LoggerInterface;
 use Puli\Discovery\Api\EditableDiscovery;
+use Puli\Discovery\Api\ResourceDiscovery;
+use Puli\Factory\PuliFactory;
 use Puli\Repository\Api\EditableRepository;
+use Puli\Repository\Api\ResourceRepository;
 use Puli\RepositoryManager\Api\Config\ConfigFileManager;
 use Puli\RepositoryManager\Api\Discovery\DiscoveryManager;
 use Puli\RepositoryManager\Api\Environment\GlobalEnvironment;
 use Puli\RepositoryManager\Api\Environment\ProjectEnvironment;
+use Puli\RepositoryManager\Api\Factory\FactoryManager;
 use Puli\RepositoryManager\Api\Package\Package;
 use Puli\RepositoryManager\Api\Package\PackageManager;
 use Puli\RepositoryManager\Api\Package\PackageState;
@@ -29,19 +33,25 @@ use Puli\RepositoryManager\Config\ConfigFileManagerImpl;
 use Puli\RepositoryManager\Config\ConfigFileStorage;
 use Puli\RepositoryManager\Config\ConfigJsonReader;
 use Puli\RepositoryManager\Config\ConfigJsonWriter;
+use Puli\RepositoryManager\Config\DefaultConfig;
+use Puli\RepositoryManager\Config\EnvConfig;
 use Puli\RepositoryManager\Discovery\DiscoveryManagerImpl;
 use Puli\RepositoryManager\Environment\GlobalEnvironmentImpl;
 use Puli\RepositoryManager\Environment\ProjectEnvironmentImpl;
+use Puli\RepositoryManager\Factory\FactoryManagerImpl;
+use Puli\RepositoryManager\Factory\Generator\DefaultGeneratorRegistry;
 use Puli\RepositoryManager\Package\PackageFileStorage;
 use Puli\RepositoryManager\Package\PackageJsonReader;
 use Puli\RepositoryManager\Package\PackageJsonWriter;
 use Puli\RepositoryManager\Package\PackageManagerImpl;
 use Puli\RepositoryManager\Package\RootPackageFileManagerImpl;
+use Puli\RepositoryManager\Php\ClassWriter;
 use Puli\RepositoryManager\Repository\RepositoryManagerImpl;
 use Puli\RepositoryManager\Util\System;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Webmozart\Expression\Expr;
+use Webmozart\PathUtil\Path;
 
 /**
  * The Puli service locator.
@@ -105,6 +115,26 @@ class Puli
      * @var GlobalEnvironment|ProjectEnvironment
      */
     private $environment;
+
+    /**
+     * @var ResourceRepository
+     */
+    private $repo;
+
+    /**
+     * @var ResourceDiscovery
+     */
+    private $discovery;
+
+    /**
+     * @var PuliFactory
+     */
+    private $factory;
+
+    /**
+     * @var FactoryManager
+     */
+    private $factoryManager;
 
     /**
      * @var ConfigFileManager
@@ -209,11 +239,6 @@ class Puli
             $this->environment = $this->createGlobalEnvironment();
         }
 
-        $this->configFileManager = null;
-        $this->rootPackageFileManager = null;
-        $this->packageManager = null;
-        $this->repositoryManager = null;
-        $this->discoveryManager = null;
         $this->started = true;
 
         // Start plugins once the container is running
@@ -336,7 +361,15 @@ class Puli
             throw new LogicException('Puli was not started');
         }
 
-        return $this->rootDir ? $this->environment->getRepository() : null;
+        if (!$this->rootDir) {
+            return null;
+        }
+
+        if (!$this->repo) {
+            $this->repo = $this->getFactory()->createRepository();
+        }
+
+        return $this->repo;
     }
 
     /**
@@ -350,7 +383,51 @@ class Puli
             throw new LogicException('Puli was not started');
         }
 
-        return $this->rootDir ? $this->environment->getDiscovery() : null;
+        if (!$this->rootDir) {
+            return null;
+        }
+
+        if (!$this->discovery) {
+            $this->discovery = $this->getFactory()->createDiscovery($this->getRepository());
+        }
+
+        return $this->discovery;
+    }
+
+    /**
+     * @return PuliFactory
+     */
+    public function getFactory()
+    {
+        if (!$this->started) {
+            throw new LogicException('Puli was not started');
+        }
+
+        if (!$this->factory && $this->rootDir) {
+            $this->factory = $this->getFactoryManager()->createFactory();
+        }
+
+        return $this->factory;
+    }
+
+    /**
+     * @return FactoryManager
+     */
+    public function getFactoryManager()
+    {
+        if (!$this->started) {
+            throw new LogicException('Puli was not started');
+        }
+
+        if (!$this->factoryManager && $this->rootDir) {
+            $this->factoryManager = new FactoryManagerImpl(
+                $this->environment,
+                new DefaultGeneratorRegistry(),
+                new ClassWriter()
+            );
+        }
+
+        return $this->factoryManager;
     }
 
     /**
@@ -378,10 +455,11 @@ class Puli
             throw new LogicException('Puli was not started');
         }
 
-        if (!$this->configFileManager) {
-            $this->configFileManager = $this->environment->getHomeDirectory()
-                ? $this->createConfigFileManager($this->environment)
-                : null;
+        if (!$this->configFileManager && $this->environment->getHomeDirectory()) {
+            $this->configFileManager = new ConfigFileManagerImpl(
+                $this->environment,
+                $this->getConfigFileStorage()
+            );
         }
 
         return $this->configFileManager;
@@ -399,7 +477,10 @@ class Puli
         }
 
         if (!$this->rootPackageFileManager && $this->rootDir) {
-            $this->rootPackageFileManager = $this->createRootPackageFileManager($this->environment);
+            $this->rootPackageFileManager = new RootPackageFileManagerImpl(
+                $this->environment,
+                $this->getPackageFileStorage($this->environment->getEventDispatcher())
+            );
         }
 
         return $this->rootPackageFileManager;
@@ -417,7 +498,10 @@ class Puli
         }
 
         if (!$this->packageManager && $this->rootDir) {
-            $this->packageManager = $this->createPackageManager($this->environment);
+            $this->packageManager = new PackageManagerImpl(
+                $this->environment,
+                $this->getPackageFileStorage($this->environment->getEventDispatcher())
+            );
         }
 
         return $this->packageManager;
@@ -435,7 +519,12 @@ class Puli
         }
 
         if (!$this->repositoryManager && $this->rootDir) {
-            $this->repositoryManager = $this->createRepositoryManager($this->environment, $this->getPackageManager());
+            $this->repositoryManager = new RepositoryManagerImpl(
+                $this->environment,
+                $this->getRepository(),
+                $this->getPackageManager()->findPackages(Expr::same(Package::STATE, PackageState::ENABLED)),
+                $this->getPackageFileStorage($this->environment->getEventDispatcher())
+            );
         }
 
         return $this->repositoryManager;
@@ -453,7 +542,13 @@ class Puli
         }
 
         if (!$this->discoveryManager && $this->rootDir) {
-            $this->discoveryManager = $this->discoveryManager = $this->createDiscoveryManager($this->environment, $this->getPackageManager(), $this->logger);
+            $this->discoveryManager = new DiscoveryManagerImpl(
+                $this->environment,
+                $this->getDiscovery(),
+                $this->getPackageManager()->findPackages(Expr::same(Package::STATE, PackageState::ENABLED)),
+                $this->getPackageFileStorage($this->environment->getEventDispatcher()),
+                $this->logger
+            );
         }
 
         return $this->discoveryManager;
@@ -464,7 +559,7 @@ class Puli
         foreach ($this->environment->getRootPackageFile()->getPluginClasses() as $pluginClass) {
             $this->validatePluginClass($pluginClass);
 
-            /** @var \Puli\RepositoryManager\Api\PuliPlugin $plugin */
+            /** @var PuliPlugin $plugin */
             $plugin = new $pluginClass();
             $plugin->activate($this);
         }
@@ -472,15 +567,23 @@ class Puli
 
     private function createGlobalEnvironment()
     {
-        $dispatcher = new EventDispatcher();
-
         $homeDir = self::parseHomeDirectory();
 
-        return new GlobalEnvironmentImpl(
-            $homeDir,
-            $this->getConfigFileStorage(),
-            $dispatcher
-        );
+        if (null !== $homeDir) {
+            Assert::fileExists($homeDir, 'Could not load Puli environment: The home directory %s does not exist.');
+            Assert::directory($homeDir, 'Could not load Puli environment: The home directory %s is a file. Expected a directory.');
+
+            $configPath = Path::canonicalize($homeDir).'/config.json';
+            $configFile = $this->getConfigFileStorage()->loadConfigFile($configPath, new DefaultConfig());
+            $baseConfig = $configFile->getConfig();
+        } else {
+            $configFile = null;
+            $baseConfig = new DefaultConfig();
+        }
+
+        $config = new EnvConfig($baseConfig);
+
+        return new GlobalEnvironment($homeDir, $config, $configFile);
     }
 
     /**
@@ -505,99 +608,30 @@ class Puli
      */
     private function createProjectEnvironment($rootDir)
     {
-        $dispatcher = new EventDispatcher();
+        Assert::fileExists($rootDir, 'Could not load Puli environment: The root %s does not exist.');
+        Assert::directory($rootDir, 'Could not load Puli environment: The root %s is a file. Expected a directory.');
 
+        $dispatcher = new EventDispatcher();
         $homeDir = self::parseHomeDirectory();
 
-        return new ProjectEnvironmentImpl(
-            $homeDir,
-            $rootDir,
-            $this->getConfigFileStorage(),
-            $this->getPackageFileStorage($dispatcher),
-            $dispatcher
-        );
-    }
+        if (null !== $homeDir) {
+            Assert::fileExists($homeDir, 'Could not load Puli environment: The home directory %s does not exist.');
+            Assert::directory($homeDir, 'Could not load Puli environment: The home directory %s is a file. Expected a directory.');
 
-    /**
-     * Creates a configuration file manager.
-     *
-     * @param GlobalEnvironment $environment The global environment.
-     *
-     * @return ConfigFileManager The created configuration file manager.
-     */
-    private function createConfigFileManager(GlobalEnvironment $environment)
-    {
-        return new ConfigFileManagerImpl(
-            $environment,
-            $this->getConfigFileStorage()
-        );
-    }
+            $configPath = Path::canonicalize($homeDir).'/config.json';
+            $configFile = $this->getConfigFileStorage()->loadConfigFile($configPath, new DefaultConfig());
+            $baseConfig = $configFile->getConfig();
+        } else {
+            $configFile = null;
+            $baseConfig = new DefaultConfig();
+        }
 
-    /**
-     * Creates a package file manager.
-     *
-     * @param ProjectEnvironment $environment The project environment.
-     *
-     * @return RootPackageFileManager The created package file manager.
-     */
-    private function createRootPackageFileManager(ProjectEnvironment $environment)
-    {
-        return new RootPackageFileManagerImpl(
-            $environment,
-            $this->getPackageFileStorage($environment->getEventDispatcher()),
-            $this->createConfigFileManager($environment)
-        );
-    }
+        $rootDir = Path::canonicalize($rootDir);
+        $rootFilePath = $this->rootDir.'/puli.json';
+        $rootPackageFile = $this->getPackageFileStorage($dispatcher)->loadRootPackageFile($rootFilePath, $baseConfig);
+        $config = new EnvConfig($rootPackageFile->getConfig());
 
-    /**
-     * Creates a package manager.
-     *
-     * @param ProjectEnvironment $environment The project environment.
-     *
-     * @return PackageManager The package manager.
-     */
-    private function createPackageManager(ProjectEnvironment $environment)
-    {
-        return new PackageManagerImpl(
-            $environment,
-            $this->getPackageFileStorage($environment->getEventDispatcher())
-        );
-    }
-
-    /**
-     * Creates a resource repository manager.
-     *
-     * @param ProjectEnvironment $environment    The project environment.
-     * @param PackageManager     $packageManager The package manager.
-     *
-     * @return RepositoryManager The repository manager.
-     */
-    private function createRepositoryManager(ProjectEnvironment $environment, PackageManager $packageManager)
-    {
-        return new RepositoryManagerImpl(
-            $environment,
-            $packageManager->findPackages(Expr::same(Package::STATE, PackageState::ENABLED)),
-            $this->getPackageFileStorage($environment->getEventDispatcher())
-        );
-    }
-
-    /**
-     * Creates a resource discovery manager.
-     *
-     * @param ProjectEnvironment $environment    The project environment.
-     * @param PackageManager     $packageManager The package manager.
-     * @param LoggerInterface    $logger         The logger.
-     *
-     * @return DiscoveryManager The discovery manager.
-     */
-    private function createDiscoveryManager(ProjectEnvironment $environment, PackageManager $packageManager, LoggerInterface $logger = null)
-    {
-        return new DiscoveryManagerImpl(
-            $environment,
-            $packageManager->findPackages(Expr::same(Package::STATE, PackageState::ENABLED)),
-            $this->getPackageFileStorage($environment->getEventDispatcher()),
-            $logger
-        );
+        return new ProjectEnvironment($homeDir, $rootDir, $config, $rootPackageFile, $configFile, $dispatcher);
     }
 
     /**

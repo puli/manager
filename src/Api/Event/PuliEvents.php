@@ -28,4 +28,9 @@ interface PuliEvents
      * Dispatched when a package file is saved.
      */
     const SAVE_PACKAGE_FILE = 'puli.save-package-file';
+
+    /**
+     * Dispatched when the factory class is generated.
+     */
+    const GENERATE_FACTORY = 'puli.generate-factory';
 }

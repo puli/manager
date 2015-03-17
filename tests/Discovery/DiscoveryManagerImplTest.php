@@ -42,6 +42,7 @@ use Webmozart\Expression\Expr;
 class DiscoveryManagerImplTest extends ManagerTestCase
 {
     const NOT_FOUND_UUID = 'fa1a334b-35ba-4662-ab5e-d64394f3081e';
+
     /**
      * @var string
      */
@@ -2113,6 +2114,6 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->packages->add(new Package($this->packageFile2, $this->packageDir2, $this->installInfo2));
         $this->packages->add(new Package($this->packageFile3, $this->packageDir3, $this->installInfo3));
 
-        $this->manager = new DiscoveryManagerImpl($this->environment, $this->packages, $this->packageFileStorage, $this->logger);
+        $this->manager = new DiscoveryManagerImpl($this->environment, $this->discovery, $this->packages, $this->packageFileStorage, $this->logger);
     }
 }

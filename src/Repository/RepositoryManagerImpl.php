@@ -105,12 +105,14 @@ class RepositoryManagerImpl implements  RepositoryManager
      * Creates a repository manager.
      *
      * @param ProjectEnvironment $environment
+     * @param EditableRepository $repo
      * @param PackageCollection  $packages
      * @param PackageFileStorage $packageFileStorage
      */
-    public function __construct(ProjectEnvironment $environment, PackageCollection $packages, PackageFileStorage $packageFileStorage)
+    public function __construct(ProjectEnvironment $environment, EditableRepository $repo, PackageCollection $packages, PackageFileStorage $packageFileStorage)
     {
         $this->environment = $environment;
+        $this->repo = $repo;
         $this->config = $environment->getConfig();
         $this->rootDir = $environment->getRootDirectory();
         $this->rootPackage = $packages->getRootPackage();
@@ -135,7 +137,6 @@ class RepositoryManagerImpl implements  RepositoryManager
         Assert::boolean($failIfNotFound, 'The argument $failIfNotFound must be a boolean.');
 
         $this->assertMappingsLoaded();
-        $this->assertRepositoryLoaded();
 
         $tx = new Transaction();
 
@@ -177,7 +178,6 @@ class RepositoryManagerImpl implements  RepositoryManager
         }
 
         $this->assertMappingsLoaded();
-        $this->assertRepositoryLoaded();
 
         $mapping = $this->mappings->get($repositoryPath, $this->rootPackage->getName());
 
@@ -266,7 +266,6 @@ class RepositoryManagerImpl implements  RepositoryManager
     public function buildRepository()
     {
         $this->assertMappingsLoaded();
-        $this->assertRepositoryLoaded();
 
         $this->insertAll()->execute();
     }
@@ -276,16 +275,7 @@ class RepositoryManagerImpl implements  RepositoryManager
      */
     public function clearRepository()
     {
-        $this->assertRepositoryLoaded();
-
         $this->repo->clear();
-    }
-
-    private function loadRepository()
-    {
-        $this->assertMappingsLoaded();
-
-        $this->repo = $this->environment->getRepository();
     }
 
     /**
@@ -392,13 +382,6 @@ class RepositoryManagerImpl implements  RepositoryManager
     {
         if (!$this->overrideGraph) {
             $this->loadResourceMappings();
-        }
-    }
-
-    private function assertRepositoryLoaded()
-    {
-        if (!$this->repo) {
-            $this->loadRepository();
         }
     }
 

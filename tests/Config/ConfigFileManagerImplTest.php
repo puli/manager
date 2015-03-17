@@ -16,9 +16,9 @@ use PHPUnit_Framework_MockObject_MockObject;
 use PHPUnit_Framework_TestCase;
 use Puli\RepositoryManager\Api\Config\Config;
 use Puli\RepositoryManager\Api\Config\ConfigFile;
+use Puli\RepositoryManager\Api\Environment\GlobalEnvironment;
 use Puli\RepositoryManager\Config\ConfigFileManagerImpl;
 use Puli\RepositoryManager\Config\ConfigFileStorage;
-use Puli\RepositoryManager\Tests\Package\Fixtures\TestGlobalEnvironment;
 use Puli\RepositoryManager\Tests\TestException;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
@@ -49,7 +49,7 @@ class ConfigFileManagerImplTest extends PHPUnit_Framework_TestCase
     private $dispatcher;
 
     /**
-     * @var TestGlobalEnvironment
+     * @var GlobalEnvironment
      */
     private $environment;
 
@@ -70,8 +70,9 @@ class ConfigFileManagerImplTest extends PHPUnit_Framework_TestCase
         $this->configFile = new ConfigFile(null, $this->baseConfig);
         $this->dispatcher = $this->getMock('Symfony\Component\EventDispatcher\EventDispatcherInterface');
 
-        $this->environment = new TestGlobalEnvironment(
+        $this->environment = new GlobalEnvironment(
             $this->homeDir,
+            $this->configFile->getConfig(),
             $this->configFile,
             $this->dispatcher
         );

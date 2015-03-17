@@ -19,6 +19,8 @@ use Symfony\Component\Filesystem\Filesystem;
 /**
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
+ *
+ * @runTestsInSeparateProcesses
  */
 class PuliTest extends PHPUnit_Framework_TestCase
 {
@@ -149,6 +151,70 @@ class PuliTest extends PHPUnit_Framework_TestCase
         $this->assertNull($environment->getHomeDirectory());
         $this->assertSame($this->tempDir, $environment->getRootDirectory());
         $this->assertSame($this->tempDir.'/puli.json', $environment->getRootPackageFile()->getPath());
+    }
+
+    public function testGetRepositoryInProjectEnvironment()
+    {
+        $this->puli->setRootDirectory($this->tempDir);
+        $this->puli->start();
+        $repo = $this->puli->getRepository();
+
+        $this->assertInstanceOf('Puli\Repository\Api\EditableRepository', $repo);
+    }
+
+    public function testGetRepositoryInGlobalEnvironment()
+    {
+        $this->puli->start();
+
+        $this->assertNull($this->puli->getRepository());
+    }
+
+    public function testGetDiscoveryInProjectEnvironment()
+    {
+        $this->puli->setRootDirectory($this->tempDir);
+        $this->puli->start();
+        $discovery = $this->puli->getDiscovery();
+
+        $this->assertInstanceOf('Puli\Discovery\Api\EditableDiscovery', $discovery);
+    }
+
+    public function testGetDiscoveryInGlobalEnvironment()
+    {
+        $this->puli->start();
+
+        $this->assertNull($this->puli->getDiscovery());
+    }
+
+    public function testGetFactoryInProjectEnvironment()
+    {
+        $this->puli->setRootDirectory($this->tempDir);
+        $this->puli->start();
+        $factory = $this->puli->getFactory();
+
+        $this->assertInstanceOf('Puli\Factory\PuliFactory', $factory);
+    }
+
+    public function testGetFactoryInGlobalEnvironment()
+    {
+        $this->puli->start();
+
+        $this->assertNull($this->puli->getFactory());
+    }
+
+    public function testGetFactoryManagerInProjectEnvironment()
+    {
+        $this->puli->setRootDirectory($this->tempDir);
+        $this->puli->start();
+        $manager = $this->puli->getFactoryManager();
+
+        $this->assertInstanceOf('Puli\RepositoryManager\Api\Factory\FactoryManager', $manager);
+    }
+
+    public function testGetFactoryManagerInGlobalEnvironment()
+    {
+        $this->puli->start();
+
+        $this->assertNull($this->puli->getFactoryManager());
     }
 
     public function testGetConfigFileManagerInProjectEnvironment()
