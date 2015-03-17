@@ -167,9 +167,9 @@ class Puli
     private $configFileStorage;
 
     /**
-     * @var PackageFileStorage[]
+     * @var PackageFileStorage|null
      */
-    private $packageFileStorages;
+    private $packageFileStorage;
 
     /**
      * @var LoggerInterface
@@ -479,7 +479,7 @@ class Puli
         if (!$this->rootPackageFileManager && $this->rootDir) {
             $this->rootPackageFileManager = new RootPackageFileManagerImpl(
                 $this->environment,
-                $this->getPackageFileStorage($this->environment->getEventDispatcher())
+                $this->getPackageFileStorage()
             );
         }
 
@@ -500,7 +500,7 @@ class Puli
         if (!$this->packageManager && $this->rootDir) {
             $this->packageManager = new PackageManagerImpl(
                 $this->environment,
-                $this->getPackageFileStorage($this->environment->getEventDispatcher())
+                $this->getPackageFileStorage()
             );
         }
 
@@ -523,7 +523,7 @@ class Puli
                 $this->environment,
                 $this->getRepository(),
                 $this->getPackageManager()->findPackages(Expr::same(Package::STATE, PackageState::ENABLED)),
-                $this->getPackageFileStorage($this->environment->getEventDispatcher())
+                $this->getPackageFileStorage()
             );
         }
 
@@ -546,7 +546,7 @@ class Puli
                 $this->environment,
                 $this->getDiscovery(),
                 $this->getPackageManager()->findPackages(Expr::same(Package::STATE, PackageState::ENABLED)),
-                $this->getPackageFileStorage($this->environment->getEventDispatcher()),
+                $this->getPackageFileStorage(),
                 $this->logger
             );
         }
@@ -628,7 +628,7 @@ class Puli
 
         $rootDir = Path::canonicalize($rootDir);
         $rootFilePath = $this->rootDir.'/puli.json';
-        $rootPackageFile = $this->getPackageFileStorage($dispatcher)->loadRootPackageFile($rootFilePath, $baseConfig);
+        $rootPackageFile = $this->getPackageFileStorage()->loadRootPackageFile($rootFilePath, $baseConfig);
         $config = new EnvConfig($rootPackageFile->getConfig());
 
         return new ProjectEnvironment($homeDir, $rootDir, $config, $rootPackageFile, $configFile, $dispatcher);
@@ -654,25 +654,18 @@ class Puli
     /**
      * Returns the cached package file storage.
      *
-     * @param EventDispatcherInterface $dispatcher The event dispatcher that
-     *                                             receives the package file
-     *                                             storage events.
-     *
      * @return PackageFileStorage The file storage.
      */
-    private function getPackageFileStorage(EventDispatcherInterface $dispatcher)
+    private function getPackageFileStorage()
     {
-        $hash = spl_object_hash($dispatcher);
-
-        if (!isset($this->packageFileStorages[$hash])) {
-            $this->packageFileStorages[$hash] = new PackageFileStorage(
+        if (!$this->packageFileStorage) {
+            $this->packageFileStorage = new PackageFileStorage(
                 new PackageJsonReader(),
-                new PackageJsonWriter(),
-                $dispatcher
+                new PackageJsonWriter()
             );
         }
 
-        return $this->packageFileStorages[$hash];
+        return $this->packageFileStorage;
     }
 
     /**

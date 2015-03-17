@@ -46,6 +46,7 @@ Changelog
  * added `Puli::getFactoryManager()`
  * added `PuliEvents::GENERATE_FACTORY` which is thrown whenever the factory
    class is generated
+ * removed `PuliEvents::LOAD_PACKAGE_FILE` and`PuliEvents::SAVE_PACKAGE_FILE` 
 
 * 1.0.0-beta2 (2015-01-27)
 
