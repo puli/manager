@@ -49,6 +49,8 @@ Changelog
  * removed `PuliEvents::LOAD_PACKAGE_FILE` and`PuliEvents::SAVE_PACKAGE_FILE`
  * moved code to `Puli\Manager` namespace
  * renamed package to "puli/manager"
+ * added more plugin management methods to `RootPackageFile` and
+   `RootPackageFileManager`
 
 * 1.0.0-beta2 (2015-01-27)
 

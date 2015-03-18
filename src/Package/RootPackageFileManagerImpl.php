@@ -109,7 +109,7 @@ class RootPackageFileManagerImpl extends AbstractConfigFileManager implements Ro
     /**
      * {@inheritdoc}
      */
-    public function installPluginClass($pluginClass)
+    public function addPluginClass($pluginClass)
     {
         if ($this->rootPackageFile->hasPluginClass($pluginClass)) {
             // Already installed locally
@@ -125,17 +125,55 @@ class RootPackageFileManagerImpl extends AbstractConfigFileManager implements Ro
     /**
      * {@inheritdoc}
      */
-    public function isPluginClassInstalled($pluginClass, $includeGlobal = true)
+    public function removePluginClass($pluginClass)
     {
-        return $this->rootPackageFile->hasPluginClass($pluginClass, $includeGlobal);
+        if (!$this->rootPackageFile->hasPluginClass($pluginClass)) {
+            return;
+        }
+
+        $this->rootPackageFile->removePluginClass($pluginClass);
+
+        $this->packageFileStorage->saveRootPackageFile($this->rootPackageFile);
+        $this->factoryManager->autoGenerateFactoryClass();
     }
 
     /**
      * {@inheritdoc}
      */
-    public function getPluginClasses($includeGlobal = true)
+    public function clearPluginClasses()
     {
-        return $this->rootPackageFile->getPluginClasses($includeGlobal);
+        if (!$this->rootPackageFile->hasPluginClasses()) {
+            return;
+        }
+
+        $this->rootPackageFile->clearPluginClasses();
+
+        $this->packageFileStorage->saveRootPackageFile($this->rootPackageFile);
+        $this->factoryManager->autoGenerateFactoryClass();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function hasPluginClass($pluginClass)
+    {
+        return $this->rootPackageFile->hasPluginClass($pluginClass);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function hasPluginClasses()
+    {
+        return $this->rootPackageFile->hasPluginClasses();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getPluginClasses()
+    {
+        return $this->rootPackageFile->getPluginClasses();
     }
 
     /**

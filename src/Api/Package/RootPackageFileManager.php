@@ -56,52 +56,54 @@ interface RootPackageFileManager extends ConfigFileManager
     public function setPackageName($packageName);
 
     /**
-     * Installs a plugin class.
+     * Adds a plugin class to the package file.
      *
      * The plugin class must be passed as fully-qualified name of a class that
      * implements {@link PuliPlugin}. Plugin constructors must not have
      * mandatory parameters.
      *
      * @param string $pluginClass The fully qualified plugin class name.
-     *
-     * @throws InvalidConfigException If a class is not found, is not a class,
-     *                                does not implement {@link PuliPlugin}
-     *                                or has required constructor parameters.
      */
-    public function installPluginClass($pluginClass);
+    public function addPluginClass($pluginClass);
 
     /**
-     * Returns whether a plugin class is installed.
+     * Removes a plugin class from the package file.
      *
-     * @param string $pluginClass   The fully qualified plugin class name.
-     * @param bool   $includeGlobal If set to `true`, both plugins installed in
-     *                              the configuration of the root package and
-     *                              plugins installed in the global configuration
-     *                              are considered. If set to `false`, only the
-     *                              plugins defined in the root package are
-     *                              considered.
+     * If the package file does not contain the class, this method does nothign.
      *
-     * @return bool Whether the plugin class is installed.
-     *
-     * @see installPluginClass()
+     * @param string $pluginClass The fully qualified plugin class name.
      */
-    public function isPluginClassInstalled($pluginClass, $includeGlobal = true);
+    public function removePluginClass($pluginClass);
+
+    /**
+     * Returns whether the package file contains a plugin class.
+     *
+     * @param string $pluginClass The fully qualified plugin class name.
+     *
+     * @return bool Returns `true` if the package file contains the given
+     *              plugin class and `false` otherwise.
+     */
+    public function hasPluginClass($pluginClass);
+
+    /**
+     * Returns whether the package file contains any plugin classes.
+     *
+     * @return bool Returns `true` if the package file contains any plugin
+     *              classes and `false` otherwise.
+     */
+    public function hasPluginClasses();
 
     /**
      * Returns all installed plugin classes.
      *
-     * @param bool $includeGlobal If set to `true`, both plugins installed in
-     *                            the configuration of the root package and
-     *                            plugins installed in the global configuration
-     *                            are returned. If set to `false`, only the
-     *                            plugins defined in the root package are
-     *                            returned.
-     *
      * @return string[] The fully qualified plugin class names.
-     *
-     * @see installPluginClass()
      */
-    public function getPluginClasses($includeGlobal = true);
+    public function getPluginClasses();
+
+    /**
+     * Removes all plugin classes from the package file.
+     */
+    public function clearPluginClasses();
 
     /**
      * Sets an extra key in the file.

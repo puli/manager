@@ -65,12 +65,10 @@ class RootPackageFileTest extends PHPUnit_Framework_TestCase
 
     public function testSetPluginClasses()
     {
-        $this->packageFile->setPluginClasses(array(
-            self::PLUGIN_CLASS,
-            self::OTHER_PLUGIN_CLASS,
-        ));
+        $this->packageFile->addPluginClass(self::PLUGIN_CLASS);
+        $this->packageFile->setPluginClasses(array(self::OTHER_PLUGIN_CLASS));
 
-        $this->assertSame(array(self::PLUGIN_CLASS, self::OTHER_PLUGIN_CLASS), $this->packageFile->getPluginClasses());
+        $this->assertSame(array(self::OTHER_PLUGIN_CLASS), $this->packageFile->getPluginClasses());
     }
 
     public function testSetPluginClassesToEmptyArray()
@@ -79,6 +77,14 @@ class RootPackageFileTest extends PHPUnit_Framework_TestCase
         $this->packageFile->setPluginClasses(array());
 
         $this->assertSame(array(), $this->packageFile->getPluginClasses());
+    }
+
+    public function testAddPluginClasses()
+    {
+        $this->packageFile->addPluginClass(self::PLUGIN_CLASS);
+        $this->packageFile->addPluginClasses(array(self::OTHER_PLUGIN_CLASS));
+
+        $this->assertSame(array(self::PLUGIN_CLASS, self::OTHER_PLUGIN_CLASS), $this->packageFile->getPluginClasses());
     }
 
     public function testRemovePluginClass()
@@ -111,6 +117,17 @@ class RootPackageFileTest extends PHPUnit_Framework_TestCase
         $this->assertSame(array(self::PLUGIN_CLASS), $this->packageFile->getPluginClasses());
     }
 
+    public function testClearPluginClasses()
+    {
+        $this->packageFile->setPluginClasses(array(
+            self::PLUGIN_CLASS,
+            self::OTHER_PLUGIN_CLASS,
+        ));
+        $this->packageFile->clearPluginClasses();
+
+        $this->assertSame(array(), $this->packageFile->getPluginClasses());
+    }
+
     public function testHasPluginClass()
     {
         $this->assertFalse($this->packageFile->hasPluginClass(self::PLUGIN_CLASS));
@@ -127,6 +144,15 @@ class RootPackageFileTest extends PHPUnit_Framework_TestCase
         $this->packageFile->addPluginClass(self::PLUGIN_CLASS);
 
         $this->assertTrue($this->packageFile->hasPluginClass('\\'.self::PLUGIN_CLASS));
+    }
+
+    public function testHasPluginClasses()
+    {
+        $this->assertFalse($this->packageFile->hasPluginClasses());
+
+        $this->packageFile->addPluginClass(self::PLUGIN_CLASS);
+
+        $this->assertTrue($this->packageFile->hasPluginClasses());
     }
 
     public function testAddInstallInfo()

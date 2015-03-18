@@ -218,6 +218,26 @@ class RootPackageFile extends PackageFile
     {
         $this->pluginClasses = array();
 
+        $this->addPluginClasses($pluginClasses);
+    }
+
+    /**
+     * Adds multiple plugin classes.
+     *
+     * The plugin classes must be fully-qualified class names that implement
+     * {@link Puli\Manager\Api\PuliPlugin}. If a class is not
+     * found or does not implement that interface, an exception is thrown.
+     *
+     * The plugin classes must not have required parameters in their constructor
+     * so that they can be successfully instantiated. If a constructor has
+     * required parameters, an exception is thrown.
+     *
+     * Leading backslashes are removed from the fully-qualified class names.
+     *
+     * @param string[] $pluginClasses The fully qualified plugin class names.
+     */
+    public function addPluginClasses(array $pluginClasses)
+    {
         foreach ($pluginClasses as $pluginClass) {
             $this->addPluginClass($pluginClass);
         }
@@ -237,10 +257,6 @@ class RootPackageFile extends PackageFile
      * Leading backslashes are removed from the fully-qualified class name.
      *
      * @param string $pluginClass The fully qualified plugin class name.
-     *
-     * @throws InvalidConfigException If the class is not found, is not a class,
-     *                                does not implement {@link PuliPlugin}
-     *                                or has required constructor parameters.
      */
     public function addPluginClass($pluginClass)
     {
@@ -264,6 +280,14 @@ class RootPackageFile extends PackageFile
     }
 
     /**
+     * Removes all plugin classes.
+     */
+    public function clearPluginClasses()
+    {
+        $this->pluginClasses = array();
+    }
+
+    /**
      * Returns whether the configuration contains a plugin class.
      *
      * @param string $pluginClass The fully qualified plugin class name.
@@ -273,5 +297,15 @@ class RootPackageFile extends PackageFile
     public function hasPluginClass($pluginClass)
     {
         return isset($this->pluginClasses[ltrim($pluginClass, '\\')]);
+    }
+
+    /**
+     * Returns whether the configuration contains any plugin classes.
+     *
+     * @return bool Whether the configuration contains any plugin classes.
+     */
+    public function hasPluginClasses()
+    {
+        return count($this->pluginClasses) > 0;
     }
 }

@@ -288,7 +288,7 @@ class RootPackageFileManagerImplTest extends ManagerTestCase
         $this->manager->removeConfigKeys(array(Config::PULI_DIR, Config::FACTORY_FILE));
     }
 
-    public function testInstallPlugin()
+    public function testAddPluginClass()
     {
         $this->packageFileStorage->expects($this->once())
             ->method('saveRootPackageFile')
@@ -300,13 +300,12 @@ class RootPackageFileManagerImplTest extends ManagerTestCase
         $this->factoryManager->expects($this->once())
             ->method('autoGenerateFactoryClass');
 
-        $this->manager->installPluginClass(self::PLUGIN_CLASS);
+        $this->manager->addPluginClass(self::PLUGIN_CLASS);
 
         $this->assertSame(array(self::PLUGIN_CLASS), $this->manager->getPluginClasses());
     }
 
-
-    public function testInstallPluginDoesNothingIfAlreadyInstalled()
+    public function testAddPluginClassDoesNothingIfAlreadyInstalled()
     {
         $this->packageFileStorage->expects($this->never())
             ->method('saveRootPackageFile');
@@ -316,19 +315,96 @@ class RootPackageFileManagerImplTest extends ManagerTestCase
 
         $this->rootPackageFile->addPluginClass(self::PLUGIN_CLASS);
 
-        $this->manager->installPluginClass(self::PLUGIN_CLASS);
+        $this->manager->addPluginClass(self::PLUGIN_CLASS);
 
         $this->assertSame(array(self::PLUGIN_CLASS), $this->manager->getPluginClasses());
     }
 
-    public function testIsPluginClassInstalled()
+    public function testRemovePluginClass()
+    {
+        $this->packageFileStorage->expects($this->once())
+            ->method('saveRootPackageFile')
+            ->with($this->rootPackageFile)
+            ->will($this->returnCallback(function (RootPackageFile $packageFile) {
+                PHPUnit_Framework_Assert::assertSame(array(RootPackageFileManagerImplTest::OTHER_PLUGIN_CLASS), $packageFile->getPluginClasses());
+            }));
+
+        $this->rootPackageFile->addPluginClass(self::PLUGIN_CLASS);
+        $this->rootPackageFile->addPluginClass(self::OTHER_PLUGIN_CLASS);
+
+        $this->factoryManager->expects($this->once())
+            ->method('autoGenerateFactoryClass');
+
+        $this->manager->removePluginClass(self::PLUGIN_CLASS);
+
+        $this->assertSame(array(self::OTHER_PLUGIN_CLASS), $this->manager->getPluginClasses());
+    }
+
+    public function testRemovePluginClassDoesNothingIfNotFound()
+    {
+        $this->packageFileStorage->expects($this->never())
+            ->method('saveRootPackageFile');
+
+        $this->factoryManager->expects($this->never())
+            ->method('autoGenerateFactoryClass');
+
+        $this->rootPackageFile->addPluginClass(self::PLUGIN_CLASS);
+
+        $this->manager->removePluginClass(self::OTHER_PLUGIN_CLASS);
+
+        $this->assertSame(array(self::PLUGIN_CLASS), $this->manager->getPluginClasses());
+    }
+
+    public function testClearPluginClasses()
+    {
+        $this->packageFileStorage->expects($this->once())
+            ->method('saveRootPackageFile')
+            ->with($this->rootPackageFile)
+            ->will($this->returnCallback(function (RootPackageFile $packageFile) {
+                PHPUnit_Framework_Assert::assertSame(array(), $packageFile->getPluginClasses());
+            }));
+
+        $this->rootPackageFile->addPluginClass(self::PLUGIN_CLASS);
+        $this->rootPackageFile->addPluginClass(self::OTHER_PLUGIN_CLASS);
+
+        $this->factoryManager->expects($this->once())
+            ->method('autoGenerateFactoryClass');
+
+        $this->manager->clearPluginClasses();
+
+        $this->assertSame(array(), $this->manager->getPluginClasses());
+    }
+
+    public function testClearPluginClassesDoesNothingIfNoneExist()
+    {
+        $this->packageFileStorage->expects($this->never())
+            ->method('saveRootPackageFile');
+
+        $this->factoryManager->expects($this->never())
+            ->method('autoGenerateFactoryClass');
+
+        $this->manager->clearPluginClasses();
+
+        $this->assertSame(array(), $this->manager->getPluginClasses());
+    }
+
+    public function testHasPluginClass()
     {
         $this->rootPackageFile->addPluginClass(self::PLUGIN_CLASS);
 
-        $this->assertTrue($this->manager->isPluginClassInstalled(self::PLUGIN_CLASS));
-        $this->assertFalse($this->manager->isPluginClassInstalled(self::OTHER_PLUGIN_CLASS));
+        $this->assertTrue($this->manager->hasPluginClass(self::PLUGIN_CLASS));
+        $this->assertFalse($this->manager->hasPluginClass(self::OTHER_PLUGIN_CLASS));
 
-        $this->assertFalse($this->manager->isPluginClassInstalled('foobar'));
+        $this->assertFalse($this->manager->hasPluginClass('foobar'));
+    }
+
+    public function testHasPluginClasses()
+    {
+        $this->assertFalse($this->manager->hasPluginClasses());
+
+        $this->rootPackageFile->addPluginClass(self::PLUGIN_CLASS);
+
+        $this->assertTrue($this->manager->hasPluginClasses());
     }
 
     public function testGetPackageName()
