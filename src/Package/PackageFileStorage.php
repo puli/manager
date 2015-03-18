@@ -13,6 +13,7 @@ namespace Puli\Manager\Package;
 
 use Puli\Manager\Api\Config\Config;
 use Puli\Manager\Api\Event\PackageFileEvent;
+use Puli\Manager\Api\Factory\FactoryManager;
 use Puli\Manager\Api\FileNotFoundException;
 use Puli\Manager\Api\InvalidConfigException;
 use Puli\Manager\Api\IOException;
@@ -45,15 +46,24 @@ class PackageFileStorage
     private $writer;
 
     /**
+     * @var FactoryManager
+     */
+    private $factoryManager;
+
+    /**
      * Creates a new storage.
      *
-     * @param PackageFileReader $reader The package file reader.
-     * @param PackageFileWriter $writer The package file writer.
+     * @param PackageFileReader $reader         The package file reader.
+     * @param PackageFileWriter $writer         The package file writer.
+     * @param FactoryManager    $factoryManager The manager used to regenerate
+     *                                          the factory class after saving
+     *                                          the root package file.
      */
-    public function __construct(PackageFileReader $reader, PackageFileWriter $writer)
+    public function __construct(PackageFileReader $reader, PackageFileWriter $writer, FactoryManager $factoryManager = null)
     {
         $this->reader = $reader;
         $this->writer = $writer;
+        $this->factoryManager = $factoryManager;
     }
 
     /**
@@ -133,5 +143,9 @@ class PackageFileStorage
     public function saveRootPackageFile(RootPackageFile $packageFile)
     {
         $this->writer->writePackageFile($packageFile, $packageFile->getPath());
+
+        if ($this->factoryManager) {
+            $this->factoryManager->autoGenerateFactoryClass();
+        }
     }
 }

@@ -17,11 +17,15 @@ use Puli\Discovery\Api\EditableDiscovery;
 use Puli\Discovery\Api\ResourceDiscovery;
 use Puli\Factory\PuliFactory;
 use Puli\Manager\Api\Config\ConfigFileManager;
+use Puli\Manager\Api\Config\ConfigFileReader;
+use Puli\Manager\Api\Config\ConfigFileWriter;
 use Puli\Manager\Api\Discovery\DiscoveryManager;
 use Puli\Manager\Api\Environment\GlobalEnvironment;
 use Puli\Manager\Api\Environment\ProjectEnvironment;
 use Puli\Manager\Api\Factory\FactoryManager;
 use Puli\Manager\Api\Package\Package;
+use Puli\Manager\Api\Package\PackageFileReader;
+use Puli\Manager\Api\Package\PackageFileWriter;
 use Puli\Manager\Api\Package\PackageManager;
 use Puli\Manager\Api\Package\PackageState;
 use Puli\Manager\Api\Package\RootPackageFileManager;
@@ -165,9 +169,29 @@ class Puli
     private $configFileStorage;
 
     /**
+     * @var ConfigFileReader|null
+     */
+    private $configFileReader;
+
+    /**
+     * @var ConfigFileWriter|null
+     */
+    private $configFileWriter;
+
+    /**
      * @var PackageFileStorage|null
      */
     private $packageFileStorage;
+
+    /**
+     * @var PackageFileReader|null
+     */
+    private $packageFileReader;
+
+    /**
+     * @var PackageFileWriter|null
+     */
+    private $packageFileWriter;
 
     /**
      * @var LoggerInterface
@@ -573,8 +597,10 @@ class Puli
             Assert::fileExists($homeDir, 'Could not load Puli environment: The home directory %s does not exist.');
             Assert::directory($homeDir, 'Could not load Puli environment: The home directory %s is a file. Expected a directory.');
 
+            // Create a storage without the factory manager
+            $configStorage = new ConfigFileStorage($this->getConfigFileReader(), $this->getConfigFileWriter());
             $configPath = Path::canonicalize($homeDir).'/config.json';
-            $configFile = $this->getConfigFileStorage()->loadConfigFile($configPath, new DefaultConfig());
+            $configFile = $configStorage->loadConfigFile($configPath, new DefaultConfig());
             $baseConfig = $configFile->getConfig();
         } else {
             $configFile = null;
@@ -618,17 +644,21 @@ class Puli
             Assert::fileExists($homeDir, 'Could not load Puli environment: The home directory %s does not exist.');
             Assert::directory($homeDir, 'Could not load Puli environment: The home directory %s is a file. Expected a directory.');
 
+            // Create a storage without the factory manager
+            $configStorage = new ConfigFileStorage($this->getConfigFileReader(), $this->getConfigFileWriter());
             $configPath = Path::canonicalize($homeDir).'/config.json';
-            $configFile = $this->getConfigFileStorage()->loadConfigFile($configPath, new DefaultConfig());
+            $configFile = $configStorage->loadConfigFile($configPath, new DefaultConfig());
             $baseConfig = $configFile->getConfig();
         } else {
             $configFile = null;
             $baseConfig = new DefaultConfig();
         }
 
+        // Create a storage without the factory manager
+        $packageFileStorage = new PackageFileStorage($this->getPackageFileReader(), $this->getPackageFileWriter());
         $rootDir = Path::canonicalize($rootDir);
         $rootFilePath = $this->rootDir.'/puli.json';
-        $rootPackageFile = $this->getPackageFileStorage()->loadRootPackageFile($rootFilePath, $baseConfig);
+        $rootPackageFile = $packageFileStorage->loadRootPackageFile($rootFilePath, $baseConfig);
         $config = new EnvConfig($rootPackageFile->getConfig());
 
         return new ProjectEnvironment($homeDir, $rootDir, $config, $rootPackageFile, $configFile, $dispatcher);
@@ -637,14 +667,15 @@ class Puli
     /**
      * Returns the cached configuration file storage.
      *
-     * @return ConfigFileStorage The file storage.
+     * @return ConfigFileStorage The configuration file storage.
      */
     private function getConfigFileStorage()
     {
         if (!$this->configFileStorage) {
             $this->configFileStorage = new ConfigFileStorage(
-                new ConfigJsonReader(),
-                new ConfigJsonWriter()
+                $this->getConfigFileReader(),
+                $this->getConfigFileWriter(),
+                $this->getFactoryManager()
             );
         }
 
@@ -652,20 +683,77 @@ class Puli
     }
 
     /**
+     * Returns the cached configuration file reader.
+     *
+     * @return ConfigFileReader The configuration file reader.
+     */
+    private function getConfigFileReader()
+    {
+        if (!$this->configFileReader) {
+            $this->configFileReader = new ConfigJsonReader();
+        }
+
+        return $this->configFileReader;
+    }
+
+    /**
+     * Returns the cached configuration file writer.
+     *
+     * @return ConfigFileWriter The configuration file writer.
+     */
+    private function getConfigFileWriter()
+    {
+        if (!$this->configFileWriter) {
+            $this->configFileWriter = new ConfigJsonWriter();
+        }
+
+        return $this->configFileWriter;
+    }
+
+    /**
      * Returns the cached package file storage.
      *
-     * @return PackageFileStorage The file storage.
+     * @return PackageFileStorage The package file storage.
      */
     private function getPackageFileStorage()
     {
         if (!$this->packageFileStorage) {
             $this->packageFileStorage = new PackageFileStorage(
-                new PackageJsonReader(),
-                new PackageJsonWriter()
+                $this->getPackageFileReader(),
+                $this->getPackageFileWriter(),
+                $this->getFactoryManager()
             );
         }
 
         return $this->packageFileStorage;
+    }
+
+    /**
+     * Returns the cached package file reader.
+     *
+     * @return PackageFileReader The package file reader.
+     */
+    private function getPackageFileReader()
+    {
+        if (!$this->packageFileReader) {
+            $this->packageFileReader = new PackageJsonReader();
+        }
+
+        return $this->packageFileReader;
+    }
+
+    /**
+     * Returns the cached package file writer.
+     *
+     * @return PackageFileWriter The package file writer.
+     */
+    private function getPackageFileWriter()
+    {
+        if (!$this->packageFileWriter) {
+            $this->packageFileWriter = new PackageJsonWriter();
+        }
+
+        return $this->packageFileWriter;
     }
 
     /**

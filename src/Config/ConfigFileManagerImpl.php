@@ -46,14 +46,9 @@ class ConfigFileManagerImpl extends AbstractConfigFileManager
      *
      * @param GlobalEnvironment $environment       The global environment.
      * @param ConfigFileStorage $configFileStorage The configuration file storage.
-     * @param FactoryManager    $factoryManager    The manager used to regenerate
-     *                                             the Puli factory class after
-     *                                             changing the configuration.
      */
-    public function __construct(GlobalEnvironment $environment, ConfigFileStorage $configFileStorage, FactoryManager $factoryManager = null)
+    public function __construct(GlobalEnvironment $environment, ConfigFileStorage $configFileStorage)
     {
-        parent::__construct($factoryManager);
-
         $this->environment = $environment;
         $this->configFileStorage = $configFileStorage;
         $this->configFile = $environment->getConfigFile();

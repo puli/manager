@@ -15,6 +15,7 @@ use Puli\Manager\Api\Config\Config;
 use Puli\Manager\Api\Config\ConfigFile;
 use Puli\Manager\Api\Config\ConfigFileReader;
 use Puli\Manager\Api\Config\ConfigFileWriter;
+use Puli\Manager\Api\Factory\FactoryManager;
 use Puli\Manager\Api\FileNotFoundException;
 use Puli\Manager\Api\InvalidConfigException;
 use Puli\Manager\Api\IOException;
@@ -43,15 +44,24 @@ class ConfigFileStorage
     private $writer;
 
     /**
+     * @var FactoryManager
+     */
+    private $factoryManager;
+
+    /**
      * Creates a new configuration file storage.
      *
-     * @param ConfigFileReader $reader The configuration file reader.
-     * @param ConfigFileWriter $writer The configuration file writer.
+     * @param ConfigFileReader $reader         The configuration file reader.
+     * @param ConfigFileWriter $writer         The configuration file writer.
+     * @param FactoryManager   $factoryManager The manager used to regenerate
+     *                                         the factory class after saving
+     *                                         the config file.
      */
-    public function __construct(ConfigFileReader $reader, ConfigFileWriter $writer)
+    public function __construct(ConfigFileReader $reader, ConfigFileWriter $writer, FactoryManager $factoryManager = null)
     {
         $this->reader = $reader;
         $this->writer = $writer;
+        $this->factoryManager = $factoryManager;
     }
 
     /**
@@ -89,5 +99,9 @@ class ConfigFileStorage
     public function saveConfigFile(ConfigFile $configFile)
     {
         $this->writer->writeConfigFile($configFile, $configFile->getPath());
+
+        if ($this->factoryManager) {
+            $this->factoryManager->autoGenerateFactoryClass();
+        }
     }
 }

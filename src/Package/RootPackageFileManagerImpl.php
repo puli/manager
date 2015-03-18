@@ -45,27 +45,16 @@ class RootPackageFileManagerImpl extends AbstractConfigFileManager implements Ro
     private $packageFileStorage;
 
     /**
-     * @var FactoryManager
-     */
-    private $factoryManager;
-
-    /**
      * Creates a new package file manager.
      *
      * @param ProjectEnvironment $environment        The project environment
      * @param PackageFileStorage $packageFileStorage The package file storage.
-     * @param FactoryManager     $factoryManager     The manager used to regenerate
-     *                                               the Puli factory class after
-     *                                               changing the configuration.
      */
-    public function __construct(ProjectEnvironment $environment, PackageFileStorage $packageFileStorage, FactoryManager $factoryManager)
+    public function __construct(ProjectEnvironment $environment, PackageFileStorage $packageFileStorage)
     {
-        parent::__construct($factoryManager);
-
         $this->environment = $environment;
         $this->rootPackageFile = $environment->getRootPackageFile();
         $this->packageFileStorage = $packageFileStorage;
-        $this->factoryManager = $factoryManager;
     }
 
     /**
@@ -103,7 +92,6 @@ class RootPackageFileManagerImpl extends AbstractConfigFileManager implements Ro
 
         $this->rootPackageFile->setPackageName($packageName);
         $this->packageFileStorage->saveRootPackageFile($this->rootPackageFile);
-        $this->factoryManager->autoGenerateFactoryClass();
     }
 
     /**
@@ -119,7 +107,6 @@ class RootPackageFileManagerImpl extends AbstractConfigFileManager implements Ro
         $this->rootPackageFile->addPluginClass($pluginClass);
 
         $this->packageFileStorage->saveRootPackageFile($this->rootPackageFile);
-        $this->factoryManager->autoGenerateFactoryClass();
     }
 
     /**
@@ -134,7 +121,6 @@ class RootPackageFileManagerImpl extends AbstractConfigFileManager implements Ro
         $this->rootPackageFile->removePluginClass($pluginClass);
 
         $this->packageFileStorage->saveRootPackageFile($this->rootPackageFile);
-        $this->factoryManager->autoGenerateFactoryClass();
     }
 
     /**
@@ -149,7 +135,6 @@ class RootPackageFileManagerImpl extends AbstractConfigFileManager implements Ro
         $this->rootPackageFile->clearPluginClasses();
 
         $this->packageFileStorage->saveRootPackageFile($this->rootPackageFile);
-        $this->factoryManager->autoGenerateFactoryClass();
     }
 
     /**
@@ -201,8 +186,6 @@ class RootPackageFileManagerImpl extends AbstractConfigFileManager implements Ro
 
             throw $e;
         }
-
-        $this->factoryManager->autoGenerateFactoryClass();
     }
 
     /**
@@ -242,8 +225,6 @@ class RootPackageFileManagerImpl extends AbstractConfigFileManager implements Ro
 
             throw $e;
         }
-
-        $this->factoryManager->autoGenerateFactoryClass();
     }
 
     /**
@@ -266,8 +247,6 @@ class RootPackageFileManagerImpl extends AbstractConfigFileManager implements Ro
 
             throw $e;
         }
-
-        $this->factoryManager->autoGenerateFactoryClass();
     }
 
     /**
@@ -296,8 +275,6 @@ class RootPackageFileManagerImpl extends AbstractConfigFileManager implements Ro
 
             throw $e;
         }
-
-        $this->factoryManager->autoGenerateFactoryClass();
     }
 
     /**
@@ -320,8 +297,6 @@ class RootPackageFileManagerImpl extends AbstractConfigFileManager implements Ro
 
             throw $e;
         }
-
-        $this->factoryManager->autoGenerateFactoryClass();
     }
 
     /**

@@ -106,4 +106,17 @@ class ConfigFileStorageTest extends PHPUnit_Framework_TestCase
 
         $this->storage->saveConfigFile($configFile);
     }
+
+    public function testSaveConfigFileGeneratesFactoryIfManagerAvailable()
+    {
+        $configFile = new ConfigFile('/path');
+
+        $factoryManager = $this->getMock('Puli\Manager\Api\Factory\FactoryManager');
+        $storage = new ConfigFileStorage($this->reader, $this->writer, $factoryManager);
+
+        $factoryManager->expects($this->once())
+            ->method('autoGenerateFactoryClass');
+
+        $storage->saveConfigFile($configFile);
+    }
 }

@@ -97,4 +97,18 @@ class PackageFileStorageTest extends PHPUnit_Framework_TestCase
 
         $this->storage->saveRootPackageFile($packageFile);
     }
+
+    public function testSaveRootPackageFileGeneratesFactoryIfManagerAvailable()
+    {
+        $baseConfig = new Config();
+        $packageFile = new RootPackageFile(null, '/path', $baseConfig);
+
+        $factoryManager = $this->getMock('Puli\Manager\Api\Factory\FactoryManager');
+        $storage = new PackageFileStorage($this->reader, $this->writer, $factoryManager);
+
+        $factoryManager->expects($this->once())
+            ->method('autoGenerateFactoryClass');
+
+        $storage->saveRootPackageFile($packageFile);
+    }
 }

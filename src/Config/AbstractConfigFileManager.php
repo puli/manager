@@ -30,23 +30,6 @@ use Webmozart\Glob\Iterator\RegexFilterIterator;
 abstract class AbstractConfigFileManager implements ConfigFileManager
 {
     /**
-     * @var FactoryManager
-     */
-    private $factoryManager;
-
-    /**
-     * Creates the manager.
-     *
-     * @param FactoryManager $factoryManager The manager used to regenerate the
-     *                                       Puli factory class after changing
-     *                                       the configuration.
-     */
-    public function __construct(FactoryManager $factoryManager = null)
-    {
-        $this->factoryManager = $factoryManager;
-    }
-
-    /**
      * {@inheritdoc}
      */
     public function setConfigKey($key, $value)
@@ -71,10 +54,6 @@ abstract class AbstractConfigFileManager implements ConfigFileManager
             }
 
             throw $e;
-        }
-
-        if ($this->factoryManager) {
-            $this->factoryManager->autoGenerateFactoryClass();
         }
     }
 
@@ -109,10 +88,6 @@ abstract class AbstractConfigFileManager implements ConfigFileManager
 
             throw $e;
         }
-
-        if ($this->factoryManager) {
-            $this->factoryManager->autoGenerateFactoryClass();
-        }
     }
 
     /**
@@ -135,10 +110,6 @@ abstract class AbstractConfigFileManager implements ConfigFileManager
             $config->set($key, $previousValue);
 
             throw $e;
-        }
-
-        if ($this->factoryManager) {
-            $this->factoryManager->autoGenerateFactoryClass();
         }
     }
 
@@ -165,10 +136,6 @@ abstract class AbstractConfigFileManager implements ConfigFileManager
             }
 
             throw $e;
-        }
-
-        if ($this->factoryManager) {
-            $this->factoryManager->autoGenerateFactoryClass();
         }
     }
 
