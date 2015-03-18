@@ -357,7 +357,7 @@ class Puli
     /**
      * Returns the used event dispatcher.
      *
-     * @return LoggerInterface The used logger.
+     * @return EventDispatcherInterface The used logger.
      */
     public function getEventDispatcher()
     {
