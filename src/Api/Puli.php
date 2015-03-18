@@ -50,7 +50,6 @@ use Puli\Manager\Repository\RepositoryManagerImpl;
 use Puli\Manager\Util\System;
 use Puli\Repository\Api\EditableRepository;
 use Puli\Repository\Api\ResourceRepository;
-use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Webmozart\Expression\Expr;
 use Webmozart\PathUtil\Path;
@@ -112,6 +111,11 @@ class Puli
      * @var string|null
      */
     private $rootDir;
+
+    /**
+     * @var EventDispatcherInterface|null
+     */
+    private $dispatcher;
 
     /**
      * @var GlobalEnvironment|ProjectEnvironment
@@ -261,6 +265,7 @@ class Puli
             $this->environment = $this->createGlobalEnvironment();
         }
 
+        $this->dispatcher = $this->environment->getEventDispatcher();
         $this->started = true;
 
         // Start plugins once the container is running
@@ -281,9 +286,7 @@ class Puli
     }
 
     /**
-     * Returns the root directory of the managed Puli project.
-     *
-     * If no Puli project is managed at the moment, `null` is returned.
+     * Sets the root directory of the managed Puli project.
      *
      * @param string|null $rootDir The root directory of the managed Puli
      *                             project or `null` to start Puli in the
@@ -291,6 +294,10 @@ class Puli
      */
     public function setRootDirectory($rootDir)
     {
+        if ($this->started) {
+            throw new LogicException('Puli is already started');
+        }
+
         Assert::nullOrDirectory($rootDir);
 
         $this->rootDir = $rootDir;
@@ -312,12 +319,14 @@ class Puli
     /**
      * Sets the logger to use.
      *
-     * All managers are reloaded after calling this method.
-     *
      * @param LoggerInterface $logger The logger to use.
      */
     public function setLogger(LoggerInterface $logger)
     {
+        if ($this->started) {
+            throw new LogicException('Puli is already started');
+        }
+
         $this->logger = $logger;
     }
 
@@ -329,6 +338,30 @@ class Puli
     public function getLogger()
     {
         return $this->logger;
+    }
+
+    /**
+     * Sets the event dispatcher to use.
+     *
+     * @param EventDispatcherInterface $dispatcher The event dispatcher to use.
+     */
+    public function setEventDispatcher(EventDispatcherInterface $dispatcher)
+    {
+        if ($this->started) {
+            throw new LogicException('Puli is already started');
+        }
+
+        $this->dispatcher = $dispatcher;
+    }
+
+    /**
+     * Returns the used event dispatcher.
+     *
+     * @return LoggerInterface The used logger.
+     */
+    public function getEventDispatcher()
+    {
+        return $this->dispatcher;
     }
 
     /**
@@ -450,20 +483,6 @@ class Puli
         }
 
         return $this->factoryManager;
-    }
-
-    /**
-     * Returns the event dispatcher.
-     *
-     * @return EventDispatcherInterface The event dispatcher.
-     */
-    public function getEventDispatcher()
-    {
-        if (!$this->started) {
-            throw new LogicException('Puli was not started');
-        }
-
-        return $this->environment->getEventDispatcher();
     }
 
     /**
@@ -609,7 +628,7 @@ class Puli
 
         $config = new EnvConfig($baseConfig);
 
-        return new GlobalEnvironment($homeDir, $config, $configFile);
+        return new GlobalEnvironment($homeDir, $config, $configFile, $this->dispatcher);
     }
 
     /**
@@ -637,7 +656,6 @@ class Puli
         Assert::fileExists($rootDir, 'Could not load Puli environment: The root %s does not exist.');
         Assert::directory($rootDir, 'Could not load Puli environment: The root %s is a file. Expected a directory.');
 
-        $dispatcher = new EventDispatcher();
         $homeDir = self::parseHomeDirectory();
 
         if (null !== $homeDir) {
@@ -661,7 +679,7 @@ class Puli
         $rootPackageFile = $packageFileStorage->loadRootPackageFile($rootFilePath, $baseConfig);
         $config = new EnvConfig($rootPackageFile->getConfig());
 
-        return new ProjectEnvironment($homeDir, $rootDir, $config, $rootPackageFile, $configFile, $dispatcher);
+        return new ProjectEnvironment($homeDir, $rootDir, $config, $rootPackageFile, $configFile, $this->dispatcher);
     }
 
     /**

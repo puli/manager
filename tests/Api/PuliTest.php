@@ -14,6 +14,7 @@ namespace Puli\Manager\Tests\Api;
 use PHPUnit_Framework_TestCase;
 use Puli\Manager\Api\Puli;
 use Puli\Manager\Tests\Api\Package\Fixtures\TestPlugin;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\Filesystem\Filesystem;
 
 /**
@@ -100,6 +101,17 @@ class PuliTest extends PHPUnit_Framework_TestCase
         $this->assertInstanceOf('Symfony\Component\EventDispatcher\EventDispatcherInterface', $environment->getEventDispatcher());
         $this->assertSame($this->tempHome, $environment->getHomeDirectory());
         $this->assertSame($this->tempHome.'/config.json', $environment->getConfigFile()->getPath());
+        $this->assertSame($environment->getEventDispatcher(), $this->puli->getEventDispatcher());
+    }
+
+    public function testGetGlobalEnvironmentWithEventDispatcher()
+    {
+        $dispatcher = new EventDispatcher();
+        $this->puli->setEventDispatcher($dispatcher);
+        $this->puli->start();
+        $environment = $this->puli->getEnvironment();
+
+        $this->assertSame($dispatcher, $environment->getEventDispatcher());
     }
 
     public function testGetGlobalEnvironmentWithoutHome()
@@ -132,6 +144,18 @@ class PuliTest extends PHPUnit_Framework_TestCase
         $this->assertSame($this->tempDir, $environment->getRootDirectory());
         $this->assertSame($this->tempHome.'/config.json', $environment->getConfigFile()->getPath());
         $this->assertSame($this->tempDir.'/puli.json', $environment->getRootPackageFile()->getPath());
+        $this->assertSame($environment->getEventDispatcher(), $this->puli->getEventDispatcher());
+    }
+
+    public function testGetProjectEnvironmentWithEventDispatcher()
+    {
+        $dispatcher = new EventDispatcher();
+        $this->puli->setEventDispatcher($dispatcher);
+        $this->puli->setRootDirectory($this->tempDir);
+        $this->puli->start();
+        $environment = $this->puli->getEnvironment();
+
+        $this->assertSame($dispatcher, $environment->getEventDispatcher());
     }
 
     public function testGetProjectEnvironmentWithoutHome()
