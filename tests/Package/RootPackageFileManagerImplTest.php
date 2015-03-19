@@ -27,6 +27,8 @@ use Puli\Manager\Tests\TestException;
  */
 class RootPackageFileManagerImplTest extends ManagerTestCase
 {
+    const PLUGIN_NAMESPACE = 'Puli\Manager\Tests\Api\Package\Fixtures';
+
     const PLUGIN_CLASS = 'Puli\Manager\Tests\Api\Package\Fixtures\TestPlugin';
 
     const OTHER_PLUGIN_CLASS = 'Puli\Manager\Tests\Api\Package\Fixtures\OtherPlugin';
@@ -293,6 +295,72 @@ class RootPackageFileManagerImplTest extends ManagerTestCase
         $this->manager->addPluginClass(self::PLUGIN_CLASS);
 
         $this->assertSame(array(self::PLUGIN_CLASS), $this->manager->getPluginClasses());
+    }
+
+    /**
+     * @expectedException \InvalidArgumentException
+     * @expectedExceptionMessage Foobar
+     */
+    public function testAddPluginClassFailsIfClassNotFound()
+    {
+        $this->packageFileStorage->expects($this->never())
+            ->method('saveRootPackageFile');
+
+        $this->manager->addPluginClass(__NAMESPACE__.'/Foobar');
+    }
+
+    /**
+     * @expectedException \InvalidArgumentException
+     * @expectedExceptionMessage is an interface
+     */
+    public function testAddPluginClassFailsIfInterface()
+    {
+        $this->packageFileStorage->expects($this->never())
+            ->method('saveRootPackageFile');
+
+        $this->manager->addPluginClass(self::PLUGIN_NAMESPACE.'\TestPluginInterface');
+    }
+
+    /**
+     * @expectedException \InvalidArgumentException
+     * @expectedExceptionMessage is a trait
+     */
+    public function testAddPluginClassFailsIfTrait()
+    {
+        if (version_compare(PHP_VERSION, '5.4.0', '<')) {
+            $this->markTestSkipped('Traits are only supported on PHP 5.4 and higher');
+
+            return;
+        }
+
+        $this->packageFileStorage->expects($this->never())
+            ->method('saveRootPackageFile');
+
+        $this->manager->addPluginClass(self::PLUGIN_NAMESPACE.'\TestPluginTrait');
+    }
+
+    /**
+     * @expectedException \InvalidArgumentException
+     * @expectedExceptionMessage must implement PuliPlugin
+     */
+    public function testAddPluginClassFailsIfNoPuliPlugin()
+    {
+        $this->packageFileStorage->expects($this->never())
+            ->method('saveRootPackageFile');
+
+        $this->manager->addPluginClass('stdClass');
+    }
+
+    /**
+     * @expectedException \InvalidArgumentException
+     * @expectedExceptionMessage must not have required parameters
+     */
+    public function testAddPluginClassFailsIfRequiredConstructorArgs()
+    {
+        $this->packageFileStorage->expects($this->never())
+            ->method('saveRootPackageFile');
+
+        $this->manager->addPluginClass(self::PLUGIN_NAMESPACE.'\TestPluginWithoutNoArgConstructor');
     }
 
     public function testRemovePluginClass()

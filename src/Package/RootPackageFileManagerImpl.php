@@ -12,11 +12,14 @@
 namespace Puli\Manager\Package;
 
 use Exception;
+use InvalidArgumentException;
 use Puli\Manager\Api\Environment\ProjectEnvironment;
 use Puli\Manager\Api\Factory\FactoryManager;
 use Puli\Manager\Api\Package\RootPackageFile;
 use Puli\Manager\Api\Package\RootPackageFileManager;
 use Puli\Manager\Config\AbstractConfigFileManager;
+use ReflectionClass;
+use ReflectionException;
 
 /**
  * Manages changes to the root package file.
@@ -103,6 +106,8 @@ class RootPackageFileManagerImpl extends AbstractConfigFileManager implements Ro
             // Already installed locally
             return;
         }
+
+        $this->validatePluginClass($pluginClass);
 
         $this->rootPackageFile->addPluginClass($pluginClass);
 
@@ -345,5 +350,48 @@ class RootPackageFileManagerImpl extends AbstractConfigFileManager implements Ro
     protected function saveConfigFile()
     {
         $this->packageFileStorage->saveRootPackageFile($this->rootPackageFile);
+    }
+
+    private function validatePluginClass($pluginClass)
+    {
+        try {
+            $reflClass = new ReflectionClass($pluginClass);
+        } catch (ReflectionException $e) {
+            throw new InvalidArgumentException(sprintf(
+                'The plugin class %s does not exist.',
+                $pluginClass
+            ), 0, $e);
+        }
+
+        if ($reflClass->isInterface()) {
+            throw new InvalidArgumentException(sprintf(
+                'The plugin class %s should be a class, but is an interface.',
+                $pluginClass
+            ));
+        }
+
+        if (version_compare(PHP_VERSION, '5.4.0', '>=') && $reflClass->isTrait()) {
+            throw new InvalidArgumentException(sprintf(
+                'The plugin class %s should be a class, but is a trait.',
+                $pluginClass
+            ));
+        }
+
+        if (!$reflClass->implementsInterface('\Puli\Manager\Api\PuliPlugin')) {
+            throw new InvalidArgumentException(sprintf(
+                'The plugin class %s must implement PuliPlugin.',
+                $pluginClass
+            ));
+        }
+
+        $constructor = $reflClass->getConstructor();
+
+        if (null !== $constructor && $constructor->getNumberOfRequiredParameters() > 0) {
+            throw new InvalidArgumentException(sprintf(
+                'The constructor of the plugin class %s must not have required '.
+                'parameters.',
+                $pluginClass
+            ));
+        }
     }
 }
