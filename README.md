@@ -1,14 +1,14 @@
 The Puli Manager Component
 ==========================
 
-[![Build Status](https://travis-ci.org/puli/manager.svg?branch=master)](https://travis-ci.org/puli/manager)
-[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/puli/manager/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/puli/manager/?branch=master)
+[![Build Status](https://travis-ci.org/puli/manager.svg?branch=1.0.0-beta3)](https://travis-ci.org/puli/manager)
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/puli/manager/badges/quality-score.png?b=1.0.0-beta3)](https://scrutinizer-ci.com/g/puli/manager/?branch=1.0.0-beta3)
 [![SensioLabsInsight](https://insight.sensiolabs.com/projects/6505ed38-0d0f-4c8d-ac85-f343f8e135a9/mini.png)](https://insight.sensiolabs.com/projects/6505ed38-0d0f-4c8d-ac85-f343f8e135a9)
 [![Latest Stable Version](https://poser.pugx.org/puli/manager/v/stable.svg)](https://packagist.org/packages/puli/manager)
 [![Total Downloads](https://poser.pugx.org/puli/manager/downloads.svg)](https://packagist.org/packages/puli/manager)
 [![Dependency Status](https://www.versioneye.com/php/puli:manager/1.0.0/badge.svg)](https://www.versioneye.com/php/puli:manager/1.0.0)
 
-Latest release: [1.0.0-beta2](https://packagist.org/packages/puli/manager#1.0.0-beta2)
+Latest release: [1.0.0-beta3](https://packagist.org/packages/puli/manager#1.0.0-beta3)
 
 PHP >= 5.3.9
 
