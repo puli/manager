@@ -17,7 +17,7 @@ The [Puli] Repository Manager Component builds a [resource repository] and
 
 ```json
 {
-    "resources": {
+    "path-mappings": {
         "/app": "res"
     }
 }
