@@ -11,8 +11,8 @@
 
 namespace Puli\Manager\Repository\Mapping;
 
-use Puli\Manager\Api\Repository\RepositoryPathConflict;
-use Puli\Manager\Api\Repository\ResourceMapping;
+use Puli\Manager\Api\Repository\PathConflict;
+use Puli\Manager\Api\Repository\PathMapping;
 use Puli\Manager\Conflict\PackageConflict;
 use Puli\Manager\Conflict\PackageConflictDetector;
 use Puli\Manager\Transaction\AtomicOperation;
@@ -42,7 +42,7 @@ class UpdateConflicts implements AtomicOperation
     private $conflicts;
 
     /**
-     * @var ResourceMappingCollection
+     * @var PathMappingCollection
      */
     private $mappings;
 
@@ -52,11 +52,11 @@ class UpdateConflicts implements AtomicOperation
     private $addedConflicts = array();
 
     /**
-     * @var ResourceMapping[]
+     * @var PathMapping[]
      */
     private $removedConflicts = array();
 
-    public function __construct(array $repositoryPaths, PackageConflictDetector $conflictDetector, ConflictCollection $conflicts, ResourceMappingCollection $mappings)
+    public function __construct(array $repositoryPaths, PackageConflictDetector $conflictDetector, ConflictCollection $conflicts, PathMappingCollection $mappings)
     {
         $this->repositoryPaths = $repositoryPaths;
         $this->conflictDetector = $conflictDetector;
@@ -90,7 +90,7 @@ class UpdateConflicts implements AtomicOperation
 
         foreach ($packageConflicts as $packageConflict) {
             $repositoryPath = $packageConflict->getConflictingToken();
-            $conflict = new RepositoryPathConflict($repositoryPath);
+            $conflict = new PathConflict($repositoryPath);
 
             foreach ($packageConflict->getPackageNames() as $packageName) {
                 $conflict->addMapping($this->mappings->get($repositoryPath, $packageName));
@@ -115,7 +115,7 @@ class UpdateConflicts implements AtomicOperation
         }
 
         foreach ($this->removedConflicts as $repositoryPath => $conflictingMappings) {
-            $conflict = new RepositoryPathConflict($repositoryPath);
+            $conflict = new PathConflict($repositoryPath);
             $conflict->addMappings($conflictingMappings);
             $this->conflicts->add($conflict);
         }

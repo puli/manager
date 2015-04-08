@@ -39,7 +39,7 @@ class SyncRepositoryPath implements AtomicOperation
     private $repo;
 
     /**
-     * @var ResourceMappingCollection
+     * @var PathMappingCollection
      */
     private $mappings;
 
@@ -61,10 +61,10 @@ class SyncRepositoryPath implements AtomicOperation
     /**
      * @param string               $repositoryPath
      * @param EditableRepository   $repo
-     * @param ResourceMappingCollection $mappings
+     * @param PathMappingCollection $mappings
      * @param OverrideGraph        $overrideGraph
      */
-    public function __construct($repositoryPath, EditableRepository $repo, ResourceMappingCollection $mappings, OverrideGraph $overrideGraph)
+    public function __construct($repositoryPath, EditableRepository $repo, PathMappingCollection $mappings, OverrideGraph $overrideGraph)
     {
         $this->repositoryPath = $repositoryPath;
         $this->repo = $repo;
@@ -222,9 +222,9 @@ class SyncRepositoryPath implements AtomicOperation
     }
 
     /**
-     * @param string              $repositoryPath
-     * @param ResourceMapping[][] $uncheckedMappings
-     * @param string[][]          $filesystemPaths
+     * @param string          $repositoryPath
+     * @param PathMapping[][] $uncheckedMappings
+     * @param string[][]      $filesystemPaths
      */
     private function collectEnabledFilesystemPaths($repositoryPath, array &$uncheckedMappings, array &$filesystemPaths = null)
     {

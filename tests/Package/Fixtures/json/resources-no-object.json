@@ -1,5 +1,5 @@
 {
     "version": "1.0",
     "name": "my/application",
-    "resources": [ "/app", "/app/css" ]
+    "path-mappings": [ "/app", "/app/css" ]
 }

@@ -18,7 +18,7 @@ use Puli\Manager\Api\Discovery\BindingParameterDescriptor;
 use Puli\Manager\Api\Discovery\BindingTypeDescriptor;
 use Puli\Manager\Api\Package\InstallInfo;
 use Puli\Manager\Api\Package\PackageFile;
-use Puli\Manager\Api\Repository\ResourceMapping;
+use Puli\Manager\Api\Repository\PathMapping;
 use Puli\Manager\Package\PackageJsonReader;
 use Rhumsaa\Uuid\Uuid;
 
@@ -328,7 +328,7 @@ class PackageJsonReaderTest extends PHPUnit_Framework_TestCase
     private function assertFullConfig(PackageFile $packageFile)
     {
         $this->assertSame('my/application', $packageFile->getPackageName());
-        $this->assertEquals(array('/app' => new ResourceMapping('/app', array('res'))), $packageFile->getResourceMappings());
+        $this->assertEquals(array('/app' => new PathMapping('/app', array('res'))), $packageFile->getPathMappings());
         $this->assertEquals(array(new BindingDescriptor('/app/config*.yml', 'my/type', array(), 'glob', Uuid::fromString(self::BINDING_UUID))), $packageFile->getBindingDescriptors());
         $this->assertEquals(array(new BindingTypeDescriptor('my/type', 'Description of my type.', array(
             new BindingParameterDescriptor('param', BindingParameterDescriptor::OPTIONAL, 1234, 'Description of the parameter.'),
@@ -343,7 +343,7 @@ class PackageJsonReaderTest extends PHPUnit_Framework_TestCase
     private function assertMinimalConfig(PackageFile $packageFile)
     {
         $this->assertNull($packageFile->getPackageName());
-        $this->assertSame(array(), $packageFile->getResourceMappings());
+        $this->assertSame(array(), $packageFile->getPathMappings());
         $this->assertSame(array(), $packageFile->getBindingDescriptors());
         $this->assertSame(array(), $packageFile->getOverriddenPackages());
     }

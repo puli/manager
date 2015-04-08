@@ -14,7 +14,7 @@ namespace Puli\Manager\Tests\Api\Package;
 use PHPUnit_Framework_TestCase;
 use Puli\Manager\Api\Discovery\BindingDescriptor;
 use Puli\Manager\Api\Package\PackageFile;
-use Puli\Manager\Api\Repository\ResourceMapping;
+use Puli\Manager\Api\Repository\PathMapping;
 use Rhumsaa\Uuid\Uuid;
 
 /**
@@ -114,90 +114,90 @@ class PackageFileTest extends PHPUnit_Framework_TestCase
         $packageFile->setPackageName($invalidName);
     }
 
-    public function testAddResourceMapping()
+    public function testAddPathMapping()
     {
-        $mapping1 = new ResourceMapping('/path1', 'res1');
-        $mapping2 = new ResourceMapping('/path2', array('res2', 'res3'));
+        $mapping1 = new PathMapping('/path1', 'res1');
+        $mapping2 = new PathMapping('/path2', array('res2', 'res3'));
 
         $packageFile = new PackageFile();
-        $packageFile->addResourceMapping($mapping1);
-        $packageFile->addResourceMapping($mapping2);
+        $packageFile->addPathMapping($mapping1);
+        $packageFile->addPathMapping($mapping2);
 
         $this->assertSame(array(
             '/path1' => $mapping1,
             '/path2' => $mapping2,
-        ), $packageFile->getResourceMappings());
+        ), $packageFile->getPathMappings());
     }
 
-    public function testGetResourceMappingsReturnsSortedResult()
+    public function testGetPathMappingsReturnsSortedResult()
     {
-        $mapping1 = new ResourceMapping('/path1', 'res1');
-        $mapping2 = new ResourceMapping('/path2', 'res2');
-        $mapping3 = new ResourceMapping('/path3', 'res3');
+        $mapping1 = new PathMapping('/path1', 'res1');
+        $mapping2 = new PathMapping('/path2', 'res2');
+        $mapping3 = new PathMapping('/path3', 'res3');
 
         $packageFile = new PackageFile();
-        $packageFile->addResourceMapping($mapping3);
-        $packageFile->addResourceMapping($mapping1);
-        $packageFile->addResourceMapping($mapping2);
+        $packageFile->addPathMapping($mapping3);
+        $packageFile->addPathMapping($mapping1);
+        $packageFile->addPathMapping($mapping2);
 
         $this->assertSame(array(
             '/path1' => $mapping1,
             '/path2' => $mapping2,
             '/path3' => $mapping3,
-        ), $packageFile->getResourceMappings());
+        ), $packageFile->getPathMappings());
     }
 
-    public function testGetResourceMapping()
+    public function testGetPathMapping()
     {
-        $mapping1 = new ResourceMapping('/path1', 'res1');
-        $mapping2 = new ResourceMapping('/path2', array('res2', 'res3'));
+        $mapping1 = new PathMapping('/path1', 'res1');
+        $mapping2 = new PathMapping('/path2', array('res2', 'res3'));
 
         $packageFile = new PackageFile();
-        $packageFile->addResourceMapping($mapping1);
-        $packageFile->addResourceMapping($mapping2);
+        $packageFile->addPathMapping($mapping1);
+        $packageFile->addPathMapping($mapping2);
 
-        $this->assertSame($mapping1, $packageFile->getResourceMapping('/path1'));
-        $this->assertSame($mapping2, $packageFile->getResourceMapping('/path2'));
+        $this->assertSame($mapping1, $packageFile->getPathMapping('/path1'));
+        $this->assertSame($mapping2, $packageFile->getPathMapping('/path2'));
     }
 
     /**
-     * @expectedException \Puli\Manager\Api\Repository\NoSuchMappingException
+     * @expectedException \Puli\Manager\Api\Repository\NoSuchPathMappingException
      * @expectedExceptionMessage foobar
      */
-    public function testGetResourceMappingFailsIfPathNotFound()
+    public function testGetPathMappingFailsIfPathNotFound()
     {
         $packageFile = new PackageFile();
 
-        $packageFile->getResourceMapping('/foobar');
+        $packageFile->getPathMapping('/foobar');
     }
 
-    public function testHasResourceMapping()
+    public function testHasPathMapping()
     {
         $packageFile = new PackageFile();
 
-        $this->assertFalse($packageFile->hasResourceMapping('/path'));
+        $this->assertFalse($packageFile->hasPathMapping('/path'));
 
-        $packageFile->addResourceMapping(new ResourceMapping('/path', 'res'));
+        $packageFile->addPathMapping(new PathMapping('/path', 'res'));
 
-        $this->assertTrue($packageFile->hasResourceMapping('/path'));
+        $this->assertTrue($packageFile->hasPathMapping('/path'));
     }
 
-    public function testRemoveResourceMapping()
+    public function testRemovePathMapping()
     {
         $packageFile = new PackageFile();
 
-        $packageFile->addResourceMapping(new ResourceMapping('/path', 'res'));
-        $packageFile->removeResourceMapping('/path');
+        $packageFile->addPathMapping(new PathMapping('/path', 'res'));
+        $packageFile->removePathMapping('/path');
 
-        $this->assertFalse($packageFile->hasResourceMapping('/path'));
+        $this->assertFalse($packageFile->hasPathMapping('/path'));
     }
 
-    public function testRemoveResourceMappingIgnoresUnknownPaths()
+    public function testRemovePathMappingIgnoresUnknownPaths()
     {
         $packageFile = new PackageFile();
-        $packageFile->removeResourceMapping('/foobar');
+        $packageFile->removePathMapping('/foobar');
 
-        $this->assertFalse($packageFile->hasResourceMapping('/foobar'));
+        $this->assertFalse($packageFile->hasPathMapping('/foobar'));
     }
 
     public function testSetOverriddenPackages()

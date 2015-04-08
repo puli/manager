@@ -22,7 +22,7 @@ use Puli\Manager\Api\Package\PackageFile;
 use Puli\Manager\Api\Package\PackageFileReader;
 use Puli\Manager\Api\Package\RootPackageFile;
 use Puli\Manager\Api\Package\UnsupportedVersionException;
-use Puli\Manager\Api\Repository\ResourceMapping;
+use Puli\Manager\Api\Repository\PathMapping;
 use Rhumsaa\Uuid\Uuid;
 use Webmozart\Json\DecodingFailedException;
 use Webmozart\Json\JsonDecoder;
@@ -74,9 +74,9 @@ class PackageJsonReader implements PackageFileReader
             $packageFile->setPackageName($jsonData->name);
         }
 
-        if (isset($jsonData->resources)) {
-            foreach ($jsonData->resources as $path => $relativePaths) {
-                $packageFile->addResourceMapping(new ResourceMapping($path, (array) $relativePaths));
+        if (isset($jsonData->{'path-mappings'})) {
+            foreach ($jsonData->{'path-mappings'} as $path => $relativePaths) {
+                $packageFile->addPathMapping(new PathMapping($path, (array) $relativePaths));
             }
         }
 

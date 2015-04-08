@@ -15,8 +15,8 @@ use InvalidArgumentException;
 use Puli\Manager\Api\Discovery\BindingDescriptor;
 use Puli\Manager\Api\Discovery\BindingTypeDescriptor;
 use Puli\Manager\Api\Discovery\NoSuchBindingException;
-use Puli\Manager\Api\Repository\NoSuchMappingException;
-use Puli\Manager\Api\Repository\ResourceMapping;
+use Puli\Manager\Api\Repository\NoSuchPathMappingException;
+use Puli\Manager\Api\Repository\PathMapping;
 use Puli\Manager\Assert\Assert;
 use Rhumsaa\Uuid\Uuid;
 
@@ -39,9 +39,9 @@ class PackageFile
     private $path;
 
     /**
-     * @var ResourceMapping[]
+     * @var PathMapping[]
      */
-    private $resourceMappings = array();
+    private $pathMappings = array();
 
     /**
      * @var BindingDescriptor[]
@@ -194,85 +194,84 @@ class PackageFile
     }
 
     /**
-     * Returns the resource mappings.
+     * Returns the path mappings.
      *
-     * @return ResourceMapping[] The resource mappings.
+     * @return PathMapping[] The path mappings.
      */
-    public function getResourceMappings()
+    public function getPathMappings()
     {
-        return $this->resourceMappings;
+        return $this->pathMappings;
     }
 
     /**
-     * Returns the resource mapping for a repository path.
+     * Returns the path mapping for a repository path.
      *
      * @param string $repositoryPath The repository path.
      *
-     * @return ResourceMapping The corresponding resource mapping.
+     * @return PathMapping The corresponding path mapping.
      *
-     * @throws NoSuchMappingException If the repository path is not mapped.
+     * @throws NoSuchPathMappingException If the repository path is not mapped.
      */
-    public function getResourceMapping($repositoryPath)
+    public function getPathMapping($repositoryPath)
     {
-        if (!isset($this->resourceMappings[$repositoryPath])) {
-            throw NoSuchMappingException::forRepositoryPath($repositoryPath);
+        if (!isset($this->pathMappings[$repositoryPath])) {
+            throw NoSuchPathMappingException::forRepositoryPath($repositoryPath);
         }
 
-        return $this->resourceMappings[$repositoryPath];
+        return $this->pathMappings[$repositoryPath];
     }
 
     /**
-     * Returns whether the file contains a resource mapping for a repository
-     * path.
+     * Returns whether the file contains a path mapping for a repository path.
      *
      * @param string $repositoryPath The repository path.
      *
      * @return bool Returns `true` if the file contains a mapping for the path.
      */
-    public function hasResourceMapping($repositoryPath)
+    public function hasPathMapping($repositoryPath)
     {
-        return isset($this->resourceMappings[$repositoryPath]);
+        return isset($this->pathMappings[$repositoryPath]);
     }
 
     /**
-     * Returns whether the file contains any resource mappings.
+     * Returns whether the file contains any path mappings.
      *
-     * @return bool Returns `true` if the file contains resource mappings and
+     * @return bool Returns `true` if the file contains path mappings and
      *              `false` otherwise.
      */
-    public function hasResourceMappings()
+    public function hasPathMappings()
     {
-        return count($this->resourceMappings) > 0;
+        return count($this->pathMappings) > 0;
     }
 
     /**
-     * Adds a resource mapping.
+     * Adds a path mapping.
      *
-     * @param ResourceMapping $mapping The resource mapping.
+     * @param PathMapping $mapping The path mapping.
      */
-    public function addResourceMapping(ResourceMapping $mapping)
+    public function addPathMapping(PathMapping $mapping)
     {
-        $this->resourceMappings[$mapping->getRepositoryPath()] = $mapping;
+        $this->pathMappings[$mapping->getRepositoryPath()] = $mapping;
 
-        ksort($this->resourceMappings);
+        ksort($this->pathMappings);
     }
 
     /**
-     * Removes the resource mapping for a repository path.
+     * Removes the path mapping for a repository path.
      *
      * @param string $repositoryPath The repository path.
      */
-    public function removeResourceMapping($repositoryPath)
+    public function removePathMapping($repositoryPath)
     {
-        unset($this->resourceMappings[$repositoryPath]);
+        unset($this->pathMappings[$repositoryPath]);
     }
 
     /**
-     * Removes all resource mappings.
+     * Removes all path mappings.
      */
-    public function clearResourceMappings()
+    public function clearPathMappings()
     {
-        $this->resourceMappings = array();
+        $this->pathMappings = array();
     }
 
     /**

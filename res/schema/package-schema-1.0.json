@@ -9,7 +9,7 @@
         "name": {
             "type": "string"
         },
-        "resources": {
+        "path-mappings": {
             "type": "object",
             "additionalProperties": {
                 "type": [ "string", "array" ]

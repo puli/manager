@@ -12,6 +12,12 @@ Changelog
    `BindingParameterDescriptor::__construct()`
  * duplicate binding UUIDs are forbidden now
  * renamed `BindingState::HELD_BACK` to `BindingState::TYPE_NOT_LOADED`
+ * renamed "resources" key in puli.json to "path-mappings"
+ * renamed `ResourceMapping` to `PathMapping`
+ * renamed `ResourceMappingState` to `PathMappingState`
+ * renamed `NoSuchMappingException` to `NoSuchPathMappingException`
+ * renamed `RepositoryPathConflict` to `PathConflict`
+ * renamed `RepositoryManager::*ResourceMapping*()` to `RepositoryManager::*PathMapping*()`
    
 * 1.0.0-beta3 (2015-03-19)
 

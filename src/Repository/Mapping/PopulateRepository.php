@@ -13,7 +13,7 @@ namespace Puli\Manager\Repository\Mapping;
 
 use Exception;
 use Puli\Manager\Api\Repository\RepositoryNotEmptyException;
-use Puli\Manager\Api\Repository\ResourceMapping;
+use Puli\Manager\Api\Repository\PathMapping;
 use Puli\Manager\Conflict\OverrideGraph;
 use Puli\Manager\Transaction\AtomicOperation;
 use Puli\Repository\Api\EditableRepository;
@@ -21,12 +21,12 @@ use Puli\Repository\Resource\DirectoryResource;
 use Puli\Repository\Resource\FileResource;
 
 /**
- * Inserts all resource mappings into the repository.
+ * Inserts all path mappings into the repository.
  *
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class InsertAll implements AtomicOperation
+class PopulateRepository implements AtomicOperation
 {
     /**
      * @var EditableRepository
@@ -34,7 +34,7 @@ class InsertAll implements AtomicOperation
     private $repo;
 
     /**
-     * @var ResourceMappingCollection
+     * @var PathMappingCollection
      */
     private $mappings;
 
@@ -48,7 +48,7 @@ class InsertAll implements AtomicOperation
      */
     private $added = false;
 
-    public function __construct(EditableRepository $repo, ResourceMappingCollection $mappings, OverrideGraph $overrideGraph)
+    public function __construct(EditableRepository $repo, PathMappingCollection $mappings, OverrideGraph $overrideGraph)
     {
         $this->repo = $repo;
         $this->mappings = $mappings;
@@ -100,7 +100,7 @@ class InsertAll implements AtomicOperation
     /**
      * @param string $packageName
      *
-     * @return ResourceMapping[]
+     * @return PathMapping[]
      */
     private function getEnabledMappingsByPackageName($packageName)
     {

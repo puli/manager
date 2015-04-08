@@ -40,7 +40,7 @@ class PackageJsonWriter implements PackageFileWriter
     private static $keyOrder = array(
         'version',
         'name',
-        'resources',
+        'path-mappings',
         'bindings',
         'binding-types',
         'override',
@@ -73,7 +73,7 @@ class PackageJsonWriter implements PackageFileWriter
 
     private function addConfig(array &$jsonData, PackageFile $packageFile)
     {
-        $resourceMappings = $packageFile->getResourceMappings();
+        $mappings = $packageFile->getPathMappings();
         $bindings = $packageFile->getBindingDescriptors();
         $bindingTypes = $packageFile->getTypeDescriptors();
         $overrides = $packageFile->getOverriddenPackages();
@@ -85,14 +85,14 @@ class PackageJsonWriter implements PackageFileWriter
             $jsonData['name'] = $packageFile->getPackageName();
         }
 
-        if (count($resourceMappings) > 0) {
-            $jsonData['resources'] = new stdClass();
+        if (count($mappings) > 0) {
+            $jsonData['path-mappings'] = new stdClass();
 
-            foreach ($resourceMappings as $binding) {
-                $puliPath = $binding->getRepositoryPath();
-                $localPaths = $binding->getPathReferences();
+            foreach ($mappings as $mapping) {
+                $puliPath = $mapping->getRepositoryPath();
+                $localPaths = $mapping->getPathReferences();
 
-                $jsonData['resources']->$puliPath = count($localPaths) > 1 ? $localPaths : reset($localPaths);
+                $jsonData['path-mappings']->$puliPath = count($localPaths) > 1 ? $localPaths : reset($localPaths);
             }
         }
 

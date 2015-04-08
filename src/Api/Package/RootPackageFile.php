@@ -78,7 +78,7 @@ class RootPackageFile extends PackageFile
     /**
      * Returns the order in which packages should be loaded.
      *
-     * If packages contain resource mappings for the same resource paths, this
+     * If packages contain path mappings for the same resource paths, this
      * setting can be used to specify in which order these packages should be
      * loaded. Alternatively, you can use {@link setOverriddenPackages()} to
      * mark one of the packages to override the other one.
@@ -93,7 +93,7 @@ class RootPackageFile extends PackageFile
     /**
      * Sets the order in which packages should be loaded.
      *
-     * If packages contain resource mappings for the same resource paths, this
+     * If packages contain path mappings for the same resource paths, this
      * setting can be used to specify in which order these packages should be
      * loaded. Alternatively, you can use {@link setOverriddenPackages()} to
      * mark one of the packages to override the other one.

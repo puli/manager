@@ -18,22 +18,22 @@ use Puli\Manager\Api\Package\Package;
 use Puli\Manager\Api\Package\PackageCollection;
 use Puli\Manager\Api\Package\RootPackageFile;
 use Puli\Manager\Api\Repository\RepositoryManager;
-use Puli\Manager\Api\Repository\ResourceMapping;
-use Puli\Manager\Api\Repository\ResourceMappingState;
+use Puli\Manager\Api\Repository\PathMapping;
+use Puli\Manager\Api\Repository\PathMappingState;
 use Puli\Manager\Assert\Assert;
 use Puli\Manager\Conflict\OverrideGraph;
 use Puli\Manager\Conflict\PackageConflictDetector;
 use Puli\Manager\Conflict\PackageConflictException;
 use Puli\Manager\Package\PackageFileStorage;
-use Puli\Manager\Repository\Mapping\AddMappingToPackageFile;
+use Puli\Manager\Repository\Mapping\AddPathMappingToPackageFile;
 use Puli\Manager\Repository\Mapping\ConflictCollection;
-use Puli\Manager\Repository\Mapping\InsertAll;
-use Puli\Manager\Repository\Mapping\LoadMapping;
+use Puli\Manager\Repository\Mapping\PopulateRepository;
+use Puli\Manager\Repository\Mapping\LoadPathMapping;
 use Puli\Manager\Repository\Mapping\OverrideConflictingPackages;
-use Puli\Manager\Repository\Mapping\RemoveMappingFromPackageFile;
-use Puli\Manager\Repository\Mapping\ResourceMappingCollection;
+use Puli\Manager\Repository\Mapping\RemovePathMappingFromPackageFile;
+use Puli\Manager\Repository\Mapping\PathMappingCollection;
 use Puli\Manager\Repository\Mapping\SyncRepositoryPath;
-use Puli\Manager\Repository\Mapping\UnloadMapping;
+use Puli\Manager\Repository\Mapping\UnloadPathMapping;
 use Puli\Manager\Repository\Mapping\UpdateConflicts;
 use Puli\Manager\Transaction\Transaction;
 use Puli\Repository\Api\EditableRepository;
@@ -92,7 +92,7 @@ class RepositoryManagerImpl implements  RepositoryManager
     private $conflictDetector;
 
     /**
-     * @var ResourceMappingCollection
+     * @var PathMappingCollection
      */
     private $mappings;
 
@@ -132,7 +132,7 @@ class RepositoryManagerImpl implements  RepositoryManager
     /**
      * {@inheritdoc}
      */
-    public function addResourceMapping(ResourceMapping $mapping, $failIfNotFound = true)
+    public function addPathMapping(PathMapping $mapping, $failIfNotFound = true)
     {
         Assert::boolean($failIfNotFound, 'The argument $failIfNotFound must be a boolean.');
 
@@ -144,7 +144,7 @@ class RepositoryManagerImpl implements  RepositoryManager
             $syncOp = $this->syncRepositoryPath($mapping->getRepositoryPath());
             $syncOp->takeSnapshot();
 
-            $tx->execute($this->loadResourceMapping($mapping, $this->rootPackage));
+            $tx->execute($this->loadPathMapping($mapping, $this->rootPackage));
 
             if ($failIfNotFound) {
                 $this->assertNoLoadErrors($mapping);
@@ -153,7 +153,7 @@ class RepositoryManagerImpl implements  RepositoryManager
             $tx->execute($this->updateConflicts($mapping->listRepositoryPaths()));
             $tx->execute($this->overrideConflictingPackages($mapping));
             $tx->execute($this->updateConflicts());
-            $tx->execute($this->addMappingToPackageFile($mapping));
+            $tx->execute($this->addPathMappingToPackageFile($mapping));
             $tx->execute($syncOp);
 
             $this->saveRootPackageFile();
@@ -169,11 +169,11 @@ class RepositoryManagerImpl implements  RepositoryManager
     /**
      * {@inheritdoc}
      */
-    public function removeResourceMapping($repositoryPath)
+    public function removePathMapping($repositoryPath)
     {
         Assert::path($repositoryPath);
 
-        if (!$this->rootPackageFile->hasResourceMapping($repositoryPath)) {
+        if (!$this->rootPackageFile->hasPathMapping($repositoryPath)) {
             return;
         }
 
@@ -187,8 +187,8 @@ class RepositoryManagerImpl implements  RepositoryManager
             $syncOp = $this->syncRepositoryPath($repositoryPath);
             $syncOp->takeSnapshot();
 
-            $tx->execute($this->unloadResourceMapping($mapping));
-            $tx->execute($this->removeMappingFromPackageFile($repositoryPath));
+            $tx->execute($this->unloadPathMapping($mapping));
+            $tx->execute($this->removePathMappingFromPackageFile($repositoryPath));
             $tx->execute($syncOp);
 
             $this->saveRootPackageFile();
@@ -206,29 +206,29 @@ class RepositoryManagerImpl implements  RepositoryManager
     /**
      * {@inheritdoc}
      */
-    public function hasResourceMapping($repositoryPath)
+    public function hasPathMapping($repositoryPath)
     {
         Assert::path($repositoryPath);
 
-        return $this->rootPackageFile->hasResourceMapping($repositoryPath);
+        return $this->rootPackageFile->hasPathMapping($repositoryPath);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function getResourceMapping($repositoryPath)
+    public function getPathMapping($repositoryPath)
     {
         Assert::path($repositoryPath);
 
-        return $this->rootPackageFile->getResourceMapping($repositoryPath);
+        return $this->rootPackageFile->getPathMapping($repositoryPath);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function getResourceMappings($packageName = null, $state = null)
+    public function getPathMappings($packageName = null, $state = null)
     {
-        Assert::nullOrOneOf($state, ResourceMappingState::all(), 'Expected a valid resource mapping state. Got: %s');
+        Assert::nullOrOneOf($state, PathMappingState::all(), 'Expected a valid path mapping state. Got: %s');
 
         $this->assertMappingsLoaded();
 
@@ -240,7 +240,7 @@ class RepositoryManagerImpl implements  RepositoryManager
         foreach ($packageNames as $packageName) {
             $packageFile = $this->packages[$packageName]->getPackageFile();
 
-            foreach ($packageFile->getResourceMappings() as $mapping) {
+            foreach ($packageFile->getPathMappings() as $mapping) {
                 if (null === $state || $state === $mapping->getState()) {
                     $mappings[] = $mapping;
                 }
@@ -267,7 +267,7 @@ class RepositoryManagerImpl implements  RepositoryManager
     {
         $this->assertMappingsLoaded();
 
-        $this->insertAll()->execute();
+        $this->populateRepository()->execute();
     }
 
     /**
@@ -278,45 +278,17 @@ class RepositoryManagerImpl implements  RepositoryManager
         $this->repo->clear();
     }
 
-    /**
-     * Loads the resource mappings and override settings for the installed
-     * packages.
-     *
-     * The method processes the package configuration files and stores the
-     * following information:
-     *
-     *  * The resources mappings of each package.
-     *  * The override dependencies between the packages.
-     *
-     * Once all that information is loaded, the repository can be built by
-     * loading the resource mappings of the packages in the order determined
-     * by the override dependencies: First the resources of overridden packages
-     * are added to the repository, then the resources of the overriding ones.
-     *
-     * If two packages map the same resource path without having an override
-     * order specified between them, a conflict exception is raised. The
-     * override order can be specified either by marking one package to override
-     * the other one (see {@link PackageFile::setOverriddenPackages()} or by
-     * setting the order between the packages in the root package file
-     * (see RootPackageFile::setPackageOrder()}.
-     *
-     * This method is called automatically when necessary. You can however use
-     * it to validate the configuration files of the packages without doing any
-     * changes to them.
-     *
-     * @throws PackageConflictException If a resource conflict is detected.
-     */
-    private function loadResourceMappings()
+    private function loadPathMappings()
     {
         $this->overrideGraph = OverrideGraph::forPackages($this->packages);
         $this->conflictDetector = new PackageConflictDetector($this->overrideGraph);
-        $this->mappings = new ResourceMappingCollection();
+        $this->mappings = new PathMappingCollection();
         $this->conflicts = new ConflictCollection();
 
         // Load mappings
         foreach ($this->packages as $package) {
-            foreach ($package->getPackageFile()->getResourceMappings() as $mapping) {
-                $this->loadResourceMapping($mapping, $package)->execute();
+            foreach ($package->getPackageFile()->getPathMappings() as $mapping) {
+                $this->loadPathMapping($mapping, $package)->execute();
             }
         }
 
@@ -324,24 +296,24 @@ class RepositoryManagerImpl implements  RepositoryManager
         $this->updateConflicts($this->mappings->getRepositoryPaths())->execute();
     }
 
-    private function addMappingToPackageFile(ResourceMapping $mapping)
+    private function addPathMappingToPackageFile(PathMapping $mapping)
     {
-        return new AddMappingToPackageFile($mapping, $this->rootPackageFile);
+        return new AddPathMappingToPackageFile($mapping, $this->rootPackageFile);
     }
 
-    private function removeMappingFromPackageFile($repositoryPath)
+    private function removePathMappingFromPackageFile($repositoryPath)
     {
-        return new RemoveMappingFromPackageFile($repositoryPath, $this->rootPackageFile);
+        return new RemovePathMappingFromPackageFile($repositoryPath, $this->rootPackageFile);
     }
 
-    private function loadResourceMapping(ResourceMapping $mapping, Package $package)
+    private function loadPathMapping(PathMapping $mapping, Package $package)
     {
-        return new LoadMapping($mapping, $package, $this->packages, $this->mappings, $this->conflictDetector);
+        return new LoadPathMapping($mapping, $package, $this->packages, $this->mappings, $this->conflictDetector);
     }
 
-    private function unloadResourceMapping(ResourceMapping $mapping)
+    private function unloadPathMapping(PathMapping $mapping)
     {
-        return new UnloadMapping($mapping, $this->packages, $this->mappings, $this->conflictDetector);
+        return new UnloadPathMapping($mapping, $this->packages, $this->mappings, $this->conflictDetector);
     }
 
     private function syncRepositoryPath($repositoryPath)
@@ -349,9 +321,9 @@ class RepositoryManagerImpl implements  RepositoryManager
         return new SyncRepositoryPath($repositoryPath, $this->repo, $this->mappings, $this->overrideGraph);
     }
 
-    private function insertAll()
+    private function populateRepository()
     {
-        return new InsertAll($this->repo, $this->mappings, $this->overrideGraph);
+        return new PopulateRepository($this->repo, $this->mappings, $this->overrideGraph);
     }
 
     private function updateConflicts(array $repositoryPaths = array())
@@ -359,7 +331,7 @@ class RepositoryManagerImpl implements  RepositoryManager
         return new UpdateConflicts($repositoryPaths, $this->conflictDetector, $this->conflicts, $this->mappings);
     }
 
-    private function overrideConflictingPackages(ResourceMapping $mapping)
+    private function overrideConflictingPackages(PathMapping $mapping)
     {
         return new OverrideConflictingPackages($mapping, $this->rootPackage, $this->overrideGraph);
     }
@@ -381,11 +353,11 @@ class RepositoryManagerImpl implements  RepositoryManager
     private function assertMappingsLoaded()
     {
         if (!$this->overrideGraph) {
-            $this->loadResourceMappings();
+            $this->loadPathMappings();
         }
     }
 
-    private function assertNoLoadErrors(ResourceMapping $mapping)
+    private function assertNoLoadErrors(PathMapping $mapping)
     {
         $loadErrors = $mapping->getLoadErrors();
 

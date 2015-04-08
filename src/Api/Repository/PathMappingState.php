@@ -12,12 +12,12 @@
 namespace Puli\Manager\Api\Repository;
 
 /**
- * Contains constants representing the state of a resource mapping.
+ * Contains constants representing the state of a path mapping.
  *
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-final class ResourceMappingState
+final class PathMappingState
 {
     /**
      * State: The mapping is enabled.

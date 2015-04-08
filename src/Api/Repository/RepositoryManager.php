@@ -32,19 +32,19 @@ interface RepositoryManager
     public function getEnvironment();
 
     /**
-     * Adds a resource mapping to the repository.
+     * Adds a path mapping to the repository.
      *
-     * @param ResourceMapping $mapping The resource mapping.
-     * @param bool            $failIfNotFound W
+     * @param PathMapping $mapping The path mapping.
+     * @param bool        $failIfNotFound W
      */
-    public function addResourceMapping(ResourceMapping $mapping, $failIfNotFound = true);
+    public function addPathMapping(PathMapping $mapping, $failIfNotFound = true);
 
     /**
-     * Removes a resource mapping from the repository.
+     * Removes a path mapping from the repository.
      *
      * @param string $repositoryPath The repository path.
      */
-    public function removeResourceMapping($repositoryPath);
+    public function removePathMapping($repositoryPath);
 
     /**
      * Returns whether a repository path is mapped.
@@ -53,31 +53,31 @@ interface RepositoryManager
      *
      * @return bool Returns `true` if the repository path is mapped.
      */
-    public function hasResourceMapping($repositoryPath);
+    public function hasPathMapping($repositoryPath);
 
     /**
-     * Returns the resource mapping for a repository path.
+     * Returns the path mapping for a repository path.
      *
      * @param string $repositoryPath The repository path.
      *
-     * @return ResourceMapping The corresponding resource mapping.
+     * @return PathMapping The corresponding path mapping.
      *
-     * @throws NoSuchMappingException If the repository path is not mapped.
+     * @throws NoSuchPathMappingException If the repository path is not mapped.
      */
-    public function getResourceMapping($repositoryPath);
+    public function getPathMapping($repositoryPath);
 
     /**
-     * Returns the resource mappings.
+     * Returns the path mappings.
      *
      * @param string|string[] $packageName The package name(s) to filter by.
      * @param int             $state       The state of the mappings to return.
      *
-     * @return ResourceMapping[] The resource mappings.
+     * @return PathMapping[] The path mappings.
      */
-    public function getResourceMappings($packageName = null, $state = null);
+    public function getPathMappings($packageName = null, $state = null);
 
     /**
-     * @return RepositoryPathConflict[]
+     * @return PathConflict[]
      */
     public function getPathConflicts();
 

@@ -12,11 +12,11 @@
 namespace Puli\Manager\Repository\Mapping;
 
 use OutOfBoundsException;
-use Puli\Manager\Api\Repository\ResourceMapping;
+use Puli\Manager\Api\Repository\PathMapping;
 use Puli\Manager\Util\TwoDimensionalHashMap;
 
 /**
- * A collection of resource mappings.
+ * A collection of path mappings.
  *
  * Each mapping has a composite key:
  *
@@ -26,7 +26,7 @@ use Puli\Manager\Util\TwoDimensionalHashMap;
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class ResourceMappingCollection
+class PathMappingCollection
 {
     /**
      * @var TwoDimensionalHashMap
@@ -42,32 +42,32 @@ class ResourceMappingCollection
     }
 
     /**
-     * Adds a resource mapping.
+     * Adds a path mapping.
      *
-     * @param ResourceMapping $mapping The resource mapping.
+     * @param PathMapping $mapping The path mapping.
      */
-    public function add(ResourceMapping $mapping)
+    public function add(PathMapping $mapping)
     {
         $this->map->set($mapping->getRepositoryPath(), $mapping->getContainingPackage()->getName(), $mapping);
         $this->map->sortPrimaryKeys();
     }
 
     /**
-     * Sets a resource mapping for a specific repository path.
+     * Sets a path mapping for a specific repository path.
      *
      * @param string          $repositoryPath The repository path.
-     * @param ResourceMapping $mapping        The resource mapping.
+     * @param PathMapping $mapping        The path mapping.
      */
-    public function set($repositoryPath, ResourceMapping $mapping)
+    public function set($repositoryPath, PathMapping $mapping)
     {
         $this->map->set($repositoryPath, $mapping->getContainingPackage()->getName(), $mapping);
         $this->map->sortPrimaryKeys();
     }
 
     /**
-     * Removes a resource mapping.
+     * Removes a path mapping.
      *
-     * This method ignores non-existing resource mappings.
+     * This method ignores non-existing path mappings.
      *
      * @param string $repositoryPath The repository path of the mapping.
      * @param string $packageName    The package containing the mapping.
@@ -78,14 +78,14 @@ class ResourceMappingCollection
     }
 
     /**
-     * Returns a resource mapping.
+     * Returns a path mapping.
      *
      * @param string $repositoryPath The repository path of the mapping.
      * @param string $packageName    The package containing the mapping.
      *
-     * @return ResourceMapping The resource mapping.
+     * @return PathMapping The path mapping.
      *
-     * @throws OutOfBoundsException If no resource mapping was set for the
+     * @throws OutOfBoundsException If no path mapping was set for the
      *                              given repository path/package.
      */
     public function get($repositoryPath, $packageName)
@@ -94,13 +94,13 @@ class ResourceMappingCollection
     }
 
     /**
-     * Returns whether a resource mapping was set for the given repository
+     * Returns whether a path mapping was set for the given repository
      * path/package.
      *
      * @param string $repositoryPath The repository path of the mapping.
      * @param string $packageName    The package containing the mapping.
      *
-     * @return bool Returns `true` if a resource mapping was set for the given
+     * @return bool Returns `true` if a path mapping was set for the given
      *              repository path/package.
      */
     public function contains($repositoryPath, $packageName = null)
@@ -109,13 +109,13 @@ class ResourceMappingCollection
     }
 
     /**
-     * Returns all resource mappings set for the given repository path.
+     * Returns all path mappings set for the given repository path.
      *
      * @param string $repositoryPath The repository path of the mapping.
      *
-     * @return ResourceMapping[] The resource mappings.
+     * @return PathMapping[] The path mappings.
      *
-     * @throws OutOfBoundsException If no resource mapping was set for the
+     * @throws OutOfBoundsException If no path mapping was set for the
      *                              given repository path.
      */
     public function listByRepositoryPath($repositoryPath)
@@ -124,13 +124,13 @@ class ResourceMappingCollection
     }
 
     /**
-     * Returns all resource mappings set for the given package name.
+     * Returns all path mappings set for the given package name.
      *
      * @param string $packageName The package name.
      *
-     * @return ResourceMapping[] The resource mappings.
+     * @return PathMapping[] The path mappings.
      *
-     * @throws OutOfBoundsException If no resource mapping was set for the
+     * @throws OutOfBoundsException If no path mapping was set for the
      *                              given package name.
      */
     public function listByPackageName($packageName)
@@ -146,7 +146,7 @@ class ResourceMappingCollection
      *
      * @return string[] The package names.
      *
-     * @throws OutOfBoundsException If no resource mapping was set for the
+     * @throws OutOfBoundsException If no path mapping was set for the
      *                              given repository path.
      */
     public function getPackageNames($repositoryPath = null)
@@ -155,7 +155,7 @@ class ResourceMappingCollection
     }
 
     /**
-     * Returns the repository paths of all resource mappings.
+     * Returns the repository paths of all path mappings.
      *
      * @return string[] The repository paths of the stored mappings.
      */

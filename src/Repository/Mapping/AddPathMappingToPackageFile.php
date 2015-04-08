@@ -12,19 +12,19 @@
 namespace Puli\Manager\Repository\Mapping;
 
 use Puli\Manager\Api\Package\RootPackageFile;
-use Puli\Manager\Api\Repository\ResourceMapping;
+use Puli\Manager\Api\Repository\PathMapping;
 use Puli\Manager\Transaction\AtomicOperation;
 
 /**
- * Adds a resource mapping to the root package file.
+ * Adds a path mapping to the root package file.
  *
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class AddMappingToPackageFile implements AtomicOperation
+class AddPathMappingToPackageFile implements AtomicOperation
 {
     /**
-     * @var ResourceMapping
+     * @var PathMapping
      */
     private $mapping;
 
@@ -34,11 +34,11 @@ class AddMappingToPackageFile implements AtomicOperation
     private $rootPackageFile;
 
     /**
-     * @var ResourceMapping
+     * @var PathMapping
      */
     private $previousMapping;
 
-    public function __construct(ResourceMapping $mapping, RootPackageFile $rootPackageFile)
+    public function __construct(PathMapping $mapping, RootPackageFile $rootPackageFile)
     {
         $this->mapping = $mapping;
         $this->rootPackageFile = $rootPackageFile;
@@ -51,11 +51,11 @@ class AddMappingToPackageFile implements AtomicOperation
     {
         $repositoryPath = $this->mapping->getRepositoryPath();
 
-        if ($this->rootPackageFile->hasResourceMapping($repositoryPath)) {
-            $this->previousMapping = $this->rootPackageFile->getResourceMappings($repositoryPath);
+        if ($this->rootPackageFile->hasPathMapping($repositoryPath)) {
+            $this->previousMapping = $this->rootPackageFile->getPathMappings($repositoryPath);
         }
 
-        $this->rootPackageFile->addResourceMapping($this->mapping);
+        $this->rootPackageFile->addPathMapping($this->mapping);
     }
 
     /**
@@ -64,9 +64,9 @@ class AddMappingToPackageFile implements AtomicOperation
     public function rollback()
     {
         if ($this->previousMapping) {
-            $this->rootPackageFile->addResourceMapping($this->previousMapping);
+            $this->rootPackageFile->addPathMapping($this->previousMapping);
         } else {
-            $this->rootPackageFile->removeResourceMapping($this->mapping->getRepositoryPath());
+            $this->rootPackageFile->removePathMapping($this->mapping->getRepositoryPath());
         }
     }
 }

@@ -12,16 +12,16 @@
 namespace Puli\Manager\Repository\Mapping;
 
 use Puli\Manager\Api\Package\RootPackageFile;
-use Puli\Manager\Api\Repository\ResourceMapping;
+use Puli\Manager\Api\Repository\PathMapping;
 use Puli\Manager\Transaction\AtomicOperation;
 
 /**
- * Removes a resource mapping from the root package file.
+ * Removes a path mapping from the root package file.
  *
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class RemoveMappingFromPackageFile implements AtomicOperation
+class RemovePathMappingFromPackageFile implements AtomicOperation
 {
     /**
      * @var string
@@ -34,7 +34,7 @@ class RemoveMappingFromPackageFile implements AtomicOperation
     private $rootPackageFile;
 
     /**
-     * @var ResourceMapping
+     * @var PathMapping
      */
     private $previousMapping;
 
@@ -49,9 +49,9 @@ class RemoveMappingFromPackageFile implements AtomicOperation
      */
     public function execute()
     {
-        if ($this->rootPackageFile->hasResourceMapping($this->repositoryPath)) {
-            $this->previousMapping = $this->rootPackageFile->getResourceMapping($this->repositoryPath);
-            $this->rootPackageFile->removeResourceMapping($this->repositoryPath);
+        if ($this->rootPackageFile->hasPathMapping($this->repositoryPath)) {
+            $this->previousMapping = $this->rootPackageFile->getPathMapping($this->repositoryPath);
+            $this->rootPackageFile->removePathMapping($this->repositoryPath);
         }
     }
 
@@ -61,7 +61,7 @@ class RemoveMappingFromPackageFile implements AtomicOperation
     public function rollback()
     {
         if ($this->previousMapping) {
-            $this->rootPackageFile->addResourceMapping($this->previousMapping);
+            $this->rootPackageFile->addPathMapping($this->previousMapping);
         }
     }
 }

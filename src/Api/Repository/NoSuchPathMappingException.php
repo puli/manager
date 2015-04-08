@@ -15,12 +15,12 @@ use Exception;
 use RuntimeException;
 
 /**
- * Thrown when a resource mapping was not found.
+ * Thrown when a path mapping was not found.
  *
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class NoSuchMappingException extends RuntimeException
+class NoSuchPathMappingException extends RuntimeException
 {
     /**
      * Creates an exception for a repository path.

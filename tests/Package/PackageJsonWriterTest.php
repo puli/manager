@@ -21,7 +21,7 @@ use Puli\Manager\Api\Package\PackageFile;
 use Puli\Manager\Api\Package\RootPackageFile;
 use Puli\Manager\Api\Puli;
 use Puli\Manager\Api\PuliPlugin;
-use Puli\Manager\Api\Repository\ResourceMapping;
+use Puli\Manager\Api\Repository\PathMapping;
 use Puli\Manager\Package\PackageJsonWriter;
 use Puli\Manager\Tests\JsonWriterTestCase;
 use Rhumsaa\Uuid\Uuid;
@@ -67,7 +67,7 @@ class PackageJsonWriterTest extends JsonWriterTestCase
     {
         $packageFile = new PackageFile();
         $packageFile->setPackageName('my/application');
-        $packageFile->addResourceMapping(new ResourceMapping('/app', 'res'));
+        $packageFile->addPathMapping(new PathMapping('/app', 'res'));
         $packageFile->addBindingDescriptor(new BindingDescriptor('/app/config*.yml', 'my/type', array(), 'glob', Uuid::fromString(self::BINDING_UUID1)));
         $packageFile->addTypeDescriptor(new BindingTypeDescriptor('my/type', 'Description of my type.', array(
             new BindingParameterDescriptor('param', BindingParameterDescriptor::OPTIONAL, 1234, 'Description of the parameter.'),
@@ -125,12 +125,12 @@ class PackageJsonWriterTest extends JsonWriterTestCase
         $this->assertJsonFileEquals(__DIR__.'/Fixtures/json/type-no-description.json', $this->tempFile);
     }
 
-    public function testWritePackageFileResourceMappings()
+    public function testWritePackageFilePathMappings()
     {
         $packageFile = new PackageFile();
-        $packageFile->addResourceMapping(new ResourceMapping('/vendor/c', 'foo'));
-        $packageFile->addResourceMapping(new ResourceMapping('/vendor/a', 'foo'));
-        $packageFile->addResourceMapping(new ResourceMapping('/vendor/b', 'foo'));
+        $packageFile->addPathMapping(new PathMapping('/vendor/c', 'foo'));
+        $packageFile->addPathMapping(new PathMapping('/vendor/a', 'foo'));
+        $packageFile->addPathMapping(new PathMapping('/vendor/b', 'foo'));
 
         $this->writer->writePackageFile($packageFile, $this->tempFile);
 
@@ -295,7 +295,7 @@ class PackageJsonWriterTest extends JsonWriterTestCase
         $baseConfig = new Config();
         $packageFile = new RootPackageFile(null, null, $baseConfig);
         $packageFile->setPackageName('my/application');
-        $packageFile->addResourceMapping(new ResourceMapping('/app', 'res'));
+        $packageFile->addPathMapping(new PathMapping('/app', 'res'));
         $packageFile->addBindingDescriptor(new BindingDescriptor('/app/config*.yml', 'my/type', array(), 'glob', Uuid::fromString(self::BINDING_UUID1)));
         $packageFile->addTypeDescriptor(new BindingTypeDescriptor('my/type', 'Description of my type.', array(
             new BindingParameterDescriptor('param', BindingParameterDescriptor::OPTIONAL, 1234, 'Description of the parameter.'),
@@ -407,7 +407,7 @@ class PackageJsonWriterTest extends JsonWriterTestCase
     {
         $packageFile = new PackageFile();
         $packageFile->setPackageName('my/application');
-        $packageFile->addResourceMapping(new ResourceMapping('/app',
+        $packageFile->addPathMapping(new PathMapping('/app',
             array('res', 'assets')));
 
         $this->writer->writePackageFile($packageFile, $this->tempFile);

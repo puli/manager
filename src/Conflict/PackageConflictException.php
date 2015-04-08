@@ -15,7 +15,7 @@ use Exception;
 use RuntimeException;
 
 /**
- * Thrown when two packages have conflicting resource mappings.
+ * Thrown when two packages have conflicting path mappings.
  *
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>

@@ -12,7 +12,7 @@
 namespace Puli\Manager\Repository\Mapping;
 
 use Puli\Manager\Api\Package\RootPackage;
-use Puli\Manager\Api\Repository\ResourceMapping;
+use Puli\Manager\Api\Repository\PathMapping;
 use Puli\Manager\Conflict\OverrideGraph;
 use Puli\Manager\Transaction\AtomicOperation;
 
@@ -25,7 +25,7 @@ use Puli\Manager\Transaction\AtomicOperation;
 class OverrideConflictingPackages implements AtomicOperation
 {
     /**
-     * @var ResourceMapping
+     * @var PathMapping
      */
     private $mapping;
 
@@ -49,7 +49,7 @@ class OverrideConflictingPackages implements AtomicOperation
      */
     private $addedEdgesFrom = array();
 
-    public function __construct(ResourceMapping $mapping, RootPackage $rootPackage, OverrideGraph $overrideGraph)
+    public function __construct(PathMapping $mapping, RootPackage $rootPackage, OverrideGraph $overrideGraph)
     {
         $this->mapping = $mapping;
         $this->rootPackage = $rootPackage;

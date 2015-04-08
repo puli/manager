@@ -1,6 +1,6 @@
 {
     "version": "1.0",
-    "resources": {
+    "path-mappings": {
         "/vendor/a": "foo",
         "/vendor/b": "foo",
         "/vendor/c": "foo"

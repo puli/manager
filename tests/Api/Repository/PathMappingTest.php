@@ -15,14 +15,14 @@ use PHPUnit_Framework_TestCase;
 use Puli\Manager\Api\Package\Package;
 use Puli\Manager\Api\Package\PackageCollection;
 use Puli\Manager\Api\Package\PackageFile;
-use Puli\Manager\Api\Repository\RepositoryPathConflict;
-use Puli\Manager\Api\Repository\ResourceMapping;
+use Puli\Manager\Api\Repository\PathConflict;
+use Puli\Manager\Api\Repository\PathMapping;
 
 /**
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class ResourceMappingTest extends PHPUnit_Framework_TestCase
+class PathMappingTest extends PHPUnit_Framework_TestCase
 {
     /**
      * @var string
@@ -79,7 +79,7 @@ class ResourceMappingTest extends PHPUnit_Framework_TestCase
      */
     public function testFailIfRepositoryPathNotString()
     {
-        new ResourceMapping(12345, 'resources');
+        new PathMapping(12345, 'resources');
     }
 
     /**
@@ -87,7 +87,7 @@ class ResourceMappingTest extends PHPUnit_Framework_TestCase
      */
     public function testFailIfRepositoryPathEmpty()
     {
-        new ResourceMapping('', 'resources');
+        new PathMapping('', 'resources');
     }
 
     /**
@@ -95,7 +95,7 @@ class ResourceMappingTest extends PHPUnit_Framework_TestCase
      */
     public function testFailIfFilesystemPathsNotStringOrArray()
     {
-        new ResourceMapping('/path', 12345);
+        new PathMapping('/path', 12345);
     }
 
     /**
@@ -103,7 +103,7 @@ class ResourceMappingTest extends PHPUnit_Framework_TestCase
      */
     public function testFailIfFilesystemPathsEmptyString()
     {
-        new ResourceMapping('/path', '');
+        new PathMapping('/path', '');
     }
 
     /**
@@ -111,7 +111,7 @@ class ResourceMappingTest extends PHPUnit_Framework_TestCase
      */
     public function testFailIfFilesystemPathsNotStringArray()
     {
-        new ResourceMapping('/path', array(12345));
+        new PathMapping('/path', array(12345));
     }
 
     /**
@@ -119,7 +119,7 @@ class ResourceMappingTest extends PHPUnit_Framework_TestCase
      */
     public function testFailIfFilesystemPathsContainEmptyString()
     {
-        new ResourceMapping('/path', array(''));
+        new PathMapping('/path', array(''));
     }
 
     /**
@@ -127,12 +127,12 @@ class ResourceMappingTest extends PHPUnit_Framework_TestCase
      */
     public function testFailIfNoFilesystemPaths()
     {
-        new ResourceMapping('/path', array());
+        new PathMapping('/path', array());
     }
 
     public function testLoad()
     {
-        $mapping = new ResourceMapping('/path', 'resources');
+        $mapping = new PathMapping('/path', 'resources');
 
         $this->assertSame(array('resources'), $mapping->getPathReferences());
         $this->assertFalse($mapping->isLoaded());
@@ -162,7 +162,7 @@ class ResourceMappingTest extends PHPUnit_Framework_TestCase
 
     public function testLoadMultiplePathReferences()
     {
-        $mapping = new ResourceMapping('/path', array('resources', 'assets'));
+        $mapping = new PathMapping('/path', array('resources', 'assets'));
 
         $this->assertSame(array('resources', 'assets'), $mapping->getPathReferences());
         $this->assertFalse($mapping->isLoaded());
@@ -198,7 +198,7 @@ class ResourceMappingTest extends PHPUnit_Framework_TestCase
 
     public function testLoadMultiplePathReferences2()
     {
-        $mapping = new ResourceMapping('/path', array('assets', 'resources'));
+        $mapping = new PathMapping('/path', array('assets', 'resources'));
 
         $this->assertSame(array('assets', 'resources'), $mapping->getPathReferences());
         $this->assertFalse($mapping->isLoaded());
@@ -234,7 +234,7 @@ class ResourceMappingTest extends PHPUnit_Framework_TestCase
 
     public function testLoadReferencesToOtherPackage()
     {
-        $mapping = new ResourceMapping('/path', '@vendor/package2:resources');
+        $mapping = new PathMapping('/path', '@vendor/package2:resources');
 
         $this->assertSame(array('@vendor/package2:resources'), $mapping->getPathReferences());
         $this->assertFalse($mapping->isLoaded());
@@ -267,7 +267,7 @@ class ResourceMappingTest extends PHPUnit_Framework_TestCase
      */
     public function testLoadFailsIfCalledTwice()
     {
-        $mapping = new ResourceMapping('/path', 'resources');
+        $mapping = new PathMapping('/path', 'resources');
 
         $mapping->load($this->package1, $this->packages);
         $mapping->load($this->package1, $this->packages);
@@ -275,7 +275,7 @@ class ResourceMappingTest extends PHPUnit_Framework_TestCase
 
     public function testLoadStoresErrorIfPathNotFound()
     {
-        $mapping = new ResourceMapping('/path', array('foo', 'assets'));
+        $mapping = new PathMapping('/path', array('foo', 'assets'));
 
         $mapping->load($this->package1, $this->packages);
 
@@ -292,7 +292,7 @@ class ResourceMappingTest extends PHPUnit_Framework_TestCase
 
     public function testLoadStoresErrorsIfNoPathFound()
     {
-        $mapping = new ResourceMapping('/path', array('foo', 'bar'));
+        $mapping = new PathMapping('/path', array('foo', 'bar'));
 
         $mapping->load($this->package1, $this->packages);
 
@@ -311,7 +311,7 @@ class ResourceMappingTest extends PHPUnit_Framework_TestCase
 
     public function testLoadStoresErrorIfPackageNotFound()
     {
-        $mapping = new ResourceMapping('/path', array('@foo:resources', 'assets'));
+        $mapping = new PathMapping('/path', array('@foo:resources', 'assets'));
 
         $mapping->load($this->package1, $this->packages);
 
@@ -328,7 +328,7 @@ class ResourceMappingTest extends PHPUnit_Framework_TestCase
 
     public function testUnload()
     {
-        $mapping = new ResourceMapping('/path', 'resources');
+        $mapping = new PathMapping('/path', 'resources');
 
         $mapping->load($this->package1, $this->packages);
         $mapping->unload();
@@ -339,10 +339,10 @@ class ResourceMappingTest extends PHPUnit_Framework_TestCase
 
     public function testUnloadReleasesConflict()
     {
-        $mapping = new ResourceMapping('/path', 'resources');
+        $mapping = new PathMapping('/path', 'resources');
 
         $mapping->load($this->package1, $this->packages);
-        $mapping->addConflict($conflict = new RepositoryPathConflict('/path/conflict'));
+        $mapping->addConflict($conflict = new PathConflict('/path/conflict'));
 
         $this->assertCount(1, $mapping->getConflicts());
         $this->assertCount(1, $conflict->getMappings());
@@ -357,16 +357,16 @@ class ResourceMappingTest extends PHPUnit_Framework_TestCase
      */
     public function testUnloadFailsIfNotLoaded()
     {
-        $mapping = new ResourceMapping('/path', 'resources');
+        $mapping = new PathMapping('/path', 'resources');
 
         $mapping->unload();
     }
 
     public function testAddConflictWithAmePath()
     {
-        $mapping = new ResourceMapping('/path', 'resources');
+        $mapping = new PathMapping('/path', 'resources');
         $mapping->load($this->package1, $this->packages);
-        $conflict = new RepositoryPathConflict('/path');
+        $conflict = new PathConflict('/path');
 
         $this->assertCount(0, $mapping->getConflicts());
         $this->assertCount(0, $conflict->getMappings());
@@ -382,9 +382,9 @@ class ResourceMappingTest extends PHPUnit_Framework_TestCase
 
     public function testAddConflictWithNestedPath()
     {
-        $mapping = new ResourceMapping('/path', 'resources');
+        $mapping = new PathMapping('/path', 'resources');
         $mapping->load($this->package1, $this->packages);
-        $conflict = new RepositoryPathConflict('/path/conflict');
+        $conflict = new PathConflict('/path/conflict');
 
         $mapping->addConflict($conflict);
 
@@ -397,10 +397,10 @@ class ResourceMappingTest extends PHPUnit_Framework_TestCase
 
     public function testAddMultipleConflicts()
     {
-        $mapping = new ResourceMapping('/path', 'resources');
+        $mapping = new PathMapping('/path', 'resources');
         $mapping->load($this->package1, $this->packages);
-        $conflict1 = new RepositoryPathConflict('/path/conflict1');
-        $conflict2 = new RepositoryPathConflict('/path/conflict2');
+        $conflict1 = new PathConflict('/path/conflict1');
+        $conflict2 = new PathConflict('/path/conflict2');
 
         $this->assertCount(0, $mapping->getConflicts());
         $this->assertCount(0, $conflict1->getMappings());
@@ -420,9 +420,9 @@ class ResourceMappingTest extends PHPUnit_Framework_TestCase
 
     public function testAddConflictIgnoresDuplicates()
     {
-        $mapping = new ResourceMapping('/path', 'resources');
+        $mapping = new PathMapping('/path', 'resources');
         $mapping->load($this->package1, $this->packages);
-        $conflict = new RepositoryPathConflict('/path/conflict');
+        $conflict = new PathConflict('/path/conflict');
 
         $this->assertCount(0, $mapping->getConflicts());
         $this->assertCount(0, $conflict->getMappings());
@@ -439,10 +439,10 @@ class ResourceMappingTest extends PHPUnit_Framework_TestCase
 
     public function testAddConflictRemovesPreviousConflictWithSameRepositoryPath()
     {
-        $mapping = new ResourceMapping('/path', 'resources');
+        $mapping = new PathMapping('/path', 'resources');
         $mapping->load($this->package1, $this->packages);
-        $previousConflict = new RepositoryPathConflict('/path/conflict');
-        $newConflict = new RepositoryPathConflict('/path/conflict');
+        $previousConflict = new PathConflict('/path/conflict');
+        $newConflict = new PathConflict('/path/conflict');
 
         $mapping->addConflict($previousConflict);
         $mapping->addConflict($newConflict);
@@ -460,8 +460,8 @@ class ResourceMappingTest extends PHPUnit_Framework_TestCase
      */
     public function testAddConflictFailsIfNotLoaded()
     {
-        $mapping = new ResourceMapping('/path', 'resources');
-        $conflict = new RepositoryPathConflict('/path/conflict');
+        $mapping = new PathMapping('/path', 'resources');
+        $conflict = new PathConflict('/path/conflict');
 
         $mapping->addConflict($conflict);
     }
@@ -471,18 +471,18 @@ class ResourceMappingTest extends PHPUnit_Framework_TestCase
      */
     public function testAddConflictFailsIfConflictWithDifferentRepositoryBasePath()
     {
-        $mapping = new ResourceMapping('/path', 'resources');
+        $mapping = new PathMapping('/path', 'resources');
         $mapping->load($this->package1, $this->packages);
-        $conflict = new RepositoryPathConflict('/other/path/conflict');
+        $conflict = new PathConflict('/other/path/conflict');
 
         $mapping->addConflict($conflict);
     }
 
     public function testRemoveConflict()
     {
-        $mapping = new ResourceMapping('/path', 'resources');
+        $mapping = new PathMapping('/path', 'resources');
         $mapping->load($this->package1, $this->packages);
-        $conflict = new RepositoryPathConflict('/path/conflict');
+        $conflict = new PathConflict('/path/conflict');
 
         $mapping->addConflict($conflict);
         $mapping->removeConflict($conflict);
@@ -494,9 +494,9 @@ class ResourceMappingTest extends PHPUnit_Framework_TestCase
 
     public function testRemoveConflictIgnoresUnknownConflicts()
     {
-        $mapping = new ResourceMapping('/path', 'resources');
+        $mapping = new PathMapping('/path', 'resources');
         $mapping->load($this->package1, $this->packages);
-        $conflict = new RepositoryPathConflict('/path/conflict');
+        $conflict = new PathConflict('/path/conflict');
 
         $mapping->removeConflict($conflict);
 
@@ -510,24 +510,24 @@ class ResourceMappingTest extends PHPUnit_Framework_TestCase
      */
     public function testRemoveConflictFailsIfNotLoaded()
     {
-        $mapping = new ResourceMapping('/path', 'resources');
-        $conflict = new RepositoryPathConflict('/path/conflict');
+        $mapping = new PathMapping('/path', 'resources');
+        $conflict = new PathConflict('/path/conflict');
 
         $mapping->removeConflict($conflict);
     }
 
     public function testGetConflictingPackages()
     {
-        $mapping1 = new ResourceMapping('/path', 'resources');
+        $mapping1 = new PathMapping('/path', 'resources');
         $mapping1->load($this->package1, $this->packages);
 
         $this->assertInstanceOf('Puli\Manager\Api\Package\PackageCollection', $mapping1->getConflictingPackages());
         $this->assertCount(0, $mapping1->getConflictingPackages());
 
-        $mapping2 = new ResourceMapping('/path', 'resources');
+        $mapping2 = new PathMapping('/path', 'resources');
         $mapping2->load($this->package2, $this->packages);
 
-        $conflict = new RepositoryPathConflict('/path/conflict');
+        $conflict = new PathConflict('/path/conflict');
 
         $mapping1->addConflict($conflict);
         $mapping2->addConflict($conflict);
@@ -537,7 +537,7 @@ class ResourceMappingTest extends PHPUnit_Framework_TestCase
         $this->assertCount(1, $mapping2->getConflictingPackages());
         $this->assertTrue($mapping2->getConflictingPackages()->contains('vendor/package1'));
 
-        $mapping3 = new ResourceMapping('/path', 'resources');
+        $mapping3 = new PathMapping('/path', 'resources');
         $mapping3->load($this->package3, $this->packages);
         $mapping3->addConflict($conflict);
 
@@ -554,15 +554,15 @@ class ResourceMappingTest extends PHPUnit_Framework_TestCase
 
     public function testGetConflictingMappings()
     {
-        $mapping1 = new ResourceMapping('/path', 'resources');
+        $mapping1 = new PathMapping('/path', 'resources');
         $mapping1->load($this->package1, $this->packages);
 
         $this->assertCount(0, $mapping1->getConflictingMappings());
 
-        $mapping2 = new ResourceMapping('/path', 'resources');
+        $mapping2 = new PathMapping('/path', 'resources');
         $mapping2->load($this->package2, $this->packages);
 
-        $conflict = new RepositoryPathConflict('/path/conflict');
+        $conflict = new PathConflict('/path/conflict');
 
         $mapping1->addConflict($conflict);
         $mapping2->addConflict($conflict);
@@ -572,7 +572,7 @@ class ResourceMappingTest extends PHPUnit_Framework_TestCase
         $this->assertCount(1, $mapping2->getConflictingMappings());
         $this->assertContains($mapping1, $mapping2->getConflictingMappings());
 
-        $mapping3 = new ResourceMapping('/path', 'resources');
+        $mapping3 = new PathMapping('/path', 'resources');
         $mapping3->load($this->package3, $this->packages);
         $mapping3->addConflict($conflict);
 

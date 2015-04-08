@@ -39,7 +39,7 @@ use Webmozart\PathUtil\Path;
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class ResourceMapping
+class PathMapping
 {
     /**
      * @var string
@@ -82,12 +82,12 @@ class ResourceMapping
     private $loadErrors = array();
 
     /**
-     * @var RepositoryPathConflict[]
+     * @var PathConflict[]
      */
     private $conflicts = array();
 
     /**
-     * Creates a new resource mapping.
+     * Creates a new path mapping.
      *
      * @param string          $repositoryPath The repository path.
      * @param string|string[] $pathReferences The path references.
@@ -362,14 +362,14 @@ class ResourceMapping
      * The method {@link load()} needs to be called before calling this method,
      * otherwise an exception is thrown.
      *
-     * @param RepositoryPathConflict $conflict The conflict to be added.
+     * @param PathConflict $conflict The conflict to be added.
      *
      * @throws NotLoadedException If the mapping is not loaded.
      * @throws InvalidArgumentException If the path of the conflict is not
      *                                  within the repository path of the
      *                                  mapping.
      */
-    public function addConflict(RepositoryPathConflict $conflict)
+    public function addConflict(PathConflict $conflict)
     {
         if (null === $this->state) {
             throw new NotLoadedException('The mapping is not loaded.');
@@ -407,11 +407,11 @@ class ResourceMapping
      * The method {@link load()} needs to be called before calling this method,
      * otherwise an exception is thrown.
      *
-     * @param RepositoryPathConflict $conflict The conflict to remove.
+     * @param PathConflict $conflict The conflict to remove.
      *
      * @throws NotLoadedException If the mapping is not loaded.
      */
-    public function removeConflict(RepositoryPathConflict $conflict)
+    public function removeConflict(PathConflict $conflict)
     {
         if (null === $this->state) {
             throw new NotLoadedException('The mapping is not loaded.');
@@ -435,7 +435,7 @@ class ResourceMapping
      * The method {@link load()} needs to be called before calling this method,
      * otherwise an exception is thrown.
      *
-     * @return RepositoryPathConflict[] The conflicts.
+     * @return PathConflict[] The conflicts.
      *
      * @throws NotLoadedException If the mapping is not loaded.
      */
@@ -449,7 +449,7 @@ class ResourceMapping
     }
 
     /**
-     * Returns all packages with conflicting resource mappings.
+     * Returns all packages with conflicting path mappings.
      *
      * The method {@link load()} needs to be called before calling this method,
      * otherwise an exception is thrown.
@@ -480,12 +480,12 @@ class ResourceMapping
     }
 
     /**
-     * Returns all conflicting resource mappings.
+     * Returns all conflicting path mappings.
      *
      * The method {@link load()} needs to be called before calling this method,
      * otherwise an exception is thrown.
      *
-     * @return ResourceMapping[] The conflicting resource mappings.
+     * @return PathMapping[] The conflicting path mappings.
      *
      * @throws NotLoadedException If the mapping is not loaded.
      */
@@ -516,7 +516,7 @@ class ResourceMapping
      * The method {@link load()} needs to be called before calling this method,
      * otherwise an exception is thrown.
      *
-     * @return int One of the {@link ResourceMappingState} constants.
+     * @return int One of the {@link PathMappingState} constants.
      *
      * @throws NotLoadedException If the mapping is not loaded.
      */
@@ -536,9 +536,9 @@ class ResourceMapping
      * otherwise an exception is thrown.
      *
      * @return bool Returns `true` if the state is
-     *              {@link ResourceMappingState::ENABLED}.
+     *              {@link PathMappingState::ENABLED}.
      *
-     * @see ResourceMappingState::ENABLED
+     * @see PathMappingState::ENABLED
      *
      * @throws NotLoadedException If the mapping is not loaded.
      *
@@ -550,7 +550,7 @@ class ResourceMapping
             throw new NotLoadedException('The mapping is not loaded.');
         }
 
-        return ResourceMappingState::ENABLED === $this->state;
+        return PathMappingState::ENABLED === $this->state;
     }
 
     /**
@@ -560,11 +560,11 @@ class ResourceMapping
      * otherwise an exception is thrown.
      *
      * @return bool Returns `true` if the state is
-     *              {@link ResourceMappingState::NOT_FOUND}.
+     *              {@link PathMappingState::NOT_FOUND}.
      *
      * @throws NotLoadedException If the mapping is not loaded.
      *
-     * @see ResourceMappingState::NOT_FOUND
+     * @see PathMappingState::NOT_FOUND
      */
     public function isNotFound()
     {
@@ -572,7 +572,7 @@ class ResourceMapping
             throw new NotLoadedException('The mapping is not loaded.');
         }
 
-        return ResourceMappingState::NOT_FOUND === $this->state;
+        return PathMappingState::NOT_FOUND === $this->state;
     }
 
     /**
@@ -582,11 +582,11 @@ class ResourceMapping
      * otherwise an exception is thrown.
      *
      * @return bool Returns `true` if the state is
-     *              {@link ResourceMappingState::CONFLICT}.
+     *              {@link PathMappingState::CONFLICT}.
      *
      * @throws NotLoadedException If the mapping is not loaded.
      *
-     * @see ResourceMappingState::CONFLICT
+     * @see PathMappingState::CONFLICT
      */
     public function isConflicting()
     {
@@ -594,17 +594,17 @@ class ResourceMapping
             throw new NotLoadedException('The mapping is not loaded.');
         }
 
-        return ResourceMappingState::CONFLICT === $this->state;
+        return PathMappingState::CONFLICT === $this->state;
     }
 
     private function refreshState()
     {
         if (count($this->conflicts) > 0) {
-            $this->state = ResourceMappingState::CONFLICT;
+            $this->state = PathMappingState::CONFLICT;
         } elseif (0 === count($this->filesystemPaths)) {
-            $this->state = ResourceMappingState::NOT_FOUND;
+            $this->state = PathMappingState::NOT_FOUND;
         } else {
-            $this->state = ResourceMappingState::ENABLED;
+            $this->state = PathMappingState::ENABLED;
         }
     }
 

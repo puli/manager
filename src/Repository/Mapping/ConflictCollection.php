@@ -17,7 +17,7 @@ use Countable;
 use InvalidArgumentException;
 use IteratorAggregate;
 use OutOfBoundsException;
-use Puli\Manager\Api\Repository\RepositoryPathConflict;
+use Puli\Manager\Api\Repository\PathConflict;
 
 /**
  * A collection of resource path conflicts.
@@ -28,11 +28,11 @@ use Puli\Manager\Api\Repository\RepositoryPathConflict;
 class ConflictCollection implements IteratorAggregate, Countable, ArrayAccess
 {
     /**
-     * @var RepositoryPathConflict[]
+     * @var PathConflict[]
      */
     private $conflicts = array();
 
-    public function add(RepositoryPathConflict $conflict)
+    public function add(PathConflict $conflict)
     {
         $this->conflicts[$conflict->getRepositoryPath()] = $conflict;
     }

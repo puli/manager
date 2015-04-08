@@ -15,12 +15,12 @@ use Puli\Manager\Api\NotLoadedException;
 use Puli\Manager\Assert\Assert;
 
 /**
- * A conflict when different resource mappings map the same repository path.
+ * A conflict when different path mappings map the same repository path.
  *
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class RepositoryPathConflict
+class PathConflict
 {
     /**
      * @var string
@@ -28,7 +28,7 @@ class RepositoryPathConflict
     private $repositoryPath;
 
     /**
-     * @var ResourceMapping[]
+     * @var PathMapping[]
      */
     private $mappings = array();
 
@@ -55,13 +55,13 @@ class RepositoryPathConflict
     }
 
     /**
-     * Adds a resource mapping involved in the conflict.
+     * Adds a path mapping involved in the conflict.
      *
-     * @param ResourceMapping $mapping The resource mapping to add.
+     * @param PathMapping $mapping The path mapping to add.
      *
      * @throws NotLoadedException If the passed mapping is not loaded.
      */
-    public function addMapping(ResourceMapping $mapping)
+    public function addMapping(PathMapping $mapping)
     {
         if (!$mapping->isLoaded()) {
             throw new NotLoadedException('The passed mapping must be loaded.');
@@ -83,9 +83,9 @@ class RepositoryPathConflict
     }
 
     /**
-     * Adds resource mappings involved in the conflict.
+     * Adds path mappings involved in the conflict.
      *
-     * @param ResourceMapping[] $mappings The resource mappings to add.
+     * @param PathMapping[] $mappings The path mappings to add.
      *
      * @throws NotLoadedException If a passed mapping is not loaded.
      */
@@ -97,16 +97,16 @@ class RepositoryPathConflict
     }
 
     /**
-     * Removes a resource mapping from the conflict.
+     * Removes a path mapping from the conflict.
      *
-     * If only one resource mapping is left after removing this mapping, that
+     * If only one path mapping is left after removing this mapping, that
      * mapping is removed as well. The conflict is then resolved.
      *
-     * @param ResourceMapping $mapping The resource mapping to remove.
+     * @param PathMapping $mapping The path mapping to remove.
      *
      * @throws NotLoadedException If the passed mapping is not loaded.
      */
-    public function removeMapping(ResourceMapping $mapping)
+    public function removeMapping(PathMapping $mapping)
     {
         if (!$mapping->isLoaded()) {
             throw new NotLoadedException('The passed mapping must be loaded.');
@@ -133,9 +133,9 @@ class RepositoryPathConflict
     }
 
     /**
-     * Returns the resource mappings involved in the conflict.
+     * Returns the path mappings involved in the conflict.
      *
-     * @return ResourceMapping[]
+     * @return PathMapping[]
      */
     public function getMappings()
     {

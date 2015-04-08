@@ -15,14 +15,14 @@ use PHPUnit_Framework_TestCase;
 use Puli\Manager\Api\Package\Package;
 use Puli\Manager\Api\Package\PackageCollection;
 use Puli\Manager\Api\Package\PackageFile;
-use Puli\Manager\Api\Repository\RepositoryPathConflict;
-use Puli\Manager\Api\Repository\ResourceMapping;
+use Puli\Manager\Api\Repository\PathConflict;
+use Puli\Manager\Api\Repository\PathMapping;
 
 /**
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class RepositoryPathConflictTest extends PHPUnit_Framework_TestCase
+class PathConflictTest extends PHPUnit_Framework_TestCase
 {
     /**
      * @var Package
@@ -54,9 +54,9 @@ class RepositoryPathConflictTest extends PHPUnit_Framework_TestCase
 
     public function testAddMapping()
     {
-        $mapping = new ResourceMapping('/path', 'resources');
+        $mapping = new PathMapping('/path', 'resources');
         $mapping->load($this->package1, $this->packages);
-        $conflict = new RepositoryPathConflict('/path/conflict');
+        $conflict = new PathConflict('/path/conflict');
 
         $this->assertCount(0, $mapping->getConflicts());
         $this->assertCount(0, $conflict->getMappings());
@@ -72,11 +72,11 @@ class RepositoryPathConflictTest extends PHPUnit_Framework_TestCase
 
     public function testAddMultipleMappings()
     {
-        $mapping1 = new ResourceMapping('/path', 'resources');
+        $mapping1 = new PathMapping('/path', 'resources');
         $mapping1->load($this->package1, $this->packages);
-        $mapping2 = new ResourceMapping('/path', 'resources');
+        $mapping2 = new PathMapping('/path', 'resources');
         $mapping2->load($this->package2, $this->packages);
-        $conflict = new RepositoryPathConflict('/path/conflict');
+        $conflict = new PathConflict('/path/conflict');
 
         $conflict->addMapping($mapping1);
         $conflict->addMapping($mapping2);
@@ -93,9 +93,9 @@ class RepositoryPathConflictTest extends PHPUnit_Framework_TestCase
 
     public function testAddMappingIgnoresDuplicates()
     {
-        $mapping = new ResourceMapping('/path', 'resources');
+        $mapping = new PathMapping('/path', 'resources');
         $mapping->load($this->package1, $this->packages);
-        $conflict = new RepositoryPathConflict('/path/conflict');
+        $conflict = new PathConflict('/path/conflict');
 
         $this->assertCount(0, $mapping->getConflicts());
         $this->assertCount(0, $conflict->getMappings());
@@ -112,11 +112,11 @@ class RepositoryPathConflictTest extends PHPUnit_Framework_TestCase
 
     public function testAddMappingRemovesPreviousMappingFromSamePackage()
     {
-        $previousMapping = new ResourceMapping('/path', 'resources');
+        $previousMapping = new PathMapping('/path', 'resources');
         $previousMapping->load($this->package1, $this->packages);
-        $mapping = new ResourceMapping('/path', 'resources');
+        $mapping = new PathMapping('/path', 'resources');
         $mapping->load($this->package1, $this->packages);
-        $conflict = new RepositoryPathConflict('/path/conflict');
+        $conflict = new PathConflict('/path/conflict');
 
         $conflict->addMapping($previousMapping);
         $conflict->addMapping($mapping);
@@ -134,17 +134,17 @@ class RepositoryPathConflictTest extends PHPUnit_Framework_TestCase
      */
     public function testAddMappingFailsIfPackageNotLoaded()
     {
-        $mapping = new ResourceMapping('/path', 'resources');
-        $conflict = new RepositoryPathConflict('/path/conflict');
+        $mapping = new PathMapping('/path', 'resources');
+        $conflict = new PathConflict('/path/conflict');
 
         $conflict->addMapping($mapping);
     }
 
     public function testRemoveMapping()
     {
-        $mapping = new ResourceMapping('/path', 'resources');
+        $mapping = new PathMapping('/path', 'resources');
         $mapping->load($this->package1, $this->packages);
-        $conflict = new RepositoryPathConflict('/path/conflict');
+        $conflict = new PathConflict('/path/conflict');
 
         $conflict->addMapping($mapping);
         $conflict->removeMapping($mapping);
@@ -156,9 +156,9 @@ class RepositoryPathConflictTest extends PHPUnit_Framework_TestCase
 
     public function testRemoveMappingIgnoresUnknownMappings()
     {
-        $mapping = new ResourceMapping('/path', 'resources');
+        $mapping = new PathMapping('/path', 'resources');
         $mapping->load($this->package1, $this->packages);
-        $conflict = new RepositoryPathConflict('/path/conflict');
+        $conflict = new PathConflict('/path/conflict');
 
         $conflict->removeMapping($mapping);
 
@@ -169,11 +169,11 @@ class RepositoryPathConflictTest extends PHPUnit_Framework_TestCase
 
     public function testRemoveMappingResolvesConflictIfOnlyOneMappingLeft()
     {
-        $mapping1 = new ResourceMapping('/path', 'resources');
+        $mapping1 = new PathMapping('/path', 'resources');
         $mapping1->load($this->package1, $this->packages);
-        $mapping2 = new ResourceMapping('/path', 'resources');
+        $mapping2 = new PathMapping('/path', 'resources');
         $mapping2->load($this->package2, $this->packages);
-        $conflict = new RepositoryPathConflict('/path/conflict');
+        $conflict = new PathConflict('/path/conflict');
 
         $conflict->addMapping($mapping1);
         $conflict->addMapping($mapping2);
@@ -187,13 +187,13 @@ class RepositoryPathConflictTest extends PHPUnit_Framework_TestCase
 
     public function testRemoveMappingDoesNotResolveConflictIfMoreThanOneMappingLeft()
     {
-        $mapping1 = new ResourceMapping('/path', 'resources');
+        $mapping1 = new PathMapping('/path', 'resources');
         $mapping1->load($this->package1, $this->packages);
-        $mapping2 = new ResourceMapping('/path', 'resources');
+        $mapping2 = new PathMapping('/path', 'resources');
         $mapping2->load($this->package2, $this->packages);
-        $mapping3 = new ResourceMapping('/path', 'resources');
+        $mapping3 = new PathMapping('/path', 'resources');
         $mapping3->load($this->package3, $this->packages);
-        $conflict = new RepositoryPathConflict('/path/conflict');
+        $conflict = new PathConflict('/path/conflict');
 
         $conflict->addMapping($mapping1);
         $conflict->addMapping($mapping2);
@@ -212,21 +212,21 @@ class RepositoryPathConflictTest extends PHPUnit_Framework_TestCase
      */
     public function testRemoveMappingFailsIfPackageNotLoaded()
     {
-        $mapping = new ResourceMapping('/path', 'resources');
-        $conflict = new RepositoryPathConflict('/path/conflict');
+        $mapping = new PathMapping('/path', 'resources');
+        $conflict = new PathConflict('/path/conflict');
 
         $conflict->removeMapping($mapping);
     }
 
     public function testResolveRemovesAllMappings()
     {
-        $mapping1 = new ResourceMapping('/path', 'resources');
+        $mapping1 = new PathMapping('/path', 'resources');
         $mapping1->load($this->package1, $this->packages);
-        $mapping2 = new ResourceMapping('/path', 'resources');
+        $mapping2 = new PathMapping('/path', 'resources');
         $mapping2->load($this->package2, $this->packages);
-        $mapping3 = new ResourceMapping('/path', 'resources');
+        $mapping3 = new PathMapping('/path', 'resources');
         $mapping3->load($this->package3, $this->packages);
-        $conflict = new RepositoryPathConflict('/path/conflict');
+        $conflict = new PathConflict('/path/conflict');
 
         $conflict->addMapping($mapping1);
         $conflict->addMapping($mapping2);

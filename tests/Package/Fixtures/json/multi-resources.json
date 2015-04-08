@@ -1,7 +1,7 @@
 {
     "version": "1.0",
     "name": "my/application",
-    "resources": {
+    "path-mappings": {
         "/app": [
             "res",
             "assets"

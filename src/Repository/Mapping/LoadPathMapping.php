@@ -13,20 +13,20 @@ namespace Puli\Manager\Repository\Mapping;
 
 use Puli\Manager\Api\Package\Package;
 use Puli\Manager\Api\Package\PackageCollection;
-use Puli\Manager\Api\Repository\ResourceMapping;
+use Puli\Manager\Api\Repository\PathMapping;
 use Puli\Manager\Conflict\PackageConflictDetector;
 use Puli\Manager\Transaction\AtomicOperation;
 
 /**
- * Unloads a resource mapping.
+ * Loads a path mapping.
  *
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class UnloadMapping implements AtomicOperation
+class LoadPathMapping implements AtomicOperation
 {
     /**
-     * @var ResourceMapping
+     * @var PathMapping
      */
     private $mapping;
 
@@ -41,7 +41,7 @@ class UnloadMapping implements AtomicOperation
     private $packages;
 
     /**
-     * @var ResourceMappingCollection
+     * @var PathMappingCollection
      */
     private $mappings;
 
@@ -50,9 +50,10 @@ class UnloadMapping implements AtomicOperation
      */
     private $conflictDetector;
 
-    public function __construct(ResourceMapping $mapping, PackageCollection $packages, ResourceMappingCollection $mappings, PackageConflictDetector $conflictDetector)
+    public function __construct(PathMapping $mapping, Package $containingPackage, PackageCollection $packages, PathMappingCollection $mappings, PackageConflictDetector $conflictDetector)
     {
         $this->mapping = $mapping;
+        $this->containingPackage = $containingPackage;
         $this->packages = $packages;
         $this->mappings = $mappings;
         $this->conflictDetector = $conflictDetector;
@@ -63,11 +64,28 @@ class UnloadMapping implements AtomicOperation
      */
     public function execute()
     {
-        if (!$this->mapping->isLoaded()) {
+        if ($this->mapping->isLoaded()) {
             return;
         }
 
-        $this->containingPackage = $this->mapping->getContainingPackage();
+        $this->mapping->load($this->containingPackage, $this->packages);
+
+        $packageName = $this->containingPackage->getName();
+
+        foreach ($this->mapping->listRepositoryPaths() as $repositoryPath) {
+            $this->mappings->set($repositoryPath, $this->mapping);
+            $this->conflictDetector->claim($repositoryPath, $packageName);
+        }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function rollback()
+    {
+        if (!$this->mapping->isLoaded()) {
+            return;
+        }
 
         $packageName = $this->containingPackage->getName();
 
@@ -78,24 +96,5 @@ class UnloadMapping implements AtomicOperation
 
         // Unload after iterating, otherwise the paths are gone
         $this->mapping->unload();
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function rollback()
-    {
-        if ($this->mapping->isLoaded() || !$this->containingPackage) {
-            return;
-        }
-
-        $this->mapping->load($this->containingPackage, $this->packages);
-
-        $packageName = $this->containingPackage->getName();
-
-        foreach ($this->mapping->listRepositoryPaths() as $repositoryPath) {
-            $this->mappings->add($this->mapping);
-            $this->conflictDetector->claim($repositoryPath, $packageName);
-        }
     }
 }
