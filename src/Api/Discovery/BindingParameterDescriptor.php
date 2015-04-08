@@ -128,6 +128,8 @@ class BindingParameterDescriptor
      */
     public function toBindingParameter()
     {
-        return new BindingParameter($this->name, $this->required, $this->defaultValue);
+        $flags = $this->required ? BindingParameter::REQUIRED : BindingParameter::OPTIONAL;
+
+        return new BindingParameter($this->name, $flags, $this->defaultValue);
     }
 }
