@@ -25,6 +25,12 @@ use Puli\Manager\Conflict\PackageConflictException;
 interface RepositoryManager
 {
     /**
+     * Flag: Don't check whether the target paths exist in
+     * {@link addPathMapping()}.
+     */
+    const NO_TARGET_PATH_CHECK = 1;
+
+    /**
      * Returns the manager's environment.
      *
      * @return ProjectEnvironment The project environment.
@@ -35,9 +41,10 @@ interface RepositoryManager
      * Adds a path mapping to the repository.
      *
      * @param PathMapping $mapping The path mapping.
-     * @param bool        $failIfNotFound W
+     * @param int         $flags   A bitwise combination of the flag constants
+     *                             in this class.
      */
-    public function addPathMapping(PathMapping $mapping, $failIfNotFound = true);
+    public function addPathMapping(PathMapping $mapping, $flags = 0);
 
     /**
      * Removes a path mapping from the repository.

@@ -151,6 +151,8 @@ class DiscoveryManagerImpl implements DiscoveryManager
      */
     public function addBindingType(BindingTypeDescriptor $typeDescriptor, $flags = 0)
     {
+        Assert::integer($flags, 'The argument $flags must be a boolean.');
+
         $this->assertPackagesLoaded();
         $this->emitWarningForDuplicateTypes();
 

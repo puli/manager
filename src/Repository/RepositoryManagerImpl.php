@@ -44,7 +44,7 @@ use Puli\Repository\Api\EditableRepository;
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class RepositoryManagerImpl implements  RepositoryManager
+class RepositoryManagerImpl implements RepositoryManager
 {
     /**
      * @var ProjectEnvironment
@@ -132,9 +132,9 @@ class RepositoryManagerImpl implements  RepositoryManager
     /**
      * {@inheritdoc}
      */
-    public function addPathMapping(PathMapping $mapping, $failIfNotFound = true)
+    public function addPathMapping(PathMapping $mapping, $flags = 0)
     {
-        Assert::boolean($failIfNotFound, 'The argument $failIfNotFound must be a boolean.');
+        Assert::integer($flags, 'The argument $flags must be a boolean.');
 
         $this->assertMappingsLoaded();
 
@@ -146,7 +146,7 @@ class RepositoryManagerImpl implements  RepositoryManager
 
             $tx->execute($this->loadPathMapping($mapping, $this->rootPackage));
 
-            if ($failIfNotFound) {
+            if (!($flags & self::NO_TARGET_PATH_CHECK)) {
                 $this->assertNoLoadErrors($mapping);
             }
 

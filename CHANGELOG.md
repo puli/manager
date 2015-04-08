@@ -18,6 +18,8 @@ Changelog
  * renamed `NoSuchMappingException` to `NoSuchPathMappingException`
  * renamed `RepositoryPathConflict` to `PathConflict`
  * renamed `RepositoryManager::*ResourceMapping*()` to `RepositoryManager::*PathMapping*()`
+ * changed boolean parameter `$failIfNotFound` to integer parameter `$flags` in
+   `RepositoryManager::addPathMapping()`
    
 * 1.0.0-beta3 (2015-03-19)
 

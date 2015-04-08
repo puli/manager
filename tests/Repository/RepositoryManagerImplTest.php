@@ -20,6 +20,7 @@ use Puli\Manager\Api\Package\RootPackage;
 use Puli\Manager\Api\Package\RootPackageFile;
 use Puli\Manager\Api\Repository\PathMapping;
 use Puli\Manager\Api\Repository\PathMappingState;
+use Puli\Manager\Api\Repository\RepositoryManager;
 use Puli\Manager\Package\PackageFileStorage;
 use Puli\Manager\Repository\RepositoryManagerImpl;
 use Puli\Manager\Tests\ManagerTestCase;
@@ -242,7 +243,7 @@ class RepositoryManagerImplTest extends ManagerTestCase
         $this->manager->addPathMapping(new PathMapping('/path', '@foobar:resources'));
     }
 
-    public function testAddPathMappingDoesNotFailIfReferencedPackageNotFoundAndNotFailIfNotFound()
+    public function testAddPathMappingDoesNotFailIfReferencedPackageNotFoundAndNoTargetPathCheck()
     {
         $this->initDefaultManager();
 
@@ -264,7 +265,7 @@ class RepositoryManagerImplTest extends ManagerTestCase
                 PHPUnit_Framework_Assert::assertTrue($mappings['/path']->isNotFound());
             }));
 
-        $this->manager->addPathMapping(new PathMapping('/path', '@foobar:resources'), false);
+        $this->manager->addPathMapping(new PathMapping('/path', '@foobar:resources'), RepositoryManager::NO_TARGET_PATH_CHECK);
     }
 
     public function testAddPathMappingOverridesConflictingPackage()
