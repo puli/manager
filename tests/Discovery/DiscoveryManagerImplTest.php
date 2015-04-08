@@ -154,8 +154,8 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->initDefaultManager();
 
         $this->rootPackageFile->addTypeDescriptor(new BindingTypeDescriptor('my/type', null, array(
-            new BindingParameterDescriptor('optional', false, 'default'),
-            new BindingParameterDescriptor('required', true),
+            new BindingParameterDescriptor('optional', BindingParameterDescriptor::OPTIONAL, 'default'),
+            new BindingParameterDescriptor('required', BindingParameterDescriptor::REQUIRED),
         )));
 
         $this->packageFile1->addBindingDescriptor(new BindingDescriptor('/path', 'my/type', array(
@@ -775,7 +775,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $binding = new BindingDescriptor('/path', 'my/type', array(), 'xpath');
 
         $this->packageFile1->addTypeDescriptor(new BindingTypeDescriptor('my/type', null, array(
-            new BindingParameterDescriptor('param', false, 'default'),
+            new BindingParameterDescriptor('param', BindingParameterDescriptor::OPTIONAL, 'default'),
         )));
 
         $this->discovery->expects($this->once())
@@ -932,7 +932,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->initDefaultManager();
 
         $this->packageFile1->addTypeDescriptor(new BindingTypeDescriptor('my/type', null, array(
-            new BindingParameterDescriptor('param', true),
+            new BindingParameterDescriptor('param', BindingParameterDescriptor::REQUIRED),
         )));
 
         $this->discovery->expects($this->never())
@@ -1011,7 +1011,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
 
         // default parameters: ["param" => "default"]
         $this->packageFile1->addTypeDescriptor(new BindingTypeDescriptor('my/type', null, array(
-            new BindingParameterDescriptor('param', false, 'default'),
+            new BindingParameterDescriptor('param', BindingParameterDescriptor::OPTIONAL, 'default'),
         )));
 
         // actual parameters: []
@@ -2092,7 +2092,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         // Required parameter is missing
         $this->rootPackageFile->addBindingDescriptor(new BindingDescriptor('/path', 'my/type'));
         $this->packageFile1->addTypeDescriptor(new BindingTypeDescriptor('my/type', null, array(
-            new BindingParameterDescriptor('param', true),
+            new BindingParameterDescriptor('param', BindingParameterDescriptor::REQUIRED),
         )));
 
         $this->discovery->expects($this->never())

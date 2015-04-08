@@ -65,7 +65,7 @@ class PackageJsonWriterTest extends JsonWriterTestCase
         $packageFile->addResourceMapping(new ResourceMapping('/app', 'res'));
         $packageFile->addBindingDescriptor(new BindingDescriptor('/app/config*.yml', 'my/type'));
         $packageFile->addTypeDescriptor(new BindingTypeDescriptor('my/type', 'Description of my type.', array(
-            new BindingParameterDescriptor('param', false, 1234, 'Description of the parameter.'),
+            new BindingParameterDescriptor('param', BindingParameterDescriptor::OPTIONAL, 1234, 'Description of the parameter.'),
         )));
         $packageFile->setOverriddenPackages(array('acme/blog'));
         $packageFile->setExtraKeys(array(
@@ -87,7 +87,7 @@ class PackageJsonWriterTest extends JsonWriterTestCase
 
         // We need to create a type and a binding in state ENABLED
         $bindingType = new BindingTypeDescriptor('my/type', null, array(
-            new BindingParameterDescriptor('param', false, 'default'),
+            new BindingParameterDescriptor('param', BindingParameterDescriptor::OPTIONAL, 'default'),
         ));
         $bindingType->load($package);
 
@@ -236,7 +236,7 @@ class PackageJsonWriterTest extends JsonWriterTestCase
         $baseConfig = new Config();
         $packageFile = new PackageFile(null, null, $baseConfig);
         $packageFile->addTypeDescriptor(new BindingTypeDescriptor('my/type', null, array(
-            new BindingParameterDescriptor('param', false, 1234),
+            new BindingParameterDescriptor('param', BindingParameterDescriptor::OPTIONAL, 1234),
         )));
 
         $this->writer->writePackageFile($packageFile, $this->tempFile);
@@ -251,7 +251,7 @@ class PackageJsonWriterTest extends JsonWriterTestCase
         $baseConfig = new Config();
         $packageFile = new PackageFile(null, null, $baseConfig);
         $packageFile->addTypeDescriptor(new BindingTypeDescriptor('my/type', null, array(
-            new BindingParameterDescriptor('param', false, null, 'Description of the parameter.'),
+            new BindingParameterDescriptor('param', BindingParameterDescriptor::OPTIONAL, null, 'Description of the parameter.'),
         )));
 
         $this->writer->writePackageFile($packageFile, $this->tempFile);
@@ -266,7 +266,7 @@ class PackageJsonWriterTest extends JsonWriterTestCase
         $baseConfig = new Config();
         $packageFile = new PackageFile(null, null, $baseConfig);
         $packageFile->addTypeDescriptor(new BindingTypeDescriptor('my/type', null, array(
-            new BindingParameterDescriptor('param', true),
+            new BindingParameterDescriptor('param', BindingParameterDescriptor::REQUIRED),
         )));
 
         $this->writer->writePackageFile($packageFile, $this->tempFile);
@@ -290,7 +290,7 @@ class PackageJsonWriterTest extends JsonWriterTestCase
         $packageFile->addResourceMapping(new ResourceMapping('/app', 'res'));
         $packageFile->addBindingDescriptor(new BindingDescriptor('/app/config*.yml', 'my/type'));
         $packageFile->addTypeDescriptor(new BindingTypeDescriptor('my/type', 'Description of my type.', array(
-            new BindingParameterDescriptor('param', false, 1234, 'Description of the parameter.'),
+            new BindingParameterDescriptor('param', BindingParameterDescriptor::OPTIONAL, 1234, 'Description of the parameter.'),
         )));
         $packageFile->setOverriddenPackages(array('acme/blog'));
         $packageFile->setOverrideOrder(array(

@@ -98,9 +98,11 @@ class PackageJsonReader implements PackageFileReader
 
                 if (isset($data->parameters)) {
                     foreach ((array) $data->parameters as $paramName => $paramData) {
+                        $required = isset($paramData->required) ? $paramData->required : false;
+
                         $parameters[] = new BindingParameterDescriptor(
                             $paramName,
-                            isset($paramData->required) ? $paramData->required : false,
+                            $required ? BindingParameterDescriptor::REQUIRED : BindingParameterDescriptor::OPTIONAL,
                             isset($paramData->default) ? $paramData->default : null,
                             isset($paramData->description) ? $paramData->description : null
                         );

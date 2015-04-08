@@ -216,8 +216,8 @@ class BindingDescriptorTest extends PHPUnit_Framework_TestCase
     public function testGetParameterValuesWhenLoadedIncludesDefaultValues()
     {
         $type = new BindingTypeDescriptor('vendor/type', null, array(
-            new BindingParameterDescriptor('foo', false, 'bar'),
-            new BindingParameterDescriptor('param', false, 'default'),
+            new BindingParameterDescriptor('foo', BindingParameterDescriptor::OPTIONAL, 'bar'),
+            new BindingParameterDescriptor('param', BindingParameterDescriptor::OPTIONAL, 'default'),
         ));
         $type->load($this->package);
 
@@ -230,8 +230,8 @@ class BindingDescriptorTest extends PHPUnit_Framework_TestCase
     public function testGetParameterValuesWhenLoadedDoesNotIncludeDefaultValuesIfSuppressed()
     {
         $type = new BindingTypeDescriptor('vendor/type', null, array(
-            new BindingParameterDescriptor('foo', false, 'bar'),
-            new BindingParameterDescriptor('param', false, 'default'),
+            new BindingParameterDescriptor('foo', BindingParameterDescriptor::OPTIONAL, 'bar'),
+            new BindingParameterDescriptor('param', BindingParameterDescriptor::OPTIONAL, 'default'),
         ));
         $type->load($this->package);
 
@@ -261,7 +261,7 @@ class BindingDescriptorTest extends PHPUnit_Framework_TestCase
     public function testGetParameterValueWhenLoadedReturnsDefaultValue()
     {
         $type = new BindingTypeDescriptor('vendor/type', null, array(
-            new BindingParameterDescriptor('param', false, 'default'),
+            new BindingParameterDescriptor('param', BindingParameterDescriptor::OPTIONAL, 'default'),
         ));
         $type->load($this->package);
 
@@ -274,7 +274,7 @@ class BindingDescriptorTest extends PHPUnit_Framework_TestCase
     public function testGetParameterValueWhenLoadedDoesNotReturnDefaultValuesIfSuppressed()
     {
         $type = new BindingTypeDescriptor('vendor/type', null, array(
-            new BindingParameterDescriptor('param', false, 'default'),
+            new BindingParameterDescriptor('param', BindingParameterDescriptor::OPTIONAL, 'default'),
         ));
         $type->load($this->package);
 
@@ -287,7 +287,7 @@ class BindingDescriptorTest extends PHPUnit_Framework_TestCase
     public function testGetParameterValueWhenLoadedPrefersOverriddenValue()
     {
         $type = new BindingTypeDescriptor('vendor/type', null, array(
-            new BindingParameterDescriptor('param', false, 'default'),
+            new BindingParameterDescriptor('param', BindingParameterDescriptor::OPTIONAL, 'default'),
         ));
         $type->load($this->package);
 
@@ -321,7 +321,7 @@ class BindingDescriptorTest extends PHPUnit_Framework_TestCase
     public function testHasParameterValuesWhenLoadedIncludesDefaultValues()
     {
         $type = new BindingTypeDescriptor('vendor/type', null, array(
-            new BindingParameterDescriptor('param', false, 'default'),
+            new BindingParameterDescriptor('param', BindingParameterDescriptor::OPTIONAL, 'default'),
         ));
         $type->load($this->package);
 
@@ -334,7 +334,7 @@ class BindingDescriptorTest extends PHPUnit_Framework_TestCase
     public function testHasParameterValuesWhenLoadedDoesNotIncludeDefaultValuesIfSuppressed()
     {
         $type = new BindingTypeDescriptor('vendor/type', null, array(
-            new BindingParameterDescriptor('param', false, 'default'),
+            new BindingParameterDescriptor('param', BindingParameterDescriptor::OPTIONAL, 'default'),
         ));
         $type->load($this->package);
 
@@ -355,7 +355,7 @@ class BindingDescriptorTest extends PHPUnit_Framework_TestCase
     public function testHasParameterValueWhenLoaded()
     {
         $type = new BindingTypeDescriptor('vendor/type', null, array(
-            new BindingParameterDescriptor('default', false, 'value'),
+            new BindingParameterDescriptor('default', BindingParameterDescriptor::OPTIONAL, 'value'),
         ));
         $type->load($this->package);
 
@@ -370,7 +370,7 @@ class BindingDescriptorTest extends PHPUnit_Framework_TestCase
     public function testHasParameterValueWhenLoadedReturnsFalseForDefaultIfSuppressed()
     {
         $type = new BindingTypeDescriptor('vendor/type', null, array(
-            new BindingParameterDescriptor('default', false, 'value'),
+            new BindingParameterDescriptor('default', BindingParameterDescriptor::OPTIONAL, 'value'),
         ));
         $type->load($this->package);
 
@@ -413,7 +413,7 @@ class BindingDescriptorTest extends PHPUnit_Framework_TestCase
     public function testInvalidIfInvalidParameter()
     {
         $type = new BindingTypeDescriptor('vendor/type', null, array(
-            new BindingParameterDescriptor('param', true),
+            new BindingParameterDescriptor('param', BindingParameterDescriptor::REQUIRED),
         ));
         $type->load($this->package);
 

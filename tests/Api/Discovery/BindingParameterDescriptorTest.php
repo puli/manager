@@ -23,7 +23,7 @@ class BindingParameterDescriptorTest extends PHPUnit_Framework_TestCase
 {
     public function testCreate()
     {
-        $descriptor = new BindingParameterDescriptor('param', true, null, 'The description');
+        $descriptor = new BindingParameterDescriptor('param', BindingParameterDescriptor::REQUIRED, null, 'The description');
 
         $this->assertSame('param', $descriptor->getName());
         $this->assertTrue($descriptor->isRequired());
@@ -33,12 +33,19 @@ class BindingParameterDescriptorTest extends PHPUnit_Framework_TestCase
 
     public function testCreateWithDefaultValues()
     {
-        $descriptor = new BindingParameterDescriptor('param', false, 'default');
+        $descriptor = new BindingParameterDescriptor('param', BindingParameterDescriptor::OPTIONAL, 'default');
 
         $this->assertSame('param', $descriptor->getName());
         $this->assertFalse($descriptor->isRequired());
         $this->assertSame('default', $descriptor->getDefaultValue());
         $this->assertNull($descriptor->getDescription());
+    }
+
+    public function testOptionalIfFlagsNull()
+    {
+        $descriptor = new BindingParameterDescriptor('param', null);
+
+        $this->assertFalse($descriptor->isRequired());
     }
 
     public function getValidNames()
@@ -83,9 +90,9 @@ class BindingParameterDescriptorTest extends PHPUnit_Framework_TestCase
     /**
      * @expectedException \InvalidArgumentException
      */
-    public function testRequiredMustBeBool()
+    public function testRequiredMustBeIntOrNull()
     {
-        new BindingParameterDescriptor('param', 1234);
+        new BindingParameterDescriptor('param', true);
     }
 
     /**
@@ -93,7 +100,7 @@ class BindingParameterDescriptorTest extends PHPUnit_Framework_TestCase
      */
     public function testDescriptionMustBeStringOrNull()
     {
-        new BindingParameterDescriptor('param', false, null, 1234);
+        new BindingParameterDescriptor('param', BindingParameterDescriptor::OPTIONAL, null, 1234);
     }
 
     /**
@@ -101,7 +108,7 @@ class BindingParameterDescriptorTest extends PHPUnit_Framework_TestCase
      */
     public function testDescriptionMustNotBeEmpty()
     {
-        new BindingParameterDescriptor('param', false, null, '');
+        new BindingParameterDescriptor('param', BindingParameterDescriptor::OPTIONAL, null, '');
     }
 
     /**
@@ -109,7 +116,7 @@ class BindingParameterDescriptorTest extends PHPUnit_Framework_TestCase
      */
     public function testDefaultValueMustNotBeObject()
     {
-        new BindingParameterDescriptor('param', false, new stdClass());
+        new BindingParameterDescriptor('param', BindingParameterDescriptor::OPTIONAL, new stdClass());
     }
 
     /**
@@ -118,7 +125,7 @@ class BindingParameterDescriptorTest extends PHPUnit_Framework_TestCase
     public function testToBindingParameter($name)
     {
         // Check that valid names are also accepted by BindingParameter
-        $descriptor = new BindingParameterDescriptor($name, false, 'default', 'The description');
+        $descriptor = new BindingParameterDescriptor($name, BindingParameterDescriptor::OPTIONAL, 'default', 'The description');
 
         $parameter = $descriptor->toBindingParameter();
 
@@ -130,7 +137,7 @@ class BindingParameterDescriptorTest extends PHPUnit_Framework_TestCase
 
     public function testToBindingParameterRequired()
     {
-        $descriptor = new BindingParameterDescriptor('param', true);
+        $descriptor = new BindingParameterDescriptor('param', BindingParameterDescriptor::REQUIRED);
 
         $parameter = $descriptor->toBindingParameter();
 

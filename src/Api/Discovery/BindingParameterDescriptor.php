@@ -26,14 +26,24 @@ use RuntimeException;
 class BindingParameterDescriptor
 {
     /**
+     * Flag: The parameter is optional.
+     */
+    const OPTIONAL = 0;
+
+    /**
+     * Flag: The parameter is required.
+     */
+    const REQUIRED = 1;
+
+    /**
      * @var string
      */
     private $name;
 
     /**
-     * @var bool
+     * @var int
      */
-    private $required;
+    private $flags;
 
     /**
      * @var mixed
@@ -49,7 +59,8 @@ class BindingParameterDescriptor
      * Creates a binding parameter descriptor.
      *
      * @param string      $name         The parameter name.
-     * @param bool        $required     Whether the parameter must be set.
+     * @param int         $flags        A bitwise combination of the flag
+     *                                  constants in this class.
      * @param mixed       $defaultValue The default value to use if the
      *                                  parameter is not set.
      * @param string|null $description  A human-readable description of the
@@ -61,20 +72,20 @@ class BindingParameterDescriptor
      *
      * @see BindingParameter
      */
-    public function __construct($name, $required = false, $defaultValue = null, $description = null)
+    public function __construct($name, $flags = self::OPTIONAL, $defaultValue = null, $description = null)
     {
         Assert::parameterName($name);
-        Assert::boolean($required, 'The parameter "$required" must be a boolean. Got: %s');
+        Assert::nullOrInteger($flags, 'The parameter "$flags" must be an integer or null. Got: %s');
         Assert::nullOrParameterValue($defaultValue);
         Assert::nullOrString($description, 'The parameter description must be a string or null. Got: %s');
         Assert::nullOrNotEmpty($description, 'The parameter description must not be empty.');
 
-        if ($required && null !== $defaultValue) {
+        if (($flags & self::REQUIRED) && null !== $defaultValue) {
             throw new RuntimeException('Required parameters cannot have default values.');
         }
 
         $this->name = $name;
-        $this->required = $required;
+        $this->flags = $flags;
         $this->defaultValue = $defaultValue;
         $this->description = $description;
     }
@@ -90,13 +101,13 @@ class BindingParameterDescriptor
     }
 
     /**
-     * Returns whether the parameter is required.
+     * Returns the flags passed to the constructor.
      *
-     * @return bool Returns `true` if the parameter is required.
+     * @return int A bitwise combination of the flag constants in this class.
      */
-    public function isRequired()
+    public function getFlags()
     {
-        return $this->required;
+        return $this->flags;
     }
 
     /**
@@ -122,13 +133,24 @@ class BindingParameterDescriptor
     }
 
     /**
+     * Returns whether the parameter is required.
+     *
+     * @return bool Returns `true` if the parameter is required and `false`
+     *              otherwise.
+     */
+    public function isRequired()
+    {
+        return (bool) ($this->flags & self::REQUIRED);
+    }
+
+    /**
      * Converts the descriptor into a binding parameter.
      *
      * @return BindingParameter The created binding parameter.
      */
     public function toBindingParameter()
     {
-        $flags = $this->required ? BindingParameter::REQUIRED : BindingParameter::OPTIONAL;
+        $flags = $this->isRequired() ? BindingParameter::REQUIRED : BindingParameter::OPTIONAL;
 
         return new BindingParameter($this->name, $flags, $this->defaultValue);
     }

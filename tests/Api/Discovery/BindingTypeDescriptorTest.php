@@ -137,7 +137,7 @@ class BindingTypeDescriptorTest extends PHPUnit_Framework_TestCase
     public function testGetParameterValues()
     {
         $descriptor = new BindingTypeDescriptor('vendor/type', null, array(
-            new BindingParameterDescriptor('param', false, 'value'),
+            new BindingParameterDescriptor('param', BindingParameterDescriptor::OPTIONAL, 'value'),
         ));
 
         $this->assertSame(array('param' => 'value'), $descriptor->getParameterValues());
@@ -146,7 +146,7 @@ class BindingTypeDescriptorTest extends PHPUnit_Framework_TestCase
     public function testGetParameterValuesIgnoresRequiredParameters()
     {
         $descriptor = new BindingTypeDescriptor('vendor/type', null, array(
-            new BindingParameterDescriptor('param', true),
+            new BindingParameterDescriptor('param', BindingParameterDescriptor::REQUIRED),
         ));
 
         $this->assertSame(array(), $descriptor->getParameterValues());
@@ -155,7 +155,7 @@ class BindingTypeDescriptorTest extends PHPUnit_Framework_TestCase
     public function testGetParameterValue()
     {
         $descriptor = new BindingTypeDescriptor('vendor/type', null, array(
-            new BindingParameterDescriptor('param', false, 'value'),
+            new BindingParameterDescriptor('param', BindingParameterDescriptor::OPTIONAL, 'value'),
         ));
 
         $this->assertSame('value', $descriptor->getParameterValue('param'));
@@ -164,7 +164,7 @@ class BindingTypeDescriptorTest extends PHPUnit_Framework_TestCase
     public function testGetParameterValueReturnsNullForRequiredParameter()
     {
         $descriptor = new BindingTypeDescriptor('vendor/type', null, array(
-            new BindingParameterDescriptor('param', true),
+            new BindingParameterDescriptor('param', BindingParameterDescriptor::REQUIRED),
         ));
 
         $this->assertNull($descriptor->getParameterValue('param'));
@@ -183,7 +183,7 @@ class BindingTypeDescriptorTest extends PHPUnit_Framework_TestCase
     public function testHasParameterValues()
     {
         $descriptor = new BindingTypeDescriptor('vendor/type', null, array(
-            new BindingParameterDescriptor('param', false, 'value'),
+            new BindingParameterDescriptor('param', BindingParameterDescriptor::OPTIONAL, 'value'),
         ));
 
         $this->assertTrue($descriptor->hasParameterValues());
@@ -192,7 +192,7 @@ class BindingTypeDescriptorTest extends PHPUnit_Framework_TestCase
     public function testHasParameterValuesIgnoresRequiredParameters()
     {
         $descriptor = new BindingTypeDescriptor('vendor/type', null, array(
-            new BindingParameterDescriptor('param', true),
+            new BindingParameterDescriptor('param', BindingParameterDescriptor::REQUIRED),
         ));
 
         $this->assertFalse($descriptor->hasParameterValues());
@@ -201,7 +201,7 @@ class BindingTypeDescriptorTest extends PHPUnit_Framework_TestCase
     public function testHasParameterValue()
     {
         $descriptor = new BindingTypeDescriptor('vendor/type', null, array(
-            new BindingParameterDescriptor('param', false, 'value'),
+            new BindingParameterDescriptor('param', BindingParameterDescriptor::OPTIONAL, 'value'),
         ));
 
         $this->assertTrue($descriptor->hasParameterValue('param'));
@@ -211,7 +211,7 @@ class BindingTypeDescriptorTest extends PHPUnit_Framework_TestCase
     public function testHasParameterValueIgnoresRequiredParameters()
     {
         $descriptor = new BindingTypeDescriptor('vendor/type', null, array(
-            new BindingParameterDescriptor('param', true),
+            new BindingParameterDescriptor('param', BindingParameterDescriptor::REQUIRED),
         ));
 
         $this->assertFalse($descriptor->hasParameterValue('param'));
@@ -220,7 +220,7 @@ class BindingTypeDescriptorTest extends PHPUnit_Framework_TestCase
     public function testHasRequiredParametersReturnsTrueIfRequiredParameters()
     {
         $descriptor = new BindingTypeDescriptor('vendor/type', null, array(
-            new BindingParameterDescriptor('param', true),
+            new BindingParameterDescriptor('param', BindingParameterDescriptor::REQUIRED),
         ));
 
         $this->assertTrue($descriptor->hasRequiredParameters());
@@ -229,7 +229,7 @@ class BindingTypeDescriptorTest extends PHPUnit_Framework_TestCase
     public function testHasRequiredParametersReturnsFalseIfNoRequiredParameters()
     {
         $descriptor = new BindingTypeDescriptor('vendor/type', null, array(
-            new BindingParameterDescriptor('param', false),
+            new BindingParameterDescriptor('param', BindingParameterDescriptor::OPTIONAL),
         ));
 
         $this->assertFalse($descriptor->hasRequiredParameters());
@@ -245,7 +245,7 @@ class BindingTypeDescriptorTest extends PHPUnit_Framework_TestCase
     public function testHasOptionalParametersReturnsTrueIfOptionalParameters()
     {
         $descriptor = new BindingTypeDescriptor('vendor/type', null, array(
-            new BindingParameterDescriptor('param', false),
+            new BindingParameterDescriptor('param', BindingParameterDescriptor::OPTIONAL),
         ));
 
         $this->assertTrue($descriptor->hasOptionalParameters());
@@ -254,7 +254,7 @@ class BindingTypeDescriptorTest extends PHPUnit_Framework_TestCase
     public function testHasOptionalParametersReturnsFalseIfNoOptionalParameters()
     {
         $descriptor = new BindingTypeDescriptor('vendor/type', null, array(
-            new BindingParameterDescriptor('param', true),
+            new BindingParameterDescriptor('param', BindingParameterDescriptor::REQUIRED),
         ));
 
         $this->assertFalse($descriptor->hasOptionalParameters());

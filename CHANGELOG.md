@@ -8,6 +8,8 @@ Changelog
  * added NO_DUPLICATE_CHECK flag to suppress duplicate checks in
    `DiscoveryManager::addBindingType()`
  * added NO_TYPE_CHECK flag to suppress type checks in `DiscoveryManager::addBinding()`
+ * changed boolean parameter `$required` to integer parameter `$flags` in
+   `BindingParameterDescriptor::__construct()`
    
 * 1.0.0-beta3 (2015-03-19)
 

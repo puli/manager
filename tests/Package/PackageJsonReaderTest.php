@@ -104,7 +104,7 @@ class PackageJsonReaderTest extends PHPUnit_Framework_TestCase
         $this->assertInstanceOf('Puli\Manager\Api\Package\PackageFile', $packageFile);
         $this->assertEquals(array(
             new BindingTypeDescriptor('my/type', null, array(
-                new BindingParameterDescriptor('param', true),
+                new BindingParameterDescriptor('param', BindingParameterDescriptor::REQUIRED),
             ))
         ), $packageFile->getTypeDescriptors());
     }
@@ -326,7 +326,7 @@ class PackageJsonReaderTest extends PHPUnit_Framework_TestCase
         $this->assertEquals(array('/app' => new ResourceMapping('/app', array('res'))), $packageFile->getResourceMappings());
         $this->assertEquals(array(new BindingDescriptor('/app/config*.yml', 'my/type')), $packageFile->getBindingDescriptors());
         $this->assertEquals(array(new BindingTypeDescriptor('my/type', 'Description of my type.', array(
-            new BindingParameterDescriptor('param', false, 1234, 'Description of the parameter.'),
+            new BindingParameterDescriptor('param', BindingParameterDescriptor::OPTIONAL, 1234, 'Description of the parameter.'),
         ))), $packageFile->getTypeDescriptors());
         $this->assertSame(array('acme/blog'), $packageFile->getOverriddenPackages());
         $this->assertEquals(array(
