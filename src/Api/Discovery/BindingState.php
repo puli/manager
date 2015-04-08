@@ -45,11 +45,6 @@ final class BindingState
     const INVALID = 5;
 
     /**
-     * State: The binding is a overridden by another binding.
-     */
-    const OVERRIDDEN = 6;
-
-    /**
      * Returns all binding states.
      *
      * @return int[] The binding states.
@@ -60,7 +55,6 @@ final class BindingState
             self::ENABLED,
             self::DISABLED,
             self::UNDECIDED,
-            self::OVERRIDDEN,
             self::HELD_BACK,
             self::INVALID,
         );

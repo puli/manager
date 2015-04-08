@@ -75,10 +75,17 @@ class SyncBindingUuid implements AtomicOperation
      */
     public function takeSnapshot()
     {
-        $bindingDescriptor = $this->bindingDescriptors->getEnabled($this->uuid);
+        $this->enabledBindingBefore = null;
 
-        // Clone so that rollback() works if the binding is unloaded
-        $this->enabledBindingBefore = $bindingDescriptor ? clone $bindingDescriptor : null;
+        if ($this->bindingDescriptors->contains($this->uuid)) {
+            $bindingDescriptor = $this->bindingDescriptors->get($this->uuid);
+
+            if ($bindingDescriptor->isEnabled()) {
+                // Clone so that rollback() works if the binding is unloaded
+                $this->enabledBindingBefore = clone $bindingDescriptor;
+            }
+        }
+
         $this->snapshotTaken = true;
     }
 
@@ -92,10 +99,16 @@ class SyncBindingUuid implements AtomicOperation
         }
 
         // Remember for rollback()
-        $bindingDescriptor = $this->bindingDescriptors->getEnabled($this->uuid);
+        $this->enabledBindingAfter = null;
 
-        // Clone so that rollback() works if the binding is unloaded
-        $this->enabledBindingAfter = $bindingDescriptor ? clone $bindingDescriptor : null;
+        if ($this->bindingDescriptors->contains($this->uuid)) {
+            $bindingDescriptor = $this->bindingDescriptors->get($this->uuid);
+
+            if ($bindingDescriptor->isEnabled()) {
+                // Clone so that rollback() works if the binding is unloaded
+                $this->enabledBindingAfter = clone $bindingDescriptor;
+            }
+        }
 
         $this->syncBindingUuid($this->enabledBindingBefore, $this->enabledBindingAfter);
     }

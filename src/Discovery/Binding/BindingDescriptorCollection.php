@@ -13,16 +13,10 @@ namespace Puli\Manager\Discovery\Binding;
 
 use OutOfBoundsException;
 use Puli\Manager\Api\Discovery\BindingDescriptor;
-use Puli\Manager\Util\TwoDimensionalHashMap;
 use Rhumsaa\Uuid\Uuid;
 
 /**
  * A collection of binding descriptors.
- *
- * Each descriptor has a composite key:
- *
- *  * The UUID of the binding descriptor.
- *  * The package that defines the binding.
  *
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
@@ -30,7 +24,7 @@ use Rhumsaa\Uuid\Uuid;
 class BindingDescriptorCollection
 {
     /**
-     * @var TwoDimensionalHashMap
+     * @var BindingDescriptor[]
      */
     private $map;
 
@@ -39,7 +33,7 @@ class BindingDescriptorCollection
      */
     public function __construct()
     {
-        $this->map = new TwoDimensionalHashMap();
+        $this->map = array();
     }
 
     /**
@@ -49,7 +43,7 @@ class BindingDescriptorCollection
      */
     public function add(BindingDescriptor $bindingDescriptor)
     {
-        $this->map->set($bindingDescriptor->getUuid()->toString(), $bindingDescriptor->getContainingPackage()->getName(), $bindingDescriptor);
+        $this->map[$bindingDescriptor->getUuid()->toString()] = $bindingDescriptor;
     }
 
     /**
@@ -58,103 +52,45 @@ class BindingDescriptorCollection
      * This method ignores non-existing binding descriptors.
      *
      * @param Uuid   $uuid        The UUID of the binding descriptor.
-     * @param string $packageName The name of the package containing the descriptor.
      */
-    public function remove(Uuid $uuid, $packageName)
+    public function remove(Uuid $uuid)
     {
-        $this->map->remove($uuid->toString(), $packageName);
+        unset($this->map[$uuid->toString()]);
     }
 
     /**
      * Returns a binding descriptor.
      *
-     * If no package is passed, the first descriptor set for the UUID is
-     * returned.
-     *
-     * @param Uuid   $uuid        The UUID of the binding descriptor.
-     * @param string $packageName The name of the package containing the descriptor.
+     * @param Uuid $uuid The UUID of the binding descriptor.
      *
      * @return BindingDescriptor The binding descriptor.
      *
      * @throws OutOfBoundsException If no binding descriptor was set for the
-     *                              given UUID/package.
-     */
-    public function get(Uuid $uuid, $packageName = null)
-    {
-        if (null !== $packageName) {
-            return $this->map->get($uuid->toString(), $packageName);
-        }
-
-        return $this->map->getFirst($uuid->toString());
-    }
-
-    /**
-     * Returns the enabled binding descriptor for a given UUID.
-     *
-     * If no descriptor is set or if none is enabled, `null` is returned.
-     *
-     * @param Uuid $uuid The UUID of the binding descriptor.
-     *
-     * @return BindingDescriptor|null The binding descriptor or none if no
-     *                                (enabled) descriptor could be found.
-     */
-    public function getEnabled(Uuid $uuid)
-    {
-        if (!$this->contains($uuid)) {
-            return null;
-        }
-
-        foreach ($this->listByUuid($uuid) as $bindingDescriptor) {
-            if ($bindingDescriptor->isEnabled()) {
-                return $bindingDescriptor;
-            }
-        }
-
-        return null;
-    }
-
-    /**
-     * Returns all binding descriptors set for the given UUID.
-     *
-     * @param Uuid $uuid The UUID of the binding descriptor.
-     *
-     * @return BindingDescriptor[] The binding descriptors.
-     *
-     * @throws OutOfBoundsException If no binding descriptor was set for the
      *                              given UUID.
      */
-    public function listByUuid(Uuid $uuid)
+    public function get(Uuid $uuid)
     {
-        return $this->map->listByPrimaryKey($uuid->toString());
+        if (!isset($this->map[$uuid->toString()])) {
+            throw new OutOfBoundsException(sprintf(
+                'The binding with UUID "%s" does not exist.',
+                $uuid->toString()
+            ));
+        }
+
+        return $this->map[$uuid->toString()];
     }
 
     /**
-     * Returns whether a binding descriptor was set for the given UUID/package.
+     * Returns whether a binding descriptor exists.
      *
-     * @param Uuid   $uuid        The UUID of the binding descriptor.
-     * @param string $packageName The name of the package containing the descriptor.
+     * @param Uuid $uuid The UUID of the binding descriptor.
      *
      * @return bool Returns `true` if a binding descriptor was set for the given
-     *              UUID/package.
+     *              UUID.
      */
-    public function contains(Uuid $uuid, $packageName = null)
+    public function contains(Uuid $uuid)
     {
-        return $this->map->contains($uuid->toString(), $packageName);
-    }
-
-    /**
-     * Returns the names of the packages defining bindings with the given UUID.
-     *
-     * @param Uuid $uuid The UUID of the binding descriptor.
-     *
-     * @return string[] The package names.
-     *
-     * @throws OutOfBoundsException If no binding descriptor was set for the
-     *                              given UUID.
-     */
-    public function getPackageNames(Uuid $uuid = null)
-    {
-        return $this->map->getSecondaryKeys($uuid ? $uuid->toString() : null);
+        return isset($this->map[$uuid->toString()]);
     }
 
     /**
@@ -166,8 +102,8 @@ class BindingDescriptorCollection
     {
         $uuids = array();
 
-        foreach ($this->map->getPrimaryKeys() as $key) {
-            $uuids[] = $this->map->getFirst($key)->getUuid();
+        foreach ($this->map as $bindingDescriptor) {
+            $uuids[] = $bindingDescriptor->getUuid();
         }
 
         return $uuids;
@@ -176,13 +112,11 @@ class BindingDescriptorCollection
     /**
      * Returns the contents of the collection as array.
      *
-     * @return BindingDescriptor[][] A multi-dimensional array containing all
-     *                               bindings indexed first by UUID, then by
-     *                               package name.
+     * @return BindingDescriptor[] An array containing all bindings indexed by UUID.
      */
     public function toArray()
     {
-        return $this->map->toArray();
+        return $this->map;
     }
 
     /**
@@ -193,6 +127,6 @@ class BindingDescriptorCollection
      */
     public function isEmpty()
     {
-        return $this->map->isEmpty();
+        return 0 === count($this->map);
     }
 }

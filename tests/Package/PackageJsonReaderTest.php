@@ -28,6 +28,8 @@ use Rhumsaa\Uuid\Uuid;
  */
 class PackageJsonReaderTest extends PHPUnit_Framework_TestCase
 {
+    const BINDING_UUID = '2438256b-c2f5-4a06-a18f-f79755e027dd';
+
     /**
      * @var Config
      */
@@ -117,7 +119,9 @@ class PackageJsonReaderTest extends PHPUnit_Framework_TestCase
         $this->assertEquals(array(new BindingDescriptor(
             '/app/config*.yml',
             'my/type',
-            array('param' => 'value')
+            array('param' => 'value'),
+            'glob',
+            Uuid::fromString(self::BINDING_UUID)
         )), $packageFile->getBindingDescriptors());
     }
 
@@ -130,7 +134,8 @@ class PackageJsonReaderTest extends PHPUnit_Framework_TestCase
             '//resource[name="config.yml"]',
             'my/type',
             array(),
-            'xpath'
+            'xpath',
+            Uuid::fromString(self::BINDING_UUID)
         )), $packageFile->getBindingDescriptors());
     }
 
@@ -324,7 +329,7 @@ class PackageJsonReaderTest extends PHPUnit_Framework_TestCase
     {
         $this->assertSame('my/application', $packageFile->getPackageName());
         $this->assertEquals(array('/app' => new ResourceMapping('/app', array('res'))), $packageFile->getResourceMappings());
-        $this->assertEquals(array(new BindingDescriptor('/app/config*.yml', 'my/type')), $packageFile->getBindingDescriptors());
+        $this->assertEquals(array(new BindingDescriptor('/app/config*.yml', 'my/type', array(), 'glob', Uuid::fromString(self::BINDING_UUID))), $packageFile->getBindingDescriptors());
         $this->assertEquals(array(new BindingTypeDescriptor('my/type', 'Description of my type.', array(
             new BindingParameterDescriptor('param', BindingParameterDescriptor::OPTIONAL, 1234, 'Description of the parameter.'),
         ))), $packageFile->getTypeDescriptors());

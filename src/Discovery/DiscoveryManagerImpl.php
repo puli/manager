@@ -26,6 +26,7 @@ use Puli\Manager\Api\Discovery\CannotDisableBindingException;
 use Puli\Manager\Api\Discovery\CannotEnableBindingException;
 use Puli\Manager\Api\Discovery\DiscoveryManager;
 use Puli\Manager\Api\Discovery\DiscoveryNotEmptyException;
+use Puli\Manager\Api\Discovery\DuplicateBindingException;
 use Puli\Manager\Api\Discovery\NoSuchBindingException;
 use Puli\Manager\Api\Discovery\TypeNotEnabledException;
 use Puli\Manager\Api\Environment\ProjectEnvironment;
@@ -46,7 +47,6 @@ use Puli\Manager\Discovery\Binding\ReloadBindingDescriptorsByUuid;
 use Puli\Manager\Discovery\Binding\RemoveBindingDescriptorFromPackageFile;
 use Puli\Manager\Discovery\Binding\SyncBindingUuid;
 use Puli\Manager\Discovery\Binding\UnloadBindingDescriptor;
-use Puli\Manager\Discovery\Binding\UpdateOverriddenMarksForUuid;
 use Puli\Manager\Discovery\Type\AddTypeDescriptorToPackageFile;
 use Puli\Manager\Discovery\Type\BindingTypeDescriptorCollection;
 use Puli\Manager\Discovery\Type\DefineType;
@@ -351,14 +351,16 @@ class DiscoveryManagerImpl implements DiscoveryManager
             }
         }
 
-        if ($this->rootPackageFile->hasBindingDescriptor($bindingDescriptor->getUuid())) {
-            return;
+        $uuid = $bindingDescriptor->getUuid();
+
+        if ($this->bindingDescriptors->contains($uuid)) {
+            throw DuplicateBindingException::forUuid($uuid);
         }
 
         $tx = new Transaction();
 
         try {
-            $syncOp = $this->syncBindingUuid($bindingDescriptor->getUuid());
+            $syncOp = $this->syncBindingUuid($uuid);
             $syncOp->takeSnapshot();
 
             $tx->execute($this->loadBindingDescriptor($bindingDescriptor, $this->rootPackage));
@@ -416,19 +418,26 @@ class DiscoveryManagerImpl implements DiscoveryManager
     /**
      * {@inheritdoc}
      */
-    public function enableBinding(Uuid $uuid, $packageName = null)
+    public function enableBinding(Uuid $uuid)
     {
         $this->assertPackagesLoaded();
 
-        $packageNames = $packageName ? (array) $packageName : $this->packages->getPackageNames();
-
-        Assert::allString($packageNames, 'The package names must be strings. Got: %s');
-
-        if (!$bindingDescriptors = $this->getBindingsByUuid($uuid, $packageNames)) {
+        if (!$this->bindingDescriptors->contains($uuid)) {
             throw NoSuchBindingException::forUuid($uuid);
         }
 
-        if (!$installInfos = $this->getInstallInfosForEnable($uuid, $bindingDescriptors)) {
+        $bindingDescriptor = $this->bindingDescriptors->get($uuid);
+        $package = $bindingDescriptor->getContainingPackage();
+
+        if ($package instanceof RootPackage) {
+            throw CannotEnableBindingException::rootPackageNotAccepted($uuid, $package->getName());
+        }
+
+        if ($bindingDescriptor->isHeldBack()) {
+            throw CannotEnableBindingException::typeNotLoaded($uuid, $package->getName());
+        }
+
+        if ($bindingDescriptor->isEnabled()) {
             return;
         }
 
@@ -438,10 +447,7 @@ class DiscoveryManagerImpl implements DiscoveryManager
             $syncOp = $this->syncBindingUuid($uuid);
             $syncOp->takeSnapshot();
 
-            foreach ($installInfos as $installInfo) {
-                $tx->execute($this->enableBindingUuid($uuid, $installInfo));
-            }
-
+            $tx->execute($this->enableBindingUuid($uuid, $package->getInstallInfo()));
             $tx->execute($syncOp);
 
             $this->saveRootPackageFile();
@@ -457,19 +463,26 @@ class DiscoveryManagerImpl implements DiscoveryManager
     /**
      * {@inheritdoc}
      */
-    public function disableBinding(Uuid $uuid, $packageName = null)
+    public function disableBinding(Uuid $uuid)
     {
         $this->assertPackagesLoaded();
 
-        $packageNames = $packageName ? (array) $packageName : $this->packages->getPackageNames();
-
-        Assert::allString($packageNames, 'The package names must be strings. Got: %s');
-
-        if (!$bindingDescriptors = $this->getBindingsByUuid($uuid, $packageNames)) {
+        if (!$this->bindingDescriptors->contains($uuid)) {
             throw NoSuchBindingException::forUuid($uuid);
         }
 
-        if (!$installInfos = $this->getInstallInfosForDisable($uuid, $bindingDescriptors)) {
+        $bindingDescriptor = $this->bindingDescriptors->get($uuid);
+        $package = $bindingDescriptor->getContainingPackage();
+
+        if ($package instanceof RootPackage) {
+            throw CannotDisableBindingException::rootPackageNotAccepted($uuid, $package->getName());
+        }
+
+        if ($bindingDescriptor->isHeldBack()) {
+            throw CannotDisableBindingException::typeNotLoaded($uuid, $package->getName());
+        }
+
+        if ($bindingDescriptor->isDisabled()) {
             return;
         }
 
@@ -479,10 +492,7 @@ class DiscoveryManagerImpl implements DiscoveryManager
             $syncOp = $this->syncBindingUuid($uuid);
             $syncOp->takeSnapshot();
 
-            foreach ($installInfos as $installInfo) {
-                $tx->execute($this->disableBindingUuid($uuid, $installInfo));
-            }
-
+            $tx->execute($this->disableBindingUuid($uuid, $package->getInstallInfo()));
             $tx->execute($syncOp);
 
             $this->saveRootPackageFile();
@@ -518,15 +528,7 @@ class DiscoveryManagerImpl implements DiscoveryManager
     {
         $this->assertPackagesLoaded();
 
-        $bindings = array();
-
-        foreach ($this->bindingDescriptors->toArray() as $uuidString => $bindingsByPackage) {
-            foreach ($bindingsByPackage as $binding) {
-                $bindings[] = $binding;
-            }
-        }
-
-        return $bindings;
+        return array_values($this->bindingDescriptors->toArray());
     }
 
     /**
@@ -538,11 +540,9 @@ class DiscoveryManagerImpl implements DiscoveryManager
 
         $bindings = array();
 
-        foreach ($this->bindingDescriptors->toArray() as $uuidString => $bindingsByPackage) {
-            foreach ($bindingsByPackage as $binding) {
-                if ($binding->match($expr)) {
-                    $bindings[] = $binding;
-                }
+        foreach ($this->bindingDescriptors->toArray() as $binding) {
+            if ($binding->match($expr)) {
+                $bindings[] = $binding;
             }
         }
 
@@ -572,11 +572,9 @@ class DiscoveryManagerImpl implements DiscoveryManager
             return !$this->bindingDescriptors->isEmpty();
         }
 
-        foreach ($this->bindingDescriptors->toArray() as $uuidString => $bindingsByPackage) {
-            foreach ($bindingsByPackage as $binding) {
-                if ($binding->match($expr)) {
-                    return true;
-                }
+        foreach ($this->bindingDescriptors->toArray() as $binding) {
+            if ($binding->match($expr)) {
+                return true;
             }
         }
 
@@ -605,8 +603,8 @@ class DiscoveryManagerImpl implements DiscoveryManager
                 }
             }
 
-            foreach ($this->bindingDescriptors->getUuids() as $uuid) {
-                if ($bindingDescriptor = $this->bindingDescriptors->getEnabled($uuid)) {
+            foreach ($this->bindingDescriptors->toArray() as $bindingDescriptor) {
+                if ($bindingDescriptor->isEnabled()) {
                     $tx->execute($this->bind($bindingDescriptor));
                 }
             }
@@ -665,6 +663,11 @@ class DiscoveryManagerImpl implements DiscoveryManager
         // Then the bindings for the loaded types
         foreach ($this->packages as $package) {
             foreach ($package->getPackageFile()->getBindingDescriptors() as $bindingDescriptor) {
+                // This REALLY shouldn't happen
+                if ($this->bindingDescriptors->contains($bindingDescriptor->getUuid())) {
+                    throw DuplicateBindingException::forUuid($bindingDescriptor->getUuid());
+                }
+
                 $this->loadBindingDescriptor($bindingDescriptor, $package)->execute();
             }
         }
@@ -690,126 +693,34 @@ class DiscoveryManagerImpl implements DiscoveryManager
 
     private function emitWarningForInvalidBindings()
     {
-        foreach ($this->bindingDescriptors->getUuids() as $uuid) {
-            foreach ($this->bindingDescriptors->listByUuid($uuid) as $packageName => $binding) {
-                foreach ($binding->getViolations() as $violation) {
-                    switch ($violation->getCode()) {
-                        case ConstraintViolation::NO_SUCH_PARAMETER:
-                            $reason = sprintf(
-                                'The parameter "%s" does not exist.',
-                                $violation->getParameterName()
-                            );
-                            break;
-                        case ConstraintViolation::MISSING_PARAMETER:
-                            $reason = sprintf(
-                                'The parameter "%s" is missing.',
-                                $violation->getParameterName()
-                            );
-                            break;
-                        default:
-                            $reason = 'Unknown reason.';
-                            break;
-                    }
-
-                    $this->logger->warning(sprintf(
-                        'The binding "%s" in package "%s" is invalid: %s',
-                        $uuid->toString(),
-                        $packageName,
-                        $reason
-                    ));
+        foreach ($this->bindingDescriptors->toArray() as $binding) {
+            foreach ($binding->getViolations() as $violation) {
+                switch ($violation->getCode()) {
+                    case ConstraintViolation::NO_SUCH_PARAMETER:
+                        $reason = sprintf(
+                            'The parameter "%s" does not exist.',
+                            $violation->getParameterName()
+                        );
+                        break;
+                    case ConstraintViolation::MISSING_PARAMETER:
+                        $reason = sprintf(
+                            'The parameter "%s" is missing.',
+                            $violation->getParameterName()
+                        );
+                        break;
+                    default:
+                        $reason = 'Unknown reason.';
+                        break;
                 }
+
+                $this->logger->warning(sprintf(
+                    'The binding "%s" in package "%s" is invalid: %s',
+                    $binding->getUuid()->toString(),
+                    $binding->getContainingPackage()->getName(),
+                    $reason
+                ));
             }
         }
-    }
-
-    /**
-     * @param Uuid $uuid
-     * @param BindingDescriptor[] $bindingDescriptors
-     *
-     * @return InstallInfo[]
-     */
-    private function getInstallInfosForEnable(Uuid $uuid, array $bindingDescriptors)
-    {
-        $installInfos = array();
-
-        foreach ($bindingDescriptors as $bindingDescriptor) {
-            $package = $bindingDescriptor->getContainingPackage();
-
-            if ($package instanceof RootPackage) {
-                throw CannotEnableBindingException::rootPackageNotAccepted($uuid, $package->getName());
-            }
-
-            $installInfo = $package->getInstallInfo();
-
-            if (!$installInfo || $installInfo->hasEnabledBindingUuid($uuid)) {
-                continue;
-            }
-
-            if ($bindingDescriptor->isHeldBack()) {
-                throw CannotEnableBindingException::typeNotLoaded($uuid, $package->getName());
-            }
-
-            $installInfos[] = $installInfo;
-        }
-
-        return $installInfos;
-    }
-
-    /**
-     * @param Uuid $uuid
-     * @param BindingDescriptor[] $bindingDescriptors
-     *
-     * @return InstallInfo[]
-     */
-    private function getInstallInfosForDisable(Uuid $uuid, array $bindingDescriptors)
-    {
-        $installInfos = array();
-
-        foreach ($bindingDescriptors as $bindingDescriptor) {
-            $package = $bindingDescriptor->getContainingPackage();
-
-            if ($package instanceof RootPackage) {
-                throw CannotDisableBindingException::rootPackageNotAccepted($uuid, $package->getName());
-            }
-
-            $installInfo = $package->getInstallInfo();
-
-            if (!$installInfo || $installInfo->hasDisabledBindingUuid($uuid)) {
-                continue;
-            }
-
-            if ($bindingDescriptor->isHeldBack()) {
-                throw CannotDisableBindingException::typeNotLoaded($uuid, $package->getName());
-            }
-
-            $installInfos[] = $installInfo;
-        }
-
-        return $installInfos;
-    }
-
-    /**
-     * @param Uuid  $uuid
-     * @param array $packageNames
-     *
-     * @return BindingDescriptor[]
-     */
-    private function getBindingsByUuid(Uuid $uuid, array $packageNames)
-    {
-        if (!$this->bindingDescriptors->contains($uuid)) {
-            return array();
-        }
-
-        $bindingDescriptors = array();
-        $descriptorsByPackage = $this->bindingDescriptors->listByUuid($uuid);
-
-        foreach ($packageNames as $packageName) {
-            if (isset($descriptorsByPackage[$packageName])) {
-                $bindingDescriptors[] = $descriptorsByPackage[$packageName];
-            }
-        }
-
-        return $bindingDescriptors;
     }
 
     private function getUuidsByTypeName($typeName)
@@ -888,28 +799,19 @@ class DiscoveryManagerImpl implements DiscoveryManager
 
     private function loadBindingDescriptor(BindingDescriptor $bindingDescriptor, Package $package)
     {
-        return new InterceptedOperation(
-            new LoadBindingDescriptor($bindingDescriptor, $package, $this->bindingDescriptors, $this->typeDescriptors),
-            new UpdateOverriddenMarksForUuid($bindingDescriptor->getUuid(), $this->bindingDescriptors, $this->rootPackage->getName())
-        );
+        return new LoadBindingDescriptor($bindingDescriptor, $package, $this->bindingDescriptors, $this->typeDescriptors);
     }
 
     private function unloadBindingDescriptor(BindingDescriptor $bindingDescriptor)
     {
-        return new InterceptedOperation(
-            new UnloadBindingDescriptor($bindingDescriptor, $this->bindingDescriptors),
-            new UpdateOverriddenMarksForUuid($bindingDescriptor->getUuid(), $this->bindingDescriptors, $this->rootPackage->getName())
-        );
+        return new UnloadBindingDescriptor($bindingDescriptor, $this->bindingDescriptors);
     }
 
     private function enableBindingUuid(Uuid $uuid, InstallInfo $installInfo)
     {
         return new InterceptedOperation(
             new EnableBindingUuid($uuid, $installInfo),
-            array(
-                new ReloadBindingDescriptorsByUuid($uuid, $this->bindingDescriptors, $this->typeDescriptors),
-                new UpdateOverriddenMarksForUuid($uuid, $this->bindingDescriptors, $this->rootPackage->getName())
-            )
+            new ReloadBindingDescriptorsByUuid($uuid, $this->bindingDescriptors, $this->typeDescriptors)
         );
     }
 
@@ -917,10 +819,7 @@ class DiscoveryManagerImpl implements DiscoveryManager
     {
         return new InterceptedOperation(
             new DisableBindingUuid($uuid, $installInfo),
-            array(
-                new ReloadBindingDescriptorsByUuid($uuid, $this->bindingDescriptors, $this->typeDescriptors),
-                new UpdateOverriddenMarksForUuid($uuid, $this->bindingDescriptors, $this->rootPackage->getName())
-            )
+            new ReloadBindingDescriptorsByUuid($uuid, $this->bindingDescriptors, $this->typeDescriptors)
         );
     }
 

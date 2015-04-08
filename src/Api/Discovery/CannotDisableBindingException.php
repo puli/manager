@@ -24,6 +24,46 @@ use RuntimeException;
 class CannotDisableBindingException extends RuntimeException
 {
     /**
+     * Code: Bindings in the root package cannot be disabled.
+     */
+    const ROOT_PACKAGE_NOT_ACCEPTED = 1;
+
+    /**
+     * Code: Bindings with unloaded types cannot be disabled.
+     */
+    const TYPE_NOT_LOADED = 2;
+
+    /**
+     * Creates an exception for a UUID that could not be disabled because the
+     * binding is in the root package.
+     *
+     * @param Uuid      $uuid        The UUID.
+     * @param string    $packageName The name of the package.
+     * @param Exception $cause       The exception that caused this exception.
+     *
+     * @return static The created exception.
+     */
+    public static function rootPackageNotAccepted(Uuid $uuid, $packageName, Exception $cause = null)
+    {
+        return static::forUuid($uuid, $packageName, '', self::ROOT_PACKAGE_NOT_ACCEPTED, $cause);
+    }
+
+    /**
+     * Creates an exception for a UUID that could not be disabled because the
+     * binding type is not loaded.
+     *
+     * @param Uuid      $uuid        The UUID.
+     * @param string    $packageName The name of the package.
+     * @param Exception $cause       The exception that caused this exception.
+     *
+     * @return static The created exception.
+     */
+    public static function typeNotLoaded(Uuid $uuid, $packageName, Exception $cause = null)
+    {
+        return static::forUuid($uuid, $packageName, 'The type of the binding is not loaded.', self::TYPE_NOT_LOADED, $cause);
+    }
+
+    /**
      * Creates an exception for a UUID that could not be disabled.
      *
      * @param Uuid      $uuid        The UUID.
@@ -34,7 +74,7 @@ class CannotDisableBindingException extends RuntimeException
      *
      * @return static The created exception.
      */
-    public static function forUuid(Uuid $uuid, $packageName, $reason = '', $code = 0, Exception $cause = null)
+    private static function forUuid(Uuid $uuid, $packageName, $reason = '', $code = 0, Exception $cause = null)
     {
         return new static(sprintf(
             'The binding with UUID "%s" in package "%s" cannot be disabled%s',
@@ -42,37 +82,5 @@ class CannotDisableBindingException extends RuntimeException
             $packageName,
             $reason ? ': '.$reason : '.'
         ), $code, $cause);
-    }
-
-    /**
-     * Creates an exception for a UUID that could not be disabled because the
-     * binding is in the root package.
-     *
-     * @param Uuid      $uuid        The UUID.
-     * @param string    $packageName The name of the package.
-     * @param int       $code        The exception code.
-     * @param Exception $cause       The exception that caused this exception.
-     *
-     * @return static The created exception.
-     */
-    public static function rootPackageNotAccepted(Uuid $uuid, $packageName, $code = 0, Exception $cause = null)
-    {
-        return static::forUuid($uuid, $packageName, '', $code, $cause);
-    }
-
-    /**
-     * Creates an exception for a UUID that could not be disabled because the
-     * binding type is not loaded.
-     *
-     * @param Uuid      $uuid        The UUID.
-     * @param string    $packageName The name of the package.
-     * @param int       $code        The exception code.
-     * @param Exception $cause       The exception that caused this exception.
-     *
-     * @return static The created exception.
-     */
-    public static function typeNotLoaded(Uuid $uuid, $packageName, $code = 0, Exception $cause = null)
-    {
-        return static::forUuid($uuid, $packageName, 'The type of the binding is not loaded.', $code, $cause);
     }
 }

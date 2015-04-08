@@ -1,7 +1,7 @@
 {
     "version": "1.0",
     "bindings": {
-        "0522316e-6007-5d02-9a5e-85d7287a11fb": {
+        "2438256b-c2f5-4a06-a18f-f79755e027dd": {
             "query": "/app/config*.yml",
             "type": "my/type",
             "parameters": {

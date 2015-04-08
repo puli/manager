@@ -44,11 +44,9 @@ class ReloadBindingDescriptorsByTypeName extends AbstractReloadBindingDescriptor
      */
     public function postExecute()
     {
-        foreach ($this->bindingDescriptors->getUuids() as $uuid) {
-            foreach ($this->bindingDescriptors->listByUuid($uuid) as $bindingDescriptor) {
-                if ($this->typeName === $bindingDescriptor->getTypeName()) {
-                    $this->reloadBindingDescriptor($bindingDescriptor);
-                }
+        foreach ($this->bindingDescriptors->toArray() as $bindingDescriptor) {
+            if ($this->typeName === $bindingDescriptor->getTypeName()) {
+                $this->reloadBindingDescriptor($bindingDescriptor);
             }
         }
     }

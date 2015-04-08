@@ -65,14 +65,6 @@ class BindingDescriptorTest extends PHPUnit_Framework_TestCase
         $this->assertTrue($descriptor->hasParameterValues());
     }
 
-    public function testCreateGeneratesDeterministicUuid()
-    {
-        $descriptor1 = new BindingDescriptor('/path', 'vendor/type', array('param' => 'value'));
-        $descriptor2 = new BindingDescriptor('/path', 'vendor/type', array('param' => 'value'));
-
-        $this->assertEquals($descriptor1->getUuid(), $descriptor2->getUuid());
-    }
-
     public function testCreateWithCustomUuid()
     {
         $descriptor = new BindingDescriptor('/path', 'vendor/type', array(
@@ -436,18 +428,6 @@ class BindingDescriptorTest extends PHPUnit_Framework_TestCase
         $this->assertSame(BindingState::ENABLED, $binding->getState());
     }
 
-    public function testOverriddenIfMarkedOverriddenInRootPackage()
-    {
-        $type = new BindingTypeDescriptor('vendor/type');
-        $type->load($this->package);
-
-        $binding = new BindingDescriptor('/path', 'vendor/type');
-        $binding->load($this->rootPackage, $type);
-        $binding->markOverridden(true);
-
-        $this->assertSame(BindingState::OVERRIDDEN, $binding->getState());
-    }
-
     public function testEnabledIfEnabled()
     {
         $type = new BindingTypeDescriptor('vendor/type');
@@ -459,20 +439,6 @@ class BindingDescriptorTest extends PHPUnit_Framework_TestCase
         $binding->load($this->package, $type);
 
         $this->assertSame(BindingState::ENABLED, $binding->getState());
-    }
-
-    public function testOverriddenIfMarkedOverriddenAndEnabled()
-    {
-        $type = new BindingTypeDescriptor('vendor/type');
-        $type->load($this->package);
-
-        $this->package->getInstallInfo()->addEnabledBindingUuid($this->uuid);
-
-        $binding = new BindingDescriptor('/path', 'vendor/type', array(), 'glob', $this->uuid);
-        $binding->load($this->package, $type);
-        $binding->markOverridden(true);
-
-        $this->assertSame(BindingState::OVERRIDDEN, $binding->getState());
     }
 
     public function testDisabledIfDisabled()
@@ -488,20 +454,6 @@ class BindingDescriptorTest extends PHPUnit_Framework_TestCase
         $this->assertSame(BindingState::DISABLED, $binding->getState());
     }
 
-    public function testDisabledIfMarkedOverriddenAndDisabled()
-    {
-        $type = new BindingTypeDescriptor('vendor/type');
-        $type->load($this->package);
-
-        $this->package->getInstallInfo()->addDisabledBindingUuid($this->uuid);
-
-        $binding = new BindingDescriptor('/path', 'vendor/type', array(), 'glob', $this->uuid);
-        $binding->load($this->package, $type);
-        $binding->markOverridden(true);
-
-        $this->assertSame(BindingState::DISABLED, $binding->getState());
-    }
-
     public function testUndecidedIfNeitherEnabledNorDisabled()
     {
         $type = new BindingTypeDescriptor('vendor/type');
@@ -509,18 +461,6 @@ class BindingDescriptorTest extends PHPUnit_Framework_TestCase
 
         $binding = new BindingDescriptor('/path', 'vendor/type', array(), 'glob', $this->uuid);
         $binding->load($this->package, $type);
-
-        $this->assertSame(BindingState::UNDECIDED, $binding->getState());
-    }
-
-    public function testUndecidedIfMarkedOverriddenAndNeitherEnabledNorDisabled()
-    {
-        $type = new BindingTypeDescriptor('vendor/type');
-        $type->load($this->package);
-
-        $binding = new BindingDescriptor('/path', 'vendor/type', array(), 'glob', $this->uuid);
-        $binding->load($this->package, $type);
-        $binding->markOverridden(true);
 
         $this->assertSame(BindingState::UNDECIDED, $binding->getState());
     }

@@ -117,11 +117,6 @@ class BindingDescriptor
     private $violations;
 
     /**
-     * @var bool
-     */
-    private $overridden = false;
-
-    /**
      * Compares two binding descriptors.
      *
      * One binding descriptor is sorted before another if:
@@ -153,8 +148,7 @@ class BindingDescriptor
      * @param array  $parameterValues The values of the binding parameters.
      * @param string $language        The language of the query.
      * @param Uuid   $uuid            The UUID of the binding. If no UUID is
-     *                                passed, a UUID is generated based on the
-     *                                given parameters.
+     *                                passed, a UUID is generated.
      *
      * @throws InvalidArgumentException If any of the arguments is invalid.
      *
@@ -169,7 +163,7 @@ class BindingDescriptor
         Assert::allParameterValue($parameterValues);
 
         if (null === $uuid) {
-            $uuid = $this->generateUuid($query, $typeName, $parameterValues, $language);
+            $uuid = Uuid::uuid4();
         }
 
         $this->uuid = $uuid;
@@ -213,7 +207,6 @@ class BindingDescriptor
 
         $this->containingPackage = $containingPackage;
         $this->typeDescriptor = $typeDescriptor;
-        $this->overridden = false;
 
         $this->refreshState();
     }
@@ -233,26 +226,8 @@ class BindingDescriptor
 
         $this->containingPackage = null;
         $this->typeDescriptor = null;
-        $this->overridden = false;
         $this->violations = null;
         $this->state = null;
-    }
-
-    /**
-     * Marks or unmarks the descriptor as overridden.
-     *
-     * If multiple descriptors exist for the same UUID, all descriptors but one
-     * are marked as overridden.
-     *
-     * @param bool $overridden Whether to mark the descriptor as overridden.
-     */
-    public function markOverridden($overridden)
-    {
-        Assert::boolean($overridden);
-
-        $this->overridden = $overridden;
-
-        $this->refreshState();
     }
 
     /**
@@ -517,27 +492,6 @@ class BindingDescriptor
     }
 
     /**
-     * Returns whether the binding is overridden.
-     *
-     * The method {@link load()} needs to be called before calling this method,
-     * otherwise an exception is thrown.
-     *
-     * @return bool Returns `true` if the state is {@link BindingState::OVERRIDDEN}.
-     *
-     * @throws NotLoadedException If the descriptor is not loaded.
-     *
-     * @see BindingState::OVERRIDDEN
-     */
-    public function isOverridden()
-    {
-        if (null === $this->state) {
-            throw new NotLoadedException('The binding descriptor is not loaded.');
-        }
-
-        return BindingState::OVERRIDDEN === $this->state;
-    }
-
-    /**
      * Returns whether the binding is neither enabled nor disabled.
      *
      * The method {@link load()} needs to be called before calling this method,
@@ -624,22 +578,6 @@ class BindingDescriptor
         ));
     }
 
-    private function generateUuid($query, $typeName, array $parameterValues, $language)
-    {
-        $dn = new DistinguishedName(array(
-            'q' => $query,
-            'l' => $language,
-            't' => $typeName,
-        ));
-
-        foreach ($parameterValues as $parameterName => $value) {
-            // Attribute values must be strings
-            $dn->add('p-'.$parameterName, serialize($value));
-        }
-
-        return Uuid::uuid5(Uuid::NAMESPACE_X500, $dn->toString());
-    }
-
     private function refreshState()
     {
         if (null === $this->typeDescriptor || !$this->typeDescriptor->isLoaded()
@@ -648,11 +586,11 @@ class BindingDescriptor
         } elseif (count($this->violations) > 0) {
             $this->state = BindingState::INVALID;
         } elseif ($this->containingPackage instanceof RootPackage) {
-            $this->state = $this->overridden ? BindingState::OVERRIDDEN : BindingState::ENABLED;
+            $this->state = BindingState::ENABLED;
         } elseif ($this->containingPackage->getInstallInfo()->hasDisabledBindingUuid($this->uuid)) {
             $this->state = BindingState::DISABLED;
         } elseif ($this->containingPackage->getInstallInfo()->hasEnabledBindingUuid($this->uuid)) {
-            $this->state = $this->overridden ? BindingState::OVERRIDDEN : BindingState::ENABLED;
+            $this->state = BindingState::ENABLED;
         } else {
             $this->state = BindingState::UNDECIDED;
         }

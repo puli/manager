@@ -45,8 +45,6 @@ class ReloadBindingDescriptorsByUuid extends AbstractReloadBindingDescriptors
      */
     public function postExecute()
     {
-        foreach ($this->bindingDescriptors->listByUuid($this->uuid) as $bindingDescriptor) {
-            $this->reloadBindingDescriptor($bindingDescriptor);
-        }
+        $this->reloadBindingDescriptor($this->bindingDescriptors->get($this->uuid));
     }
 }

@@ -5,7 +5,7 @@
         "/app": "res"
     },
     "bindings": {
-        "e736d4e9-a290-50f7-a15c-c30d5e4baac2": {
+        "2438256b-c2f5-4a06-a18f-f79755e027dd": {
             "query": "/app/config*.yml",
             "type": "my/type"
         }

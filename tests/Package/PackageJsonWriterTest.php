@@ -33,6 +33,11 @@ use Symfony\Component\Filesystem\Filesystem;
  */
 class PackageJsonWriterTest extends JsonWriterTestCase
 {
+    const BINDING_UUID1 = '2438256b-c2f5-4a06-a18f-f79755e027dd';
+    const BINDING_UUID2 = 'ff7bbf5a-44b1-4bdb-8397-e1c601ad7a2e';
+    const BINDING_UUID3 = '93fdf1a4-45b3-4a4e-80b5-77dc1137f5ae';
+    const BINDING_UUID4 = 'd939ea88-01a0-4c7b-8d1e-e0dfcffd66e5';
+
     /**
      * @var PackageJsonWriter
      */
@@ -63,7 +68,7 @@ class PackageJsonWriterTest extends JsonWriterTestCase
         $packageFile = new PackageFile();
         $packageFile->setPackageName('my/application');
         $packageFile->addResourceMapping(new ResourceMapping('/app', 'res'));
-        $packageFile->addBindingDescriptor(new BindingDescriptor('/app/config*.yml', 'my/type'));
+        $packageFile->addBindingDescriptor(new BindingDescriptor('/app/config*.yml', 'my/type', array(), 'glob', Uuid::fromString(self::BINDING_UUID1)));
         $packageFile->addTypeDescriptor(new BindingTypeDescriptor('my/type', 'Description of my type.', array(
             new BindingParameterDescriptor('param', BindingParameterDescriptor::OPTIONAL, 1234, 'Description of the parameter.'),
         )));
@@ -91,7 +96,7 @@ class PackageJsonWriterTest extends JsonWriterTestCase
         ));
         $bindingType->load($package);
 
-        $binding = new BindingDescriptor('/app/config*.yml', 'my/type');
+        $binding = new BindingDescriptor('/app/config*.yml', 'my/type', array(), 'glob', Uuid::fromString(self::BINDING_UUID1));
         $binding->load($package, $bindingType);
 
         // The default value is accessible
@@ -168,10 +173,10 @@ class PackageJsonWriterTest extends JsonWriterTestCase
     public function testWritePackageFileSortsBindings()
     {
         $packageFile = new PackageFile();
-        $packageFile->addBindingDescriptor(new BindingDescriptor('/vendor/c', 'vendor/a-type'));
-        $packageFile->addBindingDescriptor(new BindingDescriptor('/vendor/a', 'vendor/b-type'));
-        $packageFile->addBindingDescriptor(new BindingDescriptor('/vendor/b', 'vendor/b-type'));
-        $packageFile->addBindingDescriptor(new BindingDescriptor('/vendor/a', 'vendor/a-type'));
+        $packageFile->addBindingDescriptor(new BindingDescriptor('/vendor/c', 'vendor/a-type', array(), 'glob', Uuid::fromString(self::BINDING_UUID1)));
+        $packageFile->addBindingDescriptor(new BindingDescriptor('/vendor/a', 'vendor/b-type', array(), 'glob', Uuid::fromString(self::BINDING_UUID2)));
+        $packageFile->addBindingDescriptor(new BindingDescriptor('/vendor/b', 'vendor/b-type', array(), 'glob', Uuid::fromString(self::BINDING_UUID3)));
+        $packageFile->addBindingDescriptor(new BindingDescriptor('/vendor/a', 'vendor/a-type', array(), 'glob', Uuid::fromString(self::BINDING_UUID4)));
 
         $this->writer->writePackageFile($packageFile, $this->tempFile);
 
@@ -187,7 +192,7 @@ class PackageJsonWriterTest extends JsonWriterTestCase
             'c' => 'foo',
             'a' => 'foo',
             'b' => 'foo',
-        )));
+        ), 'glob', Uuid::fromString(self::BINDING_UUID1)));
 
         $this->writer->writePackageFile($packageFile, $this->tempFile);
 
@@ -203,7 +208,9 @@ class PackageJsonWriterTest extends JsonWriterTestCase
         $packageFile->addBindingDescriptor(new BindingDescriptor(
             '/app/config*.yml',
             'my/type',
-            array('param' => 'value')
+            array('param' => 'value'),
+            'glob',
+            Uuid::fromString(self::BINDING_UUID1)
         ));
 
         $this->writer->writePackageFile($packageFile, $this->tempFile);
@@ -221,7 +228,8 @@ class PackageJsonWriterTest extends JsonWriterTestCase
             '//resource[name="config.yml"]',
             'my/type',
             array(),
-            'xpath'
+            'xpath',
+            Uuid::fromString(self::BINDING_UUID1)
         ));
 
         $this->writer->writePackageFile($packageFile, $this->tempFile);
@@ -288,7 +296,7 @@ class PackageJsonWriterTest extends JsonWriterTestCase
         $packageFile = new RootPackageFile(null, null, $baseConfig);
         $packageFile->setPackageName('my/application');
         $packageFile->addResourceMapping(new ResourceMapping('/app', 'res'));
-        $packageFile->addBindingDescriptor(new BindingDescriptor('/app/config*.yml', 'my/type'));
+        $packageFile->addBindingDescriptor(new BindingDescriptor('/app/config*.yml', 'my/type', array(), 'glob', Uuid::fromString(self::BINDING_UUID1)));
         $packageFile->addTypeDescriptor(new BindingTypeDescriptor('my/type', 'Description of my type.', array(
             new BindingParameterDescriptor('param', BindingParameterDescriptor::OPTIONAL, 1234, 'Description of the parameter.'),
         )));

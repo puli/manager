@@ -10,6 +10,7 @@ Changelog
  * added NO_TYPE_CHECK flag to suppress type checks in `DiscoveryManager::addBinding()`
  * changed boolean parameter `$required` to integer parameter `$flags` in
    `BindingParameterDescriptor::__construct()`
+ * duplicate binding UUIDs are forbidden now
    
 * 1.0.0-beta3 (2015-03-19)
 

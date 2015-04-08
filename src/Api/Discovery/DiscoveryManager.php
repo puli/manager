@@ -141,44 +141,33 @@ interface DiscoveryManager
     /**
      * Enables a binding.
      *
-     * @param Uuid            $uuid        The UUID of the binding.
-     * @param string|string[] $packageName The package name to enable the
-     *                                     binding in. Useful if bindings with
-     *                                     the same UUID exist in multiple
-     *                                     packages.
+     * @param Uuid $uuid The UUID of the binding.
      *
      * @throws NoSuchBindingException If the binding does not exist.
      * @throws CannotEnableBindingException If the binding could not be enabled.
      */
-    public function enableBinding(Uuid $uuid, $packageName = null);
+    public function enableBinding(Uuid $uuid);
 
     /**
      * Disables a binding.
      *
-     * @param Uuid            $uuid        The UUID of the binding.
-     * @param string|string[] $packageName The package name to disable the
-     *                                     binding in. Useful if bindings with
-     *                                     the same UUID exist in multiple
-     *                                     packages.
+     * @param Uuid $uuid The UUID of the binding.
      *
      * @throws NoSuchBindingException If the binding does not exist.
      * @throws CannotDisableBindingException If the binding could not be disabled.
      */
-    public function disableBinding(Uuid $uuid, $packageName = null);
+    public function disableBinding(Uuid $uuid);
 
     /**
      * Returns the binding with the given UUID.
      *
-     * @param Uuid   $uuid        The UUID of the binding.
-     * @param string $packageName The name of the package to check. Useful if
-     *                            bindings with the same UUID exist in multiple
-     *                            packages.
+     * @param Uuid $uuid The UUID of the binding.
      *
      * @return BindingDescriptor The binding.
      *
      * @throws NoSuchBindingException If the binding does not exist.
      */
-    public function getBinding(Uuid $uuid, $packageName = null);
+    public function getBinding(Uuid $uuid);
 
     /**
      * Returns all bindings.
@@ -199,14 +188,11 @@ interface DiscoveryManager
     /**
      * Returns whether the binding with the given UUID exists.
      *
-     * @param Uuid   $uuid        The UUID of the binding.
-     * @param string $packageName The name of the package to check. Useful if
-     *                            bindings with the same UUID exist in multiple
-     *                            packages.
+     * @param Uuid $uuid The UUID of the binding.
      *
      * @return bool Returns `true` if the binding exists and `false` otherwise.
      */
-    public function hasBinding(Uuid $uuid, $packageName = null);
+    public function hasBinding(Uuid $uuid);
 
     /**
      * Returns whether the manager has any bindings.
