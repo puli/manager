@@ -433,7 +433,7 @@ class DiscoveryManagerImpl implements DiscoveryManager
             throw CannotEnableBindingException::rootPackageNotAccepted($uuid, $package->getName());
         }
 
-        if ($bindingDescriptor->isHeldBack()) {
+        if ($bindingDescriptor->isTypeNotLoaded()) {
             throw CannotEnableBindingException::typeNotLoaded($uuid, $package->getName());
         }
 
@@ -478,7 +478,7 @@ class DiscoveryManagerImpl implements DiscoveryManager
             throw CannotDisableBindingException::rootPackageNotAccepted($uuid, $package->getName());
         }
 
-        if ($bindingDescriptor->isHeldBack()) {
+        if ($bindingDescriptor->isTypeNotLoaded()) {
             throw CannotDisableBindingException::typeNotLoaded($uuid, $package->getName());
         }
 
@@ -634,7 +634,7 @@ class DiscoveryManagerImpl implements DiscoveryManager
 
     private function assertBindingValid(BindingDescriptor $bindingDescriptor)
     {
-        if ($bindingDescriptor->isHeldBack()) {
+        if ($bindingDescriptor->isTypeNotLoaded()) {
             return;
         }
 

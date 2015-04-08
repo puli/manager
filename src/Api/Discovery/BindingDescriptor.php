@@ -513,24 +513,24 @@ class BindingDescriptor
     }
 
     /**
-     * Returns whether the binding is held back.
+     * Returns whether the binding's type is not loaded.
      *
      * The method {@link load()} needs to be called before calling this method,
      * otherwise an exception is thrown.
      *
-     * @return bool Returns `true` if the state is {@link BindingState::HELD_BACK}.
+     * @return bool Returns `true` if the state is {@link BindingState::TYPE_NOT_LOADED}.
      *
      * @throws NotLoadedException If the descriptor is not loaded.
      *
-     * @see BindingState::HELD_BACK
+     * @see BindingState::TYPE_NOT_LOADED
      */
-    public function isHeldBack()
+    public function isTypeNotLoaded()
     {
         if (null === $this->state) {
             throw new NotLoadedException('The binding descriptor is not loaded.');
         }
 
-        return BindingState::HELD_BACK === $this->state;
+        return BindingState::TYPE_NOT_LOADED === $this->state;
     }
 
     /**
@@ -582,7 +582,7 @@ class BindingDescriptor
     {
         if (null === $this->typeDescriptor || !$this->typeDescriptor->isLoaded()
             || !$this->typeDescriptor->isEnabled()) {
-            $this->state = BindingState::HELD_BACK;
+            $this->state = BindingState::TYPE_NOT_LOADED;
         } elseif (count($this->violations) > 0) {
             $this->state = BindingState::INVALID;
         } elseif ($this->containingPackage instanceof RootPackage) {

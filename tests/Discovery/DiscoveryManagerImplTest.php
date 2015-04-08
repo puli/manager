@@ -254,7 +254,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->assertTrue($bindingType2->isDuplicate());
     }
 
-    public function testAddBindingTypeAddsHeldBackBindings()
+    public function testAddBindingTypeAddsBindingsWithTypeNotLoaded()
     {
         $this->initDefaultManager();
 
@@ -824,7 +824,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
                 $bindings = $rootPackageFile->getBindingDescriptors();
 
                 PHPUnit_Framework_Assert::assertSame(array($binding), $bindings);
-                PHPUnit_Framework_Assert::assertTrue($binding->isHeldBack());
+                PHPUnit_Framework_Assert::assertTrue($binding->isTypeNotLoaded());
             }));
 
         $this->manager->addBinding($binding, DiscoveryManager::NO_TYPE_CHECK);
@@ -869,7 +869,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
                 $bindings = $rootPackageFile->getBindingDescriptors();
 
                 PHPUnit_Framework_Assert::assertSame(array($binding), $bindings);
-                PHPUnit_Framework_Assert::assertTrue($binding->isHeldBack());
+                PHPUnit_Framework_Assert::assertTrue($binding->isTypeNotLoaded());
             }));
 
         $this->manager->addBinding($binding, DiscoveryManager::NO_TYPE_CHECK);
@@ -1395,7 +1395,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
      * @expectedException \Puli\Manager\Api\Discovery\CannotDisableBindingException
      * @expectedExceptionCode 2
      */
-    public function testDisableBindingFailsIfBindingHeldBack()
+    public function testDisableBindingFailsIfTypeNotLoaded()
     {
         $this->initDefaultManager();
 

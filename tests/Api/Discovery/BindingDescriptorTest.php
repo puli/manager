@@ -372,25 +372,25 @@ class BindingDescriptorTest extends PHPUnit_Framework_TestCase
         $this->assertFalse($descriptor->hasParameterValue('default', false));
     }
 
-    public function testHeldBackIfTypeIsNull()
+    public function testTypeNotLoadedIfTypeIsNull()
     {
         $binding = new BindingDescriptor('/path', 'vendor/type');
         $binding->load($this->package);
 
-        $this->assertSame(BindingState::HELD_BACK, $binding->getState());
+        $this->assertSame(BindingState::TYPE_NOT_LOADED, $binding->getState());
     }
 
-    public function testHeldBackIfTypeIsNotLoaded()
+    public function testTypeNotLoadedIfTypeIsNotLoaded()
     {
         $type = new BindingTypeDescriptor('vendor/type');
 
         $binding = new BindingDescriptor('/path', 'vendor/type');
         $binding->load($this->package, $type);
 
-        $this->assertSame(BindingState::HELD_BACK, $binding->getState());
+        $this->assertSame(BindingState::TYPE_NOT_LOADED, $binding->getState());
     }
 
-    public function testHeldBackIfTypeIsNotEnabled()
+    public function testTypeNotLoadedIfTypeIsNotEnabled()
     {
         $type = new BindingTypeDescriptor('vendor/type');
         $type->load($this->package);
@@ -399,7 +399,7 @@ class BindingDescriptorTest extends PHPUnit_Framework_TestCase
         $binding = new BindingDescriptor('/path', 'vendor/type');
         $binding->load($this->package, $type);
 
-        $this->assertSame(BindingState::HELD_BACK, $binding->getState());
+        $this->assertSame(BindingState::TYPE_NOT_LOADED, $binding->getState());
     }
 
     public function testInvalidIfInvalidParameter()

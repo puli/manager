@@ -11,6 +11,7 @@ Changelog
  * changed boolean parameter `$required` to integer parameter `$flags` in
    `BindingParameterDescriptor::__construct()`
  * duplicate binding UUIDs are forbidden now
+ * renamed `BindingState::HELD_BACK` to `BindingState::TYPE_NOT_LOADED`
    
 * 1.0.0-beta3 (2015-03-19)
 
