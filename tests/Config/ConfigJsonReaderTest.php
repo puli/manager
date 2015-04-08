@@ -40,8 +40,8 @@ class ConfigJsonReaderTest extends PHPUnit_Framework_TestCase
 
         $config = $configFile->getConfig();
         $this->assertSame('puli-dir', $config->get(Config::PULI_DIR));
-        $this->assertSame('Puli\MyFactory', $config->get(Config::FACTORY_CLASS));
-        $this->assertSame('puli-dir/MyFactory.php', $config->get(Config::FACTORY_FILE));
+        $this->assertSame('Puli\MyFactory', $config->get(Config::FACTORY_OUT_CLASS));
+        $this->assertSame('puli-dir/MyFactory.php', $config->get(Config::FACTORY_OUT_FILE));
         $this->assertSame('my-type', $config->get(Config::REPOSITORY_TYPE));
         $this->assertSame('puli-dir/my-repo', $config->get(Config::REPOSITORY_PATH));
         $this->assertSame('my-store-type', $config->get(Config::DISCOVERY_STORE_TYPE));
@@ -56,8 +56,8 @@ class ConfigJsonReaderTest extends PHPUnit_Framework_TestCase
         // default values
         $config = $configFile->getConfig();
         $this->assertNull($config->get(Config::PULI_DIR));
-        $this->assertNull($config->get(Config::FACTORY_CLASS));
-        $this->assertNull($config->get(Config::FACTORY_FILE));
+        $this->assertNull($config->get(Config::FACTORY_OUT_CLASS));
+        $this->assertNull($config->get(Config::FACTORY_OUT_FILE));
         $this->assertNull($config->get(Config::REPOSITORY_TYPE));
         $this->assertNull($config->get(Config::REPOSITORY_PATH));
         $this->assertNull($config->get(Config::DISCOVERY_STORE_TYPE));

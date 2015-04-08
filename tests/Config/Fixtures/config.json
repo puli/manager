@@ -1,8 +1,10 @@
 {
     "puli-dir": "puli-dir",
     "factory": {
-        "class": "Puli\\MyFactory",
-        "file": "{$puli-dir}/MyFactory.php"
+        "out": {
+            "class": "Puli\\MyFactory",
+            "file": "{$puli-dir}/MyFactory.php"
+        }
     },
     "repository": {
         "type": "my-type",

@@ -72,8 +72,8 @@ class PackageJsonReaderTest extends PHPUnit_Framework_TestCase
 
         $config = $packageFile->getConfig();
         $this->assertSame('puli-dir', $config->get(Config::PULI_DIR));
-        $this->assertSame('Puli\MyFactory', $config->get(Config::FACTORY_CLASS));
-        $this->assertSame('puli-dir/MyFactory.php', $config->get(Config::FACTORY_FILE));
+        $this->assertSame('Puli\MyFactory', $config->get(Config::FACTORY_OUT_CLASS));
+        $this->assertSame('puli-dir/MyFactory.php', $config->get(Config::FACTORY_OUT_FILE));
         $this->assertSame('my-type', $config->get(Config::REPOSITORY_TYPE));
         $this->assertSame('puli-dir/my-repo', $config->get(Config::REPOSITORY_PATH));
         $this->assertSame('my-store-type', $config->get(Config::DISCOVERY_STORE_TYPE));

@@ -64,8 +64,8 @@ class FactoryManagerImplTest extends ManagerTestCase
 
         $this->initEnvironment($this->tempDir.'/home', $this->tempDir.'/root');
 
-        $this->environment->getConfig()->set(Config::FACTORY_FILE, 'MyFactory.php');
-        $this->environment->getConfig()->set(Config::FACTORY_CLASS, 'Puli\MyFactory');
+        $this->environment->getConfig()->set(Config::FACTORY_OUT_FILE, 'MyFactory.php');
+        $this->environment->getConfig()->set(Config::FACTORY_OUT_CLASS, 'Puli\MyFactory');
 
         $this->registry = new DefaultGeneratorRegistry();
         $this->realWriter = new ClassWriter();
@@ -384,7 +384,7 @@ class FactoryManagerImplTest extends ManagerTestCase
     {
         $this->assertFalse(class_exists('Puli\Repository\Tests\TestGeneratedFactory1', false));
 
-        $this->environment->getConfig()->set(Config::FACTORY_CLASS, 'Puli\Repository\Tests\TestGeneratedFactory1');
+        $this->environment->getConfig()->set(Config::FACTORY_IN_CLASS, 'Puli\Repository\Tests\TestGeneratedFactory1');
 
         $factory = $this->manager->createFactory();
 

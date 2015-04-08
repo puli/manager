@@ -85,9 +85,17 @@ class Config
 
     const FACTORY_AUTO_GENERATE = 'factory.auto-generate';
 
-    const FACTORY_CLASS = 'factory.class';
+    const FACTORY_IN = 'factory.in';
 
-    const FACTORY_FILE = 'factory.file';
+    const FACTORY_IN_CLASS = 'factory.in.class';
+
+    const FACTORY_IN_FILE = 'factory.in.file';
+
+    const FACTORY_OUT = 'factory.out';
+
+    const FACTORY_OUT_CLASS = 'factory.out.class';
+
+    const FACTORY_OUT_FILE = 'factory.out.file';
 
     const REPOSITORY = 'repository';
 
@@ -123,8 +131,10 @@ class Config
     private static $keys = array(
         self::PULI_DIR => true,
         self::FACTORY_AUTO_GENERATE => true,
-        self::FACTORY_CLASS => true,
-        self::FACTORY_FILE => true,
+        self::FACTORY_IN_CLASS => true,
+        self::FACTORY_IN_FILE => true,
+        self::FACTORY_OUT_CLASS => true,
+        self::FACTORY_OUT_FILE => true,
         self::REPOSITORY_TYPE => true,
         self::REPOSITORY_PATH => true,
         self::REPOSITORY_SYMLINK => true,
@@ -139,6 +149,8 @@ class Config
 
     private static $compositeKeys = array(
         self::FACTORY => true,
+        self::FACTORY_IN => true,
+        self::FACTORY_OUT => true,
         self::REPOSITORY => true,
         self::DISCOVERY => true,
         self::DISCOVERY_STORE => true,

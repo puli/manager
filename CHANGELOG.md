@@ -1,6 +1,11 @@
 Changelog
 =========
 
+* 1.0.0-next (@release_date@)
+
+ * separated "factory.class" and "factory.file" config keys into
+   "factory.in.class", "factory.out.class", "factory.in.file" and "factory.out.file"
+   
 * 1.0.0-beta3 (2015-03-19)
 
  * added `BindingState::DUPLICATE` to output of `BindingState::all()`

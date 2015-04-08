@@ -29,8 +29,10 @@ class DefaultConfig extends Config
         parent::__construct(null, array(
             self::PULI_DIR => '.puli',
             self::FACTORY_AUTO_GENERATE => true,
-            self::FACTORY_CLASS => 'Puli\GeneratedPuliFactory',
-            self::FACTORY_FILE => '{$puli-dir}/GeneratedPuliFactory.php',
+            self::FACTORY_OUT_CLASS => 'Puli\GeneratedPuliFactory',
+            self::FACTORY_OUT_FILE => '{$puli-dir}/GeneratedPuliFactory.php',
+            self::FACTORY_IN_CLASS => '{$factory.out.class}',
+            self::FACTORY_IN_FILE => '{$factory.out.file}',
             self::REPOSITORY_TYPE => 'filesystem',
             self::REPOSITORY_PATH => '{$puli-dir}/repository',
             self::REPOSITORY_SYMLINK => true,

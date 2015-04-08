@@ -178,12 +178,12 @@ class ConfigFileManagerImplTest extends PHPUnit_Framework_TestCase
                 $config = $configFile->getConfig();
 
                 PHPUnit_Framework_Assert::assertSame('my-puli-dir', $config->get(Config::PULI_DIR));
-                PHPUnit_Framework_Assert::assertSame('my-puli-dir/MyFactory.php', $config->get(Config::FACTORY_FILE));
+                PHPUnit_Framework_Assert::assertSame('my-puli-dir/MyFactory.php', $config->get(Config::FACTORY_IN_FILE));
             }));
 
         $this->manager->setConfigKeys(array(
             Config::PULI_DIR => 'my-puli-dir',
-            Config::FACTORY_FILE => '{$puli-dir}/MyFactory.php',
+            Config::FACTORY_IN_FILE => '{$puli-dir}/MyFactory.php',
         ));
     }
 
@@ -198,14 +198,14 @@ class ConfigFileManagerImplTest extends PHPUnit_Framework_TestCase
         try {
             $this->manager->setConfigKeys(array(
                 Config::PULI_DIR => 'my-puli-dir',
-                Config::FACTORY_FILE => '{$puli-dir}/MyFactory.php',
+                Config::FACTORY_IN_FILE => '{$puli-dir}/MyFactory.php',
             ));
             $this->fail('Expected a TestException');
         } catch (TestException $e) {
         }
 
         $this->assertSame('previous-value', $this->configFile->getConfig()->get(Config::PULI_DIR));
-        $this->assertFalse($this->configFile->getConfig()->contains(Config::FACTORY_FILE));
+        $this->assertFalse($this->configFile->getConfig()->contains(Config::FACTORY_IN_FILE));
     }
 
     public function testHasConfigKey()
@@ -251,9 +251,9 @@ class ConfigFileManagerImplTest extends PHPUnit_Framework_TestCase
     public function testGetConfigKeyReturnsRawValue()
     {
         $this->configFile->getConfig()->set(Config::PULI_DIR, 'my-puli-dir');
-        $this->configFile->getConfig()->set(Config::FACTORY_FILE, '{$puli-dir}/MyFactory.php');
+        $this->configFile->getConfig()->set(Config::FACTORY_IN_FILE, '{$puli-dir}/MyFactory.php');
 
-        $this->assertSame('{$puli-dir}/MyFactory.php', $this->manager->getConfigKey(Config::FACTORY_FILE));
+        $this->assertSame('{$puli-dir}/MyFactory.php', $this->manager->getConfigKey(Config::FACTORY_IN_FILE));
     }
 
     public function testGetConfigKeyReturnsNullIfNotSet()
@@ -272,56 +272,56 @@ class ConfigFileManagerImplTest extends PHPUnit_Framework_TestCase
 
     public function testGetConfigKeys()
     {
-        $this->baseConfig->set(Config::FACTORY_CLASS, 'My\Class');
+        $this->baseConfig->set(Config::FACTORY_IN_CLASS, 'My\Class');
 
         $this->configFile->getConfig()->set(Config::PULI_DIR, 'my-puli-dir');
-        $this->configFile->getConfig()->set(Config::FACTORY_FILE, '{$puli-dir}/MyFactory.php');
+        $this->configFile->getConfig()->set(Config::FACTORY_IN_FILE, '{$puli-dir}/MyFactory.php');
 
         $this->assertSame(array(
             Config::PULI_DIR => 'my-puli-dir',
-            Config::FACTORY_FILE => '{$puli-dir}/MyFactory.php',
+            Config::FACTORY_IN_FILE => '{$puli-dir}/MyFactory.php',
         ), $this->manager->getConfigKeys());
     }
 
     public function testGetConfigKeysReordersToDefaultOrder()
     {
-        $this->baseConfig->set(Config::FACTORY_CLASS, 'My\Class');
+        $this->baseConfig->set(Config::FACTORY_IN_CLASS, 'My\Class');
 
-        $this->configFile->getConfig()->set(Config::FACTORY_FILE, '{$puli-dir}/MyFactory.php');
+        $this->configFile->getConfig()->set(Config::FACTORY_IN_FILE, '{$puli-dir}/MyFactory.php');
         $this->configFile->getConfig()->set(Config::PULI_DIR, 'my-puli-dir');
 
         $this->assertSame(array(
             Config::PULI_DIR => 'my-puli-dir',
-            Config::FACTORY_FILE => '{$puli-dir}/MyFactory.php',
+            Config::FACTORY_IN_FILE => '{$puli-dir}/MyFactory.php',
         ), $this->manager->getConfigKeys());
     }
 
     public function testGetConfigKeysWithFallback()
     {
-        $this->baseConfig->set(Config::FACTORY_CLASS, 'My\Class');
+        $this->baseConfig->set(Config::FACTORY_IN_CLASS, 'My\Class');
 
         $this->configFile->getConfig()->set(Config::PULI_DIR, 'my-puli-dir');
-        $this->configFile->getConfig()->set(Config::FACTORY_FILE, '{$puli-dir}/MyFactory.php');
+        $this->configFile->getConfig()->set(Config::FACTORY_IN_FILE, '{$puli-dir}/MyFactory.php');
 
         $this->assertSame(array(
             Config::PULI_DIR => 'my-puli-dir',
-            Config::FACTORY_CLASS => 'My\Class',
-            Config::FACTORY_FILE => '{$puli-dir}/MyFactory.php',
+            Config::FACTORY_IN_CLASS => 'My\Class',
+            Config::FACTORY_IN_FILE => '{$puli-dir}/MyFactory.php',
         ), $this->manager->getConfigKeys(true));
     }
 
     public function testGetConfigKeysWithAllKeys()
     {
-        $this->baseConfig->set(Config::FACTORY_CLASS, 'My\Class');
+        $this->baseConfig->set(Config::FACTORY_IN_CLASS, 'My\Class');
 
         $this->configFile->getConfig()->set(Config::PULI_DIR, 'my-puli-dir');
-        $this->configFile->getConfig()->set(Config::FACTORY_FILE, '{$puli-dir}/MyFactory.php');
+        $this->configFile->getConfig()->set(Config::FACTORY_IN_FILE, '{$puli-dir}/MyFactory.php');
 
         $values = $this->manager->getConfigKeys(false, true);
 
         $this->assertSame(Config::getKeys(), array_keys($values));
         $this->assertSame('my-puli-dir', $values[Config::PULI_DIR]);
-        $this->assertSame('{$puli-dir}/MyFactory.php', $values[Config::FACTORY_FILE]);
+        $this->assertSame('{$puli-dir}/MyFactory.php', $values[Config::FACTORY_IN_FILE]);
         $this->assertNull($values[Config::REPOSITORY_PATH]);
         $this->assertNull($values[Config::FACTORY_AUTO_GENERATE]);
     }
@@ -331,12 +331,12 @@ class ConfigFileManagerImplTest extends PHPUnit_Framework_TestCase
         $this->baseConfig->set(Config::FACTORY_AUTO_GENERATE, true);
 
         $this->configFile->getConfig()->set(Config::PULI_DIR, 'my-puli-dir');
-        $this->configFile->getConfig()->set(Config::FACTORY_CLASS, 'MyFactory');
-        $this->configFile->getConfig()->set(Config::FACTORY_FILE, '{$puli-dir}/MyFactory.php');
+        $this->configFile->getConfig()->set(Config::FACTORY_IN_CLASS, 'MyFactory');
+        $this->configFile->getConfig()->set(Config::FACTORY_IN_FILE, '{$puli-dir}/MyFactory.php');
 
         $this->assertSame(array(
-            Config::FACTORY_CLASS => 'MyFactory',
-            Config::FACTORY_FILE => '{$puli-dir}/MyFactory.php',
+            Config::FACTORY_IN_CLASS => 'MyFactory',
+            Config::FACTORY_IN_FILE => '{$puli-dir}/MyFactory.php',
         ), $this->manager->findConfigKeys('factory.*'));
     }
 
@@ -345,12 +345,12 @@ class ConfigFileManagerImplTest extends PHPUnit_Framework_TestCase
         $this->baseConfig->set(Config::FACTORY_AUTO_GENERATE, true);
 
         $this->configFile->getConfig()->set(Config::PULI_DIR, 'my-puli-dir');
-        $this->configFile->getConfig()->set(Config::FACTORY_FILE, '{$puli-dir}/MyFactory.php');
-        $this->configFile->getConfig()->set(Config::FACTORY_CLASS, 'MyFactory');
+        $this->configFile->getConfig()->set(Config::FACTORY_IN_FILE, '{$puli-dir}/MyFactory.php');
+        $this->configFile->getConfig()->set(Config::FACTORY_IN_CLASS, 'MyFactory');
 
         $this->assertSame(array(
-            Config::FACTORY_CLASS => 'MyFactory',
-            Config::FACTORY_FILE => '{$puli-dir}/MyFactory.php',
+            Config::FACTORY_IN_CLASS => 'MyFactory',
+            Config::FACTORY_IN_FILE => '{$puli-dir}/MyFactory.php',
         ), $this->manager->findConfigKeys('factory.*'));
     }
 
@@ -359,13 +359,13 @@ class ConfigFileManagerImplTest extends PHPUnit_Framework_TestCase
         $this->baseConfig->set(Config::FACTORY_AUTO_GENERATE, true);
 
         $this->configFile->getConfig()->set(Config::PULI_DIR, 'my-puli-dir');
-        $this->configFile->getConfig()->set(Config::FACTORY_CLASS, 'MyFactory');
-        $this->configFile->getConfig()->set(Config::FACTORY_FILE, '{$puli-dir}/MyFactory.php');
+        $this->configFile->getConfig()->set(Config::FACTORY_IN_CLASS, 'MyFactory');
+        $this->configFile->getConfig()->set(Config::FACTORY_IN_FILE, '{$puli-dir}/MyFactory.php');
 
         $this->assertSame(array(
             Config::FACTORY_AUTO_GENERATE => true,
-            Config::FACTORY_CLASS => 'MyFactory',
-            Config::FACTORY_FILE => '{$puli-dir}/MyFactory.php',
+            Config::FACTORY_IN_CLASS => 'MyFactory',
+            Config::FACTORY_IN_FILE => '{$puli-dir}/MyFactory.php',
         ), $this->manager->findConfigKeys('factory.*', true));
     }
 
@@ -374,12 +374,14 @@ class ConfigFileManagerImplTest extends PHPUnit_Framework_TestCase
         $this->baseConfig->set(Config::FACTORY_AUTO_GENERATE, true);
 
         $this->configFile->getConfig()->set(Config::PULI_DIR, 'my-puli-dir');
-        $this->configFile->getConfig()->set(Config::FACTORY_CLASS, 'MyFactory');
+        $this->configFile->getConfig()->set(Config::FACTORY_IN_CLASS, 'MyFactory');
 
         $this->assertSame(array(
             Config::FACTORY_AUTO_GENERATE => true,
-            Config::FACTORY_CLASS => 'MyFactory',
-            Config::FACTORY_FILE => null,
+            Config::FACTORY_IN_CLASS => 'MyFactory',
+            Config::FACTORY_IN_FILE => null,
+            Config::FACTORY_OUT_CLASS => null,
+            Config::FACTORY_OUT_FILE => null,
         ), $this->manager->findConfigKeys('factory.*', true, true));
     }
 
@@ -402,7 +404,7 @@ class ConfigFileManagerImplTest extends PHPUnit_Framework_TestCase
     public function testRemoveConfigKey()
     {
         $this->configFile->getConfig()->set(Config::PULI_DIR, 'my-puli-dir');
-        $this->configFile->getConfig()->set(Config::FACTORY_FILE, 'MyServiceRegistry.php');
+        $this->configFile->getConfig()->set(Config::FACTORY_IN_FILE, 'MyServiceRegistry.php');
 
         $this->configFileStorage->expects($this->once())
             ->method('saveConfigFile')
@@ -411,7 +413,7 @@ class ConfigFileManagerImplTest extends PHPUnit_Framework_TestCase
                 $config = $configFile->getConfig();
 
                 PHPUnit_Framework_Assert::assertNull($config->get(Config::PULI_DIR, null, false));
-                PHPUnit_Framework_Assert::assertSame('MyServiceRegistry.php', $config->get(Config::FACTORY_FILE, null, false));
+                PHPUnit_Framework_Assert::assertSame('MyServiceRegistry.php', $config->get(Config::FACTORY_IN_FILE, null, false));
             }));
 
         $this->manager->removeConfigKey(Config::PULI_DIR);
@@ -420,7 +422,7 @@ class ConfigFileManagerImplTest extends PHPUnit_Framework_TestCase
     public function testRemoveConfigKeyRevertsIfSavingNotPossible()
     {
         $this->configFile->getConfig()->set(Config::PULI_DIR, 'my-puli-dir');
-        $this->configFile->getConfig()->set(Config::FACTORY_FILE, 'MyServiceRegistry.php');
+        $this->configFile->getConfig()->set(Config::FACTORY_IN_FILE, 'MyServiceRegistry.php');
 
         $this->configFileStorage->expects($this->once())
             ->method('saveConfigFile')
@@ -433,7 +435,7 @@ class ConfigFileManagerImplTest extends PHPUnit_Framework_TestCase
         }
 
         $this->assertTrue($this->configFile->getConfig()->contains(Config::PULI_DIR));
-        $this->assertTrue($this->configFile->getConfig()->contains(Config::FACTORY_FILE));
+        $this->assertTrue($this->configFile->getConfig()->contains(Config::FACTORY_IN_FILE));
         $this->assertSame('my-puli-dir', $this->configFile->getConfig()->get(Config::PULI_DIR));
     }
 
@@ -448,7 +450,7 @@ class ConfigFileManagerImplTest extends PHPUnit_Framework_TestCase
     public function testRemoveConfigKeys()
     {
         $this->configFile->getConfig()->set(Config::PULI_DIR, 'my-puli-dir');
-        $this->configFile->getConfig()->set(Config::FACTORY_FILE, 'MyServiceRegistry.php');
+        $this->configFile->getConfig()->set(Config::FACTORY_IN_FILE, 'MyServiceRegistry.php');
 
         $this->configFileStorage->expects($this->once())
             ->method('saveConfigFile')
@@ -457,10 +459,10 @@ class ConfigFileManagerImplTest extends PHPUnit_Framework_TestCase
                 $config = $configFile->getConfig();
 
                 PHPUnit_Framework_Assert::assertNull($config->get(Config::PULI_DIR, null, false));
-                PHPUnit_Framework_Assert::assertNull($config->get(Config::FACTORY_FILE, null, false));
+                PHPUnit_Framework_Assert::assertNull($config->get(Config::FACTORY_IN_FILE, null, false));
             }));
 
-        $this->manager->removeConfigKeys(array(Config::PULI_DIR, Config::FACTORY_FILE));
+        $this->manager->removeConfigKeys(array(Config::PULI_DIR, Config::FACTORY_IN_FILE));
     }
 
     public function testRemoveConfigKeysRevertsIfSavingNotPossible()
@@ -472,13 +474,13 @@ class ConfigFileManagerImplTest extends PHPUnit_Framework_TestCase
             ->willThrowException(new TestException());
 
         try {
-            $this->manager->removeConfigKeys(array(Config::PULI_DIR, Config::FACTORY_FILE));
+            $this->manager->removeConfigKeys(array(Config::PULI_DIR, Config::FACTORY_IN_FILE));
             $this->fail('Expected a TestException');
         } catch (TestException $e) {
         }
 
         $this->assertTrue($this->configFile->getConfig()->contains(Config::PULI_DIR));
-        $this->assertFalse($this->configFile->getConfig()->contains(Config::FACTORY_FILE));
+        $this->assertFalse($this->configFile->getConfig()->contains(Config::FACTORY_IN_FILE));
         $this->assertSame('my-puli-dir', $this->configFile->getConfig()->get(Config::PULI_DIR));
     }
 }

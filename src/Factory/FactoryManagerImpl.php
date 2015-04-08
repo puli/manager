@@ -52,12 +52,22 @@ class FactoryManagerImpl implements FactoryManager
     /**
      * @var string
      */
-    private $factoryFile;
+    private $factoryInFile;
 
     /**
      * @var string
      */
-    private $factoryClass;
+    private $factoryInClass;
+
+    /**
+     * @var string
+     */
+    private $factoryOutFile;
+
+    /**
+     * @var string
+     */
+    private $factoryOutClass;
 
     /**
      * @var string
@@ -89,8 +99,10 @@ class FactoryManagerImpl implements FactoryManager
 
         $this->environment = $environment;
         $this->rootDir = $environment->getRootDirectory();
-        $this->factoryFile = Path::makeAbsolute($config->get(Config::FACTORY_FILE), $this->rootDir);
-        $this->factoryClass = $config->get(Config::FACTORY_CLASS);
+        $this->factoryInFile = Path::makeAbsolute($config->get(Config::FACTORY_IN_FILE), $this->rootDir);
+        $this->factoryInClass = $config->get(Config::FACTORY_IN_CLASS);
+        $this->factoryOutFile = Path::makeAbsolute($config->get(Config::FACTORY_OUT_FILE), $this->rootDir);
+        $this->factoryOutClass = $config->get(Config::FACTORY_OUT_CLASS);
         $this->generatorRegistry = $generatorRegistry;
         $this->classWriter = $classWriter;
     }
@@ -103,10 +115,10 @@ class FactoryManagerImpl implements FactoryManager
         Assert::nullOrStringNotEmpty($path, 'The path to the generated factory file must be a non-empty string or null. Got: %s');
         Assert::nullOrStringNotEmpty($className, 'The class name of the generated factory must be a non-empty string or null. Got: %s');
 
-        $path = $path ? Path::makeAbsolute($path, $this->rootDir) : $this->factoryFile;
-        $className = $className ?: $this->factoryClass;
-
         $this->refreshFactoryClass($path, $className);
+
+        $path = $path ? Path::makeAbsolute($path, $this->rootDir) : $this->factoryInFile;
+        $className = $className ?: $this->factoryInClass;
 
         if (!class_exists($className, false)) {
             require_once $path;
@@ -131,8 +143,8 @@ class FactoryManagerImpl implements FactoryManager
         Assert::nullOrStringNotEmpty($path, 'The path to the generated factory file must be a non-empty string or null. Got: %s');
         Assert::nullOrStringNotEmpty($className, 'The class name of the generated factory must be a non-empty string or null. Got: %s');
 
-        $path = $path ? Path::makeAbsolute($path, $this->rootDir) : $this->factoryFile;
-        $className = $className ?: $this->factoryClass;
+        $path = $path ? Path::makeAbsolute($path, $this->rootDir) : $this->factoryOutFile;
+        $className = $className ?: $this->factoryOutClass;
         $dispatcher = $this->environment->getEventDispatcher();
 
         $class = new Clazz($className);
@@ -184,8 +196,8 @@ EOF
         Assert::nullOrStringNotEmpty($path, 'The path to the generated factory file must be a non-empty string or null. Got: %s');
         Assert::nullOrStringNotEmpty($className, 'The class name of the generated factory must be a non-empty string or null. Got: %s');
 
-        $path = $path ? Path::makeAbsolute($path, $this->rootDir) : $this->factoryFile;
-        $className = $className ?: $this->factoryClass;
+        $path = $path ? Path::makeAbsolute($path, $this->rootDir) : $this->factoryOutFile;
+        $className = $className ?: $this->factoryOutClass;
 
         if (!$this->environment->getConfig()->get(Config::FACTORY_AUTO_GENERATE)) {
             return;
