@@ -15,7 +15,6 @@ use PHPUnit_Framework_Assert;
 use PHPUnit_Framework_MockObject_MockObject;
 use Psr\Log\LoggerInterface;
 use Puli\Discovery\Api\Binding\BindingType;
-use Puli\Discovery\Api\NoQueryMatchesException;
 use Puli\Manager\Api\Discovery\BindingDescriptor;
 use Puli\Manager\Api\Discovery\BindingParameterDescriptor;
 use Puli\Manager\Api\Discovery\BindingState;
@@ -938,25 +937,6 @@ class DiscoveryManagerImplTest extends ManagerTestCase
 
         $this->discovery->expects($this->never())
             ->method('bind');
-
-        $this->packageFileStorage->expects($this->never())
-            ->method('saveRootPackageFile');
-
-        $this->manager->addBinding(new BindingDescriptor('/path', 'my/type'));
-    }
-
-    /**
-     * @expectedException \Puli\Discovery\Api\NoQueryMatchesException
-     */
-    public function testAddBindingFailsIfNoResourcesFound()
-    {
-        $this->initDefaultManager();
-
-        $this->packageFile1->addTypeDescriptor(new BindingTypeDescriptor('my/type'));
-
-        $this->discovery->expects($this->once())
-            ->method('bind')
-            ->willThrowException(new NoQueryMatchesException());
 
         $this->packageFileStorage->expects($this->never())
             ->method('saveRootPackageFile');
