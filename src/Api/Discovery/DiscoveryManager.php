@@ -24,6 +24,18 @@ use Webmozart\Expression\Expression;
 interface DiscoveryManager
 {
     /**
+     * Flag: Don't check whether the type exists already in
+     * {@link addBindingType()}.
+     */
+    const NO_DUPLICATE_CHECK = 1;
+
+    /**
+     * Flag: Don't check whether the referenced type exists/is enabled in
+     * {@link addBinding()}.
+     */
+    const NO_TYPE_CHECK = 2;
+
+    /**
      * Returns the manager's environment.
      *
      * @return ProjectEnvironment The project environment.
@@ -34,10 +46,12 @@ interface DiscoveryManager
      * Adds a new binding type.
      *
      * @param BindingTypeDescriptor $typeDescriptor The type to add.
+     * @param int                   $flags          A bitwise combination of the
+     *                                              flag constants in this class.
      *
      * @throws DuplicateTypeException If the type is already defined.
      */
-    public function addBindingType(BindingTypeDescriptor $typeDescriptor);
+    public function addBindingType(BindingTypeDescriptor $typeDescriptor, $flags = 0);
 
     /**
      * Removes a binding type.
@@ -107,8 +121,15 @@ interface DiscoveryManager
      * Adds a new binding.
      *
      * @param BindingDescriptor $bindingDescriptor The binding to add.
+     * @param int               $flags             A bitwise combination of the
+     *                                             flag constants in this class.
+     *
+     * @throws NoSuchTypeException     If the type referenced by the descriptor
+     *                                 does not exist.
+     * @throws TypeNotEnabledException If the type referenced by the descriptor
+     *                                 is not enabled.
      */
-    public function addBinding(BindingDescriptor $bindingDescriptor);
+    public function addBinding(BindingDescriptor $bindingDescriptor, $flags = 0);
 
     /**
      * Removes a binding.

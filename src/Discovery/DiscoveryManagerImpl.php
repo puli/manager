@@ -149,12 +149,12 @@ class DiscoveryManagerImpl implements DiscoveryManager
     /**
      * {@inheritdoc}
      */
-    public function addBindingType(BindingTypeDescriptor $typeDescriptor)
+    public function addBindingType(BindingTypeDescriptor $typeDescriptor, $flags = 0)
     {
         $this->assertPackagesLoaded();
         $this->emitWarningForDuplicateTypes();
 
-        if ($this->typeDescriptors->contains($typeDescriptor->getName())) {
+        if (!($flags & self::NO_DUPLICATE_CHECK) && $this->typeDescriptors->contains($typeDescriptor->getName())) {
             throw DuplicateTypeException::forTypeName($typeDescriptor->getName());
         }
 
@@ -321,8 +321,6 @@ class DiscoveryManagerImpl implements DiscoveryManager
             return !$this->typeDescriptors->isEmpty();
         }
 
-        $types = array();
-
         foreach ($this->typeDescriptors->toArray() as $typeName => $typesByPackage) {
             foreach ($typesByPackage as $type) {
                 if ($type->match($expr)) {
@@ -337,18 +335,20 @@ class DiscoveryManagerImpl implements DiscoveryManager
     /**
      * {@inheritdoc}
      */
-    public function addBinding(BindingDescriptor $bindingDescriptor)
+    public function addBinding(BindingDescriptor $bindingDescriptor, $flags = 0)
     {
         $this->assertPackagesLoaded();
 
-        $typeName = $bindingDescriptor->getTypeName();
+        if (!($flags & self::NO_TYPE_CHECK)) {
+            $typeName = $bindingDescriptor->getTypeName();
 
-        if (!$this->typeDescriptors->contains($typeName)) {
-            throw NoSuchTypeException::forTypeName($typeName);
-        }
+            if (!$this->typeDescriptors->contains($typeName)) {
+                throw NoSuchTypeException::forTypeName($typeName);
+            }
 
-        if (!$this->typeDescriptors->getEnabled($typeName)) {
-            throw TypeNotEnabledException::forTypeName($typeName);
+            if (!$this->typeDescriptors->getEnabled($typeName)) {
+                throw TypeNotEnabledException::forTypeName($typeName);
+            }
         }
 
         if ($this->rootPackageFile->hasBindingDescriptor($bindingDescriptor->getUuid())) {

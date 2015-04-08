@@ -5,6 +5,9 @@ Changelog
 
  * separated "factory.class" and "factory.file" config keys into
    "factory.in.class", "factory.out.class", "factory.in.file" and "factory.out.file"
+ * added NO_DUPLICATE_CHECK flag to suppress duplicate checks in
+   `DiscoveryManager::addBindingType()`
+ * added NO_TYPE_CHECK flag to suppress type checks in `DiscoveryManager::addBinding()`
    
 * 1.0.0-beta3 (2015-03-19)
 

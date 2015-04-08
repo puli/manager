@@ -21,6 +21,7 @@ use Puli\Manager\Api\Discovery\BindingParameterDescriptor;
 use Puli\Manager\Api\Discovery\BindingState;
 use Puli\Manager\Api\Discovery\BindingTypeDescriptor;
 use Puli\Manager\Api\Discovery\BindingTypeState;
+use Puli\Manager\Api\Discovery\DiscoveryManager;
 use Puli\Manager\Api\Package\InstallInfo;
 use Puli\Manager\Api\Package\Package;
 use Puli\Manager\Api\Package\PackageCollection;
@@ -208,6 +209,38 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->manager->addBindingType($bindingType);
 
         $this->assertFalse($bindingType->isEnabled());
+    }
+
+    public function testAddBindingTypeDoesNotFailIfAlreadyDefinedAndNoDuplicateCheck()
+    {
+        $this->initDefaultManager();
+
+        $bindingType1 = new BindingTypeDescriptor('my/type');
+        $bindingType2 = new BindingTypeDescriptor('my/type');
+
+        $this->packageFile1->addTypeDescriptor($bindingType1);
+
+        $this->discovery->expects($this->never())
+            ->method('defineType');
+
+        // The type is duplicated now
+        $this->discovery->expects($this->once())
+            ->method('undefineType')
+            ->with('my/type');
+
+        $this->packageFileStorage->expects($this->once())
+            ->method('saveRootPackageFile')
+            ->with($this->rootPackageFile)
+            ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) use ($bindingType2) {
+                $types = $rootPackageFile->getTypeDescriptors();
+
+                PHPUnit_Framework_Assert::assertSame(array($bindingType2), $types);
+            }));
+
+        $this->manager->addBindingType($bindingType2, DiscoveryManager::NO_DUPLICATE_CHECK);
+
+        $this->assertTrue($bindingType1->isDuplicate());
+        $this->assertTrue($bindingType2->isDuplicate());
     }
 
     public function testAddBindingTypeAddsHeldBackBindings()
@@ -824,6 +857,29 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->manager->addBinding(new BindingDescriptor('/path', 'my/type'));
     }
 
+    public function testAddBindingDoesNotFailIfTypeNotDefinedAndNoTypeCheck()
+    {
+        $this->initDefaultManager();
+
+        $binding = new BindingDescriptor('/path', 'my/type');
+
+        // The type does not exist
+        $this->discovery->expects($this->never())
+            ->method('bind');
+
+        $this->packageFileStorage->expects($this->once())
+            ->method('saveRootPackageFile')
+            ->with($this->rootPackageFile)
+            ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) use ($binding) {
+                $bindings = $rootPackageFile->getBindingDescriptors();
+
+                PHPUnit_Framework_Assert::assertSame(array($binding), $bindings);
+                PHPUnit_Framework_Assert::assertTrue($binding->isHeldBack());
+            }));
+
+        $this->manager->addBinding($binding, DiscoveryManager::NO_TYPE_CHECK);
+    }
+
     /**
      * @expectedException \Puli\Manager\Api\Discovery\TypeNotEnabledException
      */
@@ -841,6 +897,32 @@ class DiscoveryManagerImplTest extends ManagerTestCase
             ->method('saveRootPackageFile');
 
         $this->manager->addBinding(new BindingDescriptor('/path', 'my/type'));
+    }
+
+    public function testAddBindingDoesNotFailIfTypeNotEnabledAndNoTypeCheck()
+    {
+        $this->initDefaultManager();
+
+        $binding = new BindingDescriptor('/path', 'my/type');
+
+        $this->rootPackageFile->addTypeDescriptor(new BindingTypeDescriptor('my/type'));
+        $this->packageFile1->addTypeDescriptor(new BindingTypeDescriptor('my/type'));
+
+        // The type is not enabled
+        $this->discovery->expects($this->never())
+            ->method('bind');
+
+        $this->packageFileStorage->expects($this->once())
+            ->method('saveRootPackageFile')
+            ->with($this->rootPackageFile)
+            ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) use ($binding) {
+                $bindings = $rootPackageFile->getBindingDescriptors();
+
+                PHPUnit_Framework_Assert::assertSame(array($binding), $bindings);
+                PHPUnit_Framework_Assert::assertTrue($binding->isHeldBack());
+            }));
+
+        $this->manager->addBinding($binding, DiscoveryManager::NO_TYPE_CHECK);
     }
 
     /**
