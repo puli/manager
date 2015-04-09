@@ -85,6 +85,15 @@ interface ConfigFileManager
     public function removeConfigKeys(array $keys);
 
     /**
+     * Removes all config keys from the file.
+     *
+     * The file is saved directly after removing the keys.
+     *
+     * @throws IOException If the file cannot be written.
+     */
+    public function clearConfigKeys();
+
+    /**
      * Returns whether a configuration key exists.
      *
      * @param string $key      The configuration key to search.
@@ -94,6 +103,17 @@ interface ConfigFileManager
      * @return bool Returns `true` if the file contains the key.
      */
     public function hasConfigKey($key, $fallback = false);
+
+    /**
+     * Returns whether the file contains any configuration keys.
+     *
+     * @param bool   $fallback Whether to check the base configuration if the
+     *                         key is not found.
+     *
+     * @return bool Returns `true` if the file contains any keys and `false`
+     *              otherwise.
+     */
+    public function hasConfigKeys($fallback = false);
 
     /**
      * Returns the value of a configuration key.

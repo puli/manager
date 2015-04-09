@@ -50,6 +50,10 @@ Changelog
  * added `$packageName` argument to `RepositoryManager::hasPathMapping()`
  * removed arguments from `RepositoryManager::getPathMappings()`
  * removed `$code` arguments from exception factory methods
+ * added `Config::clear()`
+ * added `Config::isEmpty()`
+ * added `ConfigFileManager::clearConfigKeys()`
+ * added `ConfigFileManager::hasConfigKeys()`
       
 * 1.0.0-beta3 (2015-03-19)
 

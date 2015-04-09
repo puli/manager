@@ -658,6 +658,17 @@ class ConfigTest extends PHPUnit_Framework_TestCase
         $config->remove('foo');
     }
 
+    public function testClear()
+    {
+        $config = new Config();
+        $config->set(Config::FACTORY_IN_FILE, 'ServiceRegistry.php');
+        $config->set(Config::FACTORY_IN_CLASS, 'Puli\ServiceRegistry');
+        $config->clear();
+
+        $this->assertNull($config->get(Config::FACTORY_IN_FILE));
+        $this->assertNull($config->get(Config::FACTORY_IN_CLASS));
+    }
+
     public function testGetReturnsFallbackAfterRemove()
     {
         $baseConfig = new Config();
@@ -853,6 +864,49 @@ class ConfigTest extends PHPUnit_Framework_TestCase
         $this->assertSame(array(
             Config::REPOSITORY_PATH => '/my-path',
         ), $config->toFlatArray(false));
+    }
+
+    public function testIsEmpty()
+    {
+        $config = new Config();
+
+        $this->assertTrue($config->isEmpty());
+
+        $config->set(Config::PULI_DIR, 'my-puli-dir');
+
+        $this->assertFalse($config->isEmpty());
+    }
+
+    public function testIsEmptyWithFallback()
+    {
+        $baseConfig = new Config();
+        $config = new Config($baseConfig);
+
+        $this->assertTrue($config->isEmpty());
+
+        $baseConfig->set(Config::PULI_DIR, 'my-puli-dir');
+
+        $this->assertFalse($config->isEmpty());
+
+        $config->set(Config::PULI_DIR, 'my-puli-dir');
+
+        $this->assertFalse($config->isEmpty());
+    }
+
+    public function testIsEmptyWithoutFallback()
+    {
+        $baseConfig = new Config();
+        $config = new Config($baseConfig);
+
+        $this->assertTrue($config->isEmpty(false));
+
+        $baseConfig->set(Config::PULI_DIR, 'my-puli-dir');
+
+        $this->assertTrue($config->isEmpty(false));
+
+        $config->set(Config::PULI_DIR, 'my-puli-dir');
+
+        $this->assertFalse($config->isEmpty(false));
     }
 
     public function getNotNullKeys()

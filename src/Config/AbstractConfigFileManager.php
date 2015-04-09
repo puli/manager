@@ -142,11 +142,45 @@ abstract class AbstractConfigFileManager implements ConfigFileManager
     /**
      * {@inheritdoc}
      */
+    public function clearConfigKeys()
+    {
+        $config = $this->getConfig();
+        $previousValues = array();
+
+        foreach ($config->toArray(false) as $key => $value) {
+            $previousValues[$key] = $value;
+        }
+
+        $config->clear();
+
+        try {
+            $this->saveConfigFile();
+        } catch (Exception $e) {
+            foreach ($previousValues as $key => $previousValue) {
+                $config->set($key, $previousValue);
+            }
+
+            throw $e;
+        }
+
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function hasConfigKey($key, $fallback = false)
     {
         Assert::boolean($fallback, 'The argument $fallback must be a boolean.');
 
         return $this->getConfig()->contains($key, $fallback);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function hasConfigKeys($fallback = false)
+    {
+        return !$this->getConfig()->isEmpty($fallback);
     }
 
     /**

@@ -234,6 +234,32 @@ class ConfigFileManagerImplTest extends PHPUnit_Framework_TestCase
         $this->assertTrue($this->manager->hasConfigKey(Config::PULI_DIR, true));
     }
 
+    public function testHasConfigKeys()
+    {
+        $this->assertFalse($this->manager->hasConfigKeys());
+
+        $this->baseConfig->set(Config::PULI_DIR, 'fallback');
+
+        $this->assertFalse($this->manager->hasConfigKeys());
+
+        $this->configFile->getConfig()->set(Config::PULI_DIR, 'my-puli-dir');
+
+        $this->assertTrue($this->manager->hasConfigKeys());
+    }
+
+    public function testHasConfigKeysWithFallback()
+    {
+        $this->assertFalse($this->manager->hasConfigKeys(true));
+
+        $this->baseConfig->set(Config::PULI_DIR, 'fallback');
+
+        $this->assertTrue($this->manager->hasConfigKeys(true));
+
+        $this->configFile->getConfig()->set(Config::PULI_DIR, 'my-puli-dir');
+
+        $this->assertTrue($this->manager->hasConfigKeys(true));
+    }
+
     public function testGetConfigKey()
     {
         $this->assertNull($this->manager->getConfigKey(Config::PULI_DIR));
@@ -475,6 +501,43 @@ class ConfigFileManagerImplTest extends PHPUnit_Framework_TestCase
 
         try {
             $this->manager->removeConfigKeys(array(Config::PULI_DIR, Config::FACTORY_IN_FILE));
+            $this->fail('Expected a TestException');
+        } catch (TestException $e) {
+        }
+
+        $this->assertTrue($this->configFile->getConfig()->contains(Config::PULI_DIR));
+        $this->assertFalse($this->configFile->getConfig()->contains(Config::FACTORY_IN_FILE));
+        $this->assertSame('my-puli-dir', $this->configFile->getConfig()->get(Config::PULI_DIR));
+    }
+
+    public function testClearConfigKeys()
+    {
+        $this->configFile->getConfig()->set(Config::PULI_DIR, 'my-puli-dir');
+        $this->configFile->getConfig()->set(Config::FACTORY_IN_FILE, 'MyServiceRegistry.php');
+
+        $this->configFileStorage->expects($this->once())
+            ->method('saveConfigFile')
+            ->with($this->configFile)
+            ->will($this->returnCallback(function (ConfigFile $configFile) {
+                $config = $configFile->getConfig();
+
+                PHPUnit_Framework_Assert::assertNull($config->get(Config::PULI_DIR, null, false));
+                PHPUnit_Framework_Assert::assertNull($config->get(Config::FACTORY_IN_FILE, null, false));
+            }));
+
+        $this->manager->clearConfigKeys();
+    }
+
+    public function testClearConfigKeysRevertsIfSavingNotPossible()
+    {
+        $this->configFile->getConfig()->set(Config::PULI_DIR, 'my-puli-dir');
+
+        $this->configFileStorage->expects($this->once())
+            ->method('saveConfigFile')
+            ->willThrowException(new TestException());
+
+        try {
+            $this->manager->clearConfigKeys();
             $this->fail('Expected a TestException');
         } catch (TestException $e) {
         }

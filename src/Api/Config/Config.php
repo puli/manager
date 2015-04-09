@@ -379,6 +379,17 @@ class Config
     }
 
     /**
+     * Removes all configuration keys.
+     *
+     * If the configuration has a base configuration, the default values will
+     * be returned by {@link get()} after removing the keys.
+     */
+    public function clear()
+    {
+        $this->values = array();
+    }
+
+    /**
      * Returns all configuration values as flat array.
      *
      * @param bool $includeFallback Whether to include values set in the base
@@ -437,6 +448,25 @@ class Config
     public function toArray($includeFallback = true)
     {
         return $this->replacePlaceholders($this->toRawArray($includeFallback), $includeFallback);
+    }
+
+    /**
+     * Returns whether the configuration is empty.
+     *
+     * @param bool $includeFallback Whether to include values set in the base
+     *                              configuration passed to {@link __construct()}.
+     *
+     * @return bool Returns `true` if no key is set and `false` otherwise.
+     */
+    public function isEmpty($includeFallback = true)
+    {
+        if (!empty($this->values)) {
+            return false;
+        }
+
+        return $includeFallback && $this->baseConfig
+            ? $this->baseConfig->isEmpty(true)
+            : true;
     }
 
     /**
