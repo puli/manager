@@ -63,6 +63,8 @@ Changelog
  * added `DiscoveryManager::clearRootBindings()`
  * fixed restoring of conflicts when `RepositoryManager::removeRootPathMapping()` fails
  * added `RepositoryManager::clearRootPathMappings()`
+ * fixed `Package::__construct()` when neither `PackageFile` nor `InstallInfo`
+   are passed
       
 * 1.0.0-beta3 (2015-03-19)
 

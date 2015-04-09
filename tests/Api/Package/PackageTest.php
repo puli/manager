@@ -11,6 +11,7 @@
 
 namespace Puli\Manager\Tests\Api\Package;
 
+use Exception;
 use PHPUnit_Framework_TestCase;
 use Puli\Manager\Api\Package\InstallInfo;
 use Puli\Manager\Api\Package\Package;
@@ -83,6 +84,13 @@ class PackageTest extends PHPUnit_Framework_TestCase
         ));
 
         $this->assertSame(PackageState::NOT_LOADABLE, $package->getState());
+    }
+
+    public function testCreatePackageWithoutPackageFileNorInstallInfo()
+    {
+        $package = new Package(null, '/path', null, array(new Exception()));
+
+        $this->assertNull($package->getName());
     }
 
     public function testMatch()

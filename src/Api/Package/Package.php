@@ -93,7 +93,7 @@ class Package
         // the predefined name in the puli.json file (if any)
         $this->name = $installInfo && null !== $installInfo->getPackageName()
             ? $installInfo->getPackageName()
-            : $packageFile->getPackageName();
+            : ($packageFile ? $packageFile->getPackageName() : null);
 
         if (null === $this->name) {
             $this->name = $this->getDefaultName();
