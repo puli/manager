@@ -164,6 +164,31 @@ class RepositoryManagerImplTest extends ManagerTestCase
         $this->manager->addRootPathMapping(new PathMapping('/path', 'resources'));
     }
 
+    public function testAddRootPathMappingDoesNotFailIfPathAlreadyMappedAndOverride()
+    {
+        $this->initDefaultManager();
+
+        $this->rootPackageFile->addPathMapping($mapping1 = new PathMapping('/path', 'assets'));
+
+        $mapping2 = new PathMapping('/path', 'resources');
+
+        $this->repo->expects($this->at(0))
+            ->method('remove');
+
+        $this->repo->expects($this->at(1))
+            ->method('add')
+            ->with('/path', new DirectoryResource($this->rootDir.'/resources'));
+
+        $this->packageFileStorage->expects($this->once())
+            ->method('saveRootPackageFile')
+            ->with($this->rootPackageFile)
+            ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) use ($mapping2) {
+                PHPUnit_Framework_Assert::assertSame(array('/path' => $mapping2), $rootPackageFile->getPathMappings());
+            }));
+
+        $this->manager->addRootPathMapping($mapping2, RepositoryManager::OVERRIDE);
+    }
+
     public function testAddRootPathMappingWithFilePath()
     {
         $this->initDefaultManager();
@@ -266,7 +291,7 @@ class RepositoryManagerImplTest extends ManagerTestCase
         $this->manager->addRootPathMapping(new PathMapping('/path', '@foobar:resources'));
     }
 
-    public function testAddRootPathMappingDoesNotFailIfReferencedPackageNotFoundAndNoTargetPathCheck()
+    public function testAddRootPathMappingDoesNotFailIfReferencedPackageNotFoundAndIgnoreFileNotFound()
     {
         $this->initDefaultManager();
 
@@ -288,7 +313,7 @@ class RepositoryManagerImplTest extends ManagerTestCase
                 PHPUnit_Framework_Assert::assertTrue($mappings['/path']->isNotFound());
             }));
 
-        $this->manager->addRootPathMapping(new PathMapping('/path', '@foobar:resources'), RepositoryManager::NO_TARGET_PATH_CHECK);
+        $this->manager->addRootPathMapping(new PathMapping('/path', '@foobar:resources'), RepositoryManager::IGNORE_FILE_NOT_FOUND);
     }
 
     public function testAddRootPathMappingOverridesConflictingPackage()

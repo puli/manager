@@ -121,7 +121,7 @@ class SyncRepositoryPath implements AtomicOperation
     private function add($repositoryPath, array $filesystemPaths)
     {
         try {
-            $this->addInOrder($filesystemPaths, $this->overrideGraph->getSortedPackageNames());
+            $this->addInOrder($filesystemPaths);
         } catch (Exception $e) {
             $this->repo->remove($repositoryPath);
 
@@ -129,19 +129,28 @@ class SyncRepositoryPath implements AtomicOperation
         }
     }
 
+    private function addInOrder(array $filesystemPaths)
+    {
+        foreach ($filesystemPaths as $packageName => $filesystemPathsByRepoPath) {
+            foreach ($filesystemPathsByRepoPath as $repoPath => $filesystemPaths) {
+                foreach ($filesystemPaths as $filesystemPath) {
+                    $this->repo->add($repoPath, $this->createResource($filesystemPath));
+                }
+            }
+        }
+    }
+
     private function replace(array $filesystemPathsBefore, array $filesystemPathsAfter)
     {
-        $packageNamesBefore = $this->getSortedPackageNames($filesystemPathsBefore);
-        $packageNamesAfter = $this->getSortedPackageNames($filesystemPathsAfter);
+        $filesystemPathsAfterSuffix = $filesystemPathsAfter;
+        $filesystemPathsAfterPrefix = array_splice($filesystemPathsAfterSuffix, 0, count($filesystemPathsBefore));
 
-        $packageNamesAfterPrefix = array_splice($packageNamesAfter, 0, count($packageNamesBefore));
-
-        if ($packageNamesBefore === $packageNamesAfterPrefix) {
+        if ($filesystemPathsBefore === $filesystemPathsAfterPrefix) {
             // Optimization: If the package names before are a prefix of the
             // package names after, we can simply add the mappings for the
             // remaining package names
-            // Note: array_splice() already removed the prefix of $packageNamesAfter
-            $this->addInOrder($filesystemPathsAfter, $packageNamesAfter);
+            // Note: array_splice() already removed the prefix of $filesystemPathsAfterSuffix
+            $this->addInOrder($filesystemPathsAfterSuffix);
 
             return;
         }
@@ -165,21 +174,6 @@ class SyncRepositoryPath implements AtomicOperation
         }
     }
 
-    private function addInOrder(array $filesystemPaths, array $sortedPackageNames)
-    {
-        foreach ($filesystemPaths as $nestedRepoPath => $filesystemPathsByPackage) {
-            foreach ($sortedPackageNames as $packageName) {
-                if (!isset($filesystemPathsByPackage[$packageName])) {
-                    continue;
-                }
-
-                foreach ($filesystemPathsByPackage[$packageName] as $filesystemPath) {
-                    $this->repo->add($nestedRepoPath, $this->createResource($filesystemPath));
-                }
-            }
-        }
-    }
-
     private function createResource($filesystemPath)
     {
         return is_dir($filesystemPath)
@@ -189,23 +183,24 @@ class SyncRepositoryPath implements AtomicOperation
 
     private function getShortestRepositoryPath(array $filesystemPathsBefore, array $filesystemPathsAfter)
     {
-        $repositoryPaths = array_keys(array_replace($filesystemPathsBefore, $filesystemPathsAfter));
+        $repositoryPaths = array();
 
-        sort($repositoryPaths);
-
-        return reset($repositoryPaths);
-    }
-
-    private function getSortedPackageNames(array $filesystemPaths)
-    {
-        $packageNames = array();
-
-        foreach ($filesystemPaths as $pathsByPackageName) {
-            $packageNames = array_merge($packageNames, array_keys($pathsByPackageName));
+        foreach ($filesystemPathsBefore as $filesystemPathsByRepoPaths) {
+            foreach ($filesystemPathsByRepoPaths as $repoPath => $filesystemPath) {
+                $repositoryPaths[$repoPath] = true;
+            }
         }
 
-        // Duplicates are removed here
-        return $this->overrideGraph->getSortedPackageNames($packageNames);
+        foreach ($filesystemPathsAfter as $filesystemPathsByRepoPaths) {
+            foreach ($filesystemPathsByRepoPaths as $repoPath => $filesystemPath) {
+                $repositoryPaths[$repoPath] = true;
+            }
+        }
+
+        ksort($repositoryPaths);
+        reset($repositoryPaths);
+
+        return key($repositoryPaths);
     }
 
     private function getEnabledFilesystemPaths($repositoryPath)
@@ -216,7 +211,18 @@ class SyncRepositoryPath implements AtomicOperation
 
         $this->collectEnabledFilesystemPaths($repositoryPath, $mappings, $filesystemPaths);
 
-        ksort($filesystemPaths);
+        if (!$filesystemPaths) {
+            return array();
+        }
+
+        // Sort primary keys (package names)
+        $sortedNames = $this->overrideGraph->getSortedPackageNames(array_keys($filesystemPaths));
+        $filesystemPaths = array_replace(array_flip($sortedNames), $filesystemPaths);
+
+        // Sort secondary keys (repository paths)
+        foreach ($filesystemPaths as $packageName => $pathsByPackage) {
+            ksort($filesystemPaths[$packageName]);
+        }
 
         return $filesystemPaths;
     }
@@ -225,17 +231,21 @@ class SyncRepositoryPath implements AtomicOperation
      * @param string          $repositoryPath
      * @param PathMapping[][] $uncheckedMappings
      * @param string[][]      $filesystemPaths
+     * @param string[][]      $filesystemPaths
      */
-    private function collectEnabledFilesystemPaths($repositoryPath, array &$uncheckedMappings, array &$filesystemPaths = null)
+    private function collectEnabledFilesystemPaths($repositoryPath, array &$uncheckedMappings, array &$filesystemPaths = null, array &$processedPaths = null)
     {
         if (null === $filesystemPaths) {
             $filesystemPaths = array();
+            $processedPaths = array();
         }
 
         // We had this one before
-        if (isset($filesystemPaths[$repositoryPath])) {
+        if (isset($processedPaths[$repositoryPath])) {
             return;
         }
+
+        $processedPaths[$repositoryPath] = true;
 
         foreach ($uncheckedMappings as $mappedPath => $mappingsByPackage) {
             // Check mappings for the passed repository path or any of its
@@ -254,23 +264,22 @@ class SyncRepositoryPath implements AtomicOperation
                 $mappingPath = $mapping->getRepositoryPath();
 
                 // We added the mapping before or it is not enabled
-                if (isset($filesystemPaths[$mappingPath][$packageName]) || !$mapping->isEnabled()) {
+                if (isset($filesystemPaths[$packageName][$mappingPath]) || !$mapping->isEnabled()) {
                     continue;
                 }
 
-                if (!isset($filesystemPaths[$mappingPath])) {
-                    $filesystemPaths[$mappingPath] = array();
+                if (!isset($filesystemPaths[$packageName])) {
+                    $filesystemPaths[$packageName] = array();
                 }
 
-                $filesystemPaths[$mappingPath][$packageName] = $mapping->getFilesystemPaths();
+                $filesystemPaths[$packageName][$mappingPath] = $mapping->getFilesystemPaths();
 
                 // Check all nested paths of the mapping for other mappings that
                 // map to the same paths
                 foreach ($mapping->listRepositoryPaths() as $nestedRepositoryPath) {
                     // Don't repeat the call for the current path
                     if ($nestedRepositoryPath !== $mappedPath) {
-                        $this->collectEnabledFilesystemPaths($nestedRepositoryPath,
-                            $uncheckedMappings, $filesystemPaths);
+                        $this->collectEnabledFilesystemPaths($nestedRepositoryPath, $uncheckedMappings, $filesystemPaths, $processedPaths);
                     }
                 }
             }

@@ -5,9 +5,9 @@ Changelog
 
  * separated "factory.class" and "factory.file" config keys into
    "factory.in.class", "factory.out.class", "factory.in.file" and "factory.out.file"
- * added NO_DUPLICATE_CHECK flag to suppress duplicate checks in
+ * added `NO_DUPLICATE_CHECK` flag to suppress duplicate checks in
    `DiscoveryManager::addBindingType()`
- * added NO_TYPE_CHECK flag to suppress type checks in `DiscoveryManager::addBinding()`
+ * added `NO_TYPE_CHECK` flag to suppress type checks in `DiscoveryManager::addBinding()`
  * changed boolean parameter `$required` to integer parameter `$flags` in
    `BindingParameterDescriptor::__construct()`
  * duplicate binding UUIDs are forbidden now
@@ -65,6 +65,8 @@ Changelog
  * added `RepositoryManager::clearRootPathMappings()`
  * fixed `Package::__construct()` when neither `PackageFile` nor `InstallInfo`
    are passed
+ * `RepositoryManager::addRootPathMapping()` now accepts the flags
+   `OVERRIDE` and `IGNORE_FILE_NOT_FOUND`
       
 * 1.0.0-beta3 (2015-03-19)
 

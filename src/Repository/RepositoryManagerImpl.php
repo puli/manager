@@ -148,7 +148,7 @@ class RepositoryManagerImpl implements RepositoryManager
 
         $this->assertMappingsLoaded();
 
-        if ($this->rootPackageFile->hasPathMapping($mapping->getRepositoryPath())) {
+        if (!($flags & self::OVERRIDE) && $this->rootPackageFile->hasPathMapping($mapping->getRepositoryPath())) {
             throw DuplicatePathMappingException::forRepositoryPath($mapping->getRepositoryPath(), $this->rootPackage->getName());
         }
 
@@ -160,7 +160,7 @@ class RepositoryManagerImpl implements RepositoryManager
 
             $tx->execute($this->loadPathMapping($mapping, $this->rootPackage));
 
-            if (!($flags & self::NO_TARGET_PATH_CHECK)) {
+            if (!($flags & self::IGNORE_FILE_NOT_FOUND)) {
                 $this->assertNoLoadErrors($mapping);
             }
 

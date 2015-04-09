@@ -27,10 +27,14 @@ use Webmozart\Expression\Expression;
 interface RepositoryManager
 {
     /**
-     * Flag: Don't check whether the target paths exist in
-     * {@link addPathMapping()}.
+     * Flag: Override existing path mappings.
      */
-    const NO_TARGET_PATH_CHECK = 1;
+    const OVERRIDE = 1;
+
+    /**
+     * Flag: Ignore if the referenced files are not found in {@link addPathMapping()}.
+     */
+    const IGNORE_FILE_NOT_FOUND = 2;
 
     /**
      * Returns the manager's environment.
