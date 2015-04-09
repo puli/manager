@@ -18,6 +18,7 @@ use Puli\Manager\Api\Package\PackageCollection;
 use Puli\Manager\Api\Package\PackageFile;
 use Puli\Manager\Api\Package\RootPackage;
 use Puli\Manager\Api\Package\RootPackageFile;
+use Puli\Manager\Api\Repository\PathConflict;
 use Puli\Manager\Api\Repository\PathMapping;
 use Puli\Manager\Api\Repository\PathMappingState;
 use Puli\Manager\Api\Repository\RepositoryManager;
@@ -28,6 +29,7 @@ use Puli\Manager\Tests\TestException;
 use Puli\Repository\Resource\DirectoryResource;
 use Puli\Repository\Resource\FileResource;
 use Symfony\Component\Filesystem\Filesystem;
+use Webmozart\Expression\Expr;
 
 /**
  * @since  1.0
@@ -115,7 +117,7 @@ class RepositoryManagerImplTest extends ManagerTestCase
         $filesystem->remove($this->tempDir);
     }
 
-    public function testAddPathMappingWithDirectoryPath()
+    public function testAddRootPathMappingWithDirectoryPath()
     {
         $this->initDefaultManager();
 
@@ -138,13 +140,13 @@ class RepositoryManagerImplTest extends ManagerTestCase
                 PHPUnit_Framework_Assert::assertTrue($mappings['/path']->isEnabled());
             }));
 
-        $this->manager->addPathMapping(new PathMapping('/path', 'resources'));
+        $this->manager->addRootPathMapping(new PathMapping('/path', 'resources'));
     }
 
     /**
      * @expectedException \Puli\Manager\Api\Repository\DuplicatePathMappingException
      */
-    public function testAddPathMappingFailsIfPathAlreadyMapped()
+    public function testAddRootPathMappingFailsIfPathAlreadyMapped()
     {
         $this->initDefaultManager();
 
@@ -159,10 +161,10 @@ class RepositoryManagerImplTest extends ManagerTestCase
         $this->packageFileStorage->expects($this->never())
             ->method('saveRootPackageFile');
 
-        $this->manager->addPathMapping(new PathMapping('/path', 'resources'));
+        $this->manager->addRootPathMapping(new PathMapping('/path', 'resources'));
     }
 
-    public function testAddPathMappingWithFilePath()
+    public function testAddRootPathMappingWithFilePath()
     {
         $this->initDefaultManager();
 
@@ -185,10 +187,10 @@ class RepositoryManagerImplTest extends ManagerTestCase
                 PHPUnit_Framework_Assert::assertTrue($mappings['/path/file']->isEnabled());
             }));
 
-        $this->manager->addPathMapping(new PathMapping('/path/file', 'resources/file'));
+        $this->manager->addRootPathMapping(new PathMapping('/path/file', 'resources/file'));
     }
 
-    public function testAddPathMappingWithMultiplePaths()
+    public function testAddRootPathMappingWithMultiplePaths()
     {
         $this->initDefaultManager();
 
@@ -215,10 +217,10 @@ class RepositoryManagerImplTest extends ManagerTestCase
                 PHPUnit_Framework_Assert::assertTrue($mappings['/path']->isEnabled());
             }));
 
-        $this->manager->addPathMapping(new PathMapping('/path', array('resources', 'assets')));
+        $this->manager->addRootPathMapping(new PathMapping('/path', array('resources', 'assets')));
     }
 
-    public function testAddPathMappingWithReferenceToOtherPackage()
+    public function testAddRootPathMappingWithReferenceToOtherPackage()
     {
         $this->initDefaultManager();
 
@@ -241,14 +243,14 @@ class RepositoryManagerImplTest extends ManagerTestCase
                 PHPUnit_Framework_Assert::assertTrue($mappings['/path']->isEnabled());
             }));
 
-        $this->manager->addPathMapping(new PathMapping('/path', '@vendor/package1:resources'));
+        $this->manager->addRootPathMapping(new PathMapping('/path', '@vendor/package1:resources'));
     }
 
     /**
      * @expectedException \Puli\Manager\Api\Package\NoSuchPackageException
      * @expectedExceptionMessage foobar
      */
-    public function testAddPathMappingFailsIfReferencedPackageNotFound()
+    public function testAddRootPathMappingFailsIfReferencedPackageNotFound()
     {
         $this->initDefaultManager();
 
@@ -261,10 +263,10 @@ class RepositoryManagerImplTest extends ManagerTestCase
         $this->packageFileStorage->expects($this->never())
             ->method('saveRootPackageFile');
 
-        $this->manager->addPathMapping(new PathMapping('/path', '@foobar:resources'));
+        $this->manager->addRootPathMapping(new PathMapping('/path', '@foobar:resources'));
     }
 
-    public function testAddPathMappingDoesNotFailIfReferencedPackageNotFoundAndNoTargetPathCheck()
+    public function testAddRootPathMappingDoesNotFailIfReferencedPackageNotFoundAndNoTargetPathCheck()
     {
         $this->initDefaultManager();
 
@@ -286,10 +288,10 @@ class RepositoryManagerImplTest extends ManagerTestCase
                 PHPUnit_Framework_Assert::assertTrue($mappings['/path']->isNotFound());
             }));
 
-        $this->manager->addPathMapping(new PathMapping('/path', '@foobar:resources'), RepositoryManager::NO_TARGET_PATH_CHECK);
+        $this->manager->addRootPathMapping(new PathMapping('/path', '@foobar:resources'), RepositoryManager::NO_TARGET_PATH_CHECK);
     }
 
-    public function testAddPathMappingOverridesConflictingPackage()
+    public function testAddRootPathMappingOverridesConflictingPackage()
     {
         $this->initDefaultManager();
 
@@ -318,13 +320,13 @@ class RepositoryManagerImplTest extends ManagerTestCase
         $this->rootPackageFile->setOverriddenPackages(array('vendor/package1'));
         $this->packageFile2->addPathMapping(new PathMapping('/path', 'resources'));
 
-        $this->manager->addPathMapping(new PathMapping('/path', 'override'));
+        $this->manager->addRootPathMapping(new PathMapping('/path', 'override'));
 
         // No conflict was added
         $this->assertCount(0, $this->manager->getPathConflicts());
     }
 
-    public function testAddPathMappingOverridesMultipleConflictingPackages()
+    public function testAddRootPathMappingOverridesMultipleConflictingPackages()
     {
         $this->initDefaultManager();
 
@@ -355,10 +357,10 @@ class RepositoryManagerImplTest extends ManagerTestCase
         $this->packageFile2->addPathMapping(new PathMapping('/path', 'resources'));
         $this->packageFile2->setOverriddenPackages(array('vendor/package1'));
 
-        $this->manager->addPathMapping(new PathMapping('/path', 'resources'));
+        $this->manager->addRootPathMapping(new PathMapping('/path', 'resources'));
     }
 
-    public function testAddPathMappingWithConflictDoesNotChangeExistingConflicts()
+    public function testAddRootPathMappingWithConflictDoesNotChangeExistingConflicts()
     {
         $this->initDefaultManager();
 
@@ -388,7 +390,7 @@ class RepositoryManagerImplTest extends ManagerTestCase
         $this->packageFile1->addPathMapping(new PathMapping('/old', 'resources'));
         $this->packageFile2->addPathMapping(new PathMapping('/old', 'resources'));
 
-        $this->manager->addPathMapping(new PathMapping('/path', 'override'));
+        $this->manager->addRootPathMapping(new PathMapping('/path', 'override'));
 
         // Old conflict still exists
         $conflicts = $this->manager->getPathConflicts();
@@ -396,7 +398,7 @@ class RepositoryManagerImplTest extends ManagerTestCase
         $this->assertSame('/old', $conflicts[0]->getRepositoryPath());
     }
 
-    public function testAddPathMappingOverridesNestedPath1()
+    public function testAddRootPathMappingOverridesNestedPath1()
     {
         $this->initDefaultManager();
 
@@ -423,10 +425,10 @@ class RepositoryManagerImplTest extends ManagerTestCase
         $this->packageFile1->addPathMapping(new PathMapping('/path/config', 'resources'));
 
         // /override overrides /package1/resources/config
-        $this->manager->addPathMapping(new PathMapping('/path', 'override'));
+        $this->manager->addRootPathMapping(new PathMapping('/path', 'override'));
     }
 
-    public function testAddPathMappingOverridesNestedPath2()
+    public function testAddRootPathMappingOverridesNestedPath2()
     {
         $this->initDefaultManager();
 
@@ -453,10 +455,10 @@ class RepositoryManagerImplTest extends ManagerTestCase
         $this->packageFile1->addPathMapping(new PathMapping('/path', 'resources'));
 
         // /override overrides /package1/resources/config
-        $this->manager->addPathMapping(new PathMapping('/path/config', 'override'));
+        $this->manager->addRootPathMapping(new PathMapping('/path/config', 'override'));
     }
 
-    public function testAddPathMappingRestoresOverriddenResourcesIfSavingFails()
+    public function testAddRootPathMappingRestoresOverriddenResourcesIfSavingFails()
     {
         $this->initDefaultManager();
 
@@ -481,7 +483,7 @@ class RepositoryManagerImplTest extends ManagerTestCase
             ->willThrowException(new TestException('Cannot save'));
 
         try {
-            $this->manager->addPathMapping($mapping);
+            $this->manager->addRootPathMapping($mapping);
             $this->fail('Expected a TestException');
         } catch (TestException $e) {
         }
@@ -490,7 +492,7 @@ class RepositoryManagerImplTest extends ManagerTestCase
         $this->assertFalse($mapping->isLoaded());
     }
 
-    public function testAddPathMappingRemovesNewConflictsIfSavingFails()
+    public function testAddRootPathMappingRemovesNewConflictsIfSavingFails()
     {
         $this->initDefaultManager();
 
@@ -515,7 +517,7 @@ class RepositoryManagerImplTest extends ManagerTestCase
             ->willThrowException(new TestException('Cannot save'));
 
         try {
-            $this->manager->addPathMapping($mapping);
+            $this->manager->addRootPathMapping($mapping);
             $this->fail('Expected a TestException');
         } catch (TestException $e) {
         }
@@ -524,7 +526,7 @@ class RepositoryManagerImplTest extends ManagerTestCase
         $this->assertFalse($mapping->isLoaded());
     }
 
-    public function testRemovePathMapping()
+    public function testRemoveRootPathMapping()
     {
         $this->initDefaultManager();
 
@@ -543,15 +545,12 @@ class RepositoryManagerImplTest extends ManagerTestCase
 
         $this->rootPackageFile->addPathMapping($mapping = new PathMapping('/app', 'resources'));
 
-        $this->manager->removePathMapping('/app');
+        $this->manager->removeRootPathMapping('/app');
 
         $this->assertFalse($mapping->isLoaded());
     }
 
-    /**
-     * @expectedException \Puli\Manager\Api\RootPackageExpectedException
-     */
-    public function testRemovePathMappingFailsIfNotInRootPackage()
+    public function testRemoveRootPathMappingIgnoresIfNotInRootPackage()
     {
         $this->initDefaultManager();
 
@@ -563,10 +562,12 @@ class RepositoryManagerImplTest extends ManagerTestCase
 
         $this->packageFile1->addPathMapping($mapping = new PathMapping('/app', 'resources'));
 
-        $this->manager->removePathMapping('/app');
+        $this->manager->removeRootPathMapping('/app');
+
+        $this->assertTrue($mapping->isEnabled());
     }
 
-    public function testRemovePathMappingDoesNothingIfUnknownPath()
+    public function testRemoveRootPathMappingDoesNothingIfUnknownPath()
     {
         $this->initDefaultManager();
 
@@ -576,10 +577,10 @@ class RepositoryManagerImplTest extends ManagerTestCase
         $this->packageFileStorage->expects($this->never())
             ->method('saveRootPackageFile');
 
-        $this->manager->removePathMapping('/app');
+        $this->manager->removeRootPathMapping('/app');
     }
 
-    public function testRemovePathMappingRestoresOverriddenResource()
+    public function testRemoveRootPathMappingRestoresOverriddenResource()
     {
         $this->initDefaultManager();
 
@@ -604,10 +605,10 @@ class RepositoryManagerImplTest extends ManagerTestCase
         $this->rootPackageFile->addPathMapping(new PathMapping('/package1', 'resources'));
         $this->rootPackageFile->setOverriddenPackages(array('vendor/package1'));
 
-        $this->manager->removePathMapping('/package1');
+        $this->manager->removeRootPathMapping('/package1');
     }
 
-    public function testRemovePathMappingRestoresOverriddenNestedResource1()
+    public function testRemoveRootPathMappingRestoresOverriddenNestedResource1()
     {
         $this->initDefaultManager();
 
@@ -633,10 +634,10 @@ class RepositoryManagerImplTest extends ManagerTestCase
         $this->rootPackageFile->addPathMapping(new PathMapping('/path/config', 'override'));
         $this->rootPackageFile->setOverriddenPackages(array('vendor/package1'));
 
-        $this->manager->removePathMapping('/path/config');
+        $this->manager->removeRootPathMapping('/path/config');
     }
 
-    public function testRemovePathMappingRestoresOverriddenNestedResource2()
+    public function testRemoveRootPathMappingRestoresOverriddenNestedResource2()
     {
         $this->initDefaultManager();
 
@@ -662,10 +663,10 @@ class RepositoryManagerImplTest extends ManagerTestCase
         $this->rootPackageFile->addPathMapping(new PathMapping('/path', 'override'));
         $this->rootPackageFile->setOverriddenPackages(array('vendor/package1'));
 
-        $this->manager->removePathMapping('/path');
+        $this->manager->removeRootPathMapping('/path');
     }
 
-    public function testRemovePathMappingDoesNotRestoreOverriddenNestedResourceIfNotEnabled()
+    public function testRemoveRootPathMappingDoesNotRestoreOverriddenNestedResourceIfNotEnabled()
     {
         $this->initDefaultManager();
 
@@ -691,7 +692,7 @@ class RepositoryManagerImplTest extends ManagerTestCase
         $this->rootPackageFile->addPathMapping(new PathMapping('/path/config', 'override'));
         $this->rootPackageFile->setOverriddenPackages(array('vendor/package1'));
 
-        $this->manager->removePathMapping('/path/config');
+        $this->manager->removeRootPathMapping('/path/config');
     }
 
     public function testRemoveResourceRemovesResolvedConflicts()
@@ -718,117 +719,192 @@ class RepositoryManagerImplTest extends ManagerTestCase
         $this->packageFile1->addPathMapping(new PathMapping('/path', 'resources'));
         $this->rootPackageFile->addPathMapping(new PathMapping('/path', 'resources'));
 
-        $this->manager->removePathMapping('/path');
+        $this->manager->removeRootPathMapping('/path');
 
         $this->assertCount(0, $this->manager->getPathConflicts());
     }
 
-    public function testGetAllPathMappings()
+    public function testGetRootPathMapping()
     {
         $this->initDefaultManager();
 
         $this->rootPackageFile->addPathMapping($mapping1 = new PathMapping('/path1', 'resources'));
-        $this->packageFile1->addPathMapping($mapping2 = new PathMapping('/path2', 'resources'));
-        $this->packageFile2->addPathMapping($mapping3 = new PathMapping('/path2', 'resources'));
-        $this->packageFile3->addPathMapping($mapping4 = new PathMapping('/path3', 'foobar'));
+        $this->rootPackageFile->addPathMapping($mapping2 = new PathMapping('/path2', 'resources'));
 
-        $this->assertSame(array(
-            $mapping1,
-            $mapping2,
-            $mapping3,
-            $mapping4,
-        ), $this->manager->getPathMappings());
-
-        $this->assertSame(array($mapping2), $this->manager->getPathMappings('vendor/package1'));
-        $this->assertSame(array($mapping2, $mapping3), $this->manager->getPathMappings(array('vendor/package1', 'vendor/package2')));
+        $this->assertSame($mapping1, $this->manager->getRootPathMapping('/path1'));
+        $this->assertSame($mapping2, $this->manager->getRootPathMapping('/path2'));
     }
 
-    public function testGetEnabledPathMappings()
+    /**
+     * @expectedException \Puli\Manager\Api\Repository\NoSuchPathMappingException
+     */
+    public function testGetRootPathMappingFailsIfNotFound()
+    {
+        $this->initDefaultManager();
+
+        $this->manager->getRootPathMapping('/path', 'vendor/root');
+    }
+
+    /**
+     * @expectedException \Puli\Manager\Api\Repository\NoSuchPathMappingException
+     */
+    public function testGetRootPathMappingFailsIfNotFoundInRootPackage()
+    {
+        $this->initDefaultManager();
+
+        $this->packageFile1->addPathMapping($mapping2 = new PathMapping('/path', 'resources'));
+
+        $this->manager->getRootPathMapping('/path', 'vendor/root');
+    }
+
+    public function testGetRootPathMappings()
     {
         $this->initDefaultManager();
 
         $this->rootPackageFile->addPathMapping($mapping1 = new PathMapping('/path1', 'resources'));
-        $this->packageFile1->addPathMapping($mapping2 = new PathMapping('/path2', 'resources'));
-        $this->packageFile2->addPathMapping($mapping3 = new PathMapping('/path3', 'resources'));
-        $this->packageFile3->addPathMapping($mapping4 = new PathMapping('/path4', 'resources'));
-        $this->packageFile3->addPathMapping($mapping5 = new PathMapping('/path5', 'foobar'));
+        $this->rootPackageFile->addPathMapping($mapping2 = new PathMapping('/path2', 'resources'));
+        $this->packageFile1->addPathMapping($mapping3 = new PathMapping('/path3', 'resources'));
 
-        $this->assertSame(array(
+        $this->assertEquals(array(
             $mapping1,
             $mapping2,
-            $mapping3,
-            $mapping4,
-        ), $this->manager->getPathMappings(null, PathMappingState::ENABLED));
-
-        $this->assertSame(array($mapping2), $this->manager->getPathMappings('vendor/package1', PathMappingState::ENABLED));
-        $this->assertSame(array($mapping2, $mapping3), $this->manager->getPathMappings(array('vendor/package1', 'vendor/package2'), PathMappingState::ENABLED));
+        ), $this->manager->getRootPathMappings());
     }
 
-    public function testGetNotFoundMappings()
+    public function testHasRootPathMapping()
     {
         $this->initDefaultManager();
 
-        $this->rootPackageFile->addPathMapping($mapping1 = new PathMapping('/path1', 'foobar'));
-        $this->packageFile1->addPathMapping($mapping2 = new PathMapping('/path2', 'foobar'));
-        $this->packageFile2->addPathMapping($mapping3 = new PathMapping('/path3', 'foobar'));
-        $this->packageFile3->addPathMapping($mapping4 = new PathMapping('/path4', 'foobar'));
-        $this->packageFile3->addPathMapping($mapping5 = new PathMapping('/path5', 'resources'));
+        $this->rootPackageFile->addPathMapping(new PathMapping('/path1', 'resources'));
+        $this->packageFile1->addPathMapping(new PathMapping('/path2', 'resources'));
 
-        $this->assertSame(array(
-            $mapping1,
-            $mapping2,
-            $mapping3,
-            $mapping4,
-        ), $this->manager->getPathMappings(null, PathMappingState::NOT_FOUND));
-
-        $this->assertSame(array($mapping2), $this->manager->getPathMappings('vendor/package1', PathMappingState::NOT_FOUND));
-        $this->assertSame(array($mapping2, $mapping3), $this->manager->getPathMappings(array('vendor/package1', 'vendor/package2'), PathMappingState::NOT_FOUND));
+        $this->assertTrue($this->manager->hasRootPathMapping('/path1'));
+        $this->assertFalse($this->manager->hasRootPathMapping('/path2'));
+        $this->assertFalse($this->manager->hasRootPathMapping('/path3'));
     }
 
-    public function testGetConflictingMappings()
+    public function testHasRootPathMappings()
     {
         $this->initDefaultManager();
 
-        $this->rootPackageFile->addPathMapping($mapping1 = new PathMapping('/path1', 'resources'));
-        $this->packageFile1->addPathMapping($mapping2 = new PathMapping('/path1', 'resources'));
-        $this->packageFile2->addPathMapping($mapping3 = new PathMapping('/path2', 'resources'));
-        $this->packageFile3->addPathMapping($mapping4 = new PathMapping('/path2', 'resources'));
-        $this->packageFile3->addPathMapping($mapping5 = new PathMapping('/path3', 'resources'));
+        $this->rootPackageFile->addPathMapping(new PathMapping('/path1', 'resources'));
+        $this->rootPackageFile->addPathMapping(new PathMapping('/path2', 'resources'));
 
-        $this->assertSame(array(
-            $mapping1,
-            $mapping2,
-            $mapping3,
-            $mapping4,
-        ), $this->manager->getPathMappings(null, PathMappingState::CONFLICT));
+        $expr1 = Expr::same(PathMapping::REPOSITORY_PATH, '/path1');
 
-        $this->assertSame(array($mapping2), $this->manager->getPathMappings('vendor/package1', PathMappingState::CONFLICT));
-        $this->assertSame(array($mapping2, $mapping3), $this->manager->getPathMappings(array('vendor/package1', 'vendor/package2'), PathMappingState::CONFLICT));
+        $expr2 = Expr::same(PathMapping::STATE, PathMappingState::CONFLICT);
+
+        $this->assertTrue($this->manager->hasRootPathMappings());
+        $this->assertTrue($this->manager->hasRootPathMappings($expr1));
+        $this->assertFalse($this->manager->hasRootPathMappings($expr2));
     }
 
     public function testGetPathMapping()
     {
         $this->initDefaultManager();
 
-        $mapping1 = new PathMapping('/path1', 'res1');
-        $mapping2 = new PathMapping('/path2', 'res2');
+        $this->rootPackageFile->addPathMapping($mapping1 = new PathMapping('/path', 'resources'));
+        $this->packageFile1->addPathMapping($mapping2 = new PathMapping('/path', 'resources'));
 
-        $this->rootPackageFile->addPathMapping($mapping1);
-        $this->rootPackageFile->addPathMapping($mapping2);
+        $this->assertSame($mapping1, $this->manager->getPathMapping('/path', 'vendor/root'));
+        $this->assertSame($mapping2, $this->manager->getPathMapping('/path', 'vendor/package1'));
+    }
 
-        $this->assertSame($mapping1, $this->manager->getPathMapping('/path1'));
-        $this->assertSame($mapping2, $this->manager->getPathMapping('/path2'));
+    /**
+     * @expectedException \Puli\Manager\Api\Repository\NoSuchPathMappingException
+     */
+    public function testGetPathMappingFailsIfNotFound()
+    {
+        $this->initDefaultManager();
+
+        $this->manager->getPathMapping('/path', 'vendor/root');
+    }
+
+    /**
+     * @expectedException \Puli\Manager\Api\Repository\NoSuchPathMappingException
+     */
+    public function testGetPathMappingFailsIfNotFoundInPackage()
+    {
+        $this->initDefaultManager();
+
+        $this->packageFile1->addPathMapping($mapping2 = new PathMapping('/path', 'resources'));
+
+        $this->manager->getPathMapping('/path', 'vendor/root');
+    }
+
+    public function testGetPathMappings()
+    {
+        $this->initDefaultManager();
+
+        $this->rootPackageFile->addPathMapping($mapping1 = new PathMapping('/path', 'resources'));
+        $this->packageFile1->addPathMapping($mapping2 = new PathMapping('/path', 'resources'));
+        $this->packageFile2->addPathMapping($mapping3 = new PathMapping('/path', 'resources'));
+
+        $this->assertEquals(array(
+            $mapping1,
+            $mapping2,
+            $mapping3,
+        ), $this->manager->getPathMappings());
+    }
+
+    public function testFindPathMappings()
+    {
+        $this->initDefaultManager();
+
+        $this->rootPackageFile->addPathMapping($mapping1 = new PathMapping('/path1', 'resources'));
+        $this->packageFile1->addPathMapping($mapping2 = new PathMapping('/path2', 'resources'));
+        $this->packageFile2->addPathMapping($mapping3 = new PathMapping('/path1', 'resources'));
+
+        $expr1 = Expr::same(PathMapping::REPOSITORY_PATH, '/path1');
+
+        $expr2 = $expr1->andSame(PathMapping::CONTAINING_PACKAGE, 'vendor/root');
+
+        $expr3 = $expr1->andSame(PathMapping::CONTAINING_PACKAGE, 'vendor/package1');
+
+        $this->assertSame(array($mapping1, $mapping3), $this->manager->findPathMappings($expr1));
+        $this->assertSame(array($mapping1), $this->manager->findPathMappings($expr2));
+        $this->assertSame(array(), $this->manager->findPathMappings($expr3));
     }
 
     public function testHasPathMapping()
     {
         $this->initDefaultManager();
 
-        $this->assertFalse($this->manager->hasPathMapping('/path'));
+        $this->rootPackageFile->addPathMapping(new PathMapping('/path1', 'resources'));
+        $this->packageFile1->addPathMapping(new PathMapping('/path2', 'resources'));
 
-        $this->rootPackageFile->addPathMapping(new PathMapping('/path', 'res'));
+        $this->assertTrue($this->manager->hasPathMapping('/path1', 'vendor/root'));
+        $this->assertTrue($this->manager->hasPathMapping('/path2', 'vendor/package1'));
+        $this->assertFalse($this->manager->hasPathMapping('/path1', 'vendor/package1'));
+        $this->assertFalse($this->manager->hasPathMapping('/path2', 'vendor/root'));
+        $this->assertFalse($this->manager->hasPathMapping('/path3', 'vendor/root'));
+    }
 
-        $this->assertTrue($this->manager->hasPathMapping('/path'));
+    public function testHasPathMappings()
+    {
+        $this->initDefaultManager();
+
+        $this->rootPackageFile->addPathMapping(new PathMapping('/path1', 'resources'));
+        $this->packageFile1->addPathMapping(new PathMapping('/path2', 'resources'));
+        $this->packageFile2->addPathMapping( new PathMapping('/path2', 'resources'));
+
+        $expr1 = Expr::same(PathMapping::CONTAINING_PACKAGE, 'vendor/package1');
+
+        $expr2 = Expr::same(PathMapping::STATE, PathMappingState::ENABLED);
+
+        $expr3 = $expr1->andX($expr2);
+
+        $this->assertTrue($this->manager->hasPathMappings());
+        $this->assertTrue($this->manager->hasPathMappings($expr1));
+        $this->assertTrue($this->manager->hasPathMappings($expr2));
+        $this->assertFalse($this->manager->hasPathMappings($expr3));
+    }
+
+    public function testHasNoPathMappings()
+    {
+        $this->initDefaultManager();
+
+        $this->assertFalse($this->manager->hasPathMappings());
     }
 
     public function testGetPathConflicts()

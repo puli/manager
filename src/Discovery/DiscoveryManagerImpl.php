@@ -34,7 +34,6 @@ use Puli\Manager\Api\Package\Package;
 use Puli\Manager\Api\Package\PackageCollection;
 use Puli\Manager\Api\Package\RootPackage;
 use Puli\Manager\Api\Package\RootPackageFile;
-use Puli\Manager\Api\RootPackageExpectedException;
 use Puli\Manager\Assert\Assert;
 use Puli\Manager\Discovery\Binding\AddBindingDescriptorToPackageFile;
 use Puli\Manager\Discovery\Binding\Bind;
@@ -59,6 +58,7 @@ use Puli\Manager\Package\PackageFileStorage;
 use Puli\Manager\Transaction\InterceptedOperation;
 use Puli\Manager\Transaction\Transaction;
 use Rhumsaa\Uuid\Uuid;
+use Webmozart\Expression\Expr;
 use Webmozart\Expression\Expression;
 
 /**
@@ -149,7 +149,7 @@ class DiscoveryManagerImpl implements DiscoveryManager
     /**
      * {@inheritdoc}
      */
-    public function addBindingType(BindingTypeDescriptor $typeDescriptor, $flags = 0)
+    public function addRootBindingType(BindingTypeDescriptor $typeDescriptor, $flags = 0)
     {
         Assert::integer($flags, 'The argument $flags must be a boolean.');
 
@@ -196,7 +196,7 @@ class DiscoveryManagerImpl implements DiscoveryManager
     /**
      * {@inheritdoc}
      */
-    public function removeBindingType($typeName)
+    public function removeRootBindingType($typeName)
     {
         // Only check that this is a string. The error message "not found" is
         // more helpful than e.g. "type name must contain /".
@@ -204,12 +204,8 @@ class DiscoveryManagerImpl implements DiscoveryManager
 
         $this->assertPackagesLoaded();
 
-        if (!$this->typeDescriptors->contains($typeName)) {
-            return;
-        }
-
         if (!$this->typeDescriptors->contains($typeName, $this->rootPackage->getName())) {
-            throw RootPackageExpectedException::cannotRemoveBindingType($typeName);
+            return;
         }
 
         $typeDescriptor = $this->typeDescriptors->get($typeName, $this->rootPackage->getName());
@@ -246,6 +242,55 @@ class DiscoveryManagerImpl implements DiscoveryManager
         }
 
         $this->emitWarningForDuplicateTypes();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getRootBindingType($typeName)
+    {
+        return $this->getBindingType($typeName, $this->rootPackage->getName());
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getRootBindingTypes()
+    {
+        $this->assertPackagesLoaded();
+
+        $types = array();
+        $rootPackageName = $this->rootPackage->getName();
+
+        foreach ($this->typeDescriptors->toArray() as $typeName => $typesByPackage) {
+            if (isset($typesByPackage[$rootPackageName])) {
+                $types[] = $typesByPackage[$rootPackageName];
+            }
+        }
+
+        return $types;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function hasRootBindingType($typeName)
+    {
+        return $this->hasBindingType($typeName, $this->rootPackage->getName());
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function hasRootBindingTypes(Expression $expr = null)
+    {
+        $expr2 = Expr::same(BindingTypeDescriptor::CONTAINING_PACKAGE, $this->rootPackage->getName());
+
+        if ($expr) {
+            $expr2 = $expr2->andX($expr);
+        }
+
+        return $this->hasBindingTypes($expr2);
     }
 
     /**
@@ -340,7 +385,7 @@ class DiscoveryManagerImpl implements DiscoveryManager
     /**
      * {@inheritdoc}
      */
-    public function addBinding(BindingDescriptor $bindingDescriptor, $flags = 0)
+    public function addRootBinding(BindingDescriptor $bindingDescriptor, $flags = 0)
     {
         $this->assertPackagesLoaded();
 
@@ -388,7 +433,7 @@ class DiscoveryManagerImpl implements DiscoveryManager
     /**
      * {@inheritdoc}
      */
-    public function removeBinding(Uuid $uuid)
+    public function removeRootBinding(Uuid $uuid)
     {
         $this->assertPackagesLoaded();
 
@@ -399,7 +444,7 @@ class DiscoveryManagerImpl implements DiscoveryManager
         $bindingDescriptor = $this->bindingDescriptors->get($uuid);
 
         if (!$bindingDescriptor->getContainingPackage() instanceof RootPackage) {
-            throw RootPackageExpectedException::cannotRemoveBinding($uuid, $bindingDescriptor->getContainingPackage()->getName());
+            return;
         }
 
         $tx = new Transaction();
@@ -420,6 +465,60 @@ class DiscoveryManagerImpl implements DiscoveryManager
 
             throw $e;
         }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getRootBinding(Uuid $uuid)
+    {
+        $binding = $this->getBinding($uuid);
+
+        if (!$binding->getContainingPackage() instanceof RootPackage) {
+            throw NoSuchBindingException::forUuidAndPackage($uuid, $this->rootPackage->getName());
+        }
+
+        return $binding;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getRootBindings()
+    {
+        $this->assertPackagesLoaded();
+
+        $bindings = array();
+
+        foreach ($this->bindingDescriptors->toArray() as $binding) {
+            if ($binding->getContainingPackage() instanceof RootPackage) {
+                $bindings[] = $binding;
+            }
+        }
+
+        return $bindings;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function hasRootBinding(Uuid $uuid)
+    {
+        return $this->hasBinding($uuid) && $this->getBinding($uuid)->getContainingPackage() instanceof RootPackage;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function hasRootBindings(Expression $expr = null)
+    {
+        $expr2 = Expr::same(BindingDescriptor::CONTAINING_PACKAGE, $this->rootPackage->getName());
+
+        if ($expr) {
+            $expr2 = $expr2->andX($expr);
+        }
+
+        return $this->hasBindings($expr2);
     }
 
     /**

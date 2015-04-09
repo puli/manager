@@ -46,16 +46,22 @@ class LoadPathMapping implements AtomicOperation
     private $mappings;
 
     /**
+     * @var PathMappingCollection
+     */
+    private $mappingsByResource;
+
+    /**
      * @var PackageConflictDetector
      */
     private $conflictDetector;
 
-    public function __construct(PathMapping $mapping, Package $containingPackage, PackageCollection $packages, PathMappingCollection $mappings, PackageConflictDetector $conflictDetector)
+    public function __construct(PathMapping $mapping, Package $containingPackage, PackageCollection $packages, PathMappingCollection $mappings, PathMappingCollection $mappingsByResource, PackageConflictDetector $conflictDetector)
     {
         $this->mapping = $mapping;
         $this->containingPackage = $containingPackage;
         $this->packages = $packages;
         $this->mappings = $mappings;
+        $this->mappingsByResource = $mappingsByResource;
         $this->conflictDetector = $conflictDetector;
     }
 
@@ -72,8 +78,10 @@ class LoadPathMapping implements AtomicOperation
 
         $packageName = $this->containingPackage->getName();
 
+        $this->mappings->add($this->mapping);
+
         foreach ($this->mapping->listRepositoryPaths() as $repositoryPath) {
-            $this->mappings->set($repositoryPath, $this->mapping);
+            $this->mappingsByResource->set($repositoryPath, $this->mapping);
             $this->conflictDetector->claim($repositoryPath, $packageName);
         }
     }
@@ -89,8 +97,10 @@ class LoadPathMapping implements AtomicOperation
 
         $packageName = $this->containingPackage->getName();
 
+        $this->mappings->remove($this->mapping->getRepositoryPath(), $packageName);
+
         foreach ($this->mapping->listRepositoryPaths() as $repositoryPath) {
-            $this->mappings->remove($repositoryPath, $packageName);
+            $this->mappingsByResource->remove($repositoryPath, $packageName);
             $this->conflictDetector->release($repositoryPath, $packageName);
         }
 

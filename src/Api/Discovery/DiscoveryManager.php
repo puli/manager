@@ -13,7 +13,6 @@ namespace Puli\Manager\Api\Discovery;
 
 use Puli\Manager\Api\Environment\ProjectEnvironment;
 use Puli\Manager\Api\NonRootPackageExpectedException;
-use Puli\Manager\Api\RootPackageExpectedException;
 use Rhumsaa\Uuid\Uuid;
 use Webmozart\Expression\Expression;
 
@@ -53,7 +52,7 @@ interface DiscoveryManager
      *
      * @throws DuplicateTypeException If the type is already defined.
      */
-    public function addBindingType(BindingTypeDescriptor $typeDescriptor, $flags = 0);
+    public function addRootBindingType(BindingTypeDescriptor $typeDescriptor, $flags = 0);
 
     /**
      * Removes a binding type.
@@ -62,11 +61,50 @@ interface DiscoveryManager
      * is not found, this method does nothing.
      *
      * @param string $typeName The name of the type to remove.
-     *
-     * @throws RootPackageExpectedException If the type is not in the root
-     *                                      package.
      */
-    public function removeBindingType($typeName);
+    public function removeRootBindingType($typeName);
+
+    /**
+     * Returns the binding type with the given name from the root package.
+     *
+     * @param string $typeName The name of the type.
+     *
+     * @return BindingTypeDescriptor The binding type.
+     *
+     * @throws NoSuchTypeException If the type does not exist.
+     */
+    public function getRootBindingType($typeName);
+
+    /**
+     * Returns all binding types from the root package.
+     *
+     * @return BindingTypeDescriptor[] The binding types.
+     */
+    public function getRootBindingTypes();
+
+    /**
+     * Returns whether the type with the given name exists in the root package.
+     *
+     * @param string $typeName The name of the type.
+     *
+     * @return bool Returns `true` if the type exists and `false` otherwise.
+     */
+    public function hasRootBindingType($typeName);
+
+    /**
+     * Returns whether the manager has any binding types in the root package.
+     *
+     * You can optionally pass an expression to check whether the manager has
+     * types matching the expression.
+     *
+     * @param Expression $expr The search criteria.
+     *
+     * @return bool Returns `true` if the manager has binding types in the root
+     *              package and `false` otherwise. If an expression was passed,
+     *              this method only returns `true` if the manager has binding
+     *              types matching the expression.
+     */
+    public function hasRootBindingTypes(Expression $expr = null);
 
     /**
      * Returns the binding type with the given name.
@@ -137,17 +175,58 @@ interface DiscoveryManager
      * @throws DuplicateBindingException If a binding with the same UUID exists
      *                                   already.
      */
-    public function addBinding(BindingDescriptor $bindingDescriptor, $flags = 0);
+    public function addRootBinding(BindingDescriptor $bindingDescriptor, $flags = 0);
 
     /**
      * Removes a binding.
      *
      * @param Uuid $uuid The UUID of the binding.
-     *
-     * @throws RootPackageExpectedException If the binding is not in the root
-     *                                      package.
      */
-    public function removeBinding(Uuid $uuid);
+    public function removeRootBinding(Uuid $uuid);
+
+    /**
+     * Returns the binding with the given UUID in the root package.
+     *
+     * @param Uuid $uuid The UUID of the binding.
+     *
+     * @return BindingDescriptor The binding.
+     *
+     * @throws NoSuchBindingException If the binding does not exist.
+     */
+    public function getRootBinding(Uuid $uuid);
+
+    /**
+     * Returns all bindings in the root package.
+     *
+     * @return BindingDescriptor[] The bindings.
+     */
+    public function getRootBindings();
+
+    /**
+     * Returns whether the binding with the given UUID exists in the root
+     * package.
+     *
+     * @param Uuid $uuid The UUID of the binding.
+     *
+     * @return bool Returns `true` if the binding exists in the root package and
+     *              `false` otherwise.
+     */
+    public function hasRootBinding(Uuid $uuid);
+
+    /**
+     * Returns whether the manager has any bindings in the root package.
+     *
+     * You can optionally pass an expression to check whether the manager has
+     * bindings matching the expression.
+     *
+     * @param Expression $expr The search criteria.
+     *
+     * @return bool Returns `true` if the manager has bindings in the root
+     *              package and `false` otherwise. If an expression was passed,
+     *              this method only returns `true` if the manager has bindings
+     *              matching the expression.
+     */
+    public function hasRootBindings(Expression $expr = null);
 
     /**
      * Enables a binding.

@@ -176,7 +176,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->manager->getBindings();
     }
 
-    public function testAddBindingType()
+    public function testAddRootBindingType()
     {
         $this->initDefaultManager();
 
@@ -195,7 +195,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
                 PHPUnit_Framework_Assert::assertSame(array($bindingType), $types);
             }));
 
-        $this->manager->addBindingType($bindingType);
+        $this->manager->addRootBindingType($bindingType);
 
         $this->assertTrue($bindingType->isEnabled());
     }
@@ -203,7 +203,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
     /**
      * @expectedException \Puli\Manager\Api\Discovery\DuplicateTypeException
      */
-    public function testAddBindingTypeFailsIfAlreadyDefined()
+    public function testAddRootBindingTypeFailsIfAlreadyDefined()
     {
         $this->initDefaultManager();
 
@@ -217,12 +217,12 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->packageFileStorage->expects($this->never())
             ->method('saveRootPackageFile');
 
-        $this->manager->addBindingType($bindingType);
+        $this->manager->addRootBindingType($bindingType);
 
         $this->assertFalse($bindingType->isEnabled());
     }
 
-    public function testAddBindingTypeDoesNotFailIfAlreadyDefinedAndNoDuplicateCheck()
+    public function testAddRootBindingTypeDoesNotFailIfAlreadyDefinedAndNoDuplicateCheck()
     {
         $this->initDefaultManager();
 
@@ -248,13 +248,13 @@ class DiscoveryManagerImplTest extends ManagerTestCase
                 PHPUnit_Framework_Assert::assertSame(array($bindingType2), $types);
             }));
 
-        $this->manager->addBindingType($bindingType2, DiscoveryManager::NO_DUPLICATE_CHECK);
+        $this->manager->addRootBindingType($bindingType2, DiscoveryManager::NO_DUPLICATE_CHECK);
 
         $this->assertTrue($bindingType1->isDuplicate());
         $this->assertTrue($bindingType2->isDuplicate());
     }
 
-    public function testAddBindingTypeAddsBindingsWithTypeNotLoaded()
+    public function testAddRootBindingTypeAddsBindingsWithTypeNotLoaded()
     {
         $this->initDefaultManager();
 
@@ -279,10 +279,10 @@ class DiscoveryManagerImplTest extends ManagerTestCase
                 PHPUnit_Framework_Assert::assertSame(array($bindingType), $types);
             }));
 
-        $this->manager->addBindingType($bindingType);
+        $this->manager->addRootBindingType($bindingType);
     }
 
-    public function testAddBindingTypeUndefinesTypeIfSavingFails()
+    public function testAddRootBindingTypeUndefinesTypeIfSavingFails()
     {
         $this->initDefaultManager();
 
@@ -304,7 +304,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
             ->willThrowException(new TestException('Some exception'));
 
         try {
-            $this->manager->addBindingType($bindingType);
+            $this->manager->addRootBindingType($bindingType);
             $this->fail('Expected an exception');
         } catch (TestException $e) {
         }
@@ -315,7 +315,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->assertFalse($bindingType->isLoaded());
     }
 
-    public function testRemoveBindingType()
+    public function testRemoveRootBindingType()
     {
         $this->initDefaultManager();
 
@@ -334,12 +334,12 @@ class DiscoveryManagerImplTest extends ManagerTestCase
                 PHPUnit_Framework_Assert::assertSame(array(), $types);
             }));
 
-        $this->manager->removeBindingType('my/type');
+        $this->manager->removeRootBindingType('my/type');
 
         $this->assertFalse($bindingType->isLoaded());
     }
 
-    public function testRemoveBindingTypeIgnoresNonExistingTypes()
+    public function testRemoveRootBindingTypeIgnoresNonExistingTypes()
     {
         $this->initDefaultManager();
 
@@ -349,13 +349,10 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->packageFileStorage->expects($this->never())
             ->method('saveRootPackageFile');
 
-        $this->manager->removeBindingType('my/type');
+        $this->manager->removeRootBindingType('my/type');
     }
 
-    /**
-     * @expectedException \Puli\Manager\Api\RootPackageExpectedException
-     */
-    public function testRemoveBindingTypeFailsIfNotRootPackage()
+    public function testRemoveRootBindingTypeIgnoresIfNotInRootPackage()
     {
         $this->initDefaultManager();
 
@@ -367,10 +364,12 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->packageFileStorage->expects($this->never())
             ->method('saveRootPackageFile');
 
-        $this->manager->removeBindingType('my/type');
+        $this->manager->removeRootBindingType('my/type');
+
+        $this->assertTrue($bindingType->isEnabled());
     }
 
-    public function testRemoveBindingTypeDefinesTypeIfResolvingDuplication()
+    public function testRemoveRootBindingTypeDefinesTypeIfResolvingDuplication()
     {
         $this->initDefaultManager();
 
@@ -393,13 +392,13 @@ class DiscoveryManagerImplTest extends ManagerTestCase
                 PHPUnit_Framework_Assert::assertSame(array(), $types);
             }));
 
-        $this->manager->removeBindingType('my/type');
+        $this->manager->removeRootBindingType('my/type');
 
         $this->assertFalse($bindingType1->isLoaded());
         $this->assertTrue($bindingType2->isEnabled());
     }
 
-    public function testRemoveBindingTypeDoesNotDefineTypeIfStillDuplicated()
+    public function testRemoveRootBindingTypeDoesNotDefineTypeIfStillDuplicated()
     {
         $this->initDefaultManager();
 
@@ -422,14 +421,14 @@ class DiscoveryManagerImplTest extends ManagerTestCase
                 PHPUnit_Framework_Assert::assertSame(array(), $types);
             }));
 
-        $this->manager->removeBindingType('my/type');
+        $this->manager->removeRootBindingType('my/type');
 
         $this->assertFalse($bindingType1->isLoaded());
         $this->assertTrue($bindingType2->isDuplicate());
         $this->assertTrue($bindingType3->isDuplicate());
     }
 
-    public function testRemoveBindingTypeUnbindsCorrespondingBindings()
+    public function testRemoveRootBindingTypeUnbindsCorrespondingBindings()
     {
         $this->initDefaultManager();
 
@@ -453,10 +452,10 @@ class DiscoveryManagerImplTest extends ManagerTestCase
                 PHPUnit_Framework_Assert::assertSame(array(), $types);
             }));
 
-        $this->manager->removeBindingType('my/type');
+        $this->manager->removeRootBindingType('my/type');
     }
 
-    public function testRemoveBindingTypeAddsFormerlyIgnoredBindings()
+    public function testRemoveRootBindingTypeAddsFormerlyIgnoredBindings()
     {
         $this->initDefaultManager();
 
@@ -484,10 +483,10 @@ class DiscoveryManagerImplTest extends ManagerTestCase
                 PHPUnit_Framework_Assert::assertSame(array(), $types);
             }));
 
-        $this->manager->removeBindingType('my/type');
+        $this->manager->removeRootBindingType('my/type');
     }
 
-    public function testRemoveBindingTypeDoesNotAddFormerlyIgnoredBindingsIfStillDuplicated()
+    public function testRemoveRootBindingTypeDoesNotAddFormerlyIgnoredBindingsIfStillDuplicated()
     {
         $this->initDefaultManager();
 
@@ -514,10 +513,10 @@ class DiscoveryManagerImplTest extends ManagerTestCase
                 PHPUnit_Framework_Assert::assertSame(array(), $types);
             }));
 
-        $this->manager->removeBindingType('my/type');
+        $this->manager->removeRootBindingType('my/type');
     }
 
-    public function testRemoveBindingTypeDoesNotEmitWarningForRemovedDuplicateType()
+    public function testRemoveRootBindingTypeDoesNotEmitWarningForRemovedDuplicateType()
     {
         $this->initDefaultManager();
 
@@ -543,10 +542,10 @@ class DiscoveryManagerImplTest extends ManagerTestCase
                 PHPUnit_Framework_Assert::assertSame(array(), $types);
             }));
 
-        $this->manager->removeBindingType('my/type');
+        $this->manager->removeRootBindingType('my/type');
     }
 
-    public function testRemoveBindingTypeEmitsWarningIfDuplicatedMoreThanOnce()
+    public function testRemoveRootBindingTypeEmitsWarningIfDuplicatedMoreThanOnce()
     {
         $this->initDefaultManager();
 
@@ -572,7 +571,70 @@ class DiscoveryManagerImplTest extends ManagerTestCase
                 PHPUnit_Framework_Assert::assertSame(array(), $types);
             }));
 
-        $this->manager->removeBindingType('my/type');
+        $this->manager->removeRootBindingType('my/type');
+    }
+
+    public function testGetRootBindingType()
+    {
+        $this->initDefaultManager();
+
+        $this->rootPackageFile->addTypeDescriptor($type = new BindingTypeDescriptor('my/type'));
+
+        $this->assertSame($type, $this->manager->getRootBindingType('my/type'));
+    }
+
+    /**
+     * @expectedException \Puli\Manager\Api\Discovery\NoSuchTypeException
+     */
+    public function testGetBindingTypeFailsIfNotFoundInRoot()
+    {
+        $this->initDefaultManager();
+
+        $this->packageFile1->addTypeDescriptor($type = new BindingTypeDescriptor('my/type'));
+
+        $this->manager->getRootBindingType('my/type');
+    }
+
+    public function testGetRootBindingTypes()
+    {
+        $this->initDefaultManager();
+
+        $this->rootPackageFile->addTypeDescriptor($type1 = new BindingTypeDescriptor('my/type1'));
+        $this->rootPackageFile->addTypeDescriptor($type2 = new BindingTypeDescriptor('my/type2'));
+        $this->packageFile2->addTypeDescriptor($type3 = new BindingTypeDescriptor('my/type3'));
+
+        $this->assertSame(array(
+            $type1,
+            $type2,
+        ), $this->manager->getRootBindingTypes());
+    }
+
+    public function testHasRootBindingType()
+    {
+        $this->initDefaultManager();
+
+        $this->rootPackageFile->addTypeDescriptor(new BindingTypeDescriptor('my/type1'));
+        $this->packageFile1->addTypeDescriptor(new BindingTypeDescriptor('my/type2'));
+
+        $this->assertTrue($this->manager->hasRootBindingType('my/type1'));
+        $this->assertFalse($this->manager->hasRootBindingType('my/type2'));
+        $this->assertFalse($this->manager->hasRootBindingType('my/type3'));
+    }
+
+    public function testHasRootBindingTypes()
+    {
+        $this->initDefaultManager();
+
+        $this->rootPackageFile->addTypeDescriptor($type1 = new BindingTypeDescriptor('my/type1'));
+        $this->rootPackageFile->addTypeDescriptor($type2 = new BindingTypeDescriptor('my/type2'));
+
+        $expr1 = Expr::same(BindingTypeDescriptor::STATE, BindingTypeState::ENABLED);
+
+        $expr2 = Expr::same(BindingTypeDescriptor::STATE, BindingTypeState::DUPLICATE);
+
+        $this->assertTrue($this->manager->hasRootBindingTypes());
+        $this->assertTrue($this->manager->hasRootBindingTypes($expr1));
+        $this->assertFalse($this->manager->hasRootBindingTypes($expr2));
     }
 
     public function testGetBindingType()
@@ -704,7 +766,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->assertFalse($this->manager->hasBindingTypes());
     }
 
-    public function testAddBinding()
+    public function testAddRootBinding()
     {
         $this->initDefaultManager();
 
@@ -728,10 +790,10 @@ class DiscoveryManagerImplTest extends ManagerTestCase
                 PHPUnit_Framework_Assert::assertTrue($binding->isEnabled());
             }));
 
-        $this->manager->addBinding($binding);
+        $this->manager->addRootBinding($binding);
     }
 
-    public function testAddBindingForTypeWithDefaultParameters()
+    public function testAddRootBindingForTypeWithDefaultParameters()
     {
         $this->initDefaultManager();
 
@@ -755,13 +817,13 @@ class DiscoveryManagerImplTest extends ManagerTestCase
                 PHPUnit_Framework_Assert::assertTrue($binding->isEnabled());
             }));
 
-        $this->manager->addBinding($binding);
+        $this->manager->addRootBinding($binding);
     }
 
     /**
      * @expectedException \Puli\Manager\Api\Discovery\DuplicateBindingException
      */
-    public function testAddBindingFailsIfUuidDuplicatedInPackage()
+    public function testAddRootBindingFailsIfUuidDuplicatedInPackage()
     {
         $this->initDefaultManager();
 
@@ -777,13 +839,13 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->packageFileStorage->expects($this->never())
             ->method('saveRootPackageFile');
 
-        $this->manager->addBinding($binding1);
+        $this->manager->addRootBinding($binding1);
     }
 
     /**
      * @expectedException \Puli\Manager\Api\Discovery\DuplicateBindingException
      */
-    public function testAddBindingFailsIfUuidDuplicatedInRoot()
+    public function testAddRootBindingFailsIfUuidDuplicatedInRoot()
     {
         $this->initDefaultManager();
 
@@ -798,13 +860,13 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->packageFileStorage->expects($this->never())
             ->method('saveRootPackageFile');
 
-        $this->manager->addBinding($binding1);
+        $this->manager->addRootBinding($binding1);
     }
 
     /**
      * @expectedException \Puli\Manager\Api\Discovery\NoSuchTypeException
      */
-    public function testAddBindingFailsIfTypeNotDefined()
+    public function testAddRootBindingFailsIfTypeNotDefined()
     {
         $this->initDefaultManager();
 
@@ -814,10 +876,10 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->packageFileStorage->expects($this->never())
             ->method('saveRootPackageFile');
 
-        $this->manager->addBinding(new BindingDescriptor('/path', 'my/type'));
+        $this->manager->addRootBinding(new BindingDescriptor('/path', 'my/type'));
     }
 
-    public function testAddBindingDoesNotFailIfTypeNotDefinedAndNoTypeCheck()
+    public function testAddRootBindingDoesNotFailIfTypeNotDefinedAndNoTypeCheck()
     {
         $this->initDefaultManager();
 
@@ -837,13 +899,13 @@ class DiscoveryManagerImplTest extends ManagerTestCase
                 PHPUnit_Framework_Assert::assertTrue($binding->isTypeNotFound());
             }));
 
-        $this->manager->addBinding($binding, DiscoveryManager::NO_TYPE_CHECK);
+        $this->manager->addRootBinding($binding, DiscoveryManager::NO_TYPE_CHECK);
     }
 
     /**
      * @expectedException \Puli\Manager\Api\Discovery\TypeNotEnabledException
      */
-    public function testAddBindingFailsIfTypeNotEnabled()
+    public function testAddRootBindingFailsIfTypeNotEnabled()
     {
         $this->initDefaultManager();
 
@@ -856,10 +918,10 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->packageFileStorage->expects($this->never())
             ->method('saveRootPackageFile');
 
-        $this->manager->addBinding(new BindingDescriptor('/path', 'my/type'));
+        $this->manager->addRootBinding(new BindingDescriptor('/path', 'my/type'));
     }
 
-    public function testAddBindingDoesNotFailIfTypeNotEnabledAndNoTypeCheck()
+    public function testAddRootBindingDoesNotFailIfTypeNotEnabledAndNoTypeCheck()
     {
         $this->initDefaultManager();
 
@@ -882,13 +944,13 @@ class DiscoveryManagerImplTest extends ManagerTestCase
                 PHPUnit_Framework_Assert::assertTrue($binding->isTypeNotEnabled());
             }));
 
-        $this->manager->addBinding($binding, DiscoveryManager::NO_TYPE_CHECK);
+        $this->manager->addRootBinding($binding, DiscoveryManager::NO_TYPE_CHECK);
     }
 
     /**
      * @expectedException \Puli\Discovery\Api\Binding\MissingParameterException
      */
-    public function testAddBindingFailsIfMissingParameters()
+    public function testAddRootBindingFailsIfMissingParameters()
     {
         $this->initDefaultManager();
 
@@ -902,10 +964,10 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->packageFileStorage->expects($this->never())
             ->method('saveRootPackageFile');
 
-        $this->manager->addBinding(new BindingDescriptor('/path', 'my/type'));
+        $this->manager->addRootBinding(new BindingDescriptor('/path', 'my/type'));
     }
 
-    public function testAddBindingUnbindsIfSavingFailed()
+    public function testAddRootBindingUnbindsIfSavingFailed()
     {
         $this->initDefaultManager();
 
@@ -930,7 +992,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
             ->willThrowException(new TestException('Some exception'));
 
         try {
-            $this->manager->addBinding($binding);
+            $this->manager->addRootBinding($binding);
             $this->fail('Expected a TestException');
         } catch (TestException $e) {
         }
@@ -939,7 +1001,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->assertFalse($binding->isLoaded());
     }
 
-    public function testRemoveBinding()
+    public function testRemoveRootBinding()
     {
         $this->initDefaultManager();
 
@@ -961,12 +1023,12 @@ class DiscoveryManagerImplTest extends ManagerTestCase
                 PHPUnit_Framework_Assert::assertSame(array(), $bindings);
             }));
 
-        $this->manager->removeBinding($binding->getUuid());
+        $this->manager->removeRootBinding($binding->getUuid());
 
         $this->assertFalse($binding->isLoaded());
     }
 
-    public function testRemoveBindingWorksWithDefaultParameters()
+    public function testRemoveRootBindingWorksWithDefaultParameters()
     {
         $this->initDefaultManager();
 
@@ -991,10 +1053,10 @@ class DiscoveryManagerImplTest extends ManagerTestCase
                 PHPUnit_Framework_Assert::assertSame(array(), $bindings);
             }));
 
-        $this->manager->removeBinding($binding->getUuid());
+        $this->manager->removeRootBinding($binding->getUuid());
     }
 
-    public function testRemoveBindingIgnoresNonExistingBindings()
+    public function testRemoveRootBindingIgnoresNonExistingBindings()
     {
         $this->initDefaultManager();
 
@@ -1004,13 +1066,10 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->packageFileStorage->expects($this->never())
             ->method('saveRootPackageFile');
 
-        $this->manager->removeBinding(Uuid::uuid4());
+        $this->manager->removeRootBinding(Uuid::uuid4());
     }
 
-    /**
-     * @expectedException \Puli\Manager\Api\RootPackageExpectedException
-     */
-    public function testRemoveBindingFailsIfBindingNotInRootPackage()
+    public function testRemoveRootBindingIgnoresIfBindingNotInRootPackage()
     {
         $this->initDefaultManager();
 
@@ -1024,10 +1083,12 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->packageFileStorage->expects($this->never())
             ->method('saveRootPackageFile');
 
-        $this->manager->removeBinding($binding->getUuid());
+        $this->manager->removeRootBinding($binding->getUuid());
+
+        $this->assertTrue($binding->isEnabled());
     }
 
-    public function testRemoveHeldBackBinding()
+    public function testRemoveRootBindingWithTypeNotFound()
     {
         $this->initDefaultManager();
 
@@ -1045,10 +1106,10 @@ class DiscoveryManagerImplTest extends ManagerTestCase
                 PHPUnit_Framework_Assert::assertSame(array(), $bindings);
             }));
 
-        $this->manager->removeBinding($binding->getUuid());
+        $this->manager->removeRootBinding($binding->getUuid());
     }
 
-    public function testRemoveIgnoredBinding()
+    public function testRemoveRootBindingWithTypeNotEnabled()
     {
         $this->initDefaultManager();
 
@@ -1068,7 +1129,37 @@ class DiscoveryManagerImplTest extends ManagerTestCase
                 PHPUnit_Framework_Assert::assertSame(array(), $bindings);
             }));
 
-        $this->manager->removeBinding($binding->getUuid());
+        $this->manager->removeRootBinding($binding->getUuid());
+    }
+
+    public function testHasRootBinding()
+    {
+        $this->initDefaultManager();
+
+        $this->rootPackageFile->addTypeDescriptor(new BindingTypeDescriptor('my/type'));
+        $this->rootPackageFile->addBindingDescriptor($binding1 = new BindingDescriptor('/path1', 'my/type'));
+        $this->packageFile1->addBindingDescriptor($binding2 = new BindingDescriptor('/path2', 'my/type'));
+
+        $this->assertTrue($this->manager->hasRootBinding($binding1->getUuid()));
+        $this->assertFalse($this->manager->hasRootBinding($binding2->getUuid()));
+        $this->assertFalse($this->manager->hasRootBinding(Uuid::fromString(self::NOT_FOUND_UUID)));
+    }
+
+    public function testHasRootBindings()
+    {
+        $this->initDefaultManager();
+
+        $this->rootPackageFile->addTypeDescriptor(new BindingTypeDescriptor('my/type1'));
+        $this->rootPackageFile->addBindingDescriptor($binding1 = new BindingDescriptor('/path1', 'my/type1'));
+        $this->rootPackageFile->addBindingDescriptor($binding2 = new BindingDescriptor('/path2', 'my/type1'));
+
+        $expr1 = Expr::same(BindingDescriptor::STATE, BindingState::ENABLED);
+
+        $expr2 = Expr::same(BindingDescriptor::STATE, BindingState::TYPE_NOT_FOUND);
+
+        $this->assertTrue($this->manager->hasRootBindings());
+        $this->assertTrue($this->manager->hasRootBindings($expr1));
+        $this->assertFalse($this->manager->hasRootBindings($expr2));
     }
 
     public function testEnableBindingBindsIfUndecided()

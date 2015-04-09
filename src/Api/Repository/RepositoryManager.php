@@ -16,6 +16,7 @@ use Puli\Manager\Api\NoDirectoryException;
 use Puli\Manager\Api\RootPackageExpectedException;
 use Puli\Manager\Config\Config;
 use Puli\Manager\Conflict\PackageConflictException;
+use Webmozart\Expression\Expression;
 
 /**
  * Manages the resource repository of a Puli project.
@@ -48,7 +49,7 @@ interface RepositoryManager
      * @throws DuplicatePathMappingException If the repository path is already
      *                                       mapped in the root package.
      */
-    public function addPathMapping(PathMapping $mapping, $flags = 0);
+    public function addRootPathMapping(PathMapping $mapping, $flags = 0);
 
     /**
      * Removes a path mapping from the repository.
@@ -57,44 +58,112 @@ interface RepositoryManager
      * is not found, this method does nothing.
      *
      * @param string $repositoryPath The repository path.
-     *
-     * @throws RootPackageExpectedException If the path mapping is not in the
-     *                                      root package.
      */
-    public function removePathMapping($repositoryPath);
+    public function removeRootPathMapping($repositoryPath);
 
     /**
-     * Returns whether a repository path is mapped.
-     *
-     * @param string $repositoryPath The repository path.
-     *
-     * @return bool Returns `true` if the repository path is mapped.
-     */
-    public function hasPathMapping($repositoryPath);
-
-    /**
-     * Returns the path mapping for a repository path.
+     * Returns the path mapping for a repository path in the root package.
      *
      * @param string $repositoryPath The repository path.
      *
      * @return PathMapping The corresponding path mapping.
      *
-     * @throws NoSuchPathMappingException If the repository path is not mapped.
+     * @throws NoSuchPathMappingException If the repository path is not mapped
+     *                                    in the given package.
      */
-    public function getPathMapping($repositoryPath);
+    public function getRootPathMapping($repositoryPath);
 
     /**
-     * Returns the path mappings.
-     *
-     * @param string|string[] $packageName The package name(s) to filter by.
-     * @param int             $state       The state of the mappings to return.
+     * Returns all path mappings in the root package.
      *
      * @return PathMapping[] The path mappings.
      */
-    public function getPathMappings($packageName = null, $state = null);
+    public function getRootPathMappings();
 
     /**
-     * @return PathConflict[]
+     * Returns whether a repository path is mapped in the root package.
+     *
+     * @param string $repositoryPath The repository path.
+     *
+     * @return bool Returns `true` if the repository path is mapped in the root
+     *              package and `false` otherwise.
+     */
+    public function hasRootPathMapping($repositoryPath);
+
+    /**
+     * Returns whether the manager has any path mappings in the root package.
+     *
+     * You can optionally pass an expression to check whether the manager has
+     * path mappings matching the expression.
+     *
+     * @param Expression $expr The search criteria.
+     *
+     * @return bool Returns `true` if the manager has path mappings in the root
+     *              package and `false` otherwise. If an expression was passed,
+     *              this method only returns `true` if the manager has path
+     *              mappings matching the expression.
+     */
+    public function hasRootPathMappings(Expression $expr = null);
+
+    /**
+     * Returns the path mapping for a repository path.
+     *
+     * @param string $repositoryPath The repository path.
+     * @param string $packageName    The name of the containing package.
+     *
+     * @return PathMapping The corresponding path mapping.
+     *
+     * @throws NoSuchPathMappingException If the repository path is not mapped
+     *                                    in the given package.
+     */
+    public function getPathMapping($repositoryPath, $packageName);
+
+    /**
+     * Returns all path mappings.
+     *
+     * @return PathMapping[] The path mappings.
+     */
+    public function getPathMappings();
+
+    /**
+     * Returns all path mappings matching the given expression.
+     *
+     * @param Expression $expr The search criteria.
+     *
+     * @return PathMapping[] The path mappings matching the expression.
+     */
+    public function findPathMappings(Expression $expr);
+
+    /**
+     * Returns whether a repository path is mapped.
+     *
+     * @param string $repositoryPath The repository path.
+     * @param string $packageName    The name of the containing package.
+     *
+     * @return bool Returns `true` if the repository path is mapped in the given
+     *              package and `false` otherwise.
+     */
+    public function hasPathMapping($repositoryPath, $packageName);
+
+    /**
+     * Returns whether the manager has any path mappings.
+     *
+     * You can optionally pass an expression to check whether the manager has
+     * path mappings matching the expression.
+     *
+     * @param Expression $expr The search criteria.
+     *
+     * @return bool Returns `true` if the manager has path mappings and `false`
+     *              otherwise. If an expression was passed, this method only
+     *              returns `true` if the manager has path mappings matching the
+     *              expression.
+     */
+    public function hasPathMappings(Expression $expr = null);
+
+    /**
+     * Returns all path conflicts.
+     *
+     * @return PathConflict[] The path conflicts.
      */
     public function getPathConflicts();
 

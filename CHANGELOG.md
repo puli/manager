@@ -21,18 +21,35 @@ Changelog
  * changed boolean parameter `$failIfNotFound` to integer parameter `$flags` in
    `RepositoryManager::addPathMapping()`
  * made argument `$packageName` mandatory in `DiscoveryManager::getBindingType()`
- * `DiscoveryManager::removeBinding()` now fails if removing a binding from a
-   non-root package
- * `DiscoveryManager::removeBindingType()` now fails if removing a type from a
-   non-root package
  * removed `CannotEnableBindingException` and `CannotDisableBindingException`
  * replaced `BindingState::TYPE_NOT_LOADED` by `TYPE_NOT_FOUND` and
    `TYPE_NOT_ENABLED`
  * `RepositoryManager::addPathMapping()` now throws an exception if the same
    repository path is already mapped in the root package
- * `RepositoryManager::removePathMapping()` now throws an exception when trying
-   to remove a mapping from a non-root package
-   
+ * renamed `DiscoveryManager::addBindingType()` to `addRootBindingType()`
+ * renamed `DiscoveryManager::removeBindingType()` to `removeRootBindingType()`
+ * added `DiscoveryManager::getRootBindingType()`
+ * added `DiscoveryManager::getRootBindingTypes()`
+ * added `DiscoveryManager::hasRootBindingType()`
+ * added `DiscoveryManager::hasRootBindingTypes()`
+ * renamed `DiscoveryManager::addBinding()` to `addRootBinding()`
+ * renamed `DiscoveryManager::removeBinding()` to `removeRootBinding()`
+ * added `DiscoveryManager::getRootBinding()`
+ * added `DiscoveryManager::getRootBindings()`
+ * added `DiscoveryManager::hasRootBinding()`
+ * added `DiscoveryManager::hasRootBindings()`
+ * renamed `RepositoryManager::addPathMapping()` to `addRootPathMapping()`
+ * renamed `RepositoryManager::removePathMapping()` to `removeRootPathMapping()`
+ * added `RepositoryManager::getRootPathMapping()`
+ * added `RepositoryManager::getRootPathMappings()`
+ * added `RepositoryManager::hasRootPathMapping()`
+ * added `RepositoryManager::hasRootPathMappings()`
+ * added `RepositoryManager::hasPathMappings()`
+ * added `RepositoryManager::findPathMappings()`
+ * added `$packageName` argument to `RepositoryManager::getPathMapping()`
+ * added `$packageName` argument to `RepositoryManager::hasPathMapping()`
+ * removed arguments from `RepositoryManager::getPathMappings()`
+      
 * 1.0.0-beta3 (2015-03-19)
 
  * added `BindingState::DUPLICATE` to output of `BindingState::all()`

@@ -44,7 +44,7 @@ class UpdateConflicts implements AtomicOperation
     /**
      * @var PathMappingCollection
      */
-    private $mappings;
+    private $mappingsByResource;
 
     /**
      * @var string[]
@@ -56,12 +56,12 @@ class UpdateConflicts implements AtomicOperation
      */
     private $removedConflicts = array();
 
-    public function __construct(array $repositoryPaths, PackageConflictDetector $conflictDetector, ConflictCollection $conflicts, PathMappingCollection $mappings)
+    public function __construct(array $repositoryPaths, PackageConflictDetector $conflictDetector, ConflictCollection $conflicts, PathMappingCollection $mappingsByResource)
     {
         $this->repositoryPaths = $repositoryPaths;
         $this->conflictDetector = $conflictDetector;
         $this->conflicts = $conflicts;
-        $this->mappings = $mappings;
+        $this->mappingsByResource = $mappingsByResource;
     }
 
     /**
@@ -93,7 +93,7 @@ class UpdateConflicts implements AtomicOperation
             $conflict = new PathConflict($repositoryPath);
 
             foreach ($packageConflict->getPackageNames() as $packageName) {
-                $conflict->addMapping($this->mappings->get($repositoryPath, $packageName));
+                $conflict->addMapping($this->mappingsByResource->get($repositoryPath, $packageName));
             }
 
             $this->conflicts->add($conflict);

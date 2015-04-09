@@ -46,15 +46,21 @@ class UnloadPathMapping implements AtomicOperation
     private $mappings;
 
     /**
+     * @var PathMappingCollection
+     */
+    private $mappingsByResource;
+
+    /**
      * @var PackageConflictDetector
      */
     private $conflictDetector;
 
-    public function __construct(PathMapping $mapping, PackageCollection $packages, PathMappingCollection $mappings, PackageConflictDetector $conflictDetector)
+    public function __construct(PathMapping $mapping, PackageCollection $packages, PathMappingCollection $mappings, PathMappingCollection $mappingsByResource, PackageConflictDetector $conflictDetector)
     {
         $this->mapping = $mapping;
         $this->packages = $packages;
         $this->mappings = $mappings;
+        $this->mappingsByResource = $mappingsByResource;
         $this->conflictDetector = $conflictDetector;
     }
 
@@ -71,8 +77,10 @@ class UnloadPathMapping implements AtomicOperation
 
         $packageName = $this->containingPackage->getName();
 
+        $this->mappings->remove($this->mapping->getRepositoryPath(), $packageName);
+
         foreach ($this->mapping->listRepositoryPaths() as $repositoryPath) {
-            $this->mappings->remove($repositoryPath, $packageName);
+            $this->mappingsByResource->remove($repositoryPath, $packageName);
             $this->conflictDetector->release($repositoryPath, $packageName);
         }
 

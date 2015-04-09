@@ -23,6 +23,7 @@ use Puli\Manager\Api\Package\PackageCollection;
 use Puli\Manager\Assert\Assert;
 use Puli\Manager\Repository\Iterator\RecursivePathsIterator;
 use RecursiveIteratorIterator;
+use Webmozart\Expression\Expression;
 use Webmozart\PathUtil\Path;
 
 /**
@@ -41,6 +42,21 @@ use Webmozart\PathUtil\Path;
  */
 class PathMapping
 {
+    /**
+     * The repository path field in {@link Expression} instances.
+     */
+    const REPOSITORY_PATH = 'repositoryPath';
+
+    /**
+     * The state field in {@link Expression} instances.
+     */
+    const STATE = 'state';
+
+    /**
+     * The package field in {@link Expression} instances.
+     */
+    const CONTAINING_PACKAGE = 'containingPackage';
+
     /**
      * @var string
      */
@@ -595,6 +611,25 @@ class PathMapping
         }
 
         return PathMappingState::CONFLICT === $this->state;
+    }
+
+    /**
+     * Returns whether the path mapping matches the given expression.
+     *
+     * @param Expression $expr The search criteria. You can use the fields
+     *                         {@link REPOSITORY_PATH}, {@link STATE} and
+     *                         {@link CONTAINING_PACKAGE} in the expression.
+     *
+     * @return bool Returns `true` if the path mapping matches the expression
+     *              and `false` otherwise.
+     */
+    public function match(Expression $expr)
+    {
+        return $expr->evaluate(array(
+            self::REPOSITORY_PATH => $this->repositoryPath,
+            self::STATE => $this->state,
+            self::CONTAINING_PACKAGE => $this->containingPackage->getName(),
+        ));
     }
 
     private function refreshState()

@@ -34,8 +34,27 @@ class NoSuchPathMappingException extends RuntimeException
     public static function forRepositoryPath($path, $code = 0, Exception $cause = null)
     {
         return new static(sprintf(
-            'The repository path "%s" was not found.',
+            'The repository path "%s" is not mapped.',
             $path
+        ), $code, $cause);
+    }
+
+    /**
+     * Creates an exception for a repository path and a package name.
+     *
+     * @param string    $path        The repository path.
+     * @param string    $packageName The name of the containing package.
+     * @param int       $code        The exception code.
+     * @param Exception $cause       The exception that caused this exception.
+     *
+     * @return static The created exception.
+     */
+    public static function forRepositoryPathAndPackage($path, $packageName, $code = 0, Exception $cause = null)
+    {
+        return new static(sprintf(
+            'The repository path "%s" is not mapped in package "%s".',
+            $path,
+            $packageName
         ), $code, $cause);
     }
 }

@@ -41,7 +41,7 @@ class SyncRepositoryPath implements AtomicOperation
     /**
      * @var PathMappingCollection
      */
-    private $mappings;
+    private $mappingsByResource;
 
     /**
      * @var OverrideGraph
@@ -59,16 +59,16 @@ class SyncRepositoryPath implements AtomicOperation
     private $enabledFilesystemPathsAfter;
 
     /**
-     * @param string               $repositoryPath
-     * @param EditableRepository   $repo
-     * @param PathMappingCollection $mappings
-     * @param OverrideGraph        $overrideGraph
+     * @param string                $repositoryPath
+     * @param EditableRepository    $repo
+     * @param PathMappingCollection $mappingsByResource
+     * @param OverrideGraph         $overrideGraph
      */
-    public function __construct($repositoryPath, EditableRepository $repo, PathMappingCollection $mappings, OverrideGraph $overrideGraph)
+    public function __construct($repositoryPath, EditableRepository $repo, PathMappingCollection $mappingsByResource, OverrideGraph $overrideGraph)
     {
         $this->repositoryPath = $repositoryPath;
         $this->repo = $repo;
-        $this->mappings = $mappings;
+        $this->mappingsByResource = $mappingsByResource;
         $this->overrideGraph = $overrideGraph;
     }
 
@@ -212,7 +212,7 @@ class SyncRepositoryPath implements AtomicOperation
     {
         // Get a copy so that we can remove the entries that we processed
         // already
-        $mappings = $this->mappings->toArray();
+        $mappings = $this->mappingsByResource->toArray();
 
         $this->collectEnabledFilesystemPaths($repositoryPath, $mappings, $filesystemPaths);
 
