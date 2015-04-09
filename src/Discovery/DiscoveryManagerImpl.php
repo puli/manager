@@ -249,9 +249,10 @@ class DiscoveryManagerImpl implements DiscoveryManager
     /**
      * {@inheritdoc}
      */
-    public function getBindingType($typeName, $packageName = null)
+    public function getBindingType($typeName, $packageName)
     {
-        Assert::nullOrString($packageName, 'The package name must be a string or null. Got: %s');
+        Assert::string($typeName, 'The type name must be a string. Got: %s');
+        Assert::string($packageName, 'The package name must be a string. Got: %s');
 
         $this->assertPackagesLoaded();
 
@@ -678,8 +679,9 @@ class DiscoveryManagerImpl implements DiscoveryManager
     private function emitWarningForDuplicateTypes()
     {
         foreach ($this->typeDescriptors->getTypeNames() as $typeName) {
-            if ($this->typeDescriptors->get($typeName)->isDuplicate()) {
-                $packageNames = $this->typeDescriptors->getPackageNames($typeName);
+            $packageNames = $this->typeDescriptors->getPackageNames($typeName);
+
+            if (count($packageNames) > 1) {
                 $lastPackageName = array_pop($packageNames);
 
                 $this->logger->warning(sprintf(

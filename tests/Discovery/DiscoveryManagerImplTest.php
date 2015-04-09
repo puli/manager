@@ -582,8 +582,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->packageFile1->addTypeDescriptor($type2 = new BindingTypeDescriptor('my/type2'));
         $this->packageFile2->addTypeDescriptor($type3 = clone $type2); // duplicate
 
-        $this->assertSame($type1, $this->manager->getBindingType('my/type1'));
-        $this->assertSame($type2, $this->manager->getBindingType('my/type2'));
+        $this->assertSame($type1, $this->manager->getBindingType('my/type1', 'vendor/root'));
         $this->assertSame($type2, $this->manager->getBindingType('my/type2', 'vendor/package1'));
         $this->assertSame($type3, $this->manager->getBindingType('my/type2', 'vendor/package2'));
     }
@@ -595,7 +594,17 @@ class DiscoveryManagerImplTest extends ManagerTestCase
     {
         $this->initDefaultManager();
 
-        $this->manager->getBindingType('my/type');
+        $this->manager->getBindingType('my/type', 'vendor/root');
+    }
+
+    /**
+     * @expectedException \InvalidArgumentException
+     */
+    public function testGetBindingTypeFailsIfTypeNoString()
+    {
+        $this->initDefaultManager();
+
+        $this->manager->getBindingType(1234, 'vendor/root');
     }
 
     /**

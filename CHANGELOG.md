@@ -20,6 +20,7 @@ Changelog
  * renamed `RepositoryManager::*ResourceMapping*()` to `RepositoryManager::*PathMapping*()`
  * changed boolean parameter `$failIfNotFound` to integer parameter `$flags` in
    `RepositoryManager::addPathMapping()`
+ * made argument `$packageName` mandatory in `DiscoveryManager::getBindingType()`
    
 * 1.0.0-beta3 (2015-03-19)
 

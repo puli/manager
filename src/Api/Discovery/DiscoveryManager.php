@@ -45,6 +45,8 @@ interface DiscoveryManager
     /**
      * Adds a new binding type.
      *
+     * The type definition is added to the root package file.
+     *
      * @param BindingTypeDescriptor $typeDescriptor The type to add.
      * @param int                   $flags          A bitwise combination of the
      *                                              flag constants in this class.
@@ -56,6 +58,9 @@ interface DiscoveryManager
     /**
      * Removes a binding type.
      *
+     * The type definition is removed from the root package file. If the type
+     * is not found, this method does nothing.
+     *
      * @param string $typeName The name of the type to remove.
      */
     public function removeBindingType($typeName);
@@ -64,15 +69,13 @@ interface DiscoveryManager
      * Returns the binding type with the given name.
      *
      * @param string $typeName    The name of the type.
-     * @param string $packageName The name of the package to check. Useful if
-     *                            types with the same name exist in multiple
-     *                            packages.
+     * @param string $packageName The name of the package to check.
      *
      * @return BindingTypeDescriptor The binding type.
      *
      * @throws NoSuchTypeException If the type does not exist.
      */
-    public function getBindingType($typeName, $packageName = null);
+    public function getBindingType($typeName, $packageName);
 
     /**
      * Returns all binding types.

@@ -24,9 +24,7 @@ use Puli\Manager\Util\TwoDimensionalHashMap;
  *  * The package that defines the type.
  *
  * The store implements transparent merging of types defined within different
- * packages, but with the same type name. If a type is requested for a name
- * without giving a package name, the first type set for that name is
- * returned by {@link get()}.
+ * packages, but with the same type name.
  *
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
@@ -72,9 +70,6 @@ class BindingTypeDescriptorCollection
     /**
      * Returns a type descriptor.
      *
-     * If no package is passed, the first descriptor set for the type name is
-     * returned.
-     *
      * @param string $typeName    The name of the type.
      * @param string $packageName The name of the package containing the type.
      *
@@ -83,13 +78,9 @@ class BindingTypeDescriptorCollection
      * @throws OutOfBoundsException If no type descriptor was set for the
      *                              given name/package.
      */
-    public function get($typeName, $packageName = null)
+    public function get($typeName, $packageName)
     {
-        if (null !== $packageName) {
-            return $this->map->get($typeName, $packageName);
-        }
-
-        return $this->map->getFirst($typeName);
+        return $this->map->get($typeName, $packageName);
     }
 
     /**
