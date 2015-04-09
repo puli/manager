@@ -69,11 +69,19 @@ interface RootPackageFileManager extends ConfigFileManager
     /**
      * Removes a plugin class from the package file.
      *
-     * If the package file does not contain the class, this method does nothign.
+     * If the package file does not contain the class, this method does nothing.
      *
      * @param string $pluginClass The fully qualified plugin class name.
      */
     public function removePluginClass($pluginClass);
+
+    /**
+     * Removes all plugin classes from the package file.
+     *
+     * If the package file does not contain any classes, this method does
+     * nothing.
+     */
+    public function clearPluginClasses();
 
     /**
      * Returns whether the package file contains a plugin class.
@@ -99,11 +107,6 @@ interface RootPackageFileManager extends ConfigFileManager
      * @return string[] The fully qualified plugin class names.
      */
     public function getPluginClasses();
-
-    /**
-     * Removes all plugin classes from the package file.
-     */
-    public function clearPluginClasses();
 
     /**
      * Sets an extra key in the file.
