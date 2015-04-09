@@ -52,7 +52,7 @@ class AddPathMappingToPackageFile implements AtomicOperation
         $repositoryPath = $this->mapping->getRepositoryPath();
 
         if ($this->rootPackageFile->hasPathMapping($repositoryPath)) {
-            $this->previousMapping = $this->rootPackageFile->getPathMappings($repositoryPath);
+            $this->previousMapping = $this->rootPackageFile->getPathMapping($repositoryPath);
         }
 
         $this->rootPackageFile->addPathMapping($this->mapping);

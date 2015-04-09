@@ -17,6 +17,7 @@ use Puli\Manager\Api\Environment\ProjectEnvironment;
 use Puli\Manager\Api\Package\Package;
 use Puli\Manager\Api\Package\PackageCollection;
 use Puli\Manager\Api\Package\RootPackageFile;
+use Puli\Manager\Api\Repository\DuplicatePathMappingException;
 use Puli\Manager\Api\Repository\RepositoryManager;
 use Puli\Manager\Api\Repository\PathMapping;
 use Puli\Manager\Api\Repository\PathMappingState;
@@ -137,6 +138,10 @@ class RepositoryManagerImpl implements RepositoryManager
         Assert::integer($flags, 'The argument $flags must be a boolean.');
 
         $this->assertMappingsLoaded();
+
+        if ($this->rootPackageFile->hasPathMapping($mapping->getRepositoryPath())) {
+            throw DuplicatePathMappingException::forRepositoryPath($mapping->getRepositoryPath(), $this->rootPackage->getName());
+        }
 
         $tx = new Transaction();
 

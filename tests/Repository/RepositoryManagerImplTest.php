@@ -141,6 +141,27 @@ class RepositoryManagerImplTest extends ManagerTestCase
         $this->manager->addPathMapping(new PathMapping('/path', 'resources'));
     }
 
+    /**
+     * @expectedException \Puli\Manager\Api\Repository\DuplicatePathMappingException
+     */
+    public function testAddPathMappingFailsIfPathAlreadyMapped()
+    {
+        $this->initDefaultManager();
+
+        $this->rootPackageFile->addPathMapping(new PathMapping('/path', 'assets'));
+
+        $this->repo->expects($this->never())
+            ->method('remove');
+
+        $this->repo->expects($this->never())
+            ->method('add');
+
+        $this->packageFileStorage->expects($this->never())
+            ->method('saveRootPackageFile');
+
+        $this->manager->addPathMapping(new PathMapping('/path', 'resources'));
+    }
+
     public function testAddPathMappingWithFilePath()
     {
         $this->initDefaultManager();

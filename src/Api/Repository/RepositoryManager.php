@@ -43,6 +43,9 @@ interface RepositoryManager
      * @param PathMapping $mapping The path mapping.
      * @param int         $flags   A bitwise combination of the flag constants
      *                             in this class.
+     *
+     * @throws DuplicatePathMappingException If the repository path is already
+     *                                       mapped in the root package.
      */
     public function addPathMapping(PathMapping $mapping, $flags = 0);
 
