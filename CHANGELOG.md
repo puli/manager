@@ -67,6 +67,9 @@ Changelog
    are passed
  * `RepositoryManager::addRootPathMapping()` now accepts the flags
    `OVERRIDE` and `IGNORE_FILE_NOT_FOUND`
+ * renamed `DiscoveryManager::NO_DUPLICATE_CHECK` to `OVERRIDE`
+ * split `DiscoveryManager::NO_TYPE_CHECK` into `IGNORE_TYPE_NOT_FOUND` and
+   `IGNORE_TYPE_NOT_ENABLED`
       
 * 1.0.0-beta3 (2015-03-19)
 

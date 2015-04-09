@@ -28,13 +28,17 @@ interface DiscoveryManager
      * Flag: Don't check whether the type exists already in
      * {@link addBindingType()}.
      */
-    const NO_DUPLICATE_CHECK = 1;
+    const OVERRIDE = 1;
 
     /**
-     * Flag: Don't check whether the referenced type exists/is enabled in
-     * {@link addBinding()}.
+     * Flag: Ignore if the type is not found in {@link addBinding()}.
      */
-    const NO_TYPE_CHECK = 2;
+    const IGNORE_TYPE_NOT_FOUND = 2;
+
+    /**
+     * Flag: Ignore if the type is not enabled in {@link addBinding()}.
+     */
+    const IGNORE_TYPE_NOT_ENABLED = 4;
 
     /**
      * Returns the manager's environment.

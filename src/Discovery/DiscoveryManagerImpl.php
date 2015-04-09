@@ -156,7 +156,7 @@ class DiscoveryManagerImpl implements DiscoveryManager
         $this->assertPackagesLoaded();
         $this->emitWarningForDuplicateTypes();
 
-        if (!($flags & self::NO_DUPLICATE_CHECK) && $this->typeDescriptors->contains($typeDescriptor->getName())) {
+        if (!($flags & self::OVERRIDE) && $this->typeDescriptors->contains($typeDescriptor->getName())) {
             throw DuplicateTypeException::forTypeName($typeDescriptor->getName());
         }
 
@@ -434,16 +434,15 @@ class DiscoveryManagerImpl implements DiscoveryManager
     {
         $this->assertPackagesLoaded();
 
-        if (!($flags & self::NO_TYPE_CHECK)) {
-            $typeName = $bindingDescriptor->getTypeName();
+        $typeName = $bindingDescriptor->getTypeName();
+        $typeExists = $this->typeDescriptors->contains($typeName);
 
-            if (!$this->typeDescriptors->contains($typeName)) {
-                throw NoSuchTypeException::forTypeName($typeName);
-            }
+        if (!($flags & self::IGNORE_TYPE_NOT_FOUND) && !$typeExists) {
+            throw NoSuchTypeException::forTypeName($typeName);
+        }
 
-            if (!$this->typeDescriptors->getFirst($typeName)->isEnabled()) {
-                throw TypeNotEnabledException::forTypeName($typeName);
-            }
+        if (!($flags & self::IGNORE_TYPE_NOT_ENABLED) && $typeExists && !$this->typeDescriptors->getFirst($typeName)->isEnabled()) {
+            throw TypeNotEnabledException::forTypeName($typeName);
         }
 
         $uuid = $bindingDescriptor->getUuid();

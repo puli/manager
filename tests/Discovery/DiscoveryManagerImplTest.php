@@ -248,7 +248,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
                 PHPUnit_Framework_Assert::assertSame(array($bindingType2), $types);
             }));
 
-        $this->manager->addRootBindingType($bindingType2, DiscoveryManager::NO_DUPLICATE_CHECK);
+        $this->manager->addRootBindingType($bindingType2, DiscoveryManager::OVERRIDE);
 
         $this->assertTrue($bindingType1->isDuplicate());
         $this->assertTrue($bindingType2->isDuplicate());
@@ -1014,7 +1014,23 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->manager->addRootBinding(new BindingDescriptor('/path', 'my/type'));
     }
 
-    public function testAddRootBindingDoesNotFailIfTypeNotDefinedAndNoTypeCheck()
+    /**
+     * @expectedException \Puli\Manager\Api\Discovery\NoSuchTypeException
+     */
+    public function testAddRootBindingFailsIfTypeNotDefinedAndIgnoreNotEnabled()
+    {
+        $this->initDefaultManager();
+
+        $this->discovery->expects($this->never())
+            ->method('bind');
+
+        $this->packageFileStorage->expects($this->never())
+            ->method('saveRootPackageFile');
+
+        $this->manager->addRootBinding(new BindingDescriptor('/path', 'my/type'), DiscoveryManager::IGNORE_TYPE_NOT_ENABLED);
+    }
+
+    public function testAddRootBindingDoesNotFailIfTypeNotDefinedAndIgnoreTypeNotFound()
     {
         $this->initDefaultManager();
 
@@ -1034,7 +1050,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
                 PHPUnit_Framework_Assert::assertTrue($binding->isTypeNotFound());
             }));
 
-        $this->manager->addRootBinding($binding, DiscoveryManager::NO_TYPE_CHECK);
+        $this->manager->addRootBinding($binding, DiscoveryManager::IGNORE_TYPE_NOT_FOUND);
     }
 
     /**
@@ -1056,7 +1072,26 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->manager->addRootBinding(new BindingDescriptor('/path', 'my/type'));
     }
 
-    public function testAddRootBindingDoesNotFailIfTypeNotEnabledAndNoTypeCheck()
+    /**
+     * @expectedException \Puli\Manager\Api\Discovery\TypeNotEnabledException
+     */
+    public function testAddRootBindingFailsIfTypeNotEnabledAndIgnoreTypeNotFOund()
+    {
+        $this->initDefaultManager();
+
+        $this->rootPackageFile->addTypeDescriptor(new BindingTypeDescriptor('my/type'));
+        $this->packageFile1->addTypeDescriptor(new BindingTypeDescriptor('my/type'));
+
+        $this->discovery->expects($this->never())
+            ->method('bind');
+
+        $this->packageFileStorage->expects($this->never())
+            ->method('saveRootPackageFile');
+
+        $this->manager->addRootBinding(new BindingDescriptor('/path', 'my/type'), DiscoveryManager::IGNORE_TYPE_NOT_FOUND);
+    }
+
+    public function testAddRootBindingDoesNotFailIfTypeNotEnabledAndIgnoreTypeNotEnabled()
     {
         $this->initDefaultManager();
 
@@ -1079,7 +1114,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
                 PHPUnit_Framework_Assert::assertTrue($binding->isTypeNotEnabled());
             }));
 
-        $this->manager->addRootBinding($binding, DiscoveryManager::NO_TYPE_CHECK);
+        $this->manager->addRootBinding($binding, DiscoveryManager::IGNORE_TYPE_NOT_ENABLED);
     }
 
     /**
