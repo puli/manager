@@ -198,7 +198,7 @@ class BindingDescriptor
 
         $this->violations = array();
 
-        if ($typeDescriptor) {
+        if ($typeDescriptor && $typeDescriptor->isLoaded() && $typeDescriptor->isEnabled()) {
             $validator = new SimpleParameterValidator();
             $bindingType = $typeDescriptor->toBindingType();
 

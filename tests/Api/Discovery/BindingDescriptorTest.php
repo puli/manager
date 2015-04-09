@@ -417,6 +417,22 @@ class BindingDescriptorTest extends PHPUnit_Framework_TestCase
         $this->assertCount(1, $binding->getViolations());
     }
 
+    public function testParametersNotValidatedIfTypeNotEnabled()
+    {
+        $type = new BindingTypeDescriptor('vendor/type', null, array(
+            new BindingParameterDescriptor('param', BindingParameterDescriptor::REQUIRED),
+        ));
+        $type->load($this->package);
+        $type->markDuplicate(true);
+
+        // Parameter is missing
+        $binding = new BindingDescriptor('/path', 'vendor/type');
+        $binding->load($this->package, $type);
+
+        $this->assertSame(BindingState::TYPE_NOT_ENABLED, $binding->getState());
+        $this->assertCount(0, $binding->getViolations());
+    }
+
     public function testEnabledInRootPackage()
     {
         $type = new BindingTypeDescriptor('vendor/type');
