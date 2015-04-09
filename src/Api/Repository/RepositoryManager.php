@@ -13,6 +13,7 @@ namespace Puli\Manager\Api\Repository;
 
 use Puli\Manager\Api\Environment\ProjectEnvironment;
 use Puli\Manager\Api\NoDirectoryException;
+use Puli\Manager\Api\RootPackageExpectedException;
 use Puli\Manager\Config\Config;
 use Puli\Manager\Conflict\PackageConflictException;
 
@@ -52,7 +53,13 @@ interface RepositoryManager
     /**
      * Removes a path mapping from the repository.
      *
+     * The path mapping is removed from the root package file. If the mapping
+     * is not found, this method does nothing.
+     *
      * @param string $repositoryPath The repository path.
+     *
+     * @throws RootPackageExpectedException If the path mapping is not in the
+     *                                      root package.
      */
     public function removePathMapping($repositoryPath);
 

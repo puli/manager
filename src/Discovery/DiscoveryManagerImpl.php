@@ -209,9 +209,7 @@ class DiscoveryManagerImpl implements DiscoveryManager
         }
 
         if (!$this->typeDescriptors->contains($typeName, $this->rootPackage->getName())) {
-            $typeDescriptor = $this->typeDescriptors->getFirst($typeName);
-
-            throw RootPackageExpectedException::cannotRemoveBindingType($typeName, $typeDescriptor->getContainingPackage()->getName());
+            throw RootPackageExpectedException::cannotRemoveBindingType($typeName);
         }
 
         $typeDescriptor = $this->typeDescriptors->get($typeName, $this->rootPackage->getName());

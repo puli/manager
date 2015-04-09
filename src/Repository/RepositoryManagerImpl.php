@@ -21,6 +21,7 @@ use Puli\Manager\Api\Repository\DuplicatePathMappingException;
 use Puli\Manager\Api\Repository\RepositoryManager;
 use Puli\Manager\Api\Repository\PathMapping;
 use Puli\Manager\Api\Repository\PathMappingState;
+use Puli\Manager\Api\RootPackageExpectedException;
 use Puli\Manager\Assert\Assert;
 use Puli\Manager\Conflict\OverrideGraph;
 use Puli\Manager\Conflict\PackageConflictDetector;
@@ -178,14 +179,17 @@ class RepositoryManagerImpl implements RepositoryManager
     {
         Assert::path($repositoryPath);
 
-        if (!$this->rootPackageFile->hasPathMapping($repositoryPath)) {
+        $this->assertMappingsLoaded();
+
+        if (!$this->mappings->contains($repositoryPath)) {
             return;
         }
 
-        $this->assertMappingsLoaded();
+        if (!$this->mappings->contains($repositoryPath, $this->rootPackage->getName())) {
+            throw RootPackageExpectedException::cannotRemovePathMapping($repositoryPath);
+        }
 
         $mapping = $this->mappings->get($repositoryPath, $this->rootPackage->getName());
-
         $tx = new Transaction();
 
         try {

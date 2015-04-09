@@ -30,6 +30,8 @@ Changelog
    `TYPE_NOT_ENABLED`
  * `RepositoryManager::addPathMapping()` now throws an exception if the same
    repository path is already mapped in the root package
+ * `RepositoryManager::removePathMapping()` now throws an exception when trying
+   to remove a mapping from a non-root package
    
 * 1.0.0-beta3 (2015-03-19)
 

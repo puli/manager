@@ -548,6 +548,24 @@ class RepositoryManagerImplTest extends ManagerTestCase
         $this->assertFalse($mapping->isLoaded());
     }
 
+    /**
+     * @expectedException \Puli\Manager\Api\RootPackageExpectedException
+     */
+    public function testRemovePathMappingFailsIfNotInRootPackage()
+    {
+        $this->initDefaultManager();
+
+        $this->repo->expects($this->never())
+            ->method('remove');
+
+        $this->packageFileStorage->expects($this->never())
+            ->method('saveRootPackageFile');
+
+        $this->packageFile1->addPathMapping($mapping = new PathMapping('/app', 'resources'));
+
+        $this->manager->removePathMapping('/app');
+    }
+
     public function testRemovePathMappingDoesNothingIfUnknownPath()
     {
         $this->initDefaultManager();
