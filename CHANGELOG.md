@@ -61,6 +61,8 @@ Changelog
  * added `RootPackageFile::hasInstallInfos()`
  * added `DiscoveryManager::clearRootBindingTypes()`
  * added `DiscoveryManager::clearRootBindings()`
+ * fixed restoring of conflicts when `RepositoryManager::removeRootPathMapping()` fails
+ * added `RepositoryManager::clearRootPathMappings()`
       
 * 1.0.0-beta3 (2015-03-19)
 

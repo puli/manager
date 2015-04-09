@@ -13,6 +13,7 @@ namespace Puli\Manager\Repository\Mapping;
 
 use Puli\Manager\Api\Package\Package;
 use Puli\Manager\Api\Package\PackageCollection;
+use Puli\Manager\Api\Repository\PathConflict;
 use Puli\Manager\Api\Repository\PathMapping;
 use Puli\Manager\Conflict\PackageConflictDetector;
 use Puli\Manager\Transaction\AtomicOperation;
@@ -55,6 +56,16 @@ class UnloadPathMapping implements AtomicOperation
      */
     private $conflictDetector;
 
+    /**
+     * @var PathConflict[]
+     */
+    private $conflicts = array();
+
+    /**
+     * @var PathMapping[][]
+     */
+    private $conflictingMappings = array();
+
     public function __construct(PathMapping $mapping, PackageCollection $packages, PathMappingCollection $mappings, PathMappingCollection $mappingsByResource, PackageConflictDetector $conflictDetector)
     {
         $this->mapping = $mapping;
@@ -74,6 +85,12 @@ class UnloadPathMapping implements AtomicOperation
         }
 
         $this->containingPackage = $this->mapping->getContainingPackage();
+
+        // Remember the conflicts that will be adjusted during unload()
+        foreach ($this->mapping->getConflicts() as $conflict) {
+            $this->conflicts[$conflict->getRepositoryPath()] = $conflict;
+            $this->conflictingMappings[$conflict->getRepositoryPath()] = $conflict->getMappings();
+        }
 
         $packageName = $this->containingPackage->getName();
 
@@ -104,6 +121,11 @@ class UnloadPathMapping implements AtomicOperation
         foreach ($this->mapping->listRepositoryPaths() as $repositoryPath) {
             $this->mappings->add($this->mapping);
             $this->conflictDetector->claim($repositoryPath, $packageName);
+        }
+
+        // Restore conflicts
+        foreach ($this->conflicts as $repositoryPath => $conflict) {
+            $conflict->addMappings($this->conflictingMappings[$repositoryPath]);
         }
     }
 }

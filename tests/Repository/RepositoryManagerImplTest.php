@@ -724,6 +724,196 @@ class RepositoryManagerImplTest extends ManagerTestCase
         $this->assertCount(0, $this->manager->getPathConflicts());
     }
 
+    public function testRemovesRootPathMappingRestoresResourcesIfSavingFails1()
+    {
+        $this->initDefaultManager();
+
+        $this->rootPackageFile->addPathMapping($mapping1 = new PathMapping('/path', 'resources'));
+        $this->rootPackageFile->setOverriddenPackages(array('vendor/package1'));
+        $this->packageFile1->addPathMapping($mapping2 = new PathMapping('/path', 'resources'));
+
+        $this->repo->expects($this->at(0))
+            ->method('remove')
+            ->with('/path');
+
+        $this->repo->expects($this->at(1))
+            ->method('add')
+            ->with('/path', new DirectoryResource($this->packageDir1.'/resources'));
+
+        // Restore: only add root mapping
+        $this->repo->expects($this->at(2))
+            ->method('add')
+            ->with('/path', new DirectoryResource($this->rootDir.'/resources'));
+
+        $this->packageFileStorage->expects($this->once())
+            ->method('saveRootPackageFile')
+            ->willThrowException(new TestException('Cannot save'));
+
+        try {
+            $this->manager->removeRootPathMapping('/path');
+            $this->fail('Expected a TestException');
+        } catch (TestException $e) {
+        }
+
+        $this->assertTrue($mapping1->isEnabled());
+        $this->assertTrue($mapping2->isEnabled());
+        $this->assertCount(0, $this->manager->getPathConflicts());
+    }
+
+    public function testRemovesRootPathMappingRestoresResourcesIfSavingFails2()
+    {
+        $this->initDefaultManager();
+
+        $this->rootPackageFile->addPathMapping($mapping1 = new PathMapping('/path', 'resources'));
+        $this->packageFile1->addPathMapping($mapping2 = new PathMapping('/path', 'resources'));
+        $this->packageFile1->setOverriddenPackages(array('vendor/root'));
+
+        $this->repo->expects($this->at(0))
+            ->method('remove')
+            ->with('/path');
+
+        $this->repo->expects($this->at(1))
+            ->method('add')
+            ->with('/path', new DirectoryResource($this->packageDir1.'/resources'));
+
+        // Restore: remove and reapply
+        $this->repo->expects($this->at(2))
+            ->method('remove')
+            ->with('/path');
+
+        $this->repo->expects($this->at(3))
+            ->method('add')
+            ->with('/path', new DirectoryResource($this->rootDir.'/resources'));
+
+        $this->repo->expects($this->at(4))
+            ->method('add')
+            ->with('/path', new DirectoryResource($this->packageDir1.'/resources'));
+
+        $this->packageFileStorage->expects($this->once())
+            ->method('saveRootPackageFile')
+            ->willThrowException(new TestException('Cannot save'));
+
+        try {
+            $this->manager->removeRootPathMapping('/path');
+            $this->fail('Expected a TestException');
+        } catch (TestException $e) {
+        }
+
+        $this->assertTrue($mapping1->isEnabled());
+        $this->assertTrue($mapping2->isEnabled());
+        $this->assertCount(0, $this->manager->getPathConflicts());
+    }
+
+    public function testRemovesRootPathMappingRestoresConflictsIfSavingFails()
+    {
+        $this->initDefaultManager();
+
+        $this->rootPackageFile->addPathMapping($mapping1 = new PathMapping('/path', 'resources'));
+        $this->packageFile1->addPathMapping($mapping2 = new PathMapping('/path', 'resources'));
+
+        $this->repo->expects($this->at(0))
+            ->method('add')
+            ->with('/path', new DirectoryResource($this->packageDir1.'/resources'));
+
+        $this->repo->expects($this->at(1))
+            ->method('remove')
+            ->with('/path');
+
+        $this->packageFileStorage->expects($this->once())
+            ->method('saveRootPackageFile')
+            ->willThrowException(new TestException('Cannot save'));
+
+        try {
+            $this->manager->removeRootPathMapping('/path');
+            $this->fail('Expected a TestException');
+        } catch (TestException $e) {
+        }
+
+        $this->assertTrue($mapping1->isConflicting());
+        $this->assertTrue($mapping2->isConflicting());
+        $this->assertCount(1, $this->manager->getPathConflicts());
+    }
+
+    public function testClearRootPathMappings()
+    {
+        $this->initDefaultManager();
+
+        $this->repo->expects($this->at(0))
+            ->method('remove')
+            ->with('/app1');
+
+        $this->repo->expects($this->at(1))
+            ->method('remove')
+            ->with('/app2');
+
+        $this->packageFileStorage->expects($this->once())
+            ->method('saveRootPackageFile')
+            ->with($this->rootPackageFile)
+            ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) {
+                PHPUnit_Framework_Assert::assertFalse($rootPackageFile->hasPathMappings());
+            }));
+
+        $this->rootPackageFile->addPathMapping($mapping1 = new PathMapping('/app1', 'resources'));
+        $this->rootPackageFile->addPathMapping($mapping2 = new PathMapping('/app2', 'resources'));
+
+        $this->manager->clearRootPathMappings();
+
+        $this->assertFalse($mapping1->isLoaded());
+        $this->assertFalse($mapping2->isLoaded());
+    }
+
+    public function testClearRootPathMappingRestoresResourcesIfSavingFails1()
+    {
+        $this->initDefaultManager();
+
+        $this->repo->expects($this->at(0))
+            ->method('remove')
+            ->with('/path1');
+
+        $this->repo->expects($this->at(1))
+            ->method('add')
+            ->with('/path1', new DirectoryResource($this->packageDir1.'/resources'));
+
+        $this->repo->expects($this->at(2))
+            ->method('remove')
+            ->with('/path2');
+
+        $this->repo->expects($this->at(3))
+            ->method('add')
+            ->with('/path2', new DirectoryResource($this->packageDir1.'/resources'));
+
+        // Restore: only add root mappings
+        $this->repo->expects($this->at(4))
+            ->method('add')
+            ->with('/path2', new DirectoryResource($this->rootDir.'/resources'));
+
+        $this->repo->expects($this->at(5))
+            ->method('add')
+            ->with('/path1', new DirectoryResource($this->rootDir.'/resources'));
+
+        $this->packageFileStorage->expects($this->once())
+            ->method('saveRootPackageFile')
+            ->willThrowException(new TestException('Cannot save'));
+
+        $this->rootPackageFile->addPathMapping($mapping1 = new PathMapping('/path1', 'resources'));
+        $this->rootPackageFile->addPathMapping($mapping2 = new PathMapping('/path2', 'resources'));
+        $this->rootPackageFile->setOverriddenPackages(array('vendor/package1'));
+        $this->packageFile1->addPathMapping($mapping3 = new PathMapping('/path1', 'resources'));
+        $this->packageFile1->addPathMapping($mapping4 = new PathMapping('/path2', 'resources'));
+
+        try {
+            $this->manager->clearRootPathMappings();
+            $this->fail('Expected a TestException');
+        } catch (TestException $e) {
+        }
+
+        $this->assertTrue($mapping1->isEnabled());
+        $this->assertTrue($mapping2->isEnabled());
+        $this->assertTrue($mapping3->isEnabled());
+        $this->assertTrue($mapping4->isEnabled());
+        $this->assertCount(0, $this->manager->getPathConflicts());
+    }
+
     public function testGetRootPathMapping()
     {
         $this->initDefaultManager();

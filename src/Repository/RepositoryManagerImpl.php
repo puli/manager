@@ -219,6 +219,37 @@ class RepositoryManagerImpl implements RepositoryManager
     /**
      * {@inheritdoc}
      */
+    public function clearRootPathMappings()
+    {
+        $this->assertMappingsLoaded();
+
+        $tx = new Transaction();
+
+        try {
+            foreach ($this->getRootPathMappings() as $mapping) {
+                $syncOp = $this->syncRepositoryPath($mapping->getRepositoryPath());
+                $syncOp->takeSnapshot();
+
+                $tx->execute($this->unloadPathMapping($mapping));
+                $tx->execute($this->removePathMappingFromPackageFile($mapping->getRepositoryPath()));
+                $tx->execute($syncOp);
+            }
+
+            $this->saveRootPackageFile();
+
+            $tx->commit();
+        } catch (Exception $e) {
+            $tx->rollback();
+
+            throw $e;
+        }
+
+        $this->removeResolvedConflicts();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function getRootPathMapping($repositoryPath)
     {
         return $this->getPathMapping($repositoryPath, $this->rootPackage->getName());

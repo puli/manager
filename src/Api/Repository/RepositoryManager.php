@@ -62,6 +62,13 @@ interface RepositoryManager
     public function removeRootPathMapping($repositoryPath);
 
     /**
+     * Removes all path mappings from the repository.
+     *
+     * If no mapping is found, this method does nothing.
+     */
+    public function clearRootPathMappings();
+
+    /**
      * Returns the path mapping for a repository path in the root package.
      *
      * @param string $repositoryPath The repository path.
