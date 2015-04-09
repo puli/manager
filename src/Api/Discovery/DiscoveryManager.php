@@ -11,7 +11,6 @@
 
 namespace Puli\Manager\Api\Discovery;
 
-use Puli\Discovery\Api\DuplicateTypeException;
 use Puli\Manager\Api\Environment\ProjectEnvironment;
 use Puli\Manager\Api\NonRootPackageExpectedException;
 use Puli\Manager\Api\RootPackageExpectedException;

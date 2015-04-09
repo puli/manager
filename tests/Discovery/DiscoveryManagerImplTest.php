@@ -201,7 +201,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
     }
 
     /**
-     * @expectedException \Puli\Discovery\Api\DuplicateTypeException
+     * @expectedException \Puli\Manager\Api\Discovery\DuplicateTypeException
      */
     public function testAddBindingTypeFailsIfAlreadyDefined()
     {
