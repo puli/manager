@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\Manager\Tests\Package;
+namespace Puli\Manager\Tests\Api\Package;
 
 use PHPUnit_Framework_TestCase;
 use Puli\Manager\Api\Package\Package;
@@ -193,6 +193,29 @@ class PackageCollectionTest extends PHPUnit_Framework_TestCase
         $this->assertTrue($this->collection->contains('vendor/package2'));
 
         $this->assertNull($this->collection->getRootPackage());
+    }
+
+    public function testClear()
+    {
+        $packageFile1 = new PackageFile('vendor/package1');
+        $package1 = new Package($packageFile1, '/path1');
+
+        $packageFile2 = new PackageFile('vendor/package2');
+        $package2 = new Package($packageFile2, '/path2');
+
+        $rootPackageFile = new RootPackageFile('vendor/root');
+        $rootPackage = new RootPackage($rootPackageFile, '/path3');
+
+        $this->collection->add($package1);
+        $this->collection->add($rootPackage);
+        $this->collection->add($package2);
+
+        $this->collection->clear();
+
+        $this->assertFalse($this->collection->contains('vendor/root'));
+        $this->assertFalse($this->collection->contains('vendor/package1'));
+        $this->assertFalse($this->collection->contains('vendor/package2'));
+        $this->assertTrue($this->collection->isEmpty());
     }
 
     public function testIterate()

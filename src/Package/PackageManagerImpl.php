@@ -86,8 +86,8 @@ class PackageManagerImpl implements PackageManager
      */
     public function installPackage($installPath, $name = null, $installerName = InstallInfo::DEFAULT_INSTALLER_NAME)
     {
-        Assert::string($installPath, 'The install path must be a string.');
-        Assert::string($installerName, 'The installer name must be a string.');
+        Assert::string($installPath, 'The install path must be a string. Got: %s');
+        Assert::string($installerName, 'The installer name must be a string. Got: %s');
         Assert::nullOrPackageName($name);
 
         $this->assertPackagesLoaded();
@@ -155,7 +155,7 @@ class PackageManagerImpl implements PackageManager
     {
         // Only check that this is a string. The error message "not found" is
         // more helpful than e.g. "package name must contain /".
-        Assert::string($name, 'The package name must be a string');
+        Assert::string($name, 'The package name must be a string. Got: %s');
 
         $this->assertPackagesLoaded();
 
@@ -178,9 +178,32 @@ class PackageManagerImpl implements PackageManager
     /**
      * {@inheritdoc}
      */
+    public function clearPackages()
+    {
+        $this->assertPackagesLoaded();
+
+        if ($this->rootPackageFile->hasInstallInfos()) {
+            $installInfos = $this->rootPackageFile->getInstallInfos();
+            $this->rootPackageFile->clearInstallInfos();
+
+            try {
+                $this->packageFileStorage->saveRootPackageFile($this->rootPackageFile);
+            } catch (Exception $e) {
+                $this->rootPackageFile->setInstallInfos($installInfos);
+
+                throw $e;
+            }
+        }
+
+        $this->packages->clear();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function getPackage($name)
     {
-        Assert::string($name, 'The package name must be a string');
+        Assert::string($name, 'The package name must be a string. Got: %s');
 
         $this->assertPackagesLoaded();
 
@@ -231,7 +254,7 @@ class PackageManagerImpl implements PackageManager
      */
     public function hasPackage($name)
     {
-        Assert::string($name, 'The package name must be a string');
+        Assert::string($name, 'The package name must be a string. Got: %s');
 
         $this->assertPackagesLoaded();
 

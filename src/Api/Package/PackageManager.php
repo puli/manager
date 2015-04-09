@@ -24,6 +24,13 @@ use Webmozart\Expression\Expression;
 interface PackageManager
 {
     /**
+     * Returns the manager's environment.
+     *
+     * @return ProjectEnvironment The project environment.
+     */
+    public function getEnvironment();
+
+    /**
      * Installs the package at the given path in the repository.
      *
      * @param string      $installPath   The path to the package.
@@ -44,6 +51,11 @@ interface PackageManager
      * @param string $name The package name.
      */
     public function removePackage($name);
+
+    /**
+     * Removes all packages.
+     */
+    public function clearPackages();
 
     /**
      * Returns a package by name.
@@ -102,11 +114,4 @@ interface PackageManager
      *              expression.
      */
     public function hasPackages(Expression $expr = null);
-
-    /**
-     * Returns the manager's environment.
-     *
-     * @return ProjectEnvironment The project environment.
-     */
-    public function getEnvironment();
 }

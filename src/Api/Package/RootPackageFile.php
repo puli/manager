@@ -106,17 +106,6 @@ class RootPackageFile extends PackageFile
     }
 
     /**
-     * Returns the install infos of all installed packages.
-     *
-     * @return InstallInfo[] The install infos.
-     */
-    public function getInstallInfos()
-    {
-        // The package names as array keys are for internal use only
-        return array_values($this->installInfos);
-    }
-
-    /**
      * Sets the install infos of all installed packages.
      *
      * @param InstallInfo[] The install infos.
@@ -151,6 +140,14 @@ class RootPackageFile extends PackageFile
     }
 
     /**
+     * Removes all install infos.
+     */
+    public function clearInstallInfos()
+    {
+        $this->installInfos = array();
+    }
+
+    /**
      * Returns the install info of an installed package.
      *
      * @param string $packageName The package name.
@@ -172,6 +169,17 @@ class RootPackageFile extends PackageFile
     }
 
     /**
+     * Returns the install infos of all installed packages.
+     *
+     * @return InstallInfo[] The install infos.
+     */
+    public function getInstallInfos()
+    {
+        // The package names as array keys are for internal use only
+        return array_values($this->installInfos);
+    }
+
+    /**
      * Returns whether an install info with a given name exists.
      *
      * @param string $packageName The name of the package.
@@ -181,6 +189,17 @@ class RootPackageFile extends PackageFile
     public function hasInstallInfo($packageName)
     {
         return isset($this->installInfos[$packageName]);
+    }
+
+    /**
+     * Returns whether the package file contains any install infos.
+     *
+     * @return bool Returns `true` if the file contains install infos and
+     *              `false` otherwise.
+     */
+    public function hasInstallInfos()
+    {
+        return count($this->installInfos) > 0;
     }
 
     /**

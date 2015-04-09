@@ -530,6 +530,53 @@ class PackageManagerImplTest extends ManagerTestCase
         $this->assertTrue($this->manager->getPackages()->contains('vendor/package1'));
     }
 
+    public function testClearPackages()
+    {
+        $this->initDefaultManager();
+
+        $packageDir = $this->packageDir1;
+
+        $this->packageFileStorage->expects($this->once())
+            ->method('saveRootPackageFile')
+            ->with($this->rootPackageFile)
+            ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) use ($packageDir) {
+                PHPUnit_Framework_Assert::assertFalse($rootPackageFile->hasInstallInfos());
+            }));
+
+        $this->assertTrue($this->rootPackageFile->hasInstallInfo('vendor/package1'));
+        $this->assertTrue($this->rootPackageFile->hasInstallInfo('vendor/package2'));
+        $this->assertTrue($this->manager->hasPackage('vendor/package1'));
+        $this->assertTrue($this->manager->hasPackage('vendor/package2'));
+
+        $this->manager->clearPackages();
+
+        $this->assertFalse($this->rootPackageFile->hasInstallInfos());
+        $this->assertFalse($this->manager->hasPackages());
+        $this->assertTrue($this->manager->getPackages()->isEmpty());
+    }
+
+    public function testClearPackagesRevertsIfSavingNotPossible()
+    {
+        $this->initDefaultManager();
+
+        $this->packageFileStorage->expects($this->once())
+            ->method('saveRootPackageFile')
+            ->willThrowException(new TestException());
+
+        try {
+            $this->manager->clearPackages();
+            $this->fail('Expected a TestException');
+        } catch (TestException $e) {
+        }
+
+        $this->assertTrue($this->rootPackageFile->hasInstallInfo('vendor/package1'));
+        $this->assertTrue($this->rootPackageFile->hasInstallInfo('vendor/package2'));
+        $this->assertTrue($this->manager->hasPackage('vendor/package1'));
+        $this->assertTrue($this->manager->hasPackage('vendor/package2'));
+        $this->assertTrue($this->manager->getPackages()->contains('vendor/package1'));
+        $this->assertTrue($this->manager->getPackages()->contains('vendor/package2'));
+    }
+
     public function testGetPackage()
     {
         $this->initDefaultManager();

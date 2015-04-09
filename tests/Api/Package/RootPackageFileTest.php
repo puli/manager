@@ -211,6 +211,19 @@ class RootPackageFileTest extends PHPUnit_Framework_TestCase
         $this->assertSame(array($installInfo1), $this->packageFile->getInstallInfos());
     }
 
+    public function testClearInstallInfos()
+    {
+        $installInfo1 = new InstallInfo('vendor/package1', '/path/to/package1');
+        $installInfo2 = new InstallInfo('vendor/package2', '/path/to/package2');
+
+        $this->packageFile->addInstallInfo($installInfo1);
+        $this->packageFile->addInstallInfo($installInfo2);
+
+        $this->packageFile->clearInstallInfos();
+
+        $this->assertSame(array(), $this->packageFile->getInstallInfos());
+    }
+
     public function testHasInstallInfo()
     {
         $this->assertFalse($this->packageFile->hasInstallInfo('vendor/package'));
@@ -218,5 +231,14 @@ class RootPackageFileTest extends PHPUnit_Framework_TestCase
         $this->packageFile->addInstallInfo(new InstallInfo('vendor/package', '/path/to/package'));
 
         $this->assertTrue($this->packageFile->hasInstallInfo('vendor/package'));
+    }
+
+    public function testHasInstallInfos()
+    {
+        $this->assertFalse($this->packageFile->hasInstallInfos());
+
+        $this->packageFile->addInstallInfo(new InstallInfo('vendor/package', '/path/to/package'));
+
+        $this->assertTrue($this->packageFile->hasInstallInfos());
     }
 }

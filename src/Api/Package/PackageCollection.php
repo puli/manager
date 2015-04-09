@@ -70,6 +70,18 @@ class PackageCollection implements IteratorAggregate, Countable, ArrayAccess
     }
 
     /**
+     * Removes all packages from the collection.
+     */
+    public function clear()
+    {
+        if ($this->rootPackage) {
+            $this->rootPackage = null;
+        }
+
+        $this->packages = array();
+    }
+
+    /**
      * Returns the package with the given name.
      *
      * @param string $name The package name.

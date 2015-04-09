@@ -54,6 +54,11 @@ Changelog
  * added `Config::isEmpty()`
  * added `ConfigFileManager::clearConfigKeys()`
  * added `ConfigFileManager::hasConfigKeys()`
+ * added `PackageCollection::clear()`
+ * added `PackageManager::clearPackages()`
+ * added `RootPackageFile::clearInstallInfos()`
+ * added `RootPackageFile::getInstallInfos()`
+ * added `RootPackageFile::hasInstallInfos()`
       
 * 1.0.0-beta3 (2015-03-19)
 
