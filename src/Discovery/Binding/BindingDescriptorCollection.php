@@ -51,7 +51,7 @@ class BindingDescriptorCollection
      *
      * This method ignores non-existing binding descriptors.
      *
-     * @param Uuid   $uuid        The UUID of the binding descriptor.
+     * @param Uuid $uuid The UUID of the binding descriptor.
      */
     public function remove(Uuid $uuid)
     {

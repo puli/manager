@@ -1006,7 +1006,10 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->manager->removeBinding(Uuid::uuid4());
     }
 
-    public function testRemoveBindingIgnoresBindingsInPackages()
+    /**
+     * @expectedException \Puli\Manager\Api\Discovery\CannotRemoveBindingException
+     */
+    public function testRemoveBindingFailsIfBindingNotInRootPackage()
     {
         $this->initDefaultManager();
 
@@ -1021,8 +1024,6 @@ class DiscoveryManagerImplTest extends ManagerTestCase
             ->method('saveRootPackageFile');
 
         $this->manager->removeBinding($binding->getUuid());
-
-        $this->assertTrue($binding->isEnabled());
     }
 
     public function testRemoveHeldBackBinding()
@@ -1529,16 +1530,6 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->manager->getBinding(Uuid::fromString(self::NOT_FOUND_UUID));
     }
 
-    /**
-     * @expectedException \InvalidArgumentException
-     */
-    public function testGetBindingFailsIfPackageNoString()
-    {
-        $this->initDefaultManager();
-
-        $this->manager->getBinding(Uuid::fromString(self::NOT_FOUND_UUID), 1234);
-    }
-
     public function testGetBindings()
     {
         $this->initDefaultManager();
@@ -1609,16 +1600,6 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->assertTrue($this->manager->hasBinding($binding1->getUuid()));
         $this->assertTrue($this->manager->hasBinding($binding2->getUuid()));
         $this->assertFalse($this->manager->hasBinding(Uuid::fromString(self::NOT_FOUND_UUID)));
-    }
-
-    /**
-     * @expectedException \InvalidArgumentException
-     */
-    public function testHasBindingFailsIfPackageNoString()
-    {
-        $this->initDefaultManager();
-
-        $this->manager->hasBinding(Uuid::fromString(self::NOT_FOUND_UUID), 1234);
     }
 
     public function testHasBindings()

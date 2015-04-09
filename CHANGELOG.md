@@ -21,6 +21,8 @@ Changelog
  * changed boolean parameter `$failIfNotFound` to integer parameter `$flags` in
    `RepositoryManager::addPathMapping()`
  * made argument `$packageName` mandatory in `DiscoveryManager::getBindingType()`
+ * `DiscoveryManager::removeBinding()` now fails if removing a binding from a
+   non-root package
    
 * 1.0.0-beta3 (2015-03-19)
 

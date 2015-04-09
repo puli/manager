@@ -138,6 +138,8 @@ interface DiscoveryManager
      * Removes a binding.
      *
      * @param Uuid $uuid The UUID of the binding.
+     *
+     * @throws CannotRemoveBindingException If the binding could not be removed.
      */
     public function removeBinding(Uuid $uuid);
 

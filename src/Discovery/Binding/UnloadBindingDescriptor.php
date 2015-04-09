@@ -69,15 +69,14 @@ class UnloadBindingDescriptor implements AtomicOperation
         $this->typeDescriptor = $this->bindingDescriptor->getTypeDescriptor();
 
         $uuid = $this->bindingDescriptor->getUuid();
-        $packageName = $this->containingPackage->getName();
 
         // never fails with the check in the beginning
         $this->bindingDescriptor->unload();
 
-        if ($this->bindingDescriptors->contains($uuid, $packageName)
-            && $this->bindingDescriptor === $this->bindingDescriptors->get($uuid, $packageName)) {
+        if ($this->bindingDescriptors->contains($uuid)
+            && $this->bindingDescriptor === $this->bindingDescriptors->get($uuid)) {
             // never fails
-            $this->bindingDescriptors->remove($uuid, $packageName);
+            $this->bindingDescriptors->remove($uuid);
             $this->wasRemoved = true;
         }
     }

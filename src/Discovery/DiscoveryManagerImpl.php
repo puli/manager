@@ -24,6 +24,7 @@ use Puli\Manager\Api\Discovery\BindingDescriptor;
 use Puli\Manager\Api\Discovery\BindingTypeDescriptor;
 use Puli\Manager\Api\Discovery\CannotDisableBindingException;
 use Puli\Manager\Api\Discovery\CannotEnableBindingException;
+use Puli\Manager\Api\Discovery\CannotRemoveBindingException;
 use Puli\Manager\Api\Discovery\DiscoveryManager;
 use Puli\Manager\Api\Discovery\DiscoveryNotEmptyException;
 use Puli\Manager\Api\Discovery\DuplicateBindingException;
@@ -390,22 +391,24 @@ class DiscoveryManagerImpl implements DiscoveryManager
     {
         $this->assertPackagesLoaded();
 
-        if (!$this->rootPackageFile->hasBindingDescriptor($uuid)) {
+        if (!$this->bindingDescriptors->contains($uuid)) {
             return;
+        }
+
+        $bindingDescriptor = $this->bindingDescriptors->get($uuid);
+
+        if (!$bindingDescriptor->getContainingPackage() instanceof RootPackage) {
+            throw CannotRemoveBindingException::rootPackageRequired($uuid, $bindingDescriptor->getContainingPackage()->getName());
         }
 
         $tx = new Transaction();
 
         try {
-            if ($this->bindingDescriptors->contains($uuid, $this->rootPackage->getName())) {
-                $bindingDescriptor = $this->bindingDescriptors->get($uuid, $this->rootPackage->getName());
-                $syncOp = $this->syncBindingUuid($uuid);
-                $syncOp->takeSnapshot();
+            $syncOp = $this->syncBindingUuid($uuid);
+            $syncOp->takeSnapshot();
 
-                $tx->execute($this->unloadBindingDescriptor($bindingDescriptor));
-                $tx->execute($syncOp);
-            }
-
+            $tx->execute($this->unloadBindingDescriptor($bindingDescriptor));
+            $tx->execute($syncOp);
             $tx->execute($this->removeBindingDescriptorFromPackageFile($uuid));
 
             $this->saveRootPackageFile();
@@ -511,17 +514,15 @@ class DiscoveryManagerImpl implements DiscoveryManager
     /**
      * {@inheritdoc}
      */
-    public function getBinding(Uuid $uuid, $packageName = null)
+    public function getBinding(Uuid $uuid)
     {
-        Assert::nullOrString($packageName, 'The package name must be a string or null. Got: %s');
-
         $this->assertPackagesLoaded();
 
-        if (!$this->bindingDescriptors->contains($uuid, $packageName)) {
+        if (!$this->bindingDescriptors->contains($uuid)) {
             throw NoSuchBindingException::forUuid($uuid);
         }
 
-        return $this->bindingDescriptors->get($uuid, $packageName);
+        return $this->bindingDescriptors->get($uuid);
     }
 
     /**
@@ -555,13 +556,11 @@ class DiscoveryManagerImpl implements DiscoveryManager
     /**
      * {@inheritdoc}
      */
-    public function hasBinding(Uuid $uuid, $packageName = null)
+    public function hasBinding(Uuid $uuid)
     {
-        Assert::nullOrString($packageName, 'The package name must be a string or null. Got: %s');
-
         $this->assertPackagesLoaded();
 
-        return $this->bindingDescriptors->contains($uuid, $packageName);
+        return $this->bindingDescriptors->contains($uuid);
     }
 
     /**
