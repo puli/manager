@@ -27,16 +27,15 @@ class DuplicateBindingException extends RuntimeException
      * Creates an exception for a duplicate UUID.
      *
      * @param Uuid      $uuid  The UUID.
-     * @param int       $code  The exception code.
      * @param Exception $cause The exception that caused this exception.
      *
      * @return static The created exception.
      */
-    public static function forUuid(Uuid $uuid, $code = 0, Exception $cause = null)
+    public static function forUuid(Uuid $uuid, Exception $cause = null)
     {
         return new static(sprintf(
             'A binding with UUID "%s" exists already.',
             $uuid->toString()
-        ), $code, $cause);
+        ), 0, $cause);
     }
 }

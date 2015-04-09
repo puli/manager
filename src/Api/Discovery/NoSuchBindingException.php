@@ -27,17 +27,16 @@ class NoSuchBindingException extends RuntimeException
      * Creates an exception for a UUID that was not found.
      *
      * @param Uuid      $uuid  The UUID.
-     * @param int       $code  The exception code.
      * @param Exception $cause The exception that caused this exception.
      *
      * @return static The created exception.
      */
-    public static function forUuid(Uuid $uuid, $code = 0, Exception $cause = null)
+    public static function forUuid(Uuid $uuid, Exception $cause = null)
     {
         return new static(sprintf(
             'The binding with UUID "%s" does not exist.',
             $uuid->toString()
-        ), $code, $cause);
+        ), 0, $cause);
     }
 
     /**
@@ -45,17 +44,16 @@ class NoSuchBindingException extends RuntimeException
      *
      * @param Uuid      $uuid        The UUID.
      * @param string    $packageName The name of the containing package.
-     * @param int       $code        The exception code.
      * @param Exception $cause       The exception that caused this exception.
      *
      * @return static The created exception.
      */
-    public static function forUuidAndPackage(Uuid $uuid, $packageName, $code = 0, Exception $cause = null)
+    public static function forUuidAndPackage(Uuid $uuid, $packageName, Exception $cause = null)
     {
         return new static(sprintf(
             'The binding with UUID "%s" does not exist in package "%s".',
             $uuid->toString(),
             $packageName
-        ), $code, $cause);
+        ), 0, $cause);
     }
 }

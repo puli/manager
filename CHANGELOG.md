@@ -49,6 +49,7 @@ Changelog
  * added `$packageName` argument to `RepositoryManager::getPathMapping()`
  * added `$packageName` argument to `RepositoryManager::hasPathMapping()`
  * removed arguments from `RepositoryManager::getPathMappings()`
+ * removed `$code` arguments from exception factory methods
       
 * 1.0.0-beta3 (2015-03-19)
 

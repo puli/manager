@@ -26,16 +26,15 @@ class FileNotFoundException extends RuntimeException
      * Creates an exception for file path.
      *
      * @param string    $path  The path of the file that could not be found.
-     * @param int       $code  The exception code.
      * @param Exception $cause The exception that caused this exception.
      *
      * @return static The created exception.
      */
-    public static function forPath($path, $code = 0, Exception $cause = null)
+    public static function forPath($path, Exception $cause = null)
     {
         return new static(sprintf(
             'The file %s does not exist.',
             $path
-        ), $code, $cause);
+        ), 0, $cause);
     }
 }

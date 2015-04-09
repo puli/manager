@@ -22,7 +22,7 @@ use RuntimeException;
  */
 class PackageConflictException extends RuntimeException
 {
-    public static function forPathConflict(PackageConflict $conflict, $code = 0, Exception $cause = null)
+    public static function forPathConflict(PackageConflict $conflict, Exception $cause = null)
     {
         $packageNames = $conflict->getPackageNames();
         $lastPackageName = array_pop($packageNames);
@@ -37,6 +37,6 @@ class PackageConflictException extends RuntimeException
             implode('", "', $packageNames),
             $lastPackageName,
             $conflict->getConflictingToken()
-        ), $code, $cause);
+        ), 0, $cause);
     }
 }

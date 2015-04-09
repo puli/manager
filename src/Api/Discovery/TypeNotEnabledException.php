@@ -26,16 +26,15 @@ class TypeNotEnabledException extends RuntimeException
      * Creates an exception for a type name.
      *
      * @param string    $typeName The name of the type that was not enabled.
-     * @param int       $code     The exception code.
      * @param Exception $cause    The exception that caused this exception.
      *
      * @return static The created exception.
      */
-    public static function forTypeName($typeName, $code = 0, Exception $cause = null)
+    public static function forTypeName($typeName, Exception $cause = null)
     {
         return new static(sprintf(
             'The binding type "%s" is not enabled.',
             $typeName
-        ), $code, $cause);
+        ), 0, $cause);
     }
 }

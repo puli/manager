@@ -28,12 +28,11 @@ class UnsupportedVersionException extends RuntimeException
      * @param string    $version    The version that caused the exception.
      * @param string    $maxVersion The highest readable version.
      * @param string    $path       The path of the read package file.
-     * @param int       $code       The exception code.
      * @param Exception $cause      The exception that caused this exception.
      *
      * @return static The created exception.
      */
-    public static function versionTooHigh($version, $maxVersion, $path, $code = 0, Exception $cause = null)
+    public static function versionTooHigh($version, $maxVersion, $path, Exception $cause = null)
     {
         return new static(sprintf(
             'Cannot read package file %s at version %s. The highest readable '.
@@ -41,7 +40,7 @@ class UnsupportedVersionException extends RuntimeException
             $path,
             $version,
             $maxVersion
-        ), $code, $cause);
+        ), 0, $cause);
     }
 
     /**
@@ -50,12 +49,11 @@ class UnsupportedVersionException extends RuntimeException
      * @param string    $version    The version that caused the exception.
      * @param string    $minVersion The lowest readable version.
      * @param string    $path       The path of the read package file.
-     * @param int       $code       The exception code.
      * @param Exception $cause      The exception that caused this exception.
      *
      * @return static The created exception.
      */
-    public static function versionTooLow($version, $minVersion, $path, $code = 0, Exception $cause = null)
+    public static function versionTooLow($version, $minVersion, $path, Exception $cause = null)
     {
         return new static(sprintf(
             'Cannot read package file %s at version %s. The lowest readable '.
@@ -63,6 +61,6 @@ class UnsupportedVersionException extends RuntimeException
             $path,
             $version,
             $minVersion
-        ), $code, $cause);
+        ), 0, $cause);
     }
 }
