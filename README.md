@@ -29,8 +29,9 @@ This mapping can be loaded with the [`RepositoryManager`]:
 use Puli\Manager\Api\Puli;
 
 $puli = new Puli(getcwd());
-$repoManager = $puli->getRepositoryManager();
+$puli->start();
 
+$repoManager = $puli->getRepositoryManager();
 $repoManager->buildRepository();
 ```
 
