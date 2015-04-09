@@ -239,6 +239,8 @@ interface DiscoveryManager
 
     /**
      * Builds the resource discovery.
+     *
+     * @throws DiscoveryNotEmptyException If the discovery is not empty.
      */
     public function buildDiscovery();
 
