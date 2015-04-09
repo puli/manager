@@ -59,6 +59,8 @@ Changelog
  * added `RootPackageFile::clearInstallInfos()`
  * added `RootPackageFile::getInstallInfos()`
  * added `RootPackageFile::hasInstallInfos()`
+ * added `DiscoveryManager::clearRootBindingTypes()`
+ * added `DiscoveryManager::clearRootBindings()`
       
 * 1.0.0-beta3 (2015-03-19)
 

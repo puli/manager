@@ -247,6 +247,51 @@ class DiscoveryManagerImpl implements DiscoveryManager
     /**
      * {@inheritdoc}
      */
+    public function clearRootBindingTypes()
+    {
+        $this->assertPackagesLoaded();
+
+        $tx = new Transaction();
+        $syncBindingOps = array();
+
+        try {
+            foreach ($this->getRootBindingTypes() as $typeDescriptor) {
+                $typeName = $typeDescriptor->getName();
+
+                $tx->execute($this->removeTypeDescriptorFromPackageFile($typeName));
+
+                foreach ($this->getUuidsByTypeName($typeName) as $uuid) {
+                    $syncBindingOp = $this->syncBindingUuid($uuid);
+                    $syncBindingOp->takeSnapshot();
+                    $syncBindingOps[] = $syncBindingOp;
+                }
+
+                $syncOp = $this->syncTypeName($typeName);
+                $syncOp->takeSnapshot();
+
+                $tx->execute($this->unloadTypeDescriptor($typeDescriptor));
+                $tx->execute($syncOp);
+            }
+
+            foreach ($syncBindingOps as $syncBindingOp) {
+                $tx->execute($syncBindingOp);
+            }
+
+            $this->saveRootPackageFile();
+
+            $tx->commit();
+        } catch (Exception $e) {
+            $tx->rollback();
+
+            throw $e;
+        }
+
+        $this->emitWarningForDuplicateTypes();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function getRootBindingType($typeName)
     {
         return $this->getBindingType($typeName, $this->rootPackage->getName());
@@ -456,6 +501,35 @@ class DiscoveryManagerImpl implements DiscoveryManager
             $tx->execute($this->unloadBindingDescriptor($bindingDescriptor));
             $tx->execute($syncOp);
             $tx->execute($this->removeBindingDescriptorFromPackageFile($uuid));
+
+            $this->saveRootPackageFile();
+
+            $tx->commit();
+        } catch (Exception $e) {
+            $tx->rollback();
+
+            throw $e;
+        }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function clearRootBindings()
+    {
+        $this->assertPackagesLoaded();
+
+        $tx = new Transaction();
+
+        try {
+            foreach ($this->getRootBindings() as $bindingDescriptor) {
+                $syncOp = $this->syncBindingUuid($bindingDescriptor->getUuid());
+                $syncOp->takeSnapshot();
+
+                $tx->execute($this->unloadBindingDescriptor($bindingDescriptor));
+                $tx->execute($syncOp);
+                $tx->execute($this->removeBindingDescriptorFromPackageFile($bindingDescriptor->getUuid()));
+            }
 
             $this->saveRootPackageFile();
 

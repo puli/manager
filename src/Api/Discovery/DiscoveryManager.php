@@ -57,7 +57,7 @@ interface DiscoveryManager
     public function addRootBindingType(BindingTypeDescriptor $typeDescriptor, $flags = 0);
 
     /**
-     * Removes a binding type.
+     * Removes a binding type from the root package.
      *
      * The type definition is removed from the root package file. If the type
      * is not found, this method does nothing.
@@ -65,6 +65,11 @@ interface DiscoveryManager
      * @param string $typeName The name of the type to remove.
      */
     public function removeRootBindingType($typeName);
+
+    /**
+     * Removes all binding types from the root package.
+     */
+    public function clearRootBindingTypes();
 
     /**
      * Returns the binding type with the given name from the root package.
@@ -166,6 +171,8 @@ interface DiscoveryManager
     /**
      * Adds a new binding.
      *
+     * The binding descriptor is added to the root package file.
+     *
      * @param BindingDescriptor $bindingDescriptor The binding to add.
      * @param int               $flags             A bitwise combination of the
      *                                             flag constants in this class.
@@ -180,11 +187,21 @@ interface DiscoveryManager
     public function addRootBinding(BindingDescriptor $bindingDescriptor, $flags = 0);
 
     /**
-     * Removes a binding.
+     * Removes a binding from the root package.
+     *
+     * The binding descriptor is removed from the root package file. If the
+     * binding is not found, this method does nothing.
      *
      * @param Uuid $uuid The UUID of the binding.
      */
     public function removeRootBinding(Uuid $uuid);
+
+    /**
+     * Removes all bindings from the root package.
+     *
+     * If no bindings are found, this method does nothing.
+     */
+    public function clearRootBindings();
 
     /**
      * Returns the binding with the given UUID in the root package.
