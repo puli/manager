@@ -74,7 +74,16 @@ class SyncTypeName implements AtomicOperation
      */
     public function takeSnapshot()
     {
-        $this->enabledTypeBefore = $this->typeDescriptors->getEnabled($this->typeName);
+        $this->enabledTypeBefore = null;
+
+        if ($this->typeDescriptors->contains($this->typeName)) {
+            foreach ($this->typeDescriptors->listByTypeName($this->typeName) as $typeDescriptor) {
+                if ($typeDescriptor->isEnabled()) {
+                    $this->enabledTypeBefore = $typeDescriptor;
+                }
+            }
+        }
+
         $this->snapshotTaken = true;
     }
 
@@ -88,7 +97,15 @@ class SyncTypeName implements AtomicOperation
         }
 
         // Remember for rollback()
-        $this->enabledTypeAfter = $this->typeDescriptors->getEnabled($this->typeName);
+        $this->enabledTypeAfter = null;
+
+        if ($this->typeDescriptors->contains($this->typeName)) {
+            foreach ($this->typeDescriptors->listByTypeName($this->typeName) as $typeDescriptor) {
+                if ($typeDescriptor->isEnabled()) {
+                    $this->enabledTypeAfter = $typeDescriptor;
+                }
+            }
+        }
 
         $this->syncTypeName($this->enabledTypeBefore, $this->enabledTypeAfter);
     }

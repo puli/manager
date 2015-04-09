@@ -84,6 +84,21 @@ class BindingTypeDescriptorCollection
     }
 
     /**
+     * Returns the first type descriptor with the given name.
+     *
+     * @param string $typeName The name of the type.
+     *
+     * @return BindingTypeDescriptor The type descriptor.
+     *
+     * @throws OutOfBoundsException If no type descriptor was set for the
+     *                              given name.
+     */
+    public function getFirst($typeName)
+    {
+        return $this->map->getFirst($typeName);
+    }
+
+    /**
      * Returns the enabled type descriptor for a given type name.
      *
      * @param string $typeName The name of the type.

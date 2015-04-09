@@ -352,7 +352,10 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->manager->removeBindingType('my/type');
     }
 
-    public function testRemoveBindingTypeIgnoresTypesInInstalledPackages()
+    /**
+     * @expectedException \Puli\Manager\Api\RootPackageExpectedException
+     */
+    public function testRemoveBindingTypeFailsIfNotRootPackage()
     {
         $this->initDefaultManager();
 
@@ -365,8 +368,6 @@ class DiscoveryManagerImplTest extends ManagerTestCase
             ->method('saveRootPackageFile');
 
         $this->manager->removeBindingType('my/type');
-
-        $this->assertTrue($bindingType->isEnabled());
     }
 
     public function testRemoveBindingTypeDefinesTypeIfResolvingDuplication()
@@ -588,7 +589,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
     }
 
     /**
-     * @expectedException \Puli\Discovery\Api\NoSuchTypeException
+     * @expectedException \Puli\Manager\Api\Discovery\NoSuchTypeException
      */
     public function testGetBindingTypeFailsIfNotFound()
     {
@@ -801,7 +802,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
     }
 
     /**
-     * @expectedException \Puli\Discovery\Api\NoSuchTypeException
+     * @expectedException \Puli\Manager\Api\Discovery\NoSuchTypeException
      */
     public function testAddBindingFailsIfTypeNotDefined()
     {
@@ -833,7 +834,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
                 $bindings = $rootPackageFile->getBindingDescriptors();
 
                 PHPUnit_Framework_Assert::assertSame(array($binding), $bindings);
-                PHPUnit_Framework_Assert::assertTrue($binding->isTypeNotLoaded());
+                PHPUnit_Framework_Assert::assertTrue($binding->isTypeNotFound());
             }));
 
         $this->manager->addBinding($binding, DiscoveryManager::NO_TYPE_CHECK);
@@ -878,7 +879,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
                 $bindings = $rootPackageFile->getBindingDescriptors();
 
                 PHPUnit_Framework_Assert::assertSame(array($binding), $bindings);
-                PHPUnit_Framework_Assert::assertTrue($binding->isTypeNotLoaded());
+                PHPUnit_Framework_Assert::assertTrue($binding->isTypeNotEnabled());
             }));
 
         $this->manager->addBinding($binding, DiscoveryManager::NO_TYPE_CHECK);
@@ -1007,7 +1008,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
     }
 
     /**
-     * @expectedException \Puli\Manager\Api\Discovery\CannotRemoveBindingException
+     * @expectedException \Puli\Manager\Api\RootPackageExpectedException
      */
     public function testRemoveBindingFailsIfBindingNotInRootPackage()
     {
@@ -1164,8 +1165,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
     }
 
     /**
-     * @expectedException \Puli\Manager\Api\Discovery\CannotEnableBindingException
-     * @expectedExceptionCode 1
+     * @expectedException \Puli\Manager\Api\NonRootPackageExpectedException
      */
     public function testEnableBindingFailsIfBindingInRootPackage()
     {
@@ -1184,8 +1184,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
     }
 
     /**
-     * @expectedException \Puli\Manager\Api\Discovery\CannotEnableBindingException
-     * @expectedExceptionCode 2
+     * @expectedException \Puli\Manager\Api\Discovery\NoSuchTypeException
      */
     public function testEnableBindingFailsIfTypeNotFound()
     {
@@ -1203,8 +1202,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
     }
 
     /**
-     * @expectedException \Puli\Manager\Api\Discovery\CannotEnableBindingException
-     * @expectedExceptionCode 2
+     * @expectedException \Puli\Manager\Api\Discovery\TypeNotEnabledException
      */
     public function testEnableBindingFailsIfTypeNotEnabled()
     {
@@ -1382,8 +1380,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
     }
 
     /**
-     * @expectedException \Puli\Manager\Api\Discovery\CannotDisableBindingException
-     * @expectedExceptionCode 1
+     * @expectedException \Puli\Manager\Api\NonRootPackageExpectedException
      */
     public function testDisableBindingFailsIfBindingInRootPackage()
     {
@@ -1402,10 +1399,9 @@ class DiscoveryManagerImplTest extends ManagerTestCase
     }
 
     /**
-     * @expectedException \Puli\Manager\Api\Discovery\CannotDisableBindingException
-     * @expectedExceptionCode 2
+     * @expectedException \Puli\Manager\Api\Discovery\NoSuchTypeException
      */
-    public function testDisableBindingFailsIfTypeNotLoaded()
+    public function testDisableBindingFailsIfTypeNotFound()
     {
         $this->initDefaultManager();
 
@@ -1421,9 +1417,9 @@ class DiscoveryManagerImplTest extends ManagerTestCase
     }
 
     /**
-     * @expectedException \Puli\Manager\Api\Discovery\CannotDisableBindingException
+     * @expectedException \Puli\Manager\Api\Discovery\TypeNotEnabledException
      */
-    public function testDisableBindingFailsIfBindingIgnored()
+    public function testDisableBindingFailsIfTypeNotEnabled()
     {
         $this->initDefaultManager();
 

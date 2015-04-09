@@ -18,24 +18,23 @@ use Puli\Discovery\Api\Binding\MissingParameterException;
 use Puli\Discovery\Api\Binding\NoSuchParameterException;
 use Puli\Discovery\Api\DuplicateTypeException;
 use Puli\Discovery\Api\EditableDiscovery;
-use Puli\Discovery\Api\NoSuchTypeException;
 use Puli\Discovery\Api\Validation\ConstraintViolation;
 use Puli\Manager\Api\Discovery\BindingDescriptor;
 use Puli\Manager\Api\Discovery\BindingTypeDescriptor;
-use Puli\Manager\Api\Discovery\CannotDisableBindingException;
-use Puli\Manager\Api\Discovery\CannotEnableBindingException;
-use Puli\Manager\Api\Discovery\CannotRemoveBindingException;
 use Puli\Manager\Api\Discovery\DiscoveryManager;
 use Puli\Manager\Api\Discovery\DiscoveryNotEmptyException;
 use Puli\Manager\Api\Discovery\DuplicateBindingException;
 use Puli\Manager\Api\Discovery\NoSuchBindingException;
+use Puli\Manager\Api\Discovery\NoSuchTypeException;
 use Puli\Manager\Api\Discovery\TypeNotEnabledException;
 use Puli\Manager\Api\Environment\ProjectEnvironment;
+use Puli\Manager\Api\NonRootPackageExpectedException;
 use Puli\Manager\Api\Package\InstallInfo;
 use Puli\Manager\Api\Package\Package;
 use Puli\Manager\Api\Package\PackageCollection;
 use Puli\Manager\Api\Package\RootPackage;
 use Puli\Manager\Api\Package\RootPackageFile;
+use Puli\Manager\Api\RootPackageExpectedException;
 use Puli\Manager\Assert\Assert;
 use Puli\Manager\Discovery\Binding\AddBindingDescriptorToPackageFile;
 use Puli\Manager\Discovery\Binding\Bind;
@@ -205,34 +204,38 @@ class DiscoveryManagerImpl implements DiscoveryManager
 
         $this->assertPackagesLoaded();
 
-        if (!$this->rootPackageFile->hasTypeDescriptor($typeName)) {
+        if (!$this->typeDescriptors->contains($typeName)) {
             return;
         }
 
+        if (!$this->typeDescriptors->contains($typeName, $this->rootPackage->getName())) {
+            $typeDescriptor = $this->typeDescriptors->getFirst($typeName);
+
+            throw RootPackageExpectedException::cannotRemoveBindingType($typeName, $typeDescriptor->getContainingPackage()->getName());
+        }
+
+        $typeDescriptor = $this->typeDescriptors->get($typeName, $this->rootPackage->getName());
         $tx = new Transaction();
 
         try {
             $tx->execute($this->removeTypeDescriptorFromPackageFile($typeName));
 
-            if ($this->typeDescriptors->contains($typeName, $this->rootPackage->getName())) {
-                $typeDescriptor = $this->typeDescriptors->get($typeName, $this->rootPackage->getName());
-                $syncBindingOps = array();
+            $syncBindingOps = array();
 
-                foreach ($this->getUuidsByTypeName($typeName) as $uuid) {
-                    $syncBindingOp = $this->syncBindingUuid($uuid);
-                    $syncBindingOp->takeSnapshot();
-                    $syncBindingOps[] = $syncBindingOp;
-                }
+            foreach ($this->getUuidsByTypeName($typeName) as $uuid) {
+                $syncBindingOp = $this->syncBindingUuid($uuid);
+                $syncBindingOp->takeSnapshot();
+                $syncBindingOps[] = $syncBindingOp;
+            }
 
-                $syncOp = $this->syncTypeName($typeName);
-                $syncOp->takeSnapshot();
+            $syncOp = $this->syncTypeName($typeName);
+            $syncOp->takeSnapshot();
 
-                $tx->execute($this->unloadTypeDescriptor($typeDescriptor));
-                $tx->execute($syncOp);
+            $tx->execute($this->unloadTypeDescriptor($typeDescriptor));
+            $tx->execute($syncOp);
 
-                foreach ($syncBindingOps as $syncBindingOp) {
-                    $tx->execute($syncBindingOp);
-                }
+            foreach ($syncBindingOps as $syncBindingOp) {
+                $tx->execute($syncBindingOp);
             }
 
             $this->saveRootPackageFile();
@@ -350,7 +353,7 @@ class DiscoveryManagerImpl implements DiscoveryManager
                 throw NoSuchTypeException::forTypeName($typeName);
             }
 
-            if (!$this->typeDescriptors->getEnabled($typeName)) {
+            if (!$this->typeDescriptors->getFirst($typeName)->isEnabled()) {
                 throw TypeNotEnabledException::forTypeName($typeName);
             }
         }
@@ -398,7 +401,7 @@ class DiscoveryManagerImpl implements DiscoveryManager
         $bindingDescriptor = $this->bindingDescriptors->get($uuid);
 
         if (!$bindingDescriptor->getContainingPackage() instanceof RootPackage) {
-            throw CannotRemoveBindingException::rootPackageRequired($uuid, $bindingDescriptor->getContainingPackage()->getName());
+            throw RootPackageExpectedException::cannotRemoveBinding($uuid, $bindingDescriptor->getContainingPackage()->getName());
         }
 
         $tx = new Transaction();
@@ -436,11 +439,15 @@ class DiscoveryManagerImpl implements DiscoveryManager
         $package = $bindingDescriptor->getContainingPackage();
 
         if ($package instanceof RootPackage) {
-            throw CannotEnableBindingException::rootPackageNotAccepted($uuid, $package->getName());
+            throw NonRootPackageExpectedException::cannotEnableBinding($uuid, $package->getName());
         }
 
-        if ($bindingDescriptor->isTypeNotLoaded()) {
-            throw CannotEnableBindingException::typeNotLoaded($uuid, $package->getName());
+        if ($bindingDescriptor->isTypeNotFound()) {
+            throw NoSuchTypeException::forTypeName($bindingDescriptor->getTypeName());
+        }
+
+        if ($bindingDescriptor->isTypeNotEnabled()) {
+            throw TypeNotEnabledException::forTypeName($bindingDescriptor->getTypeName());
         }
 
         if ($bindingDescriptor->isEnabled()) {
@@ -481,11 +488,15 @@ class DiscoveryManagerImpl implements DiscoveryManager
         $package = $bindingDescriptor->getContainingPackage();
 
         if ($package instanceof RootPackage) {
-            throw CannotDisableBindingException::rootPackageNotAccepted($uuid, $package->getName());
+            throw NonRootPackageExpectedException::cannotDisableBinding($uuid, $package->getName());
         }
 
-        if ($bindingDescriptor->isTypeNotLoaded()) {
-            throw CannotDisableBindingException::typeNotLoaded($uuid, $package->getName());
+        if ($bindingDescriptor->isTypeNotFound()) {
+            throw NoSuchTypeException::forTypeName($bindingDescriptor->getTypeName());
+        }
+
+        if ($bindingDescriptor->isTypeNotEnabled()) {
+            throw TypeNotEnabledException::forTypeName($bindingDescriptor->getTypeName());
         }
 
         if ($bindingDescriptor->isDisabled()) {
@@ -599,9 +610,11 @@ class DiscoveryManagerImpl implements DiscoveryManager
         $tx = new Transaction();
 
         try {
-            foreach ($this->typeDescriptors->getTypeNames() as $typeName) {
-                if ($typeDescriptor = $this->typeDescriptors->getEnabled($typeName)) {
-                    $tx->execute($this->defineType($typeDescriptor));
+            foreach ($this->typeDescriptors->toArray() as $typeName => $typesByPackage) {
+                foreach ($typesByPackage as $typeDescriptor) {
+                    if ($typeDescriptor->isEnabled()) {
+                        $tx->execute($this->defineType($typeDescriptor));
+                    }
                 }
             }
 
@@ -636,7 +649,7 @@ class DiscoveryManagerImpl implements DiscoveryManager
 
     private function assertBindingValid(BindingDescriptor $bindingDescriptor)
     {
-        if ($bindingDescriptor->isTypeNotLoaded()) {
+        if ($bindingDescriptor->isTypeNotFound() || $bindingDescriptor->isTypeNotEnabled()) {
             return;
         }
 

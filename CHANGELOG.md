@@ -23,6 +23,11 @@ Changelog
  * made argument `$packageName` mandatory in `DiscoveryManager::getBindingType()`
  * `DiscoveryManager::removeBinding()` now fails if removing a binding from a
    non-root package
+ * `DiscoveryManager::removeBindingType()` now fails if removing a type from a
+   non-root package
+ * removed `CannotEnableBindingException` and `CannotDisableBindingException`
+ * replaced `BindingState::TYPE_NOT_LOADED` by `TYPE_NOT_FOUND` and
+   `TYPE_NOT_ENABLED`
    
 * 1.0.0-beta3 (2015-03-19)
 

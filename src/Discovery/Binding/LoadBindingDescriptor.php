@@ -68,7 +68,9 @@ class LoadBindingDescriptor implements AtomicOperation
         }
 
         $typeName = $this->bindingDescriptor->getTypeName();
-        $typeDescriptor = $this->typeDescriptors->getEnabled($typeName);
+        $typeDescriptor = $this->typeDescriptors->contains($typeName)
+            ? $this->typeDescriptors->getFirst($typeName)
+            : null;
 
         $this->bindingDescriptor->load($this->containingPackage, $typeDescriptor);
 

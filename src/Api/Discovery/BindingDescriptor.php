@@ -513,24 +513,45 @@ class BindingDescriptor
     }
 
     /**
-     * Returns whether the binding's type is not loaded.
+     * Returns whether the type of the binding does not exist.
      *
      * The method {@link load()} needs to be called before calling this method,
      * otherwise an exception is thrown.
      *
-     * @return bool Returns `true` if the state is {@link BindingState::TYPE_NOT_LOADED}.
+     * @return bool Returns `true` if the state is {@link BindingState::TYPE_NOT_FOUND}.
      *
      * @throws NotLoadedException If the descriptor is not loaded.
      *
-     * @see BindingState::TYPE_NOT_LOADED
+     * @see BindingState::TYPE_NOT_FOUND
      */
-    public function isTypeNotLoaded()
+    public function isTypeNotFound()
     {
         if (null === $this->state) {
             throw new NotLoadedException('The binding descriptor is not loaded.');
         }
 
-        return BindingState::TYPE_NOT_LOADED === $this->state;
+        return BindingState::TYPE_NOT_FOUND === $this->state;
+    }
+
+    /**
+     * Returns whether the type of the binding is not enabled.
+     *
+     * The method {@link load()} needs to be called before calling this method,
+     * otherwise an exception is thrown.
+     *
+     * @return bool Returns `true` if the state is {@link BindingState::TYPE_NOT_ENABLED}.
+     *
+     * @throws NotLoadedException If the descriptor is not loaded.
+     *
+     * @see BindingState::TYPE_NOT_ENABLED
+     */
+    public function isTypeNotEnabled()
+    {
+        if (null === $this->state) {
+            throw new NotLoadedException('The binding descriptor is not loaded.');
+        }
+
+        return BindingState::TYPE_NOT_ENABLED === $this->state;
     }
 
     /**
@@ -580,9 +601,10 @@ class BindingDescriptor
 
     private function refreshState()
     {
-        if (null === $this->typeDescriptor || !$this->typeDescriptor->isLoaded()
-            || !$this->typeDescriptor->isEnabled()) {
-            $this->state = BindingState::TYPE_NOT_LOADED;
+        if (null === $this->typeDescriptor || !$this->typeDescriptor->isLoaded()) {
+            $this->state = BindingState::TYPE_NOT_FOUND;
+        } elseif (!$this->typeDescriptor->isEnabled()) {
+            $this->state = BindingState::TYPE_NOT_ENABLED;
         } elseif (count($this->violations) > 0) {
             $this->state = BindingState::INVALID;
         } elseif ($this->containingPackage instanceof RootPackage) {

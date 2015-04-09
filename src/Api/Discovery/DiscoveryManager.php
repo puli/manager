@@ -12,8 +12,9 @@
 namespace Puli\Manager\Api\Discovery;
 
 use Puli\Discovery\Api\DuplicateTypeException;
-use Puli\Discovery\Api\NoSuchTypeException;
 use Puli\Manager\Api\Environment\ProjectEnvironment;
+use Puli\Manager\Api\NonRootPackageExpectedException;
+use Puli\Manager\Api\RootPackageExpectedException;
 use Rhumsaa\Uuid\Uuid;
 use Webmozart\Expression\Expression;
 
@@ -62,6 +63,9 @@ interface DiscoveryManager
      * is not found, this method does nothing.
      *
      * @param string $typeName The name of the type to remove.
+     *
+     * @throws RootPackageExpectedException If the type is not in the root
+     *                                      package.
      */
     public function removeBindingType($typeName);
 
@@ -127,10 +131,12 @@ interface DiscoveryManager
      * @param int               $flags             A bitwise combination of the
      *                                             flag constants in this class.
      *
-     * @throws NoSuchTypeException     If the type referenced by the descriptor
-     *                                 does not exist.
+     * @throws NoSuchTypeException If the type referenced by the descriptor does
+     *                             not exist.
      * @throws TypeNotEnabledException If the type referenced by the descriptor
      *                                 is not enabled.
+     * @throws DuplicateBindingException If a binding with the same UUID exists
+     *                                   already.
      */
     public function addBinding(BindingDescriptor $bindingDescriptor, $flags = 0);
 
@@ -139,7 +145,8 @@ interface DiscoveryManager
      *
      * @param Uuid $uuid The UUID of the binding.
      *
-     * @throws CannotRemoveBindingException If the binding could not be removed.
+     * @throws RootPackageExpectedException If the binding is not in the root
+     *                                      package.
      */
     public function removeBinding(Uuid $uuid);
 
@@ -149,7 +156,15 @@ interface DiscoveryManager
      * @param Uuid $uuid The UUID of the binding.
      *
      * @throws NoSuchBindingException If the binding does not exist.
-     * @throws CannotEnableBindingException If the binding could not be enabled.
+     * @throws NoSuchTypeException If the type referenced by the descriptor does
+     *                             not exist.
+     * @throws TypeNotEnabledException If the type referenced by the descriptor
+     *                                 is not enabled.
+     * @throws NonRootPackageExpectedException If the binding is in the root
+     *                                         package. Can only enable bindings
+     *                                         in non-root packages, because the
+     *                                         bindings in the root package are
+     *                                         implicitly enabled.
      */
     public function enableBinding(Uuid $uuid);
 
@@ -159,7 +174,15 @@ interface DiscoveryManager
      * @param Uuid $uuid The UUID of the binding.
      *
      * @throws NoSuchBindingException If the binding does not exist.
-     * @throws CannotDisableBindingException If the binding could not be disabled.
+     * @throws NoSuchTypeException If the type referenced by the descriptor does
+     *                             not exist.
+     * @throws TypeNotEnabledException If the type referenced by the descriptor
+     *                                 is not enabled.
+     * @throws NonRootPackageExpectedException If the binding is in the root
+     *                                         package. Can only disable bindings
+     *                                         in non-root packages, because the
+     *                                         bindings in the root package are
+     *                                         implicitly enabled.
      */
     public function disableBinding(Uuid $uuid);
 
