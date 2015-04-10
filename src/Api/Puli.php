@@ -565,7 +565,7 @@ class Puli
             $this->repositoryManager = new RepositoryManagerImpl(
                 $this->environment,
                 $this->getRepository(),
-                $this->getPackageManager()->findPackages(Expr::same(Package::STATE, PackageState::ENABLED)),
+                $this->getPackageManager()->findPackages(Expr::same(PackageState::ENABLED, Package::STATE)),
                 $this->getPackageFileStorage()
             );
         }
@@ -588,7 +588,7 @@ class Puli
             $this->discoveryManager = new DiscoveryManagerImpl(
                 $this->environment,
                 $this->getDiscovery(),
-                $this->getPackageManager()->findPackages(Expr::same(Package::STATE, PackageState::ENABLED)),
+                $this->getPackageManager()->findPackages(Expr::same(PackageState::ENABLED, Package::STATE)),
                 $this->getPackageFileStorage(),
                 $this->logger
             );
