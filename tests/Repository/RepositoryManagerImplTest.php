@@ -858,9 +858,13 @@ class RepositoryManagerImplTest extends ManagerTestCase
         $this->assertCount(1, $this->manager->getPathConflicts());
     }
 
-    public function testClearRootPathMappings()
+    public function testRemoveRootPathMappings()
     {
         $this->initDefaultManager();
+
+        $this->rootPackageFile->addPathMapping($mapping1 = new PathMapping('/app1', 'resources'));
+        $this->rootPackageFile->addPathMapping($mapping2 = new PathMapping('/app2', 'resources'));
+        $this->rootPackageFile->addPathMapping($mapping3 = new PathMapping('/other', 'resources'));
 
         $this->repo->expects($this->at(0))
             ->method('remove')
@@ -873,20 +877,18 @@ class RepositoryManagerImplTest extends ManagerTestCase
         $this->packageFileStorage->expects($this->once())
             ->method('saveRootPackageFile')
             ->with($this->rootPackageFile)
-            ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) {
-                PHPUnit_Framework_Assert::assertFalse($rootPackageFile->hasPathMappings());
+            ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) use ($mapping3) {
+                PHPUnit_Framework_Assert::assertSame(array('/other' => $mapping3), $rootPackageFile->getPathMappings());
             }));
 
-        $this->rootPackageFile->addPathMapping($mapping1 = new PathMapping('/app1', 'resources'));
-        $this->rootPackageFile->addPathMapping($mapping2 = new PathMapping('/app2', 'resources'));
-
-        $this->manager->clearRootPathMappings();
+        $this->manager->removeRootPathMappings(Expr::startsWith('/app', PathMapping::REPOSITORY_PATH));
 
         $this->assertFalse($mapping1->isLoaded());
         $this->assertFalse($mapping2->isLoaded());
+        $this->assertTrue($mapping3->isLoaded());
     }
 
-    public function testClearRootPathMappingRestoresResourcesIfSavingFails1()
+    public function testRemoveRootPathMappingRestoresResourcesIfSavingFails1()
     {
         $this->initDefaultManager();
 
@@ -926,7 +928,7 @@ class RepositoryManagerImplTest extends ManagerTestCase
         $this->packageFile1->addPathMapping($mapping4 = new PathMapping('/path2', 'resources'));
 
         try {
-            $this->manager->clearRootPathMappings();
+            $this->manager->removeRootPathMappings(Expr::startsWith('/path', PathMapping::REPOSITORY_PATH));
             $this->fail('Expected a TestException');
         } catch (TestException $e) {
         }
@@ -936,6 +938,34 @@ class RepositoryManagerImplTest extends ManagerTestCase
         $this->assertTrue($mapping3->isEnabled());
         $this->assertTrue($mapping4->isEnabled());
         $this->assertCount(0, $this->manager->getPathConflicts());
+    }
+
+    public function testClearRootPathMappings()
+    {
+        $this->initDefaultManager();
+
+        $this->repo->expects($this->at(0))
+            ->method('remove')
+            ->with('/app1');
+
+        $this->repo->expects($this->at(1))
+            ->method('remove')
+            ->with('/app2');
+
+        $this->packageFileStorage->expects($this->once())
+            ->method('saveRootPackageFile')
+            ->with($this->rootPackageFile)
+            ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) {
+                PHPUnit_Framework_Assert::assertFalse($rootPackageFile->hasPathMappings());
+            }));
+
+        $this->rootPackageFile->addPathMapping($mapping1 = new PathMapping('/app1', 'resources'));
+        $this->rootPackageFile->addPathMapping($mapping2 = new PathMapping('/app2', 'resources'));
+
+        $this->manager->clearRootPathMappings();
+
+        $this->assertFalse($mapping1->isLoaded());
+        $this->assertFalse($mapping2->isLoaded());
     }
 
     public function testGetRootPathMapping()

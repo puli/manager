@@ -217,7 +217,7 @@ class RepositoryManagerImpl implements RepositoryManager
     /**
      * {@inheritdoc}
      */
-    public function clearRootPathMappings()
+    public function removeRootPathMappings(Expression $expr)
     {
         $this->assertMappingsLoaded();
 
@@ -225,12 +225,14 @@ class RepositoryManagerImpl implements RepositoryManager
 
         try {
             foreach ($this->getRootPathMappings() as $mapping) {
-                $syncOp = $this->syncRepositoryPath($mapping->getRepositoryPath());
-                $syncOp->takeSnapshot();
+                if ($mapping->match($expr)) {
+                    $syncOp = $this->syncRepositoryPath($mapping->getRepositoryPath());
+                    $syncOp->takeSnapshot();
 
-                $tx->execute($this->unloadPathMapping($mapping));
-                $tx->execute($this->removePathMappingFromPackageFile($mapping->getRepositoryPath()));
-                $tx->execute($syncOp);
+                    $tx->execute($this->unloadPathMapping($mapping));
+                    $tx->execute($this->removePathMappingFromPackageFile($mapping->getRepositoryPath()));
+                    $tx->execute($syncOp);
+                }
             }
 
             $this->saveRootPackageFile();
@@ -243,6 +245,14 @@ class RepositoryManagerImpl implements RepositoryManager
         }
 
         $this->removeResolvedConflicts();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function clearRootPathMappings()
+    {
+        $this->removeRootPathMappings(Expr::valid());
     }
 
     /**

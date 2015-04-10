@@ -83,6 +83,7 @@ Changelog
  * changed argument `$pattern` to `$expr` for `ConfigFileManager::findConfigKeys()`
  * added `DiscoveryManager::removeRootBindingTypes()`
  * added `DiscoveryManager::removeRootBindings()`
+ * added `RepositoryManager::removeRootPathMappings()`
       
 * 1.0.0-beta3 (2015-03-19)
 

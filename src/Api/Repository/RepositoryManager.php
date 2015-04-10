@@ -66,6 +66,16 @@ interface RepositoryManager
     public function removeRootPathMapping($repositoryPath);
 
     /**
+     * Removes all path mappings from the repository that match the given
+     * expression.
+     *
+     * If no mapping is found, this method does nothing.
+     *
+     * @param Expression $expr The search criteria.
+     */
+    public function removeRootPathMappings(Expression $expr);
+
+    /**
      * Removes all path mappings from the repository.
      *
      * If no mapping is found, this method does nothing.
