@@ -74,6 +74,9 @@ Changelog
  * fixed `RootPackageFileManager` methods when saving fails
  * added optional argument `$expr` to `RootPackageFileManager::hasPluginClasses()`
  * added `RootPackageFileManager::findPluginClasses()`
+ * added optional argument `$expr` to `RootPackageFileManager::hasExtraKeys()`
+ * changed argument `$keys` to `$expr` for `RootPackageFileManager::removeExtraKeys()`
+ * added `RootPackageFileManager::findExtraKeys()`
       
 * 1.0.0-beta3 (2015-03-19)
 

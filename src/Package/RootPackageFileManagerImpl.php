@@ -14,13 +14,11 @@ namespace Puli\Manager\Package;
 use Exception;
 use InvalidArgumentException;
 use Puli\Manager\Api\Environment\ProjectEnvironment;
-use Puli\Manager\Api\Factory\FactoryManager;
 use Puli\Manager\Api\Package\RootPackageFile;
 use Puli\Manager\Api\Package\RootPackageFileManager;
 use Puli\Manager\Config\AbstractConfigFileManager;
 use ReflectionClass;
 use ReflectionException;
-use Webmozart\Expression\Expr;
 use Webmozart\Expression\Expression;
 
 /**
@@ -346,26 +344,26 @@ class RootPackageFileManagerImpl extends AbstractConfigFileManager implements Ro
     /**
      * {@inheritdoc}
      */
-    public function removeExtraKeys(array $keys)
+    public function removeExtraKeys(Expression $expr)
     {
-        $previousValues = array();
+        $previousValues = $this->rootPackageFile->getExtraKeys();
+        $save = false;
 
-        foreach ($keys as $key) {
-            if ($this->rootPackageFile->hasExtraKey($key)) {
-                $previousValues[$key] = $this->rootPackageFile->getExtraKey($key);
+        foreach ($this->rootPackageFile->getExtraKeys() as $key => $value) {
+            if ($expr->evaluate($key)) {
+                $this->rootPackageFile->removeExtraKey($key);
+                $save = true;
             }
-
-            $this->rootPackageFile->removeExtraKey($key);
         }
 
-        if (!$previousValues) {
+        if (!$save) {
             return;
         }
 
         try {
             $this->packageFileStorage->saveRootPackageFile($this->rootPackageFile);
         } catch (Exception $e) {
-            $this->rootPackageFile->addExtraKeys($previousValues);
+            $this->rootPackageFile->setExtraKeys($previousValues);
 
             throw $e;
         }
@@ -404,9 +402,19 @@ class RootPackageFileManagerImpl extends AbstractConfigFileManager implements Ro
     /**
      * {@inheritdoc}
      */
-    public function hasExtraKeys()
+    public function hasExtraKeys(Expression $expr = null)
     {
-        return $this->rootPackageFile->hasExtraKeys();
+        if (!$expr) {
+            return $this->rootPackageFile->hasExtraKeys();
+        }
+
+        foreach ($this->rootPackageFile->getExtraKeys() as $key => $value) {
+            if ($expr->evaluate($key)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -423,6 +431,22 @@ class RootPackageFileManagerImpl extends AbstractConfigFileManager implements Ro
     public function getExtraKeys()
     {
         return $this->rootPackageFile->getExtraKeys();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function findExtraKeys(Expression $expr)
+    {
+        $values = array();
+
+        foreach ($this->rootPackageFile->getExtraKeys() as $key => $value) {
+            if ($expr->evaluate($key)) {
+                $values[$key] = $value;
+            }
+        }
+
+        return $values;
     }
 
     /**

@@ -811,7 +811,7 @@ class RootPackageFileManagerImplTest extends ManagerTestCase
                 ), $packageFile->getExtraKeys());
             }));
 
-        $this->manager->removeExtraKeys(array('key1', 'key3'));
+        $this->manager->removeExtraKeys(Expr::in(array('key1', 'key3')));
     }
 
     public function testRemoveExtraKeysIgnoresIfNoneRemoved()
@@ -819,7 +819,7 @@ class RootPackageFileManagerImplTest extends ManagerTestCase
         $this->packageFileStorage->expects($this->never())
             ->method('saveRootPackageFile');
 
-        $this->manager->removeExtraKeys(array('key1', 'key3'));
+        $this->manager->removeExtraKeys(Expr::in(array('key1', 'key3')));
     }
 
     public function testRemoveExtraKeysRestoresPreviousValuesIfSavingFails()
@@ -832,7 +832,7 @@ class RootPackageFileManagerImplTest extends ManagerTestCase
             ->will($this->throwException(new TestException()));
 
         try {
-            $this->manager->removeExtraKeys(array('key1', 'key2'));
+            $this->manager->removeExtraKeys(Expr::in(array('key1', 'key2')));
             $this->fail('Expected a TestException');
         } catch (TestException $e) {
         }
@@ -894,8 +894,15 @@ class RootPackageFileManagerImplTest extends ManagerTestCase
     public function testHasExtraKeys()
     {
         $this->assertFalse($this->manager->hasExtraKeys());
-        $this->rootPackageFile->setExtraKey('key', 'value');
+
+        $this->rootPackageFile->setExtraKey('key1', 'value');
+
         $this->assertTrue($this->manager->hasExtraKeys());
+        $this->assertFalse($this->manager->hasExtraKeys(Expr::same('key2')));
+
+        $this->rootPackageFile->setExtraKey('key2', 'value');
+
+        $this->assertTrue($this->manager->hasExtraKeys(Expr::same('key2')));
     }
 
     public function testGetExtraKey()
@@ -915,5 +922,21 @@ class RootPackageFileManagerImplTest extends ManagerTestCase
             'key1' => 'value1',
             'key2' => 'value2',
         ), $this->manager->getExtraKeys());
+    }
+
+    public function testFindExtraKeys()
+    {
+        $this->rootPackageFile->setExtraKey('key1', 'value1');
+        $this->rootPackageFile->setExtraKey('key2', 'value2');
+
+        $expr1 = Expr::same('key1');
+
+        $expr2 = Expr::startsWith('key');
+
+        $expr3 = Expr::same('foo');
+
+        $this->assertSame(array('key1' => 'value1'), $this->manager->findExtraKeys($expr1));
+        $this->assertSame(array('key1' => 'value1', 'key2' => 'value2'), $this->manager->findExtraKeys($expr2));
+        $this->assertSame(array(), $this->manager->findExtraKeys($expr3));
     }
 }

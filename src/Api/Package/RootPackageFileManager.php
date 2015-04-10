@@ -169,15 +169,16 @@ interface RootPackageFileManager extends ConfigFileManager
     public function removeExtraKey($key);
 
     /**
-     * Removes multiple extra keys from the file.
+     * Removes the extra keys from the package file that match the given
+     * expression.
      *
      * The file is saved directly after removing the keys.
      *
-     * @param string[] $keys The names of the removed extra keys.
+     * @param Expression $expr The search criteria.
      *
      * @throws IOException If the file cannot be written.
      */
-    public function removeExtraKeys(array $keys);
+    public function removeExtraKeys(Expression $expr);
 
     /**
      * Removes all extra keys from the file.
@@ -201,10 +202,14 @@ interface RootPackageFileManager extends ConfigFileManager
     /**
      * Returns whether the file contains any extra keys.
      *
+     * @param Expression $expr The search criteria.
+     *
      * @return bool Returns `true` if the file contains extra keys and `false`
-     *              otherwise.
+     *              otherwise. If an expression is passed, this method only
+     *              returns `true` if the file contains extra keys matching the
+     *              expression.
      */
-    public function hasExtraKeys();
+    public function hasExtraKeys(Expression $expr = null);
 
     /**
      * Returns the value of a configuration key.
@@ -222,4 +227,13 @@ interface RootPackageFileManager extends ConfigFileManager
      * @return array A mapping of configuration keys to values.
      */
     public function getExtraKeys();
+
+    /**
+     * Returns the values of all extra keys matching the given expression.
+     *
+     * @param Expression $expr The search criteria.
+     *
+     * @return array A mapping of configuration keys to values.
+     */
+    public function findExtraKeys(Expression $expr);
 }
