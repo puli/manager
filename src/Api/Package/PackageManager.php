@@ -53,7 +53,18 @@ interface PackageManager
     public function removePackage($name);
 
     /**
+     * Removes all packages matching the given expression.
+     *
+     * If no matching packages are found, this method does nothing.
+     *
+     * @param Expression $expr The search criteria.
+     */
+    public function removePackages(Expression $expr);
+
+    /**
      * Removes all packages.
+     *
+     * If matching packages are found, this method does nothing.
      */
     public function clearPackages();
 

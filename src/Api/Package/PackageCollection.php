@@ -56,6 +56,29 @@ class PackageCollection implements IteratorAggregate, Countable, ArrayAccess
     }
 
     /**
+     * Adds multiple packages to the collection.
+     *
+     * @param Package[] $packages The added packages.
+     */
+    public function merge(array $packages)
+    {
+        foreach ($packages as $package) {
+            $this->add($package);
+        }
+    }
+
+    /**
+     * Replaces the collection with the given packages.
+     *
+     * @param Package[] $packages The packages to set.
+     */
+    public function replace(array $packages)
+    {
+        $this->clear();
+        $this->merge($packages);
+    }
+
+    /**
      * Removes a package from the collection.
      *
      * @param string $name The package name.

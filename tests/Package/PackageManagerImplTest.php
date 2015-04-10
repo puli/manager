@@ -530,6 +530,64 @@ class PackageManagerImplTest extends ManagerTestCase
         $this->assertTrue($this->manager->getPackages()->contains('vendor/package1'));
     }
 
+    public function testRemovePackages()
+    {
+        $this->initDefaultManager();
+
+        $packageDir = $this->packageDir1;
+
+        $this->packageFileStorage->expects($this->once())
+            ->method('saveRootPackageFile')
+            ->with($this->rootPackageFile)
+            ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) use ($packageDir) {
+                PHPUnit_Framework_Assert::assertFalse($rootPackageFile->hasInstallInfo('vendor/package1'));
+                PHPUnit_Framework_Assert::assertFalse($rootPackageFile->hasInstallInfo('vendor/package2'));
+                PHPUnit_Framework_Assert::assertTrue($rootPackageFile->hasInstallInfo('vendor/package3'));
+            }));
+
+        $this->rootPackageFile->addInstallInfo($this->installInfo3);
+
+        $this->assertTrue($this->rootPackageFile->hasInstallInfo('vendor/package1'));
+        $this->assertTrue($this->rootPackageFile->hasInstallInfo('vendor/package2'));
+        $this->assertTrue($this->rootPackageFile->hasInstallInfo('vendor/package3'));
+        $this->assertTrue($this->manager->hasPackage('vendor/root'));
+        $this->assertTrue($this->manager->hasPackage('vendor/package1'));
+        $this->assertTrue($this->manager->hasPackage('vendor/package2'));
+        $this->assertTrue($this->manager->hasPackage('vendor/package3'));
+
+        $this->manager->removePackages(Expr::key(Package::NAME, Expr::endsWith('1')->orEndsWith('2')));
+
+        $this->assertFalse($this->rootPackageFile->hasInstallInfo('vendor/package1'));
+        $this->assertFalse($this->rootPackageFile->hasInstallInfo('vendor/package2'));
+        $this->assertTrue($this->rootPackageFile->hasInstallInfo('vendor/package3'));
+        $this->assertTrue($this->manager->hasPackage('vendor/root'));
+        $this->assertFalse($this->manager->hasPackage('vendor/package1'));
+        $this->assertFalse($this->manager->hasPackage('vendor/package2'));
+        $this->assertTrue($this->manager->hasPackage('vendor/package3'));
+    }
+
+    public function testRemovePackagesRevertsIfSavingNotPossible()
+    {
+        $this->initDefaultManager();
+
+        $this->packageFileStorage->expects($this->once())
+            ->method('saveRootPackageFile')
+            ->willThrowException(new TestException());
+
+        try {
+            $this->manager->removePackages(Expr::startsWith('vendor/package', Package::NAME));
+            $this->fail('Expected a TestException');
+        } catch (TestException $e) {
+        }
+
+        $this->assertTrue($this->rootPackageFile->hasInstallInfo('vendor/package1'));
+        $this->assertTrue($this->rootPackageFile->hasInstallInfo('vendor/package2'));
+        $this->assertTrue($this->manager->hasPackage('vendor/package1'));
+        $this->assertTrue($this->manager->hasPackage('vendor/package2'));
+        $this->assertTrue($this->manager->getPackages()->contains('vendor/package1'));
+        $this->assertTrue($this->manager->getPackages()->contains('vendor/package2'));
+    }
+
     public function testClearPackages()
     {
         $this->initDefaultManager();
@@ -545,36 +603,15 @@ class PackageManagerImplTest extends ManagerTestCase
 
         $this->assertTrue($this->rootPackageFile->hasInstallInfo('vendor/package1'));
         $this->assertTrue($this->rootPackageFile->hasInstallInfo('vendor/package2'));
+        $this->assertTrue($this->manager->hasPackage('vendor/root'));
         $this->assertTrue($this->manager->hasPackage('vendor/package1'));
         $this->assertTrue($this->manager->hasPackage('vendor/package2'));
 
         $this->manager->clearPackages();
 
         $this->assertFalse($this->rootPackageFile->hasInstallInfos());
-        $this->assertFalse($this->manager->hasPackages());
-        $this->assertTrue($this->manager->getPackages()->isEmpty());
-    }
-
-    public function testClearPackagesRevertsIfSavingNotPossible()
-    {
-        $this->initDefaultManager();
-
-        $this->packageFileStorage->expects($this->once())
-            ->method('saveRootPackageFile')
-            ->willThrowException(new TestException());
-
-        try {
-            $this->manager->clearPackages();
-            $this->fail('Expected a TestException');
-        } catch (TestException $e) {
-        }
-
-        $this->assertTrue($this->rootPackageFile->hasInstallInfo('vendor/package1'));
-        $this->assertTrue($this->rootPackageFile->hasInstallInfo('vendor/package2'));
-        $this->assertTrue($this->manager->hasPackage('vendor/package1'));
-        $this->assertTrue($this->manager->hasPackage('vendor/package2'));
-        $this->assertTrue($this->manager->getPackages()->contains('vendor/package1'));
-        $this->assertTrue($this->manager->getPackages()->contains('vendor/package2'));
+        $this->assertCount(1, $this->manager->getPackages());
+        $this->assertTrue($this->manager->hasPackage('vendor/root'));
     }
 
     public function testGetPackage()

@@ -147,6 +147,47 @@ class PackageCollectionTest extends PHPUnit_Framework_TestCase
         $this->assertSame(array('vendor/package1', 'vendor/package2'), $this->collection->getInstalledPackageNames());
     }
 
+    public function testMerge()
+    {
+        $packageFile1 = new PackageFile('vendor/package1');
+        $package1 = new Package($packageFile1, '/path1');
+
+        $packageFile2 = new PackageFile('vendor/package2');
+        $package2 = new Package($packageFile2, '/path2');
+
+        $packageFile3 = new PackageFile('vendor/package3');
+        $package3 = new Package($packageFile3, '/path3');
+
+        $this->collection->add($package1);
+        $this->collection->merge(array($package2, $package3));
+
+        $this->assertSame(array(
+            'vendor/package1' => $package1,
+            'vendor/package2' => $package2,
+            'vendor/package3' => $package3,
+        ), $this->collection->toArray());
+    }
+
+    public function testReplace()
+    {
+        $packageFile1 = new PackageFile('vendor/package1');
+        $package1 = new Package($packageFile1, '/path1');
+
+        $packageFile2 = new PackageFile('vendor/package2');
+        $package2 = new Package($packageFile2, '/path2');
+
+        $packageFile3 = new PackageFile('vendor/package3');
+        $package3 = new Package($packageFile3, '/path3');
+
+        $this->collection->add($package1);
+        $this->collection->replace(array($package2, $package3));
+
+        $this->assertSame(array(
+            'vendor/package2' => $package2,
+            'vendor/package3' => $package3,
+        ), $this->collection->toArray());
+    }
+
     public function testRemove()
     {
         $packageFile1 = new PackageFile('vendor/package1');

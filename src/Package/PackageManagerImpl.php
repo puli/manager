@@ -26,6 +26,7 @@ use Puli\Manager\Api\Package\RootPackage;
 use Puli\Manager\Api\Package\RootPackageFile;
 use Puli\Manager\Api\Package\UnsupportedVersionException;
 use Puli\Manager\Assert\Assert;
+use Webmozart\Expression\Expr;
 use Webmozart\Expression\Expression;
 use Webmozart\PathUtil\Path;
 
@@ -178,24 +179,44 @@ class PackageManagerImpl implements PackageManager
     /**
      * {@inheritdoc}
      */
-    public function clearPackages()
+    public function removePackages(Expression $expr)
     {
         $this->assertPackagesLoaded();
 
-        if ($this->rootPackageFile->hasInstallInfos()) {
-            $installInfos = $this->rootPackageFile->getInstallInfos();
-            $this->rootPackageFile->clearInstallInfos();
+        $installInfos = $this->rootPackageFile->getInstallInfos();
+        $packages = $this->packages->toArray();
 
-            try {
-                $this->packageFileStorage->saveRootPackageFile($this->rootPackageFile);
-            } catch (Exception $e) {
-                $this->rootPackageFile->setInstallInfos($installInfos);
+        foreach ($this->packages as $package) {
+            if ($package instanceof RootPackage) {
+                continue;
+            }
 
-                throw $e;
+            if ($package->match($expr)) {
+                $this->rootPackageFile->removeInstallInfo($package->getName());
+                $this->packages->remove($package->getName());
             }
         }
 
-        $this->packages->clear();
+        if (!$installInfos) {
+            return;
+        }
+
+        try {
+            $this->packageFileStorage->saveRootPackageFile($this->rootPackageFile);
+        } catch (Exception $e) {
+            $this->rootPackageFile->setInstallInfos($installInfos);
+            $this->packages->replace($packages);
+
+            throw $e;
+        }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function clearPackages()
+    {
+        $this->removePackages(Expr::valid());
     }
 
     /**

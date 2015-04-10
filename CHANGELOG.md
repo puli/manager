@@ -84,6 +84,10 @@ Changelog
  * added `DiscoveryManager::removeRootBindingTypes()`
  * added `DiscoveryManager::removeRootBindings()`
  * added `RepositoryManager::removeRootPathMappings()`
+ * added `PackageCollection::merge()`
+ * added `PackageCollection::replace()`
+ * added `PackageManager::removePackages()`
+ * fixed `PackageManager::clearPackages()`
       
 * 1.0.0-beta3 (2015-03-19)
 
