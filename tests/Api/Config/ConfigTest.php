@@ -625,6 +625,21 @@ class ConfigTest extends PHPUnit_Framework_TestCase
         $this->assertSame('repo-file.php', $config->get(Config::FACTORY_IN_FILE));
     }
 
+    public function testReplace()
+    {
+        $config = new Config();
+        $config->set(Config::PULI_DIR, 'puli-dir');
+        $config->set(Config::FACTORY_IN_CLASS, 'Puli\ServiceRegistry');
+        $config->replace(array(
+            Config::FACTORY_IN_CLASS => 'My\ServiceRegistry',
+            Config::FACTORY_IN_FILE => 'repo-file.php',
+        ));
+
+        $this->assertNull($config->get(Config::PULI_DIR));
+        $this->assertSame('My\ServiceRegistry', $config->get(Config::FACTORY_IN_CLASS));
+        $this->assertSame('repo-file.php', $config->get(Config::FACTORY_IN_FILE));
+    }
+
     public function testRemove()
     {
         $config = new Config();

@@ -354,6 +354,20 @@ class Config
     }
 
     /**
+     * Replaces the configuration with a list of configuration values.
+     *
+     * @param array $values The values to set.
+     *
+     * @throws NoSuchConfigKeyException If a configuration key is invalid.
+     * @throws InvalidConfigException If a value is invalid.
+     */
+    public function replace(array $values)
+    {
+        $this->clear();
+        $this->merge($values);
+    }
+
+    /**
      * Removes a configuration key.
      *
      * If the configuration has a base configuration, the default value will
@@ -451,25 +465,6 @@ class Config
     }
 
     /**
-     * Returns whether the configuration is empty.
-     *
-     * @param bool $includeFallback Whether to include values set in the base
-     *                              configuration passed to {@link __construct()}.
-     *
-     * @return bool Returns `true` if no key is set and `false` otherwise.
-     */
-    public function isEmpty($includeFallback = true)
-    {
-        if (!empty($this->values)) {
-            return false;
-        }
-
-        return $includeFallback && $this->baseConfig
-            ? $this->baseConfig->isEmpty(true)
-            : true;
-    }
-
-    /**
      * Returns all raw configuration values as nested array.
      *
      * Unlike {@link toArray()}, this method does not resolve placeholders:
@@ -512,6 +507,25 @@ class Config
         return $includeFallback && $this->baseConfig
             ? array_replace_recursive($this->baseConfig->toRawArray(), $values)
             : $values;
+    }
+
+    /**
+     * Returns whether the configuration is empty.
+     *
+     * @param bool $includeFallback Whether to include values set in the base
+     *                              configuration passed to {@link __construct()}.
+     *
+     * @return bool Returns `true` if no key is set and `false` otherwise.
+     */
+    public function isEmpty($includeFallback = true)
+    {
+        if (!empty($this->values)) {
+            return false;
+        }
+
+        return $includeFallback && $this->baseConfig
+            ? $this->baseConfig->isEmpty(true)
+            : true;
     }
 
     private function validate($key, $value)

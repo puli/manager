@@ -14,7 +14,6 @@ namespace Puli\Manager\Tests\Package;
 use PHPUnit_Framework_Assert;
 use PHPUnit_Framework_MockObject_MockObject;
 use Puli\Manager\Api\Config\Config;
-use Puli\Manager\Api\Factory\FactoryManager;
 use Puli\Manager\Api\Package\RootPackageFile;
 use Puli\Manager\Package\PackageFileStorage;
 use Puli\Manager\Package\RootPackageFileManagerImpl;
@@ -190,7 +189,7 @@ class RootPackageFileManagerImplTest extends ManagerTestCase
         $this->assertSame(array(
             Config::FACTORY_IN_CLASS => 'MyFactory',
             Config::FACTORY_IN_FILE => '{$puli-dir}/MyFactory.php',
-        ), $this->manager->findConfigKeys('factory.*'));
+        ), $this->manager->findConfigKeys(Expr::startsWith('factory.')));
     }
 
     public function testFindConfigKeysReordersToDefaultOrder()
@@ -204,7 +203,7 @@ class RootPackageFileManagerImplTest extends ManagerTestCase
         $this->assertSame(array(
             Config::FACTORY_IN_CLASS => 'MyFactory',
             Config::FACTORY_IN_FILE => '{$puli-dir}/MyFactory.php',
-        ), $this->manager->findConfigKeys('factory.*'));
+        ), $this->manager->findConfigKeys(Expr::startsWith('factory.')));
     }
 
     public function testFindConfigKeysWithFallback()
@@ -219,7 +218,7 @@ class RootPackageFileManagerImplTest extends ManagerTestCase
             Config::FACTORY_AUTO_GENERATE => true,
             Config::FACTORY_IN_CLASS => 'MyFactory',
             Config::FACTORY_IN_FILE => '{$puli-dir}/MyFactory.php',
-        ), $this->manager->findConfigKeys('factory.*', true));
+        ), $this->manager->findConfigKeys(Expr::startsWith('factory.'), true));
     }
 
     public function testFindConfigKeysWithUnsetKeys()
@@ -235,7 +234,7 @@ class RootPackageFileManagerImplTest extends ManagerTestCase
             Config::FACTORY_IN_FILE => null,
             Config::FACTORY_OUT_CLASS => null,
             Config::FACTORY_OUT_FILE => null,
-        ), $this->manager->findConfigKeys('factory.*', true, true));
+        ), $this->manager->findConfigKeys(Expr::startsWith('factory.'), true, true));
     }
 
     public function testRemoveConfigKey()
@@ -271,7 +270,7 @@ class RootPackageFileManagerImplTest extends ManagerTestCase
                 PHPUnit_Framework_Assert::assertNull($config->get(Config::FACTORY_IN_FILE, null, false));
             }));
 
-        $this->manager->removeConfigKeys(array(Config::PULI_DIR, Config::FACTORY_IN_FILE));
+        $this->manager->removeConfigKeys(Expr::in(array(Config::PULI_DIR, Config::FACTORY_IN_FILE)));
     }
 
     public function testAddPluginClass()

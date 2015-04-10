@@ -11,15 +11,13 @@
 
 namespace Puli\Manager\Config;
 
-use ArrayIterator;
 use Exception;
 use Puli\Manager\Api\Config\Config;
 use Puli\Manager\Api\Config\ConfigFileManager;
-use Puli\Manager\Api\Factory\FactoryManager;
 use Puli\Manager\Api\InvalidConfigException;
 use Puli\Manager\Api\IOException;
 use Puli\Manager\Assert\Assert;
-use Webmozart\Glob\Iterator\RegexFilterIterator;
+use Webmozart\Expression\Expression;
 
 /**
  * Base class for configuration file managers.
@@ -63,28 +61,14 @@ abstract class AbstractConfigFileManager implements ConfigFileManager
     public function setConfigKeys(array $values)
     {
         $config = $this->getConfig();
-        $previouslyUnset = array();
-        $previousValues = array();
-
-        foreach ($values as $key => $value) {
-            if ($config->contains($key)) {
-                $previousValues[$key] = $config->get($key);
-            } else {
-                $previouslyUnset[] = $key;
-            }
-        }
+        $previousValues = $config->toFlatRawArray(false);
 
         $config->merge($values);
 
         try {
             $this->saveConfigFile();
         } catch (Exception $e) {
-            foreach ($previousValues as $key => $previousValue) {
-                $config->set($key, $previousValue);
-            }
-            foreach ($previouslyUnset as $key) {
-                $config->remove($key);
-            }
+            $config->replace($previousValues);
 
             throw $e;
         }
@@ -116,14 +100,13 @@ abstract class AbstractConfigFileManager implements ConfigFileManager
     /**
      * {@inheritdoc}
      */
-    public function removeConfigKeys(array $keys)
+    public function removeConfigKeys(Expression $expr)
     {
         $config = $this->getConfig();
-        $previousValues = array();
+        $previousValues = $config->toFlatRawArray(false);
 
-        foreach ($keys as $key) {
-            if ($config->contains($key)) {
-                $previousValues[$key] = $config->get($key);
+        foreach ($previousValues as $key => $value) {
+            if ($expr->evaluate($key)) {
                 $config->remove($key);
             }
         }
@@ -131,9 +114,7 @@ abstract class AbstractConfigFileManager implements ConfigFileManager
         try {
             $this->saveConfigFile();
         } catch (Exception $e) {
-            foreach ($previousValues as $key => $previousValue) {
-                $config->set($key, $previousValue);
-            }
+            $config->replace($previousValues);
 
             throw $e;
         }
@@ -145,20 +126,14 @@ abstract class AbstractConfigFileManager implements ConfigFileManager
     public function clearConfigKeys()
     {
         $config = $this->getConfig();
-        $previousValues = array();
-
-        foreach ($config->toArray(false) as $key => $value) {
-            $previousValues[$key] = $value;
-        }
+        $previousValues = $config->toFlatRawArray(false);
 
         $config->clear();
 
         try {
             $this->saveConfigFile();
         } catch (Exception $e) {
-            foreach ($previousValues as $key => $previousValue) {
-                $config->set($key, $previousValue);
-            }
+            $config->replace($previousValues);
 
             throw $e;
         }
@@ -168,19 +143,29 @@ abstract class AbstractConfigFileManager implements ConfigFileManager
     /**
      * {@inheritdoc}
      */
-    public function hasConfigKey($key, $fallback = false)
+    public function hasConfigKey($key, $includeFallback = false)
     {
-        Assert::boolean($fallback, 'The argument $fallback must be a boolean.');
+        Assert::boolean($includeFallback, 'The argument $fallback must be a boolean.');
 
-        return $this->getConfig()->contains($key, $fallback);
+        return $this->getConfig()->contains($key, $includeFallback);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function hasConfigKeys($fallback = false)
+    public function hasConfigKeys(Expression $expr = null, $includeFallback = false)
     {
-        return !$this->getConfig()->isEmpty($fallback);
+        if (!$expr) {
+            return !$this->getConfig()->isEmpty($includeFallback);
+        }
+
+        foreach ($this->getConfigKeys($includeFallback) as $key => $value) {
+            if ($expr->evaluate($key)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -217,29 +202,20 @@ abstract class AbstractConfigFileManager implements ConfigFileManager
     /**
      * {@inheritdoc}
      */
-    public function findConfigKeys($pattern, $includeFallback = false, $includeUnset = false)
+    public function findConfigKeys(Expression $expr, $includeFallback = false, $includeUnset = false)
     {
-        Assert::string($pattern, 'The pattern must be a string.');
         Assert::boolean($includeFallback, 'The argument $includeFallback must be a boolean.');
         Assert::boolean($includeUnset, 'The argument $includeUnset must be a boolean.');
 
-        $values = $this->getConfigKeys($includeFallback, $includeUnset);
+        $values = array();
 
-        $regEx = '~^'.str_replace('\\*', '.*', preg_quote($pattern, '~')).'$~';
-        $staticPrefix = $pattern;
-
-        if (false !== $pos = strpos($staticPrefix, '*')) {
-            $staticPrefix = substr($staticPrefix, 0, $pos);
+        foreach ($this->getConfigKeys($includeFallback, $includeUnset) as $key => $value) {
+            if ($expr->evaluate($key)) {
+                $values[$key] = $value;
+            }
         }
 
-        $iterator = new RegexFilterIterator(
-            $regEx,
-            $staticPrefix,
-            new ArrayIterator($values),
-            RegexFilterIterator::FILTER_KEY | RegexFilterIterator::KEY_AS_KEY
-        );
-
-        return iterator_to_array($iterator);
+        return $values;
     }
 
     /**

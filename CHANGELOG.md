@@ -77,6 +77,10 @@ Changelog
  * added optional argument `$expr` to `RootPackageFileManager::hasExtraKeys()`
  * changed argument `$keys` to `$expr` for `RootPackageFileManager::removeExtraKeys()`
  * added `RootPackageFileManager::findExtraKeys()`
+ * added `Config::replace()`
+ * changed argument `$keys` to `$expr` for `ConfigFileManager::removeConfigKeys()`
+ * added optional argument `$expr` to `ConfigFileManager::hasConfigKeys()`
+ * changed argument `$pattern` to `$expr` for `ConfigFileManager::findConfigKeys()`
       
 * 1.0.0-beta3 (2015-03-19)
 

@@ -13,7 +13,6 @@ namespace Puli\Manager\Config;
 
 use Puli\Manager\Api\Config\ConfigFile;
 use Puli\Manager\Api\Environment\GlobalEnvironment;
-use Puli\Manager\Api\Factory\FactoryManager;
 
 /**
  * Manages changes to the global configuration file.

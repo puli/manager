@@ -14,6 +14,7 @@ namespace Puli\Manager\Api\Config;
 use Puli\Manager\Api\Environment\GlobalEnvironment;
 use Puli\Manager\Api\InvalidConfigException;
 use Puli\Manager\Api\IOException;
+use Webmozart\Expression\Expression;
 
 /**
  * Manages changes to the global configuration file.
@@ -73,16 +74,16 @@ interface ConfigFileManager
     public function removeConfigKey($key);
 
     /**
-     * Removes config keys from the file.
+     * Removes the config keys from the file that match the given expression.
      *
      * The file is saved directly after removing the keys.
      *
-     * @param string[] $keys The removed configuration keys.
+     * @param Expression $expr The search criteria.
      *
      * @throws NoSuchConfigKeyException If a configuration key is invalid.
      * @throws IOException If the file cannot be written.
      */
-    public function removeConfigKeys(array $keys);
+    public function removeConfigKeys(Expression $expr);
 
     /**
      * Removes all config keys from the file.
@@ -96,24 +97,30 @@ interface ConfigFileManager
     /**
      * Returns whether a configuration key exists.
      *
-     * @param string $key      The configuration key to search.
-     * @param bool   $fallback Whether to check the base configuration if the
-     *                         key is not found.
+     * @param string $key             The configuration key to search.
+     * @param bool   $includeFallback Whether to check the base configuration if
+     *                                the key is not found.
      *
      * @return bool Returns `true` if the file contains the key.
      */
-    public function hasConfigKey($key, $fallback = false);
+    public function hasConfigKey($key, $includeFallback = false);
 
     /**
      * Returns whether the file contains any configuration keys.
      *
-     * @param bool   $fallback Whether to check the base configuration if the
-     *                         key is not found.
+     * You can optionally pass an expression to check whether the file contains
+     * configuration keys matching the expression.
      *
-     * @return bool Returns `true` if the file contains any keys and `false`
-     *              otherwise.
+     * @param Expression $expr            The search criteria.
+     * @param bool       $includeFallback Whether to check the base configuration
+     *                                    if the key is not found.
+     *
+     * @return bool Returns `true` if the file contains configuration keys and
+     *              `false` otherwise. If an expression is passed, this method
+     *              only returns `true` if the file contains keys matching the
+     *              expression.
      */
-    public function hasConfigKeys($fallback = false);
+    public function hasConfigKeys(Expression $expr = null, $includeFallback = false);
 
     /**
      * Returns the value of a configuration key.
@@ -145,15 +152,17 @@ interface ConfigFileManager
     public function getConfigKeys($includeFallback = false, $includeUnset = false);
 
     /**
-     * Returns the values of all configuration keys matching a pattern.
+     * Returns the values of all configuration keys matching the given
+     * expression.
      *
-     * @param string $pattern         The configuration key pattern. May contain
-     *                                the wildcard "*".
-     * @param bool   $includeFallback Whether to include values set in the base
-     *                                configuration.
-     * @param bool   $includeUnset    Whether to include unset keys in the result.
+     *
+     * @param Expression $expr            The search criteria.
+     * @param bool       $includeFallback Whether to include values set in the
+     *                                    base configuration.
+     * @param bool       $includeUnset    Whether to include unset keys in the
+     *                                    result.
      *
      * @return array A mapping of configuration keys to values.
      */
-    public function findConfigKeys($pattern, $includeFallback = false, $includeUnset = false);
+    public function findConfigKeys(Expression $expr, $includeFallback = false, $includeUnset = false);
 }

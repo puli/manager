@@ -17,11 +17,11 @@ use PHPUnit_Framework_TestCase;
 use Puli\Manager\Api\Config\Config;
 use Puli\Manager\Api\Config\ConfigFile;
 use Puli\Manager\Api\Environment\GlobalEnvironment;
-use Puli\Manager\Api\Factory\FactoryManager;
 use Puli\Manager\Config\ConfigFileManagerImpl;
 use Puli\Manager\Config\ConfigFileStorage;
 use Puli\Manager\Tests\TestException;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Webmozart\Expression\Expr;
 
 /**
  * @since  1.0
@@ -245,19 +245,31 @@ class ConfigFileManagerImplTest extends PHPUnit_Framework_TestCase
         $this->configFile->getConfig()->set(Config::PULI_DIR, 'my-puli-dir');
 
         $this->assertTrue($this->manager->hasConfigKeys());
+        $this->assertFalse($this->manager->hasConfigKeys(Expr::same(Config::FACTORY_IN_CLASS)));
+
+        $this->configFile->getConfig()->set(Config::FACTORY_IN_CLASS, 'MyFactory');
+
+        $this->assertTrue($this->manager->hasConfigKeys(Expr::same(Config::FACTORY_IN_CLASS)));
     }
 
     public function testHasConfigKeysWithFallback()
     {
-        $this->assertFalse($this->manager->hasConfigKeys(true));
+        $this->assertFalse($this->manager->hasConfigKeys(null, true));
 
         $this->baseConfig->set(Config::PULI_DIR, 'fallback');
 
-        $this->assertTrue($this->manager->hasConfigKeys(true));
+        $this->assertTrue($this->manager->hasConfigKeys(null, true));
+        $this->assertFalse($this->manager->hasConfigKeys(Expr::same(Config::FACTORY_IN_CLASS), true));
+
+        $this->configFile->getConfig()->set(Config::FACTORY_IN_CLASS, 'MyFactory');
+
+        $this->assertTrue($this->manager->hasConfigKeys(null, true));
+        $this->assertTrue($this->manager->hasConfigKeys(Expr::same(Config::FACTORY_IN_CLASS), true));
 
         $this->configFile->getConfig()->set(Config::PULI_DIR, 'my-puli-dir');
 
-        $this->assertTrue($this->manager->hasConfigKeys(true));
+        $this->assertTrue($this->manager->hasConfigKeys(null, true));
+        $this->assertTrue($this->manager->hasConfigKeys(Expr::same(Config::FACTORY_IN_CLASS), true));
     }
 
     public function testGetConfigKey()
@@ -363,7 +375,7 @@ class ConfigFileManagerImplTest extends PHPUnit_Framework_TestCase
         $this->assertSame(array(
             Config::FACTORY_IN_CLASS => 'MyFactory',
             Config::FACTORY_IN_FILE => '{$puli-dir}/MyFactory.php',
-        ), $this->manager->findConfigKeys('factory.*'));
+        ), $this->manager->findConfigKeys(Expr::startsWith('factory.')));
     }
 
     public function testFindConfigKeysReordersToDefaultOrder()
@@ -377,7 +389,7 @@ class ConfigFileManagerImplTest extends PHPUnit_Framework_TestCase
         $this->assertSame(array(
             Config::FACTORY_IN_CLASS => 'MyFactory',
             Config::FACTORY_IN_FILE => '{$puli-dir}/MyFactory.php',
-        ), $this->manager->findConfigKeys('factory.*'));
+        ), $this->manager->findConfigKeys(Expr::startsWith('factory.')));
     }
 
     public function testFindConfigKeysWithFallback()
@@ -392,7 +404,7 @@ class ConfigFileManagerImplTest extends PHPUnit_Framework_TestCase
             Config::FACTORY_AUTO_GENERATE => true,
             Config::FACTORY_IN_CLASS => 'MyFactory',
             Config::FACTORY_IN_FILE => '{$puli-dir}/MyFactory.php',
-        ), $this->manager->findConfigKeys('factory.*', true));
+        ), $this->manager->findConfigKeys(Expr::startsWith('factory.'), true));
     }
 
     public function testFindConfigKeysWithUnsetKeys()
@@ -408,15 +420,7 @@ class ConfigFileManagerImplTest extends PHPUnit_Framework_TestCase
             Config::FACTORY_IN_FILE => null,
             Config::FACTORY_OUT_CLASS => null,
             Config::FACTORY_OUT_FILE => null,
-        ), $this->manager->findConfigKeys('factory.*', true, true));
-    }
-
-    /**
-     * @expectedException \InvalidArgumentException
-     */
-    public function testFindConfigKeysFailsIfPatternNoString()
-    {
-        $this->manager->findConfigKeys(1234);
+        ), $this->manager->findConfigKeys(Expr::startsWith('factory.'), true, true));
     }
 
     /**
@@ -424,7 +428,7 @@ class ConfigFileManagerImplTest extends PHPUnit_Framework_TestCase
      */
     public function testFindConfigKeysFailsIfIncludeFallbackNoBool()
     {
-        $this->manager->findConfigKeys('factory.*', 'true');
+        $this->manager->findConfigKeys(Expr::startsWith('factory.'), 'true');
     }
 
     public function testRemoveConfigKey()
@@ -488,7 +492,7 @@ class ConfigFileManagerImplTest extends PHPUnit_Framework_TestCase
                 PHPUnit_Framework_Assert::assertNull($config->get(Config::FACTORY_IN_FILE, null, false));
             }));
 
-        $this->manager->removeConfigKeys(array(Config::PULI_DIR, Config::FACTORY_IN_FILE));
+        $this->manager->removeConfigKeys(Expr::in(array(Config::PULI_DIR, Config::FACTORY_IN_FILE)));
     }
 
     public function testRemoveConfigKeysRevertsIfSavingNotPossible()
@@ -500,7 +504,7 @@ class ConfigFileManagerImplTest extends PHPUnit_Framework_TestCase
             ->willThrowException(new TestException());
 
         try {
-            $this->manager->removeConfigKeys(array(Config::PULI_DIR, Config::FACTORY_IN_FILE));
+            $this->manager->removeConfigKeys(Expr::in(array(Config::PULI_DIR, Config::FACTORY_IN_FILE)));
             $this->fail('Expected a TestException');
         } catch (TestException $e) {
         }

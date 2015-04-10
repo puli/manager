@@ -13,7 +13,6 @@ namespace Puli\Manager\Api\Package;
 
 use Puli\Manager\Api\Config\ConfigFileManager;
 use Puli\Manager\Api\Environment\ProjectEnvironment;
-use Puli\Manager\Api\InvalidConfigException;
 use Puli\Manager\Api\IOException;
 use Webmozart\Expression\Expression;
 
@@ -201,6 +200,9 @@ interface RootPackageFileManager extends ConfigFileManager
 
     /**
      * Returns whether the file contains any extra keys.
+     *
+     * You can optionally pass an expression to check whether the file contains
+     * extra keys matching the expression.
      *
      * @param Expression $expr The search criteria.
      *

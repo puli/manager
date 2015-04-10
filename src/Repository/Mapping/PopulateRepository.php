@@ -12,8 +12,8 @@
 namespace Puli\Manager\Repository\Mapping;
 
 use Exception;
-use Puli\Manager\Api\Repository\RepositoryNotEmptyException;
 use Puli\Manager\Api\Repository\PathMapping;
+use Puli\Manager\Api\Repository\RepositoryNotEmptyException;
 use Puli\Manager\Conflict\OverrideGraph;
 use Puli\Manager\Transaction\AtomicOperation;
 use Puli\Repository\Api\EditableRepository;

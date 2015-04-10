@@ -12,7 +12,6 @@
 namespace Puli\Manager\Api\Discovery;
 
 use Exception;
-use Rhumsaa\Uuid\Uuid;
 use RuntimeException;
 
 /**

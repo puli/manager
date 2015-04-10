@@ -20,7 +20,6 @@ use Puli\Manager\Api\NotLoadedException;
 use Puli\Manager\Api\Package\Package;
 use Puli\Manager\Api\Package\RootPackage;
 use Puli\Manager\Assert\Assert;
-use Puli\Manager\Util\DistinguishedName;
 use Rhumsaa\Uuid\Uuid;
 use Webmozart\Expression\Expression;
 
