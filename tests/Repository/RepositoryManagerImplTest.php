@@ -1005,9 +1005,9 @@ class RepositoryManagerImplTest extends ManagerTestCase
         $this->rootPackageFile->addPathMapping(new PathMapping('/path1', 'resources'));
         $this->rootPackageFile->addPathMapping(new PathMapping('/path2', 'resources'));
 
-        $expr1 = Expr::same(PathMapping::REPOSITORY_PATH, '/path1');
+        $expr1 = Expr::same('/path1', PathMapping::REPOSITORY_PATH);
 
-        $expr2 = Expr::same(PathMapping::STATE, PathMappingState::CONFLICT);
+        $expr2 = Expr::same(PathMappingState::CONFLICT, PathMapping::STATE);
 
         $this->assertTrue($this->manager->hasRootPathMappings());
         $this->assertTrue($this->manager->hasRootPathMappings($expr1));
@@ -1070,11 +1070,11 @@ class RepositoryManagerImplTest extends ManagerTestCase
         $this->packageFile1->addPathMapping($mapping2 = new PathMapping('/path2', 'resources'));
         $this->packageFile2->addPathMapping($mapping3 = new PathMapping('/path1', 'resources'));
 
-        $expr1 = Expr::same(PathMapping::REPOSITORY_PATH, '/path1');
+        $expr1 = Expr::same('/path1', PathMapping::REPOSITORY_PATH);
 
-        $expr2 = $expr1->andSame(PathMapping::CONTAINING_PACKAGE, 'vendor/root');
+        $expr2 = $expr1->andSame('vendor/root', PathMapping::CONTAINING_PACKAGE);
 
-        $expr3 = $expr1->andSame(PathMapping::CONTAINING_PACKAGE, 'vendor/package1');
+        $expr3 = $expr1->andSame('vendor/package1', PathMapping::CONTAINING_PACKAGE);
 
         $this->assertSame(array($mapping1, $mapping3), $this->manager->findPathMappings($expr1));
         $this->assertSame(array($mapping1), $this->manager->findPathMappings($expr2));
@@ -1103,9 +1103,9 @@ class RepositoryManagerImplTest extends ManagerTestCase
         $this->packageFile1->addPathMapping(new PathMapping('/path2', 'resources'));
         $this->packageFile2->addPathMapping( new PathMapping('/path2', 'resources'));
 
-        $expr1 = Expr::same(PathMapping::CONTAINING_PACKAGE, 'vendor/package1');
+        $expr1 = Expr::same('vendor/package1', PathMapping::CONTAINING_PACKAGE);
 
-        $expr2 = Expr::same(PathMapping::STATE, PathMappingState::ENABLED);
+        $expr2 = Expr::same(PathMappingState::ENABLED, PathMapping::STATE);
 
         $expr3 = $expr1->andX($expr2);
 

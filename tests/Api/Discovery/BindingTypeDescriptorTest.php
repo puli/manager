@@ -307,13 +307,13 @@ class BindingTypeDescriptorTest extends PHPUnit_Framework_TestCase
         $type = new BindingTypeDescriptor('vendor/type');
         $type->load($this->package);
 
-        $this->assertFalse($type->match(Expr::same(BindingTypeDescriptor::NAME, 'foobar')));
-        $this->assertTrue($type->match(Expr::same(BindingTypeDescriptor::NAME, 'vendor/type')));
+        $this->assertFalse($type->match(Expr::same('foobar', BindingTypeDescriptor::NAME)));
+        $this->assertTrue($type->match(Expr::same('vendor/type', BindingTypeDescriptor::NAME)));
 
-        $this->assertFalse($type->match(Expr::same(BindingTypeDescriptor::CONTAINING_PACKAGE, 'foobar')));
-        $this->assertTrue($type->match(Expr::same(BindingTypeDescriptor::CONTAINING_PACKAGE, $this->package->getName())));
+        $this->assertFalse($type->match(Expr::same('foobar', BindingTypeDescriptor::CONTAINING_PACKAGE)));
+        $this->assertTrue($type->match(Expr::same($this->package->getName(), BindingTypeDescriptor::CONTAINING_PACKAGE)));
 
-        $this->assertFalse($type->match(Expr::same(BindingTypeDescriptor::STATE, BindingTypeState::DUPLICATE)));
-        $this->assertTrue($type->match(Expr::same(BindingTypeDescriptor::STATE, BindingTypeState::ENABLED)));
+        $this->assertFalse($type->match(Expr::same(BindingTypeState::DUPLICATE, BindingTypeDescriptor::STATE)));
+        $this->assertTrue($type->match(Expr::same(BindingTypeState::ENABLED, BindingTypeDescriptor::STATE)));
     }
 }

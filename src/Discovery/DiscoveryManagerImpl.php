@@ -329,7 +329,7 @@ class DiscoveryManagerImpl implements DiscoveryManager
      */
     public function hasRootBindingTypes(Expression $expr = null)
     {
-        $expr2 = Expr::same(BindingTypeDescriptor::CONTAINING_PACKAGE, $this->rootPackage->getName());
+        $expr2 = Expr::same($this->rootPackage->getName(), BindingTypeDescriptor::CONTAINING_PACKAGE);
 
         if ($expr) {
             $expr2 = $expr2->andX($expr);
@@ -585,7 +585,7 @@ class DiscoveryManagerImpl implements DiscoveryManager
      */
     public function hasRootBindings(Expression $expr = null)
     {
-        $expr2 = Expr::same(BindingDescriptor::CONTAINING_PACKAGE, $this->rootPackage->getName());
+        $expr2 = Expr::same($this->rootPackage->getName(), BindingDescriptor::CONTAINING_PACKAGE);
 
         if ($expr) {
             $expr2 = $expr2->andX($expr);

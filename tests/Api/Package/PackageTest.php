@@ -98,22 +98,22 @@ class PackageTest extends PHPUnit_Framework_TestCase
         $packageFile = new PackageFile('vendor/name');
         $package = new Package($packageFile, __DIR__);
 
-        $this->assertFalse($package->match(Expr::same(Package::NAME, 'foobar')));
-        $this->assertTrue($package->match(Expr::same(Package::NAME, 'vendor/name')));
+        $this->assertFalse($package->match(Expr::same('foobar', Package::NAME)));
+        $this->assertTrue($package->match(Expr::same('vendor/name', Package::NAME)));
 
-        $this->assertFalse($package->match(Expr::same(Package::INSTALL_PATH, '/path/foo')));
-        $this->assertTrue($package->match(Expr::same(Package::INSTALL_PATH, __DIR__)));
+        $this->assertFalse($package->match(Expr::same('/path/foo', Package::INSTALL_PATH)));
+        $this->assertTrue($package->match(Expr::same(__DIR__, Package::INSTALL_PATH)));
 
-        $this->assertFalse($package->match(Expr::same(Package::STATE, PackageState::NOT_LOADABLE)));
-        $this->assertTrue($package->match(Expr::same(Package::STATE, PackageState::ENABLED)));
+        $this->assertFalse($package->match(Expr::same(PackageState::NOT_LOADABLE, Package::STATE)));
+        $this->assertTrue($package->match(Expr::same(PackageState::ENABLED, Package::STATE)));
 
-        $this->assertFalse($package->match(Expr::same(Package::INSTALLER, 'webmozart')));
+        $this->assertFalse($package->match(Expr::same('webmozart', Package::INSTALLER)));
 
         $installInfo = new InstallInfo('vendor/install-info', '/path');
         $installInfo->setInstallerName('webmozart');
         $packageWithInstallInfo = new Package($packageFile, __DIR__, $installInfo);
 
-        $this->assertFalse($packageWithInstallInfo->match(Expr::same(Package::INSTALLER, 'foobar')));
-        $this->assertTrue($packageWithInstallInfo->match(Expr::same(Package::INSTALLER, 'webmozart')));
+        $this->assertFalse($packageWithInstallInfo->match(Expr::same('foobar', Package::INSTALLER)));
+        $this->assertTrue($packageWithInstallInfo->match(Expr::same('webmozart', Package::INSTALLER)));
     }
 }

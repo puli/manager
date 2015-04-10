@@ -594,13 +594,13 @@ class PathMappingTest extends PHPUnit_Framework_TestCase
         $mapping = new PathMapping('/path', 'resources');
         $mapping->load($this->package1, $this->packages);
 
-        $this->assertFalse($mapping->match(Expr::same(PathMapping::CONTAINING_PACKAGE, 'foobar')));
-        $this->assertTrue($mapping->match(Expr::same(PathMapping::CONTAINING_PACKAGE, $this->package1->getName())));
+        $this->assertFalse($mapping->match(Expr::same('foobar', PathMapping::CONTAINING_PACKAGE)));
+        $this->assertTrue($mapping->match(Expr::same($this->package1->getName(), PathMapping::CONTAINING_PACKAGE)));
 
-        $this->assertFalse($mapping->match(Expr::same(PathMapping::STATE, PathMappingState::CONFLICT)));
-        $this->assertTrue($mapping->match(Expr::same(PathMapping::STATE, PathMappingState::ENABLED)));
+        $this->assertFalse($mapping->match(Expr::same(PathMappingState::CONFLICT, PathMapping::STATE)));
+        $this->assertTrue($mapping->match(Expr::same(PathMappingState::ENABLED, PathMapping::STATE)));
 
-        $this->assertFalse($mapping->match(Expr::startsWith(PathMapping::REPOSITORY_PATH, '/foo')));
-        $this->assertTrue($mapping->match(Expr::startsWith(PathMapping::REPOSITORY_PATH, '/pa')));
+        $this->assertFalse($mapping->match(Expr::startsWith('/foo', PathMapping::REPOSITORY_PATH)));
+        $this->assertTrue($mapping->match(Expr::startsWith('/pa', PathMapping::REPOSITORY_PATH)));
     }
 }

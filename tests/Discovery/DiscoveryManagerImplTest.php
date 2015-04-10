@@ -763,9 +763,9 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->rootPackageFile->addTypeDescriptor($type1 = new BindingTypeDescriptor('my/type1'));
         $this->rootPackageFile->addTypeDescriptor($type2 = new BindingTypeDescriptor('my/type2'));
 
-        $expr1 = Expr::same(BindingTypeDescriptor::STATE, BindingTypeState::ENABLED);
+        $expr1 = Expr::same(BindingTypeState::ENABLED, BindingTypeDescriptor::STATE);
 
-        $expr2 = Expr::same(BindingTypeDescriptor::STATE, BindingTypeState::DUPLICATE);
+        $expr2 = Expr::same(BindingTypeState::DUPLICATE, BindingTypeDescriptor::STATE);
 
         $this->assertTrue($this->manager->hasRootBindingTypes());
         $this->assertTrue($this->manager->hasRootBindingTypes($expr1));
@@ -841,9 +841,9 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->packageFile2->addTypeDescriptor($type3 = clone $type2); // duplicate
         $this->packageFile3->addTypeDescriptor($type4 = new BindingTypeDescriptor('my/type4'));
 
-        $expr1 = Expr::same(BindingTypeDescriptor::CONTAINING_PACKAGE, 'vendor/package1');
+        $expr1 = Expr::same('vendor/package1', BindingTypeDescriptor::CONTAINING_PACKAGE);
 
-        $expr2 = Expr::same(BindingTypeDescriptor::STATE, BindingTypeState::DUPLICATE);
+        $expr2 = Expr::same(BindingTypeState::DUPLICATE, BindingTypeDescriptor::STATE);
 
         $expr3 = $expr1->andX($expr2);
 
@@ -883,11 +883,11 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->packageFile1->addTypeDescriptor($type2 = new BindingTypeDescriptor('my/type2'));
         $this->packageFile1->addTypeDescriptor($type3 = clone $type2);
 
-        $expr1 = Expr::same(BindingTypeDescriptor::CONTAINING_PACKAGE, 'vendor/package1')
-            ->andSame(BindingTypeDescriptor::STATE, BindingTypeState::ENABLED);
+        $expr1 = Expr::same('vendor/package1', BindingTypeDescriptor::CONTAINING_PACKAGE)
+            ->andSame(BindingTypeState::ENABLED, BindingTypeDescriptor::STATE);
 
-        $expr2 = Expr::same(BindingTypeDescriptor::CONTAINING_PACKAGE, 'vendor/package2')
-            ->andSame(BindingTypeDescriptor::STATE, BindingTypeState::DUPLICATE);
+        $expr2 = Expr::same('vendor/package2', BindingTypeDescriptor::CONTAINING_PACKAGE)
+            ->andSame(BindingTypeState::DUPLICATE, BindingTypeDescriptor::STATE);
 
         $this->assertTrue($this->manager->hasBindingTypes());
         $this->assertTrue($this->manager->hasBindingTypes($expr1));
@@ -1435,9 +1435,9 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->rootPackageFile->addBindingDescriptor($binding1 = new BindingDescriptor('/path1', 'my/type1'));
         $this->rootPackageFile->addBindingDescriptor($binding2 = new BindingDescriptor('/path2', 'my/type1'));
 
-        $expr1 = Expr::same(BindingDescriptor::STATE, BindingState::ENABLED);
+        $expr1 = Expr::same(BindingState::ENABLED, BindingDescriptor::STATE);
 
-        $expr2 = Expr::same(BindingDescriptor::STATE, BindingState::TYPE_NOT_FOUND);
+        $expr2 = Expr::same(BindingState::TYPE_NOT_FOUND, BindingDescriptor::STATE);
 
         $this->assertTrue($this->manager->hasRootBindings());
         $this->assertTrue($this->manager->hasRootBindings($expr1));
@@ -1947,11 +1947,11 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->packageFile1->addBindingDescriptor($binding2);
         $this->packageFile2->addBindingDescriptor($binding3);
 
-        $expr1 = Expr::startsWith(BindingDescriptor::UUID, 'ecc');
+        $expr1 = Expr::startsWith('ecc', BindingDescriptor::UUID);
 
-        $expr2 = $expr1->andSame(BindingDescriptor::CONTAINING_PACKAGE, 'vendor/package1');
+        $expr2 = $expr1->andSame('vendor/package1', BindingDescriptor::CONTAINING_PACKAGE);
 
-        $expr3 = $expr1->andSame(BindingDescriptor::CONTAINING_PACKAGE, 'vendor/root');
+        $expr3 = $expr1->andSame('vendor/root', BindingDescriptor::CONTAINING_PACKAGE);
 
         $this->assertSame(array($binding2, $binding3), $this->manager->findBindings($expr1));
         $this->assertSame(array($binding2), $this->manager->findBindings($expr2));
@@ -1979,9 +1979,9 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->rootPackageFile->addBindingDescriptor($binding1 = new BindingDescriptor('/path1', 'my/type1'));
         $this->packageFile1->addBindingDescriptor($binding2 = new BindingDescriptor('/path2', 'my/type2'));
 
-        $expr1 = Expr::same(BindingDescriptor::CONTAINING_PACKAGE, 'vendor/package1');
+        $expr1 = Expr::same('vendor/package1', BindingDescriptor::CONTAINING_PACKAGE);
 
-        $expr2 = Expr::same(BindingDescriptor::STATE, BindingState::ENABLED);
+        $expr2 = Expr::same(BindingState::ENABLED, BindingDescriptor::STATE);
 
         $expr3 = $expr1->andX($expr2);
 

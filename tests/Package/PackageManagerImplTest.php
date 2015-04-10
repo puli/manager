@@ -158,9 +158,9 @@ class PackageManagerImplTest extends ManagerTestCase
 
         $manager = new PackageManagerImpl($this->environment, $this->packageFileStorage);
 
-        $expr1 = Expr::same(Package::STATE, PackageState::ENABLED);
+        $expr1 = Expr::same(PackageState::ENABLED, Package::STATE);
 
-        $expr2 = Expr::same(Package::INSTALLER, 'webmozart');
+        $expr2 = Expr::same('webmozart', Package::INSTALLER);
 
         $expr3 = $expr1->andX($expr2);
 
@@ -268,8 +268,8 @@ class PackageManagerImplTest extends ManagerTestCase
         $this->initDefaultManager();
 
         $this->assertTrue($this->manager->hasPackages());
-        $this->assertTrue($this->manager->hasPackages(Expr::same(Package::NAME, 'vendor/root')));
-        $this->assertFalse($this->manager->hasPackages(Expr::same(Package::NAME, 'foobar')));
+        $this->assertTrue($this->manager->hasPackages(Expr::same('vendor/root', Package::NAME)));
+        $this->assertFalse($this->manager->hasPackages(Expr::same('foobar', Package::NAME)));
     }
 
     public function testInstallPackage()

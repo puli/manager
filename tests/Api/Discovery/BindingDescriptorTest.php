@@ -511,25 +511,25 @@ class BindingDescriptorTest extends PHPUnit_Framework_TestCase
         ), 'glob', $uuid);
         $binding->load($this->package, $type);
 
-        $this->assertFalse($binding->match(Expr::same(BindingDescriptor::CONTAINING_PACKAGE, 'foobar')));
-        $this->assertTrue($binding->match(Expr::same(BindingDescriptor::CONTAINING_PACKAGE, $this->package->getName())));
+        $this->assertFalse($binding->match(Expr::same('foobar', BindingDescriptor::CONTAINING_PACKAGE)));
+        $this->assertTrue($binding->match(Expr::same($this->package->getName(), BindingDescriptor::CONTAINING_PACKAGE)));
 
-        $this->assertFalse($binding->match(Expr::same(BindingDescriptor::STATE, BindingState::DISABLED)));
-        $this->assertTrue($binding->match(Expr::same(BindingDescriptor::STATE, BindingState::ENABLED)));
+        $this->assertFalse($binding->match(Expr::same(BindingState::DISABLED, BindingDescriptor::STATE)));
+        $this->assertTrue($binding->match(Expr::same(BindingState::ENABLED, BindingDescriptor::STATE)));
 
-        $this->assertFalse($binding->match(Expr::startsWith(BindingDescriptor::UUID, 'abce')));
-        $this->assertTrue($binding->match(Expr::startsWith(BindingDescriptor::UUID, 'abcd')));
+        $this->assertFalse($binding->match(Expr::startsWith('abce', BindingDescriptor::UUID)));
+        $this->assertTrue($binding->match(Expr::startsWith('abcd', BindingDescriptor::UUID)));
 
-        $this->assertFalse($binding->match(Expr::same(BindingDescriptor::QUERY, '/path/nested')));
-        $this->assertTrue($binding->match(Expr::same(BindingDescriptor::QUERY, '/path')));
+        $this->assertFalse($binding->match(Expr::same('/path/nested', BindingDescriptor::QUERY)));
+        $this->assertTrue($binding->match(Expr::same('/path', BindingDescriptor::QUERY)));
 
-        $this->assertFalse($binding->match(Expr::same(BindingDescriptor::LANGUAGE, 'xpath')));
-        $this->assertTrue($binding->match(Expr::same(BindingDescriptor::LANGUAGE, 'glob')));
+        $this->assertFalse($binding->match(Expr::same('xpath', BindingDescriptor::LANGUAGE)));
+        $this->assertTrue($binding->match(Expr::same('glob', BindingDescriptor::LANGUAGE)));
 
-        $this->assertFalse($binding->match(Expr::same(BindingDescriptor::TYPE_NAME, 'vendor/other')));
-        $this->assertTrue($binding->match(Expr::same(BindingDescriptor::TYPE_NAME, 'vendor/type')));
+        $this->assertFalse($binding->match(Expr::same('vendor/other', BindingDescriptor::TYPE_NAME)));
+        $this->assertTrue($binding->match(Expr::same('vendor/type', BindingDescriptor::TYPE_NAME)));
 
-        $this->assertFalse($binding->match(Expr::keySame(BindingDescriptor::PARAMETER_VALUES, 'param', 'foobar')));
-        $this->assertTrue($binding->match(Expr::keySame(BindingDescriptor::PARAMETER_VALUES, 'param', 'value')));
+        $this->assertFalse($binding->match(Expr::key(BindingDescriptor::PARAMETER_VALUES, Expr::key('param', Expr::same('foobar')))));
+        $this->assertTrue($binding->match(Expr::key(BindingDescriptor::PARAMETER_VALUES, Expr::key('param', Expr::same('value')))));
     }
 }

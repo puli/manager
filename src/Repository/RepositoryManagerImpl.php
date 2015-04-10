@@ -287,7 +287,7 @@ class RepositoryManagerImpl implements RepositoryManager
      */
     public function hasRootPathMappings(Expression $expr = null)
     {
-        $expr2 = Expr::same(PathMapping::CONTAINING_PACKAGE, $this->rootPackage->getName());
+        $expr2 = Expr::same($this->rootPackage->getName(), PathMapping::CONTAINING_PACKAGE);
 
         if ($expr) {
             $expr2 = $expr2->andX($expr);
