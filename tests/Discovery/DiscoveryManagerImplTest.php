@@ -604,12 +604,13 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->assertTrue($bindingType->isEnabled());
     }
 
-    public function testClearRootBindingTypes()
+    public function testRemoveRootBindingTypes()
     {
         $this->initDefaultManager();
 
         $this->rootPackageFile->addTypeDescriptor($bindingType1 = new BindingTypeDescriptor('my/type1'));
         $this->rootPackageFile->addTypeDescriptor($bindingType2 = new BindingTypeDescriptor('my/type2'));
+        $this->rootPackageFile->addTypeDescriptor($bindingType3 = new BindingTypeDescriptor('other/type'));
 
         $this->discovery->expects($this->at(0))
             ->method('undefineType')
@@ -622,17 +623,18 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->packageFileStorage->expects($this->once())
             ->method('saveRootPackageFile')
             ->with($this->rootPackageFile)
-            ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) {
-                PHPUnit_Framework_Assert::assertFalse($rootPackageFile->hasTypeDescriptors());
+            ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) use ($bindingType3){
+                PHPUnit_Framework_Assert::assertSame(array($bindingType3), $rootPackageFile->getTypeDescriptors());
             }));
 
-        $this->manager->clearRootBindingTypes();
+        $this->manager->removeRootBindingTypes(Expr::startsWith('my', BindingTypeDescriptor::NAME));
 
         $this->assertFalse($bindingType1->isLoaded());
         $this->assertFalse($bindingType2->isLoaded());
+        $this->assertTrue($bindingType3->isLoaded());
     }
 
-    public function testClearRootBindingTypesUnbindsCorrespondingBindings()
+    public function testRemoveRootBindingTypesUnbindsCorrespondingBindings()
     {
         $this->initDefaultManager();
 
@@ -664,7 +666,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
                 PHPUnit_Framework_Assert::assertFalse($rootPackageFile->hasTypeDescriptors());
             }));
 
-        $this->manager->clearRootBindingTypes();
+        $this->manager->removeRootBindingTypes(Expr::startsWith('my', BindingTypeDescriptor::NAME));
     }
 
     public function testClearRootBindingTypesDefinesTypesIfSavingFails()
@@ -696,7 +698,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
             ->willThrowException(new TestException('Some exception'));
 
         try {
-            $this->manager->clearRootBindingTypes();
+            $this->manager->removeRootBindingTypes(Expr::startsWith('my', BindingTypeDescriptor::NAME));
             $this->fail('Expected an exception');
         } catch (TestException $e) {
         }
@@ -707,6 +709,34 @@ class DiscoveryManagerImplTest extends ManagerTestCase
 
         $this->assertTrue($bindingType1->isEnabled());
         $this->assertTrue($bindingType2->isEnabled());
+    }
+
+    public function testClearRootBindingTypes()
+    {
+        $this->initDefaultManager();
+
+        $this->rootPackageFile->addTypeDescriptor($bindingType1 = new BindingTypeDescriptor('my/type1'));
+        $this->rootPackageFile->addTypeDescriptor($bindingType2 = new BindingTypeDescriptor('my/type2'));
+
+        $this->discovery->expects($this->at(0))
+            ->method('undefineType')
+            ->with('my/type1');
+
+        $this->discovery->expects($this->at(1))
+            ->method('undefineType')
+            ->with('my/type2');
+
+        $this->packageFileStorage->expects($this->once())
+            ->method('saveRootPackageFile')
+            ->with($this->rootPackageFile)
+            ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) {
+                PHPUnit_Framework_Assert::assertFalse($rootPackageFile->hasTypeDescriptors());
+            }));
+
+        $this->manager->clearRootBindingTypes();
+
+        $this->assertFalse($bindingType1->isLoaded());
+        $this->assertFalse($bindingType2->isLoaded());
     }
 
     public function testGetRootBindingType()
@@ -1336,7 +1366,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->assertTrue($binding->isLoaded());
     }
 
-    public function testClearRootBindings()
+    public function testRemoveRootBindings()
     {
         $this->initDefaultManager();
 
@@ -1345,6 +1375,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         )));
         $this->rootPackageFile->addBindingDescriptor($binding1 = new BindingDescriptor('/path1', 'my/type', array('param' => 'value1'), 'xpath'));
         $this->rootPackageFile->addBindingDescriptor($binding2 = new BindingDescriptor('/path2', 'my/type', array('param' => 'value2'), 'xpath'));
+        $this->rootPackageFile->addBindingDescriptor($binding3 = new BindingDescriptor('/other3', 'my/type'));
 
         $this->discovery->expects($this->at(0))
             ->method('unbind')
@@ -1357,17 +1388,18 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->packageFileStorage->expects($this->once())
             ->method('saveRootPackageFile')
             ->with($this->rootPackageFile)
-            ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) {
-                PHPUnit_Framework_Assert::assertFalse($rootPackageFile->hasBindingDescriptors());
+            ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) use ($binding3) {
+                PHPUnit_Framework_Assert::assertSame(array($binding3), $rootPackageFile->getBindingDescriptors());
             }));
 
-        $this->manager->clearRootBindings();
+        $this->manager->removeRootBindings(Expr::startsWith('/path', BindingDescriptor::QUERY));
 
         $this->assertFalse($binding1->isLoaded());
         $this->assertFalse($binding2->isLoaded());
+        $this->assertTrue($binding3->isLoaded());
     }
 
-    public function testClearRootBindingBindsIfSavingFailed()
+    public function testRemoveRootBindingsBindsIfSavingFailed()
     {
         $this->initDefaultManager();
 
@@ -1402,7 +1434,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
             ->willThrowException(new TestException('Some exception'));
 
         try {
-            $this->manager->clearRootBindings();
+            $this->manager->removeRootBindings(Expr::startsWith('/path', BindingDescriptor::QUERY));
             $this->fail('Expected a TestException');
         } catch (TestException $e) {
         }
@@ -1412,6 +1444,37 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->assertCount(2, $this->rootPackageFile->getBindingDescriptors());
         $this->assertTrue($binding1->isLoaded());
         $this->assertTrue($binding2->isLoaded());
+    }
+
+    public function testClearRootBindings()
+    {
+        $this->initDefaultManager();
+
+        $this->packageFile1->addTypeDescriptor(new BindingTypeDescriptor('my/type', null, array(
+            new BindingParameterDescriptor('param'),
+        )));
+        $this->rootPackageFile->addBindingDescriptor($binding1 = new BindingDescriptor('/path1', 'my/type', array('param' => 'value1'), 'xpath'));
+        $this->rootPackageFile->addBindingDescriptor($binding2 = new BindingDescriptor('/path2', 'my/type', array('param' => 'value2'), 'xpath'));
+
+        $this->discovery->expects($this->at(0))
+            ->method('unbind')
+            ->with('/path1', 'my/type', array('param' => 'value1'), 'xpath');
+
+        $this->discovery->expects($this->at(1))
+            ->method('unbind')
+            ->with('/path2', 'my/type', array('param' => 'value2'), 'xpath');
+
+        $this->packageFileStorage->expects($this->once())
+            ->method('saveRootPackageFile')
+            ->with($this->rootPackageFile)
+            ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) {
+                PHPUnit_Framework_Assert::assertFalse($rootPackageFile->hasBindingDescriptors());
+            }));
+
+        $this->manager->clearRootBindings();
+
+        $this->assertFalse($binding1->isLoaded());
+        $this->assertFalse($binding2->isLoaded());
     }
 
     public function testHasRootBinding()

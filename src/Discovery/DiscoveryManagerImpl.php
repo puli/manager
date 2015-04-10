@@ -247,7 +247,7 @@ class DiscoveryManagerImpl implements DiscoveryManager
     /**
      * {@inheritdoc}
      */
-    public function clearRootBindingTypes()
+    public function removeRootBindingTypes(Expression $expr)
     {
         $this->assertPackagesLoaded();
 
@@ -256,21 +256,23 @@ class DiscoveryManagerImpl implements DiscoveryManager
 
         try {
             foreach ($this->getRootBindingTypes() as $typeDescriptor) {
-                $typeName = $typeDescriptor->getName();
+                if ($typeDescriptor->match($expr)) {
+                    $typeName = $typeDescriptor->getName();
 
-                $tx->execute($this->removeTypeDescriptorFromPackageFile($typeName));
+                    $tx->execute($this->removeTypeDescriptorFromPackageFile($typeName));
 
-                foreach ($this->getUuidsByTypeName($typeName) as $uuid) {
-                    $syncBindingOp = $this->syncBindingUuid($uuid);
-                    $syncBindingOp->takeSnapshot();
-                    $syncBindingOps[] = $syncBindingOp;
+                    foreach ($this->getUuidsByTypeName($typeName) as $uuid) {
+                        $syncBindingOp = $this->syncBindingUuid($uuid);
+                        $syncBindingOp->takeSnapshot();
+                        $syncBindingOps[] = $syncBindingOp;
+                    }
+
+                    $syncOp = $this->syncTypeName($typeName);
+                    $syncOp->takeSnapshot();
+
+                    $tx->execute($this->unloadTypeDescriptor($typeDescriptor));
+                    $tx->execute($syncOp);
                 }
-
-                $syncOp = $this->syncTypeName($typeName);
-                $syncOp->takeSnapshot();
-
-                $tx->execute($this->unloadTypeDescriptor($typeDescriptor));
-                $tx->execute($syncOp);
             }
 
             foreach ($syncBindingOps as $syncBindingOp) {
@@ -287,6 +289,14 @@ class DiscoveryManagerImpl implements DiscoveryManager
         }
 
         $this->emitWarningForDuplicateTypes();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function clearRootBindingTypes()
+    {
+        $this->removeRootBindingTypes(Expr::valid());
     }
 
     /**
@@ -514,7 +524,7 @@ class DiscoveryManagerImpl implements DiscoveryManager
     /**
      * {@inheritdoc}
      */
-    public function clearRootBindings()
+    public function removeRootBindings(Expression $expr)
     {
         $this->assertPackagesLoaded();
 
@@ -522,12 +532,14 @@ class DiscoveryManagerImpl implements DiscoveryManager
 
         try {
             foreach ($this->getRootBindings() as $bindingDescriptor) {
-                $syncOp = $this->syncBindingUuid($bindingDescriptor->getUuid());
-                $syncOp->takeSnapshot();
+                if ($bindingDescriptor->match($expr)) {
+                    $syncOp = $this->syncBindingUuid($bindingDescriptor->getUuid());
+                    $syncOp->takeSnapshot();
 
-                $tx->execute($this->unloadBindingDescriptor($bindingDescriptor));
-                $tx->execute($syncOp);
-                $tx->execute($this->removeBindingDescriptorFromPackageFile($bindingDescriptor->getUuid()));
+                    $tx->execute($this->unloadBindingDescriptor($bindingDescriptor));
+                    $tx->execute($syncOp);
+                    $tx->execute($this->removeBindingDescriptorFromPackageFile($bindingDescriptor->getUuid()));
+                }
             }
 
             $this->saveRootPackageFile();
@@ -538,6 +550,14 @@ class DiscoveryManagerImpl implements DiscoveryManager
 
             throw $e;
         }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function clearRootBindings()
+    {
+        $this->removeRootBindings(Expr::valid());
     }
 
     /**

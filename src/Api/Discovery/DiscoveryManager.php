@@ -71,6 +71,15 @@ interface DiscoveryManager
     public function removeRootBindingType($typeName);
 
     /**
+     * Removes all binding types matching the given expression.
+     *
+     * If no matching binding types are found, this method does nothing.
+     *
+     * @param Expression $expr The search criteria.
+     */
+    public function removeRootBindingTypes(Expression $expr);
+
+    /**
      * Removes all binding types from the root package.
      */
     public function clearRootBindingTypes();
@@ -199,6 +208,15 @@ interface DiscoveryManager
      * @param Uuid $uuid The UUID of the binding.
      */
     public function removeRootBinding(Uuid $uuid);
+
+    /**
+     * Removes all bindings matching the given expression.
+     *
+     * If no matching bindings are found, this method does nothing.
+     *
+     * @param Expression $expr The search criteria.
+     */
+    public function removeRootBindings(Expression $expr);
 
     /**
      * Removes all bindings from the root package.

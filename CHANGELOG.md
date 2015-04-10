@@ -81,6 +81,8 @@ Changelog
  * changed argument `$keys` to `$expr` for `ConfigFileManager::removeConfigKeys()`
  * added optional argument `$expr` to `ConfigFileManager::hasConfigKeys()`
  * changed argument `$pattern` to `$expr` for `ConfigFileManager::findConfigKeys()`
+ * added `DiscoveryManager::removeRootBindingTypes()`
+ * added `DiscoveryManager::removeRootBindings()`
       
 * 1.0.0-beta3 (2015-03-19)
 
