@@ -19,6 +19,7 @@ use Puli\Manager\Api\Package\RootPackageFileManager;
 use Puli\Manager\Config\AbstractConfigFileManager;
 use ReflectionClass;
 use ReflectionException;
+use Webmozart\Expression\Expr;
 use Webmozart\Expression\Expression;
 
 /**
@@ -186,21 +187,7 @@ class RootPackageFileManagerImpl extends AbstractConfigFileManager implements Ro
      */
     public function clearPluginClasses()
     {
-        if (!$this->rootPackageFile->hasPluginClasses()) {
-            return;
-        }
-
-        $previousClasses = $this->rootPackageFile->getPluginClasses();
-
-        $this->rootPackageFile->clearPluginClasses();
-
-        try {
-            $this->packageFileStorage->saveRootPackageFile($this->rootPackageFile);
-        } catch (Exception $e) {
-            $this->rootPackageFile->setPluginClasses($previousClasses);
-
-            throw $e;
-        }
+        $this->removePluginClasses(Expr::valid());
     }
 
     /**

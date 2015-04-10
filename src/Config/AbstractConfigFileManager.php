@@ -17,6 +17,7 @@ use Puli\Manager\Api\Config\ConfigFileManager;
 use Puli\Manager\Api\InvalidConfigException;
 use Puli\Manager\Api\IOException;
 use Puli\Manager\Assert\Assert;
+use Webmozart\Expression\Expr;
 use Webmozart\Expression\Expression;
 
 /**
@@ -125,19 +126,7 @@ abstract class AbstractConfigFileManager implements ConfigFileManager
      */
     public function clearConfigKeys()
     {
-        $config = $this->getConfig();
-        $previousValues = $config->toFlatRawArray(false);
-
-        $config->clear();
-
-        try {
-            $this->saveConfigFile();
-        } catch (Exception $e) {
-            $config->replace($previousValues);
-
-            throw $e;
-        }
-
+        $this->removeConfigKeys(Expr::valid());
     }
 
     /**
