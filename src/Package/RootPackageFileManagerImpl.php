@@ -20,6 +20,7 @@ use Puli\Manager\Api\Package\RootPackageFileManager;
 use Puli\Manager\Config\AbstractConfigFileManager;
 use ReflectionClass;
 use ReflectionException;
+use Webmozart\Expression\Expression;
 
 /**
  * Manages changes to the root package file.
@@ -93,8 +94,17 @@ class RootPackageFileManagerImpl extends AbstractConfigFileManager implements Ro
             return;
         }
 
+        $previousName = $this->rootPackageFile->getPackageName();
+
         $this->rootPackageFile->setPackageName($packageName);
-        $this->packageFileStorage->saveRootPackageFile($this->rootPackageFile);
+
+        try {
+            $this->packageFileStorage->saveRootPackageFile($this->rootPackageFile);
+        } catch (Exception $e) {
+            $this->rootPackageFile->setPackageName($previousName);
+
+            throw $e;
+        }
     }
 
     /**
@@ -109,9 +119,17 @@ class RootPackageFileManagerImpl extends AbstractConfigFileManager implements Ro
 
         $this->validatePluginClass($pluginClass);
 
+        $previousClasses = $this->rootPackageFile->getPluginClasses();
+
         $this->rootPackageFile->addPluginClass($pluginClass);
 
-        $this->packageFileStorage->saveRootPackageFile($this->rootPackageFile);
+        try {
+            $this->packageFileStorage->saveRootPackageFile($this->rootPackageFile);
+        } catch (Exception $e) {
+            $this->rootPackageFile->setPluginClasses($previousClasses);
+
+            throw $e;
+        }
     }
 
     /**
@@ -123,9 +141,45 @@ class RootPackageFileManagerImpl extends AbstractConfigFileManager implements Ro
             return;
         }
 
+        $previousClasses = $this->rootPackageFile->getPluginClasses();
+
         $this->rootPackageFile->removePluginClass($pluginClass);
 
-        $this->packageFileStorage->saveRootPackageFile($this->rootPackageFile);
+        try {
+            $this->packageFileStorage->saveRootPackageFile($this->rootPackageFile);
+        } catch (Exception $e) {
+            $this->rootPackageFile->setPluginClasses($previousClasses);
+
+            throw $e;
+        }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function removePluginClasses(Expression $expr)
+    {
+        $save = false;
+        $previousClasses = $this->rootPackageFile->getPluginClasses();
+
+        foreach ($previousClasses as $pluginClass) {
+            if ($expr->evaluate($pluginClass)) {
+                $this->rootPackageFile->removePluginClass($pluginClass);
+                $save = true;
+            }
+        }
+
+        if (!$save) {
+            return;
+        }
+
+        try {
+            $this->packageFileStorage->saveRootPackageFile($this->rootPackageFile);
+        } catch (Exception $e) {
+            $this->rootPackageFile->setPluginClasses($previousClasses);
+
+            throw $e;
+        }
     }
 
     /**
@@ -137,9 +191,17 @@ class RootPackageFileManagerImpl extends AbstractConfigFileManager implements Ro
             return;
         }
 
+        $previousClasses = $this->rootPackageFile->getPluginClasses();
+
         $this->rootPackageFile->clearPluginClasses();
 
-        $this->packageFileStorage->saveRootPackageFile($this->rootPackageFile);
+        try {
+            $this->packageFileStorage->saveRootPackageFile($this->rootPackageFile);
+        } catch (Exception $e) {
+            $this->rootPackageFile->setPluginClasses($previousClasses);
+
+            throw $e;
+        }
     }
 
     /**

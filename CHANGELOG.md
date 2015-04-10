@@ -70,6 +70,8 @@ Changelog
  * renamed `DiscoveryManager::NO_DUPLICATE_CHECK` to `OVERRIDE`
  * split `DiscoveryManager::NO_TYPE_CHECK` into `IGNORE_TYPE_NOT_FOUND` and
    `IGNORE_TYPE_NOT_ENABLED`
+ * added `RootPackageFileManager::removePluginClasses()`
+ * fixed `RootPackageFileManager` methods when saving fails
       
 * 1.0.0-beta3 (2015-03-19)
 

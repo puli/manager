@@ -20,6 +20,7 @@ use Puli\Manager\Package\PackageFileStorage;
 use Puli\Manager\Package\RootPackageFileManagerImpl;
 use Puli\Manager\Tests\ManagerTestCase;
 use Puli\Manager\Tests\TestException;
+use Webmozart\Expression\Expr;
 
 /**
  * @since  1.0
@@ -365,6 +366,24 @@ class RootPackageFileManagerImplTest extends ManagerTestCase
         $this->manager->addPluginClass(self::PLUGIN_NAMESPACE.'\TestPluginWithoutNoArgConstructor');
     }
 
+    public function testAddPluginClassRevertsIfSavingFails()
+    {
+        $this->rootPackageFile->addPluginClass(self::OTHER_PLUGIN_CLASS);
+
+        $this->packageFileStorage->expects($this->once())
+            ->method('saveRootPackageFile')
+            ->with($this->rootPackageFile)
+            ->will($this->throwException(new TestException()));
+
+        try {
+            $this->manager->addPluginClass(self::PLUGIN_CLASS);
+            $this->fail('Expected a TestException');
+        } catch (TestException $e) {
+        }
+
+        $this->assertSame(array(self::OTHER_PLUGIN_CLASS), $this->manager->getPluginClasses());
+    }
+
     public function testRemovePluginClass()
     {
         $this->packageFileStorage->expects($this->once())
@@ -394,6 +413,90 @@ class RootPackageFileManagerImplTest extends ManagerTestCase
         $this->assertSame(array(self::PLUGIN_CLASS), $this->manager->getPluginClasses());
     }
 
+    public function testRemovePluginClassRevertsIfSavingFails()
+    {
+        $this->rootPackageFile->addPluginClass(self::PLUGIN_CLASS);
+        $this->rootPackageFile->addPluginClass(self::OTHER_PLUGIN_CLASS);
+
+        $this->packageFileStorage->expects($this->once())
+            ->method('saveRootPackageFile')
+            ->with($this->rootPackageFile)
+            ->will($this->throwException(new TestException()));
+
+        try {
+            $this->manager->removePluginClass(self::PLUGIN_CLASS);
+            $this->fail('Expected a TestException');
+        } catch (TestException $e) {
+        }
+
+        $this->assertSame(array(self::PLUGIN_CLASS, self::OTHER_PLUGIN_CLASS), $this->manager->getPluginClasses());
+    }
+
+    public function testRemovePluginClasses()
+    {
+        $this->packageFileStorage->expects($this->once())
+            ->method('saveRootPackageFile')
+            ->with($this->rootPackageFile)
+            ->will($this->returnCallback(function (RootPackageFile $packageFile) {
+                PHPUnit_Framework_Assert::assertSame(array(), $packageFile->getPluginClasses());
+            }));
+
+        $this->rootPackageFile->addPluginClass(self::PLUGIN_CLASS);
+        $this->rootPackageFile->addPluginClass(self::OTHER_PLUGIN_CLASS);
+
+        $this->manager->removePluginClasses(Expr::in(array(self::PLUGIN_CLASS, self::OTHER_PLUGIN_CLASS)));
+
+        $this->assertSame(array(), $this->manager->getPluginClasses());
+    }
+
+    public function testRemovePluginClassesIgnoresNotFoundClasses()
+    {
+        $this->packageFileStorage->expects($this->once())
+            ->method('saveRootPackageFile')
+            ->with($this->rootPackageFile)
+            ->will($this->returnCallback(function (RootPackageFile $packageFile) {
+                PHPUnit_Framework_Assert::assertSame(array(self::OTHER_PLUGIN_CLASS), $packageFile->getPluginClasses());
+            }));
+
+        $this->rootPackageFile->addPluginClass(self::PLUGIN_CLASS);
+        $this->rootPackageFile->addPluginClass(self::OTHER_PLUGIN_CLASS);
+
+        $this->manager->removePluginClasses(Expr::in(array(self::PLUGIN_CLASS, 'Some\\Class')));
+
+        $this->assertSame(array(self::OTHER_PLUGIN_CLASS), $this->manager->getPluginClasses());
+    }
+
+    public function testRemovePluginClassesDoesNothingIfNotFound()
+    {
+        $this->packageFileStorage->expects($this->never())
+            ->method('saveRootPackageFile');
+
+        $this->rootPackageFile->addPluginClass(self::PLUGIN_CLASS);
+
+        $this->manager->removePluginClasses(Expr::in(array(self::OTHER_PLUGIN_CLASS)));
+
+        $this->assertSame(array(self::PLUGIN_CLASS), $this->manager->getPluginClasses());
+    }
+
+    public function testRemovePluginClassesRevertsIfSavingFails()
+    {
+        $this->rootPackageFile->addPluginClass(self::PLUGIN_CLASS);
+        $this->rootPackageFile->addPluginClass(self::OTHER_PLUGIN_CLASS);
+
+        $this->packageFileStorage->expects($this->once())
+            ->method('saveRootPackageFile')
+            ->with($this->rootPackageFile)
+            ->will($this->throwException(new TestException()));
+
+        try {
+        $this->manager->removePluginClasses(Expr::in(array(self::PLUGIN_CLASS, self::OTHER_PLUGIN_CLASS)));
+            $this->fail('Expected a TestException');
+        } catch (TestException $e) {
+        }
+
+        $this->assertSame(array(self::PLUGIN_CLASS, self::OTHER_PLUGIN_CLASS), $this->manager->getPluginClasses());
+    }
+
     public function testClearPluginClasses()
     {
         $this->packageFileStorage->expects($this->once())
@@ -419,6 +522,25 @@ class RootPackageFileManagerImplTest extends ManagerTestCase
         $this->manager->clearPluginClasses();
 
         $this->assertSame(array(), $this->manager->getPluginClasses());
+    }
+
+    public function testClearPluginClassesRevertsIfSavingFails()
+    {
+        $this->rootPackageFile->addPluginClass(self::PLUGIN_CLASS);
+        $this->rootPackageFile->addPluginClass(self::OTHER_PLUGIN_CLASS);
+
+        $this->packageFileStorage->expects($this->once())
+            ->method('saveRootPackageFile')
+            ->with($this->rootPackageFile)
+            ->will($this->throwException(new TestException()));
+
+        try {
+            $this->manager->clearPluginClasses();
+            $this->fail('Expected a TestException');
+        } catch (TestException $e) {
+        }
+
+        $this->assertSame(array(self::PLUGIN_CLASS, self::OTHER_PLUGIN_CLASS), $this->manager->getPluginClasses());
     }
 
     public function testHasPluginClass()
@@ -475,6 +597,24 @@ class RootPackageFileManagerImplTest extends ManagerTestCase
         $this->manager->setPackageName('vendor/package');
 
         $this->assertSame('vendor/package', $this->manager->getPackageName());
+    }
+
+    public function testSetPackageNameRevertsIfSavingFails()
+    {
+        $this->rootPackageFile->setPackageName('vendor/old');
+
+        $this->packageFileStorage->expects($this->once())
+            ->method('saveRootPackageFile')
+            ->with($this->rootPackageFile)
+            ->will($this->throwException(new TestException()));
+
+        try {
+            $this->manager->setPackageName('vendor/new');
+            $this->fail('Expected a TestException');
+        } catch (TestException $e) {
+        }
+
+        $this->assertSame('vendor/old', $this->manager->getPackageName());
     }
 
     public function testSetExtraKey()

@@ -15,6 +15,7 @@ use Puli\Manager\Api\Config\ConfigFileManager;
 use Puli\Manager\Api\Environment\ProjectEnvironment;
 use Puli\Manager\Api\InvalidConfigException;
 use Puli\Manager\Api\IOException;
+use Webmozart\Expression\Expression;
 
 /**
  * Manages changes to the root package file.
@@ -74,6 +75,14 @@ interface RootPackageFileManager extends ConfigFileManager
      * @param string $pluginClass The fully qualified plugin class name.
      */
     public function removePluginClass($pluginClass);
+
+    /**
+     * Removes the plugin classes from the package file that match the given
+     * expression.
+     *
+     * @param Expression $expr The search criteria.
+     */
+    public function removePluginClasses(Expression $expr);
 
     /**
      * Removes all plugin classes from the package file.
