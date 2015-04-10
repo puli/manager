@@ -454,7 +454,7 @@ class RootPackageFileManagerImplTest extends ManagerTestCase
             ->method('saveRootPackageFile')
             ->with($this->rootPackageFile)
             ->will($this->returnCallback(function (RootPackageFile $packageFile) {
-                PHPUnit_Framework_Assert::assertSame(array(self::OTHER_PLUGIN_CLASS), $packageFile->getPluginClasses());
+                PHPUnit_Framework_Assert::assertSame(array(RootPackageFileManagerImplTest::OTHER_PLUGIN_CLASS), $packageFile->getPluginClasses());
             }));
 
         $this->rootPackageFile->addPluginClass(self::PLUGIN_CLASS);
