@@ -186,11 +186,7 @@ class PackageManagerImpl implements PackageManager
         $installInfos = $this->rootPackageFile->getInstallInfos();
         $packages = $this->packages->toArray();
 
-        foreach ($this->packages as $package) {
-            if ($package instanceof RootPackage) {
-                continue;
-            }
-
+        foreach ($this->packages->getInstalledPackages() as $package) {
             if ($package->match($expr)) {
                 $this->rootPackageFile->removeInstallInfo($package->getName());
                 $this->packages->remove($package->getName());

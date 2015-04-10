@@ -36,9 +36,7 @@ class PackageCollection implements IteratorAggregate, Countable, ArrayAccess
 
     public function __construct(array $packages = array())
     {
-        foreach ($packages as $package) {
-            $this->add($package);
-        }
+        $this->merge($packages);
     }
 
     /**
