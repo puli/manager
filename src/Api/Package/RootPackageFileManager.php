@@ -105,10 +105,17 @@ interface RootPackageFileManager extends ConfigFileManager
     /**
      * Returns whether the package file contains any plugin classes.
      *
-     * @return bool Returns `true` if the package file contains any plugin
-     *              classes and `false` otherwise.
+     * You can optionally pass an expression to check whether the manager has
+     * plugin classes matching the expression.
+     *
+     * @param Expression $expr The search criteria.
+     *
+     * @return bool Returns `true` if the manager has plugin classes in the root
+     *              package and `false` otherwise. If an expression is passed,
+     *              this method only returns `true` if the manager has plugin
+     *              classes matching the expression.
      */
-    public function hasPluginClasses();
+    public function hasPluginClasses(Expression $expr = null);
 
     /**
      * Returns all installed plugin classes.
@@ -116,6 +123,16 @@ interface RootPackageFileManager extends ConfigFileManager
      * @return string[] The fully qualified plugin class names.
      */
     public function getPluginClasses();
+
+    /**
+     * Returns all installed plugin classes matching the given expression.
+     *
+     * @param Expression $expr The search criteria.
+     *
+     * @return string[] The fully qualified plugin class names matching the
+     *                  expression.
+     */
+    public function findPluginClasses(Expression $expr);
 
     /**
      * Sets an extra key in the file.

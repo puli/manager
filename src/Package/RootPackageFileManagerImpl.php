@@ -20,6 +20,7 @@ use Puli\Manager\Api\Package\RootPackageFileManager;
 use Puli\Manager\Config\AbstractConfigFileManager;
 use ReflectionClass;
 use ReflectionException;
+use Webmozart\Expression\Expr;
 use Webmozart\Expression\Expression;
 
 /**
@@ -215,9 +216,19 @@ class RootPackageFileManagerImpl extends AbstractConfigFileManager implements Ro
     /**
      * {@inheritdoc}
      */
-    public function hasPluginClasses()
+    public function hasPluginClasses(Expression $expr = null)
     {
-        return $this->rootPackageFile->hasPluginClasses();
+        if (!$expr) {
+            return $this->rootPackageFile->hasPluginClasses();
+        }
+
+        foreach ($this->rootPackageFile->getPluginClasses() as $pluginClass) {
+            if ($expr->evaluate($pluginClass)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -226,6 +237,22 @@ class RootPackageFileManagerImpl extends AbstractConfigFileManager implements Ro
     public function getPluginClasses()
     {
         return $this->rootPackageFile->getPluginClasses();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function findPluginClasses(Expression $expr)
+    {
+        $pluginClasses = array();
+
+        foreach ($this->rootPackageFile->getPluginClasses() as $pluginClass) {
+            if ($expr->evaluate($pluginClass)) {
+                $pluginClasses[] = $pluginClass;
+            }
+        }
+
+        return $pluginClasses;
     }
 
     /**

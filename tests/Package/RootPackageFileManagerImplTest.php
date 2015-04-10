@@ -543,6 +543,27 @@ class RootPackageFileManagerImplTest extends ManagerTestCase
         $this->assertSame(array(self::PLUGIN_CLASS, self::OTHER_PLUGIN_CLASS), $this->manager->getPluginClasses());
     }
 
+    public function testGetPluginClasses()
+    {
+        $this->rootPackageFile->addPluginClass(self::PLUGIN_CLASS);
+        $this->rootPackageFile->addPluginClass(self::OTHER_PLUGIN_CLASS);
+
+        $this->assertSame(array(self::PLUGIN_CLASS, self::OTHER_PLUGIN_CLASS), $this->manager->getPluginClasses());
+    }
+
+    public function testFindPluginClasses()
+    {
+        $this->rootPackageFile->addPluginClass(self::PLUGIN_CLASS);
+        $this->rootPackageFile->addPluginClass(self::OTHER_PLUGIN_CLASS);
+
+        $expr1 = Expr::same(self::PLUGIN_CLASS);
+
+        $expr2 = Expr::same('foo');
+
+        $this->assertSame(array(self::PLUGIN_CLASS), $this->manager->findPluginClasses($expr1));
+        $this->assertSame(array(), $this->manager->findPluginClasses($expr2));
+    }
+
     public function testHasPluginClass()
     {
         $this->rootPackageFile->addPluginClass(self::PLUGIN_CLASS);
@@ -560,6 +581,11 @@ class RootPackageFileManagerImplTest extends ManagerTestCase
         $this->rootPackageFile->addPluginClass(self::PLUGIN_CLASS);
 
         $this->assertTrue($this->manager->hasPluginClasses());
+        $this->assertFalse($this->manager->hasPluginClasses(Expr::same(self::OTHER_PLUGIN_CLASS)));
+
+        $this->rootPackageFile->addPluginClass(self::OTHER_PLUGIN_CLASS);
+
+        $this->assertTrue($this->manager->hasPluginClasses(Expr::same(self::OTHER_PLUGIN_CLASS)));
     }
 
     public function testGetPackageName()

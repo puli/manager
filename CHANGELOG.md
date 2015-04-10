@@ -72,6 +72,8 @@ Changelog
    `IGNORE_TYPE_NOT_ENABLED`
  * added `RootPackageFileManager::removePluginClasses()`
  * fixed `RootPackageFileManager` methods when saving fails
+ * added optional argument `$expr` to `RootPackageFileManager::hasPluginClasses()`
+ * added `RootPackageFileManager::findPluginClasses()`
       
 * 1.0.0-beta3 (2015-03-19)
 
