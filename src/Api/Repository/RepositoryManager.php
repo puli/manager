@@ -95,6 +95,16 @@ interface RepositoryManager
     public function getRootPathMapping($repositoryPath);
 
     /**
+     * Returns all path mappings in the root package that match the given
+     * expression.
+     *
+     * @param Expression $expr The search criteria.
+     *
+     * @return PathMapping[] The path mappings matching the expression.
+     */
+    public function findRootPathMappings(Expression $expr);
+
+    /**
      * Returns all path mappings in the root package.
      *
      * @return PathMapping[] The path mappings.

@@ -266,6 +266,17 @@ class RepositoryManagerImpl implements RepositoryManager
     /**
      * {@inheritdoc}
      */
+    public function findRootPathMappings(Expression $expr)
+    {
+        $expr = Expr::same($this->rootPackage->getName(), PathMapping::CONTAINING_PACKAGE)
+            ->andX($expr);
+
+        return $this->findPathMappings($expr);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function getRootPathMappings()
     {
         $this->assertMappingsLoaded();

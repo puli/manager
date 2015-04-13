@@ -90,6 +90,7 @@ Changelog
  * fixed `PackageManager::clearPackages()`
  * added `DiscoveryManager::findRootBindingTypes()`
  * added `DiscoveryManager::findRootBindings()`
+ * added `RepositoryManager::findRootPathMappings()`
       
 * 1.0.0-beta3 (2015-03-19)
 

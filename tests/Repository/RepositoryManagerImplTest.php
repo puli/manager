@@ -1015,6 +1015,22 @@ class RepositoryManagerImplTest extends ManagerTestCase
         ), $this->manager->getRootPathMappings());
     }
 
+    public function testFindRootPathMappings()
+    {
+        $this->initDefaultManager();
+
+        $this->rootPackageFile->addPathMapping($mapping1 = new PathMapping('/path1', 'resources'));
+        $this->rootPackageFile->addPathMapping($mapping2 = new PathMapping('/path2', 'resources'));
+        $this->packageFile1->addPathMapping($mapping3 = new PathMapping('/path1', 'resources'));
+
+        $expr1 = Expr::startsWith('/path', PathMapping::REPOSITORY_PATH);
+
+        $expr2 = Expr::same('/path2', PathMapping::REPOSITORY_PATH);
+
+        $this->assertSame(array($mapping1, $mapping2), $this->manager->findRootPathMappings($expr1));
+        $this->assertSame(array($mapping2), $this->manager->findRootPathMappings($expr2));
+    }
+
     public function testHasRootPathMapping()
     {
         $this->initDefaultManager();
