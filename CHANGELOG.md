@@ -1,7 +1,7 @@
 Changelog
 =========
 
-* 1.0.0-next (@release_date@)
+* 1.0.0-beta4 (2015-04-13)
 
  * separated "factory.class" and "factory.file" config keys into
    "factory.in.class", "factory.out.class", "factory.in.file" and "factory.out.file"
