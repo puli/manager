@@ -103,6 +103,16 @@ interface DiscoveryManager
     public function getRootBindingTypes();
 
     /**
+     * Returns all binding types from the root package that match the given
+     * expression.
+     *
+     * @param Expression $expr The search criteria.
+     *
+     * @return BindingTypeDescriptor[] The binding types matching the expression.
+     */
+    public function findRootBindingTypes(Expression $expr);
+
+    /**
      * Returns whether the type with the given name exists in the root package.
      *
      * @param string $typeName The name of the type.
@@ -242,6 +252,15 @@ interface DiscoveryManager
      * @return BindingDescriptor[] The bindings.
      */
     public function getRootBindings();
+
+    /**
+     * Returns all bindings from the root package that match the given expression.
+     *
+     * @param Expression $expr The search criteria.
+     *
+     * @return BindingDescriptor[] The bindings matching the expression.
+     */
+    public function findRootBindings(Expression $expr);
 
     /**
      * Returns whether the binding with the given UUID exists in the root

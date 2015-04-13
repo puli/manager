@@ -774,6 +774,26 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         ), $this->manager->getRootBindingTypes());
     }
 
+    public function testFindRootBindingTypes()
+    {
+        $this->initDefaultManager();
+
+        $this->rootPackageFile->addTypeDescriptor($type1 = new BindingTypeDescriptor('my/type1'));
+        $this->rootPackageFile->addTypeDescriptor($type2 = new BindingTypeDescriptor('my/type2'));
+        $this->packageFile1->addTypeDescriptor($type3 = clone $type2); // duplicate
+        $this->packageFile2->addTypeDescriptor($type4 = new BindingTypeDescriptor('my/type4'));
+
+        $expr1 = Expr::startsWith('my/type', BindingTypeDescriptor::NAME);
+
+        $expr2 = Expr::same(BindingTypeState::DUPLICATE, BindingTypeDescriptor::STATE);
+
+        $expr3 = $expr1->andX($expr2);
+
+        $this->assertSame(array($type1, $type2), $this->manager->findRootBindingTypes($expr1));
+        $this->assertSame(array($type2), $this->manager->findRootBindingTypes($expr2));
+        $this->assertSame(array($type2), $this->manager->findRootBindingTypes($expr3));
+    }
+
     public function testHasRootBindingType()
     {
         $this->initDefaultManager();
@@ -1488,6 +1508,47 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->assertTrue($this->manager->hasRootBinding($binding1->getUuid()));
         $this->assertFalse($this->manager->hasRootBinding($binding2->getUuid()));
         $this->assertFalse($this->manager->hasRootBinding(Uuid::fromString(self::NOT_FOUND_UUID)));
+    }
+
+    public function testFindRootBindings()
+    {
+        $this->initDefaultManager();
+
+        $binding1 = new BindingDescriptor(
+            '/path1',
+            'my/type',
+            array(),
+            'glob',
+            $uuid1 = Uuid::fromString('f966a2e1-4738-42ac-b007-1ac8798c1877')
+        );
+        $binding2 = new BindingDescriptor(
+            '/path2',
+            'my/type',
+            array(),
+            'glob',
+            $uuid2 = Uuid::fromString('ecc5bb18-a4be-483d-9682-3999504b80d5')
+        );
+        $binding3 = new BindingDescriptor(
+            '/path3',
+            'my/type',
+            array(),
+            'glob',
+            $uuid3 = Uuid::fromString('ecc0b0b5-67ff-4b01-9836-9aa4d5136af4')
+        );
+
+        $this->rootPackageFile->addBindingDescriptor($binding1);
+        $this->rootPackageFile->addBindingDescriptor($binding2);
+        $this->packageFile1->addBindingDescriptor($binding3);
+
+        $expr1 = Expr::startsWith('ecc', BindingDescriptor::UUID);
+
+        $expr2 = Expr::same('my/type', BindingDescriptor::TYPE_NAME);
+
+        $expr3 = $expr1->andX($expr2);
+
+        $this->assertSame(array($binding2), $this->manager->findRootBindings($expr1));
+        $this->assertSame(array($binding1, $binding2), $this->manager->findRootBindings($expr2));
+        $this->assertSame(array($binding2), $this->manager->findRootBindings($expr3));
     }
 
     public function testHasRootBindings()

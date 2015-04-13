@@ -88,6 +88,8 @@ Changelog
  * added `PackageCollection::replace()`
  * added `PackageManager::removePackages()`
  * fixed `PackageManager::clearPackages()`
+ * added `DiscoveryManager::findRootBindingTypes()`
+ * added `DiscoveryManager::findRootBindings()`
       
 * 1.0.0-beta3 (2015-03-19)
 
