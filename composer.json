@@ -20,7 +20,7 @@
         "webmozart/assert": "~1.0",
         "symfony/event-dispatcher": "~2.3",
         "symfony/filesystem": "~2.3",
-        "rhumsaa/uuid": "~2.8",
+        "ramsey/uuid": "~2.8",
         "psr/log": "~1.0"
     },
     "require-dev": {
