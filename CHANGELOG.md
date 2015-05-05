@@ -1,6 +1,10 @@
 Changelog
 =========
 
+* 1.0.0-next (@release_date@)
+
+ * integrated puli/asset-plugin in puli/manager
+
 * 1.0.0-beta4 (2015-04-13)
 
  * separated "factory.class" and "factory.file" config keys into

@@ -1,0 +1,30 @@
+{
+    "type": "object",
+    "additionalProperties": {
+        "type": "object",
+        "properties": {
+            "class": {
+                "type": "string",
+                "required": true
+            },
+            "description": {
+                "type": "string"
+            },
+            "parameters": {
+                "type": "object",
+                "additionalProperties": {
+                    "type": "object",
+                    "properties": {
+                        "required": {
+                            "type": "boolean"
+                        },
+                        "default": {},
+                        "description": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

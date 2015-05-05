@@ -1,0 +1,26 @@
+{
+    "type": "object",
+    "additionalProperties": {
+        "type": "object",
+        "properties": {
+            "installer": {
+                "type": "string",
+                "required": true
+            },
+            "document-root": {
+                "type": "string",
+                "required": true
+            },
+            "url-format": {
+                "type": "string"
+            },
+            "default": {
+                "type": "boolean"
+            },
+            "parameters": {
+                "type": "object",
+                "additionalProperties": true
+            }
+        }
+    }
+}
