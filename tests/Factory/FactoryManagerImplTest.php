@@ -178,7 +178,7 @@ class MyFactory implements PuliFactory, UrlGeneratorFactory
      *
      * @param ResourceDiscovery \$discovery The resource discovery to read from.
      *
-     * @return AssetUrlGenerator The created URL generator.
+     * @return UrlGenerator The created URL generator.
      */
     public function createUrlGenerator(ResourceDiscovery \$discovery)
     {

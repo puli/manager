@@ -341,7 +341,7 @@ EOF
         $arg->setDescription('The resource discovery to read from.');
         $method->addArgument($arg);
 
-        $method->setReturnValue(new ReturnValue('$generator', 'AssetUrlGenerator', 'The created URL generator.'));
+        $method->setReturnValue(new ReturnValue('$generator', 'UrlGenerator', 'The created URL generator.'));
 
         $urlFormatsString = '';
 
