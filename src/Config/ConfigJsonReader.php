@@ -19,6 +19,7 @@ use Puli\Manager\Api\InvalidConfigException;
 use Webmozart\Json\DecodingFailedException;
 use Webmozart\Json\JsonDecoder;
 use Webmozart\Json\ValidationFailedException;
+use Webmozart\PathUtil\Path;
 
 /**
  * Reads JSON configuration files.
@@ -51,7 +52,9 @@ class ConfigJsonReader implements ConfigFileReader
     private function decodeFile($path)
     {
         $decoder = new JsonDecoder();
-        $schema = $decoder->decodeFile(realpath(__DIR__.'/../../res/schema/package-schema-1.0.json'));
+        // We can't use realpath(), which doesn't work inside PHARs.
+        // However, we want to display nice paths if the file is not found.
+        $schema = $decoder->decodeFile(Path::canonicalize(__DIR__.'/../../res/schema/package-schema-1.0.json'));
         $configSchema = $schema->properties->config;
 
         if (!file_exists($path)) {

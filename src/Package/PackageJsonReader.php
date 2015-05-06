@@ -27,6 +27,7 @@ use Rhumsaa\Uuid\Uuid;
 use Webmozart\Json\DecodingFailedException;
 use Webmozart\Json\JsonDecoder;
 use Webmozart\Json\JsonValidator;
+use Webmozart\PathUtil\Path;
 
 /**
  * Reads JSON package files.
@@ -173,7 +174,9 @@ class PackageJsonReader implements PackageFileReader
     {
         $decoder = new JsonDecoder();
         $validator = new JsonValidator();
-        $schema = realpath(__DIR__.'/../../res/schema/package-schema-1.0.json');
+        // We can't use realpath(), which doesn't work inside PHARs.
+        // However, we want to display nice paths if the file is not found.
+        $schema = Path::canonicalize(__DIR__.'/../../res/schema/package-schema-1.0.json');
 
         if (!file_exists($path)) {
             throw FileNotFoundException::forPath($path);

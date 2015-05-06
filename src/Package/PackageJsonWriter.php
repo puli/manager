@@ -256,7 +256,9 @@ class PackageJsonWriter implements PackageFileWriter
         $encoder->setPrettyPrinting(true);
         $encoder->setEscapeSlash(false);
         $encoder->setTerminateWithLineFeed(true);
-        $schema = realpath(__DIR__.'/../../res/schema/package-schema-1.0.json');
+        // We can't use realpath(), which doesn't work inside PHARs.
+        // However, we want to display nice paths if the file is not found.
+        $schema = Path::canonicalize(__DIR__.'/../../res/schema/package-schema-1.0.json');
 
         if (!is_dir($dir = Path::getDirectory($path))) {
             $filesystem = new Filesystem();
