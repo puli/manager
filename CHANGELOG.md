@@ -5,6 +5,7 @@ Changelog
 
  * integrated puli/asset-plugin in puli/manager
  * added `ConfigManager` interface
+ * added argument `$raw` to the getters in `ConfigManager`
 
 * 1.0.0-beta4 (2015-04-13)
 

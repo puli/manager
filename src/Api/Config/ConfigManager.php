@@ -127,12 +127,15 @@ interface ConfigManager
      * @param mixed  $default  The value to return if the key was not set.
      * @param bool   $fallback Whether to return the value of the base
      *                         configuration if the key was not set.
+     * @param bool   $raw      Whether to return the raw value of the key. If
+     *                         `true`, placeholders in the value are replaced
+     *                         by their actual values.
      *
      * @return mixed The value of the key or the default value, if none is set.
      *
      * @throws NoSuchConfigKeyException If the configuration key is invalid.
      */
-    public function getConfigKey($key, $default = null, $fallback = false);
+    public function getConfigKey($key, $default = null, $fallback = false, $raw = true);
 
     /**
      * Returns the values of all configuration keys set in the file.
@@ -142,23 +145,29 @@ interface ConfigManager
      * @param bool $includeFallback Whether to include values set in the base
      *                              configuration.
      * @param bool $includeUnset    Whether to include unset keys in the result.
+     * @param bool $raw             Whether to return the raw values of the keys.
+     *                              If `true`, placeholders in the values are
+     *                              replaced by their actual values.
      *
      * @return array A mapping of configuration keys to values.
      */
-    public function getConfigKeys($includeFallback = false, $includeUnset = false);
+    public function getConfigKeys($includeFallback = false, $includeUnset = false, $raw = true);
 
     /**
      * Returns the values of all configuration keys matching the given
      * expression.
-     *
      *
      * @param Expression $expr            The search criteria.
      * @param bool       $includeFallback Whether to include values set in the
      *                                    base configuration.
      * @param bool       $includeUnset    Whether to include unset keys in the
      *                                    result.
+     * @param bool       $raw             Whether to return the raw values of
+     *                                    the keys. If `true`, placeholders in
+     *                                    the values are replaced by their
+     *                                    actual values.
      *
      * @return array A mapping of configuration keys to values.
      */
-    public function findConfigKeys(Expression $expr, $includeFallback = false, $includeUnset = false);
+    public function findConfigKeys(Expression $expr, $includeFallback = false, $includeUnset = false, $raw = true);
 }

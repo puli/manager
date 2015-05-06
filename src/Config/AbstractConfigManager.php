@@ -160,22 +160,28 @@ abstract class AbstractConfigManager implements ConfigManager
     /**
      * {@inheritdoc}
      */
-    public function getConfigKey($key, $default = null, $fallback = false)
+    public function getConfigKey($key, $default = null, $fallback = false, $raw = true)
     {
         Assert::boolean($fallback, 'The argument $fallback must be a boolean.');
 
-        return $this->getConfig()->getRaw($key, $default, $fallback);
+        if ($raw) {
+            return $this->getConfig()->getRaw($key, $default, $fallback);
+        }
+
+        return $this->getConfig()->get($key, $default, $fallback);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function getConfigKeys($includeFallback = false, $includeUnset = false)
+    public function getConfigKeys($includeFallback = false, $includeUnset = false, $raw = true)
     {
         Assert::boolean($includeFallback, 'The argument $includeFallback must be a boolean.');
         Assert::boolean($includeUnset, 'The argument $includeUnset must be a boolean.');
 
-        $values = $this->getConfig()->toFlatRawArray($includeFallback);
+        $values = $raw
+            ? $this->getConfig()->toFlatRawArray($includeFallback)
+            : $this->getConfig()->toFlatArray($includeFallback);
 
         // Reorder the returned values
         $keysInDefaultOrder = Config::getKeys();
@@ -191,14 +197,14 @@ abstract class AbstractConfigManager implements ConfigManager
     /**
      * {@inheritdoc}
      */
-    public function findConfigKeys(Expression $expr, $includeFallback = false, $includeUnset = false)
+    public function findConfigKeys(Expression $expr, $includeFallback = false, $includeUnset = false, $raw = true)
     {
         Assert::boolean($includeFallback, 'The argument $includeFallback must be a boolean.');
         Assert::boolean($includeUnset, 'The argument $includeUnset must be a boolean.');
 
         $values = array();
 
-        foreach ($this->getConfigKeys($includeFallback, $includeUnset) as $key => $value) {
+        foreach ($this->getConfigKeys($includeFallback, $includeUnset, $raw) as $key => $value) {
             if ($expr->evaluate($key)) {
                 $values[$key] = $value;
             }
