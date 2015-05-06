@@ -4,6 +4,7 @@ Changelog
 * 1.0.0-next (@release_date@)
 
  * integrated puli/asset-plugin in puli/manager
+ * added `ConfigManager` interface
 
 * 1.0.0-beta4 (2015-04-13)
 

@@ -12,6 +12,7 @@
 namespace Puli\Manager\Api\Package;
 
 use InvalidArgumentException;
+use Puli\Manager\Api\Config\ConfigFile;
 use Puli\Manager\Api\Discovery\BindingDescriptor;
 use Puli\Manager\Api\Discovery\BindingTypeDescriptor;
 use Puli\Manager\Api\Discovery\NoSuchBindingException;

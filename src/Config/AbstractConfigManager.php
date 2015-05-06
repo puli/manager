@@ -13,7 +13,7 @@ namespace Puli\Manager\Config;
 
 use Exception;
 use Puli\Manager\Api\Config\Config;
-use Puli\Manager\Api\Config\ConfigFileManager;
+use Puli\Manager\Api\Config\ConfigManager;
 use Puli\Manager\Api\InvalidConfigException;
 use Puli\Manager\Api\IOException;
 use Puli\Manager\Assert\Assert;
@@ -26,7 +26,7 @@ use Webmozart\Expression\Expression;
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-abstract class AbstractConfigFileManager implements ConfigFileManager
+abstract class AbstractConfigManager implements ConfigManager
 {
     /**
      * {@inheritdoc}
@@ -206,13 +206,6 @@ abstract class AbstractConfigFileManager implements ConfigFileManager
 
         return $values;
     }
-
-    /**
-     * Returns the managed configuration.
-     *
-     * @return Config The configuration.
-     */
-    abstract protected function getConfig();
 
     /**
      * Saves the file containing the managed configuration.

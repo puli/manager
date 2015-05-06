@@ -16,7 +16,7 @@ use InvalidArgumentException;
 use Puli\Manager\Api\Environment\ProjectEnvironment;
 use Puli\Manager\Api\Package\RootPackageFile;
 use Puli\Manager\Api\Package\RootPackageFileManager;
-use Puli\Manager\Config\AbstractConfigFileManager;
+use Puli\Manager\Config\AbstractConfigManager;
 use ReflectionClass;
 use ReflectionException;
 use Webmozart\Expression\Expr;
@@ -31,7 +31,7 @@ use Webmozart\Expression\Expression;
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class RootPackageFileManagerImpl extends AbstractConfigFileManager implements RootPackageFileManager
+class RootPackageFileManagerImpl extends AbstractConfigManager implements RootPackageFileManager
 {
     /**
      * @var ProjectEnvironment
@@ -59,6 +59,14 @@ class RootPackageFileManagerImpl extends AbstractConfigFileManager implements Ro
         $this->environment = $environment;
         $this->rootPackageFile = $environment->getRootPackageFile();
         $this->packageFileStorage = $packageFileStorage;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getConfig()
+    {
+        return $this->rootPackageFile->getConfig();
     }
 
     /**
@@ -434,14 +442,6 @@ class RootPackageFileManagerImpl extends AbstractConfigFileManager implements Ro
         }
 
         return $values;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function getConfig()
-    {
-        return $this->rootPackageFile->getConfig();
     }
 
     /**

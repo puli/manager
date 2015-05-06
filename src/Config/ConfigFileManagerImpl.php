@@ -12,6 +12,7 @@
 namespace Puli\Manager\Config;
 
 use Puli\Manager\Api\Config\ConfigFile;
+use Puli\Manager\Api\Config\ConfigFileManager;
 use Puli\Manager\Api\Environment\GlobalEnvironment;
 
 /**
@@ -23,7 +24,7 @@ use Puli\Manager\Api\Environment\GlobalEnvironment;
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class ConfigFileManagerImpl extends AbstractConfigFileManager
+class ConfigFileManagerImpl extends AbstractConfigManager implements ConfigFileManager
 {
     /**
      * @var GlobalEnvironment
@@ -56,6 +57,14 @@ class ConfigFileManagerImpl extends AbstractConfigFileManager
     /**
      * {@inheritdoc}
      */
+    public function getConfig()
+    {
+        return $this->configFile->getConfig();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function getEnvironment()
     {
         return $this->environment;
@@ -64,9 +73,9 @@ class ConfigFileManagerImpl extends AbstractConfigFileManager
     /**
      * {@inheritdoc}
      */
-    protected function getConfig()
+    public function getConfigFile()
     {
-        return $this->configFile->getConfig();
+        return $this->configFile;
     }
 
     /**

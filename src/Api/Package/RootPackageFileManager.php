@@ -11,7 +11,7 @@
 
 namespace Puli\Manager\Api\Package;
 
-use Puli\Manager\Api\Config\ConfigFileManager;
+use Puli\Manager\Api\Config\ConfigManager;
 use Puli\Manager\Api\Environment\ProjectEnvironment;
 use Puli\Manager\Api\IOException;
 use Webmozart\Expression\Expression;
@@ -25,7 +25,7 @@ use Webmozart\Expression\Expression;
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-interface RootPackageFileManager extends ConfigFileManager
+interface RootPackageFileManager extends ConfigManager
 {
     /**
      * Returns the project environment.
