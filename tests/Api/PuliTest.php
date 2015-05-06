@@ -335,6 +335,91 @@ class PuliTest extends PHPUnit_Framework_TestCase
         $this->assertNull($this->puli->getDiscoveryManager());
     }
 
+    public function testGetAssetManagerInProjectEnvironment()
+    {
+        $this->puli->setRootDirectory($this->tempDir);
+        $this->puli->start();
+        $manager = $this->puli->getAssetManager();
+
+        $this->assertInstanceOf('Puli\Manager\Api\Asset\AssetManager', $manager);
+        $this->assertSame($manager, $this->puli->getAssetManager());
+    }
+
+    public function testGetAssetManagerInGlobalEnvironment()
+    {
+        $this->puli->start();
+
+        $this->assertNull($this->puli->getAssetManager());
+    }
+
+    public function testGetInstallationManagerInProjectEnvironment()
+    {
+        $this->puli->setRootDirectory($this->tempDir);
+        $this->puli->start();
+        $manager = $this->puli->getInstallationManager();
+
+        $this->assertInstanceOf('Puli\Manager\Api\Installation\InstallationManager', $manager);
+        $this->assertSame($manager, $this->puli->getInstallationManager());
+    }
+
+    public function testGetInstallationManagerInGlobalEnvironment()
+    {
+        $this->puli->start();
+
+        $this->assertNull($this->puli->getInstallationManager());
+    }
+
+    public function testGetInstallerManagerInProjectEnvironment()
+    {
+        $this->puli->setRootDirectory($this->tempDir);
+        $this->puli->start();
+        $manager = $this->puli->getInstallerManager();
+
+        $this->assertInstanceOf('Puli\Manager\Api\Installer\InstallerManager', $manager);
+        $this->assertSame($manager, $this->puli->getInstallerManager());
+    }
+
+    public function testGetInstallerManagerInGlobalEnvironment()
+    {
+        $this->puli->start();
+
+        $this->assertNull($this->puli->getInstallerManager());
+    }
+
+    public function testGetServerManagerInProjectEnvironment()
+    {
+        $this->puli->setRootDirectory($this->tempDir);
+        $this->puli->start();
+        $manager = $this->puli->getServerManager();
+
+        $this->assertInstanceOf('Puli\Manager\Api\Server\ServerManager', $manager);
+        $this->assertSame($manager, $this->puli->getServerManager());
+    }
+
+    public function testGetServerManagerInGlobalEnvironment()
+    {
+        $this->puli->start();
+
+        $this->assertNull($this->puli->getServerManager());
+    }
+
+    public function testGetUrlGeneratorInProjectEnvironment()
+    {
+        $this->puli->setRootDirectory($this->tempDir);
+        $this->puli->start();
+        $manager = $this->puli->getUrlGenerator();
+
+        $this->assertInstanceOf('Puli\UrlGenerator\Api\UrlGenerator', $manager);
+        $this->assertSame($manager, $this->puli->getUrlGenerator());
+    }
+
+    public function testGetUrlGeneratorInGlobalEnvironment()
+    {
+        $this->puli->start();
+
+        $this->assertNull($this->puli->getUrlGenerator());
+    }
+
     public function testPassRootDirToConstructor()
     {
         $this->puli->setRootDirectory($this->tempDir);

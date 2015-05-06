@@ -16,6 +16,7 @@ use Psr\Log\LoggerInterface;
 use Puli\Discovery\Api\EditableDiscovery;
 use Puli\Discovery\Api\ResourceDiscovery;
 use Puli\Factory\PuliFactory;
+use Puli\Manager\Api\Asset\AssetManager;
 use Puli\Manager\Api\Config\ConfigFileManager;
 use Puli\Manager\Api\Config\ConfigFileReader;
 use Puli\Manager\Api\Config\ConfigFileWriter;
@@ -23,6 +24,8 @@ use Puli\Manager\Api\Discovery\DiscoveryManager;
 use Puli\Manager\Api\Environment\GlobalEnvironment;
 use Puli\Manager\Api\Environment\ProjectEnvironment;
 use Puli\Manager\Api\Factory\FactoryManager;
+use Puli\Manager\Api\Installation\InstallationManager;
+use Puli\Manager\Api\Installer\InstallerManager;
 use Puli\Manager\Api\Package\Package;
 use Puli\Manager\Api\Package\PackageFileReader;
 use Puli\Manager\Api\Package\PackageFileWriter;
@@ -30,7 +33,9 @@ use Puli\Manager\Api\Package\PackageManager;
 use Puli\Manager\Api\Package\PackageState;
 use Puli\Manager\Api\Package\RootPackageFileManager;
 use Puli\Manager\Api\Repository\RepositoryManager;
+use Puli\Manager\Api\Server\ServerManager;
 use Puli\Manager\Assert\Assert;
+use Puli\Manager\Asset\DiscoveryAssetManager;
 use Puli\Manager\Config\ConfigFileManagerImpl;
 use Puli\Manager\Config\ConfigFileStorage;
 use Puli\Manager\Config\ConfigJsonReader;
@@ -40,6 +45,8 @@ use Puli\Manager\Config\EnvConfig;
 use Puli\Manager\Discovery\DiscoveryManagerImpl;
 use Puli\Manager\Factory\FactoryManagerImpl;
 use Puli\Manager\Factory\Generator\DefaultGeneratorRegistry;
+use Puli\Manager\Installation\InstallationManagerImpl;
+use Puli\Manager\Installer\PackageFileInstallerManager;
 use Puli\Manager\Package\PackageFileStorage;
 use Puli\Manager\Package\PackageJsonReader;
 use Puli\Manager\Package\PackageJsonWriter;
@@ -47,9 +54,12 @@ use Puli\Manager\Package\PackageManagerImpl;
 use Puli\Manager\Package\RootPackageFileManagerImpl;
 use Puli\Manager\Php\ClassWriter;
 use Puli\Manager\Repository\RepositoryManagerImpl;
+use Puli\Manager\Server\PackageFileServerManager;
 use Puli\Manager\Util\System;
 use Puli\Repository\Api\EditableRepository;
 use Puli\Repository\Api\ResourceRepository;
+use Puli\UrlGenerator\Api\UrlGenerator;
+use Puli\UrlGenerator\DiscoveryUrlGenerator;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Webmozart\Expression\Expr;
 use Webmozart\PathUtil\Path;
@@ -166,6 +176,31 @@ class Puli
      * @var DiscoveryManager
      */
     private $discoveryManager;
+
+    /**
+     * @var AssetManager
+     */
+    private $assetManager;
+
+    /**
+     * @var InstallationManager
+     */
+    private $installationManager;
+
+    /**
+     * @var InstallerManager
+     */
+    private $installerManager;
+
+    /**
+     * @var ServerManager
+     */
+    private $serverManager;
+
+    /**
+     * @var UrlGenerator
+     */
+    private $urlGenerator;
 
     /**
      * @var ConfigFileStorage|null
@@ -480,6 +515,9 @@ class Puli
                 new DefaultGeneratorRegistry(),
                 new ClassWriter()
             );
+
+            // Don't set via the constructor to prevent a cyclic dependency
+            $this->factoryManager->setServers($this->getServerManager()->getServers());
         }
 
         return $this->factoryManager;
@@ -521,8 +559,7 @@ class Puli
         if (!$this->rootPackageFileManager && $this->rootDir) {
             $this->rootPackageFileManager = new RootPackageFileManagerImpl(
                 $this->environment,
-                $this->getPackageFileStorage(),
-                $this->getFactoryManager()
+                $this->getPackageFileStorage()
             );
         }
 
@@ -595,6 +632,115 @@ class Puli
         }
 
         return $this->discoveryManager;
+    }
+
+    /**
+     * Returns the asset manager.
+     *
+     * @return AssetManager The asset manager.
+     */
+    public function getAssetManager()
+    {
+        if (!$this->started) {
+            throw new LogicException('Puli was not started');
+        }
+
+        if (!$this->assetManager && $this->rootDir) {
+            $this->assetManager = new DiscoveryAssetManager(
+                $this->getDiscoveryManager(),
+                $this->getServerManager()->getServers()
+            );
+        }
+
+        return $this->assetManager;
+    }
+
+    /**
+     * Returns the installation manager.
+     *
+     * @return InstallationManager The installation manager.
+     */
+    public function getInstallationManager()
+    {
+        if (!$this->started) {
+            throw new LogicException('Puli was not started');
+        }
+
+        if (!$this->installationManager && $this->rootDir) {
+            $this->installationManager = new InstallationManagerImpl(
+                $this->getEnvironment(),
+                $this->getRepository(),
+                $this->getServerManager()->getServers(),
+                $this->getInstallerManager()
+            );
+        }
+
+        return $this->installationManager;
+    }
+
+    /**
+     * Returns the installer manager.
+     *
+     * @return InstallerManager The installer manager.
+     */
+    public function getInstallerManager()
+    {
+        if (!$this->started) {
+            throw new LogicException('Puli was not started');
+        }
+
+        if (!$this->installerManager && $this->rootDir) {
+            $this->installerManager = new PackageFileInstallerManager(
+                $this->getRootPackageFileManager(),
+                $this->getPackageManager()->getPackages()
+            );
+        }
+
+        return $this->installerManager;
+    }
+
+    /**
+     * Returns the server manager.
+     *
+     * @return ServerManager The server manager.
+     */
+    public function getServerManager()
+    {
+        if (!$this->started) {
+            throw new LogicException('Puli was not started');
+        }
+
+        if (!$this->serverManager && $this->rootDir) {
+            $this->serverManager = new PackageFileServerManager(
+                $this->getRootPackageFileManager(),
+                $this->getInstallerManager()
+            );
+        }
+
+        return $this->serverManager;
+    }
+
+    /**
+     * Returns the resource URL generator.
+     *
+     * @return UrlGenerator The resource URL generator.
+     */
+    public function getUrlGenerator()
+    {
+        if (!$this->started) {
+            throw new LogicException('Puli was not started');
+        }
+
+        if (!$this->urlGenerator && $this->rootDir) {
+            $urlFormats = array();
+            foreach ($this->getServerManager()->getServers() as $server) {
+                $urlFormats[$server->getName()] = $server->getUrlFormat();
+            }
+
+            $this->urlGenerator = new DiscoveryUrlGenerator($this->getDiscovery(), $urlFormats);
+        }
+
+        return $this->urlGenerator;
     }
 
     private function activatePlugins()

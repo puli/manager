@@ -22,6 +22,7 @@ use Puli\Manager\Api\Php\Clazz;
 use Puli\Manager\Api\Php\Import;
 use Puli\Manager\Api\Php\Method;
 use Puli\Manager\Api\Php\ReturnValue;
+use Puli\Manager\Api\Server\ServerCollection;
 use Puli\Manager\Assert\Assert;
 use Puli\Manager\Php\ClassWriter;
 use Webmozart\PathUtil\Path;
@@ -85,15 +86,22 @@ class FactoryManagerImpl implements FactoryManager
     private $classWriter;
 
     /**
+     * @var ServerCollection
+     */
+    private $servers;
+
+    /**
      * Creates a new factory generator.
      *
      * @param ProjectEnvironment $environment       The project environment.
      * @param GeneratorRegistry  $generatorRegistry The registry providing the
      *                                              generators for the services
      *                                              returned by the factory.
-     * @param ClassWriter $classWriter       The writer t
+     * @param ClassWriter        $classWriter       The writer that writes the
+     *                                              class to a file.
+     * @param ServerCollection   $servers           The configured servers.
      */
-    public function __construct(ProjectEnvironment $environment, GeneratorRegistry $generatorRegistry, ClassWriter $classWriter)
+    public function __construct(ProjectEnvironment $environment, GeneratorRegistry $generatorRegistry, ClassWriter $classWriter, ServerCollection $servers = null)
     {
         $config = $environment->getConfig();
 
@@ -105,6 +113,17 @@ class FactoryManagerImpl implements FactoryManager
         $this->factoryOutClass = $config->get(Config::FACTORY_OUT_CLASS);
         $this->generatorRegistry = $generatorRegistry;
         $this->classWriter = $classWriter;
+        $this->servers = $servers;
+    }
+
+    /**
+     * Sets the servers included in the createUrlGenerator() method.
+     *
+     * @param ServerCollection $servers The configured servers.
+     */
+    public function setServers(ServerCollection $servers)
+    {
+        $this->servers = $servers;
     }
 
     /**
@@ -168,6 +187,7 @@ EOF
 
         $this->addCreateRepositoryMethod($class);
         $this->addCreateDiscoveryMethod($class);
+        $this->addCreateUrlGeneratorMethod($class);
 
         if ($dispatcher->hasListeners(PuliEvents::GENERATE_FACTORY)) {
             $dispatcher->dispatch(PuliEvents::GENERATE_FACTORY, new GenerateFactoryEvent($class));
@@ -295,6 +315,51 @@ EOF
 
         $generator = $this->generatorRegistry->getServiceGenerator(GeneratorRegistry::DISCOVERY, $type);
         $generator->generateNewInstance(self::DISCOVERY_VAR_NAME, $method, $this->generatorRegistry, $options);
+    }
+
+    /**
+     * Adds the createUrlGenerator() method.
+     *
+     * @param Clazz $class The factory class model.
+     */
+    public function addCreateUrlGeneratorMethod(Clazz $class)
+    {
+        $class->addImport(new Import('Puli\Discovery\Api\ResourceDiscovery'));
+        $class->addImport(new Import('Puli\Manager\Api\Server\ServerCollection'));
+        $class->addImport(new Import('Puli\UrlGenerator\Api\UrlGenerator'));
+        $class->addImport(new Import('Puli\UrlGenerator\Api\UrlGeneratorFactory'));
+        $class->addImport(new Import('Puli\UrlGenerator\DiscoveryUrlGenerator'));
+
+        $class->addImplementedInterface('UrlGeneratorFactory');
+
+        $method = new Method('createUrlGenerator');
+        $method->setDescription('Creates the URL generator.');
+
+        $arg = new Argument('discovery');
+        $arg->setTypeHint('ResourceDiscovery');
+        $arg->setType('ResourceDiscovery');
+        $arg->setDescription('The resource discovery to read from.');
+        $method->addArgument($arg);
+
+        $method->setReturnValue(new ReturnValue('$generator', 'AssetUrlGenerator', 'The created URL generator.'));
+
+        $urlFormatsString = '';
+
+        foreach ($this->servers as $server) {
+            $urlFormatsString .= sprintf(
+                "\n    %s => %s,",
+                var_export($server->getName(), true),
+                var_export($server->getUrlFormat(), true)
+            );
+        }
+
+        if ($urlFormatsString) {
+            $urlFormatsString .= "\n";
+        }
+
+        $method->addBody("\$generator = new DiscoveryUrlGenerator(\$discovery, array($urlFormatsString));");
+
+        $class->addMethod($method);
     }
 
     /**
