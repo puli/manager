@@ -11,6 +11,7 @@
 
 namespace Puli\Manager\Api\Package;
 
+use Exception;
 use RuntimeException;
 
 /**
@@ -21,4 +22,19 @@ use RuntimeException;
  */
 class NameConflictException extends RuntimeException
 {
+    /**
+     * Creates a new exception.
+     *
+     * @param string    $name  The conflicting name.
+     * @param Exception $cause The exception that caused this exception.
+     *
+     * @return static The created exception.
+     */
+    public static function forName($name, Exception $cause = null)
+    {
+        return new static(sprintf(
+            'A package with the name "%s" exists already.',
+            $name
+        ), 0, $cause);
+    }
 }

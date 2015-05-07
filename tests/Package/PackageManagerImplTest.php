@@ -24,6 +24,7 @@ use Puli\Manager\Package\PackageFileStorage;
 use Puli\Manager\Package\PackageManagerImpl;
 use Puli\Manager\Tests\ManagerTestCase;
 use Puli\Manager\Tests\TestException;
+use Rhumsaa\Uuid\Uuid;
 use Symfony\Component\Filesystem\Filesystem;
 use Webmozart\Expression\Expr;
 
@@ -105,9 +106,9 @@ class PackageManagerImplTest extends ManagerTestCase
         $this->packageFile2 = new PackageFile();
         $this->packageFile3 = new PackageFile('vendor/package3');
 
-        $this->installInfo1 = new InstallInfo('vendor/package1', $this->packageDir1);
-        $this->installInfo2 = new InstallInfo('vendor/package2', $this->packageDir2);
-        $this->installInfo3 = new InstallInfo('vendor/package3', $this->packageDir3);
+        $this->installInfo1 = new InstallInfo('vendor/package1', '../package1');
+        $this->installInfo2 = new InstallInfo('vendor/package2', '../package2');
+        $this->installInfo3 = new InstallInfo('vendor/package3', '../package3');
 
         $this->packageFileStorage = $this->getMockBuilder('Puli\Manager\Package\PackageFileStorage')
             ->disableOriginalConstructor()
@@ -276,18 +277,15 @@ class PackageManagerImplTest extends ManagerTestCase
     {
         $this->initDefaultManager();
 
-        $packageDir1 = $this->packageDir1;
-        $packageDir2 = $this->packageDir2;
-
         $this->packageFileStorage->expects($this->once())
             ->method('saveRootPackageFile')
             ->with($this->rootPackageFile)
-            ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) use ($packageDir1, $packageDir2) {
+            ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) {
                 $installInfos = $rootPackageFile->getInstallInfos();
 
                 PHPUnit_Framework_Assert::assertCount(3, $installInfos);
-                PHPUnit_Framework_Assert::assertSame($packageDir1, $installInfos[0]->getInstallPath());
-                PHPUnit_Framework_Assert::assertSame($packageDir2, $installInfos[1]->getInstallPath());
+                PHPUnit_Framework_Assert::assertSame('../package1', $installInfos[0]->getInstallPath());
+                PHPUnit_Framework_Assert::assertSame('../package2', $installInfos[1]->getInstallPath());
                 PHPUnit_Framework_Assert::assertSame('../package3', $installInfos[2]->getInstallPath());
             }));
 
@@ -298,18 +296,15 @@ class PackageManagerImplTest extends ManagerTestCase
     {
         $this->initDefaultManager();
 
-        $packageDir1 = $this->packageDir1;
-        $packageDir2 = $this->packageDir2;
-
         $this->packageFileStorage->expects($this->once())
             ->method('saveRootPackageFile')
             ->with($this->rootPackageFile)
-            ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) use ($packageDir1, $packageDir2) {
+            ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) {
                 $installInfos = $rootPackageFile->getInstallInfos();
 
                 PHPUnit_Framework_Assert::assertCount(3, $installInfos);
-                PHPUnit_Framework_Assert::assertSame($packageDir1, $installInfos[0]->getInstallPath());
-                PHPUnit_Framework_Assert::assertSame($packageDir2, $installInfos[1]->getInstallPath());
+                PHPUnit_Framework_Assert::assertSame('../package1', $installInfos[0]->getInstallPath());
+                PHPUnit_Framework_Assert::assertSame('../package2', $installInfos[1]->getInstallPath());
                 PHPUnit_Framework_Assert::assertSame('../package3', $installInfos[2]->getInstallPath());
             }));
 
@@ -320,19 +315,16 @@ class PackageManagerImplTest extends ManagerTestCase
     {
         $this->initDefaultManager();
 
-        $packageDir1 = $this->packageDir1;
-        $packageDir2 = $this->packageDir2;
-
         $this->packageFileStorage->expects($this->once())
             ->method('saveRootPackageFile')
             ->with($this->rootPackageFile)
-            ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) use ($packageDir1, $packageDir2) {
+            ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) {
                 $installInfos = $rootPackageFile->getInstallInfos();
 
                 PHPUnit_Framework_Assert::assertCount(3, $installInfos);
-                PHPUnit_Framework_Assert::assertSame($packageDir1, $installInfos[0]->getInstallPath());
+                PHPUnit_Framework_Assert::assertSame('../package1', $installInfos[0]->getInstallPath());
                 PHPUnit_Framework_Assert::assertSame('vendor/package1', $installInfos[0]->getPackageName());
-                PHPUnit_Framework_Assert::assertSame($packageDir2, $installInfos[1]->getInstallPath());
+                PHPUnit_Framework_Assert::assertSame('../package2', $installInfos[1]->getInstallPath());
                 PHPUnit_Framework_Assert::assertSame('vendor/package2', $installInfos[1]->getPackageName());
                 PHPUnit_Framework_Assert::assertSame('../package3', $installInfos[2]->getInstallPath());
                 PHPUnit_Framework_Assert::assertSame('my/package3-custom', $installInfos[2]->getPackageName());
@@ -359,19 +351,16 @@ class PackageManagerImplTest extends ManagerTestCase
     {
         $this->initDefaultManager();
 
-        $packageDir1 = $this->packageDir1;
-        $packageDir2 = $this->packageDir2;
-
         $this->packageFileStorage->expects($this->once())
             ->method('saveRootPackageFile')
             ->with($this->rootPackageFile)
-            ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) use ($packageDir1, $packageDir2) {
+            ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) {
                 $installInfos = $rootPackageFile->getInstallInfos();
 
                 PHPUnit_Framework_Assert::assertCount(3, $installInfos);
-                PHPUnit_Framework_Assert::assertSame($packageDir1, $installInfos[0]->getInstallPath());
+                PHPUnit_Framework_Assert::assertSame('../package1', $installInfos[0]->getInstallPath());
                 PHPUnit_Framework_Assert::assertSame('user', $installInfos[0]->getInstallerName());
-                PHPUnit_Framework_Assert::assertSame($packageDir2, $installInfos[1]->getInstallPath());
+                PHPUnit_Framework_Assert::assertSame('../package2', $installInfos[1]->getInstallPath());
                 PHPUnit_Framework_Assert::assertSame('user', $installInfos[1]->getInstallerName());
                 PHPUnit_Framework_Assert::assertSame('../package3', $installInfos[2]->getInstallPath());
                 PHPUnit_Framework_Assert::assertSame('composer', $installInfos[2]->getInstallerName());
@@ -457,6 +446,159 @@ class PackageManagerImplTest extends ManagerTestCase
             ->willThrowException($e);
 
         $manager->installPackage(__DIR__.'/Fixtures/version-too-high', 'vendor/my-package');
+    }
+
+    public function testRenameRootPackage()
+    {
+        $this->initDefaultManager();
+
+        $this->packageFileStorage->expects($this->once())
+            ->method('saveRootPackageFile')
+            ->with($this->rootPackageFile)
+            ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) {
+                PHPUnit_Framework_Assert::assertSame('vendor/new', $rootPackageFile->getPackageName());
+            }));
+
+        $this->assertSame('vendor/root', $this->rootPackageFile->getPackageName());
+        $this->assertTrue($this->manager->hasPackage('vendor/root'));
+
+        $this->manager->renamePackage('vendor/root', 'vendor/new');
+
+        $this->assertSame('vendor/new', $this->rootPackageFile->getPackageName());
+        $this->assertFalse($this->manager->hasPackage('vendor/root'));
+        $this->assertTrue($this->manager->hasPackage('vendor/new'));
+
+        $package = $this->manager->getPackage('vendor/new');
+
+        $this->assertInstanceOf('Puli\Manager\Api\Package\RootPackage', $package);
+        $this->assertSame('vendor/new', $package->getName());
+        $this->assertSame($this->rootDir, $package->getInstallPath());
+    }
+
+    public function testRenameRootPackageDoesNothingIfUnchanged()
+    {
+        $this->initDefaultManager();
+
+        $this->packageFileStorage->expects($this->never())
+            ->method('saveRootPackageFile');
+
+        $this->manager->renamePackage('vendor/root', 'vendor/root');
+    }
+
+    /**
+     * @expectedException \Puli\Manager\Api\Package\NameConflictException
+     */
+    public function testRenameRootPackageFailsIfNameConflict()
+    {
+        $this->initDefaultManager();
+
+        $this->packageFileStorage->expects($this->never())
+            ->method('saveRootPackageFile');
+
+        $this->manager->renamePackage('vendor/root', 'vendor/package1');
+    }
+
+    public function testRenameRootPackageRevertsIfSavingFails()
+    {
+        $this->initDefaultManager();
+
+        $this->packageFileStorage->expects($this->once())
+            ->method('saveRootPackageFile')
+            ->with($this->rootPackageFile)
+            ->willThrowException(new TestException());
+
+        try {
+            $this->manager->renamePackage('vendor/root', 'vendor/new');
+            $this->fail('Expected a TestException');
+        } catch (TestException $e) {
+        }
+
+        $this->assertSame('vendor/root', $this->rootPackageFile->getPackageName());
+        $this->assertTrue($this->manager->hasPackage('vendor/root'));
+        $this->assertFalse($this->manager->hasPackage('vendor/new'));
+    }
+
+    public function testRenameNonRootPackage()
+    {
+        $this->initDefaultManager();
+
+        $this->packageFileStorage->expects($this->once())
+            ->method('saveRootPackageFile')
+            ->with($this->rootPackageFile)
+            ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) {
+                PHPUnit_Framework_Assert::assertTrue($rootPackageFile->hasInstallInfo('vendor/new'));
+                PHPUnit_Framework_Assert::assertFalse($rootPackageFile->hasInstallInfo('vendor/package1'));
+            }));
+
+        $this->installInfo1->addEnabledBindingUuid($uuid1 = Uuid::uuid4());
+        $this->installInfo1->addDisabledBindingUuid($uuid2 = Uuid::uuid4());
+
+        $this->assertSame('vendor/package1', $this->installInfo1->getPackageName());
+        $this->assertTrue($this->manager->hasPackage('vendor/package1'));
+
+        $this->manager->renamePackage('vendor/package1', 'vendor/new');
+
+        $this->assertTrue($this->rootPackageFile->hasInstallInfo('vendor/new'));
+        $this->assertFalse($this->rootPackageFile->hasInstallInfo('vendor/package1'));
+        $this->assertFalse($this->manager->hasPackage('vendor/package1'));
+        $this->assertTrue($this->manager->hasPackage('vendor/new'));
+
+        $package = $this->manager->getPackage('vendor/new');
+        $installInfo = $this->rootPackageFile->getInstallInfo('vendor/new');
+
+        $this->assertInstanceOf('Puli\Manager\Api\Package\Package', $package);
+        $this->assertSame('vendor/new', $package->getName());
+        $this->assertSame($this->packageDir1, $package->getInstallPath());
+        $this->assertSame($installInfo, $package->getInstallInfo());
+
+        $this->assertSame('vendor/new', $installInfo->getPackageName());
+        $this->assertSame('../package1', $installInfo->getInstallPath());
+        $this->assertSame(array($uuid1), $installInfo->getEnabledBindingUuids());
+        $this->assertSame(array($uuid2), $installInfo->getDisabledBindingUuids());
+    }
+
+    public function testRenameNonRootPackageDoesNothingIfUnchanged()
+    {
+        $this->initDefaultManager();
+
+        $this->packageFileStorage->expects($this->never())
+            ->method('saveRootPackageFile');
+
+        $this->manager->renamePackage('vendor/package1', 'vendor/package1');
+    }
+
+    /**
+     * @expectedException \Puli\Manager\Api\Package\NameConflictException
+     */
+    public function testRenameNonRootPackageFailsIfNameConflict()
+    {
+        $this->initDefaultManager();
+
+        $this->packageFileStorage->expects($this->never())
+            ->method('saveRootPackageFile');
+
+        $this->manager->renamePackage('vendor/package1', 'vendor/root');
+    }
+
+    public function testRenameNonRootPackageRevertsIfSavingFails()
+    {
+        $this->initDefaultManager();
+
+        $this->packageFileStorage->expects($this->once())
+            ->method('saveRootPackageFile')
+            ->with($this->rootPackageFile)
+            ->willThrowException(new TestException());
+
+        try {
+            $this->manager->renamePackage('vendor/package1', 'vendor/new');
+            $this->fail('Expected a TestException');
+        } catch (TestException $e) {
+        }
+
+        $this->assertTrue($this->rootPackageFile->hasInstallInfo('vendor/package1'));
+        $this->assertFalse($this->rootPackageFile->hasInstallInfo('vendor/new'));
+        $this->assertTrue($this->manager->hasPackage('vendor/root'));
+        $this->assertFalse($this->manager->hasPackage('vendor/new'));
     }
 
     public function testRemovePackage()

@@ -117,15 +117,7 @@ class PackageManagerImpl implements PackageManager
         }
 
         if ($this->packages->contains($name)) {
-            $conflictingPackage = $this->packages->get($name);
-
-            throw new NameConflictException(sprintf(
-                'Cannot load package "%s" at %s: The package at %s has the '.
-                'same name.',
-                $name,
-                $installPath,
-                $conflictingPackage->getInstallPath()
-            ));
+            throw NameConflictException::forName($name);;
         }
 
         $relInstallPath = Path::makeRelative($installPath, $this->rootDir);
@@ -147,6 +139,28 @@ class PackageManagerImpl implements PackageManager
 
         $this->packages->add($package);
 
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function renamePackage($name, $newName)
+    {
+        $package = $this->getPackage($name);
+
+        if ($name === $newName) {
+            return;
+        }
+
+        if ($this->packages->contains($newName)) {
+            throw NameConflictException::forName($newName);
+        }
+
+        if ($package instanceof RootPackage) {
+            $this->renameRootPackage($package, $newName);
+        } else {
+            $this->renameNonRootPackage($package, $newName);
+        }
     }
 
     /**
@@ -392,5 +406,59 @@ class PackageManagerImpl implements PackageManager
             // Rethrow first error
             throw reset($loadErrors);
         }
+    }
+
+    private function renameRootPackage(RootPackage $package, $newName)
+    {
+        $packageFile = $package->getPackageFile();
+        $previousName = $packageFile->getPackageName();
+        $packageFile->setPackageName($newName);
+
+        try {
+            $this->packageFileStorage->saveRootPackageFile($this->rootPackageFile);
+        } catch (Exception $e) {
+            $packageFile->setPackageName($previousName);
+
+            throw $e;
+        }
+
+        $this->packages->remove($package->getName());
+        $this->packages->add(new RootPackage($packageFile, $package->getInstallPath()));
+    }
+
+    private function renameNonRootPackage(Package $package, $newName)
+    {
+        $previousInstallInfo = $package->getInstallInfo();
+
+        $installInfo = new InstallInfo($newName, $previousInstallInfo->getInstallPath());
+        $installInfo->setInstallerName($previousInstallInfo->getInstallerName());
+
+        foreach ($previousInstallInfo->getEnabledBindingUuids() as $uuid) {
+            $installInfo->addEnabledBindingUuid($uuid);
+        }
+
+        foreach ($previousInstallInfo->getDisabledBindingUuids() as $uuid) {
+            $installInfo->addDisabledBindingUuid($uuid);
+        }
+
+        $this->rootPackageFile->removeInstallInfo($package->getName());
+        $this->rootPackageFile->addInstallInfo($installInfo);
+
+        try {
+            $this->packageFileStorage->saveRootPackageFile($this->rootPackageFile);
+        } catch (Exception $e) {
+            $this->rootPackageFile->removeInstallInfo($newName);
+            $this->rootPackageFile->addInstallInfo($previousInstallInfo);
+
+            throw $e;
+        }
+
+        $this->packages->remove($package->getName());
+        $this->packages->add(new Package(
+            $package->getPackageFile(),
+            $package->getInstallPath(),
+            $installInfo,
+            $package->getLoadErrors()
+        ));
     }
 }

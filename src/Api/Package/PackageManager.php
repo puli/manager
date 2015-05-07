@@ -46,6 +46,18 @@ interface PackageManager
     public function installPackage($installPath, $name = null, $installerName = InstallInfo::DEFAULT_INSTALLER_NAME);
 
     /**
+     * Renames the package with the given name.
+     *
+     * @param string $name    The package name.
+     * @param string $newName The new package name.
+     *
+     * @throws NoSuchPackageException If the package was not found.
+     * @throws NameConflictException If a package with the new name exists
+     *                               already.
+     */
+    public function renamePackage($name, $newName);
+
+    /**
      * Removes the package with the given name.
      *
      * @param string $name The package name.

@@ -7,6 +7,7 @@ Changelog
  * added `ConfigManager` interface
  * added argument `$raw` to the getters in `ConfigManager`
  * added `PuliEvents::PRE_BUILD_REPOSITORY` and `PuliEvents::POST_BUILD_REPOSITORY`
+ * added `PackageManager::renamePackage()`
 
 * 1.0.0-beta4 (2015-04-13)
 
