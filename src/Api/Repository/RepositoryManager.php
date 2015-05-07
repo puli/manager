@@ -16,6 +16,7 @@ use Puli\Manager\Api\NoDirectoryException;
 use Puli\Manager\Api\RootPackageExpectedException;
 use Puli\Manager\Config\Config;
 use Puli\Manager\Conflict\PackageConflictException;
+use Puli\Repository\Api\EditableRepository;
 use Webmozart\Expression\Expression;
 
 /**
@@ -42,6 +43,13 @@ interface RepositoryManager
      * @return ProjectEnvironment The project environment.
      */
     public function getEnvironment();
+
+    /**
+     * Returns the managed repository.
+     *
+     * @return EditableRepository The managed repository.
+     */
+    public function getRepository();
 
     /**
      * Adds a path mapping to the repository.

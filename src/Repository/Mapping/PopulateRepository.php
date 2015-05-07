@@ -13,7 +13,6 @@ namespace Puli\Manager\Repository\Mapping;
 
 use Exception;
 use Puli\Manager\Api\Repository\PathMapping;
-use Puli\Manager\Api\Repository\RepositoryNotEmptyException;
 use Puli\Manager\Conflict\OverrideGraph;
 use Puli\Manager\Transaction\AtomicOperation;
 use Puli\Repository\Api\EditableRepository;
@@ -60,10 +59,6 @@ class PopulateRepository implements AtomicOperation
      */
     public function execute()
     {
-        if ($this->repo->hasChildren('/')) {
-            throw new RepositoryNotEmptyException('The repository is not empty.');
-        }
-
         // Quit if no mappings exist
         if (!$packageNames = $this->mappings->getPackageNames()) {
             return;

@@ -13,6 +13,8 @@ namespace Puli\Manager\Tests\Repository;
 
 use PHPUnit_Framework_Assert;
 use PHPUnit_Framework_MockObject_MockObject;
+use Puli\Manager\Api\Event\BuildRepositoryEvent;
+use Puli\Manager\Api\Event\PuliEvents;
 use Puli\Manager\Api\Package\Package;
 use Puli\Manager\Api\Package\PackageCollection;
 use Puli\Manager\Api\Package\PackageFile;
@@ -1236,11 +1238,11 @@ class RepositoryManagerImplTest extends ManagerTestCase
         $this->packageFile1->addPathMapping(new PathMapping('/path', 'resources'));
         $this->packageFile1->addPathMapping(new PathMapping('/path/css', 'assets/css'));
 
-        $this->repo->expects($this->at(1))
+        $this->repo->expects($this->at(0))
             ->method('add')
             ->with('/path', new DirectoryResource($this->packageDir1.'/resources'));
 
-        $this->repo->expects($this->at(2))
+        $this->repo->expects($this->at(1))
             ->method('add')
             ->with('/path/css', new DirectoryResource($this->packageDir1.'/assets/css'));
 
@@ -1289,11 +1291,11 @@ class RepositoryManagerImplTest extends ManagerTestCase
         $this->packageFile1->addPathMapping(new PathMapping('/package/css', 'assets/css'));
         $this->packageFile1->addPathMapping(new PathMapping('/package', 'resources'));
 
-        $this->repo->expects($this->at(1))
+        $this->repo->expects($this->at(0))
             ->method('add')
             ->with('/package', new DirectoryResource($this->packageDir1.'/resources'));
 
-        $this->repo->expects($this->at(2))
+        $this->repo->expects($this->at(1))
             ->method('add')
             ->with('/package/css', new DirectoryResource($this->packageDir1.'/assets/css'));
 
@@ -1310,19 +1312,19 @@ class RepositoryManagerImplTest extends ManagerTestCase
         $this->packageFile2->addPathMapping(new PathMapping('/package1/css', 'css-override'));
         $this->packageFile2->setOverriddenPackages(array('vendor/package1'));
 
-        $this->repo->expects($this->at(1))
+        $this->repo->expects($this->at(0))
             ->method('add')
             ->with('/package1', new DirectoryResource($this->packageDir1.'/resources'));
 
-        $this->repo->expects($this->at(2))
+        $this->repo->expects($this->at(1))
             ->method('add')
             ->with('/package1/css', new DirectoryResource($this->packageDir1.'/assets/css'));
 
-        $this->repo->expects($this->at(3))
+        $this->repo->expects($this->at(2))
             ->method('add')
             ->with('/package1', new DirectoryResource($this->packageDir2.'/override'));
 
-        $this->repo->expects($this->at(4))
+        $this->repo->expects($this->at(3))
             ->method('add')
             ->with('/package1/css', new DirectoryResource($this->packageDir2.'/css-override'));
 
@@ -1339,15 +1341,15 @@ class RepositoryManagerImplTest extends ManagerTestCase
         $this->packageFile3->addPathMapping(new PathMapping('/package1', 'override2'));
         $this->packageFile3->setOverriddenPackages(array('vendor/package2'));
 
-        $this->repo->expects($this->at(1))
+        $this->repo->expects($this->at(0))
             ->method('add')
             ->with('/package1', new DirectoryResource($this->packageDir1.'/resources'));
 
-        $this->repo->expects($this->at(2))
+        $this->repo->expects($this->at(1))
             ->method('add')
             ->with('/package1', new DirectoryResource($this->packageDir2.'/override'));
 
-        $this->repo->expects($this->at(3))
+        $this->repo->expects($this->at(2))
             ->method('add')
             ->with('/package1', new DirectoryResource($this->packageDir3.'/override2'));
 
@@ -1364,19 +1366,19 @@ class RepositoryManagerImplTest extends ManagerTestCase
         $this->packageFile3->addPathMapping(new PathMapping('/package2', 'override2'));
         $this->packageFile3->setOverriddenPackages(array('vendor/package1', 'vendor/package2'));
 
-        $this->repo->expects($this->at(1))
+        $this->repo->expects($this->at(0))
             ->method('add')
             ->with('/package1', new DirectoryResource($this->packageDir1.'/resources'));
 
-        $this->repo->expects($this->at(2))
+        $this->repo->expects($this->at(1))
             ->method('add')
             ->with('/package2', new DirectoryResource($this->packageDir2.'/resources'));
 
-        $this->repo->expects($this->at(3))
+        $this->repo->expects($this->at(2))
             ->method('add')
             ->with('/package1', new DirectoryResource($this->packageDir3.'/override1'));
 
-        $this->repo->expects($this->at(4))
+        $this->repo->expects($this->at(3))
             ->method('add')
             ->with('/package2', new DirectoryResource($this->packageDir3.'/override2'));
 
@@ -1390,7 +1392,7 @@ class RepositoryManagerImplTest extends ManagerTestCase
         $this->packageFile1->addPathMapping(new PathMapping('/package', 'resources'));
         $this->packageFile1->setOverriddenPackages(array('foobar'));
 
-        $this->repo->expects($this->at(1))
+        $this->repo->expects($this->once())
             ->method('add')
             ->with('/package', new DirectoryResource($this->packageDir1.'/resources'));
 
@@ -1405,15 +1407,15 @@ class RepositoryManagerImplTest extends ManagerTestCase
         $this->packageFile2->addPathMapping(new PathMapping('/package1', array('override', 'css-override')));
         $this->packageFile2->setOverriddenPackages(array('vendor/package1'));
 
-        $this->repo->expects($this->at(1))
+        $this->repo->expects($this->at(0))
             ->method('add')
             ->with('/package1', new DirectoryResource($this->packageDir1.'/resources'));
 
-        $this->repo->expects($this->at(2))
+        $this->repo->expects($this->at(1))
             ->method('add')
             ->with('/package1', new DirectoryResource($this->packageDir2.'/override'));
 
-        $this->repo->expects($this->at(3))
+        $this->repo->expects($this->at(2))
             ->method('add')
             ->with('/package1', new DirectoryResource($this->packageDir2.'/css-override'));
 
@@ -1427,11 +1429,11 @@ class RepositoryManagerImplTest extends ManagerTestCase
         $this->packageFile1->addPathMapping(new PathMapping('/path', 'resources'));
         $this->packageFile2->addPathMapping(new PathMapping('/path/new', 'override'));
 
-        $this->repo->expects($this->at(1))
+        $this->repo->expects($this->at(0))
             ->method('add')
             ->with('/path', new DirectoryResource($this->packageDir1.'/resources'));
 
-        $this->repo->expects($this->at(2))
+        $this->repo->expects($this->at(1))
             ->method('add')
             ->with('/path/new', new DirectoryResource($this->packageDir2.'/override'));
 
@@ -1446,11 +1448,11 @@ class RepositoryManagerImplTest extends ManagerTestCase
         $this->packageFile1->addPathMapping(new PathMapping('/path', 'resources'));
         $this->packageFile2->addPathMapping(new PathMapping('/path', 'override'));
 
-        $this->repo->expects($this->at(1))
+        $this->repo->expects($this->at(0))
             ->method('add')
             ->with('/path', new DirectoryResource($this->packageDir1.'/resources'));
 
-        $this->repo->expects($this->at(2))
+        $this->repo->expects($this->at(1))
             ->method('add')
             ->with('/path', new DirectoryResource($this->packageDir2.'/override'));
 
@@ -1476,20 +1478,41 @@ class RepositoryManagerImplTest extends ManagerTestCase
         $this->manager->buildRepository();
     }
 
-    /**
-     * @expectedException \Puli\Manager\Api\Repository\RepositoryNotEmptyException
-     */
-    public function testBuildRepositoryFailsIfNotEmpty()
+    public function testBuildRepositoryDispatchesEvent()
     {
+        $testResource1 = new FileResource(__FILE__);
+        $testResource2 = new FileResource(__FILE__);
+
+        $this->initEnvironment($this->homeDir, $this->rootDir, false);
         $this->initDefaultManager();
 
-        $this->repo->expects($this->once())
-            ->method('hasChildren')
-            ->with('/')
-            ->willReturn(true);
+        $this->packageFile1->addPathMapping(new PathMapping('/path', 'resources'));
 
-        $this->repo->expects($this->never())
-            ->method('add');
+        $this->repo->expects($this->at(0))
+            ->method('add')
+            ->with('/pre', $this->identicalTo($testResource1));
+
+        $this->repo->expects($this->at(1))
+            ->method('add')
+            ->with('/path', new DirectoryResource($this->packageDir1.'/resources'));
+
+        $this->repo->expects($this->at(2))
+            ->method('add')
+            ->with('/post', $this->identicalTo($testResource2));
+
+        $this->dispatcher->addListener(
+            PuliEvents::PRE_BUILD_REPOSITORY,
+            function (BuildRepositoryEvent $event) use ($testResource1) {
+                $event->getRepositoryManager()->getRepository()->add('/pre', $testResource1);
+            }
+        );
+
+        $this->dispatcher->addListener(
+            PuliEvents::POST_BUILD_REPOSITORY,
+            function (BuildRepositoryEvent $event) use ($testResource2) {
+                $event->getRepositoryManager()->getRepository()->add('/post', $testResource2);
+            }
+        );
 
         $this->manager->buildRepository();
     }

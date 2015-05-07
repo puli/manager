@@ -23,4 +23,14 @@ interface PuliEvents
      * Dispatched when the factory class is generated.
      */
     const GENERATE_FACTORY = 'puli.generate-factory';
+
+    /**
+     * Dispatched before the resource repository is built.
+     */
+    const PRE_BUILD_REPOSITORY = 'puli.pre-build-repository';
+
+    /**
+     * Dispatched before the resource repository is built.
+     */
+    const POST_BUILD_REPOSITORY = 'puli.post-build-repository';
 }

@@ -14,6 +14,8 @@ namespace Puli\Manager\Repository;
 use Exception;
 use Puli\Manager\Api\Config\Config;
 use Puli\Manager\Api\Environment\ProjectEnvironment;
+use Puli\Manager\Api\Event\BuildRepositoryEvent;
+use Puli\Manager\Api\Event\PuliEvents;
 use Puli\Manager\Api\Package\Package;
 use Puli\Manager\Api\Package\PackageCollection;
 use Puli\Manager\Api\Package\RootPackageFile;
@@ -21,7 +23,6 @@ use Puli\Manager\Api\Repository\DuplicatePathMappingException;
 use Puli\Manager\Api\Repository\NoSuchPathMappingException;
 use Puli\Manager\Api\Repository\PathMapping;
 use Puli\Manager\Api\Repository\RepositoryManager;
-use Puli\Manager\Api\RootPackageExpectedException;
 use Puli\Manager\Assert\Assert;
 use Puli\Manager\Conflict\OverrideGraph;
 use Puli\Manager\Conflict\PackageConflictDetector;
@@ -38,6 +39,7 @@ use Puli\Manager\Repository\Mapping\UnloadPathMapping;
 use Puli\Manager\Repository\Mapping\UpdateConflicts;
 use Puli\Manager\Transaction\Transaction;
 use Puli\Repository\Api\EditableRepository;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Webmozart\Expression\Expr;
 use Webmozart\Expression\Expression;
 
@@ -53,6 +55,11 @@ class RepositoryManagerImpl implements RepositoryManager
      * @var ProjectEnvironment
      */
     private $environment;
+
+    /**
+     * @var EventDispatcherInterface
+     */
+    private $dispatcher;
 
     /**
      * @var Config
@@ -120,6 +127,7 @@ class RepositoryManagerImpl implements RepositoryManager
     public function __construct(ProjectEnvironment $environment, EditableRepository $repo, PackageCollection $packages, PackageFileStorage $packageFileStorage)
     {
         $this->environment = $environment;
+        $this->dispatcher = $environment->getEventDispatcher();
         $this->repo = $repo;
         $this->config = $environment->getConfig();
         $this->rootDir = $environment->getRootDirectory();
@@ -135,6 +143,14 @@ class RepositoryManagerImpl implements RepositoryManager
     public function getEnvironment()
     {
         return $this->environment;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getRepository()
+    {
+        return $this->repo;
     }
 
     /**
@@ -422,7 +438,15 @@ class RepositoryManagerImpl implements RepositoryManager
     {
         $this->assertMappingsLoaded();
 
+        if ($this->dispatcher->hasListeners(PuliEvents::PRE_BUILD_REPOSITORY)) {
+            $this->dispatcher->dispatch(PuliEvents::PRE_BUILD_REPOSITORY, new BuildRepositoryEvent($this));
+        }
+
         $this->populateRepository()->execute();
+
+        if ($this->dispatcher->hasListeners(PuliEvents::POST_BUILD_REPOSITORY)) {
+            $this->dispatcher->dispatch(PuliEvents::POST_BUILD_REPOSITORY, new BuildRepositoryEvent($this));
+        }
     }
 
     /**
