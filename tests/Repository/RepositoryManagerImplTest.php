@@ -1517,6 +1517,36 @@ class RepositoryManagerImplTest extends ManagerTestCase
         $this->manager->buildRepository();
     }
 
+    public function testPreBuildRepositoryEventSupportsSkipping()
+    {
+        $testResource = new FileResource(__FILE__);
+
+        $this->initEnvironment($this->homeDir, $this->rootDir, false);
+        $this->initDefaultManager();
+
+        $this->packageFile1->addPathMapping(new PathMapping('/path', 'resources'));
+
+        $this->repo->expects($this->never())
+            ->method('add');
+
+        $this->dispatcher->addListener(
+            PuliEvents::PRE_BUILD_REPOSITORY,
+            function (BuildRepositoryEvent $event) {
+                $event->skipBuild();
+            }
+        );
+
+        $this->dispatcher->addListener(
+            PuliEvents::POST_BUILD_REPOSITORY,
+            function (BuildRepositoryEvent $event) use ($testResource) {
+                // The post event is not executed if the build is skipped
+                $event->getRepositoryManager()->getRepository()->add('/post', $testResource);
+            }
+        );
+
+        $this->manager->buildRepository();
+    }
+
     public function testClearRepository()
     {
         $this->initDefaultManager();

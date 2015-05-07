@@ -439,7 +439,13 @@ class RepositoryManagerImpl implements RepositoryManager
         $this->assertMappingsLoaded();
 
         if ($this->dispatcher->hasListeners(PuliEvents::PRE_BUILD_REPOSITORY)) {
-            $this->dispatcher->dispatch(PuliEvents::PRE_BUILD_REPOSITORY, new BuildRepositoryEvent($this));
+            $event = new BuildRepositoryEvent($this);
+
+            $this->dispatcher->dispatch(PuliEvents::PRE_BUILD_REPOSITORY, $event);
+
+            if ($event->isBuildSkipped()) {
+                return;
+            }
         }
 
         $this->populateRepository()->execute();
