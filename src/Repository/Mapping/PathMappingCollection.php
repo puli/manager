@@ -34,6 +34,11 @@ class PathMappingCollection
     private $map;
 
     /**
+     * @var boolean
+     */
+    private $primaryKeysSorted = false;
+
+    /**
      * Creates the store.
      */
     public function __construct()
@@ -49,7 +54,7 @@ class PathMappingCollection
     public function add(PathMapping $mapping)
     {
         $this->map->set($mapping->getRepositoryPath(), $mapping->getContainingPackage()->getName(), $mapping);
-        $this->map->sortPrimaryKeys();
+        $this->primaryKeysSorted = false;
     }
 
     /**
@@ -61,7 +66,7 @@ class PathMappingCollection
     public function set($repositoryPath, PathMapping $mapping)
     {
         $this->map->set($repositoryPath, $mapping->getContainingPackage()->getName(), $mapping);
-        $this->map->sortPrimaryKeys();
+        $this->primaryKeysSorted = false;
     }
 
     /**
@@ -135,6 +140,7 @@ class PathMappingCollection
      */
     public function listByPackageName($packageName)
     {
+        $this->lazySortPrimaryKeys();
         return $this->map->listBySecondaryKey($packageName);
     }
 
@@ -161,6 +167,7 @@ class PathMappingCollection
      */
     public function getRepositoryPaths()
     {
+        $this->lazySortPrimaryKeys();
         return $this->map->getPrimaryKeys();
     }
 
@@ -172,6 +179,7 @@ class PathMappingCollection
      */
     public function toArray()
     {
+        $this->lazySortPrimaryKeys();
         return $this->map->toArray();
     }
 
@@ -184,5 +192,17 @@ class PathMappingCollection
     public function isEmpty()
     {
         return $this->map->isEmpty();
+    }
+
+    /**
+     * Sorts the map primary keys, if necessary.
+     */
+    private function lazySortPrimaryKeys()
+    {
+        if( $this->primaryKeysSorted === true ){
+            return;
+        }
+        $this->map->sortPrimaryKeys();
+        $this->primaryKeysSorted = true;
     }
 }
