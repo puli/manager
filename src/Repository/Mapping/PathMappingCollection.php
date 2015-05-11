@@ -140,7 +140,10 @@ class PathMappingCollection
      */
     public function listByPackageName($packageName)
     {
-        $this->lazySortPrimaryKeys();
+        if ($this->primaryKeysSorted === true) {
+            $this->lazySortPrimaryKeys();
+        }
+
         return $this->map->listBySecondaryKey($packageName);
     }
 
@@ -167,7 +170,10 @@ class PathMappingCollection
      */
     public function getRepositoryPaths()
     {
-        $this->lazySortPrimaryKeys();
+        if ($this->primaryKeysSorted === true) {
+            $this->lazySortPrimaryKeys();
+        }
+
         return $this->map->getPrimaryKeys();
     }
 
@@ -179,7 +185,10 @@ class PathMappingCollection
      */
     public function toArray()
     {
-        $this->lazySortPrimaryKeys();
+        if ($this->primaryKeysSorted === true) {
+            $this->lazySortPrimaryKeys();
+        }
+
         return $this->map->toArray();
     }
 
@@ -199,9 +208,6 @@ class PathMappingCollection
      */
     private function lazySortPrimaryKeys()
     {
-        if( $this->primaryKeysSorted === true ){
-            return;
-        }
         $this->map->sortPrimaryKeys();
         $this->primaryKeysSorted = true;
     }
