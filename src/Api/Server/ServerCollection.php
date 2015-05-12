@@ -31,11 +31,6 @@ class ServerCollection implements IteratorAggregate, ArrayAccess, Countable
     private $servers = array();
 
     /**
-     * @var Server
-     */
-    private $defaultServer;
-
-    /**
      * Creates the collection.
      *
      * @param Server[] $servers The servers to initially fill into the
@@ -54,10 +49,6 @@ class ServerCollection implements IteratorAggregate, ArrayAccess, Countable
     public function add(Server $server)
     {
         $this->servers[$server->getName()] = $server;
-
-        if (!$this->defaultServer) {
-            $this->defaultServer = $server;
-        }
     }
 
     /**
@@ -71,10 +62,6 @@ class ServerCollection implements IteratorAggregate, ArrayAccess, Countable
      */
     public function get($serverName)
     {
-        if (Server::DEFAULT_SERVER === $serverName) {
-            return $this->getDefaultServer();
-        }
-
         if (!isset($this->servers[$serverName])) {
             throw NoSuchServerException::forServerName($serverName);
         }
@@ -91,15 +78,7 @@ class ServerCollection implements IteratorAggregate, ArrayAccess, Countable
      */
     public function remove($serverName)
     {
-        if (Server::DEFAULT_SERVER === $serverName && $this->defaultServer) {
-            $serverName = $this->defaultServer->getName();
-        }
-
         unset($this->servers[$serverName]);
-
-        if ($this->defaultServer && $serverName === $this->defaultServer->getName()) {
-            $this->defaultServer = $this->servers ? reset($this->servers) : null;
-        }
     }
 
     /**
@@ -111,10 +90,6 @@ class ServerCollection implements IteratorAggregate, ArrayAccess, Countable
      */
     public function contains($serverName)
     {
-        if (Server::DEFAULT_SERVER === $serverName) {
-            return null !== $this->defaultServer;
-        }
-
         return isset($this->servers[$serverName]);
     }
 
@@ -124,7 +99,6 @@ class ServerCollection implements IteratorAggregate, ArrayAccess, Countable
     public function clear()
     {
         $this->servers = array();
-        $this->defaultServer = null;
     }
 
     /**
@@ -180,37 +154,6 @@ class ServerCollection implements IteratorAggregate, ArrayAccess, Countable
     public function toArray()
     {
         return $this->servers;
-    }
-
-    /**
-     * Returns the default server of the collection.
-     *
-     * By default, the first added server is the default server. The default
-     * server can be changed with {@link setDefaultServer}.
-     *
-     * @return Server Returns the default server.
-     *
-     * @throws NoSuchServerException If the collection is empty.
-     */
-    public function getDefaultServer()
-    {
-        if (!$this->defaultServer) {
-            throw new NoSuchServerException('Cannot get the default server of an empty collection.');
-        }
-
-        return $this->defaultServer;
-    }
-
-    /**
-     * Sets the default server of the collection.
-     *
-     * @param string $serverName The name of the default server.
-     *
-     * @throws NoSuchServerException If the server does not exist.
-     */
-    public function setDefaultServer($serverName)
-    {
-        $this->defaultServer = $this->get($serverName);
     }
 
     /**

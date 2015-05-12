@@ -23,9 +23,9 @@ class ServerTest extends PHPUnit_Framework_TestCase
 {
     public function testCreate()
     {
-        $server = new Server('local', 'symlink', 'web/assets', '/assets/%s');
+        $server = new Server('localhost', 'symlink', 'web/assets', '/assets/%s');
 
-        $this->assertSame('local', $server->getName());
+        $this->assertSame('localhost', $server->getName());
         $this->assertSame('symlink', $server->getInstallerName());
         $this->assertSame('web/assets', $server->getDocumentRoot());
         $this->assertSame('/assets/%s', $server->getUrlFormat());
@@ -34,7 +34,7 @@ class ServerTest extends PHPUnit_Framework_TestCase
 
     public function testCreateWithParameter()
     {
-        $server = new Server('local', 'symlink', 'web/assets', '/%s', array(
+        $server = new Server('localhost', 'symlink', 'web/assets', '/%s', array(
             'param1' => 'webmozart',
         ));
 
@@ -43,7 +43,7 @@ class ServerTest extends PHPUnit_Framework_TestCase
 
     public function testCreateWithDefaultUrlFormat()
     {
-        $server = new Server('local', 'symlink', 'web/assets');
+        $server = new Server('localhost', 'symlink', 'web/assets');
 
         $this->assertSame('/%s', $server->getUrlFormat());
         $this->assertSame(array(), $server->getParameterValues());
@@ -76,17 +76,9 @@ class ServerTest extends PHPUnit_Framework_TestCase
     /**
      * @expectedException \InvalidArgumentException
      */
-    public function testFailIfNameDefault()
-    {
-        new Server(Server::DEFAULT_SERVER, 'symlink', 'web/assets');
-    }
-
-    /**
-     * @expectedException \InvalidArgumentException
-     */
     public function testFailIfInstallerNameNull()
     {
-        new Server('local', null, 'web/assets');
+        new Server('localhost', null, 'web/assets');
     }
 
     /**
@@ -94,7 +86,7 @@ class ServerTest extends PHPUnit_Framework_TestCase
      */
     public function testFailIfInstallerNameEmpty()
     {
-        new Server('local', '', 'web/assets');
+        new Server('localhost', '', 'web/assets');
     }
 
     /**
@@ -102,7 +94,7 @@ class ServerTest extends PHPUnit_Framework_TestCase
      */
     public function testFailIfInstallerNameNoString()
     {
-        new Server('local', 1234, 'web/assets');
+        new Server('localhost', 1234, 'web/assets');
     }
 
     /**
@@ -110,7 +102,7 @@ class ServerTest extends PHPUnit_Framework_TestCase
      */
     public function testFailIfLocationNull()
     {
-        new Server('local', 'symlink', null);
+        new Server('localhost', 'symlink', null);
     }
 
     /**
@@ -118,7 +110,7 @@ class ServerTest extends PHPUnit_Framework_TestCase
      */
     public function testFailIfLocationEmpty()
     {
-        new Server('local', 'symlink', '');
+        new Server('localhost', 'symlink', '');
     }
 
     /**
@@ -126,7 +118,7 @@ class ServerTest extends PHPUnit_Framework_TestCase
      */
     public function testFailIfLocationNoString()
     {
-        new Server('local', 'symlink', 1234);
+        new Server('localhost', 'symlink', 1234);
     }
 
     /**
@@ -134,7 +126,7 @@ class ServerTest extends PHPUnit_Framework_TestCase
      */
     public function testFailIfUrlFormatNull()
     {
-        new Server('local', 'symlink', 'web/assets', null);
+        new Server('localhost', 'symlink', 'web/assets', null);
     }
 
     /**
@@ -142,7 +134,7 @@ class ServerTest extends PHPUnit_Framework_TestCase
      */
     public function testFailIfUrlFormatEmpty()
     {
-        new Server('local', 'symlink', 'web/assets', '');
+        new Server('localhost', 'symlink', 'web/assets', '');
     }
 
     /**
@@ -150,12 +142,12 @@ class ServerTest extends PHPUnit_Framework_TestCase
      */
     public function testFailIfUrlFormatNoString()
     {
-        new Server('local', 'symlink', 'web/assets', 1234);
+        new Server('localhost', 'symlink', 'web/assets', 1234);
     }
 
     public function testGetParameterValue()
     {
-        $server = new Server('local', 'symlink', 'web', '/%s', array('param1' => 'value1', 'param2' => 'value2'));
+        $server = new Server('localhost', 'symlink', 'web', '/%s', array('param1' => 'value1', 'param2' => 'value2'));
 
         $this->assertSame('value1', $server->getParameterValue('param1'));
         $this->assertSame('value2', $server->getParameterValue('param2'));
@@ -167,14 +159,14 @@ class ServerTest extends PHPUnit_Framework_TestCase
      */
     public function testGetParameterValueFailsIfNotFound()
     {
-        $server = new Server('local', 'symlink', 'web');
+        $server = new Server('localhost', 'symlink', 'web');
 
         $server->getParameterValue('foobar');
     }
 
     public function testHasParameterValue()
     {
-        $server = new Server('local', 'symlink', 'web', '/%s', array('param1' => 'value1', 'param2' => 'value2'));
+        $server = new Server('localhost', 'symlink', 'web', '/%s', array('param1' => 'value1', 'param2' => 'value2'));
 
         $this->assertTrue($server->hasParameterValue('param1'));
         $this->assertTrue($server->hasParameterValue('param2'));
@@ -183,24 +175,24 @@ class ServerTest extends PHPUnit_Framework_TestCase
 
     public function testHasParameterValues()
     {
-        $server = new Server('local', 'symlink', 'web', '/%s', array('param1' => 'value1'));
+        $server = new Server('localhost', 'symlink', 'web', '/%s', array('param1' => 'value1'));
 
         $this->assertTrue($server->hasParameterValues());
     }
 
     public function testHasNoParameterValues()
     {
-        $server = new Server('local', 'symlink', 'web', '/%s', array());
+        $server = new Server('localhost', 'symlink', 'web', '/%s', array());
 
         $this->assertFalse($server->hasParameterValues());
     }
 
     public function testMatch()
     {
-        $server = new Server('local', 'symlink', 'web', '/%s', array('param1' => 'value1', 'param2' => 'value2'));
+        $server = new Server('localhost', 'symlink', 'web', '/%s', array('param1' => 'value1', 'param2' => 'value2'));
 
         $this->assertFalse($server->match(Expr::same('foobar', Server::NAME)));
-        $this->assertTrue($server->match(Expr::same('local', Server::NAME)));
+        $this->assertTrue($server->match(Expr::same('localhost', Server::NAME)));
 
         $this->assertFalse($server->match(Expr::same('foobar', Server::INSTALLER_NAME)));
         $this->assertTrue($server->match(Expr::same('symlink', Server::INSTALLER_NAME)));

@@ -65,11 +65,6 @@ class Server
     const PARAMETER_VALUES = 'parameterValues';
 
     /**
-     * The alias for the default server.
-     */
-    const DEFAULT_SERVER = 'default';
-
-    /**
      * The default URL format.
      */
     const DEFAULT_URL_FORMAT = '/%s';
@@ -115,7 +110,6 @@ class Server
     public function __construct($name, $installerName, $documentRoot, $urlFormat = self::DEFAULT_URL_FORMAT, array $parameterValues = array())
     {
         Assert::stringNotEmpty($name, 'The server name must be a non-empty string. Got: %s');
-        Assert::notEq($name, self::DEFAULT_SERVER, 'The name name must not be "'.self::DEFAULT_SERVER.'".');
         Assert::stringNotEmpty($installerName, 'The installer name must be a non-empty string. Got: %s');
         Assert::stringNotEmpty($documentRoot, 'The server location must be a non-empty string. Got: %s');
         Assert::stringNotEmpty($urlFormat, 'The URL format must be a non-empty string. Got: %s');

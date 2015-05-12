@@ -108,27 +108,4 @@ interface ServerManager
      *              otherwise.
      */
     public function hasServers(Expression $expr = null);
-
-    /**
-     * Sets the default server.
-     *
-     * By default, the first added server is the default server.
-     *
-     * @param string $serverName The name of the default server.
-     *
-     * @throws NoSuchServerException If the server does not exist.
-     */
-    public function setDefaultServer($serverName);
-
-    /**
-     * Returns the default server.
-     *
-     * By default, the first added server is the default server. The default
-     * server can be changed with {@link setDefaultServer()}.
-     *
-     * @return Server The default server.
-     *
-     * @throws NoSuchServerException If the collection is empty.
-     */
-    public function getDefaultServer();
 }

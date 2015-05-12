@@ -207,28 +207,6 @@ class PackageFileServerManager implements ServerManager
         return false;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function setDefaultServer($serverName)
-    {
-        $this->assertServersLoaded();
-
-        $this->servers->setDefaultServer($serverName);
-
-        $this->persistServersData();
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getDefaultServer()
-    {
-        $this->assertServersLoaded();
-
-        return $this->servers->getDefaultServer();
-    }
-
     private function assertServersLoaded()
     {
         if (null !== $this->servers) {
@@ -255,18 +233,12 @@ class PackageFileServerManager implements ServerManager
 
         foreach ($this->serversData as $serverName => $serverData) {
             $this->servers->add($this->dataToServer($serverName, $serverData));
-
-            if (isset($serverData->default) && $serverData->default) {
-                $this->servers->setDefaultServer($serverName);
-            }
         }
     }
 
     private function persistServersData()
     {
         if ($this->serversData) {
-            $this->updateDefaultServerData();
-
             $this->rootPackageFileManager->setExtraKey(self::SERVERS_KEY, (object) $this->serversData);
         } else {
             $this->rootPackageFileManager->removeExtraKey(self::SERVERS_KEY);
@@ -299,18 +271,5 @@ class PackageFileServerManager implements ServerManager
         }
 
         return $data;
-    }
-
-    private function updateDefaultServerData()
-    {
-        $defaultServer = $this->servers->isEmpty() ? null : $this->servers->getDefaultServer()->getName();
-
-        foreach ($this->serversData as $serverName => &$data) {
-            if ($serverName === $defaultServer) {
-                $data->default = true;
-            } else {
-                unset($data->default);
-            }
-        }
     }
 }

@@ -148,7 +148,6 @@ class PackageFileServerManagerUnloadedTest extends PHPUnit_Framework_TestCase
                     'installer' => 'symlink',
                     'document-root' => 'web',
                     'url-format' => '/public/%s',
-                    'default' => true,
                 ),
                 'localhost2' => (object) array(
                     'installer' => 'copy',
@@ -209,7 +208,6 @@ class PackageFileServerManagerUnloadedTest extends PHPUnit_Framework_TestCase
                     'installer' => 'symlink',
                     'document-root' => 'web',
                     'url-format' => '/public/%s',
-                    'default' => true,
                 ),
                 'cdn' => (object) array(
                     'installer' => 'rsync',
@@ -235,7 +233,6 @@ class PackageFileServerManagerUnloadedTest extends PHPUnit_Framework_TestCase
                     'installer' => 'symlink',
                     'document-root' => 'web',
                     'url-format' => '/public/%s',
-                    'default' => true,
                 ),
                 'cdn' => (object) array(
                     'installer' => 'rsync',
@@ -262,7 +259,6 @@ class PackageFileServerManagerUnloadedTest extends PHPUnit_Framework_TestCase
                     'installer' => 'symlink',
                     'document-root' => 'web',
                     'url-format' => '/public/%s',
-                    'default' => true,
                 ),
                 'cdn' => (object) array(
                     'installer' => 'rsync',
@@ -307,7 +303,6 @@ class PackageFileServerManagerUnloadedTest extends PHPUnit_Framework_TestCase
                     'installer' => 'symlink',
                     'document-root' => 'web',
                     'url-format' => '/public/%s',
-                    'default' => true,
                 ),
             ));
 
@@ -337,7 +332,6 @@ class PackageFileServerManagerUnloadedTest extends PHPUnit_Framework_TestCase
                     'installer' => 'symlink',
                     'document-root' => 'web',
                     'url-format' => '/public/%s',
-                    'default' => true,
                 ),
                 'cdn' => (object) array(
                     'installer' => 'rsync',
@@ -353,7 +347,6 @@ class PackageFileServerManagerUnloadedTest extends PHPUnit_Framework_TestCase
                     'installer' => 'rsync',
                     'document-root' => 'ssh://my.cdn.com',
                     'parameters' => (object) array('param' => 'value'),
-                    'default' => true,
                 ),
             ));
 
@@ -400,7 +393,6 @@ class PackageFileServerManagerUnloadedTest extends PHPUnit_Framework_TestCase
                     'installer' => 'symlink',
                     'document-root' => 'web',
                     'url-format' => '/public/%s',
-                    'default' => true,
                 ),
                 'cdn' => (object) array(
                     'installer' => 'rsync',
@@ -433,7 +425,6 @@ class PackageFileServerManagerUnloadedTest extends PHPUnit_Framework_TestCase
                     'installer' => 'symlink',
                     'document-root' => 'web',
                     'url-format' => '/public/%s',
-                    'default' => true,
                 ),
                 'localhost2' => (object) array(
                     'installer' => 'copy',
@@ -454,7 +445,6 @@ class PackageFileServerManagerUnloadedTest extends PHPUnit_Framework_TestCase
                     'installer' => 'rsync',
                     'document-root' => 'ssh://my.cdn.com',
                     'parameters' => (object) array('param' => 'value'),
-                    'default' => true,
                 ),
             ));
 
@@ -475,7 +465,6 @@ class PackageFileServerManagerUnloadedTest extends PHPUnit_Framework_TestCase
                     'installer' => 'symlink',
                     'document-root' => 'web',
                     'url-format' => '/public/%s',
-                    'default' => true,
                 ),
                 'cdn' => (object) array(
                     'installer' => 'rsync',
@@ -508,7 +497,6 @@ class PackageFileServerManagerUnloadedTest extends PHPUnit_Framework_TestCase
                     'installer' => 'symlink',
                     'document-root' => 'web',
                     'url-format' => '/public/%s',
-                    'default' => true,
                 ),
                 'cdn' => (object) array(
                     'installer' => 'rsync',
@@ -527,53 +515,6 @@ class PackageFileServerManagerUnloadedTest extends PHPUnit_Framework_TestCase
         $this->assertFalse($this->serverManager->hasServer('cdn'));
     }
 
-    public function testGetDefaultServer()
-    {
-        $this->populateDefaultManager();
-
-        $this->assertSame($this->serverManager->getServer('localhost'), $this->serverManager->getDefaultServer());
-    }
-
-    public function testSetDefaultServer()
-    {
-        $this->packageFileManager->expects($this->any())
-            ->method('getExtraKey')
-            ->with(PackageFileServerManager::SERVERS_KEY)
-            ->willReturn((object) array(
-                'localhost' => (object) array(
-                    'installer' => 'symlink',
-                    'document-root' => 'web',
-                    'url-format' => '/public/%s',
-                    'default' => true,
-                ),
-                'cdn' => (object) array(
-                    'installer' => 'rsync',
-                    'document-root' => 'ssh://my.cdn.com',
-                    'parameters' => (object) array('param' => 'value'),
-                ),
-            ));
-
-        $this->packageFileManager->expects($this->any())
-            ->method('setExtraKey')
-            ->with(PackageFileServerManager::SERVERS_KEY, (object) array(
-                'localhost' => (object) array(
-                    'installer' => 'symlink',
-                    'document-root' => 'web',
-                    'url-format' => '/public/%s',
-                ),
-                'cdn' => (object) array(
-                    'installer' => 'rsync',
-                    'document-root' => 'ssh://my.cdn.com',
-                    'parameters' => (object) array('param' => 'value'),
-                    'default' => true,
-                ),
-            ));
-
-        $this->serverManager->setDefaultServer('cdn');
-
-        $this->assertSame($this->serverManager->getServer('cdn'), $this->serverManager->getDefaultServer());
-    }
-
     protected function populateDefaultManager()
     {
         $this->packageFileManager->expects($this->any())
@@ -584,7 +525,6 @@ class PackageFileServerManagerUnloadedTest extends PHPUnit_Framework_TestCase
                     'installer' => 'symlink',
                     'document-root' => 'web',
                     'url-format' => '/public/%s',
-                    'default' => true,
                 )
             ));
     }
