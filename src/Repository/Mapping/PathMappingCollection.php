@@ -140,7 +140,7 @@ class PathMappingCollection
      */
     public function listByPackageName($packageName)
     {
-        if ($this->primaryKeysSorted === true) {
+        if ($this->primaryKeysSorted) {
             $this->lazySortPrimaryKeys();
         }
 
@@ -170,7 +170,7 @@ class PathMappingCollection
      */
     public function getRepositoryPaths()
     {
-        if ($this->primaryKeysSorted === true) {
+        if ($this->primaryKeysSorted) {
             $this->lazySortPrimaryKeys();
         }
 
@@ -185,7 +185,7 @@ class PathMappingCollection
      */
     public function toArray()
     {
-        if ($this->primaryKeysSorted === true) {
+        if ($this->primaryKeysSorted) {
             $this->lazySortPrimaryKeys();
         }
 
