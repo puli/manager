@@ -27,7 +27,7 @@ class AssetMappingTest extends PHPUnit_Framework_TestCase
 
         $this->assertSame('/blog/public', $mapping->getGlob());
         $this->assertSame('local', $mapping->getServerName());
-        $this->assertSame('/blog', $mapping->getPublicPath());
+        $this->assertSame('/blog', $mapping->getServerPath());
         $this->assertInstanceOf('Rhumsaa\Uuid\Uuid', $mapping->getUuid());
     }
 
@@ -38,22 +38,22 @@ class AssetMappingTest extends PHPUnit_Framework_TestCase
 
         $this->assertSame('/blog/public', $mapping->getGlob());
         $this->assertSame('local', $mapping->getServerName());
-        $this->assertSame('/blog', $mapping->getPublicPath());
+        $this->assertSame('/blog', $mapping->getServerPath());
         $this->assertSame($uuid, $mapping->getUuid());
     }
 
-    public function testCreateNormalizesPublicPath()
+    public function testCreateNormalizesServerPath()
     {
         $mapping = new AssetMapping('/blog/public', 'local', 'blog/');
 
-        $this->assertSame('/blog', $mapping->getPublicPath());
+        $this->assertSame('/blog', $mapping->getServerPath());
     }
 
-    public function testCreateWithEmptyPublicPath()
+    public function testCreateWithEmptyServerPath()
     {
         $mapping = new AssetMapping('/blog/public', 'local', '');
 
-        $this->assertSame('/', $mapping->getPublicPath());
+        $this->assertSame('/', $mapping->getServerPath());
     }
 
     /**
@@ -107,7 +107,7 @@ class AssetMappingTest extends PHPUnit_Framework_TestCase
     /**
      * @expectedException \InvalidArgumentException
      */
-    public function testFailIfJPublicPathNull()
+    public function testFailIfJServerPathNull()
     {
         new AssetMapping('/blog/public', 'local', null);
     }
@@ -115,7 +115,7 @@ class AssetMappingTest extends PHPUnit_Framework_TestCase
     /**
      * @expectedException \InvalidArgumentException
      */
-    public function testFailIfPublicPathNoString()
+    public function testFailIfServerPathNoString()
     {
         new AssetMapping('/blog/public', 'local', 1234);
     }

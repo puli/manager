@@ -55,7 +55,7 @@ class InstallationParamsTest extends PHPUnit_Framework_TestCase
         $this->assertSame('/root', $params->getRootDirectory());
         $this->assertSame('/path/to', $params->getBasePath());
         $this->assertSame('public_html', $params->getDocumentRoot());
-        $this->assertSame('/demo', $params->getPublicPath());
+        $this->assertSame('/demo', $params->getServerPath());
         $this->assertSame(array(
             'param1' => 'default1',
             'param2' => 'custom',
@@ -137,7 +137,7 @@ class InstallationParamsTest extends PHPUnit_Framework_TestCase
         );
     }
 
-    public function testGetWebPathForResource()
+    public function testGetServerPathForResource()
     {
         $installer = new TestInstaller();
         $descriptor = new InstallerDescriptor('test', get_class($installer));
@@ -157,11 +157,11 @@ class InstallationParamsTest extends PHPUnit_Framework_TestCase
             '/root'
         );
 
-        $this->assertSame('/blog/css', $params->getPublicPathForResource($resource1));
-        $this->assertSame('/blog/js', $params->getPublicPathForResource($resource2));
+        $this->assertSame('/blog/css', $params->getServerPathForResource($resource1));
+        $this->assertSame('/blog/js', $params->getServerPathForResource($resource2));
     }
 
-    public function testGetWebPathForResourceSamePathAsBasePath()
+    public function testGetServerPathForResourceSamePathAsBasePath()
     {
         $installer = new TestInstaller();
         $descriptor = new InstallerDescriptor('test', get_class($installer));
@@ -180,10 +180,10 @@ class InstallationParamsTest extends PHPUnit_Framework_TestCase
             '/root'
         );
 
-        $this->assertSame('/blog', $params->getPublicPathForResource($resource1));
+        $this->assertSame('/blog', $params->getServerPathForResource($resource1));
     }
 
-    public function testGetWebPathForResourceInRoot()
+    public function testGetServerPathForResourceInRoot()
     {
         $installer = new TestInstaller();
         $descriptor = new InstallerDescriptor('test', get_class($installer));
@@ -202,6 +202,6 @@ class InstallationParamsTest extends PHPUnit_Framework_TestCase
             '/root'
         );
 
-        $this->assertSame('/', $params->getPublicPathForResource($resource1));
+        $this->assertSame('/', $params->getServerPathForResource($resource1));
     }
 }

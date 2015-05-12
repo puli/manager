@@ -38,9 +38,9 @@ class AssetMapping
     const SERVER_NAME = 'serverName';
 
     /**
-     * The public path field in {@link Expression} instances.
+     * The server path field in {@link Expression} instances.
      */
-    const PUBLIC_PATH = 'publicPath';
+    const SERVER_PATH = 'serverPath';
 
     /**
      * @var Uuid
@@ -60,26 +60,27 @@ class AssetMapping
     /**
      * @var string
      */
-    private $publicPath;
+    private $serverPath;
 
     /**
      * Creates the mapping.
      *
      * @param string $glob       A glob for resources in the repository.
      * @param string $serverName The name of the asset server.
-     * @param string $publicPath The path of the resource in the document root.
+     * @param string $serverPath The path of the resource in the document root
+     *                           of the server.
      * @param Uuid   $uuid       The UUID of the mapping.
      */
-    public function __construct($glob, $serverName, $publicPath, Uuid $uuid = null)
+    public function __construct($glob, $serverName, $serverPath, Uuid $uuid = null)
     {
         Assert::stringNotEmpty($glob, 'The glob must be a non-empty string. Got: %s');
         Assert::stringNotEmpty($serverName, 'The server name must be a non-empty string. Got: %s');
-        Assert::string($publicPath, 'The public path must be a string. Got: %s');
+        Assert::string($serverPath, 'The public path must be a string. Got: %s');
 
         $this->uuid = $uuid ?: Uuid::uuid4();
         $this->glob = $glob;
         $this->serverName = $serverName;
-        $this->publicPath = '/'.trim($publicPath, '/');
+        $this->serverPath = '/'.trim($serverPath, '/');
     }
 
     /**
@@ -113,12 +114,12 @@ class AssetMapping
     }
 
     /**
-     * Returns the path of the resources relative to the document root.
+     * Returns the path of the resources relative to the server's document root.
      *
      * @return string The public resource path.
      */
-    public function getPublicPath()
+    public function getServerPath()
     {
-        return $this->publicPath;
+        return $this->serverPath;
     }
 }

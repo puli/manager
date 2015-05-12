@@ -49,12 +49,12 @@ class CopyInstaller implements ResourceInstaller
             mkdir($documentRoot, 0777, true);
         }
 
-        $repoPath = $params->getPublicPathForResource($resource);
+        $serverPath = $params->getServerPathForResource($resource);
         $parameterValues = $params->getParameterValues();
         $relative = !isset($parameterValues['relative']) || $parameterValues['relative'];
         $filesystemRepo = new FilesystemRepository($documentRoot, $this->symlinks, $relative);
 
-        if ('/' === $repoPath) {
+        if ('/' === $serverPath) {
             foreach ($resource->listChildren() as $child) {
                 $name = $child->getName();
 
@@ -64,13 +64,13 @@ class CopyInstaller implements ResourceInstaller
                 }
 
                 if ($name) {
-                    $filesystemRepo->remove($repoPath.'/'.$name);
+                    $filesystemRepo->remove($serverPath.'/'.$name);
                 }
             }
         } else {
-            $filesystemRepo->remove($repoPath);
+            $filesystemRepo->remove($serverPath);
         }
 
-        $filesystemRepo->add($repoPath, $resource);
+        $filesystemRepo->add($serverPath, $resource);
     }
 }

@@ -323,7 +323,7 @@ class DiscoveryAssetManagerTest extends PHPUnit_Framework_TestCase
             ->with($this->webPath('/other/path'))
             ->willReturn(array($this->binding2));
 
-        $expr = Expr::same('/other/path', AssetMapping::PUBLIC_PATH);
+        $expr = Expr::same('/other/path', AssetMapping::SERVER_PATH);
         $expected = new AssetMapping('/other/path', 'target2', '/js', $this->binding2->getUuid());
 
         $this->assertEquals(array($expected), $this->manager->findAssetMappings($expr));
@@ -336,7 +336,7 @@ class DiscoveryAssetManagerTest extends PHPUnit_Framework_TestCase
             ->with($this->webPath('/foobar'))
             ->willReturn(array());
 
-        $expr = Expr::same('/foobar', AssetMapping::PUBLIC_PATH);
+        $expr = Expr::same('/foobar', AssetMapping::SERVER_PATH);
 
         $this->assertEquals(array(), $this->manager->findAssetMappings($expr));
     }
@@ -392,7 +392,7 @@ class DiscoveryAssetManagerTest extends PHPUnit_Framework_TestCase
             ->with($this->webPath('/path'))
             ->willReturn(true);
 
-        $expr = Expr::same('/path', AssetMapping::PUBLIC_PATH);
+        $expr = Expr::same('/path', AssetMapping::SERVER_PATH);
 
         $this->assertTrue($this->manager->hasAssetMappings($expr));
     }
@@ -458,7 +458,7 @@ class DiscoveryAssetManagerTest extends PHPUnit_Framework_TestCase
             ->with($this->webPath('/other/path'))
             ->willReturn(array($this->binding2));
 
-        $expr = Expr::same('/other/path', AssetMapping::PUBLIC_PATH);
+        $expr = Expr::same('/other/path', AssetMapping::SERVER_PATH);
         $expected = new AssetMapping('/other/path', 'target2', '/js', $this->binding2->getUuid());
 
         $this->assertEquals(array($expected), $this->manager->findRootAssetMappings($expr));
@@ -471,7 +471,7 @@ class DiscoveryAssetManagerTest extends PHPUnit_Framework_TestCase
             ->with($this->webPath('/foobar'))
             ->willReturn(array());
 
-        $expr = Expr::same('/foobar', AssetMapping::PUBLIC_PATH);
+        $expr = Expr::same('/foobar', AssetMapping::SERVER_PATH);
 
         $this->assertEquals(array(), $this->manager->findRootAssetMappings($expr));
     }
@@ -527,7 +527,7 @@ class DiscoveryAssetManagerTest extends PHPUnit_Framework_TestCase
             ->with($this->webPath('/path'))
             ->willReturn(true);
 
-        $expr = Expr::same('/path', AssetMapping::PUBLIC_PATH);
+        $expr = Expr::same('/path', AssetMapping::SERVER_PATH);
 
         $this->assertTrue($this->manager->hasRootAssetMappings($expr));
     }

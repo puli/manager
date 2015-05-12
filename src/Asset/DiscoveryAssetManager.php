@@ -73,7 +73,7 @@ class DiscoveryAssetManager implements AssetManager
             DiscoveryUrlGenerator::BINDING_TYPE,
             array(
                 DiscoveryUrlGenerator::SERVER_PARAMETER => $mapping->getServerName(),
-                DiscoveryUrlGenerator::PATH_PARAMETER => $mapping->getPublicPath(),
+                DiscoveryUrlGenerator::PATH_PARAMETER => $mapping->getServerPath(),
             ),
             'glob',
             $mapping->getUuid()

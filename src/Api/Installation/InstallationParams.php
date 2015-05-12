@@ -181,31 +181,31 @@ class InstallationParams
     }
 
     /**
-     * Returns the public path where the resources are going to be installed.
+     * Returns the path where the resources are going to be installed.
      *
      * This is a path relative to the document root of the target server.
      *
-     * @return string The public path.
+     * @return string The server path.
      */
-    public function getPublicPath()
+    public function getServerPath()
     {
-        return $this->mapping->getPublicPath();
+        return $this->mapping->getServerPath();
     }
 
     /**
-     * Returns the public path where a resource is going to be installed.
+     * Returns the path where a resource is going to be installed.
      *
      * This is a path relative to the document root of the target server.
      *
      * @param Resource $resource The resource.
      *
-     * @return string The public path.
+     * @return string The server path.
      */
-    public function getPublicPathForResource(Resource $resource)
+    public function getServerPathForResource(Resource $resource)
     {
         $relPath = Path::makeRelative($resource->getRepositoryPath(), $this->basePath);
 
-        return '/'.trim($this->mapping->getPublicPath().'/'.$relPath, '/');
+        return '/'.trim($this->mapping->getServerPath().'/'.$relPath, '/');
     }
 
     /**

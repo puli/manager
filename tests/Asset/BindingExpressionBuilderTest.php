@@ -50,7 +50,7 @@ class BindingExpressionBuilderTest extends PHPUnit_Framework_TestCase
             ->orSame('local', AssetMapping::SERVER_NAME)
             ->orX(
                 Expr::same('/path', AssetMapping::GLOB)
-                    ->andSame('css', AssetMapping::PUBLIC_PATH)
+                    ->andSame('css', AssetMapping::SERVER_PATH)
             );
 
         $expr2 = Expr::same(BindingState::ENABLED, BindingDescriptor::STATE)

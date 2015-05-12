@@ -110,7 +110,7 @@ class BindingExpressionBuilder implements ExpressionVisitor
                         Expr::key(DiscoveryUrlGenerator::SERVER_PARAMETER, $expr->getExpression())
                     );
 
-                case AssetMapping::PUBLIC_PATH:
+                case AssetMapping::SERVER_PATH:
                     return Expr::key(
                         BindingDescriptor::PARAMETER_VALUES,
                         Expr::key(DiscoveryUrlGenerator::PATH_PARAMETER, $expr->getExpression())
