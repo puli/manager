@@ -16,7 +16,7 @@
         "puli/url-generator": "~1.0",
         "puli/factory": "~1.0",
         "webmozart/json": "~1.0",
-        "webmozart/path-util": "~1.0",
+        "webmozart/path-util": "~2.0",
         "webmozart/expression": "~1.0",
         "webmozart/assert": "~1.0",
         "symfony/event-dispatcher": "~2.3",

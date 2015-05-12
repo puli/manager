@@ -238,7 +238,7 @@ class PackageJsonWriter implements PackageFileWriter
 
     private function encodeFile(stdClass $jsonData, $path)
     {
-        if (!Path::isAbsolute($path)) {
+        if (!is_string($path) || !Path::isAbsolute($path)) {
             throw new IOException(sprintf(
                 'Cannot write "%s": Expected an absolute path.',
                 $path

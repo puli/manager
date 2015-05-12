@@ -11,6 +11,7 @@ Changelog
  * removed default servers
  * renamed `AssetMapping::getPublicPath()` to `getServerPath()`
  * renamed `InstallationParams::getPublicPath()` to `getServerPath()`
+ * upgraded to webmozart/path-util 2.0
 
 * 1.0.0-beta4 (2015-04-13)
 
