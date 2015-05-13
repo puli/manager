@@ -27,7 +27,8 @@
     "require-dev": {
         "predis/predis": "~1.0",
         "basho/riak": "~1.4",
-        "doctrine/cache": "~1.4"
+        "doctrine/cache": "~1.4",
+        "phpunit/phpunit": "^4.6"
     },
     "minimum-stability": "dev",
     "autoload": {
