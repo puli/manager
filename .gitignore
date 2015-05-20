@@ -1,2 +1,4 @@
 /vendor/
+/.puli/
+puli.phar
 composer.lock
