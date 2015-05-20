@@ -362,6 +362,11 @@ class PackageFileInstallerManager implements InstallerManager
     private function loadInstallers(Package $package)
     {
         $packageFile = $package->getPackageFile();
+
+        if (!$packageFile) {
+            return;
+        }
+
         $packageName = $package->getName();
         $installersData = $packageFile->getExtraKey(self::INSTALLERS_KEY);
 

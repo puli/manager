@@ -11,6 +11,7 @@
 
 namespace Puli\Manager\Tests\Installer;
 
+use Exception;
 use PHPUnit_Framework_MockObject_MockObject;
 use PHPUnit_Framework_TestCase;
 use Puli\Manager\Api\Installer\InstallerDescriptor;
@@ -62,6 +63,11 @@ class PackageFileInstallerManagerUnloadedTest extends PHPUnit_Framework_TestCase
     protected $package2;
 
     /**
+     * @var Package
+     */
+    protected $package3;
+
+    /**
      * @var PackageCollection
      */
     protected $packages;
@@ -85,10 +91,12 @@ class PackageFileInstallerManagerUnloadedTest extends PHPUnit_Framework_TestCase
         $this->rootPackage = new RootPackage($this->rootPackageFile, '/path');
         $this->package1 = new Package($this->packageFile1, '/path');
         $this->package2 = new Package($this->packageFile2, '/path');
+        $this->package3 = new Package(null, '/path', null, array(new Exception()));
         $this->packages = new PackageCollection(array(
             $this->rootPackage,
             $this->package1,
             $this->package2,
+            $this->package3,
         ));
         $this->manager = new PackageFileInstallerManager($this->packageFileManager, $this->packages);
     }
