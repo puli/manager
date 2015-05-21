@@ -268,7 +268,7 @@ class RepositoryManagerImpl implements RepositoryManager
      */
     public function clearRootPathMappings()
     {
-        $this->removeRootPathMappings(Expr::valid());
+        $this->removeRootPathMappings(Expr::true());
     }
 
     /**

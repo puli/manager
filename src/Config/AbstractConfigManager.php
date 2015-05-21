@@ -126,7 +126,7 @@ abstract class AbstractConfigManager implements ConfigManager
      */
     public function clearConfigKeys()
     {
-        $this->removeConfigKeys(Expr::valid());
+        $this->removeConfigKeys(Expr::true());
     }
 
     /**

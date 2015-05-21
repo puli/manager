@@ -296,7 +296,7 @@ class DiscoveryManagerImpl implements DiscoveryManager
      */
     public function clearRootBindingTypes()
     {
-        $this->removeRootBindingTypes(Expr::valid());
+        $this->removeRootBindingTypes(Expr::true());
     }
 
     /**
@@ -568,7 +568,7 @@ class DiscoveryManagerImpl implements DiscoveryManager
      */
     public function clearRootBindings()
     {
-        $this->removeRootBindings(Expr::valid());
+        $this->removeRootBindings(Expr::true());
     }
 
     /**

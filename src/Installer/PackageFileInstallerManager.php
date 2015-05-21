@@ -180,7 +180,7 @@ class PackageFileInstallerManager implements InstallerManager
      */
     public function clearRootInstallerDescriptors()
     {
-        $this->removeRootInstallerDescriptors(Expr::valid());
+        $this->removeRootInstallerDescriptors(Expr::true());
     }
 
     /**

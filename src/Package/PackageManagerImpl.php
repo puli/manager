@@ -226,7 +226,7 @@ class PackageManagerImpl implements PackageManager
      */
     public function clearPackages()
     {
-        $this->removePackages(Expr::valid());
+        $this->removePackages(Expr::true());
     }
 
     /**

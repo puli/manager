@@ -136,7 +136,7 @@ class PackageFileServerManager implements ServerManager
      */
     public function clearServers()
     {
-        $this->removeServers(Expr::valid());
+        $this->removeServers(Expr::true());
     }
 
     /**

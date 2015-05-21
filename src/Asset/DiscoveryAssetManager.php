@@ -126,7 +126,7 @@ class DiscoveryAssetManager implements AssetManager
      */
     public function getRootAssetMappings()
     {
-        return $this->findRootAssetMappings(Expr::valid());
+        return $this->findRootAssetMappings(Expr::true());
     }
 
     /**
@@ -182,7 +182,7 @@ class DiscoveryAssetManager implements AssetManager
      */
     public function getAssetMappings()
     {
-        return $this->findAssetMappings(Expr::valid());
+        return $this->findAssetMappings(Expr::true());
     }
 
     /**

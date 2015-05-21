@@ -195,7 +195,7 @@ class RootPackageFileManagerImpl extends AbstractConfigManager implements RootPa
      */
     public function clearPluginClasses()
     {
-        $this->removePluginClasses(Expr::valid());
+        $this->removePluginClasses(Expr::true());
     }
 
     /**
