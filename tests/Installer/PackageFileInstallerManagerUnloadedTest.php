@@ -105,9 +105,18 @@ class PackageFileInstallerManagerUnloadedTest extends PHPUnit_Framework_TestCase
     {
         $this->populateDefaultManager();
 
-        $descriptor = new InstallerDescriptor('symlink', 'SymlinkInstaller');
+        $descriptor = new InstallerDescriptor('custom-symlink', 'CustomSymlinkInstaller');
 
-        $this->assertEquals($descriptor, $this->manager->getInstallerDescriptor('symlink'));
+        $this->assertEquals($descriptor, $this->manager->getInstallerDescriptor('custom-symlink'));
+    }
+
+    public function testGetBuiltinInstallerDescriptor()
+    {
+        $descriptor = $this->manager->getInstallerDescriptor('symlink');
+
+        $this->assertInstanceOf('Puli\Manager\Api\Installer\InstallerDescriptor', $descriptor);
+        $this->assertSame('symlink', $descriptor->getName());
+        $this->assertSame('Puli\Manager\Installer\SymlinkInstaller', $descriptor->getClassName());
     }
 
     /**
@@ -126,19 +135,19 @@ class PackageFileInstallerManagerUnloadedTest extends PHPUnit_Framework_TestCase
     {
         $this->packageFile1->setExtraKey(PackageFileInstallerManager::INSTALLERS_KEY, array(
             (object) array(
-                'name' => 'symlink',
-                'class' => 'Package1SymlinkInstaller',
+                'name' => 'custom-symlink',
+                'class' => 'Package1CustomSymlinkInstaller',
             )
         ));
 
-        $this->manager->getInstallerDescriptor('symlink');
+        $this->manager->getInstallerDescriptor('custom-symlink');
     }
 
     public function testGetInstallerDescriptorLoadsFullyConfiguredInstaller()
     {
         $this->rootPackageFile->setExtraKey(PackageFileInstallerManager::INSTALLERS_KEY, (object) array(
-            'symlink' => (object) array(
-                'class' => 'SymlinkInstaller',
+            'custom-symlink' => (object) array(
+                'class' => 'CustomSymlinkInstaller',
                 'description' => 'The description',
                 'parameters' => (object) array(
                     'required' => (object) array(
@@ -156,25 +165,27 @@ class PackageFileInstallerManagerUnloadedTest extends PHPUnit_Framework_TestCase
             )
         ));
 
-        $descriptor = new InstallerDescriptor('symlink', 'SymlinkInstaller', 'The description', array(
+        $descriptor = new InstallerDescriptor('custom-symlink', 'CustomSymlinkInstaller', 'The description', array(
             new InstallerParameter('required', InstallerParameter::REQUIRED, null, 'The parameter description 1'),
             new InstallerParameter('optional', InstallerParameter::OPTIONAL, null, 'The parameter description 2'),
             new InstallerParameter('optional-with-default', InstallerParameter::OPTIONAL, 'foobar'),
             new InstallerParameter('optional-empty'),
         ));
 
-        $this->assertEquals($descriptor, $this->manager->getInstallerDescriptor('symlink'));
+        $this->assertEquals($descriptor, $this->manager->getInstallerDescriptor('custom-symlink'));
     }
 
     public function testGetInstallerDescriptors()
     {
         $this->populateDefaultManager();
 
-        $descriptor1 = new InstallerDescriptor('symlink', 'SymlinkInstaller');
+        $descriptor1 = new InstallerDescriptor('custom-symlink', 'CustomSymlinkInstaller');
         $descriptor2 = new InstallerDescriptor('rsync', 'RsyncInstaller');
 
         $this->assertEquals(array(
-            'symlink' => $descriptor1,
+            'copy' => $this->manager->getInstallerDescriptor('copy'),
+            'symlink' => $this->manager->getInstallerDescriptor('symlink'),
+            'custom-symlink' => $descriptor1,
             'rsync' => $descriptor2,
         ), $this->manager->getInstallerDescriptors());
     }
@@ -183,22 +194,26 @@ class PackageFileInstallerManagerUnloadedTest extends PHPUnit_Framework_TestCase
     {
         $this->populateDefaultManager();
 
-        $descriptor1 = new InstallerDescriptor('symlink', 'SymlinkInstaller');
+        $descriptor1 = new InstallerDescriptor('custom-symlink', 'CustomSymlinkInstaller');
         $descriptor2 = new InstallerDescriptor('rsync', 'RsyncInstaller');
+        $descriptor3 = $this->manager->getInstallerDescriptor('copy');
+        $descriptor4 = $this->manager->getInstallerDescriptor('symlink');
 
-        $expr1 = Expr::same('symlink', InstallerDescriptor::NAME);
+        $expr1 = Expr::same('custom-symlink', InstallerDescriptor::NAME);
 
         $expr2 = Expr::endsWith('Installer', InstallerDescriptor::CLASS_NAME);
 
         $this->assertEquals(array($descriptor1), $this->manager->findInstallerDescriptors($expr1));
-        $this->assertEquals(array($descriptor2, $descriptor1), $this->manager->findInstallerDescriptors($expr2));
+        $this->assertEquals(array($descriptor3, $descriptor4, $descriptor2, $descriptor1), $this->manager->findInstallerDescriptors($expr2));
     }
 
     public function testHasInstallerDescriptor()
     {
         $this->populateDefaultManager();
 
+        $this->assertTrue($this->manager->hasInstallerDescriptor('copy'));
         $this->assertTrue($this->manager->hasInstallerDescriptor('symlink'));
+        $this->assertTrue($this->manager->hasInstallerDescriptor('custom-symlink'));
         $this->assertTrue($this->manager->hasInstallerDescriptor('rsync'));
         $this->assertFalse($this->manager->hasInstallerDescriptor('foobar'));
     }
@@ -208,22 +223,18 @@ class PackageFileInstallerManagerUnloadedTest extends PHPUnit_Framework_TestCase
         $this->populateDefaultManager();
 
         $this->assertTrue($this->manager->hasInstallerDescriptors());
-        $this->assertTrue($this->manager->hasInstallerDescriptors(Expr::same('symlink', InstallerDescriptor::NAME)));
+        $this->assertTrue($this->manager->hasInstallerDescriptors(Expr::same('copy', InstallerDescriptor::NAME)));
+        $this->assertTrue($this->manager->hasInstallerDescriptors(Expr::same('custom-symlink', InstallerDescriptor::NAME)));
         $this->assertFalse($this->manager->hasInstallerDescriptors(Expr::same('foobar', InstallerDescriptor::NAME)));
-    }
-
-    public function testHasNoInstallerDescriptors()
-    {
-        $this->assertFalse($this->manager->hasInstallerDescriptors());
     }
 
     public function testGetRootInstallerDescriptor()
     {
         $this->populateRootManager();
 
-        $descriptor = new InstallerDescriptor('symlink', 'SymlinkInstaller');
+        $descriptor = new InstallerDescriptor('custom-symlink', 'CustomSymlinkInstaller');
 
-        $this->assertEquals($descriptor, $this->manager->getRootInstallerDescriptor('symlink'));
+        $this->assertEquals($descriptor, $this->manager->getRootInstallerDescriptor('custom-symlink'));
     }
 
     /**
@@ -246,16 +257,25 @@ class PackageFileInstallerManagerUnloadedTest extends PHPUnit_Framework_TestCase
         $this->manager->getRootInstallerDescriptor('rsync');
     }
 
+    /**
+     * @expectedException \Puli\Manager\Api\Installer\NoSuchInstallerException
+     * @expectedExceptionMessage copy
+     */
+    public function testGetRootInstallerDescriptorFailsIfBuiltin()
+    {
+        $this->manager->getRootInstallerDescriptor('copy');
+    }
+
     public function testGetRootInstallerDescriptors()
     {
         $this->populateRootManager();
 
-        $descriptor1 = new InstallerDescriptor('symlink', 'SymlinkInstaller');
-        $descriptor2 = new InstallerDescriptor('copy', 'CopyInstaller');
+        $descriptor1 = new InstallerDescriptor('custom-symlink', 'CustomSymlinkInstaller');
+        $descriptor2 = new InstallerDescriptor('custom-copy', 'CustomCopyInstaller');
 
         $this->assertEquals(array(
-            'symlink' => $descriptor1,
-            'copy' => $descriptor2,
+            'custom-symlink' => $descriptor1,
+            'custom-copy' => $descriptor2,
         ), $this->manager->getRootInstallerDescriptors());
     }
 
@@ -263,10 +283,10 @@ class PackageFileInstallerManagerUnloadedTest extends PHPUnit_Framework_TestCase
     {
         $this->populateRootManager();
 
-        $descriptor1 = new InstallerDescriptor('symlink', 'SymlinkInstaller');
-        $descriptor2 = new InstallerDescriptor('copy', 'CopyInstaller');
+        $descriptor1 = new InstallerDescriptor('custom-symlink', 'CustomSymlinkInstaller');
+        $descriptor2 = new InstallerDescriptor('custom-copy', 'CustomCopyInstaller');
 
-        $expr1 = Expr::same('symlink', InstallerDescriptor::NAME);
+        $expr1 = Expr::same('custom-symlink', InstallerDescriptor::NAME);
 
         $expr2 = Expr::endsWith('Installer', InstallerDescriptor::CLASS_NAME);
 
@@ -278,8 +298,10 @@ class PackageFileInstallerManagerUnloadedTest extends PHPUnit_Framework_TestCase
     {
         $this->populateRootManager();
 
-        $this->assertTrue($this->manager->hasRootInstallerDescriptor('symlink'));
-        $this->assertTrue($this->manager->hasRootInstallerDescriptor('copy'));
+        $this->assertTrue($this->manager->hasRootInstallerDescriptor('custom-symlink'));
+        $this->assertTrue($this->manager->hasRootInstallerDescriptor('custom-copy'));
+        $this->assertFalse($this->manager->hasRootInstallerDescriptor('copy'));
+        $this->assertFalse($this->manager->hasRootInstallerDescriptor('symlink'));
         $this->assertFalse($this->manager->hasRootInstallerDescriptor('rsync'));
         $this->assertFalse($this->manager->hasRootInstallerDescriptor('foobar'));
     }
@@ -289,7 +311,7 @@ class PackageFileInstallerManagerUnloadedTest extends PHPUnit_Framework_TestCase
         $this->populateRootManager();
 
         $this->assertTrue($this->manager->hasRootInstallerDescriptors());
-        $this->assertTrue($this->manager->hasRootInstallerDescriptors(Expr::same('symlink', InstallerDescriptor::NAME)));
+        $this->assertTrue($this->manager->hasRootInstallerDescriptors(Expr::same('custom-symlink', InstallerDescriptor::NAME)));
         $this->assertFalse($this->manager->hasRootInstallerDescriptors(Expr::same('rsync', InstallerDescriptor::NAME)));
         $this->assertFalse($this->manager->hasRootInstallerDescriptors(Expr::same('foobar', InstallerDescriptor::NAME)));
     }
@@ -312,8 +334,8 @@ class PackageFileInstallerManagerUnloadedTest extends PHPUnit_Framework_TestCase
         $this->packageFileManager->expects($this->once())
             ->method('setExtraKey')
             ->with(PackageFileInstallerManager::INSTALLERS_KEY, (object) array(
-                'symlink' => (object) array(
-                    'class' => 'SymlinkInstaller',
+                'custom-symlink' => (object) array(
+                    'class' => 'CustomSymlinkInstaller',
                 ),
                 'cdn' => (object) array(
                     'class' => 'CdnInstaller',
@@ -334,8 +356,8 @@ class PackageFileInstallerManagerUnloadedTest extends PHPUnit_Framework_TestCase
         $this->packageFileManager->expects($this->once())
             ->method('setExtraKey')
             ->with(PackageFileInstallerManager::INSTALLERS_KEY, (object) array(
-                'symlink' => (object) array(
-                    'class' => 'SymlinkInstaller',
+                'custom-symlink' => (object) array(
+                    'class' => 'CustomSymlinkInstaller',
                 ),
                 'cdn' => (object) array(
                     'class' => 'CdnInstaller',
@@ -371,7 +393,7 @@ class PackageFileInstallerManagerUnloadedTest extends PHPUnit_Framework_TestCase
     public function testAddRootInstallerDescriptorOverridesPreviousRootInstaller()
     {
         $this->rootPackageFile->setExtraKey(PackageFileInstallerManager::INSTALLERS_KEY, (object) array(
-            'symlink' => (object) array(
+            'custom-symlink' => (object) array(
                 'class' => 'PreviousInstaller',
             )
         ));
@@ -379,16 +401,16 @@ class PackageFileInstallerManagerUnloadedTest extends PHPUnit_Framework_TestCase
         $this->packageFileManager->expects($this->once())
             ->method('setExtraKey')
             ->with(PackageFileInstallerManager::INSTALLERS_KEY, (object) array(
-                'symlink' => (object) array(
+                'custom-symlink' => (object) array(
                     'class' => 'NewInstaller',
                 ),
             ));
 
-        $descriptor = new InstallerDescriptor('symlink', 'NewInstaller');
+        $descriptor = new InstallerDescriptor('custom-symlink', 'NewInstaller');
 
         $this->manager->addRootInstallerDescriptor($descriptor);
 
-        $this->assertSame($descriptor, $this->manager->getInstallerDescriptor('symlink'));
+        $this->assertSame($descriptor, $this->manager->getInstallerDescriptor('custom-symlink'));
     }
 
     /**
@@ -397,7 +419,7 @@ class PackageFileInstallerManagerUnloadedTest extends PHPUnit_Framework_TestCase
     public function testAddRootInstallerDescriptorFailsIfInstallerExistsInOtherPackage()
     {
         $this->packageFile1->setExtraKey(PackageFileInstallerManager::INSTALLERS_KEY, (object) array(
-            'symlink' => (object) array(
+            'custom-symlink' => (object) array(
                 'class' => 'PreviousInstaller',
             )
         ));
@@ -405,7 +427,20 @@ class PackageFileInstallerManagerUnloadedTest extends PHPUnit_Framework_TestCase
         $this->packageFileManager->expects($this->never())
             ->method('setExtraKey');
 
-        $descriptor = new InstallerDescriptor('symlink', 'NewInstaller');
+        $descriptor = new InstallerDescriptor('custom-symlink', 'NewInstaller');
+
+        $this->manager->addRootInstallerDescriptor($descriptor);
+    }
+
+    /**
+     * @expectedException \RuntimeException
+     */
+    public function testAddRootInstallerDescriptorFailsIfInstallerBuiltin()
+    {
+        $this->packageFileManager->expects($this->never())
+            ->method('setExtraKey');
+
+        $descriptor = new InstallerDescriptor('copy', 'NewCopyInstaller');
 
         $this->manager->addRootInstallerDescriptor($descriptor);
     }
@@ -413,7 +448,7 @@ class PackageFileInstallerManagerUnloadedTest extends PHPUnit_Framework_TestCase
     public function testAddRootInstallerDescriptorRestoresPreviousInstallerIfSavingFails()
     {
         $this->rootPackageFile->setExtraKey(PackageFileInstallerManager::INSTALLERS_KEY, (object) array(
-            'symlink' => (object) array(
+            'custom-symlink' => (object) array(
                 'class' => 'PreviousInstaller',
             )
         ));
@@ -424,8 +459,8 @@ class PackageFileInstallerManagerUnloadedTest extends PHPUnit_Framework_TestCase
             ->with(PackageFileInstallerManager::INSTALLERS_KEY)
             ->willThrowException(new TestException());
 
-        $previousDescriptor = new InstallerDescriptor('symlink', 'PreviousInstaller');
-        $newDescriptor = new InstallerDescriptor('symlink', 'NewInstaller');
+        $previousDescriptor = new InstallerDescriptor('custom-symlink', 'PreviousInstaller');
+        $newDescriptor = new InstallerDescriptor('custom-symlink', 'NewInstaller');
 
         try {
             $this->manager->addRootInstallerDescriptor($newDescriptor);
@@ -433,7 +468,7 @@ class PackageFileInstallerManagerUnloadedTest extends PHPUnit_Framework_TestCase
         } catch (TestException $e) {
         }
 
-        $this->assertEquals($previousDescriptor, $this->manager->getInstallerDescriptor('symlink'));
+        $this->assertEquals($previousDescriptor, $this->manager->getInstallerDescriptor('custom-symlink'));
     }
 
     public function testAddRootInstallerDescriptorRemovesNewInstallerIfSavingFails()
@@ -444,7 +479,7 @@ class PackageFileInstallerManagerUnloadedTest extends PHPUnit_Framework_TestCase
             ->with(PackageFileInstallerManager::INSTALLERS_KEY)
             ->willThrowException(new TestException());
 
-        $newDescriptor = new InstallerDescriptor('symlink', 'NewInstaller');
+        $newDescriptor = new InstallerDescriptor('custom-symlink', 'NewInstaller');
 
         try {
             $this->manager->addRootInstallerDescriptor($newDescriptor);
@@ -452,14 +487,14 @@ class PackageFileInstallerManagerUnloadedTest extends PHPUnit_Framework_TestCase
         } catch (TestException $e) {
         }
 
-        $this->assertFalse($this->manager->hasInstallerDescriptor('symlink'));
+        $this->assertFalse($this->manager->hasInstallerDescriptor('custom-symlink'));
     }
 
     public function testRemoveRootInstallerDescriptor()
     {
         $this->rootPackageFile->setExtraKey(PackageFileInstallerManager::INSTALLERS_KEY, (object) array(
-            'symlink' => (object) array(
-                'class' => 'SymlinkInstaller',
+            'custom-symlink' => (object) array(
+                'class' => 'CustomSymlinkInstaller',
             ),
             'cdn' => (object) array(
                 'class' => 'CdnInstaller',
@@ -474,17 +509,17 @@ class PackageFileInstallerManagerUnloadedTest extends PHPUnit_Framework_TestCase
                 ),
             ));
 
-        $this->manager->removeRootInstallerDescriptor('symlink');
+        $this->manager->removeRootInstallerDescriptor('custom-symlink');
 
         $this->assertTrue($this->manager->hasInstallerDescriptor('cdn'));
-        $this->assertFalse($this->manager->hasInstallerDescriptor('symlink'));
+        $this->assertFalse($this->manager->hasInstallerDescriptor('custom-symlink'));
     }
 
     public function testRemoveRootInstallerDescriptorRemovesExtraKeyAfterLastInstaller()
     {
         $this->rootPackageFile->setExtraKey(PackageFileInstallerManager::INSTALLERS_KEY, (object) array(
-            'symlink' => (object) array(
-                'class' => 'SymlinkInstaller',
+            'custom-symlink' => (object) array(
+                'class' => 'CustomSymlinkInstaller',
             ),
         ));
 
@@ -492,15 +527,15 @@ class PackageFileInstallerManagerUnloadedTest extends PHPUnit_Framework_TestCase
             ->method('removeExtraKey')
             ->with(PackageFileInstallerManager::INSTALLERS_KEY);
 
-        $this->manager->removeRootInstallerDescriptor('symlink');
+        $this->manager->removeRootInstallerDescriptor('custom-symlink');
 
-        $this->assertFalse($this->manager->hasInstallerDescriptor('symlink'));
+        $this->assertFalse($this->manager->hasInstallerDescriptor('custom-symlink'));
     }
 
     public function testRemoveRootInstallerDescriptorRestoresPreviousInstallerIfSavingFails()
     {
         $this->rootPackageFile->setExtraKey(PackageFileInstallerManager::INSTALLERS_KEY, (object) array(
-            'symlink' => (object) array(
+            'custom-symlink' => (object) array(
                 'class' => 'PreviousInstaller',
             )
         ));
@@ -512,20 +547,20 @@ class PackageFileInstallerManagerUnloadedTest extends PHPUnit_Framework_TestCase
             ->willThrowException(new TestException());
 
         try {
-            $this->manager->removeRootInstallerDescriptor('symlink');
+            $this->manager->removeRootInstallerDescriptor('custom-symlink');
             $this->fail('Expected a TestException');
         } catch (TestException $e) {
         }
 
         $this->assertEquals((object) array(
-            'symlink' => (object) array(
+            'custom-symlink' => (object) array(
                 'class' => 'PreviousInstaller',
             )
         ), $this->rootPackageFile->getExtraKey(PackageFileInstallerManager::INSTALLERS_KEY));
 
         $this->assertEquals(
-            new InstallerDescriptor('symlink', 'PreviousInstaller'),
-            $this->manager->getInstallerDescriptor('symlink')
+            new InstallerDescriptor('custom-symlink', 'PreviousInstaller'),
+            $this->manager->getInstallerDescriptor('custom-symlink')
         );
     }
 
@@ -535,15 +570,26 @@ class PackageFileInstallerManagerUnloadedTest extends PHPUnit_Framework_TestCase
     public function testRemoveRootInstallerDescriptorFailsIfInstallerNotInRoot()
     {
         $this->packageFile1->setExtraKey(PackageFileInstallerManager::INSTALLERS_KEY, (object) array(
-            'symlink' => (object) array(
-                'class' => 'SymlinkInstaller',
+            'custom-symlink' => (object) array(
+                'class' => 'CustomSymlinkInstaller',
             ),
         ));
 
         $this->packageFileManager->expects($this->never())
             ->method('setExtraKey');
 
-        $this->manager->removeRootInstallerDescriptor('symlink');
+        $this->manager->removeRootInstallerDescriptor('custom-symlink');
+    }
+
+    /**
+     * @expectedException \RuntimeException
+     */
+    public function testRemoveRootInstallerDescriptorFailsIfInstallerBuiltin()
+    {
+        $this->packageFileManager->expects($this->never())
+            ->method('setExtraKey');
+
+        $this->manager->removeRootInstallerDescriptor('copy');
     }
 
     public function testRemoveRootInstallerDescriptorDoesNothingIfNotFound()
@@ -559,8 +605,8 @@ class PackageFileInstallerManagerUnloadedTest extends PHPUnit_Framework_TestCase
     public function testRemoveRootInstallerDescriptors()
     {
         $this->rootPackageFile->setExtraKey(PackageFileInstallerManager::INSTALLERS_KEY, (object) array(
-            'symlink1' => (object) array(
-                'class' => 'SymlinkInstaller',
+            'custom-symlink1' => (object) array(
+                'class' => 'CustomSymlinkInstaller',
             ),
             'cdn' => (object) array(
                 'class' => 'CdnInstaller',
@@ -568,8 +614,8 @@ class PackageFileInstallerManagerUnloadedTest extends PHPUnit_Framework_TestCase
         ));
 
         $this->packageFile1->setExtraKey(PackageFileInstallerManager::INSTALLERS_KEY, (object) array(
-            'symlink2' => (object) array(
-                'class' => 'SymlinkInstaller',
+            'custom-symlink2' => (object) array(
+                'class' => 'CustomSymlinkInstaller',
             ),
         ));
 
@@ -581,18 +627,18 @@ class PackageFileInstallerManagerUnloadedTest extends PHPUnit_Framework_TestCase
                 ),
             ));
 
-        $this->manager->removeRootInstallerDescriptors(Expr::startsWith('symlink', InstallerDescriptor::NAME));
+        $this->manager->removeRootInstallerDescriptors(Expr::startsWith('custom-symlink', InstallerDescriptor::NAME));
 
         $this->assertTrue($this->manager->hasInstallerDescriptor('cdn'));
-        $this->assertTrue($this->manager->hasInstallerDescriptor('symlink2'));
-        $this->assertFalse($this->manager->hasInstallerDescriptor('symlink1'));
+        $this->assertTrue($this->manager->hasInstallerDescriptor('custom-symlink2'));
+        $this->assertFalse($this->manager->hasInstallerDescriptor('custom-symlink1'));
     }
 
     public function testRemoveRootInstallerDescriptorsRestoresPreviousInstallersIfSavingFails()
     {
         $this->rootPackageFile->setExtraKey(PackageFileInstallerManager::INSTALLERS_KEY, (object) array(
-            'symlink' => (object) array(
-                'class' => 'SymlinkInstaller',
+            'custom-symlink' => (object) array(
+                'class' => 'CustomSymlinkInstaller',
             ),
             'cdn' => (object) array(
                 'class' => 'CdnInstaller',
@@ -609,29 +655,29 @@ class PackageFileInstallerManagerUnloadedTest extends PHPUnit_Framework_TestCase
             ->willThrowException(new TestException());
 
         try {
-            $this->manager->removeRootInstallerDescriptors(Expr::startsWith('symlink', InstallerDescriptor::NAME));
+            $this->manager->removeRootInstallerDescriptors(Expr::startsWith('custom-symlink', InstallerDescriptor::NAME));
             $this->fail('Expected a TestException');
         } catch (TestException $e) {
         }
 
         $this->assertEquals((object) array(
-            'symlink' => (object) array(
-                'class' => 'SymlinkInstaller',
+            'custom-symlink' => (object) array(
+                'class' => 'CustomSymlinkInstaller',
             ),
             'cdn' => (object) array(
                 'class' => 'CdnInstaller',
             ),
         ), $this->rootPackageFile->getExtraKey(PackageFileInstallerManager::INSTALLERS_KEY));
 
-        $this->assertTrue($this->manager->hasInstallerDescriptor('symlink'));
+        $this->assertTrue($this->manager->hasInstallerDescriptor('custom-symlink'));
         $this->assertTrue($this->manager->hasInstallerDescriptor('cdn'));
     }
 
     public function testClearRootInstallerDescriptors()
     {
         $this->rootPackageFile->setExtraKey(PackageFileInstallerManager::INSTALLERS_KEY, (object) array(
-            'symlink' => (object) array(
-                'class' => 'SymlinkInstaller',
+            'custom-symlink' => (object) array(
+                'class' => 'CustomSymlinkInstaller',
             ),
             'cdn' => (object) array(
                 'class' => 'CdnInstaller',
@@ -644,15 +690,15 @@ class PackageFileInstallerManagerUnloadedTest extends PHPUnit_Framework_TestCase
 
         $this->manager->clearRootInstallerDescriptors();
 
-        $this->assertFalse($this->manager->hasInstallerDescriptor('symlink'));
+        $this->assertFalse($this->manager->hasInstallerDescriptor('custom-symlink'));
         $this->assertFalse($this->manager->hasInstallerDescriptor('cdn'));
     }
 
     protected function populateDefaultManager()
     {
         $this->rootPackageFile->setExtraKey(PackageFileInstallerManager::INSTALLERS_KEY, (object) array(
-            'symlink' => (object) array(
-                'class' => 'SymlinkInstaller',
+            'custom-symlink' => (object) array(
+                'class' => 'CustomSymlinkInstaller',
             )
         ));
         $this->packageFile1->setExtraKey(PackageFileInstallerManager::INSTALLERS_KEY, (object) array(
@@ -665,11 +711,11 @@ class PackageFileInstallerManagerUnloadedTest extends PHPUnit_Framework_TestCase
     protected function populateRootManager()
     {
         $this->rootPackageFile->setExtraKey(PackageFileInstallerManager::INSTALLERS_KEY, (object) array(
-            'symlink' => (object) array(
-                'class' => 'SymlinkInstaller',
+            'custom-symlink' => (object) array(
+                'class' => 'CustomSymlinkInstaller',
             ),
-            'copy' => (object) array(
-                'class' => 'CopyInstaller',
+            'custom-copy' => (object) array(
+                'class' => 'CustomCopyInstaller',
             ),
         ));
         $this->packageFile1->setExtraKey(PackageFileInstallerManager::INSTALLERS_KEY, (object) array(

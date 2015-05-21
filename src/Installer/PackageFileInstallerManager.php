@@ -42,6 +42,26 @@ class PackageFileInstallerManager implements InstallerManager
     const INSTALLERS_KEY = 'installers';
 
     /**
+     * @var array
+     */
+    private static $builtinInstallers = array(
+        'copy' => array(
+            'class' => 'Puli\Manager\Installer\CopyInstaller',
+            'description' => 'Copies assets to a target directory',
+        ),
+        'symlink' => array(
+            'class' => 'Puli\Manager\Installer\SymlinkInstaller',
+            'description' => 'Creates asset symlinks in a target directory',
+            'parameters' => array(
+                'relative' => array(
+                    'default' => true,
+                    'description' => 'Whether to create relative or absolute links',
+                )
+            )
+        ),
+    );
+
+    /**
      * @var RootPackageFileManager
      */
     private $rootPackageFileManager;
@@ -361,6 +381,12 @@ class PackageFileInstallerManager implements InstallerManager
 
     private function loadInstallers(Package $package)
     {
+        foreach (self::$builtinInstallers as $name => $installerData) {
+            $installer = $this->dataToInstaller($name, (object) $installerData);
+
+            $this->installerDescriptors[$name] = $installer;
+        }
+
         $packageFile = $package->getPackageFile();
 
         if (!$packageFile) {
@@ -402,7 +428,7 @@ class PackageFileInstallerManager implements InstallerManager
         $parameters = array();
 
         if (isset($installerData->parameters)) {
-            $parameters = $this->dataToParameters($installerData->parameters);
+            $parameters = $this->dataToParameters((object) $installerData->parameters);
         }
 
         return new InstallerDescriptor(
@@ -418,7 +444,7 @@ class PackageFileInstallerManager implements InstallerManager
         $parameters = array();
 
         foreach ($parametersData as $parameterName => $parameterData) {
-            $parameters[$parameterName] = $this->dataToParameter($parameterName, $parameterData);
+            $parameters[$parameterName] = $this->dataToParameter($parameterName, (object) $parameterData);
         }
 
         return $parameters;
