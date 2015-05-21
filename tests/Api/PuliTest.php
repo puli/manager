@@ -215,7 +215,8 @@ class PuliTest extends PHPUnit_Framework_TestCase
         $this->puli->start();
         $factory = $this->puli->getFactory();
 
-        $this->assertInstanceOf('Puli\Factory\PuliFactory', $factory);
+        $this->assertInternalType('object', $factory);
+        $this->assertTrue(method_exists($factory, 'createRepository'));
     }
 
     public function testGetFactoryInGlobalEnvironment()

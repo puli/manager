@@ -168,8 +168,6 @@ class FactoryManagerImpl implements FactoryManager
 
         $class = new Clazz($className);
         $class->setFilePath($path);
-        $class->addImplementedInterface('PuliFactory');
-        $class->addImport(new Import('Puli\Factory\PuliFactory'));
         $class->setDescription(
 <<<EOF
 Creates Puli's core services.

@@ -15,7 +15,6 @@ use LogicException;
 use Psr\Log\LoggerInterface;
 use Puli\Discovery\Api\EditableDiscovery;
 use Puli\Discovery\Api\ResourceDiscovery;
-use Puli\Factory\PuliFactory;
 use Puli\Manager\Api\Asset\AssetManager;
 use Puli\Manager\Api\Config\ConfigFileManager;
 use Puli\Manager\Api\Config\ConfigFileReader;
@@ -143,7 +142,7 @@ class Puli
     private $discovery;
 
     /**
-     * @var PuliFactory
+     * @var object
      */
     private $factory;
 
@@ -485,7 +484,7 @@ class Puli
     }
 
     /**
-     * @return PuliFactory
+     * @return object
      */
     public function getFactory()
     {
