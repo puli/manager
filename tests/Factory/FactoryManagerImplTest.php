@@ -124,6 +124,7 @@ use Puli\Repository\Api\ResourceRepository;
 use Puli\Repository\FilesystemRepository;
 use Puli\UrlGenerator\Api\UrlGenerator;
 use Puli\UrlGenerator\DiscoveryUrlGenerator;
+use RuntimeException;
 use Webmozart\KeyValueStore\JsonFileStore;
 
 /**
@@ -147,6 +148,10 @@ class MyFactory
      */
     public function createRepository()
     {
+        if (!interface_exists('Puli\Repository\Api\ResourceRepository')) {
+            throw new RuntimeException('Please install puli/repository to create ResourceRepository instances.');
+        }
+
         if (!file_exists(__DIR__.'/.puli/repository')) {
             mkdir(__DIR__.'/.puli/repository', 0777, true);
         }
@@ -165,6 +170,10 @@ class MyFactory
      */
     public function createDiscovery(ResourceRepository \$repo)
     {
+        if (!interface_exists('Puli\Discovery\Api\ResourceDiscovery')) {
+            throw new RuntimeException('Please install puli/discovery to create ResourceDiscovery instances.');
+        }
+
         \$store = new JsonFileStore(__DIR__.'/.puli/bindings.json', true);
         \$discovery = new KeyValueStoreDiscovery(\$repo, \$store);
 
@@ -180,6 +189,10 @@ class MyFactory
      */
     public function createUrlGenerator(ResourceDiscovery \$discovery)
     {
+        if (!interface_exists('Puli\UrlGenerator\Api\UrlGenerator')) {
+            throw new RuntimeException('Please install puli/url-generator to create UrlGenerator instances.');
+        }
+
         \$generator = new DiscoveryUrlGenerator(\$discovery, array(
             'localhost' => '/%s',
             'example.com' => 'http://example.com/%s',

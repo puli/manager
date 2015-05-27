@@ -264,8 +264,17 @@ EOF
             'ResourceRepository',
             'The created resource repository.'
         ));
+        $method->addBody(
+<<<EOF
+if (!interface_exists('Puli\Repository\Api\ResourceRepository')) {
+    throw new RuntimeException('Please install puli/repository to create ResourceRepository instances.');
+}
+
+EOF
+        );
 
         $class->addImport(new Import('Puli\Repository\Api\ResourceRepository'));
+        $class->addImport(new Import('RuntimeException'));
         $class->addMethod($method);
 
         // Add method body
@@ -301,8 +310,18 @@ EOF
             'The created resource discovery.'
         ));
 
+        $method->addBody(
+<<<EOF
+if (!interface_exists('Puli\Discovery\Api\ResourceDiscovery')) {
+    throw new RuntimeException('Please install puli/discovery to create ResourceDiscovery instances.');
+}
+
+EOF
+        );
+
         $class->addImport(new Import('Puli\Repository\Api\ResourceRepository'));
         $class->addImport(new Import('Puli\Discovery\Api\ResourceDiscovery'));
+        $class->addImport(new Import('RuntimeException'));
         $class->addMethod($method);
 
         // Add method body
@@ -326,6 +345,7 @@ EOF
         $class->addImport(new Import('Puli\Manager\Api\Server\ServerCollection'));
         $class->addImport(new Import('Puli\UrlGenerator\Api\UrlGenerator'));
         $class->addImport(new Import('Puli\UrlGenerator\DiscoveryUrlGenerator'));
+        $class->addImport(new Import('RuntimeException'));
 
         $method = new Method('createUrlGenerator');
         $method->setDescription('Creates the URL generator.');
@@ -337,6 +357,15 @@ EOF
         $method->addArgument($arg);
 
         $method->setReturnValue(new ReturnValue('$generator', 'UrlGenerator', 'The created URL generator.'));
+
+        $method->addBody(
+<<<EOF
+if (!interface_exists('Puli\UrlGenerator\Api\UrlGenerator')) {
+    throw new RuntimeException('Please install puli/url-generator to create UrlGenerator instances.');
+}
+
+EOF
+        );
 
         $urlFormatsString = '';
 
