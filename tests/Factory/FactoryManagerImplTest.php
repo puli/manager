@@ -123,7 +123,6 @@ use Puli\Manager\Api\Server\ServerCollection;
 use Puli\Repository\Api\ResourceRepository;
 use Puli\Repository\FilesystemRepository;
 use Puli\UrlGenerator\Api\UrlGenerator;
-use Puli\UrlGenerator\Api\UrlGeneratorFactory;
 use Puli\UrlGenerator\DiscoveryUrlGenerator;
 use Webmozart\KeyValueStore\JsonFileStore;
 
@@ -139,7 +138,7 @@ use Webmozart\KeyValueStore\JsonFileStore;
  *
  * Otherwise any modifications will be overwritten!
  */
-class MyFactory implements UrlGeneratorFactory
+class MyFactory
 {
     /**
      * Creates the resource repository.

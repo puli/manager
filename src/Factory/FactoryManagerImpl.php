@@ -325,10 +325,7 @@ EOF
         $class->addImport(new Import('Puli\Discovery\Api\ResourceDiscovery'));
         $class->addImport(new Import('Puli\Manager\Api\Server\ServerCollection'));
         $class->addImport(new Import('Puli\UrlGenerator\Api\UrlGenerator'));
-        $class->addImport(new Import('Puli\UrlGenerator\Api\UrlGeneratorFactory'));
         $class->addImport(new Import('Puli\UrlGenerator\DiscoveryUrlGenerator'));
-
-        $class->addImplementedInterface('UrlGeneratorFactory');
 
         $method = new Method('createUrlGenerator');
         $method->setDescription('Creates the URL generator.');
