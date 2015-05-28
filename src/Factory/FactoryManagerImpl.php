@@ -228,14 +228,19 @@ EOF
         }
 
         $rootPackageFile = $this->environment->getRootPackageFile()->getPath();
-        $configFile = $this->environment->getConfigFile()
-            ? $this->environment->getConfigFile()->getPath()
-            : '';
+
+        if (!file_exists($rootPackageFile)) {
+            return;
+        }
 
         // Regenerate file if the configuration has changed and
         // auto-generation is enabled
         clearstatcache(true, $rootPackageFile);
         $lastConfigChange = filemtime($rootPackageFile);
+
+        $configFile = $this->environment->getConfigFile()
+            ? $this->environment->getConfigFile()->getPath()
+            : '';
 
         if (file_exists($configFile)) {
             clearstatcache(true, $configFile);

@@ -14,6 +14,7 @@ Changelog
  * upgraded to webmozart/path-util 2.0
  * fixed `PackageFileInstallerManager` for unloadable packages
  * decoupled from puli/factory
+ * fixed filemtime() warning when no puli.json is present in the current directory
 
 * 1.0.0-beta4 (2015-04-13)
 

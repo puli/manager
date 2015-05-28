@@ -403,6 +403,20 @@ EOF;
         $manager->refreshFactoryClass();
     }
 
+    public function testRefreshFactoryClassDoesNotRegenerateIfNoRootPackageFile()
+    {
+        $manager = new FactoryManagerImpl($this->environment, $this->registry, $this->fakeWriter, $this->servers);
+
+        // The class has been generated. No need to refresh it as no puli.json
+        // exists.
+        touch($this->rootDir.'/MyFactory.php');
+
+        $this->fakeWriter->expects($this->never())
+            ->method('writeClass');
+
+        $manager->refreshFactoryClass();
+    }
+
     public function testRefreshFactoryClassGeneratesWithCustomParameters()
     {
         $rootDir = $this->rootDir;
