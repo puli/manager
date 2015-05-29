@@ -1,9 +1,9 @@
 Changelog
 =========
 
-* 1.0.0-next (@release_date@)
+* 1.0.0-beta5 (2015-05-29)
 
- * integrated puli/asset-plugin in puli/manager
+ * integrated puli/asset-plugin into puli/manager
  * added `ConfigManager` interface
  * added argument `$raw` to the getters in `ConfigManager`
  * added `PuliEvents::PRE_BUILD_REPOSITORY` and `PuliEvents::POST_BUILD_REPOSITORY`
@@ -15,6 +15,8 @@ Changelog
  * fixed `PackageFileInstallerManager` for unloadable packages
  * decoupled from puli/factory
  * fixed filemtime() warning when no puli.json is present in the current directory
+ * removed realpath() where it doesn't work if the package is distributed in a
+   PHAR
 
 * 1.0.0-beta4 (2015-04-13)
 
