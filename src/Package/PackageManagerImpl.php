@@ -85,7 +85,7 @@ class PackageManagerImpl implements PackageManager
     /**
      * {@inheritdoc}
      */
-    public function installPackage($installPath, $name = null, $installerName = InstallInfo::DEFAULT_INSTALLER_NAME)
+    public function installPackage($installPath, $name = null, $installerName = InstallInfo::DEFAULT_INSTALLER_NAME, $isDev = false)
     {
         Assert::string($installPath, 'The install path must be a string. Got: %s');
         Assert::string($installerName, 'The installer name must be a string. Got: %s');
