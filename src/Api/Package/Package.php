@@ -44,6 +44,11 @@ class Package
     const INSTALLER = 'installer';
 
     /**
+     * The dev field in {@link Expression} instances.
+     */
+    const DEV = 'dev';
+
+    /**
      * @var string
      */
     private $name;
@@ -232,6 +237,7 @@ class Package
             self::INSTALL_PATH => $this->installPath,
             self::STATE => $this->state,
             self::INSTALLER => $this->installInfo ? $this->installInfo->getInstallerName() : null,
+            self::DEV => $this->installInfo ? $this->installInfo->isDev() : false,
         ));
     }
 
