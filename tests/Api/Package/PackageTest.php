@@ -26,6 +26,7 @@ use Webmozart\Expression\Expr;
  */
 class PackageTest extends PHPUnit_Framework_TestCase
 {
+    /*
     public function testUsePackageNameFromPackageFile()
     {
         $packageFile = new PackageFile('vendor/name');
@@ -93,27 +94,41 @@ class PackageTest extends PHPUnit_Framework_TestCase
         $this->assertNull($package->getName());
     }
 
+    public function testDev()
+    {
+        $packageFile = new PackageFile('vendor/package-file');
+        $installInfo = new InstallInfo('vendor/install-info', '/path', true);
+        $package = new Package($packageFile, '/path', $installInfo);
+
+        $this->assertSame(true, $package->isDev());
+    }
+*/
     public function testMatch()
     {
-        $packageFile = new PackageFile('vendor/name');
-        $package = new Package($packageFile, __DIR__);
+       $packageFile = new PackageFile('vendor/name');
+       $package = new Package($packageFile, __DIR__);
 
-        $this->assertFalse($package->match(Expr::same('foobar', Package::NAME)));
-        $this->assertTrue($package->match(Expr::same('vendor/name', Package::NAME)));
+       $this->assertFalse($package->match(Expr::same('foobar', Package::NAME)));
+       $this->assertTrue($package->match(Expr::same('vendor/name', Package::NAME)));
 
-        $this->assertFalse($package->match(Expr::same('/path/foo', Package::INSTALL_PATH)));
-        $this->assertTrue($package->match(Expr::same(__DIR__, Package::INSTALL_PATH)));
+       $this->assertFalse($package->match(Expr::same('/path/foo', Package::INSTALL_PATH)));
+       $this->assertTrue($package->match(Expr::same(__DIR__, Package::INSTALL_PATH)));
 
-        $this->assertFalse($package->match(Expr::same(PackageState::NOT_LOADABLE, Package::STATE)));
-        $this->assertTrue($package->match(Expr::same(PackageState::ENABLED, Package::STATE)));
+       $this->assertFalse($package->match(Expr::same(PackageState::NOT_LOADABLE, Package::STATE)));
+       $this->assertTrue($package->match(Expr::same(PackageState::ENABLED, Package::STATE)));
 
-        $this->assertFalse($package->match(Expr::same('webmozart', Package::INSTALLER)));
+       $this->assertFalse($package->match(Expr::same('webmozart', Package::INSTALLER)));
 
-        $installInfo = new InstallInfo('vendor/install-info', '/path');
-        $installInfo->setInstallerName('webmozart');
-        $packageWithInstallInfo = new Package($packageFile, __DIR__, $installInfo);
+       $installInfo = new InstallInfo('vendor/install-info', '/path', true);
+       $installInfo->setInstallerName('webmozart');
+       $packageWithInstallInfo = new Package($packageFile, __DIR__, $installInfo);
 
-        $this->assertFalse($packageWithInstallInfo->match(Expr::same('foobar', Package::INSTALLER)));
-        $this->assertTrue($packageWithInstallInfo->match(Expr::same('webmozart', Package::INSTALLER)));
+       $this->assertFalse($packageWithInstallInfo->match(Expr::same('foobar', Package::INSTALLER)));
+       $this->assertTrue($packageWithInstallInfo->match(Expr::same('webmozart', Package::INSTALLER)));
+       $this->assertTrue($packageWithInstallInfo->match(Expr::same(true, Package::DEV)));
+
+       $installInfo2 = new InstallInfo('vendor/install-info', '/path');
+       $packageWithInstallInfo2 = new Package($packageFile, __DIR__, $installInfo2);
+       $this->assertTrue($packageWithInstallInfo2->match(Expr::notsame(true, Package::DEV)));
     }
 }

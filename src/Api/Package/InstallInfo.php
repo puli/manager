@@ -40,6 +40,12 @@ class InstallInfo
     private $packageName;
 
     /**
+     * @var bool
+     */
+    private $isDev;
+
+
+    /**
      * @var string
      */
     private $installerName = self::DEFAULT_INSTALLER_NAME;
@@ -62,16 +68,19 @@ class InstallInfo
      *                            If a relative path is given, the path is
      *                            assumed to be relative to the install path
      *                            of the root package.
+     * @param bool   $isDev       The true or false value that defines a dev
+     *                            package.
      *
      * @throws InvalidArgumentException If any of the arguments is invalid.
      */
-    public function __construct($packageName, $installPath)
+    public function __construct($packageName, $installPath, $isDev = false)
     {
         Assert::packageName($packageName);
         Assert::systemPath($installPath);
 
         $this->packageName = $packageName;
         $this->installPath = $installPath;
+        $this->isDev = $isDev;
     }
 
     /**
@@ -227,5 +236,15 @@ class InstallInfo
     public function hasDisabledBindingUuids()
     {
         return count($this->disabledBindingUuids) > 0;
+    }
+
+    /**
+     * Returns whether the packages is a dev requirement or not.
+     *
+     * @return bool Whether the packages is a dev requirement or not.
+     */
+    public function isDev()
+    {
+        return $this->isDev;
     }
 }

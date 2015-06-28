@@ -38,12 +38,13 @@ interface PackageManager
      *                                   should be read from the package's
      *                                   puli.json.
      * @param string      $installerName The name of the installer.
+     * @param bool        $isDev         The package dev parameter.gis
      *
      * @throws InvalidConfigException If the package is not configured correctly.
      * @throws NameConflictException If the package has the same name as another
      *                               loaded package.
      */
-    public function installPackage($installPath, $name = null, $installerName = InstallInfo::DEFAULT_INSTALLER_NAME);
+    public function installPackage($installPath, $name = null, $installerName = InstallInfo::DEFAULT_INSTALLER_NAME, $isDev = false);
 
     /**
      * Renames the package with the given name.

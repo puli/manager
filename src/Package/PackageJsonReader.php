@@ -147,7 +147,12 @@ class PackageJsonReader implements PackageFileReader
 
         if (isset($jsonData->packages)) {
             foreach ($jsonData->packages as $packageName => $packageData) {
-                $installInfo = new InstallInfo($packageName, $packageData->{'install-path'});
+                $isDev = false;
+                if (isset( $packageData->{'dev'})) {
+                    $isDev = true;
+                }
+
+                $installInfo = new InstallInfo($packageName, $packageData->{'install-path'}, $isDev);
 
                 if (isset($packageData->installer)) {
                     $installInfo->setInstallerName($packageData->installer);
