@@ -65,7 +65,8 @@
             ]
         },
         "vendor/package2": {
-            "install-path": "/path/to/package2"
+            "install-path": "/path/to/package2",
+            "dev": true
         }
     }
 }

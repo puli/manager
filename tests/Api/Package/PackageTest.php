@@ -26,6 +26,7 @@ use Webmozart\Expression\Expr;
  */
 class PackageTest extends PHPUnit_Framework_TestCase
 {
+
     public function testUsePackageNameFromPackageFile()
     {
         $packageFile = new PackageFile('vendor/name');
@@ -109,11 +110,16 @@ class PackageTest extends PHPUnit_Framework_TestCase
 
         $this->assertFalse($package->match(Expr::same('webmozart', Package::INSTALLER)));
 
-        $installInfo = new InstallInfo('vendor/install-info', '/path');
+        $installInfo = new InstallInfo('vendor/install-info', '/path', true);
         $installInfo->setInstallerName('webmozart');
         $packageWithInstallInfo = new Package($packageFile, __DIR__, $installInfo);
 
         $this->assertFalse($packageWithInstallInfo->match(Expr::same('foobar', Package::INSTALLER)));
         $this->assertTrue($packageWithInstallInfo->match(Expr::same('webmozart', Package::INSTALLER)));
+        $this->assertTrue($packageWithInstallInfo->match(Expr::same(true, Package::DEV)));
+
+        $installInfo2 = new InstallInfo('vendor/install-info', '/path');
+        $packageWithInstallInfo2 = new Package($packageFile, __DIR__, $installInfo2);
+        $this->assertTrue($packageWithInstallInfo2->match(Expr::notsame(true, Package::DEV)));
     }
 }
