@@ -110,6 +110,10 @@
                         "items": {
                             "type": "string"
                         }
+                    },
+                    "dev" : {
+                      "type": "bool",
+                      "required": false
                     }
                 }
             }

@@ -227,6 +227,10 @@ class PackageJsonWriter implements PackageFileWriter
                     sort($installData->{'disabled-bindings'});
                 }
 
+                if ($installInfo->isDev()) {
+                    $installData->{'dev'} = $installInfo->isDev();
+                }
+
                 $packagesData[$installInfo->getPackageName()] = $installData;
             }
 
