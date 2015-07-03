@@ -228,7 +228,7 @@ class PackageJsonWriter implements PackageFileWriter
                 }
 
                 if ($installInfo->isDev()) {
-                    $installData->{'dev'} = $installInfo->isDev();
+                    $installData->dev = $installInfo->isDev();
                 }
 
                 $packagesData[$installInfo->getPackageName()] = $installData;

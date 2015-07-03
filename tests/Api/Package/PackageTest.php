@@ -26,7 +26,7 @@ use Webmozart\Expression\Expr;
  */
 class PackageTest extends PHPUnit_Framework_TestCase
 {
-    /*
+
     public function testUsePackageNameFromPackageFile()
     {
         $packageFile = new PackageFile('vendor/name');
@@ -94,15 +94,6 @@ class PackageTest extends PHPUnit_Framework_TestCase
         $this->assertNull($package->getName());
     }
 
-    public function testDev()
-    {
-        $packageFile = new PackageFile('vendor/package-file');
-        $installInfo = new InstallInfo('vendor/install-info', '/path', true);
-        $package = new Package($packageFile, '/path', $installInfo);
-
-        $this->assertSame(true, $package->isDev());
-    }
-*/
     public function testMatch()
     {
        $packageFile = new PackageFile('vendor/name');

@@ -148,7 +148,7 @@ class PackageJsonReader implements PackageFileReader
         if (isset($jsonData->packages)) {
             foreach ($jsonData->packages as $packageName => $packageData) {
                 $isDev = false;
-                if (isset( $packageData->{'dev'})) {
+                if (isset($packageData->dev)) {
                     $isDev = true;
                 }
 

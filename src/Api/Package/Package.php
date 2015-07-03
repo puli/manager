@@ -74,11 +74,6 @@ class Package
     private $state;
 
     /**
-     * @var bool
-     */
-    private $dev;
-
-    /**
      * @var Exception|null
      */
     private $loadErrors;
@@ -104,10 +99,6 @@ class Package
         $this->name = $installInfo && null !== $installInfo->getPackageName()
             ? $installInfo->getPackageName()
             : ($packageFile ? $packageFile->getPackageName() : null);
-
-        $this->dev = $installInfo && null !== $installInfo->isDev()
-            ? $installInfo->isDev()
-            : false;
 
         if (null === $this->name) {
             $this->name = $this->getDefaultName();
@@ -218,16 +209,6 @@ class Package
     }
 
     /**
-     * Returns whether the package is dev or not.
-     *
-     * @return bool Returns `true` if the dev state is present.
-     */
-    public function isDev()
-    {
-        return $this->dev;
-    }
-
-    /**
      * Returns whether the package was not loadable.
      *
      * @return bool Returns `true` if the state is {@link PackageState::NOT_LOADABLE}.
@@ -256,7 +237,7 @@ class Package
             self::INSTALL_PATH => $this->installPath,
             self::STATE => $this->state,
             self::INSTALLER => $this->installInfo ? $this->installInfo->getInstallerName() : null,
-            self::DEV => $this->dev,
+            self::DEV => $this->installInfo ? $this->installInfo->isDev() : false,
         ));
     }
 
