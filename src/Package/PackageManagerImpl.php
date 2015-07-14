@@ -85,10 +85,11 @@ class PackageManagerImpl implements PackageManager
     /**
      * {@inheritdoc}
      */
-    public function installPackage($installPath, $name = null, $installerName = InstallInfo::DEFAULT_INSTALLER_NAME, $isDev = false)
+    public function installPackage($installPath, $name = null, $installerName = InstallInfo::DEFAULT_INSTALLER_NAME, $dev = false)
     {
         Assert::string($installPath, 'The install path must be a string. Got: %s');
         Assert::string($installerName, 'The installer name must be a string. Got: %s');
+        Assert::boolean($dev, 'The dev dependency setting must be a boolean. Got: %s');
         Assert::nullOrPackageName($name);
 
         $this->assertPackagesLoaded();
@@ -123,6 +124,7 @@ class PackageManagerImpl implements PackageManager
         $relInstallPath = Path::makeRelative($installPath, $this->rootDir);
         $installInfo = new InstallInfo($name, $relInstallPath);
         $installInfo->setInstallerName($installerName);
+        $installInfo->setDevDependency($dev);
 
         $package = $this->loadPackage($installInfo);
 

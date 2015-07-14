@@ -64,7 +64,8 @@ class PackageJsonReaderTest extends PHPUnit_Framework_TestCase
         $installInfo1->setInstallerName('composer');
         $installInfo1->addEnabledBindingUuid(Uuid::fromString('a54e5668-2b36-43f4-a32c-2d175092b77d'));
         $installInfo1->addDisabledBindingUuid(Uuid::fromString('4d02ee67-d845-4789-a9c1-8301351c6f5a'));
-        $installInfo2 = new InstallInfo('vendor/package2', '/path/to/package2', true);
+        $installInfo2 = new InstallInfo('vendor/package2', '/path/to/package2');
+        $installInfo2->setDevDependency(true);
 
         $this->assertInstanceOf('Puli\Manager\Api\Package\RootPackageFile', $packageFile);
         $this->assertSame(__DIR__.'/Fixtures/json/full-root.json', $packageFile->getPath());

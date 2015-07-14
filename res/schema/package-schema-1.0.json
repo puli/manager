@@ -112,8 +112,8 @@
                         }
                     },
                     "dev" : {
-                      "type": "bool",
-                      "required": false
+                        "type": "bool",
+                        "required": false
                     }
                 }
             }

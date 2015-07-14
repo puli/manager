@@ -42,8 +42,7 @@ class InstallInfo
     /**
      * @var bool
      */
-    private $isDev;
-
+    private $dev = false;
 
     /**
      * @var string
@@ -68,19 +67,16 @@ class InstallInfo
      *                            If a relative path is given, the path is
      *                            assumed to be relative to the install path
      *                            of the root package.
-     * @param bool   $isDev       The true or false value that defines a dev
-     *                            package.
      *
      * @throws InvalidArgumentException If any of the arguments is invalid.
      */
-    public function __construct($packageName, $installPath, $isDev = false)
+    public function __construct($packageName, $installPath)
     {
         Assert::packageName($packageName);
         Assert::systemPath($installPath);
 
         $this->packageName = $packageName;
         $this->installPath = $installPath;
-        $this->isDev = $isDev;
     }
 
     /**
@@ -239,12 +235,24 @@ class InstallInfo
     }
 
     /**
-     * Returns whether the packages is a dev requirement or not.
+     * Sets whether the package is only required in development environments.
      *
-     * @return bool Whether the packages is a dev requirement or not.
+     * @param bool $dev Set to `true` if the package is only required in
+     *                  developments environments and to `false` otherwise.
      */
-    public function isDev()
+    public function setDevDependency($dev)
     {
-        return $this->isDev;
+        $this->dev = (bool) $dev;
+    }
+
+    /**
+     * Returns whether the package is only required in development environments.
+     *
+     * @return bool Returns `true` if the package is only required in
+     *              development environments and `false` otherwise.
+     */
+    public function isDevDependency()
+    {
+        return $this->dev;
     }
 }

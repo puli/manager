@@ -237,7 +237,7 @@ class Package
             self::INSTALL_PATH => $this->installPath,
             self::STATE => $this->state,
             self::INSTALLER => $this->installInfo ? $this->installInfo->getInstallerName() : null,
-            self::DEV => $this->installInfo ? $this->installInfo->isDev() : false,
+            self::DEV => $this->installInfo ? $this->installInfo->isDevDependency() : false,
         ));
     }
 

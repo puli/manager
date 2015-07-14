@@ -38,7 +38,8 @@ interface PackageManager
      *                                   should be read from the package's
      *                                   puli.json.
      * @param string      $installerName The name of the installer.
-     * @param bool        $dev           The package dev parameter.gis
+     * @param bool        $dev           Whether the package is only required in
+     *                                   development environments.
      *
      * @throws InvalidConfigException If the package is not configured correctly.
      * @throws NameConflictException If the package has the same name as another
