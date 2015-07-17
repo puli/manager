@@ -1,5 +1,8 @@
 preset: symfony
 
+finder:
+    exclude: res
+
 enabled:
     - ordered_use
     - strict
