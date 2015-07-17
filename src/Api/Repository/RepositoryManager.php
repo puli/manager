@@ -13,8 +13,6 @@ namespace Puli\Manager\Api\Repository;
 
 use Puli\Manager\Api\Environment\ProjectEnvironment;
 use Puli\Manager\Api\NoDirectoryException;
-use Puli\Manager\Api\RootPackageExpectedException;
-use Puli\Manager\Config\Config;
 use Puli\Manager\Conflict\PackageConflictException;
 use Puli\Repository\Api\EditableRepository;
 use Webmozart\Expression\Expression;
@@ -23,6 +21,7 @@ use Webmozart\Expression\Expression;
  * Manages the resource repository of a Puli project.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 interface RepositoryManager
@@ -209,8 +208,8 @@ interface RepositoryManager
     /**
      * Builds the resource repository.
      *
-     * @throws NoDirectoryException If the dump directory exists and is not a
-     *                              directory.
+     * @throws NoDirectoryException     If the dump directory exists and is not a
+     *                                  directory.
      * @throws PackageConflictException If two packages contain conflicting
      *                                  resource definitions.
      */

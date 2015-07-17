@@ -26,6 +26,7 @@ use Webmozart\PathUtil\Path;
  * Contains all the necessary information to install resources on a server.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class InstallationParams

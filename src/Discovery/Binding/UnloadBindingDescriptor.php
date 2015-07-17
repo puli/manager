@@ -20,6 +20,7 @@ use Puli\Manager\Transaction\AtomicOperation;
  * Unloads a binding descriptor.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class UnloadBindingDescriptor implements AtomicOperation

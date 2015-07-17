@@ -15,6 +15,7 @@ namespace Puli\Manager\Installer;
  * Installs resources via symbolic links on the local filesystem.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class SymlinkInstaller extends CopyInstaller

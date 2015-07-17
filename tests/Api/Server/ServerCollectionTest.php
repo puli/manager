@@ -17,6 +17,7 @@ use Puli\Manager\Api\Server\ServerCollection;
 
 /**
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class ServerCollectionTest extends PHPUnit_Framework_TestCase

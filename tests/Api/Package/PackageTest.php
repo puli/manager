@@ -22,6 +22,7 @@ use Webmozart\Expression\Expr;
 
 /**
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class PackageTest extends PHPUnit_Framework_TestCase

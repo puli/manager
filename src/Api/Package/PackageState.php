@@ -15,6 +15,7 @@ namespace Puli\Manager\Api\Package;
  * Contains constants representing the state of a package.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 final class PackageState
@@ -51,5 +52,7 @@ final class PackageState
     /**
      * Must not be instantiated.
      */
-    private function __construct() {}
+    private function __construct()
+    {
+    }
 }

@@ -18,6 +18,7 @@ use Rhumsaa\Uuid\Uuid;
  * Thrown when an asset mapping exists already.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class DuplicateAssetMappingException extends Exception

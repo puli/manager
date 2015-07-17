@@ -15,6 +15,7 @@ namespace Puli\Manager\Api\Repository;
  * Contains constants representing the state of a path mapping.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 final class PathMappingState
@@ -51,5 +52,7 @@ final class PathMappingState
     /**
      * Must not be instantiated.
      */
-    private function __construct() {}
+    private function __construct()
+    {
+    }
 }

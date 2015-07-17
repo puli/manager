@@ -15,14 +15,13 @@ use PHPUnit_Framework_TestCase;
 use Puli\Manager\Api\Factory\Generator\GeneratorRegistry;
 use Puli\Manager\Api\Php\Clazz;
 use Puli\Manager\Api\Php\Method;
-use Puli\Manager\Factory\Generator\BuildRecipe;
 use Puli\Manager\Factory\Generator\DefaultGeneratorRegistry;
-use Puli\Manager\Factory\Generator\ProviderFactory;
 use Puli\Manager\Php\ClassWriter;
 use Symfony\Component\Filesystem\Filesystem;
 
 /**
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 abstract class AbstractGeneratorTest extends PHPUnit_Framework_TestCase
@@ -69,7 +68,8 @@ abstract class AbstractGeneratorTest extends PHPUnit_Framework_TestCase
 
     protected function setUp()
     {
-        while (false === @mkdir($this->tempDir = sys_get_temp_dir().'/puli-repo-manager/AbstractGeneratorTest'.rand(10000, 99999), 0777, true)) {}
+        while (false === @mkdir($this->tempDir = sys_get_temp_dir().'/puli-repo-manager/AbstractGeneratorTest'.rand(10000, 99999), 0777, true)) {
+        }
 
         $this->rootDir = $this->tempDir.'/root';
         $this->outputDir = $this->rootDir.'/out';

@@ -20,6 +20,7 @@ use Rhumsaa\Uuid\Uuid;
  * Contains information about a package installation.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class InstallInfo

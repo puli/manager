@@ -19,6 +19,7 @@ use Webmozart\Expression\Expression;
  * A configured package.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class Package

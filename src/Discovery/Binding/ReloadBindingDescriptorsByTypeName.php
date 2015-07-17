@@ -17,6 +17,7 @@ use Puli\Manager\Discovery\Type\BindingTypeDescriptorCollection;
  * Reloads all binding descriptors with a given type name.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class ReloadBindingDescriptorsByTypeName extends AbstractReloadBindingDescriptors

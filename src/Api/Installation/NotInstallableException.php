@@ -17,6 +17,7 @@ use Exception;
  * Thrown when the installation of resources fails.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class NotInstallableException extends Exception

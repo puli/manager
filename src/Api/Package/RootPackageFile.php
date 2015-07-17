@@ -21,6 +21,7 @@ use Puli\Manager\Api\InvalidConfigException;
  * configuration will inherit.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class RootPackageFile extends PackageFile

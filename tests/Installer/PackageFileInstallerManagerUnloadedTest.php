@@ -28,6 +28,7 @@ use Webmozart\Expression\Expr;
 
 /**
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class PackageFileInstallerManagerUnloadedTest extends PHPUnit_Framework_TestCase
@@ -137,7 +138,7 @@ class PackageFileInstallerManagerUnloadedTest extends PHPUnit_Framework_TestCase
             (object) array(
                 'name' => 'custom-symlink',
                 'class' => 'Package1CustomSymlinkInstaller',
-            )
+            ),
         ));
 
         $this->manager->getInstallerDescriptor('custom-symlink');
@@ -161,8 +162,8 @@ class PackageFileInstallerManagerUnloadedTest extends PHPUnit_Framework_TestCase
                         'default' => 'foobar',
                     ),
                     'optional-empty' => (object) array(),
-                )
-            )
+                ),
+            ),
         ));
 
         $descriptor = new InstallerDescriptor('custom-symlink', 'CustomSymlinkInstaller', 'The description', array(
@@ -321,7 +322,7 @@ class PackageFileInstallerManagerUnloadedTest extends PHPUnit_Framework_TestCase
         $this->packageFile1->setExtraKey(PackageFileInstallerManager::INSTALLERS_KEY, (object) array(
             'rsync' => (object) array(
                 'class' => 'RsyncInstaller',
-            )
+            ),
         ));
 
         $this->assertFalse($this->manager->hasRootInstallerDescriptors());
@@ -374,8 +375,8 @@ class PackageFileInstallerManagerUnloadedTest extends PHPUnit_Framework_TestCase
                             'default' => 'foobar',
                         ),
                         'optional-empty' => (object) array(),
-                    )
-                )
+                    ),
+                ),
             ));
 
         $descriptor = new InstallerDescriptor('cdn', 'CdnInstaller', 'The description', array(
@@ -395,7 +396,7 @@ class PackageFileInstallerManagerUnloadedTest extends PHPUnit_Framework_TestCase
         $this->rootPackageFile->setExtraKey(PackageFileInstallerManager::INSTALLERS_KEY, (object) array(
             'custom-symlink' => (object) array(
                 'class' => 'PreviousInstaller',
-            )
+            ),
         ));
 
         $this->packageFileManager->expects($this->once())
@@ -421,7 +422,7 @@ class PackageFileInstallerManagerUnloadedTest extends PHPUnit_Framework_TestCase
         $this->packageFile1->setExtraKey(PackageFileInstallerManager::INSTALLERS_KEY, (object) array(
             'custom-symlink' => (object) array(
                 'class' => 'PreviousInstaller',
-            )
+            ),
         ));
 
         $this->packageFileManager->expects($this->never())
@@ -450,7 +451,7 @@ class PackageFileInstallerManagerUnloadedTest extends PHPUnit_Framework_TestCase
         $this->rootPackageFile->setExtraKey(PackageFileInstallerManager::INSTALLERS_KEY, (object) array(
             'custom-symlink' => (object) array(
                 'class' => 'PreviousInstaller',
-            )
+            ),
         ));
 
         // The new installer should be saved in the root package
@@ -537,7 +538,7 @@ class PackageFileInstallerManagerUnloadedTest extends PHPUnit_Framework_TestCase
         $this->rootPackageFile->setExtraKey(PackageFileInstallerManager::INSTALLERS_KEY, (object) array(
             'custom-symlink' => (object) array(
                 'class' => 'PreviousInstaller',
-            )
+            ),
         ));
 
         // The new installer should be saved in the root package
@@ -555,7 +556,7 @@ class PackageFileInstallerManagerUnloadedTest extends PHPUnit_Framework_TestCase
         $this->assertEquals((object) array(
             'custom-symlink' => (object) array(
                 'class' => 'PreviousInstaller',
-            )
+            ),
         ), $this->rootPackageFile->getExtraKey(PackageFileInstallerManager::INSTALLERS_KEY));
 
         $this->assertEquals(
@@ -699,12 +700,12 @@ class PackageFileInstallerManagerUnloadedTest extends PHPUnit_Framework_TestCase
         $this->rootPackageFile->setExtraKey(PackageFileInstallerManager::INSTALLERS_KEY, (object) array(
             'custom-symlink' => (object) array(
                 'class' => 'CustomSymlinkInstaller',
-            )
+            ),
         ));
         $this->packageFile1->setExtraKey(PackageFileInstallerManager::INSTALLERS_KEY, (object) array(
             'rsync' => (object) array(
                 'class' => 'RsyncInstaller',
-            )
+            ),
         ));
     }
 
@@ -721,7 +722,7 @@ class PackageFileInstallerManagerUnloadedTest extends PHPUnit_Framework_TestCase
         $this->packageFile1->setExtraKey(PackageFileInstallerManager::INSTALLERS_KEY, (object) array(
             'rsync' => (object) array(
                 'class' => 'RsyncInstaller',
-            )
+            ),
         ));
     }
 }

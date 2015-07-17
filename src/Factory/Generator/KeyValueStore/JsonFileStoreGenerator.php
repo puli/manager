@@ -22,6 +22,7 @@ use Webmozart\PathUtil\Path;
  * Generates the setup code for a {@link JsonFileStore}.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class JsonFileStoreGenerator implements ServiceGenerator

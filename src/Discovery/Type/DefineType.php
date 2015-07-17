@@ -19,6 +19,7 @@ use Puli\Manager\Transaction\AtomicOperation;
  * Defines a type descriptor in the resource discovery.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class DefineType implements AtomicOperation

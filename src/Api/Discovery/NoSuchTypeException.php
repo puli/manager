@@ -18,6 +18,7 @@ use RuntimeException;
  * Thrown when a binding type was not found.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class NoSuchTypeException extends RuntimeException

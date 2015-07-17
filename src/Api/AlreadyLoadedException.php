@@ -17,6 +17,7 @@ use RuntimeException;
  * Thrown when an object should be loaded that is loaded already.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class AlreadyLoadedException extends RuntimeException

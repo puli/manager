@@ -35,6 +35,7 @@ use Webmozart\Expression\Expression;
  * include the domain in the URL: "http://example.com/%s".
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class Server

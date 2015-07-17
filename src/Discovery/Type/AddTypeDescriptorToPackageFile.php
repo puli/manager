@@ -19,6 +19,7 @@ use Puli\Manager\Transaction\AtomicOperation;
  * Adds a type descriptor to the root package file.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class AddTypeDescriptorToPackageFile implements AtomicOperation

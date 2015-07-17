@@ -20,6 +20,7 @@ use Puli\Manager\Transaction\AtomicOperation;
  * Adds an override statement for each package conflicting with the root package.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class OverrideConflictingPackages implements AtomicOperation
@@ -75,7 +76,6 @@ class OverrideConflictingPackages implements AtomicOperation
             if (!$this->overrideGraph->hasEdge($packageName, $rootPackageName)) {
                 $this->overrideGraph->addEdge($packageName, $rootPackageName);
                 $this->addedEdgesFrom[] = $packageName;
-
             }
         }
     }

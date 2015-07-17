@@ -17,6 +17,7 @@ use Exception;
  * Thrown when a server was not found.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class NoSuchServerException extends Exception

@@ -15,7 +15,9 @@ namespace Puli\Manager\Conflict;
  * A conflict between two packages claiming the same token.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
+ *
  * @see    PackageConflictDetector
  */
 class PackageConflict

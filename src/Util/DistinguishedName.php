@@ -18,7 +18,9 @@ use Puli\Manager\Assert\Assert;
  * A LDAPv3 Distinguished Name.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
+ *
  * @link   https://www.ietf.org/rfc/rfc2253.txt
  */
 class DistinguishedName
@@ -176,5 +178,4 @@ class DistinguishedName
 
         return '"'.str_replace(array('\\', '"'), array('\\\\', '\\"'), $value).'"';
     }
-
 }

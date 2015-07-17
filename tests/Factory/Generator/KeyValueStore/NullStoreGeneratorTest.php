@@ -16,6 +16,7 @@ use Puli\Manager\Tests\Factory\Generator\AbstractGeneratorTest;
 
 /**
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class NullStoreGeneratorTest extends AbstractGeneratorTest

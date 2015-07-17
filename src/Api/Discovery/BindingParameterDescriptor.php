@@ -20,7 +20,9 @@ use RuntimeException;
  * Describes a binding parameter.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
+ *
  * @see    BindingParameter
  */
 class BindingParameterDescriptor
@@ -67,8 +69,8 @@ class BindingParameterDescriptor
      *                                  parameter.
      *
      * @throws InvalidArgumentException If any of the arguments is invalid.
-     * @throws RuntimeException If a default value is set even though required
-     *                          is set to `true`.
+     * @throws RuntimeException         If a default value is set even though required
+     *                                  is set to `true`.
      *
      * @see BindingParameter
      */

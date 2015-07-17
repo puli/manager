@@ -24,6 +24,7 @@ use Puli\Manager\Util\TwoDimensionalHashMap;
  *  * The package that defines the mapping.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class PathMappingCollection
@@ -34,7 +35,7 @@ class PathMappingCollection
     private $map;
 
     /**
-     * @var boolean
+     * @var bool
      */
     private $primaryKeysSorted = false;
 
@@ -60,7 +61,7 @@ class PathMappingCollection
     /**
      * Sets a path mapping for a specific repository path.
      *
-     * @param string          $repositoryPath The repository path.
+     * @param string      $repositoryPath The repository path.
      * @param PathMapping $mapping        The path mapping.
      */
     public function set($repositoryPath, PathMapping $mapping)

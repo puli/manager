@@ -38,6 +38,7 @@ use Webmozart\PathUtil\Path;
  * {@link load()} is called.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class PathMapping
@@ -380,7 +381,7 @@ class PathMapping
      *
      * @param PathConflict $conflict The conflict to be added.
      *
-     * @throws NotLoadedException If the mapping is not loaded.
+     * @throws NotLoadedException       If the mapping is not loaded.
      * @throws InvalidArgumentException If the path of the conflict is not
      *                                  within the repository path of the
      *                                  mapping.
@@ -557,7 +558,6 @@ class PathMapping
      * @see PathMappingState::ENABLED
      *
      * @throws NotLoadedException If the mapping is not loaded.
-     *
      * @throws NotLoadedException If the mapping is not loaded.
      */
     public function isEnabled()

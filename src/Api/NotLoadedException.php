@@ -17,6 +17,7 @@ use RuntimeException;
  * Thrown when an object was expected to be loaded.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class NotLoadedException extends RuntimeException

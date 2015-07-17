@@ -18,6 +18,7 @@ use RuntimeException;
  * Thrown when the version of a package file is not supported.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class UnsupportedVersionException extends RuntimeException

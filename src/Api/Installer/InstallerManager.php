@@ -17,6 +17,7 @@ use Webmozart\Expression\Expression;
  * Manages the installers used to install resources on asset servers.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 interface InstallerManager
@@ -83,8 +84,8 @@ interface InstallerManager
      *
      * @param string $name The installer name.
      *
-     * @return boolean Returns `true` if the installer with the given name
-     *                 exists and `false` otherwise.
+     * @return bool Returns `true` if the installer with the given name
+     *              exists and `false` otherwise.
      */
     public function hasRootInstallerDescriptor($name);
 
@@ -96,8 +97,8 @@ interface InstallerManager
      *
      * @param Expression $expr The search criteria.
      *
-     * @return boolean Returns `true` if the manager contains installers and
-     *                 `false` otherwise.
+     * @return bool Returns `true` if the manager contains installers and
+     *              `false` otherwise.
      */
     public function hasRootInstallerDescriptors(Expression $expr = null);
 
@@ -132,8 +133,8 @@ interface InstallerManager
      *
      * @param string $name The installer name.
      *
-     * @return boolean Returns `true` if the installer with the given name
-     *                 exists and `false` otherwise.
+     * @return bool Returns `true` if the installer with the given name
+     *              exists and `false` otherwise.
      */
     public function hasInstallerDescriptor($name);
 
@@ -145,8 +146,8 @@ interface InstallerManager
      *
      * @param Expression $expr The search criteria.
      *
-     * @return boolean Returns `true` if the manager contains installers and
-     *                 `false` otherwise.
+     * @return bool Returns `true` if the manager contains installers and
+     *              `false` otherwise.
      */
     public function hasInstallerDescriptors(Expression $expr = null);
 }

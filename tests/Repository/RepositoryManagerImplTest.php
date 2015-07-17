@@ -34,6 +34,7 @@ use Webmozart\Expression\Expr;
 
 /**
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class RepositoryManagerImplTest extends ManagerTestCase
@@ -90,7 +91,8 @@ class RepositoryManagerImplTest extends ManagerTestCase
 
     protected function setUp()
     {
-        while (false === @mkdir($this->tempDir = sys_get_temp_dir().'/puli-repo-manager/RepositoryManagerImplTest'.rand(10000, 99999), 0777, true)) {}
+        while (false === @mkdir($this->tempDir = sys_get_temp_dir().'/puli-repo-manager/RepositoryManagerImplTest'.rand(10000, 99999), 0777, true)) {
+        }
 
         $filesystem = new Filesystem();
         $filesystem->mirror(__DIR__.'/Fixtures', $this->tempDir);
@@ -1148,7 +1150,7 @@ class RepositoryManagerImplTest extends ManagerTestCase
 
         $this->rootPackageFile->addPathMapping(new PathMapping('/path1', 'resources'));
         $this->packageFile1->addPathMapping(new PathMapping('/path2', 'resources'));
-        $this->packageFile2->addPathMapping( new PathMapping('/path2', 'resources'));
+        $this->packageFile2->addPathMapping(new PathMapping('/path2', 'resources'));
 
         $expr1 = Expr::same('vendor/package1', PathMapping::CONTAINING_PACKAGE);
 

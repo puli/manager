@@ -75,6 +75,7 @@ use Puli\Manager\Api\InvalidConfigException;
  * ```
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class Config
@@ -314,7 +315,7 @@ class Config
      * @param mixed  $value The value to set.
      *
      * @throws NoSuchConfigKeyException If the configuration key is invalid.
-     * @throws InvalidConfigException If the value is invalid.
+     * @throws InvalidConfigException   If the value is invalid.
      */
     public function set($key, $value)
     {
@@ -344,7 +345,7 @@ class Config
      * @param array $values The values to set.
      *
      * @throws NoSuchConfigKeyException If a configuration key is invalid.
-     * @throws InvalidConfigException If a value is invalid.
+     * @throws InvalidConfigException   If a value is invalid.
      */
     public function merge(array $values)
     {
@@ -359,7 +360,7 @@ class Config
      * @param array $values The values to set.
      *
      * @throws NoSuchConfigKeyException If a configuration key is invalid.
-     * @throws InvalidConfigException If a value is invalid.
+     * @throws InvalidConfigException   If a value is invalid.
      */
     public function replace(array $values)
     {
@@ -557,7 +558,6 @@ class Config
 
                 break;
         }
-
     }
 
     private function assertArray($key, $value)
@@ -699,5 +699,4 @@ class Config
 
         $target[$keyParts[$l]] = $value;
     }
-
 }

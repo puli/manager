@@ -29,6 +29,7 @@ use Webmozart\Expression\Expression;
  * Whenever you call methods in this class, the changes will be written to disk.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class RootPackageFileManagerImpl extends AbstractConfigManager implements RootPackageFileManager

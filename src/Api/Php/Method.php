@@ -18,6 +18,7 @@ use Webmozart\Assert\Assert;
  * A method of a {@link Clazz}.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class Method

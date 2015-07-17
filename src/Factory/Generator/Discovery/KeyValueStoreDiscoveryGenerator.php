@@ -21,6 +21,7 @@ use Puli\Manager\Assert\Assert;
  * Generates the setup code for a {@link KeyValueStoreDiscovery}.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class KeyValueStoreDiscoveryGenerator implements ServiceGenerator
@@ -28,7 +29,7 @@ class KeyValueStoreDiscoveryGenerator implements ServiceGenerator
     private static $defaultOptions = array(
         'store' => array(
             'type' => 'null',
-        )
+        ),
     );
 
     /**

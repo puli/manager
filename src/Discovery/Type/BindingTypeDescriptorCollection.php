@@ -27,6 +27,7 @@ use Puli\Manager\Util\TwoDimensionalHashMap;
  * packages, but with the same type name.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class BindingTypeDescriptorCollection

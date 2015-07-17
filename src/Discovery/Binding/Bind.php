@@ -20,6 +20,7 @@ use Puli\Manager\Transaction\AtomicOperation;
  * Binds a binding descriptor to the resource discovery.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class Bind implements AtomicOperation

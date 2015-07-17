@@ -19,6 +19,7 @@ use Puli\Repository\Api\Resource\Resource;
  * Installs resources on a server.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 interface ResourceInstaller

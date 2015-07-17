@@ -17,6 +17,7 @@ use Puli\Manager\Api\Php\Method;
  * Generates the instantiation code for a service.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 interface ServiceGenerator

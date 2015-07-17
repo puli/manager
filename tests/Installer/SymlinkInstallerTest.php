@@ -24,6 +24,7 @@ use Symfony\Component\Filesystem\Filesystem;
 
 /**
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class SymlinkInstallerTest extends PHPUnit_Framework_TestCase
@@ -55,7 +56,8 @@ class SymlinkInstallerTest extends PHPUnit_Framework_TestCase
 
     protected function setUp()
     {
-        while (false === @mkdir($this->tempBaseDir = sys_get_temp_dir().'/puli-web-plugin/SymlinkInstallerTest'.rand(10000, 99999), 0777, true)) {}
+        while (false === @mkdir($this->tempBaseDir = sys_get_temp_dir().'/puli-web-plugin/SymlinkInstallerTest'.rand(10000, 99999), 0777, true)) {
+        }
 
         $this->tempDir = $this->tempBaseDir.'/workspace';
         $this->fixturesDir = $this->tempBaseDir.'/fixtures';

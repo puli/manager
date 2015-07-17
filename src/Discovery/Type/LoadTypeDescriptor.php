@@ -19,6 +19,7 @@ use Puli\Manager\Transaction\AtomicOperation;
  * Loads a type descriptor.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class LoadTypeDescriptor implements AtomicOperation

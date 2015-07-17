@@ -26,7 +26,9 @@ use Webmozart\Expression\Expression;
  * in this package.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
+ *
  * @see    BindingType
  */
 class BindingTypeDescriptor

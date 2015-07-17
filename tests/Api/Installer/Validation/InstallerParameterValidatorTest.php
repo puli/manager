@@ -19,6 +19,7 @@ use Puli\Manager\Api\Installer\Validation\InstallerParameterValidator;
 
 /**
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class InstallerParameterValidatorTest extends PHPUnit_Framework_TestCase

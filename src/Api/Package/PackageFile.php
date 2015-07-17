@@ -12,7 +12,6 @@
 namespace Puli\Manager\Api\Package;
 
 use InvalidArgumentException;
-use Puli\Manager\Api\Config\ConfigFile;
 use Puli\Manager\Api\Discovery\BindingDescriptor;
 use Puli\Manager\Api\Discovery\BindingTypeDescriptor;
 use Puli\Manager\Api\Discovery\NoSuchBindingException;
@@ -25,6 +24,7 @@ use Rhumsaa\Uuid\Uuid;
  * Stores the configuration of a package.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class PackageFile

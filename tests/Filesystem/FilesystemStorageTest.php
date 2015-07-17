@@ -17,6 +17,7 @@ use Symfony\Component\Filesystem\Filesystem;
 
 /**
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class FilesystemStorageTest extends PHPUnit_Framework_TestCase
@@ -34,7 +35,8 @@ class FilesystemStorageTest extends PHPUnit_Framework_TestCase
 
     protected function setUp()
     {
-        while (false === @mkdir($this->tempDir = sys_get_temp_dir().'/puli-manager/FilesystemStorageTest'.rand(10000, 99999), 0777, true)) {}
+        while (false === @mkdir($this->tempDir = sys_get_temp_dir().'/puli-manager/FilesystemStorageTest'.rand(10000, 99999), 0777, true)) {
+        }
 
         $this->storage = new FilesystemStorage();
         $this->path = $this->tempDir.'/test-file';

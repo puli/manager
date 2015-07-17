@@ -20,6 +20,7 @@ use Webmozart\Expression\Expression;
  * Manages the resource discovery of a Puli project.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 interface DiscoveryManager
@@ -200,10 +201,10 @@ interface DiscoveryManager
      * @param int               $flags             A bitwise combination of the
      *                                             flag constants in this class.
      *
-     * @throws NoSuchTypeException If the type referenced by the descriptor does
-     *                             not exist.
-     * @throws TypeNotEnabledException If the type referenced by the descriptor
-     *                                 is not enabled.
+     * @throws NoSuchTypeException       If the type referenced by the descriptor does
+     *                                   not exist.
+     * @throws TypeNotEnabledException   If the type referenced by the descriptor
+     *                                   is not enabled.
      * @throws DuplicateBindingException If a binding with the same UUID exists
      *                                   already.
      */
@@ -293,11 +294,11 @@ interface DiscoveryManager
      *
      * @param Uuid $uuid The UUID of the binding.
      *
-     * @throws NoSuchBindingException If the binding does not exist.
-     * @throws NoSuchTypeException If the type referenced by the descriptor does
-     *                             not exist.
-     * @throws TypeNotEnabledException If the type referenced by the descriptor
-     *                                 is not enabled.
+     * @throws NoSuchBindingException          If the binding does not exist.
+     * @throws NoSuchTypeException             If the type referenced by the descriptor does
+     *                                         not exist.
+     * @throws TypeNotEnabledException         If the type referenced by the descriptor
+     *                                         is not enabled.
      * @throws NonRootPackageExpectedException If the binding is in the root
      *                                         package. Can only enable bindings
      *                                         in non-root packages, because the
@@ -311,11 +312,11 @@ interface DiscoveryManager
      *
      * @param Uuid $uuid The UUID of the binding.
      *
-     * @throws NoSuchBindingException If the binding does not exist.
-     * @throws NoSuchTypeException If the type referenced by the descriptor does
-     *                             not exist.
-     * @throws TypeNotEnabledException If the type referenced by the descriptor
-     *                                 is not enabled.
+     * @throws NoSuchBindingException          If the binding does not exist.
+     * @throws NoSuchTypeException             If the type referenced by the descriptor does
+     *                                         not exist.
+     * @throws TypeNotEnabledException         If the type referenced by the descriptor
+     *                                         is not enabled.
      * @throws NonRootPackageExpectedException If the binding is in the root
      *                                         package. Can only disable bindings
      *                                         in non-root packages, because the

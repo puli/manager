@@ -22,6 +22,7 @@ use Puli\Manager\Transaction\AtomicOperation;
  * Unloads a path mapping.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class UnloadPathMapping implements AtomicOperation

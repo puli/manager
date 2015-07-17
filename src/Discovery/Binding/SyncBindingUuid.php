@@ -29,6 +29,7 @@ use Rhumsaa\Uuid\Uuid;
  * unbound from the discovery, depending on the outcome.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class SyncBindingUuid implements AtomicOperation

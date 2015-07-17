@@ -22,6 +22,7 @@ use Webmozart\Expression\Expr;
 
 /**
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class PackageFileServerManagerUnloadedTest extends PHPUnit_Framework_TestCase
@@ -86,7 +87,7 @@ class PackageFileServerManagerUnloadedTest extends PHPUnit_Framework_TestCase
                     'document-root' => 'web',
                     'url-format' => '/public/%s',
                     'parameters' => (object) array('param' => 'value'),
-                )
+                ),
             ));
 
         $server = new Server('localhost', 'symlink', 'web', '/public/%s', array(
@@ -105,7 +106,7 @@ class PackageFileServerManagerUnloadedTest extends PHPUnit_Framework_TestCase
                 'localhost' => (object) array(
                     'installer' => 'symlink',
                     'document-root' => 'web',
-                )
+                ),
             ));
 
         $server = new Server('localhost', 'symlink', 'web');
@@ -237,7 +238,7 @@ class PackageFileServerManagerUnloadedTest extends PHPUnit_Framework_TestCase
                 'cdn' => (object) array(
                     'installer' => 'rsync',
                     'document-root' => 'ssh://my.cdn.com',
-                    'url-format' => 'http://my.cdn.com/%s'
+                    'url-format' => 'http://my.cdn.com/%s',
                 ),
             ));
 
@@ -525,7 +526,7 @@ class PackageFileServerManagerUnloadedTest extends PHPUnit_Framework_TestCase
                     'installer' => 'symlink',
                     'document-root' => 'web',
                     'url-format' => '/public/%s',
-                )
+                ),
             ));
     }
 }

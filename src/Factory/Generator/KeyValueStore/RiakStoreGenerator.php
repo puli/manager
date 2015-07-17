@@ -21,6 +21,7 @@ use Puli\Manager\Assert\Assert;
  * Generates the setup code for a {@link RiakStore}.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class RiakStoreGenerator implements ServiceGenerator

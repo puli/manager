@@ -23,6 +23,7 @@ use Puli\Manager\Api\Repository\PathConflict;
  * A collection of resource path conflicts.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class ConflictCollection implements IteratorAggregate, Countable, ArrayAccess

@@ -17,6 +17,7 @@ use RuntimeException;
  * Thrown when the resource discovery should have been empty but was not.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class DiscoveryNotEmptyException extends RuntimeException

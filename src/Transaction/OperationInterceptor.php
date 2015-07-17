@@ -17,7 +17,9 @@ namespace Puli\Manager\Transaction;
  * See {@link InterceptedOperation} for a description of interceptors.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
+ *
  * @see    InterceptedOperation
  */
 interface OperationInterceptor

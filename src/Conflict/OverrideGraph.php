@@ -60,6 +60,7 @@ use RuntimeException;
  * ```
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class OverrideGraph
@@ -179,9 +180,8 @@ class OverrideGraph
      * @param string $from The start package name.
      * @param string $to   The end package name.
      *
-     * @throws RuntimeException If any of the packages does not exist in the
-     *                          graph. Each package must have been added first.
-     *
+     * @throws RuntimeException          If any of the packages does not exist in the
+     *                                   graph. Each package must have been added first.
      * @throws CyclicDependencyException If adding the edge would create a cycle.
      */
     public function addEdge($from, $to)

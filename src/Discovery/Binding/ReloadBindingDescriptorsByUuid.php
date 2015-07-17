@@ -18,6 +18,7 @@ use Rhumsaa\Uuid\Uuid;
  * Reloads all binding descriptors with a given UUID.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class ReloadBindingDescriptorsByUuid extends AbstractReloadBindingDescriptors

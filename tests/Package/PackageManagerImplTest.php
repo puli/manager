@@ -30,6 +30,7 @@ use Webmozart\Expression\Expr;
 
 /**
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class PackageManagerImplTest extends ManagerTestCase
@@ -96,7 +97,8 @@ class PackageManagerImplTest extends ManagerTestCase
 
     protected function setUp()
     {
-        while (false === @mkdir($this->tempDir = sys_get_temp_dir().'/puli-repo-manager/PackageManagerTest_temp'.rand(10000, 99999), 0777, true)) {}
+        while (false === @mkdir($this->tempDir = sys_get_temp_dir().'/puli-repo-manager/PackageManagerTest_temp'.rand(10000, 99999), 0777, true)) {
+        }
 
         $this->packageDir1 = __DIR__.'/Fixtures/package1';
         $this->packageDir2 = __DIR__.'/Fixtures/package2';

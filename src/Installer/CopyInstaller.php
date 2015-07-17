@@ -22,6 +22,7 @@ use Webmozart\PathUtil\Path;
  * Installs resources via a local filesystem copy.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class CopyInstaller implements ResourceInstaller

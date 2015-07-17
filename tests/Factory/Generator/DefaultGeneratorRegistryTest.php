@@ -17,6 +17,7 @@ use Puli\Manager\Factory\Generator\DefaultGeneratorRegistry;
 
 /**
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class DefaultGeneratorRegistryTest extends PHPUnit_Framework_TestCase

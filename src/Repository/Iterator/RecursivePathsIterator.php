@@ -20,6 +20,7 @@ use RuntimeException;
  * corresponding repository paths.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class RecursivePathsIterator implements RecursiveIterator

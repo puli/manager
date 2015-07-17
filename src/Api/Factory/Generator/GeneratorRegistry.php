@@ -15,6 +15,7 @@ namespace Puli\Manager\Api\Factory\Generator;
  * Provides access to named service generators.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 interface GeneratorRegistry

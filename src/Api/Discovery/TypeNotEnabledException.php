@@ -18,6 +18,7 @@ use RuntimeException;
  * Thrown when a type was expected to be enabled but was not.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class TypeNotEnabledException extends RuntimeException

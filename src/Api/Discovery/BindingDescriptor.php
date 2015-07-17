@@ -30,7 +30,9 @@ use Webmozart\Expression\Expression;
  * used in this package.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
+ *
  * @see    ResourceBinding
  */
 class BindingDescriptor

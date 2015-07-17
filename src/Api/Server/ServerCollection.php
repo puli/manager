@@ -21,6 +21,7 @@ use LogicException;
  * A collection of {@link Server} instances.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class ServerCollection implements IteratorAggregate, ArrayAccess, Countable
@@ -34,7 +35,7 @@ class ServerCollection implements IteratorAggregate, ArrayAccess, Countable
      * Creates the collection.
      *
      * @param Server[] $servers The servers to initially fill into the
-     *                               collection.
+     *                          collection.
      */
     public function __construct(array $servers = array())
     {
@@ -149,7 +150,7 @@ class ServerCollection implements IteratorAggregate, ArrayAccess, Countable
      * Returns the collection contents as array.
      *
      * @return Server[] The servers in the collection indexed by their
-     *                       names.
+     *                  names.
      */
     public function toArray()
     {

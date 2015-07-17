@@ -17,6 +17,7 @@ use Puli\Manager\Config\EnvConfig;
 
 /**
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class EnvConfigTest extends PHPUnit_Framework_TestCase
@@ -45,7 +46,5 @@ class EnvConfigTest extends PHPUnit_Framework_TestCase
         $config = new EnvConfig($default);
 
         $this->assertSame('default', $config->get(Config::PULI_DIR));
-
     }
-
 }

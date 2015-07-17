@@ -21,6 +21,7 @@ use Rhumsaa\Uuid\Uuid;
  * marked as duplicates. Otherwise the single type is marked as no duplicate.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class UpdateDuplicateMarksForTypeName implements OperationInterceptor

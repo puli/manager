@@ -18,6 +18,7 @@ use Puli\Manager\Api\Package\RootPackageFile;
 
 /**
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class RootPackageFileTest extends PHPUnit_Framework_TestCase

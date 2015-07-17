@@ -21,6 +21,7 @@ use Puli\Manager\Assert\Assert;
  * Generates the setup code for a {@link PredisStore}.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class PredisStoreGenerator implements ServiceGenerator

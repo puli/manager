@@ -15,7 +15,6 @@ use Puli\Manager\Api\Config\Config;
 use Puli\Manager\Api\Discovery\BindingDescriptor;
 use Puli\Manager\Api\Discovery\BindingParameterDescriptor;
 use Puli\Manager\Api\Discovery\BindingTypeDescriptor;
-use Puli\Manager\Api\FileNotFoundException;
 use Puli\Manager\Api\InvalidConfigException;
 use Puli\Manager\Api\Package\InstallInfo;
 use Puli\Manager\Api\Package\PackageFile;
@@ -23,7 +22,6 @@ use Puli\Manager\Api\Package\PackageFileSerializer;
 use Puli\Manager\Api\Package\RootPackageFile;
 use Puli\Manager\Api\Package\UnsupportedVersionException;
 use Puli\Manager\Api\Repository\PathMapping;
-use Puli\Manager\Assert\Assert;
 use Rhumsaa\Uuid\Uuid;
 use stdClass;
 use Webmozart\Json\DecodingFailedException;
@@ -38,6 +36,7 @@ use Webmozart\PathUtil\Path;
  * The JSON is validated against the schema `res/schema/package-schema.json`.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class PackageJsonSerializer implements PackageFileSerializer

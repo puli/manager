@@ -14,9 +14,10 @@ namespace Puli\Manager\Api\Installer\Validation;
 use Puli\Manager\Api\Installer\InstallerDescriptor;
 
 /**
- * Validates parameter values against the constraints defined by an installer
+ * Validates parameter values against the constraints defined by an installer.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class InstallerParameterValidator
@@ -24,10 +25,10 @@ class InstallerParameterValidator
     /**
      * Returns whether the given parameter values are valid.
      *
-     * @param array $parameterValues          The parameter values to
-     *                                        validate.
-     * @param InstallerDescriptor $descriptor The installer descriptor to
-     *                                        validate the values for.
+     * @param array               $parameterValues The parameter values to
+     *                                             validate.
+     * @param InstallerDescriptor $descriptor      The installer descriptor to
+     *                                             validate the values for.
      *
      * @return ConstraintViolation[] The found violations. If no violations were
      *                               found, an empty array is returned.

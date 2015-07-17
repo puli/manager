@@ -16,6 +16,7 @@ use Puli\Manager\Api\Installer\Validation\ConstraintViolation;
 
 /**
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class ConstraintViolationTest extends PHPUnit_Framework_TestCase

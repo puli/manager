@@ -18,6 +18,7 @@ use RuntimeException;
  * A parameter of an {@link InstallerDescriptor}.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class InstallerParameter

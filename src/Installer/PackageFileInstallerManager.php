@@ -28,10 +28,10 @@ use Webmozart\Json\JsonValidator;
 use Webmozart\Json\ValidationFailedException;
 
 /**
- *
  * An installer manager that stores the installers in the package file.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class PackageFileInstallerManager implements InstallerManager
@@ -56,8 +56,8 @@ class PackageFileInstallerManager implements InstallerManager
                 'relative' => array(
                     'default' => true,
                     'description' => 'Whether to create relative or absolute links',
-                )
-            )
+                ),
+            ),
         ),
     );
 

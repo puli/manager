@@ -23,6 +23,7 @@ use Webmozart\Expression\Expr;
 
 /**
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class RootPackageFileManagerImplTest extends ManagerTestCase
@@ -488,7 +489,7 @@ class RootPackageFileManagerImplTest extends ManagerTestCase
             ->will($this->throwException(new TestException()));
 
         try {
-        $this->manager->removePluginClasses(Expr::in(array(self::PLUGIN_CLASS, self::OTHER_PLUGIN_CLASS)));
+            $this->manager->removePluginClasses(Expr::in(array(self::PLUGIN_CLASS, self::OTHER_PLUGIN_CLASS)));
             $this->fail('Expected a TestException');
         } catch (TestException $e) {
         }
@@ -605,7 +606,6 @@ class RootPackageFileManagerImplTest extends ManagerTestCase
             ->will($this->returnCallback(function (RootPackageFile $packageFile) {
                 PHPUnit_Framework_Assert::assertSame('vendor/package', $packageFile->getPackageName());
             }));
-
 
         $this->manager->setPackageName('vendor/package');
 

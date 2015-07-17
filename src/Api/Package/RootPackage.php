@@ -15,6 +15,7 @@ namespace Puli\Manager\Api\Package;
  * The root package.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class RootPackage extends Package

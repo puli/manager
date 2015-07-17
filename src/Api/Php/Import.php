@@ -17,6 +17,7 @@ use Puli\Manager\Assert\Assert;
  * An import statement of a {@link Clazz} file.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class Import
@@ -104,7 +105,6 @@ class Import
     {
         return $this->alias;
     }
-
 
     /**
      * Returns the source code of the import.

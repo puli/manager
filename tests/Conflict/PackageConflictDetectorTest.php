@@ -17,6 +17,7 @@ use Puli\Manager\Conflict\PackageConflictDetector;
 
 /**
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class PackageConflictDetectorTest extends PHPUnit_Framework_TestCase

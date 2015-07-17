@@ -15,6 +15,7 @@ namespace Puli\Manager\Api\Event;
  * Contains the events triggered by this package.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 interface PuliEvents

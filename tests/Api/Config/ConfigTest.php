@@ -16,6 +16,7 @@ use Puli\Manager\Api\Config\Config;
 
 /**
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class ConfigTest extends PHPUnit_Framework_TestCase
@@ -709,7 +710,7 @@ class ConfigTest extends PHPUnit_Framework_TestCase
             Config::REPOSITORY => array(
                 'type' => 'my-type',
                 'path' => '{$puli-dir}/my-path',
-            )
+            ),
         ), $config->toRawArray());
     }
 
@@ -727,7 +728,7 @@ class ConfigTest extends PHPUnit_Framework_TestCase
             Config::REPOSITORY => array(
                 'type' => 'my-type',
                 'path' => '{$puli-dir}/my-path',
-            )
+            ),
         ), $config->toRawArray());
     }
 
@@ -743,7 +744,7 @@ class ConfigTest extends PHPUnit_Framework_TestCase
         $this->assertSame(array(
             Config::REPOSITORY => array(
                 'path' => '{$puli-dir}/my-path',
-            )
+            ),
         ), $config->toRawArray(false));
     }
 
@@ -801,7 +802,7 @@ class ConfigTest extends PHPUnit_Framework_TestCase
             Config::REPOSITORY => array(
                 'type' => 'my-type',
                 'path' => 'my-puli-dir/my-path',
-            )
+            ),
         ), $config->toArray());
     }
 
@@ -819,7 +820,7 @@ class ConfigTest extends PHPUnit_Framework_TestCase
             Config::REPOSITORY => array(
                 'type' => 'my-type',
                 'path' => 'my-puli-dir/my-path',
-            )
+            ),
         ), $config->toArray());
     }
 
@@ -835,7 +836,7 @@ class ConfigTest extends PHPUnit_Framework_TestCase
         $this->assertSame(array(
             Config::REPOSITORY => array(
                 'path' => '/my-path',
-            )
+            ),
         ), $config->toArray(false));
     }
 
@@ -966,7 +967,7 @@ class ConfigTest extends PHPUnit_Framework_TestCase
         return array(
             array(Config::FACTORY_AUTO_GENERATE),
             array(Config::REPOSITORY_SYMLINK),
-            array(Config::DISCOVERY_STORE_CACHE)
+            array(Config::DISCOVERY_STORE_CACHE),
         );
     }
 }

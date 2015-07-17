@@ -18,6 +18,7 @@ use RuntimeException;
  * Thrown when a duplicate path mapping is detected.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class DuplicatePathMappingException extends RuntimeException

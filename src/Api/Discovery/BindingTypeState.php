@@ -15,6 +15,7 @@ namespace Puli\Manager\Api\Discovery;
  * Contains constants representing the state of a binding type.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 final class BindingTypeState
@@ -38,12 +39,14 @@ final class BindingTypeState
     {
         return array(
             self::ENABLED,
-            self::DUPLICATE
+            self::DUPLICATE,
         );
     }
 
     /**
      * Must not be instantiated.
      */
-    private function __construct() {}
+    private function __construct()
+    {
+    }
 }

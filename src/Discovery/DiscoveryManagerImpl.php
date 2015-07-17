@@ -63,6 +63,7 @@ use Webmozart\Expression\Expression;
 
 /**
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class DiscoveryManagerImpl implements DiscoveryManager
@@ -127,8 +128,7 @@ class DiscoveryManagerImpl implements DiscoveryManager
         PackageCollection $packages,
         PackageFileStorage $packageFileStorage,
         LoggerInterface $logger = null
-    )
-    {
+    ) {
         $this->environment = $environment;
         $this->discovery = $discovery;
         $this->packages = $packages;
@@ -987,7 +987,7 @@ class DiscoveryManagerImpl implements DiscoveryManager
             new LoadTypeDescriptor($typeDescriptor, $package, $this->typeDescriptors),
             array(
                 new UpdateDuplicateMarksForTypeName($typeName, $this->typeDescriptors),
-                new ReloadBindingDescriptorsByTypeName($typeName, $this->bindingDescriptors, $this->typeDescriptors)
+                new ReloadBindingDescriptorsByTypeName($typeName, $this->bindingDescriptors, $this->typeDescriptors),
             )
         );
     }
@@ -1000,7 +1000,7 @@ class DiscoveryManagerImpl implements DiscoveryManager
             new UnloadTypeDescriptor($typeDescriptor, $this->typeDescriptors),
             array(
                 new UpdateDuplicateMarksForTypeName($typeName, $this->typeDescriptors),
-                new ReloadBindingDescriptorsByTypeName($typeName, $this->bindingDescriptors, $this->typeDescriptors)
+                new ReloadBindingDescriptorsByTypeName($typeName, $this->bindingDescriptors, $this->typeDescriptors),
             )
         );
     }

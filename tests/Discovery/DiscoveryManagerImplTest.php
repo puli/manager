@@ -37,6 +37,7 @@ use Webmozart\Expression\Expr;
 
 /**
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class DiscoveryManagerImplTest extends ManagerTestCase
@@ -115,7 +116,8 @@ class DiscoveryManagerImplTest extends ManagerTestCase
 
     protected function setUp()
     {
-        while (false === @mkdir($this->tempDir = sys_get_temp_dir().'/puli-repo-manager/DiscoveryManagerImplTest'.rand(10000, 99999), 0777, true)) {}
+        while (false === @mkdir($this->tempDir = sys_get_temp_dir().'/puli-repo-manager/DiscoveryManagerImplTest'.rand(10000, 99999), 0777, true)) {
+        }
 
         $filesystem = new Filesystem();
         $filesystem->mirror(__DIR__.'/Fixtures', $this->tempDir);
@@ -623,7 +625,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->packageFileStorage->expects($this->once())
             ->method('saveRootPackageFile')
             ->with($this->rootPackageFile)
-            ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) use ($bindingType3){
+            ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) use ($bindingType3) {
                 PHPUnit_Framework_Assert::assertSame(array($bindingType3), $rootPackageFile->getTypeDescriptors());
             }));
 

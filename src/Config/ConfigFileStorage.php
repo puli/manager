@@ -23,6 +23,7 @@ use Puli\Manager\Api\Storage\StorageException;
  * Loads and saves configuration files.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class ConfigFileStorage

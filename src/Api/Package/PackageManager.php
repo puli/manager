@@ -19,6 +19,7 @@ use Webmozart\Expression\Expression;
  * Manages the package repository of a Puli project.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 interface PackageManager
@@ -42,8 +43,8 @@ interface PackageManager
      *                                   development environments.
      *
      * @throws InvalidConfigException If the package is not configured correctly.
-     * @throws NameConflictException If the package has the same name as another
-     *                               loaded package.
+     * @throws NameConflictException  If the package has the same name as another
+     *                                loaded package.
      */
     public function installPackage($installPath, $name = null, $installerName = InstallInfo::DEFAULT_INSTALLER_NAME, $dev = false);
 
@@ -54,8 +55,8 @@ interface PackageManager
      * @param string $newName The new package name.
      *
      * @throws NoSuchPackageException If the package was not found.
-     * @throws NameConflictException If a package with the new name exists
-     *                               already.
+     * @throws NameConflictException  If a package with the new name exists
+     *                                already.
      */
     public function renamePackage($name, $newName);
 

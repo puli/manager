@@ -17,6 +17,7 @@ use stdClass;
 
 /**
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class InstallerParameterTest extends PHPUnit_Framework_TestCase

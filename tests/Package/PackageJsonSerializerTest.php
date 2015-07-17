@@ -28,6 +28,7 @@ use Rhumsaa\Uuid\Uuid;
 
 /**
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class PackageJsonSerializerTest extends JsonTestCase
@@ -547,7 +548,7 @@ JSON;
         $packageFile->setOverriddenPackages(array('acme/blog'));
         $packageFile->setOverrideOrder(array(
             'acme/blog-extension1',
-            'acme/blog-extension2'
+            'acme/blog-extension2',
         ));
         $packageFile->addPluginClass('Puli\Manager\Tests\Api\Package\Fixtures\TestPlugin');
         $packageFile->getConfig()->merge(array(
@@ -814,7 +815,7 @@ JSON;
         $this->assertEquals(array(
             new BindingTypeDescriptor('my/type', null, array(
                 new BindingParameterDescriptor('param', BindingParameterDescriptor::REQUIRED),
-            ))
+            )),
         ), $packageFile->getTypeDescriptors());
     }
 
@@ -1053,7 +1054,6 @@ JSON;
 
 JSON;
 
-
         $this->serializer->unserializePackageFile($json);
     }
 
@@ -1071,7 +1071,6 @@ JSON;
 }
 
 JSON;
-
 
         $this->serializer->unserializePackageFile($json);
     }
@@ -1095,7 +1094,6 @@ JSON;
 
 JSON;
 
-
         $this->serializer->unserializePackageFile($json);
     }
 
@@ -1109,7 +1107,6 @@ JSON;
 }
 
 JSON;
-
 
         $packageFile = $this->serializer->unserializePackageFile($json);
 
@@ -1130,7 +1127,6 @@ JSON;
 
 JSON;
 
-
         $this->serializer->unserializePackageFile($json);
     }
 
@@ -1147,7 +1143,6 @@ JSON;
 }
 
 JSON;
-
 
         $this->serializer->unserializePackageFile($json);
     }
@@ -1168,7 +1163,6 @@ JSON;
 
 JSON;
 
-
         $this->serializer->unserializePackageFile($json);
     }
 
@@ -1185,7 +1179,6 @@ JSON;
 }
 
 JSON;
-
 
         $this->serializer->unserializePackageFile($json);
     }
@@ -1216,15 +1209,21 @@ JSON;
 
 class PluginA implements PuliPlugin
 {
-    public function activate(Puli $puli) {}
+    public function activate(Puli $puli)
+    {
+    }
 }
 
 class PluginB implements PuliPlugin
 {
-    public function activate(Puli $puli) {}
+    public function activate(Puli $puli)
+    {
+    }
 }
 
 class PluginC implements PuliPlugin
 {
-    public function activate(Puli $puli) {}
+    public function activate(Puli $puli)
+    {
+    }
 }

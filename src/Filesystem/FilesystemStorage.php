@@ -21,6 +21,7 @@ use Webmozart\PathUtil\Path;
  * Stores files on the filesystem.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class FilesystemStorage implements Storage

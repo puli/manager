@@ -18,7 +18,6 @@ use Puli\Discovery\Api\ResourceDiscovery;
 use Puli\Manager\Api\Asset\AssetManager;
 use Puli\Manager\Api\Config\ConfigFileManager;
 use Puli\Manager\Api\Config\ConfigFileSerializer;
-use Puli\Manager\Api\Config\ConfigFileWriter;
 use Puli\Manager\Api\Discovery\DiscoveryManager;
 use Puli\Manager\Api\Environment\GlobalEnvironment;
 use Puli\Manager\Api\Environment\ProjectEnvironment;
@@ -111,6 +110,7 @@ use Webmozart\PathUtil\Path;
  * access.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class Puli

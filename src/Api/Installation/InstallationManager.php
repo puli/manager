@@ -18,6 +18,7 @@ use Puli\Repository\Api\Resource\Resource;
  * Manages the installation of resources.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 interface InstallationManager

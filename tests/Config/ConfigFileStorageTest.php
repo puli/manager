@@ -16,12 +16,12 @@ use PHPUnit_Framework_TestCase;
 use Puli\Manager\Api\Config\Config;
 use Puli\Manager\Api\Config\ConfigFile;
 use Puli\Manager\Api\Config\ConfigFileSerializer;
-use Puli\Manager\Api\FileNotFoundException;
 use Puli\Manager\Api\Storage\Storage;
 use Puli\Manager\Config\ConfigFileStorage;
 
 /**
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class ConfigFileStorageTest extends PHPUnit_Framework_TestCase

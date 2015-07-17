@@ -11,13 +11,13 @@
 
 namespace Puli\Manager\Api\Config;
 
-use Puli\Manager\Api\FileNotFoundException;
 use Puli\Manager\Api\InvalidConfigException;
 
 /**
  * Serializes and unserializes configuration files.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 interface ConfigFileSerializer

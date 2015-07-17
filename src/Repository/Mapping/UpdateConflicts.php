@@ -22,6 +22,7 @@ use Webmozart\PathUtil\Path;
  * Updates the resource path conflicts.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class UpdateConflicts implements AtomicOperation

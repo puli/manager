@@ -19,6 +19,7 @@ use Puli\Manager\Transaction\AtomicOperation;
  * Unloads a type descriptor.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class UnloadTypeDescriptor implements AtomicOperation
@@ -58,7 +59,6 @@ class UnloadTypeDescriptor implements AtomicOperation
         if (!$this->typeDescriptor->isLoaded()) {
             return;
         }
-
 
         // never fails with the check before
         $this->containingPackage = $this->typeDescriptor->getContainingPackage();

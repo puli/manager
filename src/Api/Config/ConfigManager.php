@@ -19,6 +19,7 @@ use Webmozart\Expression\Expression;
  * Manages changes to the configuration.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 interface ConfigManager
@@ -39,8 +40,8 @@ interface ConfigManager
      * @param mixed  $value The new value.
      *
      * @throws NoSuchConfigKeyException If the configuration key is invalid.
-     * @throws InvalidConfigException If the value is invalid.
-     * @throws StorageException If the file cannot be written.
+     * @throws InvalidConfigException   If the value is invalid.
+     * @throws StorageException         If the file cannot be written.
      */
     public function setConfigKey($key, $value);
 
@@ -52,8 +53,8 @@ interface ConfigManager
      * @param string[] $values The map from configuration keys to values.
      *
      * @throws NoSuchConfigKeyException If a configuration key is invalid.
-     * @throws InvalidConfigException If a value is invalid.
-     * @throws StorageException If the file cannot be written.
+     * @throws InvalidConfigException   If a value is invalid.
+     * @throws StorageException         If the file cannot be written.
      */
     public function setConfigKeys(array $values);
 
@@ -65,7 +66,7 @@ interface ConfigManager
      * @param string $key The removed configuration key.
      *
      * @throws NoSuchConfigKeyException If the configuration key is invalid.
-     * @throws StorageException If the file cannot be written.
+     * @throws StorageException         If the file cannot be written.
      */
     public function removeConfigKey($key);
 
@@ -77,7 +78,7 @@ interface ConfigManager
      * @param Expression $expr The search criteria.
      *
      * @throws NoSuchConfigKeyException If a configuration key is invalid.
-     * @throws StorageException If the file cannot be written.
+     * @throws StorageException         If the file cannot be written.
      */
     public function removeConfigKeys(Expression $expr);
 

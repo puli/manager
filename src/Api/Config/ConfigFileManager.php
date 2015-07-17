@@ -12,9 +12,6 @@
 namespace Puli\Manager\Api\Config;
 
 use Puli\Manager\Api\Environment\GlobalEnvironment;
-use Puli\Manager\Api\InvalidConfigException;
-use Puli\Manager\Api\Storage\StorageException;
-use Webmozart\Expression\Expression;
 
 /**
  * Manages changes to the global configuration file.
@@ -23,6 +20,7 @@ use Webmozart\Expression\Expression;
  * Whenever you call methods in this class, the changes will be written to disk.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 interface ConfigFileManager extends ConfigManager

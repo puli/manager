@@ -28,6 +28,7 @@ use Webmozart\Json\ValidationFailedException;
  * A server manager that stores the servers in the package file.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class PackageFileServerManager implements ServerManager

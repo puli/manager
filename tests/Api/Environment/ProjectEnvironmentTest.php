@@ -20,6 +20,7 @@ use Symfony\Component\EventDispatcher\EventDispatcher;
 
 /**
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class ProjectEnvironmentTest extends PHPUnit_Framework_TestCase

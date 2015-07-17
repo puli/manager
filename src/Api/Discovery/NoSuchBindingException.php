@@ -19,6 +19,7 @@ use RuntimeException;
  * Thrown when a binding was not found.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class NoSuchBindingException extends RuntimeException

@@ -15,6 +15,7 @@ namespace Puli\Manager\Api\Discovery;
  * Contains constants representing the state of a binding.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 final class BindingState
@@ -69,5 +70,7 @@ final class BindingState
     /**
      * Must not be instantiated.
      */
-    private function __construct() {}
+    private function __construct()
+    {
+    }
 }

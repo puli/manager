@@ -17,6 +17,7 @@ use Puli\Manager\Api\Config\Config;
  * Stores default configuration values.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class DefaultConfig extends Config

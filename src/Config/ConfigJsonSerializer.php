@@ -14,7 +14,6 @@ namespace Puli\Manager\Config;
 use Puli\Manager\Api\Config\Config;
 use Puli\Manager\Api\Config\ConfigFile;
 use Puli\Manager\Api\Config\ConfigFileSerializer;
-use Puli\Manager\Api\FileNotFoundException;
 use Puli\Manager\Api\InvalidConfigException;
 use stdClass;
 use Webmozart\Json\DecodingFailedException;
@@ -29,6 +28,7 @@ use Webmozart\PathUtil\Path;
  * The JSON is validated against the schema `res/schema/config-schema.json`.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class ConfigJsonSerializer implements ConfigFileSerializer

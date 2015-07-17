@@ -30,6 +30,7 @@ use Puli\Manager\Assert\Assert;
  *    {@link OperationInterceptor::postExecute()} fails.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class InterceptedOperation implements AtomicOperation

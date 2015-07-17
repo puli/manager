@@ -18,6 +18,7 @@ use RuntimeException;
  * Puli's default {@link GeneratorRegistry}.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class DefaultGeneratorRegistry implements GeneratorRegistry

@@ -19,6 +19,7 @@ use RuntimeException;
  * Thrown when a duplicate binding is detected.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class DuplicateBindingException extends RuntimeException

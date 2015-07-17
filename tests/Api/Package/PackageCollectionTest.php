@@ -20,6 +20,7 @@ use Puli\Manager\Api\Package\RootPackageFile;
 
 /**
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class PackageCollectionTest extends PHPUnit_Framework_TestCase
@@ -108,7 +109,7 @@ class PackageCollectionTest extends PHPUnit_Framework_TestCase
 
         $this->assertSame(array(
             'vendor/package1' => $package1,
-            'vendor/package2' => $package2
+            'vendor/package2' => $package2,
         ), $this->collection->getInstalledPackages());
     }
 
@@ -129,7 +130,7 @@ class PackageCollectionTest extends PHPUnit_Framework_TestCase
 
         $this->assertSame(array(
             'vendor/package1' => $package1,
-            'vendor/package2' => $package2
+            'vendor/package2' => $package2,
         ), $this->collection->getInstalledPackages());
     }
 

@@ -22,6 +22,7 @@ use Puli\Manager\Api\Environment\GlobalEnvironment;
  * Whenever you call methods in this class, the changes will be written to disk.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class ConfigFileManagerImpl extends AbstractConfigManager implements ConfigFileManager

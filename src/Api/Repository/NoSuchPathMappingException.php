@@ -18,6 +18,7 @@ use RuntimeException;
  * Thrown when a path mapping was not found.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class NoSuchPathMappingException extends RuntimeException

@@ -19,6 +19,7 @@ use Puli\Manager\Transaction\AtomicOperation;
  * Removes a type descriptor from the root package file.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class RemoveTypeDescriptorFromPackageFile implements AtomicOperation

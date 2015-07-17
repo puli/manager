@@ -11,7 +11,6 @@
 
 namespace Puli\Manager\Tests\Config;
 
-use PHPUnit_Framework_TestCase;
 use Puli\Manager\Api\Config\Config;
 use Puli\Manager\Api\Config\ConfigFile;
 use Puli\Manager\Config\ConfigJsonSerializer;
@@ -19,6 +18,7 @@ use Puli\Manager\Tests\JsonTestCase;
 
 /**
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class ConfigJsonSerializerTest extends JsonTestCase

@@ -22,6 +22,7 @@ use Webmozart\Expression\Expr;
 
 /**
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class BindingTypeDescriptorTest extends PHPUnit_Framework_TestCase
@@ -65,7 +66,7 @@ class BindingTypeDescriptorTest extends PHPUnit_Framework_TestCase
             array('my/type'),
             array('my/type-name'),
             array('my/type-name'),
-            array('my123/type-name-123')
+            array('my123/type-name-123'),
         );
     }
 

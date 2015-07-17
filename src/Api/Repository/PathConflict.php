@@ -18,6 +18,7 @@ use Puli\Manager\Assert\Assert;
  * A conflict when different path mappings map the same repository path.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class PathConflict

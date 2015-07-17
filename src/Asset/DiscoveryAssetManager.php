@@ -28,6 +28,7 @@ use Webmozart\Expression\Expression;
  * An asset manager that uses a {@link DiscoveryManager} as storage backend.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class DiscoveryAssetManager implements AssetManager

@@ -18,6 +18,7 @@ use Rhumsaa\Uuid\Uuid;
  * Maps Puli resources to a public path on a server.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class AssetMapping

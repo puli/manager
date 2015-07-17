@@ -20,6 +20,7 @@ use Symfony\Component\Filesystem\Filesystem;
  * Provides system utilities.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class System
@@ -42,8 +43,8 @@ class System
      *
      * @throws InvalidConfigException If no environment variable can be found to
      *                                determine the home directory.
-     * @throws FileNotFoundException If the home directory is not found.
-     * @throws NoDirectoryException If the home directory is not a directory.
+     * @throws FileNotFoundException  If the home directory is not found.
+     * @throws NoDirectoryException   If the home directory is not a directory.
      */
     public static function parseHomeDirectory()
     {
@@ -114,5 +115,7 @@ class System
         }
     }
 
-    private function __construct() {}
+    private function __construct()
+    {
+    }
 }

@@ -23,6 +23,7 @@ use Puli\Repository\Resource\GenericResource;
 
 /**
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class InstallationParamsTest extends PHPUnit_Framework_TestCase

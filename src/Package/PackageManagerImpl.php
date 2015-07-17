@@ -34,6 +34,7 @@ use Webmozart\PathUtil\Path;
  * Manages the package repository of a Puli project.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class PackageManagerImpl implements PackageManager
@@ -69,10 +70,10 @@ class PackageManagerImpl implements PackageManager
      * @param ProjectEnvironment $environment        The project environment.
      * @param PackageFileStorage $packageFileStorage The package file storage.
      *
-     * @throws FileNotFoundException If the install path of a package not exist.
-     * @throws NoDirectoryException If the install path of a package points to a file.
+     * @throws FileNotFoundException  If the install path of a package not exist.
+     * @throws NoDirectoryException   If the install path of a package points to a file.
      * @throws InvalidConfigException If a configuration file contains invalid configuration.
-     * @throws NameConflictException If a package has the same name as another loaded package.
+     * @throws NameConflictException  If a package has the same name as another loaded package.
      */
     public function __construct(ProjectEnvironment $environment, PackageFileStorage $packageFileStorage)
     {
@@ -118,7 +119,7 @@ class PackageManagerImpl implements PackageManager
         }
 
         if ($this->packages->contains($name)) {
-            throw NameConflictException::forName($name);;
+            throw NameConflictException::forName($name);
         }
 
         $relInstallPath = Path::makeRelative($installPath, $this->rootDir);
@@ -140,7 +141,6 @@ class PackageManagerImpl implements PackageManager
         }
 
         $this->packages->add($package);
-
     }
 
     /**
@@ -325,12 +325,12 @@ class PackageManagerImpl implements PackageManager
     /**
      * Loads all packages referenced by the install file.
      *
-     * @throws FileNotFoundException If the install path of a package not exist.
-     * @throws NoDirectoryException If the install path of a package points to a
-     *                              file.
+     * @throws FileNotFoundException  If the install path of a package not exist.
+     * @throws NoDirectoryException   If the install path of a package points to a
+     *                                file.
      * @throws InvalidConfigException If a package is not configured correctly.
-     * @throws NameConflictException If a package has the same name as another
-     *                               loaded package.
+     * @throws NameConflictException  If a package has the same name as another
+     *                                loaded package.
      */
     private function loadPackages()
     {

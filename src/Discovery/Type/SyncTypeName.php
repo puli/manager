@@ -28,6 +28,7 @@ use Puli\Manager\Transaction\AtomicOperation;
  * the outcome.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class SyncTypeName implements AtomicOperation

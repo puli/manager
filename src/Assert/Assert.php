@@ -17,6 +17,7 @@ use Webmozart\PathUtil\Path;
  * Domain-specific assertions.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  *
  * @method static void nullOrSystemPath($value, $message = null, $propertyPath = null)

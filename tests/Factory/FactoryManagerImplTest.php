@@ -28,6 +28,7 @@ use Symfony\Component\Filesystem\Filesystem;
 
 /**
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class FactoryManagerImplTest extends ManagerTestCase
@@ -64,7 +65,8 @@ class FactoryManagerImplTest extends ManagerTestCase
 
     protected function setUp()
     {
-        while (false === @mkdir($this->tempDir = sys_get_temp_dir().'/puli-repo-manager/FactoryManagerImplTest'.rand(10000, 99999), 0777, true)) {}
+        while (false === @mkdir($this->tempDir = sys_get_temp_dir().'/puli-repo-manager/FactoryManagerImplTest'.rand(10000, 99999), 0777, true)) {
+        }
 
         @mkdir($this->tempDir.'/home');
         @mkdir($this->tempDir.'/root');
@@ -203,7 +205,6 @@ class MyFactory
 }
 
 EOF;
-
 
         $this->assertSame($expected, $contents);
     }

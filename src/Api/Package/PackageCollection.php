@@ -20,6 +20,7 @@ use IteratorAggregate;
  * A collection of Puli packages.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class PackageCollection implements IteratorAggregate, Countable, ArrayAccess

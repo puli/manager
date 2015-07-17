@@ -29,6 +29,7 @@ use Webmozart\PathUtil\Path;
  * Use {@link getConfig()} to access the project configuration.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class ProjectEnvironment extends GlobalEnvironment

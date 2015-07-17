@@ -21,6 +21,7 @@ use Symfony\Component\EventDispatcher\Event;
  * You can listen to the event to add custom code to the factory class.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class GenerateFactoryEvent extends Event

@@ -24,6 +24,7 @@ use Webmozart\PathUtil\Path;
  * Synchronizes all mappings for a repository path with the repository.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class SyncRepositoryPath implements AtomicOperation

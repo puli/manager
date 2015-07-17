@@ -47,6 +47,7 @@ use Webmozart\Expression\Expression;
  * Manages the resource repository of a Puli project.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class RepositoryManagerImpl implements RepositoryManager

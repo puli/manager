@@ -18,6 +18,7 @@ use Webmozart\Glob\Iterator\RecursiveDirectoryIterator;
  * path.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class RecursivePathIterator extends RecursiveDirectoryIterator

@@ -12,24 +12,21 @@
 namespace Puli\Manager\Package;
 
 use Puli\Manager\Api\Config\Config;
-use Puli\Manager\Api\Event\PackageFileEvent;
 use Puli\Manager\Api\Factory\FactoryManager;
-use Puli\Manager\Api\FileNotFoundException;
 use Puli\Manager\Api\InvalidConfigException;
-use Puli\Manager\Api\Storage\Storage;
-use Puli\Manager\Api\Storage\StorageException;
 use Puli\Manager\Api\Package\PackageFile;
 use Puli\Manager\Api\Package\PackageFileSerializer;
-use Puli\Manager\Api\Package\PackageFileEncoder;
 use Puli\Manager\Api\Package\RootPackageFile;
 use Puli\Manager\Api\Package\UnsupportedVersionException;
+use Puli\Manager\Api\Storage\Storage;
+use Puli\Manager\Api\Storage\StorageException;
 use Puli\Manager\Filesystem\FilesystemStorage;
-use Puli\Manager\Filesystem\FileWriter;
 
 /**
  * Loads and saves package files.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class PackageFileStorage

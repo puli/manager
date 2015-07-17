@@ -19,6 +19,7 @@ use Webmozart\Expression\Expression;
  * Manages asset mappings.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 interface AssetManager
@@ -42,8 +43,8 @@ interface AssetManager
      * @param int          $flags   A bitwise combination of the flag constants
      *                              in this class.
      *
-     * @throws NoSuchServerException If the server referred to by the mapping
-     *                               does not exist.
+     * @throws NoSuchServerException          If the server referred to by the mapping
+     *                                        does not exist.
      * @throws DuplicateAssetMappingException If a mapping with the same UUID
      *                                        exists already.
      */
@@ -174,5 +175,4 @@ interface AssetManager
      * @return bool Returns `true` if any asset mappings exist.
      */
     public function hasAssetMappings(Expression $expr = null);
-
 }

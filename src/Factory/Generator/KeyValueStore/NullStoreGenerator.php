@@ -20,6 +20,7 @@ use Puli\Manager\Api\Php\Method;
  * Generates the setup code for a {@link NullStore}.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class NullStoreGenerator implements ServiceGenerator

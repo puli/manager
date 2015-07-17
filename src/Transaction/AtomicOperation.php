@@ -19,6 +19,7 @@ namespace Puli\Manager\Transaction;
  * undoes any side effects caused by {@link execute()}.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 interface AtomicOperation

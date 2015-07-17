@@ -15,6 +15,7 @@ namespace Puli\Manager\Api;
  * A plugin for the repository manager.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 interface PuliPlugin

@@ -18,6 +18,7 @@ use Webmozart\Expression\Expression;
  * Manages the asset servers of the application.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 interface ServerManager

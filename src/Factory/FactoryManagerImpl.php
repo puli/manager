@@ -31,6 +31,7 @@ use Webmozart\PathUtil\Path;
  * The default {@link FactoryManager} implementation.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class FactoryManagerImpl implements FactoryManager
@@ -143,7 +144,7 @@ class FactoryManagerImpl implements FactoryManager
             require_once $path;
         }
 
-        return new $className;
+        return new $className();
     }
 
     /**

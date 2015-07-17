@@ -17,6 +17,7 @@ use Exception;
  * Thrown when an installer parameter was not found.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class NoSuchParameterException extends Exception

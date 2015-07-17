@@ -15,6 +15,7 @@ namespace Puli\Manager\Api\Storage;
  * Stores files.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 interface Storage

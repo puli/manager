@@ -23,6 +23,7 @@ use Puli\Repository\Resource\FileResource;
  * Inserts all path mappings into the repository.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class PopulateRepository implements AtomicOperation

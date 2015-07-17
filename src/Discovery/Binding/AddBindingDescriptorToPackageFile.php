@@ -19,6 +19,7 @@ use Puli\Manager\Transaction\AtomicOperation;
  * Adds a binding descriptor to the root package file.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class AddBindingDescriptorToPackageFile implements AtomicOperation

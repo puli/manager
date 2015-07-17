@@ -17,6 +17,7 @@ use Rhumsaa\Uuid\Uuid;
 
 /**
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class AssetMappingTest extends PHPUnit_Framework_TestCase
@@ -31,7 +32,7 @@ class AssetMappingTest extends PHPUnit_Framework_TestCase
         $this->assertInstanceOf('Rhumsaa\Uuid\Uuid', $mapping->getUuid());
     }
 
-    function testCreateWithUuid()
+    public function testCreateWithUuid()
     {
         $uuid = Uuid::uuid4();
         $mapping = new AssetMapping('/blog/public', 'local', '/blog', $uuid);

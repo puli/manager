@@ -24,6 +24,7 @@ use Webmozart\Expression\Expression;
  * Base class for configuration file managers.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 abstract class AbstractConfigManager implements ConfigManager
@@ -217,7 +218,7 @@ abstract class AbstractConfigManager implements ConfigManager
      * Saves the file containing the managed configuration.
      *
      * @throws InvalidConfigException If the value is invalid.
-     * @throws StorageException If the file cannot be written.
+     * @throws StorageException       If the file cannot be written.
      */
     abstract protected function saveConfigFile();
 }

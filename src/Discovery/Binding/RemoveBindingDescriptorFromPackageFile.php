@@ -20,6 +20,7 @@ use Rhumsaa\Uuid\Uuid;
  * Removes a binding descriptor from the root package file.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class RemoveBindingDescriptorFromPackageFile implements AtomicOperation

@@ -19,6 +19,7 @@ use Rhumsaa\Uuid\Uuid;
  * A collection of binding descriptors.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class BindingDescriptorCollection

@@ -22,6 +22,7 @@ use Puli\Manager\Package\PackageFileStorage;
 
 /**
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class PackageFileStorageTest extends PHPUnit_Framework_TestCase

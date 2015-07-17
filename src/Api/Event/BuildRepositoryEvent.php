@@ -18,6 +18,7 @@ use Symfony\Component\EventDispatcher\Event;
  * Dispatched when the resource repository is built.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class BuildRepositoryEvent extends Event
@@ -55,8 +56,8 @@ class BuildRepositoryEvent extends Event
     /**
      * Returns whether the build of the repository should be skipped.
      *
-     * @return boolean Returns `true` if the build of the repository should be
-     *                 skipped and `false` otherwise.
+     * @return bool Returns `true` if the build of the repository should be
+     *              skipped and `false` otherwise.
      */
     public function isBuildSkipped()
     {

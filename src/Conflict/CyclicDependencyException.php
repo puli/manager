@@ -17,6 +17,7 @@ use RuntimeException;
  * Thrown when a cyclic dependency is detected in the package graph.
  *
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class CyclicDependencyException extends RuntimeException

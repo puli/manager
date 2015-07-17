@@ -15,6 +15,7 @@ use Puli\Manager\Api\PuliPlugin;
 
 /**
  * @since  1.0
+ *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 interface TestPluginInterface extends PuliPlugin
