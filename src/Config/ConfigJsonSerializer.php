@@ -13,34 +13,49 @@ namespace Puli\Manager\Config;
 
 use Puli\Manager\Api\Config\Config;
 use Puli\Manager\Api\Config\ConfigFile;
-use Puli\Manager\Api\Config\ConfigFileReader;
+use Puli\Manager\Api\Config\ConfigFileSerializer;
 use Puli\Manager\Api\FileNotFoundException;
 use Puli\Manager\Api\InvalidConfigException;
+use stdClass;
 use Webmozart\Json\DecodingFailedException;
 use Webmozart\Json\JsonDecoder;
+use Webmozart\Json\JsonEncoder;
 use Webmozart\Json\ValidationFailedException;
 use Webmozart\PathUtil\Path;
 
 /**
- * Reads JSON configuration files.
+ * Serializes and unserializes to/from JSON.
  *
- * The data in the JSON file is validated against the schema
- * `res/schema/config-schema.json`.
+ * The JSON is validated against the schema `res/schema/config-schema.json`.
  *
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class ConfigJsonReader implements ConfigFileReader
+class ConfigJsonSerializer implements ConfigFileSerializer
 {
     /**
      * {@inheritdoc}
      */
-    public function readConfigFile($path, Config $baseConfig = null)
+    public function serializeConfigFile(ConfigFile $configFile)
+    {
+        $jsonData = new stdClass();
+
+        foreach ($configFile->getConfig()->toRawArray(false) as $key => $value) {
+            $jsonData->$key = $value;
+        }
+
+        return $this->encode($jsonData);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function unserializeConfigFile($serialized, $path = null, Config $baseConfig = null)
     {
         $configFile = new ConfigFile($path, $baseConfig);
         $config = $configFile->getConfig();
 
-        $jsonData = $this->objectsToArrays($this->decodeFile($path));
+        $jsonData = $this->objectsToArrays($this->decode($serialized, $path));
 
         foreach ($jsonData as $key => $value) {
             $config->set($key, $value);
@@ -49,7 +64,22 @@ class ConfigJsonReader implements ConfigFileReader
         return $configFile;
     }
 
-    private function decodeFile($path)
+    private function encode($jsonData)
+    {
+        $encoder = new JsonEncoder();
+        $encoder->setPrettyPrinting(true);
+        $encoder->setEscapeSlash(false);
+        $encoder->setTerminateWithLineFeed(true);
+        $decoder = new JsonDecoder();
+        // We can't use realpath(), which doesn't work inside PHARs.
+        // However, we want to display nice paths if the file is not found.
+        $schema = $decoder->decodeFile(Path::canonicalize(__DIR__.'/../../res/schema/package-schema-1.0.json'));
+        $configSchema = $schema->properties->config;
+
+        return $encoder->encode($jsonData, $configSchema);
+    }
+
+    private function decode($json, $path = null)
     {
         $decoder = new JsonDecoder();
         // We can't use realpath(), which doesn't work inside PHARs.
@@ -57,22 +87,18 @@ class ConfigJsonReader implements ConfigFileReader
         $schema = $decoder->decodeFile(Path::canonicalize(__DIR__.'/../../res/schema/package-schema-1.0.json'));
         $configSchema = $schema->properties->config;
 
-        if (!file_exists($path)) {
-            throw FileNotFoundException::forPath($path);
-        }
-
         try {
-            return $decoder->decodeFile($path, $configSchema);
+            return $decoder->decode($json, $configSchema);
         } catch (ValidationFailedException $e) {
             throw new InvalidConfigException(sprintf(
-                "The configuration in %s is invalid:\n%s",
-                $path,
+                "The configuration%s is invalid:\n%s",
+                $path ? ' in '.$path : '',
                 $e->getErrorsAsString()
             ), 0, $e);
         } catch (DecodingFailedException $e) {
             throw new InvalidConfigException(sprintf(
-                "The configuration in %s could not be decoded:\n%s",
-                $path,
+                "The configuration%s could not be decoded:\n%s",
+                $path ? ' in '.$path : '',
                 $e->getMessage()
             ), $e->getCode(), $e);
         }

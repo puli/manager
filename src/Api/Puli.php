@@ -17,7 +17,7 @@ use Puli\Discovery\Api\EditableDiscovery;
 use Puli\Discovery\Api\ResourceDiscovery;
 use Puli\Manager\Api\Asset\AssetManager;
 use Puli\Manager\Api\Config\ConfigFileManager;
-use Puli\Manager\Api\Config\ConfigFileReader;
+use Puli\Manager\Api\Config\ConfigFileSerializer;
 use Puli\Manager\Api\Config\ConfigFileWriter;
 use Puli\Manager\Api\Discovery\DiscoveryManager;
 use Puli\Manager\Api\Environment\GlobalEnvironment;
@@ -37,8 +37,7 @@ use Puli\Manager\Assert\Assert;
 use Puli\Manager\Asset\DiscoveryAssetManager;
 use Puli\Manager\Config\ConfigFileManagerImpl;
 use Puli\Manager\Config\ConfigFileStorage;
-use Puli\Manager\Config\ConfigJsonReader;
-use Puli\Manager\Config\ConfigJsonWriter;
+use Puli\Manager\Config\ConfigJsonSerializer;
 use Puli\Manager\Config\DefaultConfig;
 use Puli\Manager\Config\EnvConfig;
 use Puli\Manager\Discovery\DiscoveryManagerImpl;
@@ -212,14 +211,9 @@ class Puli
     private $configFileStorage;
 
     /**
-     * @var ConfigFileReader|null
+     * @var ConfigFileSerializer|null
      */
-    private $configFileReader;
-
-    /**
-     * @var ConfigFileWriter|null
-     */
-    private $configFileWriter;
+    private $configFileSerializer;
 
     /**
      * @var PackageFileStorage|null
@@ -757,9 +751,23 @@ class Puli
     }
 
     /**
-     * Returns the cached package file reader.
+     * Returns the cached configuration file serializer.
      *
-     * @return PackageFileSerializer The package file reader.
+     * @return ConfigFileSerializer The configuration file serializer.
+     */
+    public function getConfigFileSerializer()
+    {
+        if (!$this->configFileSerializer) {
+            $this->configFileSerializer = new ConfigJsonSerializer();
+        }
+
+        return $this->configFileSerializer;
+    }
+
+    /**
+     * Returns the cached package file serializer.
+     *
+     * @return PackageFileSerializer The package file serializer.
      */
     public function getPackageFileSerializer()
     {
@@ -790,7 +798,7 @@ class Puli
             Assert::directory($homeDir, 'Could not load Puli environment: The home directory %s is a file. Expected a directory.');
 
             // Create a storage without the factory manager
-            $configStorage = new ConfigFileStorage($this->getConfigFileReader(), $this->getConfigFileWriter());
+            $configStorage = new ConfigFileStorage($this->getStorage(), $this->getConfigFileSerializer());
             $configPath = Path::canonicalize($homeDir).'/config.json';
             $configFile = $configStorage->loadConfigFile($configPath, new DefaultConfig());
             $baseConfig = $configFile->getConfig();
@@ -836,7 +844,7 @@ class Puli
             Assert::directory($homeDir, 'Could not load Puli environment: The home directory %s is a file. Expected a directory.');
 
             // Create a storage without the factory manager
-            $configStorage = new ConfigFileStorage($this->getConfigFileReader(), $this->getConfigFileWriter());
+            $configStorage = new ConfigFileStorage($this->getStorage(), $this->getConfigFileSerializer());
             $configPath = Path::canonicalize($homeDir).'/config.json';
             $configFile = $configStorage->loadConfigFile($configPath, new DefaultConfig());
             $baseConfig = $configFile->getConfig();
@@ -864,41 +872,13 @@ class Puli
     {
         if (!$this->configFileStorage) {
             $this->configFileStorage = new ConfigFileStorage(
-                $this->getConfigFileReader(),
-                $this->getConfigFileWriter(),
+                $this->getStorage(),
+                $this->getConfigFileSerializer(),
                 $this->getFactoryManager()
             );
         }
 
         return $this->configFileStorage;
-    }
-
-    /**
-     * Returns the cached configuration file reader.
-     *
-     * @return ConfigFileReader The configuration file reader.
-     */
-    private function getConfigFileReader()
-    {
-        if (!$this->configFileReader) {
-            $this->configFileReader = new ConfigJsonReader();
-        }
-
-        return $this->configFileReader;
-    }
-
-    /**
-     * Returns the cached configuration file writer.
-     *
-     * @return ConfigFileWriter The configuration file writer.
-     */
-    private function getConfigFileWriter()
-    {
-        if (!$this->configFileWriter) {
-            $this->configFileWriter = new ConfigJsonWriter();
-        }
-
-        return $this->configFileWriter;
     }
 
     /**

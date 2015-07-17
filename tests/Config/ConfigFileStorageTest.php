@@ -15,9 +15,9 @@ use PHPUnit_Framework_MockObject_MockObject;
 use PHPUnit_Framework_TestCase;
 use Puli\Manager\Api\Config\Config;
 use Puli\Manager\Api\Config\ConfigFile;
-use Puli\Manager\Api\Config\ConfigFileReader;
-use Puli\Manager\Api\Config\ConfigFileWriter;
+use Puli\Manager\Api\Config\ConfigFileSerializer;
 use Puli\Manager\Api\FileNotFoundException;
+use Puli\Manager\Api\Storage\Storage;
 use Puli\Manager\Config\ConfigFileStorage;
 
 /**
@@ -32,31 +32,39 @@ class ConfigFileStorageTest extends PHPUnit_Framework_TestCase
     private $storage;
 
     /**
-     * @var PHPUnit_Framework_MockObject_MockObject|ConfigFileReader
+     * @var PHPUnit_Framework_MockObject_MockObject|Storage
      */
-    private $reader;
+    private $backend;
 
     /**
-     * @var PHPUnit_Framework_MockObject_MockObject|ConfigFileWriter
+     * @var PHPUnit_Framework_MockObject_MockObject|ConfigFileSerializer
      */
-    private $writer;
+    private $serializer;
 
     protected function setUp()
     {
-        $this->reader = $this->getMock('Puli\Manager\Api\Config\ConfigFileReader');
-        $this->writer = $this->getMock('Puli\Manager\Api\Config\ConfigFileWriter');
+        $this->serializer = $this->getMock('Puli\Manager\Api\Config\ConfigFileSerializer');
+        $this->backend = $this->getMock('Puli\Manager\Api\Storage\Storage');
 
-        $this->storage = new ConfigFileStorage($this->reader, $this->writer);
+        $this->storage = new ConfigFileStorage($this->backend, $this->serializer);
     }
 
     public function testLoadConfigFile()
     {
         $configFile = new ConfigFile();
 
-        $this->reader->expects($this->once())
-            ->method('readConfigFile')
+        $this->backend->expects($this->once())
+            ->method('exists')
             ->with('/path')
-            ->will($this->returnValue($configFile));
+            ->willReturn(true);
+        $this->backend->expects($this->once())
+            ->method('read')
+            ->with('/path')
+            ->willReturn('SERIALIZED');
+        $this->serializer->expects($this->once())
+            ->method('unserializeConfigFile')
+            ->with('SERIALIZED', '/path')
+            ->willReturn($configFile);
 
         $this->assertSame($configFile, $this->storage->loadConfigFile('/path'));
     }
@@ -66,43 +74,50 @@ class ConfigFileStorageTest extends PHPUnit_Framework_TestCase
         $baseConfig = new Config();
         $configFile = new ConfigFile();
 
-        $this->reader->expects($this->once())
-            ->method('readConfigFile')
-            ->with('/path', $baseConfig)
-            ->will($this->returnValue($configFile));
+        $this->backend->expects($this->once())
+            ->method('exists')
+            ->with('/path')
+            ->willReturn(true);
+        $this->backend->expects($this->once())
+            ->method('read')
+            ->with('/path')
+            ->willReturn('SERIALIZED');
+        $this->serializer->expects($this->once())
+            ->method('unserializeConfigFile')
+            ->with('SERIALIZED', '/path', $baseConfig)
+            ->willReturn($configFile);
 
         $this->assertSame($configFile, $this->storage->loadConfigFile('/path', $baseConfig));
     }
 
     public function testLoadConfigFileCreatesNewIfNotFound()
     {
-        $this->reader->expects($this->once())
-            ->method('readConfigFile')
-            ->with('/path')
-            ->will($this->throwException(new FileNotFoundException()));
-
-        $this->assertEquals(new ConfigFile('/path'), $this->storage->loadConfigFile('/path'));
-    }
-
-    public function testLoadConfigFileWithBaseConfigCreatesNewIfNotFound()
-    {
         $baseConfig = new Config();
+        $configFile = new ConfigFile('/path', $baseConfig);
 
-        $this->reader->expects($this->once())
-            ->method('readConfigFile')
-            ->with('/path', $baseConfig)
-            ->will($this->throwException(new FileNotFoundException()));
+        $this->backend->expects($this->once())
+            ->method('exists')
+            ->with('/path')
+            ->willReturn(false);
+        $this->backend->expects($this->never())
+            ->method('read');
+        $this->serializer->expects($this->never())
+            ->method('unserializeConfigFile');
 
-        $this->assertEquals(new ConfigFile('/path', $baseConfig), $this->storage->loadConfigFile('/path', $baseConfig));
+        $this->assertEquals($configFile, $this->storage->loadConfigFile('/path', $baseConfig));
     }
 
     public function testSaveConfigFile()
     {
         $configFile = new ConfigFile('/path');
 
-        $this->writer->expects($this->once())
-            ->method('writeConfigFile')
-            ->with($configFile, '/path');
+        $this->serializer->expects($this->once())
+            ->method('serializeConfigFile')
+            ->with($configFile)
+            ->willReturn('SERIALIZED');
+        $this->backend->expects($this->once())
+            ->method('write')
+            ->with('/path', 'SERIALIZED');
 
         $this->storage->saveConfigFile($configFile);
     }
@@ -112,7 +127,7 @@ class ConfigFileStorageTest extends PHPUnit_Framework_TestCase
         $configFile = new ConfigFile('/path');
 
         $factoryManager = $this->getMock('Puli\Manager\Api\Factory\FactoryManager');
-        $storage = new ConfigFileStorage($this->reader, $this->writer, $factoryManager);
+        $storage = new ConfigFileStorage($this->backend, $this->serializer, $factoryManager);
 
         $factoryManager->expects($this->once())
             ->method('autoGenerateFactoryClass');

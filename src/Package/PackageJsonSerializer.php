@@ -33,10 +33,9 @@ use Webmozart\Json\JsonValidator;
 use Webmozart\PathUtil\Path;
 
 /**
- * Reads JSON package files.
+ * Serializes and unserializes package files to/from JSON.
  *
- * The data in the JSON file is validated against the schema
- * `res/schema/package-schema.json`.
+ * The JSON is validated against the schema `res/schema/package-schema.json`.
  *
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>

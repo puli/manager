@@ -13,20 +13,14 @@ namespace Puli\Manager\Config;
 
 use Puli\Manager\Api\Config\Config;
 use Puli\Manager\Api\Config\ConfigFile;
-use Puli\Manager\Api\Config\ConfigFileReader;
-use Puli\Manager\Api\Config\ConfigFileWriter;
+use Puli\Manager\Api\Config\ConfigFileSerializer;
 use Puli\Manager\Api\Factory\FactoryManager;
-use Puli\Manager\Api\FileNotFoundException;
 use Puli\Manager\Api\InvalidConfigException;
+use Puli\Manager\Api\Storage\Storage;
 use Puli\Manager\Api\Storage\StorageException;
 
 /**
  * Loads and saves configuration files.
- *
- * This class adds a layer on top of {@link ConfigFileReader} and
- * {@link ConfigFileWriter}. Any logic that is related to the loading and saving
- * of configuration files, but not directly related to the reading/writing of a
- * specific file format, is executed by this class.
  *
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
@@ -34,14 +28,14 @@ use Puli\Manager\Api\Storage\StorageException;
 class ConfigFileStorage
 {
     /**
-     * @var ConfigFileReader
+     * @var Storage
      */
-    private $reader;
+    private $storage;
 
     /**
-     * @var ConfigFileWriter
+     * @var ConfigFileSerializer
      */
-    private $writer;
+    private $serializer;
 
     /**
      * @var FactoryManager
@@ -51,16 +45,17 @@ class ConfigFileStorage
     /**
      * Creates a new configuration file storage.
      *
-     * @param ConfigFileReader $reader         The configuration file reader.
-     * @param ConfigFileWriter $writer         The configuration file writer.
-     * @param FactoryManager   $factoryManager The manager used to regenerate
-     *                                         the factory class after saving
-     *                                         the config file.
+     * @param Storage              $storage        The file storage.
+     * @param ConfigFileSerializer $serializer     The configuration file
+     *                                             serializer.
+     * @param FactoryManager       $factoryManager The manager used to regenerate
+     *                                             the factory class after saving
+     *                                             the config file.
      */
-    public function __construct(ConfigFileReader $reader, ConfigFileWriter $writer, FactoryManager $factoryManager = null)
+    public function __construct(Storage $storage, ConfigFileSerializer $serializer, FactoryManager $factoryManager = null)
     {
-        $this->reader = $reader;
-        $this->writer = $writer;
+        $this->storage = $storage;
+        $this->serializer = $serializer;
         $this->factoryManager = $factoryManager;
     }
 
@@ -75,16 +70,18 @@ class ConfigFileStorage
      *
      * @return ConfigFile The loaded configuration file.
      *
+     * @throws StorageException       If the file cannot be read.
      * @throws InvalidConfigException If the file contains invalid configuration.
      */
     public function loadConfigFile($path, Config $baseConfig = null)
     {
-        try {
-            // Don't use file_exists() to decouple from the file system
-            return $this->reader->readConfigFile($path, $baseConfig);
-        } catch (FileNotFoundException $e) {
+        if (!$this->storage->exists($path)) {
             return new ConfigFile($path, $baseConfig);
         }
+
+        $serialized = $this->storage->read($path);
+
+        return $this->serializer->unserializeConfigFile($serialized, $path, $baseConfig);
     }
 
     /**
@@ -98,7 +95,9 @@ class ConfigFileStorage
      */
     public function saveConfigFile(ConfigFile $configFile)
     {
-        $this->writer->writeConfigFile($configFile, $configFile->getPath());
+        $serialized = $this->serializer->serializeConfigFile($configFile);
+
+        $this->storage->write($configFile->getPath(), $serialized);
 
         if ($this->factoryManager) {
             $this->factoryManager->autoGenerateFactoryClass();

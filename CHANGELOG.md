@@ -6,6 +6,7 @@ Changelog
  * added `Storage` and `FilesystemStorage`
  * renamed `Puli\Manager\Api\IOException` to `Puli\Manager\Api\Storage\StorageException`
  * replaced `PackageFileReader` and `PackageFileWriter` by `PackageFileSerializer`
+ * replaced `ConfigFileReader` and `ConfigFileWriter` by `ConfigFileSerializer`
 
 * 1.0.0-beta5 (2015-05-29)
 
@@ -317,7 +318,7 @@ Changelog
  * added `Config::DISCOVERY_STORE_CACHE`
  * added `$name` argument to constructor of `InstallInfo`
  * added optional `$baseConfig` argument to `ConfigFileStorage::loadConfigFile()` 
- * added optional `$baseConfig` argument to `ConfigFileReader::readConfigFile()` 
+ * added optional `$baseConfig` argument to `ConfigFileSerializer::readConfigFile()` 
  * added optional `$baseConfig` argument to `ConfigFile` constructor
  * added `Config::getKeys()`
  * added optional `$default` argument to `Config::get()` and `Config::getRaw()`
