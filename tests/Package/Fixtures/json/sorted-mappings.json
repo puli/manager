@@ -1,8 +1,0 @@
-{
-    "version": "1.0",
-    "path-mappings": {
-        "/vendor/a": "foo",
-        "/vendor/b": "foo",
-        "/vendor/c": "foo"
-    }
-}

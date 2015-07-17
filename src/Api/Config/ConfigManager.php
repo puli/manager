@@ -12,7 +12,7 @@
 namespace Puli\Manager\Api\Config;
 
 use Puli\Manager\Api\InvalidConfigException;
-use Puli\Manager\Api\IOException;
+use Puli\Manager\Api\Storage\StorageException;
 use Webmozart\Expression\Expression;
 
 /**
@@ -40,7 +40,7 @@ interface ConfigManager
      *
      * @throws NoSuchConfigKeyException If the configuration key is invalid.
      * @throws InvalidConfigException If the value is invalid.
-     * @throws IOException If the file cannot be written.
+     * @throws StorageException If the file cannot be written.
      */
     public function setConfigKey($key, $value);
 
@@ -53,7 +53,7 @@ interface ConfigManager
      *
      * @throws NoSuchConfigKeyException If a configuration key is invalid.
      * @throws InvalidConfigException If a value is invalid.
-     * @throws IOException If the file cannot be written.
+     * @throws StorageException If the file cannot be written.
      */
     public function setConfigKeys(array $values);
 
@@ -65,7 +65,7 @@ interface ConfigManager
      * @param string $key The removed configuration key.
      *
      * @throws NoSuchConfigKeyException If the configuration key is invalid.
-     * @throws IOException If the file cannot be written.
+     * @throws StorageException If the file cannot be written.
      */
     public function removeConfigKey($key);
 
@@ -77,7 +77,7 @@ interface ConfigManager
      * @param Expression $expr The search criteria.
      *
      * @throws NoSuchConfigKeyException If a configuration key is invalid.
-     * @throws IOException If the file cannot be written.
+     * @throws StorageException If the file cannot be written.
      */
     public function removeConfigKeys(Expression $expr);
 
@@ -86,7 +86,7 @@ interface ConfigManager
      *
      * The file is saved directly after removing the keys.
      *
-     * @throws IOException If the file cannot be written.
+     * @throws StorageException If the file cannot be written.
      */
     public function clearConfigKeys();
 

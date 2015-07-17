@@ -1,8 +1,0 @@
-{
-    "version": "1.0",
-    "name": "my/application",
-    "override": [
-        "acme/blog1",
-        "acme/blog2"
-    ]
-}

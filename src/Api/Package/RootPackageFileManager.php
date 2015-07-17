@@ -13,7 +13,7 @@ namespace Puli\Manager\Api\Package;
 
 use Puli\Manager\Api\Config\ConfigManager;
 use Puli\Manager\Api\Environment\ProjectEnvironment;
-use Puli\Manager\Api\IOException;
+use Puli\Manager\Api\Storage\StorageException;
 use Webmozart\Expression\Expression;
 
 /**
@@ -141,7 +141,7 @@ interface RootPackageFileManager extends ConfigManager
      * @param string $key   The key name.
      * @param mixed  $value The stored value.
      *
-     * @throws IOException If the file cannot be written.
+     * @throws StorageException If the file cannot be written.
      */
     public function setExtraKey($key, $value);
 
@@ -152,7 +152,7 @@ interface RootPackageFileManager extends ConfigManager
      *
      * @param string[] $values A list of values indexed by their key names.
      *
-     * @throws IOException If the file cannot be written.
+     * @throws StorageException If the file cannot be written.
      */
     public function setExtraKeys(array $values);
 
@@ -163,7 +163,7 @@ interface RootPackageFileManager extends ConfigManager
      *
      * @param string $key The name of the removed extra key.
      *
-     * @throws IOException If the file cannot be written.
+     * @throws StorageException If the file cannot be written.
      */
     public function removeExtraKey($key);
 
@@ -175,7 +175,7 @@ interface RootPackageFileManager extends ConfigManager
      *
      * @param Expression $expr The search criteria.
      *
-     * @throws IOException If the file cannot be written.
+     * @throws StorageException If the file cannot be written.
      */
     public function removeExtraKeys(Expression $expr);
 
@@ -184,7 +184,7 @@ interface RootPackageFileManager extends ConfigManager
      *
      * The file is saved directly after removing the keys.
      *
-     * @throws IOException If the file cannot be written.
+     * @throws StorageException If the file cannot be written.
      */
     public function clearExtraKeys();
 

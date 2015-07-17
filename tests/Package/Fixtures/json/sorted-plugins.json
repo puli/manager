@@ -1,8 +1,0 @@
-{
-    "version": "1.0",
-    "plugins": [
-        "Puli\\Manager\\Tests\\Package\\PluginA",
-        "Puli\\Manager\\Tests\\Package\\PluginB",
-        "Puli\\Manager\\Tests\\Package\\PluginC"
-    ]
-}

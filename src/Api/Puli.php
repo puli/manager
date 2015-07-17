@@ -26,13 +26,13 @@ use Puli\Manager\Api\Factory\FactoryManager;
 use Puli\Manager\Api\Installation\InstallationManager;
 use Puli\Manager\Api\Installer\InstallerManager;
 use Puli\Manager\Api\Package\Package;
-use Puli\Manager\Api\Package\PackageFileReader;
-use Puli\Manager\Api\Package\PackageFileWriter;
+use Puli\Manager\Api\Package\PackageFileSerializer;
 use Puli\Manager\Api\Package\PackageManager;
 use Puli\Manager\Api\Package\PackageState;
 use Puli\Manager\Api\Package\RootPackageFileManager;
 use Puli\Manager\Api\Repository\RepositoryManager;
 use Puli\Manager\Api\Server\ServerManager;
+use Puli\Manager\Api\Storage\Storage;
 use Puli\Manager\Assert\Assert;
 use Puli\Manager\Asset\DiscoveryAssetManager;
 use Puli\Manager\Config\ConfigFileManagerImpl;
@@ -44,11 +44,11 @@ use Puli\Manager\Config\EnvConfig;
 use Puli\Manager\Discovery\DiscoveryManagerImpl;
 use Puli\Manager\Factory\FactoryManagerImpl;
 use Puli\Manager\Factory\Generator\DefaultGeneratorRegistry;
+use Puli\Manager\Filesystem\FilesystemStorage;
 use Puli\Manager\Installation\InstallationManagerImpl;
 use Puli\Manager\Installer\PackageFileInstallerManager;
 use Puli\Manager\Package\PackageFileStorage;
-use Puli\Manager\Package\PackageJsonReader;
-use Puli\Manager\Package\PackageJsonWriter;
+use Puli\Manager\Package\PackageJsonSerializer;
 use Puli\Manager\Package\PackageManagerImpl;
 use Puli\Manager\Package\RootPackageFileManagerImpl;
 use Puli\Manager\Php\ClassWriter;
@@ -202,6 +202,11 @@ class Puli
     private $urlGenerator;
 
     /**
+     * @var Storage|null
+     */
+    private $storage;
+
+    /**
      * @var ConfigFileStorage|null
      */
     private $configFileStorage;
@@ -222,14 +227,9 @@ class Puli
     private $packageFileStorage;
 
     /**
-     * @var PackageFileReader|null
+     * @var PackageFileSerializer|null
      */
-    private $packageFileReader;
-
-    /**
-     * @var PackageFileWriter|null
-     */
-    private $packageFileWriter;
+    private $packageFileSerializer;
 
     /**
      * @var LoggerInterface
@@ -742,6 +742,34 @@ class Puli
         return $this->urlGenerator;
     }
 
+    /**
+     * Returns the cached file storage.
+     *
+     * @return Storage The storage.
+     */
+    public function getStorage()
+    {
+        if (!$this->storage) {
+            $this->storage = new FilesystemStorage();
+        }
+
+        return $this->storage;
+    }
+
+    /**
+     * Returns the cached package file reader.
+     *
+     * @return PackageFileSerializer The package file reader.
+     */
+    public function getPackageFileSerializer()
+    {
+        if (!$this->packageFileSerializer) {
+            $this->packageFileSerializer = new PackageJsonSerializer();
+        }
+
+        return $this->packageFileSerializer;
+    }
+
     private function activatePlugins()
     {
         foreach ($this->environment->getRootPackageFile()->getPluginClasses() as $pluginClass) {
@@ -818,7 +846,7 @@ class Puli
         }
 
         // Create a storage without the factory manager
-        $packageFileStorage = new PackageFileStorage($this->getPackageFileReader(), $this->getPackageFileWriter());
+        $packageFileStorage = new PackageFileStorage($this->getStorage(), $this->getPackageFileSerializer());
         $rootDir = Path::canonicalize($rootDir);
         $rootFilePath = $this->rootDir.'/puli.json';
         $rootPackageFile = $packageFileStorage->loadRootPackageFile($rootFilePath, $baseConfig);
@@ -882,41 +910,13 @@ class Puli
     {
         if (!$this->packageFileStorage) {
             $this->packageFileStorage = new PackageFileStorage(
-                $this->getPackageFileReader(),
-                $this->getPackageFileWriter(),
+                $this->getStorage(),
+                $this->getPackageFileSerializer(),
                 $this->getFactoryManager()
             );
         }
 
         return $this->packageFileStorage;
-    }
-
-    /**
-     * Returns the cached package file reader.
-     *
-     * @return PackageFileReader The package file reader.
-     */
-    private function getPackageFileReader()
-    {
-        if (!$this->packageFileReader) {
-            $this->packageFileReader = new PackageJsonReader();
-        }
-
-        return $this->packageFileReader;
-    }
-
-    /**
-     * Returns the cached package file writer.
-     *
-     * @return PackageFileWriter The package file writer.
-     */
-    private function getPackageFileWriter()
-    {
-        if (!$this->packageFileWriter) {
-            $this->packageFileWriter = new PackageJsonWriter();
-        }
-
-        return $this->packageFileWriter;
     }
 
     /**

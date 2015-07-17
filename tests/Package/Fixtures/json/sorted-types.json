@@ -1,8 +1,0 @@
-{
-    "version": "1.0",
-    "binding-types": {
-        "vendor/a": {},
-        "vendor/b": {},
-        "vendor/c": {}
-    }
-}

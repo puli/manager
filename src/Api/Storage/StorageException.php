@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\Manager\Api;
+namespace Puli\Manager\Api\Storage;
 
 use RuntimeException;
 
@@ -19,6 +19,6 @@ use RuntimeException;
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class IOException extends RuntimeException
+class StorageException extends RuntimeException
 {
 }

@@ -16,19 +16,18 @@ use Puli\Manager\Api\Event\PackageFileEvent;
 use Puli\Manager\Api\Factory\FactoryManager;
 use Puli\Manager\Api\FileNotFoundException;
 use Puli\Manager\Api\InvalidConfigException;
-use Puli\Manager\Api\IOException;
+use Puli\Manager\Api\Storage\Storage;
+use Puli\Manager\Api\Storage\StorageException;
 use Puli\Manager\Api\Package\PackageFile;
-use Puli\Manager\Api\Package\PackageFileReader;
-use Puli\Manager\Api\Package\PackageFileWriter;
+use Puli\Manager\Api\Package\PackageFileSerializer;
+use Puli\Manager\Api\Package\PackageFileEncoder;
 use Puli\Manager\Api\Package\RootPackageFile;
+use Puli\Manager\Api\Package\UnsupportedVersionException;
+use Puli\Manager\Filesystem\FilesystemStorage;
+use Puli\Manager\Filesystem\FileWriter;
 
 /**
  * Loads and saves package files.
- *
- * This class adds a layer on top of {@link PackageFileReader} and
- * {@link PackageFileWriter}. Any logic that is related to the loading and
- * saving of package configuration, but not directly related to the
- * reading/writing of a specific file format, is executed by this class.
  *
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
@@ -36,14 +35,14 @@ use Puli\Manager\Api\Package\RootPackageFile;
 class PackageFileStorage
 {
     /**
-     * @var PackageFileReader
+     * @var FilesystemStorage
      */
-    private $reader;
+    private $storage;
 
     /**
-     * @var PackageFileWriter
+     * @var PackageFileSerializer
      */
-    private $writer;
+    private $serializer;
 
     /**
      * @var FactoryManager
@@ -53,16 +52,17 @@ class PackageFileStorage
     /**
      * Creates a new storage.
      *
-     * @param PackageFileReader $reader         The package file reader.
-     * @param PackageFileWriter $writer         The package file writer.
-     * @param FactoryManager    $factoryManager The manager used to regenerate
-     *                                          the factory class after saving
-     *                                          the root package file.
+     * @param Storage               $storage        The file storage.
+     * @param PackageFileSerializer $serializer     The package file serializer.
+     * @param FactoryManager        $factoryManager The manager used to
+     *                                              regenerate the factory class
+     *                                              after saving the root
+     *                                              package file.
      */
-    public function __construct(PackageFileReader $reader, PackageFileWriter $writer, FactoryManager $factoryManager = null)
+    public function __construct(Storage $storage, PackageFileSerializer $serializer, FactoryManager $factoryManager = null)
     {
-        $this->reader = $reader;
-        $this->writer = $writer;
+        $this->storage = $storage;
+        $this->serializer = $serializer;
         $this->factoryManager = $factoryManager;
     }
 
@@ -78,18 +78,21 @@ class PackageFileStorage
      *
      * @return PackageFile The loaded package file.
      *
-     * @throws InvalidConfigException If the file contains invalid configuration.
+     * @throws StorageException            If the file cannot be read.
+     * @throws InvalidConfigException      If the file contains invalid
+     *                                     configuration.
+     * @throws UnsupportedVersionException If the version of the package file
+     *                                     is not supported.
      */
     public function loadPackageFile($path)
     {
-        try {
-            // Don't use file_exists() to decouple from the file system
-            $packageFile = $this->reader->readPackageFile($path);
-        } catch (FileNotFoundException $e) {
-            $packageFile = new PackageFile(null, $path);
+        if (!$this->storage->exists($path)) {
+            return new PackageFile(null, $path);
         }
 
-        return $packageFile;
+        $serialized = $this->storage->read($path);
+
+        return $this->serializer->unserializePackageFile($serialized, $path);
     }
 
     /**
@@ -99,11 +102,13 @@ class PackageFileStorage
      *
      * @param PackageFile $packageFile The package file to save.
      *
-     * @throws IOException If the file cannot be written.
+     * @throws StorageException If the file cannot be written.
      */
     public function savePackageFile(PackageFile $packageFile)
     {
-        $this->writer->writePackageFile($packageFile, $packageFile->getPath());
+        $serialized = $this->serializer->serializePackageFile($packageFile);
+
+        $this->storage->write($packageFile->getPath(), $serialized);
     }
 
     /**
@@ -117,18 +122,21 @@ class PackageFileStorage
      *
      * @return RootPackageFile The loaded package file.
      *
-     * @throws InvalidConfigException If the file contains invalid configuration.
+     * @throws StorageException            If the file cannot be read.
+     * @throws InvalidConfigException      If the file contains invalid
+     *                                     configuration.
+     * @throws UnsupportedVersionException If the version of the package file
+     *                                     is not supported.
      */
     public function loadRootPackageFile($path, Config $baseConfig)
     {
-        try {
-            // Don't use file_exists() to decouple from the file system
-            $packageFile = $this->reader->readRootPackageFile($path, $baseConfig);
-        } catch (FileNotFoundException $e) {
-            $packageFile = new RootPackageFile(null, $path, $baseConfig);
+        if (!$this->storage->exists($path)) {
+            return new RootPackageFile(null, $path, $baseConfig);
         }
 
-        return $packageFile;
+        $serialized = $this->storage->read($path);
+
+        return $this->serializer->unserializeRootPackageFile($serialized, $path, $baseConfig);
     }
 
     /**
@@ -138,11 +146,13 @@ class PackageFileStorage
      *
      * @param RootPackageFile $packageFile The package file to save.
      *
-     * @throws IOException If the file cannot be written.
+     * @throws StorageException If the file cannot be written.
      */
     public function saveRootPackageFile(RootPackageFile $packageFile)
     {
-        $this->writer->writePackageFile($packageFile, $packageFile->getPath());
+        $serialized = $this->serializer->serializeRootPackageFile($packageFile);
+
+        $this->storage->write($packageFile->getPath(), $serialized);
 
         if ($this->factoryManager) {
             $this->factoryManager->autoGenerateFactoryClass();

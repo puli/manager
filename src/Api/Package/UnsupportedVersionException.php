@@ -32,12 +32,12 @@ class UnsupportedVersionException extends RuntimeException
      *
      * @return static The created exception.
      */
-    public static function versionTooHigh($version, $maxVersion, $path, Exception $cause = null)
+    public static function versionTooHigh($version, $maxVersion, $path = null, Exception $cause = null)
     {
         return new static(sprintf(
-            'Cannot read package file %s at version %s. The highest readable '.
+            'Cannot read package file%s at version %s. The highest readable '.
             'version is %s. Please upgrade Puli.',
-            $path,
+            $path ? ' '.$path : '',
             $version,
             $maxVersion
         ), 0, $cause);
@@ -53,12 +53,12 @@ class UnsupportedVersionException extends RuntimeException
      *
      * @return static The created exception.
      */
-    public static function versionTooLow($version, $minVersion, $path, Exception $cause = null)
+    public static function versionTooLow($version, $minVersion, $path = null, Exception $cause = null)
     {
         return new static(sprintf(
-            'Cannot read package file %s at version %s. The lowest readable '.
+            'Cannot read package file%s at version %s. The lowest readable '.
             'version is %s. Please upgrade the package file.',
-            $path,
+            $path ? ' '.$path : '',
             $version,
             $minVersion
         ), 0, $cause);

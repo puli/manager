@@ -13,7 +13,7 @@ namespace Puli\Manager\Config;
 
 use Puli\Manager\Api\Config\ConfigFile;
 use Puli\Manager\Api\Config\ConfigFileWriter;
-use Puli\Manager\Api\IOException;
+use Puli\Manager\Api\Storage\StorageException;
 use stdClass;
 use Symfony\Component\Filesystem\Filesystem;
 use Webmozart\Json\JsonDecoder;
@@ -48,14 +48,14 @@ class ConfigJsonWriter implements ConfigFileWriter
     private function encodeFile($jsonData, $path)
     {
         if (!is_string($path) || !Path::isAbsolute($path)) {
-            throw new IOException(sprintf(
+            throw new StorageException(sprintf(
                 'Cannot write "%s": Expected an absolute path.',
                 $path
             ));
         }
 
         if (is_dir($path)) {
-            throw new IOException(sprintf(
+            throw new StorageException(sprintf(
                 'Cannot write %s: Is a directory.',
                 $path
             ));

@@ -18,7 +18,7 @@ use Puli\Manager\Api\Config\ConfigFileWriter;
 use Puli\Manager\Api\Factory\FactoryManager;
 use Puli\Manager\Api\FileNotFoundException;
 use Puli\Manager\Api\InvalidConfigException;
-use Puli\Manager\Api\IOException;
+use Puli\Manager\Api\Storage\StorageException;
 
 /**
  * Loads and saves configuration files.
@@ -94,7 +94,7 @@ class ConfigFileStorage
      *
      * @param ConfigFile $configFile The configuration file to save.
      *
-     * @throws IOException If the file cannot be written.
+     * @throws StorageException If the file cannot be written.
      */
     public function saveConfigFile(ConfigFile $configFile)
     {

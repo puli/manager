@@ -14,11 +14,10 @@ namespace Puli\Manager\Tests\Package;
 use PHPUnit_Framework_MockObject_MockObject;
 use PHPUnit_Framework_TestCase;
 use Puli\Manager\Api\Config\Config;
-use Puli\Manager\Api\Event\PackageFileEvent;
 use Puli\Manager\Api\Package\PackageFile;
-use Puli\Manager\Api\Package\PackageFileReader;
-use Puli\Manager\Api\Package\PackageFileWriter;
+use Puli\Manager\Api\Package\PackageFileSerializer;
 use Puli\Manager\Api\Package\RootPackageFile;
+use Puli\Manager\Api\Storage\Storage;
 use Puli\Manager\Package\PackageFileStorage;
 
 /**
@@ -33,42 +32,70 @@ class PackageFileStorageTest extends PHPUnit_Framework_TestCase
     private $storage;
 
     /**
-     * @var PHPUnit_Framework_MockObject_MockObject|PackageFileReader
+     * @var PHPUnit_Framework_MockObject_MockObject|PackageFileSerializer
      */
-    private $reader;
+    private $serializer;
 
     /**
-     * @var PHPUnit_Framework_MockObject_MockObject|PackageFileWriter
+     * @var PHPUnit_Framework_MockObject_MockObject|Storage
      */
-    private $writer;
+    private $backend;
 
     protected function setUp()
     {
-        $this->reader = $this->getMock('Puli\Manager\Api\Package\PackageFileReader');
-        $this->writer = $this->getMock('Puli\Manager\Api\Package\PackageFileWriter');
+        $this->serializer = $this->getMock('Puli\Manager\Api\Package\PackageFileSerializer');
+        $this->backend = $this->getMock('Puli\Manager\Api\Storage\Storage');
 
-        $this->storage = new PackageFileStorage($this->reader, $this->writer);
+        $this->storage = new PackageFileStorage($this->backend, $this->serializer);
     }
 
     public function testLoadPackageFile()
     {
-        $packageFile = new PackageFile('vendor/package');
+        $packageFile = new PackageFile(null);
 
-        $this->reader->expects($this->once())
-            ->method('readPackageFile')
+        $this->backend->expects($this->once())
+            ->method('exists')
             ->with('/path')
+            ->willReturn(true);
+        $this->backend->expects($this->once())
+            ->method('read')
+            ->with('/path')
+            ->willReturn('SERIALIZED');
+        $this->serializer->expects($this->once())
+            ->method('unserializePackageFile')
+            ->with('SERIALIZED', '/path')
             ->will($this->returnValue($packageFile));
 
         $this->assertSame($packageFile, $this->storage->loadPackageFile('/path'));
+    }
+
+    public function testLoadPackageFileReturnsNewIfNotFound()
+    {
+        $packageFile = new PackageFile(null, '/path');
+
+        $this->backend->expects($this->once())
+            ->method('exists')
+            ->with('/path')
+            ->willReturn(false);
+        $this->backend->expects($this->never())
+            ->method('read');
+        $this->serializer->expects($this->never())
+            ->method('unserializePackageFile');
+
+        $this->assertEquals($packageFile, $this->storage->loadPackageFile('/path'));
     }
 
     public function testSavePackageFile()
     {
         $packageFile = new PackageFile(null, '/path');
 
-        $this->writer->expects($this->once())
-            ->method('writePackageFile')
-            ->with($packageFile, '/path');
+        $this->serializer->expects($this->once())
+            ->method('serializePackageFile')
+            ->with($packageFile)
+            ->willReturn('SERIALIZED');
+        $this->backend->expects($this->once())
+            ->method('write')
+            ->with('/path', 'SERIALIZED');
 
         $this->storage->savePackageFile($packageFile);
     }
@@ -76,14 +103,39 @@ class PackageFileStorageTest extends PHPUnit_Framework_TestCase
     public function testLoadRootPackageFile()
     {
         $baseConfig = new Config();
-        $packageFile = new RootPackageFile('vendor/package', null, $baseConfig);
+        $packageFile = new RootPackageFile(null, '/path', $baseConfig);
 
-        $this->reader->expects($this->once())
-            ->method('readRootPackageFile')
+        $this->backend->expects($this->once())
+            ->method('exists')
             ->with('/path')
+            ->willReturn(true);
+        $this->backend->expects($this->once())
+            ->method('read')
+            ->with('/path')
+            ->willReturn('SERIALIZED');
+        $this->serializer->expects($this->once())
+            ->method('unserializeRootPackageFile')
+            ->with('SERIALIZED', '/path', $baseConfig)
             ->will($this->returnValue($packageFile));
 
         $this->assertSame($packageFile, $this->storage->loadRootPackageFile('/path', $baseConfig));
+    }
+
+    public function testLoadRootPackageFileCreatesNewIfNotFound()
+    {
+        $baseConfig = new Config();
+        $packageFile = new RootPackageFile(null, '/path', $baseConfig);
+
+        $this->backend->expects($this->once())
+            ->method('exists')
+            ->with('/path')
+            ->willReturn(false);
+        $this->backend->expects($this->never())
+            ->method('read');
+        $this->serializer->expects($this->never())
+            ->method('unserializeRootPackageFile');
+
+        $this->assertEquals($packageFile, $this->storage->loadRootPackageFile('/path', $baseConfig));
     }
 
     public function testSaveRootPackageFile()
@@ -91,9 +143,13 @@ class PackageFileStorageTest extends PHPUnit_Framework_TestCase
         $baseConfig = new Config();
         $packageFile = new RootPackageFile(null, '/path', $baseConfig);
 
-        $this->writer->expects($this->once())
-            ->method('writePackageFile')
-            ->with($packageFile, '/path');
+        $this->serializer->expects($this->once())
+            ->method('serializeRootPackageFile')
+            ->with($packageFile)
+            ->willReturn('SERIALIZED');
+        $this->backend->expects($this->once())
+            ->method('write')
+            ->with('/path', 'SERIALIZED');
 
         $this->storage->saveRootPackageFile($packageFile);
     }
@@ -104,7 +160,7 @@ class PackageFileStorageTest extends PHPUnit_Framework_TestCase
         $packageFile = new RootPackageFile(null, '/path', $baseConfig);
 
         $factoryManager = $this->getMock('Puli\Manager\Api\Factory\FactoryManager');
-        $storage = new PackageFileStorage($this->reader, $this->writer, $factoryManager);
+        $storage = new PackageFileStorage($this->backend, $this->serializer, $factoryManager);
 
         $factoryManager->expects($this->once())
             ->method('autoGenerateFactoryClass');

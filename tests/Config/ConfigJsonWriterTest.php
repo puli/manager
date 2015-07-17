@@ -14,14 +14,14 @@ namespace Puli\Manager\Tests\Config;
 use Puli\Manager\Api\Config\Config;
 use Puli\Manager\Api\Config\ConfigFile;
 use Puli\Manager\Config\ConfigJsonWriter;
-use Puli\Manager\Tests\JsonWriterTestCase;
+use Puli\Manager\Tests\JsonTestCase;
 use Symfony\Component\Filesystem\Filesystem;
 
 /**
  * @since  1.0
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class ConfigJsonWriterTest extends JsonWriterTestCase
+class ConfigJsonWriterTest extends JsonTestCase
 {
     /**
      * @var ConfigJsonWriter
@@ -97,7 +97,7 @@ class ConfigJsonWriterTest extends JsonWriterTestCase
 
     /**
      * @dataProvider provideInvalidPaths
-     * @expectedException \Puli\Manager\Api\IOException
+     * @expectedException \Puli\Manager\Api\Storage\StorageException
      */
     public function testWriteConfigExpectsValidPath($invalidPath)
     {

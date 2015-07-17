@@ -1,6 +1,12 @@
 Changelog
 =========
 
+* 1.0.0-next (@release_date@)
+
+ * added `Storage` and `FilesystemStorage`
+ * renamed `Puli\Manager\Api\IOException` to `Puli\Manager\Api\Storage\StorageException`
+ * replaced `PackageFileReader` and `PackageFileWriter` by `PackageFileSerializer`
+
 * 1.0.0-beta5 (2015-05-29)
 
  * integrated puli/asset-plugin into puli/manager

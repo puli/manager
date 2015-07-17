@@ -13,7 +13,7 @@ namespace Puli\Manager\Api\Config;
 
 use Puli\Manager\Api\Environment\GlobalEnvironment;
 use Puli\Manager\Api\InvalidConfigException;
-use Puli\Manager\Api\IOException;
+use Puli\Manager\Api\Storage\StorageException;
 use Webmozart\Expression\Expression;
 
 /**
