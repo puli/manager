@@ -554,8 +554,7 @@ class PackageManagerImplTest extends ManagerTestCase
                 PHPUnit_Framework_Assert::assertFalse($rootPackageFile->hasInstallInfo('vendor/package1'));
             }));
 
-        $this->installInfo1->addEnabledBindingUuid($uuid1 = Uuid::uuid4());
-        $this->installInfo1->addDisabledBindingUuid($uuid2 = Uuid::uuid4());
+        $this->installInfo1->addDisabledBindingUuid($uuid = Uuid::uuid4());
 
         $this->assertSame('vendor/package1', $this->installInfo1->getPackageName());
         $this->assertTrue($this->manager->hasPackage('vendor/package1'));
@@ -577,8 +576,7 @@ class PackageManagerImplTest extends ManagerTestCase
 
         $this->assertSame('vendor/new', $installInfo->getPackageName());
         $this->assertSame('../package1', $installInfo->getInstallPath());
-        $this->assertSame(array($uuid1), $installInfo->getEnabledBindingUuids());
-        $this->assertSame(array($uuid2), $installInfo->getDisabledBindingUuids());
+        $this->assertSame(array($uuid), $installInfo->getDisabledBindingUuids());
     }
 
     public function testRenameNonRootPackageDoesNothingIfUnchanged()

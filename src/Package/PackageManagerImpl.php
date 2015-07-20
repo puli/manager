@@ -435,10 +435,6 @@ class PackageManagerImpl implements PackageManager
         $installInfo = new InstallInfo($newName, $previousInstallInfo->getInstallPath());
         $installInfo->setInstallerName($previousInstallInfo->getInstallerName());
 
-        foreach ($previousInstallInfo->getEnabledBindingUuids() as $uuid) {
-            $installInfo->addEnabledBindingUuid($uuid);
-        }
-
         foreach ($previousInstallInfo->getDisabledBindingUuids() as $uuid) {
             $installInfo->addDisabledBindingUuid($uuid);
         }

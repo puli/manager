@@ -260,16 +260,6 @@ class PackageJsonSerializer implements PackageFileSerializer
                     $installData->installer = $installInfo->getInstallerName();
                 }
 
-                if ($installInfo->hasEnabledBindingUuids()) {
-                    $installData->{'enabled-bindings'} = array();
-
-                    foreach ($installInfo->getEnabledBindingUuids() as $uuid) {
-                        $installData->{'enabled-bindings'}[] = $uuid->toString();
-                    }
-
-                    sort($installData->{'enabled-bindings'});
-                }
-
                 if ($installInfo->hasDisabledBindingUuids()) {
                     $installData->{'disabled-bindings'} = array();
 
@@ -376,12 +366,6 @@ class PackageJsonSerializer implements PackageFileSerializer
 
                 if (isset($packageData->installer)) {
                     $installInfo->setInstallerName($packageData->installer);
-                }
-
-                if (isset($packageData->{'enabled-bindings'})) {
-                    foreach ($packageData->{'enabled-bindings'} as $uuid) {
-                        $installInfo->addEnabledBindingUuid(Uuid::fromString($uuid));
-                    }
                 }
 
                 if (isset($packageData->{'disabled-bindings'})) {

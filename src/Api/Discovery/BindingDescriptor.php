@@ -493,27 +493,6 @@ class BindingDescriptor
     }
 
     /**
-     * Returns whether the binding is neither enabled nor disabled.
-     *
-     * The method {@link load()} needs to be called before calling this method,
-     * otherwise an exception is thrown.
-     *
-     * @return bool Returns `true` if the state is {@link BindingState::UNDECIDED}.
-     *
-     * @throws NotLoadedException If the descriptor is not loaded.
-     *
-     * @see BindingState::UNDECIDED
-     */
-    public function isUndecided()
-    {
-        if (null === $this->state) {
-            throw new NotLoadedException('The binding descriptor is not loaded.');
-        }
-
-        return BindingState::UNDECIDED === $this->state;
-    }
-
-    /**
      * Returns whether the type of the binding does not exist.
      *
      * The method {@link load()} needs to be called before calling this method,
@@ -612,10 +591,8 @@ class BindingDescriptor
             $this->state = BindingState::ENABLED;
         } elseif ($this->containingPackage->getInstallInfo()->hasDisabledBindingUuid($this->uuid)) {
             $this->state = BindingState::DISABLED;
-        } elseif ($this->containingPackage->getInstallInfo()->hasEnabledBindingUuid($this->uuid)) {
-            $this->state = BindingState::ENABLED;
         } else {
-            $this->state = BindingState::UNDECIDED;
+            $this->state = BindingState::ENABLED;
         }
     }
 }

@@ -7,6 +7,9 @@ Changelog
  * renamed `Puli\Manager\Api\IOException` to `Puli\Manager\Api\Storage\StorageException`
  * replaced `PackageFileReader` and `PackageFileWriter` by `PackageFileSerializer`
  * replaced `ConfigFileReader` and `ConfigFileWriter` by `ConfigFileSerializer`
+ * bindings are now always enabled unless they are explicitly disabled
+ * removed `BindingState::UNDECIDED`
+ * removed `InstallInfo::*Enabled*()` methods
 
 * 1.0.0-beta5 (2015-05-29)
 

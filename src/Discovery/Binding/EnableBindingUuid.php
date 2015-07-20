@@ -52,9 +52,8 @@ class EnableBindingUuid implements AtomicOperation
     {
         if ($this->installInfo->hasDisabledBindingUuid($this->uuid)) {
             $this->wasDisabled = true;
+            $this->installInfo->removeDisabledBindingUuid($this->uuid);
         }
-
-        $this->installInfo->addEnabledBindingUuid($this->uuid);
     }
 
     /**
@@ -64,8 +63,6 @@ class EnableBindingUuid implements AtomicOperation
     {
         if ($this->wasDisabled) {
             $this->installInfo->addDisabledBindingUuid($this->uuid);
-        } else {
-            $this->installInfo->removeEnabledBindingUuid($this->uuid);
         }
     }
 }

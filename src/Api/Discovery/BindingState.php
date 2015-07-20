@@ -31,24 +31,19 @@ final class BindingState
     const DISABLED = 2;
 
     /**
-     * State: The binding is neither enabled nor disabled.
+     * State: The binding's type does not exist.
      */
-    const UNDECIDED = 3;
+    const TYPE_NOT_FOUND = 3;
 
     /**
      * State: The binding's type does not exist.
      */
-    const TYPE_NOT_FOUND = 4;
-
-    /**
-     * State: The binding's type does not exist.
-     */
-    const TYPE_NOT_ENABLED = 5;
+    const TYPE_NOT_ENABLED = 4;
 
     /**
      * State: The binding does not match the constraints of the binding type.
      */
-    const INVALID = 6;
+    const INVALID = 5;
 
     /**
      * Returns all binding states.
@@ -60,7 +55,6 @@ final class BindingState
         return array(
             self::ENABLED,
             self::DISABLED,
-            self::UNDECIDED,
             self::TYPE_NOT_FOUND,
             self::TYPE_NOT_ENABLED,
             self::INVALID,

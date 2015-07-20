@@ -136,9 +136,6 @@ JSON;
         "vendor/package1": {
             "install-path": "/path/to/package1",
             "installer": "composer",
-            "enabled-bindings": [
-                "a54e5668-2b36-43f4-a32c-2d175092b77d"
-            ],
             "disabled-bindings": [
                 "4d02ee67-d845-4789-a9c1-8301351c6f5a"
             ]
@@ -532,7 +529,6 @@ JSON;
     {
         $installInfo1 = new InstallInfo('vendor/package1', '/path/to/package1');
         $installInfo1->setInstallerName('composer');
-        $installInfo1->addEnabledBindingUuid(Uuid::fromString('a54e5668-2b36-43f4-a32c-2d175092b77d'));
         $installInfo1->addDisabledBindingUuid(Uuid::fromString('4d02ee67-d845-4789-a9c1-8301351c6f5a'));
         $installInfo2 = new InstallInfo('vendor/package2', '/path/to/package2');
         $installInfo2->setDevDependency(true);
@@ -626,9 +622,6 @@ JSON;
     public function testSerializeRootPackageFileSortsPackageBindings()
     {
         $installInfo = new InstallInfo('vendor/package1', '/path/to/package1');
-        $installInfo->addEnabledBindingUuid(Uuid::fromString('c54e5668-2b36-43f4-a32c-2d175092b77d'));
-        $installInfo->addEnabledBindingUuid(Uuid::fromString('a54e5668-2b36-43f4-a32c-2d175092b77d'));
-        $installInfo->addEnabledBindingUuid(Uuid::fromString('b54e5668-2b36-43f4-a32c-2d175092b77d'));
         $installInfo->addDisabledBindingUuid(Uuid::fromString('6d02ee67-d845-4789-a9c1-8301351c6f5a'));
         $installInfo->addDisabledBindingUuid(Uuid::fromString('4d02ee67-d845-4789-a9c1-8301351c6f5a'));
         $installInfo->addDisabledBindingUuid(Uuid::fromString('5d02ee67-d845-4789-a9c1-8301351c6f5a'));
@@ -642,11 +635,6 @@ JSON;
     "packages": {
         "vendor/package1": {
             "install-path": "/path/to/package1",
-            "enabled-bindings": [
-                "a54e5668-2b36-43f4-a32c-2d175092b77d",
-                "b54e5668-2b36-43f4-a32c-2d175092b77d",
-                "c54e5668-2b36-43f4-a32c-2d175092b77d"
-            ],
             "disabled-bindings": [
                 "4d02ee67-d845-4789-a9c1-8301351c6f5a",
                 "5d02ee67-d845-4789-a9c1-8301351c6f5a",
@@ -746,7 +734,6 @@ JSON;
 
         $installInfo1 = new InstallInfo('vendor/package1', '/path/to/package1');
         $installInfo1->setInstallerName('composer');
-        $installInfo1->addEnabledBindingUuid(Uuid::fromString('a54e5668-2b36-43f4-a32c-2d175092b77d'));
         $installInfo1->addDisabledBindingUuid(Uuid::fromString('4d02ee67-d845-4789-a9c1-8301351c6f5a'));
         $installInfo2 = new InstallInfo('vendor/package2', '/path/to/package2');
         $installInfo2->setDevDependency(true);

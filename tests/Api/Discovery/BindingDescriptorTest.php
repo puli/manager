@@ -445,19 +445,6 @@ class BindingDescriptorTest extends PHPUnit_Framework_TestCase
         $this->assertSame(BindingState::ENABLED, $binding->getState());
     }
 
-    public function testEnabledIfEnabled()
-    {
-        $type = new BindingTypeDescriptor('vendor/type');
-        $type->load($this->package);
-
-        $this->package->getInstallInfo()->addEnabledBindingUuid($this->uuid);
-
-        $binding = new BindingDescriptor('/path', 'vendor/type', array(), 'glob', $this->uuid);
-        $binding->load($this->package, $type);
-
-        $this->assertSame(BindingState::ENABLED, $binding->getState());
-    }
-
     public function testDisabledIfDisabled()
     {
         $type = new BindingTypeDescriptor('vendor/type');
@@ -471,7 +458,7 @@ class BindingDescriptorTest extends PHPUnit_Framework_TestCase
         $this->assertSame(BindingState::DISABLED, $binding->getState());
     }
 
-    public function testUndecidedIfNeitherEnabledNorDisabled()
+    public function testEnabledIfNotDisabled()
     {
         $type = new BindingTypeDescriptor('vendor/type');
         $type->load($this->package);
@@ -479,7 +466,7 @@ class BindingDescriptorTest extends PHPUnit_Framework_TestCase
         $binding = new BindingDescriptor('/path', 'vendor/type', array(), 'glob', $this->uuid);
         $binding->load($this->package, $type);
 
-        $this->assertSame(BindingState::UNDECIDED, $binding->getState());
+        $this->assertSame(BindingState::ENABLED, $binding->getState());
     }
 
     public function testCompare()
@@ -506,7 +493,6 @@ class BindingDescriptorTest extends PHPUnit_Framework_TestCase
         $type->load($this->package);
 
         $uuid = Uuid::fromString('abcdb814-9dad-11d1-80b4-00c04fd430c8');
-        $this->package->getInstallInfo()->addEnabledBindingUuid($uuid);
         $binding = new BindingDescriptor('/path', 'vendor/type', array(
             'param' => 'value',
         ), 'glob', $uuid);

@@ -37,7 +37,7 @@ class DisableBindingUuid implements AtomicOperation
     /**
      * @var bool
      */
-    private $wasEnabled = false;
+    private $wasDisabled = true;
 
     public function __construct(Uuid $uuid, InstallInfo $installInfo)
     {
@@ -50,11 +50,10 @@ class DisableBindingUuid implements AtomicOperation
      */
     public function execute()
     {
-        if ($this->installInfo->hasEnabledBindingUuid($this->uuid)) {
-            $this->wasEnabled = true;
+        if (!$this->installInfo->hasDisabledBindingUuid($this->uuid)) {
+            $this->wasDisabled = false;
+            $this->installInfo->addDisabledBindingUuid($this->uuid);
         }
-
-        $this->installInfo->addDisabledBindingUuid($this->uuid);
     }
 
     /**
@@ -62,9 +61,7 @@ class DisableBindingUuid implements AtomicOperation
      */
     public function rollback()
     {
-        if ($this->wasEnabled) {
-            $this->installInfo->addEnabledBindingUuid($this->uuid);
-        } else {
+        if (!$this->wasDisabled) {
             $this->installInfo->removeDisabledBindingUuid($this->uuid);
         }
     }

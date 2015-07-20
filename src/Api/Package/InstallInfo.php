@@ -124,62 +124,6 @@ class InstallInfo
     }
 
     /**
-     * Returns the enabled resource bindings of the package.
-     *
-     * @return Uuid[] The UUIDs of the enabled resource bindings.
-     */
-    public function getEnabledBindingUuids()
-    {
-        return array_values($this->enabledBindingUuids);
-    }
-
-    /**
-     * Adds an enabled resource binding for the package.
-     *
-     * @param Uuid $uuid The UUID of the enabled resource binding.
-     */
-    public function addEnabledBindingUuid(Uuid $uuid)
-    {
-        $this->enabledBindingUuids[$uuid->toString()] = $uuid;
-
-        $this->removeDisabledBindingUuid($uuid);
-    }
-
-    /**
-     * Removes an enabled resource binding.
-     *
-     * If the resource binding is not enabled, this method does nothing.
-     *
-     * @param Uuid $uuid The UUID of the resource binding to remove.
-     */
-    public function removeEnabledBindingUuid(Uuid $uuid)
-    {
-        unset($this->enabledBindingUuids[$uuid->toString()]);
-    }
-
-    /**
-     * Returns whether the resource binding is enabled.
-     *
-     * @param Uuid $uuid The UUID of the resource binding.
-     *
-     * @return bool Whether the resource binding is enabled.
-     */
-    public function hasEnabledBindingUuid(Uuid $uuid)
-    {
-        return isset($this->enabledBindingUuids[$uuid->toString()]);
-    }
-
-    /**
-     * Returns whether the install info contains enabled bindings.
-     *
-     * @return bool Whether any bindings are enabled.
-     */
-    public function hasEnabledBindingUuids()
-    {
-        return count($this->enabledBindingUuids) > 0;
-    }
-
-    /**
      * Returns the disabled resource bindings of the package.
      *
      * @return Uuid[] The UUIDs of the disabled resource bindings.
@@ -197,8 +141,6 @@ class InstallInfo
     public function addDisabledBindingUuid(Uuid $uuid)
     {
         $this->disabledBindingUuids[$uuid->toString()] = $uuid;
-
-        $this->removeEnabledBindingUuid($uuid);
     }
 
     /**

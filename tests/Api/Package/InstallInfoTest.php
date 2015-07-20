@@ -64,48 +64,6 @@ class InstallInfoTest extends PHPUnit_Framework_TestCase
         new InstallInfo('', '/path');
     }
 
-    public function testAddEnabledBindingUuid()
-    {
-        $installInfo = new InstallInfo('vendor/package', '/path');
-        $uuid = Uuid::uuid4();
-
-        $installInfo->addEnabledBindingUuid($uuid);
-
-        $this->assertSame(array($uuid), $installInfo->getEnabledBindingUuids());
-    }
-
-    public function testAddEnabledBindingUuidIgnoresDuplicates()
-    {
-        $installInfo = new InstallInfo('vendor/package', '/path');
-        $uuid = Uuid::uuid4();
-
-        $installInfo->addEnabledBindingUuid($uuid);
-        $installInfo->addEnabledBindingUuid($uuid);
-
-        $this->assertSame(array($uuid), $installInfo->getEnabledBindingUuids());
-    }
-
-    public function testRemoveEnabledBindingUuid()
-    {
-        $installInfo = new InstallInfo('vendor/package', '/path');
-        $uuid = Uuid::uuid4();
-
-        $installInfo->addEnabledBindingUuid($uuid);
-        $installInfo->removeEnabledBindingUuid($uuid);
-
-        $this->assertSame(array(), $installInfo->getEnabledBindingUuids());
-    }
-
-    public function testRemoveEnabledBindingUuidIgnoresUnknown()
-    {
-        $installInfo = new InstallInfo('vendor/package', '/path');
-        $uuid = Uuid::uuid4();
-
-        $installInfo->removeEnabledBindingUuid($uuid);
-
-        $this->assertSame(array(), $installInfo->getEnabledBindingUuids());
-    }
-
     public function testAddDisabledBindingUuid()
     {
         $installInfo = new InstallInfo('vendor/package', '/path');
@@ -146,29 +104,5 @@ class InstallInfoTest extends PHPUnit_Framework_TestCase
         $installInfo->removeDisabledBindingUuid($uuid);
 
         $this->assertSame(array(), $installInfo->getDisabledBindingUuids());
-    }
-
-    public function testAddEnabledBindingUuidRemovesDisabledMapping()
-    {
-        $installInfo = new InstallInfo('vendor/package', '/path');
-        $uuid = Uuid::uuid4();
-
-        $installInfo->addDisabledBindingUuid($uuid);
-        $installInfo->addEnabledBindingUuid($uuid);
-
-        $this->assertSame(array($uuid), $installInfo->getEnabledBindingUuids());
-        $this->assertSame(array(), $installInfo->getDisabledBindingUuids());
-    }
-
-    public function testAddDisabledBindingUuidRemovesEnabledMapping()
-    {
-        $installInfo = new InstallInfo('vendor/package', '/path');
-        $uuid = Uuid::uuid4();
-
-        $installInfo->addEnabledBindingUuid($uuid);
-        $installInfo->addDisabledBindingUuid($uuid);
-
-        $this->assertSame(array(), $installInfo->getEnabledBindingUuids());
-        $this->assertSame(array($uuid), $installInfo->getDisabledBindingUuids());
     }
 }
