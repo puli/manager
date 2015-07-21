@@ -13,6 +13,7 @@ namespace Puli\Manager\Repository\Mapping;
 
 use Exception;
 use LogicException;
+use Puli\Manager\Api\Repository\PathMapping;
 use Puli\Manager\Conflict\OverrideGraph;
 use Puli\Manager\Transaction\AtomicOperation;
 use Puli\Repository\Api\EditableRepository;
