@@ -78,7 +78,7 @@ class RecursivePathIteratorTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \InvalidArgumentException
+     * @expectedException \UnexpectedValueException
      */
     public function testRewindFailsIfFileNotFound()
     {

@@ -11,7 +11,7 @@
 
 namespace Puli\Manager\Repository\Iterator;
 
-use Webmozart\Glob\Iterator\RecursiveDirectoryIterator;
+use RecursiveDirectoryIterator;
 
 /**
  * Recursively iterates over a filesystem path and its corresponding repository
@@ -33,7 +33,7 @@ class RecursivePathIterator extends RecursiveDirectoryIterator
      */
     private $flags;
 
-    public function __construct($filesystemPath, $repositoryPath, $flags = null)
+    public function __construct($filesystemPath, $repositoryPath, $flags = self::SKIP_DOTS)
     {
         parent::__construct($filesystemPath, $flags);
 
@@ -51,6 +51,15 @@ class RecursivePathIterator extends RecursiveDirectoryIterator
         }
 
         return $this->repositoryPath.'/'.basename($this->key());
+    }
+
+    public function key()
+    {
+        if (!$this->valid()) {
+            return null;
+        }
+
+        return parent::key();
     }
 
     /**
