@@ -11,7 +11,6 @@
 
 namespace Puli\Manager\Api\Repository;
 
-use ArrayIterator;
 use Exception;
 use InvalidArgumentException;
 use Puli\Manager\Api\AlreadyLoadedException;
@@ -21,7 +20,7 @@ use Puli\Manager\Api\Package\NoSuchPackageException;
 use Puli\Manager\Api\Package\Package;
 use Puli\Manager\Api\Package\PackageCollection;
 use Puli\Manager\Assert\Assert;
-use Puli\Manager\Repository\Iterator\RecursivePathsIterator;
+use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use Webmozart\Expression\Expression;
 use Webmozart\PathUtil\Path;
@@ -163,32 +162,31 @@ class PathMapping
             }
         }
 
-        $iterator = new RecursivePathsIterator(
-            new ArrayIterator($filesystemPaths),
-            $this->repositoryPath
-        );
+        foreach ($filesystemPaths as $filesystemPath) {
+            $this->pathMappings[$filesystemPath] = $this->repositoryPath;
 
-        foreach ($iterator as $filesystemPath => $repositoryPath) {
-            $directoryEntries = array();
-
-            // If the filesystem path is a directory, list all entries of the
-            // directory recursively
-            if ($iterator->hasChildren()) {
-                $directoryEntries = iterator_to_array(new RecursiveIteratorIterator(
-                    $iterator->getChildren(),
-                    RecursiveIteratorIterator::SELF_FIRST
-                ));
-
-                ksort($directoryEntries);
+            if (!is_dir($filesystemPath)) {
+                continue;
             }
 
-            $this->pathMappings = array_merge(
-                $this->pathMappings,
-                // Append the current path
-                array($filesystemPath => $repositoryPath),
-                // Append all entries of the directory (if any)
-                $directoryEntries
-            );
+            $prefixLength = strlen($filesystemPath);
+            $directoryEntries = iterator_to_array(new RecursiveIteratorIterator(
+                new RecursiveDirectoryIterator(
+                    $filesystemPath,
+                    RecursiveDirectoryIterator::CURRENT_AS_PATHNAME | RecursiveDirectoryIterator::SKIP_DOTS
+                ),
+                RecursiveIteratorIterator::SELF_FIRST
+            ));
+
+            // RecursiveDirectoryIterator is not guaranteed to sort its results,
+            // so sort them here
+            // We need to sort in the loop and not at the very end because the
+            // order of the $filesystemPaths should be kept in $pathMappings
+            ksort($directoryEntries);
+
+            foreach ($directoryEntries as $nestedFilesystemPath) {
+                $this->pathMappings[$nestedFilesystemPath] = substr_replace($nestedFilesystemPath, $this->repositoryPath, 0, $prefixLength);
+            }
         }
 
         $this->repositoryPaths = array_unique($this->pathMappings);
