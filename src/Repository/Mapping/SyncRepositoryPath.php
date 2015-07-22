@@ -43,7 +43,7 @@ class SyncRepositoryPath implements AtomicOperation
     /**
      * @var PathMappingCollection
      */
-    private $mappingsByResource;
+    private $mappings;
 
     /**
      * @var OverrideGraph
@@ -63,14 +63,14 @@ class SyncRepositoryPath implements AtomicOperation
     /**
      * @param string                $repositoryPath
      * @param EditableRepository    $repo
-     * @param PathMappingCollection $mappingsByResource
+     * @param PathMappingCollection $mappings
      * @param OverrideGraph         $overrideGraph
      */
-    public function __construct($repositoryPath, EditableRepository $repo, PathMappingCollection $mappingsByResource, OverrideGraph $overrideGraph)
+    public function __construct($repositoryPath, EditableRepository $repo, PathMappingCollection $mappings, OverrideGraph $overrideGraph)
     {
         $this->repositoryPath = $repositoryPath;
         $this->repo = $repo;
-        $this->mappingsByResource = $mappingsByResource;
+        $this->mappings = $mappings;
         $this->overrideGraph = $overrideGraph;
     }
 
@@ -209,9 +209,17 @@ class SyncRepositoryPath implements AtomicOperation
     {
         // Get a copy so that we can remove the entries that we processed
         // already
-        $mappings = $this->mappingsByResource->toArray();
+        $inMappings = $this->mappings->toArray();
+        $outMappings = array();
+        $filesystemPaths = array();
 
-        $this->collectEnabledFilesystemPaths($repositoryPath, $mappings, $filesystemPaths);
+        $this->filterEnabledMappings($repositoryPath, $inMappings, $outMappings);
+
+        foreach ($outMappings as $mappingPath => $mappingsByPackage) {
+            foreach ($mappingsByPackage as $packageName => $mapping) {
+                $filesystemPaths[$packageName][$mappingPath] = $mapping->getFilesystemPaths();
+            }
+        }
 
         if (!$filesystemPaths) {
             return array();
@@ -231,58 +239,51 @@ class SyncRepositoryPath implements AtomicOperation
 
     /**
      * @param string          $repositoryPath
-     * @param PathMapping[][] $uncheckedMappings
-     * @param string[][]      $filesystemPaths
-     * @param string[][]      $filesystemPaths
+     * @param PathMapping[][] $inMappings
+     * @param PathMapping[][] $outMappings
+     * @param bool[]          $processedPaths
      */
-    private function collectEnabledFilesystemPaths($repositoryPath, array &$uncheckedMappings, array &$filesystemPaths = null, array &$processedPaths = null)
+    private function filterEnabledMappings($repositoryPath, array &$inMappings, array &$outMappings, array &$processedPaths = array())
     {
-        if (null === $filesystemPaths) {
-            $filesystemPaths = array();
-            $processedPaths = array();
-        }
-
-        // We had this one before
-        if (isset($processedPaths[$repositoryPath])) {
-            return;
-        }
-
+        $repositoryPaths = array();
         $processedPaths[$repositoryPath] = true;
 
-        foreach ($uncheckedMappings as $mappedPath => $mappingsByPackage) {
-            // Check mappings for the passed repository path or any of its
-            // nested paths
-            if ($repositoryPath !== $mappedPath && !Path::isBasePath($repositoryPath, $mappedPath)) {
-                continue;
-            }
-
+        foreach ($inMappings as $mappingPath => $mappingsByPackage) {
             foreach ($mappingsByPackage as $packageName => $mapping) {
-                // Don't check the mapping again for this repository path
-                unset($uncheckedMappings[$mappedPath][$packageName]);
-
-                // The path of the mapping is not necessarily the current repository
-                // path. The paths are different when checking the nested paths of
-                // a mapping.
-                $mappingPath = $mapping->getRepositoryPath();
-
-                // We added the mapping before or it is not enabled
-                if (isset($filesystemPaths[$packageName][$mappingPath]) || !$mapping->isEnabled()) {
+                if (!$mapping->isEnabled()) {
                     continue;
                 }
 
-                if (!isset($filesystemPaths[$packageName])) {
-                    $filesystemPaths[$packageName] = array();
+                $nestedMappingPaths = $mapping->listRepositoryPaths();
+
+                // Check that the mapping actually contains the path
+                if (!Path::isBasePath($repositoryPath, $mappingPath) && !in_array($repositoryPath, $nestedMappingPaths, true)) {
+                    continue;
                 }
 
-                $filesystemPaths[$packageName][$mappingPath] = $mapping->getFilesystemPaths();
+                // Don't check this mapping anymore in recursive calls
+                unset($inMappings[$mappingPath][$packageName]);
 
-                // Check all nested paths of the mapping for other mappings that
-                // map to the same paths
-                foreach ($mapping->listRepositoryPaths() as $nestedRepositoryPath) {
-                    // Don't repeat the call for the current path
-                    if ($nestedRepositoryPath !== $mappedPath) {
-                        $this->collectEnabledFilesystemPaths($nestedRepositoryPath, $uncheckedMappings, $filesystemPaths, $processedPaths);
-                    }
+                if (empty($inMappings[$mappingPath])) {
+                    unset($inMappings[$mappingPath]);
+                }
+
+                // Add mapping to output
+                $outMappings[$mappingPath][$packageName] = $mapping;
+
+                foreach ($nestedMappingPaths as $nestedMappingPath) {
+                    $repositoryPaths[$nestedMappingPath] = true;
+                }
+            }
+        }
+
+        // Continue to search for mappings for the repository paths we collected
+        // already until there are no more mappings
+        if (!empty($inMappings)) {
+            foreach ($repositoryPaths as $nestedMappingPath => $true) {
+                // Don't process paths twice
+                if (!isset($processedPaths[$nestedMappingPath])) {
+                    $this->filterEnabledMappings($nestedMappingPath, $inMappings, $outMappings, $processedPaths);
                 }
             }
         }

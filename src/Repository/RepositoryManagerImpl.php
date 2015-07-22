@@ -505,7 +505,7 @@ class RepositoryManagerImpl implements RepositoryManager
 
     private function syncRepositoryPath($repositoryPath)
     {
-        return new SyncRepositoryPath($repositoryPath, $this->repo, $this->mappingsByResource, $this->overrideGraph);
+        return new SyncRepositoryPath($repositoryPath, $this->repo, $this->mappings, $this->overrideGraph);
     }
 
     private function populateRepository()
