@@ -143,6 +143,7 @@ class PathMapping
         }
 
         $filesystemPaths = array();
+        $pathMappings = array();
         $loadErrors = array();
 
         foreach ($this->pathReferences as $relativePath) {
@@ -163,7 +164,7 @@ class PathMapping
         }
 
         foreach ($filesystemPaths as $filesystemPath) {
-            $this->pathMappings[$filesystemPath] = $this->repositoryPath;
+            $pathMappings[$filesystemPath] = $this->repositoryPath;
 
             if (!is_dir($filesystemPath)) {
                 continue;
@@ -185,12 +186,13 @@ class PathMapping
             ksort($directoryEntries);
 
             foreach ($directoryEntries as $nestedFilesystemPath) {
-                $this->pathMappings[$nestedFilesystemPath] = substr_replace($nestedFilesystemPath, $this->repositoryPath, 0, $prefixLength);
+                $pathMappings[$nestedFilesystemPath] = substr_replace($nestedFilesystemPath, $this->repositoryPath, 0, $prefixLength);
             }
         }
 
-        $this->repositoryPaths = array_unique($this->pathMappings);
+        $this->repositoryPaths = array_unique($pathMappings);
         $this->filesystemPaths = $filesystemPaths;
+        $this->pathMappings = $pathMappings;
         $this->loadErrors = $loadErrors;
         $this->containingPackage = $containingPackage;
 
