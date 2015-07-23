@@ -13,6 +13,7 @@ namespace Puli\Manager\Tests\Api;
 
 use PHPUnit_Framework_TestCase;
 use Puli\Manager\Api\Puli;
+use Puli\Manager\Tests\Api\Fixtures\BootstrapPlugin;
 use Puli\Manager\Tests\Api\Package\Fixtures\TestPlugin;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\Filesystem\Filesystem;
@@ -516,6 +517,25 @@ class PuliTest extends PHPUnit_Framework_TestCase
 
         $this->assertNull(TestPlugin::getPuli());
         $this->assertNull(TestPlugin::getEnvironment());
+    }
+
+    /**
+     * @runInSeparateProcess
+     */
+    public function testUseBootstrapFileForLoadingPlugins()
+    {
+        $filesystem = new Filesystem();
+        $filesystem->copy($this->tempDir.'/puli-bootstrap.json', $this->tempDir.'/puli.json', true);
+        $filesystem->copy(__DIR__.'/Fixtures/test-bootstrap.php', $this->tempDir.'/test-bootstrap.php', true);
+
+        $this->puli->setRootDirectory($this->tempDir);
+
+        $this->assertFalse(defined('PULI_TEST_BOOTSTRAP_LOADED'));
+
+        $this->puli->start();
+
+        $this->assertTrue(defined('PULI_TEST_BOOTSTRAP_LOADED'));
+        $this->assertTrue(BootstrapPlugin::$activated);
     }
 
     /**

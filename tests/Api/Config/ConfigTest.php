@@ -938,6 +938,7 @@ class ConfigTest extends PHPUnit_Framework_TestCase
     public function getNullableKeys()
     {
         return array(
+            array(Config::BOOTSTRAP_FILE),
             array(Config::DISCOVERY_STORE_TYPE),
         );
     }
@@ -946,6 +947,7 @@ class ConfigTest extends PHPUnit_Framework_TestCase
     {
         return array(
             array(Config::PULI_DIR),
+            array(Config::BOOTSTRAP_FILE),
             array(Config::FACTORY_IN_CLASS),
             array(Config::FACTORY_IN_FILE),
             array(Config::DISCOVERY_STORE_BUCKET),
@@ -956,6 +958,7 @@ class ConfigTest extends PHPUnit_Framework_TestCase
     {
         return array(
             array(Config::PULI_DIR),
+            array(Config::BOOTSTRAP_FILE),
             array(Config::FACTORY_IN_CLASS),
             array(Config::FACTORY_IN_FILE),
             array(Config::DISCOVERY_STORE_BUCKET),

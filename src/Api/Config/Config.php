@@ -82,6 +82,8 @@ class Config
 {
     const PULI_DIR = 'puli-dir';
 
+    const BOOTSTRAP_FILE = 'bootstrap-file';
+
     const FACTORY = 'factory';
 
     const FACTORY_AUTO_GENERATE = 'factory.auto-generate';
@@ -131,6 +133,7 @@ class Config
      */
     private static $keys = array(
         self::PULI_DIR => true,
+        self::BOOTSTRAP_FILE => true,
         self::FACTORY_AUTO_GENERATE => true,
         self::FACTORY_IN_CLASS => true,
         self::FACTORY_IN_FILE => true,
@@ -544,6 +547,7 @@ class Config
                 $this->assertInteger($key, $value);
                 break;
 
+            case self::BOOTSTRAP_FILE:
             case self::DISCOVERY_STORE_TYPE:
                 if (null !== $value) {
                     $this->assertString($key, $value);

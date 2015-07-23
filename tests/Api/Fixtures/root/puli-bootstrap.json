@@ -1,0 +1,18 @@
+{
+    "version": "1.0",
+    "name": "vendor/root",
+    "packages": {
+        "vendor/package1": {
+            "install-path": "package1"
+        },
+        "vendor/package2": {
+            "install-path": "package2"
+        }
+    },
+    "config": {
+        "bootstrap-file": "test-bootstrap.php"
+    },
+    "plugins": [
+        "Puli\\Manager\\Tests\\Api\\Fixtures\\BootstrapPlugin"
+    ]
+}

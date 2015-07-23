@@ -10,6 +10,7 @@ Changelog
  * bindings are now always enabled unless they are explicitly disabled
  * removed `BindingState::UNDECIDED`
  * removed `InstallInfo::*Enabled*()` methods
+ * added config key "bootstrap-file" which is loaded before loading plugins
 
 * 1.0.0-beta5 (2015-05-29)
 

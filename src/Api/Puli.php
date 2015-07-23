@@ -16,6 +16,7 @@ use Psr\Log\LoggerInterface;
 use Puli\Discovery\Api\EditableDiscovery;
 use Puli\Discovery\Api\ResourceDiscovery;
 use Puli\Manager\Api\Asset\AssetManager;
+use Puli\Manager\Api\Config\Config;
 use Puli\Manager\Api\Config\ConfigFileManager;
 use Puli\Manager\Api\Config\ConfigFileSerializer;
 use Puli\Manager\Api\Discovery\DiscoveryManager;
@@ -289,6 +290,13 @@ class Puli
 
         if ($this->rootDir) {
             $this->environment = $this->createProjectEnvironment($this->rootDir);
+            $bootstrapFile = $this->environment->getConfig()->get(Config::BOOTSTRAP_FILE);
+
+            // Run the project's bootstrap file to enable project-specific
+            // autoloading
+            if (null !== $bootstrapFile) {
+                require_once Path::makeAbsolute($bootstrapFile, $this->rootDir);
+            }
         } else {
             $this->environment = $this->createGlobalEnvironment();
         }
