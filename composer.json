@@ -18,6 +18,7 @@
         "webmozart/path-util": "~2.0",
         "webmozart/expression": "~1.0",
         "webmozart/assert": "~1.0",
+        "webmozart/glob": "^3.0",
         "symfony/event-dispatcher": "~2.3",
         "symfony/filesystem": "~2.3",
         "ramsey/uuid": "~2.8",

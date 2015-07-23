@@ -20,9 +20,9 @@ use Puli\Manager\Api\Package\NoSuchPackageException;
 use Puli\Manager\Api\Package\Package;
 use Puli\Manager\Api\Package\PackageCollection;
 use Puli\Manager\Assert\Assert;
-use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use Webmozart\Expression\Expression;
+use Webmozart\Glob\Iterator\RecursiveDirectoryIterator;
 use Webmozart\PathUtil\Path;
 
 /**
