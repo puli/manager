@@ -280,7 +280,7 @@ class MethodTest extends PHPUnit_Framework_TestCase
     public function testAddBody()
     {
         $this->method->setBody("\$foo = 'bar';");
-        $this->method->addBody("\$baz = \$foo;");
+        $this->method->addBody('$baz = $foo;');
 
         $expected = <<<EOF
 \$foo = 'bar';
@@ -292,7 +292,7 @@ EOF;
 
     public function testAddBodyWithoutPriorSet()
     {
-        $this->method->addBody("\$baz = \$foo;");
+        $this->method->addBody('$baz = $foo;');
 
         $expected = <<<EOF
 \$baz = \$foo;
