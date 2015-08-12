@@ -30,6 +30,7 @@ class PathMappingRepositoryGenerator implements ServiceGenerator
         'store' => array(
             'type' => 'null',
         ),
+        'optimize' => false,
     );
 
     /**
@@ -46,8 +47,10 @@ class PathMappingRepositoryGenerator implements ServiceGenerator
         $kvsOptions['rootDir'] = $options['rootDir'];
         $kvsGenerator->generateNewInstance('store', $targetMethod, $generatorRegistry, $kvsOptions);
 
-        $targetMethod->getClass()->addImport(new Import('Puli\Repository\PathMappingRepository'));
+        $className = ($options['optimize'] ? 'Optimized' : '').'PathMappingRepository';
 
-        $targetMethod->addBody(sprintf('$%s = new PathMappingRepository($store);', $varName));
+        $targetMethod->getClass()->addImport(new Import('Puli\\Repository\\'.$className));
+
+        $targetMethod->addBody(sprintf('$%s = new %s($store);', $varName, $className));
     }
 }

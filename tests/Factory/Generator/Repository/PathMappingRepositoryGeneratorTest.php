@@ -47,6 +47,21 @@ EOF;
         $this->assertSame($expected, $this->method->getBody());
     }
 
+    public function testGenerateOptimizedService()
+    {
+        $this->generator->generateNewInstance('repo', $this->method, $this->registry, array(
+            'rootDir' => $this->rootDir,
+            'optimize' => true,
+        ));
+
+        $expected = <<<EOF
+\$store = new NullStore();
+\$repo = new OptimizedPathMappingRepository(\$store);
+EOF;
+
+        $this->assertSame($expected, $this->method->getBody());
+    }
+
     /**
      * @expectedException \InvalidArgumentException
      */
@@ -69,6 +84,21 @@ EOF;
 
         $this->assertSame($expected, $this->method->getBody());
     }
+    public function testGenerateOptimizedServiceForTypeNull()
+    {
+        $this->generator->generateNewInstance('repo', $this->method, $this->registry, array(
+            'rootDir' => $this->rootDir,
+            'store' => array('type' => null),
+            'optimize' => true,
+        ));
+
+        $expected = <<<EOF
+\$store = new NullStore();
+\$repo = new OptimizedPathMappingRepository(\$store);
+EOF;
+
+        $this->assertSame($expected, $this->method->getBody());
+    }
 
     public function testRunGeneratedCode()
     {
@@ -82,5 +112,20 @@ EOF;
 
         $this->assertTrue(isset($repo));
         $this->assertInstanceOf('Puli\Repository\PathMappingRepository', $repo);
+    }
+
+    public function testRunGeneratedCodeWithOptimizeOption()
+    {
+        $this->generator->generateNewInstance('repo', $this->method, $this->registry, array(
+            'rootDir' => $this->rootDir,
+            'optimize' => true,
+        ));
+
+        $this->putCode($this->outputPath, $this->method);
+
+        require $this->outputPath;
+
+        $this->assertTrue(isset($repo));
+        $this->assertInstanceOf('Puli\Repository\OptimizedPathMappingRepository', $repo);
     }
 }

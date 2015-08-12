@@ -108,6 +108,8 @@ class Config
 
     const REPOSITORY_SYMLINK = 'repository.symlink';
 
+    const REPOSITORY_OPTIMIZE = 'repository.optimize';
+
     const REPOSITORY_STORE = 'repository.store';
 
     const REPOSITORY_STORE_TYPE = 'repository.store.type';
@@ -156,6 +158,7 @@ class Config
         self::REPOSITORY_TYPE => true,
         self::REPOSITORY_PATH => true,
         self::REPOSITORY_SYMLINK => true,
+        self::REPOSITORY_OPTIMIZE => true,
         self::REPOSITORY_STORE_TYPE => true,
         self::REPOSITORY_STORE_PATH => true,
         self::REPOSITORY_STORE_HOST => true,
@@ -558,6 +561,7 @@ class Config
         switch ($key) {
             case self::FACTORY_AUTO_GENERATE:
             case self::REPOSITORY_SYMLINK:
+            case self::REPOSITORY_OPTIMIZE:
             case self::REPOSITORY_STORE_CACHE:
             case self::DISCOVERY_STORE_CACHE:
                 $this->assertNotNull($key, $value);

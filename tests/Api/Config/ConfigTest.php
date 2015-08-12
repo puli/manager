@@ -975,6 +975,7 @@ class ConfigTest extends PHPUnit_Framework_TestCase
             array(Config::FACTORY_AUTO_GENERATE),
             array(Config::REPOSITORY_SYMLINK),
             array(Config::REPOSITORY_STORE_CACHE),
+            array(Config::REPOSITORY_OPTIMIZE),
             array(Config::DISCOVERY_STORE_CACHE),
         );
     }
