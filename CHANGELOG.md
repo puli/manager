@@ -1,7 +1,7 @@
 Changelog
 =========
 
-* 1.0.0-next (@release_date@)
+* 1.0.0-beta6 (2015-08-12)
 
  * added `Storage` and `FilesystemStorage`
  * renamed `Puli\Manager\Api\IOException` to `Puli\Manager\Api\Storage\StorageException`
@@ -10,12 +10,15 @@ Changelog
  * bindings are now always enabled unless they are explicitly disabled
  * removed `BindingState::UNDECIDED`
  * removed `InstallInfo::*Enabled*()` methods
+ * improved speed by 99% through optimized `SyncRepositoryPath` algorithm
  * added config key "bootstrap-file" which is loaded before loading plugins
  * added repository type "path-mapping"
  * added config key "repository.optimize"
  * the config key "factory.in.file" can now be set to `null` if "factory.in.class"
    is auto-loadable
  * changed default "repository.type" to "path-mapping"
+ * added `$dev` parameter to `PackageManager::installPackage()`
+ * added `InstallInfo::isDev()`
 
 * 1.0.0-beta5 (2015-05-29)
 
