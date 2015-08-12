@@ -15,6 +15,7 @@ Changelog
  * added config key "repository.optimize"
  * the config key "factory.in.file" can now be set to `null` if "factory.in.class"
    is auto-loadable
+ * changed default "repository.type" to "path-mapping"
 
 * 1.0.0-beta5 (2015-05-29)
 

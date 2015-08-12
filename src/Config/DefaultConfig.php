@@ -34,7 +34,7 @@ class DefaultConfig extends Config
             self::FACTORY_OUT_FILE => '{$puli-dir}/GeneratedPuliFactory.php',
             self::FACTORY_IN_CLASS => '{$factory.out.class}',
             self::FACTORY_IN_FILE => '{$factory.out.file}',
-            self::REPOSITORY_TYPE => 'filesystem',
+            self::REPOSITORY_TYPE => 'path-mapping',
             self::REPOSITORY_PATH => '{$puli-dir}/repository',
             self::REPOSITORY_SYMLINK => true,
             self::REPOSITORY_OPTIMIZE => false,
