@@ -75,6 +75,8 @@ class FactoryManagerImplTest extends ManagerTestCase
 
         $this->environment->getConfig()->set(Config::FACTORY_OUT_FILE, 'MyFactory.php');
         $this->environment->getConfig()->set(Config::FACTORY_OUT_CLASS, 'Puli\MyFactory');
+        $this->environment->getConfig()->set(Config::FACTORY_IN_FILE, 'MyFactory.php');
+        $this->environment->getConfig()->set(Config::FACTORY_IN_CLASS, 'Puli\MyFactory');
 
         $this->registry = new DefaultGeneratorRegistry();
         $this->realWriter = new ClassWriter();
@@ -499,23 +501,66 @@ EOF;
         $manager->refreshFactoryClass();
     }
 
-    public function testCreateFactory()
+    public function testCreateFactoryGeneratesFactoryClass()
     {
-        $this->assertFalse(class_exists('Puli\Repository\Tests\TestGeneratedFactory1', false));
+        $this->assertFalse(class_exists('Puli\Manager\Tests\Factory\Fixtures\TestGeneratedFactory1', false));
 
-        $this->environment->getConfig()->set(Config::FACTORY_IN_CLASS, 'Puli\Repository\Tests\TestGeneratedFactory1');
+        $this->environment->getConfig()->set(Config::FACTORY_OUT_CLASS, 'Puli\Manager\Tests\Factory\Fixtures\TestGeneratedFactory1');
+        $this->environment->getConfig()->set(Config::FACTORY_IN_CLASS, 'Puli\Manager\Tests\Factory\Fixtures\TestGeneratedFactory1');
 
         $factory = $this->manager->createFactory();
 
-        $this->isInstanceOf('Puli\Repository\Tests\TestGeneratedFactory1', $factory);
+        $this->assertInstanceOf('Puli\Manager\Tests\Factory\Fixtures\TestGeneratedFactory1', $factory);
     }
 
-    public function testCreateFactoryWithCustomParameters()
+    public function testCreateFactoryGeneratesFactoryClassAtCustomLocation()
     {
-        $this->assertFalse(class_exists('Puli\Repository\Tests\TestGeneratedFactory2', false));
+        $className = $this->environment->getConfig()->get(Config::FACTORY_IN_CLASS);
 
-        $factory = $this->manager->createFactory('MyFactory.php', 'Puli\Repository\Tests\TestGeneratedFactory2');
+        $this->assertFileNotExists($this->rootDir.'/MyFactory.php');
+        $this->assertFalse(class_exists($className, false));
 
-        $this->isInstanceOf('Puli\Repository\Tests\TestGeneratedFactory2', $factory);
+        $this->environment->getConfig()->set(Config::FACTORY_OUT_FILE, 'MyFactory.php');
+        $this->environment->getConfig()->set(Config::FACTORY_IN_FILE, 'MyFactory.php');
+
+        $factory = $this->manager->createFactory();
+
+        $this->assertFileExists($this->rootDir.'/MyFactory.php');
+        $this->assertInstanceOf($className, $factory);
+    }
+
+    public function testCreateFactoryWithParameters()
+    {
+        $this->assertFileNotExists($this->rootDir.'/MyFactory.php');
+        $this->assertFalse(class_exists('Puli\Manager\Tests\Factory\Fixtures\TestGeneratedFactory2', false));
+
+        $factory = $this->manager->createFactory('MyFactory.php', 'Puli\Manager\Tests\Factory\Fixtures\TestGeneratedFactory2');
+
+        $this->assertFileExists($this->rootDir.'/MyFactory.php');
+        $this->assertInstanceOf('Puli\Manager\Tests\Factory\Fixtures\TestGeneratedFactory2', $factory);
+    }
+
+    public function testCreateFactoryWithExistingClass()
+    {
+        $this->assertFalse(class_exists('Puli\Manager\Tests\Factory\Fixtures\TestFactoryNAL', false));
+
+        $this->environment->getConfig()->set(Config::FACTORY_IN_FILE, __DIR__.'/Fixtures/TestFactoryNotAutoLoadable.php');
+        $this->environment->getConfig()->set(Config::FACTORY_IN_CLASS, 'Puli\Manager\Tests\Factory\Fixtures\TestFactoryNAL');
+
+        $factory = $this->manager->createFactory();
+
+        $this->assertInstanceOf('Puli\Manager\Tests\Factory\Fixtures\TestFactoryNAL', $factory);
+    }
+
+    public function testCreateFactoryWithExistingAutoLoadableClass()
+    {
+        $this->assertFalse(class_exists('Puli\Manager\Tests\Factory\Fixtures\TestFactory', false));
+
+        $this->environment->getConfig()->set(Config::FACTORY_IN_FILE, null);
+        $this->environment->getConfig()->set(Config::FACTORY_IN_CLASS, 'Puli\Manager\Tests\Factory\Fixtures\TestFactory');
+
+        $factory = $this->manager->createFactory();
+
+        $this->assertInstanceOf('Puli\Manager\Tests\Factory\Fixtures\TestFactory', $factory);
     }
 }

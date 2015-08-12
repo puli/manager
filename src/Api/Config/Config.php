@@ -575,6 +575,7 @@ class Config
                 break;
 
             case self::BOOTSTRAP_FILE:
+            case self::FACTORY_IN_FILE:
             case self::REPOSITORY_STORE_TYPE:
             case self::DISCOVERY_STORE_TYPE:
                 if (null !== $value) {

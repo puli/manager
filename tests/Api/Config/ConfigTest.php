@@ -930,7 +930,6 @@ class ConfigTest extends PHPUnit_Framework_TestCase
         return array(
             array(Config::PULI_DIR),
             array(Config::FACTORY_IN_CLASS),
-            array(Config::FACTORY_IN_FILE),
             array(Config::REPOSITORY_STORE_BUCKET),
             array(Config::DISCOVERY_STORE_BUCKET),
         );
@@ -940,6 +939,7 @@ class ConfigTest extends PHPUnit_Framework_TestCase
     {
         return array(
             array(Config::BOOTSTRAP_FILE),
+            array(Config::FACTORY_IN_FILE),
             array(Config::REPOSITORY_STORE_TYPE),
             array(Config::DISCOVERY_STORE_TYPE),
         );
