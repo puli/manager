@@ -125,7 +125,7 @@ use Puli\Discovery\Api\ResourceDiscovery;
 use Puli\Discovery\KeyValueStoreDiscovery;
 use Puli\Manager\Api\Server\ServerCollection;
 use Puli\Repository\Api\ResourceRepository;
-use Puli\Repository\FilesystemRepository;
+use Puli\Repository\PathMappingRepository;
 use Puli\UrlGenerator\Api\UrlGenerator;
 use Puli\UrlGenerator\DiscoveryUrlGenerator;
 use RuntimeException;
@@ -156,11 +156,8 @@ class MyFactory
             throw new RuntimeException('Please install puli/repository to create ResourceRepository instances.');
         }
 
-        if (!file_exists(__DIR__.'/.puli/repository')) {
-            mkdir(__DIR__.'/.puli/repository', 0777, true);
-        }
-
-        \$repo = new FilesystemRepository(__DIR__.'/.puli/repository', true);
+        \$store = new JsonFileStore(__DIR__.'/.puli/path-mappings.json', true);
+        \$repo = new PathMappingRepository(\$store);
 
         return \$repo;
     }
