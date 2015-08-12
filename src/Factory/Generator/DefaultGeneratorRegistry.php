@@ -29,6 +29,7 @@ class DefaultGeneratorRegistry implements GeneratorRegistry
     private static $classNames = array(
         self::REPOSITORY => array(
             'filesystem' => 'Puli\Manager\Factory\Generator\Repository\FilesystemRepositoryGenerator',
+            'path-mapping' => 'Puli\Manager\Factory\Generator\Repository\PathMappingRepositoryGenerator',
         ),
         self::DISCOVERY => array(
             'key-value-store' => 'Puli\Manager\Factory\Generator\Discovery\KeyValueStoreDiscoveryGenerator',

@@ -931,6 +931,7 @@ class ConfigTest extends PHPUnit_Framework_TestCase
             array(Config::PULI_DIR),
             array(Config::FACTORY_IN_CLASS),
             array(Config::FACTORY_IN_FILE),
+            array(Config::REPOSITORY_STORE_BUCKET),
             array(Config::DISCOVERY_STORE_BUCKET),
         );
     }
@@ -939,6 +940,7 @@ class ConfigTest extends PHPUnit_Framework_TestCase
     {
         return array(
             array(Config::BOOTSTRAP_FILE),
+            array(Config::REPOSITORY_STORE_TYPE),
             array(Config::DISCOVERY_STORE_TYPE),
         );
     }
@@ -950,6 +952,7 @@ class ConfigTest extends PHPUnit_Framework_TestCase
             array(Config::BOOTSTRAP_FILE),
             array(Config::FACTORY_IN_CLASS),
             array(Config::FACTORY_IN_FILE),
+            array(Config::REPOSITORY_STORE_BUCKET),
             array(Config::DISCOVERY_STORE_BUCKET),
         );
     }
@@ -961,6 +964,7 @@ class ConfigTest extends PHPUnit_Framework_TestCase
             array(Config::BOOTSTRAP_FILE),
             array(Config::FACTORY_IN_CLASS),
             array(Config::FACTORY_IN_FILE),
+            array(Config::REPOSITORY_STORE_BUCKET),
             array(Config::DISCOVERY_STORE_BUCKET),
         );
     }
@@ -970,6 +974,7 @@ class ConfigTest extends PHPUnit_Framework_TestCase
         return array(
             array(Config::FACTORY_AUTO_GENERATE),
             array(Config::REPOSITORY_SYMLINK),
+            array(Config::REPOSITORY_STORE_CACHE),
             array(Config::DISCOVERY_STORE_CACHE),
         );
     }

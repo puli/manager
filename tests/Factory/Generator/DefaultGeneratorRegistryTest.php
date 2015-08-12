@@ -36,6 +36,7 @@ class DefaultGeneratorRegistryTest extends PHPUnit_Framework_TestCase
     {
         return array(
             array(GeneratorRegistry::REPOSITORY, 'filesystem', 'Puli\Manager\Factory\Generator\Repository\FilesystemRepositoryGenerator'),
+            array(GeneratorRegistry::REPOSITORY, 'path-mapping', 'Puli\Manager\Factory\Generator\Repository\PathMappingRepositoryGenerator'),
             array(GeneratorRegistry::DISCOVERY, 'key-value-store', 'Puli\Manager\Factory\Generator\Discovery\KeyValueStoreDiscoveryGenerator'),
             array(GeneratorRegistry::KEY_VALUE_STORE, 'array', 'Puli\Manager\Factory\Generator\KeyValueStore\ArrayStoreGenerator'),
             array(GeneratorRegistry::KEY_VALUE_STORE, 'json-file', 'Puli\Manager\Factory\Generator\KeyValueStore\JsonFileStoreGenerator'),

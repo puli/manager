@@ -108,6 +108,20 @@ class Config
 
     const REPOSITORY_SYMLINK = 'repository.symlink';
 
+    const REPOSITORY_STORE = 'repository.store';
+
+    const REPOSITORY_STORE_TYPE = 'repository.store.type';
+
+    const REPOSITORY_STORE_PATH = 'repository.store.path';
+
+    const REPOSITORY_STORE_HOST = 'repository.store.host';
+
+    const REPOSITORY_STORE_PORT = 'repository.store.port';
+
+    const REPOSITORY_STORE_BUCKET = 'repository.store.bucket';
+
+    const REPOSITORY_STORE_CACHE = 'repository.store.cache';
+
     const DISCOVERY = 'discovery';
 
     const DISCOVERY_TYPE = 'discovery.type';
@@ -142,6 +156,12 @@ class Config
         self::REPOSITORY_TYPE => true,
         self::REPOSITORY_PATH => true,
         self::REPOSITORY_SYMLINK => true,
+        self::REPOSITORY_STORE_TYPE => true,
+        self::REPOSITORY_STORE_PATH => true,
+        self::REPOSITORY_STORE_HOST => true,
+        self::REPOSITORY_STORE_PORT => true,
+        self::REPOSITORY_STORE_BUCKET => true,
+        self::REPOSITORY_STORE_CACHE => true,
         self::DISCOVERY_TYPE => true,
         self::DISCOVERY_STORE_TYPE => true,
         self::DISCOVERY_STORE_PATH => true,
@@ -156,6 +176,7 @@ class Config
         self::FACTORY_IN => true,
         self::FACTORY_OUT => true,
         self::REPOSITORY => true,
+        self::REPOSITORY_STORE => true,
         self::DISCOVERY => true,
         self::DISCOVERY_STORE => true,
     );
@@ -537,17 +558,20 @@ class Config
         switch ($key) {
             case self::FACTORY_AUTO_GENERATE:
             case self::REPOSITORY_SYMLINK:
+            case self::REPOSITORY_STORE_CACHE:
             case self::DISCOVERY_STORE_CACHE:
                 $this->assertNotNull($key, $value);
                 $this->assertBoolean($key, $value);
                 break;
 
+            case self::REPOSITORY_STORE_PORT:
             case self::DISCOVERY_STORE_PORT:
                 $this->assertNotNull($key, $value);
                 $this->assertInteger($key, $value);
                 break;
 
             case self::BOOTSTRAP_FILE:
+            case self::REPOSITORY_STORE_TYPE:
             case self::DISCOVERY_STORE_TYPE:
                 if (null !== $value) {
                     $this->assertString($key, $value);
