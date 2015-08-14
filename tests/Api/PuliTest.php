@@ -15,6 +15,7 @@ use PHPUnit_Framework_TestCase;
 use Puli\Manager\Api\Puli;
 use Puli\Manager\Tests\Api\Fixtures\BootstrapPlugin;
 use Puli\Manager\Tests\Api\Package\Fixtures\TestPlugin;
+use Puli\Repository\Tests\TestUtil;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\Filesystem\Filesystem;
 
@@ -35,6 +36,11 @@ class PuliTest extends PHPUnit_Framework_TestCase
     /**
      * @var string
      */
+    private $tempRoot;
+
+    /**
+     * @var string
+     */
     private $tempHome;
 
     /**
@@ -44,13 +50,12 @@ class PuliTest extends PHPUnit_Framework_TestCase
 
     protected function setUp()
     {
-        while (false === @mkdir($this->tempDir = sys_get_temp_dir().'/puli-repo-manager/ManagerFactoryTest_temp'.rand(10000, 99999), 0777, true)) {
-        }
-        while (false === @mkdir($this->tempHome = sys_get_temp_dir().'/puli-repo-manager/ManagerFactoryTest_home'.rand(10000, 99999), 0777, true)) {
-        }
+        $this->tempDir = TestUtil::makeTempDir('puli-manager', __CLASS__);
+        $this->tempRoot = $this->tempDir.'/root';
+        $this->tempHome = $this->tempDir.'/home';
 
         $filesystem = new Filesystem();
-        $filesystem->mirror(__DIR__.'/Fixtures/root', $this->tempDir);
+        $filesystem->mirror(__DIR__.'/Fixtures/root', $this->tempRoot);
         $filesystem->mirror(__DIR__.'/Fixtures/home', $this->tempHome);
 
         TestPlugin::reset();
@@ -67,7 +72,6 @@ class PuliTest extends PHPUnit_Framework_TestCase
     {
         $filesystem = new Filesystem();
         $filesystem->remove($this->tempDir);
-        $filesystem->remove($this->tempHome);
 
         // Unset env variables
         putenv('PULI_HOME');
@@ -87,7 +91,7 @@ class PuliTest extends PHPUnit_Framework_TestCase
     {
         $this->assertFileNotExists($this->tempHome.'/.htaccess');
 
-        $this->puli->setRootDirectory($this->tempDir);
+        $this->puli->setRootDirectory($this->tempRoot);
         $this->puli->start();
 
         $this->assertFileExists($this->tempHome.'/.htaccess');
@@ -135,7 +139,7 @@ class PuliTest extends PHPUnit_Framework_TestCase
 
     public function testGetProjectEnvironment()
     {
-        $this->puli->setRootDirectory($this->tempDir);
+        $this->puli->setRootDirectory($this->tempRoot);
         $this->puli->start();
         $environment = $this->puli->getEnvironment();
 
@@ -145,9 +149,9 @@ class PuliTest extends PHPUnit_Framework_TestCase
         $this->assertInstanceOf('Puli\Manager\Api\Package\RootPackageFile', $environment->getRootPackageFile());
         $this->assertInstanceOf('Symfony\Component\EventDispatcher\EventDispatcherInterface', $environment->getEventDispatcher());
         $this->assertSame($this->tempHome, $environment->getHomeDirectory());
-        $this->assertSame($this->tempDir, $environment->getRootDirectory());
+        $this->assertSame($this->tempRoot, $environment->getRootDirectory());
         $this->assertSame($this->tempHome.'/config.json', $environment->getConfigFile()->getPath());
-        $this->assertSame($this->tempDir.'/puli.json', $environment->getRootPackageFile()->getPath());
+        $this->assertSame($this->tempRoot.'/puli.json', $environment->getRootPackageFile()->getPath());
         $this->assertSame($environment->getEventDispatcher(), $this->puli->getEventDispatcher());
     }
 
@@ -155,7 +159,7 @@ class PuliTest extends PHPUnit_Framework_TestCase
     {
         $dispatcher = new EventDispatcher();
         $this->puli->setEventDispatcher($dispatcher);
-        $this->puli->setRootDirectory($this->tempDir);
+        $this->puli->setRootDirectory($this->tempRoot);
         $this->puli->start();
         $environment = $this->puli->getEnvironment();
 
@@ -167,7 +171,7 @@ class PuliTest extends PHPUnit_Framework_TestCase
         // Unset env variable
         putenv('PULI_HOME');
 
-        $this->puli->setRootDirectory($this->tempDir);
+        $this->puli->setRootDirectory($this->tempRoot);
         $this->puli->start();
         $environment = $this->puli->getEnvironment();
 
@@ -177,13 +181,13 @@ class PuliTest extends PHPUnit_Framework_TestCase
         $this->assertInstanceOf('Puli\Manager\Api\Package\RootPackageFile', $environment->getRootPackageFile());
         $this->assertInstanceOf('Symfony\Component\EventDispatcher\EventDispatcherInterface', $environment->getEventDispatcher());
         $this->assertNull($environment->getHomeDirectory());
-        $this->assertSame($this->tempDir, $environment->getRootDirectory());
-        $this->assertSame($this->tempDir.'/puli.json', $environment->getRootPackageFile()->getPath());
+        $this->assertSame($this->tempRoot, $environment->getRootDirectory());
+        $this->assertSame($this->tempRoot.'/puli.json', $environment->getRootPackageFile()->getPath());
     }
 
     public function testGetRepositoryInProjectEnvironment()
     {
-        $this->puli->setRootDirectory($this->tempDir);
+        $this->puli->setRootDirectory($this->tempRoot);
         $this->puli->start();
         $repo = $this->puli->getRepository();
 
@@ -199,7 +203,7 @@ class PuliTest extends PHPUnit_Framework_TestCase
 
     public function testGetDiscoveryInProjectEnvironment()
     {
-        $this->puli->setRootDirectory($this->tempDir);
+        $this->puli->setRootDirectory($this->tempRoot);
         $this->puli->start();
         $discovery = $this->puli->getDiscovery();
 
@@ -215,7 +219,7 @@ class PuliTest extends PHPUnit_Framework_TestCase
 
     public function testGetFactoryInProjectEnvironment()
     {
-        $this->puli->setRootDirectory($this->tempDir);
+        $this->puli->setRootDirectory($this->tempRoot);
         $this->puli->start();
         $factory = $this->puli->getFactory();
 
@@ -232,7 +236,7 @@ class PuliTest extends PHPUnit_Framework_TestCase
 
     public function testGetFactoryManagerInProjectEnvironment()
     {
-        $this->puli->setRootDirectory($this->tempDir);
+        $this->puli->setRootDirectory($this->tempRoot);
         $this->puli->start();
         $manager = $this->puli->getFactoryManager();
 
@@ -248,12 +252,12 @@ class PuliTest extends PHPUnit_Framework_TestCase
 
     public function testGetConfigFileManagerInProjectEnvironment()
     {
-        $this->puli->setRootDirectory($this->tempDir);
+        $this->puli->setRootDirectory($this->tempRoot);
         $this->puli->start();
         $manager = $this->puli->getConfigFileManager();
 
         $this->assertInstanceOf('Puli\Manager\Api\Config\ConfigFileManager', $manager);
-        $this->assertSame($this->puli->getEnvironment($this->tempDir), $manager->getEnvironment());
+        $this->assertSame($this->puli->getEnvironment($this->tempRoot), $manager->getEnvironment());
     }
 
     public function testGetConfigFileManagerInGlobalEnvironment()
@@ -267,7 +271,7 @@ class PuliTest extends PHPUnit_Framework_TestCase
 
     public function testGetRootPackageFileManagerInProjectEnvironment()
     {
-        $this->puli->setRootDirectory($this->tempDir);
+        $this->puli->setRootDirectory($this->tempRoot);
         $this->puli->start();
         $manager = $this->puli->getRootPackageFileManager();
 
@@ -284,7 +288,7 @@ class PuliTest extends PHPUnit_Framework_TestCase
 
     public function testGetPackageManagerInProjectEnvironment()
     {
-        $this->puli->setRootDirectory($this->tempDir);
+        $this->puli->setRootDirectory($this->tempRoot);
         $this->puli->start();
         $manager = $this->puli->getPackageManager();
 
@@ -308,7 +312,7 @@ class PuliTest extends PHPUnit_Framework_TestCase
 
     public function testGetRepositoryManagerInProjectEnvironment()
     {
-        $this->puli->setRootDirectory($this->tempDir);
+        $this->puli->setRootDirectory($this->tempRoot);
         $this->puli->start();
         $manager = $this->puli->getRepositoryManager();
 
@@ -325,7 +329,7 @@ class PuliTest extends PHPUnit_Framework_TestCase
 
     public function testGetDiscoveryManagerInProjectEnvironment()
     {
-        $this->puli->setRootDirectory($this->tempDir);
+        $this->puli->setRootDirectory($this->tempRoot);
         $this->puli->start();
         $manager = $this->puli->getDiscoveryManager();
 
@@ -342,7 +346,7 @@ class PuliTest extends PHPUnit_Framework_TestCase
 
     public function testGetAssetManagerInProjectEnvironment()
     {
-        $this->puli->setRootDirectory($this->tempDir);
+        $this->puli->setRootDirectory($this->tempRoot);
         $this->puli->start();
         $manager = $this->puli->getAssetManager();
 
@@ -359,7 +363,7 @@ class PuliTest extends PHPUnit_Framework_TestCase
 
     public function testGetInstallationManagerInProjectEnvironment()
     {
-        $this->puli->setRootDirectory($this->tempDir);
+        $this->puli->setRootDirectory($this->tempRoot);
         $this->puli->start();
         $manager = $this->puli->getInstallationManager();
 
@@ -376,7 +380,7 @@ class PuliTest extends PHPUnit_Framework_TestCase
 
     public function testGetInstallerManagerInProjectEnvironment()
     {
-        $this->puli->setRootDirectory($this->tempDir);
+        $this->puli->setRootDirectory($this->tempRoot);
         $this->puli->start();
         $manager = $this->puli->getInstallerManager();
 
@@ -393,7 +397,7 @@ class PuliTest extends PHPUnit_Framework_TestCase
 
     public function testGetServerManagerInProjectEnvironment()
     {
-        $this->puli->setRootDirectory($this->tempDir);
+        $this->puli->setRootDirectory($this->tempRoot);
         $this->puli->start();
         $manager = $this->puli->getServerManager();
 
@@ -410,7 +414,7 @@ class PuliTest extends PHPUnit_Framework_TestCase
 
     public function testGetUrlGeneratorInProjectEnvironment()
     {
-        $this->puli->setRootDirectory($this->tempDir);
+        $this->puli->setRootDirectory($this->tempRoot);
         $this->puli->start();
         $manager = $this->puli->getUrlGenerator();
 
@@ -427,12 +431,12 @@ class PuliTest extends PHPUnit_Framework_TestCase
 
     public function testPassRootDirToConstructor()
     {
-        $this->puli->setRootDirectory($this->tempDir);
+        $this->puli->setRootDirectory($this->tempRoot);
         $this->puli->start();
 
-        $this->assertSame($this->tempDir, $this->puli->getRootDirectory());
+        $this->assertSame($this->tempRoot, $this->puli->getRootDirectory());
         $this->assertInstanceOf('Puli\Manager\Api\Environment\ProjectEnvironment', $this->puli->getEnvironment());
-        $this->assertSame($this->tempDir, $this->puli->getEnvironment()->getRootDirectory());
+        $this->assertSame($this->tempRoot, $this->puli->getEnvironment()->getRootDirectory());
     }
 
     public function testPassNoRootDirToConstructor()
@@ -445,17 +449,17 @@ class PuliTest extends PHPUnit_Framework_TestCase
 
     public function testSetRootDirectory()
     {
-        $this->puli->setRootDirectory($this->tempDir);
+        $this->puli->setRootDirectory($this->tempRoot);
         $this->puli->start();
 
-        $this->assertSame($this->tempDir, $this->puli->getRootDirectory());
+        $this->assertSame($this->tempRoot, $this->puli->getRootDirectory());
         $this->assertInstanceOf('Puli\Manager\Api\Environment\ProjectEnvironment', $this->puli->getEnvironment());
-        $this->assertSame($this->tempDir, $this->puli->getEnvironment()->getRootDirectory());
+        $this->assertSame($this->tempRoot, $this->puli->getEnvironment()->getRootDirectory());
     }
 
     public function testPassNoRootDirToSetRootDirectory()
     {
-        $this->puli->setRootDirectory($this->tempDir);
+        $this->puli->setRootDirectory($this->tempRoot);
         $this->puli->setRootDirectory(null);
         $this->puli->start();
 
@@ -469,7 +473,7 @@ class PuliTest extends PHPUnit_Framework_TestCase
      */
     public function testFailIfRootDirNotFound()
     {
-        $this->puli->setRootDirectory($this->tempDir.'/foobar');
+        $this->puli->setRootDirectory($this->tempRoot.'/foobar');
     }
 
     /**
@@ -478,7 +482,7 @@ class PuliTest extends PHPUnit_Framework_TestCase
      */
     public function testFailIfRootDirNoDirectory()
     {
-        $this->puli->setRootDirectory($this->tempDir.'/puli.json');
+        $this->puli->setRootDirectory($this->tempRoot.'/puli.json');
     }
 
     /**
@@ -494,7 +498,7 @@ class PuliTest extends PHPUnit_Framework_TestCase
 
     public function testActivatePluginsInProjectEnvironment()
     {
-        $this->puli->setRootDirectory($this->tempDir);
+        $this->puli->setRootDirectory($this->tempRoot);
         $this->puli->start();
 
         $this->assertSame($this->puli, TestPlugin::getPuli());
@@ -511,7 +515,7 @@ class PuliTest extends PHPUnit_Framework_TestCase
 
     public function testDoNotActivatePluginsIfDisabled()
     {
-        $this->puli->setRootDirectory($this->tempDir);
+        $this->puli->setRootDirectory($this->tempRoot);
         $this->puli->disablePlugins();
         $this->puli->start();
 
@@ -525,10 +529,10 @@ class PuliTest extends PHPUnit_Framework_TestCase
     public function testUseBootstrapFileForLoadingPlugins()
     {
         $filesystem = new Filesystem();
-        $filesystem->copy($this->tempDir.'/puli-bootstrap.json', $this->tempDir.'/puli.json', true);
-        $filesystem->copy(__DIR__.'/Fixtures/test-bootstrap.php', $this->tempDir.'/test-bootstrap.php', true);
+        $filesystem->copy($this->tempRoot.'/puli-bootstrap.json', $this->tempRoot.'/puli.json', true);
+        $filesystem->copy(__DIR__.'/Fixtures/test-bootstrap.php', $this->tempRoot.'/test-bootstrap.php', true);
 
-        $this->puli->setRootDirectory($this->tempDir);
+        $this->puli->setRootDirectory($this->tempRoot);
 
         $this->assertFalse(defined('PULI_TEST_BOOTSTRAP_LOADED'));
 
@@ -544,9 +548,9 @@ class PuliTest extends PHPUnit_Framework_TestCase
     public function testFailIfPluginClassNotFound()
     {
         $filesystem = new Filesystem();
-        $filesystem->copy($this->tempDir.'/puli-no-such-plugin.json', $this->tempDir.'/puli.json', true);
+        $filesystem->copy($this->tempRoot.'/puli-no-such-plugin.json', $this->tempRoot.'/puli.json', true);
 
-        $this->puli->setRootDirectory($this->tempDir);
+        $this->puli->setRootDirectory($this->tempRoot);
         $this->puli->start();
     }
 
@@ -556,9 +560,9 @@ class PuliTest extends PHPUnit_Framework_TestCase
     public function testFailIfPluginClassNotInstanceOfPuliPlugin()
     {
         $filesystem = new Filesystem();
-        $filesystem->copy($this->tempDir.'/puli-not-a-plugin.json', $this->tempDir.'/puli.json', true);
+        $filesystem->copy($this->tempRoot.'/puli-not-a-plugin.json', $this->tempRoot.'/puli.json', true);
 
-        $this->puli->setRootDirectory($this->tempDir);
+        $this->puli->setRootDirectory($this->tempRoot);
         $this->puli->start();
     }
 }

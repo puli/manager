@@ -24,6 +24,7 @@ use Puli\Manager\Factory\FactoryManagerImpl;
 use Puli\Manager\Factory\Generator\DefaultGeneratorRegistry;
 use Puli\Manager\Php\ClassWriter;
 use Puli\Manager\Tests\ManagerTestCase;
+use Puli\Repository\Tests\TestUtil;
 use Symfony\Component\Filesystem\Filesystem;
 
 /**
@@ -65,8 +66,7 @@ class FactoryManagerImplTest extends ManagerTestCase
 
     protected function setUp()
     {
-        while (false === @mkdir($this->tempDir = sys_get_temp_dir().'/puli-repo-manager/FactoryManagerImplTest'.rand(10000, 99999), 0777, true)) {
-        }
+        $this->tempDir = TestUtil::makeTempDir('puli-manager', __CLASS__);
 
         @mkdir($this->tempDir.'/home');
         @mkdir($this->tempDir.'/root');

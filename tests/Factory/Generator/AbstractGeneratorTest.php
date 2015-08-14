@@ -17,6 +17,7 @@ use Puli\Manager\Api\Php\Clazz;
 use Puli\Manager\Api\Php\Method;
 use Puli\Manager\Factory\Generator\DefaultGeneratorRegistry;
 use Puli\Manager\Php\ClassWriter;
+use Puli\Repository\Tests\TestUtil;
 use Symfony\Component\Filesystem\Filesystem;
 
 /**
@@ -68,9 +69,7 @@ abstract class AbstractGeneratorTest extends PHPUnit_Framework_TestCase
 
     protected function setUp()
     {
-        while (false === @mkdir($this->tempDir = sys_get_temp_dir().'/puli-repo-manager/AbstractGeneratorTest'.rand(10000, 99999), 0777, true)) {
-        }
-
+        $this->tempDir = TestUtil::makeTempDir('puli-manager', __CLASS__);
         $this->rootDir = $this->tempDir.'/root';
         $this->outputDir = $this->rootDir.'/out';
         $this->outputPath = $this->outputDir.'/generated.php';

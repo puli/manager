@@ -38,7 +38,8 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "Puli\\Manager\\Tests\\": "tests/"
+            "Puli\\Manager\\Tests\\": "tests/",
+            "Puli\\Repository\\Tests\\": "vendor/puli/repository/tests/"
         }
     },
     "extra": {

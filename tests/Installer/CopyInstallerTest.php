@@ -19,6 +19,7 @@ use Puli\Manager\Api\Server\Server;
 use Puli\Manager\Installer\CopyInstaller;
 use Puli\Repository\Resource\Collection\ArrayResourceCollection;
 use Puli\Repository\Resource\DirectoryResource;
+use Puli\Repository\Tests\TestUtil;
 use Symfony\Component\Filesystem\Filesystem;
 
 /**
@@ -45,9 +46,7 @@ class CopyInstallerTest extends PHPUnit_Framework_TestCase
 
     protected function setUp()
     {
-        while (false === @mkdir($this->tempDir = sys_get_temp_dir().'/puli-web-plugin/CopyInstallerTest'.rand(10000, 99999), 0777, true)) {
-        }
-
+        $this->tempDir = TestUtil::makeTempDir('puli-manager', __CLASS__);
         $this->installer = new CopyInstaller();
         $this->installerDescriptor = new InstallerDescriptor('copy', get_class($this->installer));
     }

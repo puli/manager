@@ -31,6 +31,7 @@ use Puli\Manager\Discovery\DiscoveryManagerImpl;
 use Puli\Manager\Package\PackageFileStorage;
 use Puli\Manager\Tests\ManagerTestCase;
 use Puli\Manager\Tests\TestException;
+use Puli\Repository\Tests\TestUtil;
 use Rhumsaa\Uuid\Uuid;
 use Symfony\Component\Filesystem\Filesystem;
 use Webmozart\Expression\Expr;
@@ -116,8 +117,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
 
     protected function setUp()
     {
-        while (false === @mkdir($this->tempDir = sys_get_temp_dir().'/puli-repo-manager/DiscoveryManagerImplTest'.rand(10000, 99999), 0777, true)) {
-        }
+        $this->tempDir = TestUtil::makeTempDir('puli-manager', __CLASS__);
 
         $filesystem = new Filesystem();
         $filesystem->mirror(__DIR__.'/Fixtures', $this->tempDir);

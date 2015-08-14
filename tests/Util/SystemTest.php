@@ -13,6 +13,7 @@ namespace Puli\Manager\Tests\Util;
 
 use PHPUnit_Framework_TestCase;
 use Puli\Manager\Util\System;
+use Puli\Repository\Tests\TestUtil;
 use Symfony\Component\Filesystem\Filesystem;
 
 /**
@@ -29,8 +30,7 @@ class SystemTest extends PHPUnit_Framework_TestCase
 
     protected function setUp()
     {
-        while (false === @mkdir($this->tempHome = sys_get_temp_dir().'/puli-repo-manager/SystemTest_home'.rand(10000, 99999), 0777, true)) {
-        }
+        $this->tempHome = TestUtil::makeTempDir('puli-manager', __CLASS__);
     }
 
     protected function tearDown()

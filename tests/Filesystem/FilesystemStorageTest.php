@@ -13,6 +13,7 @@ namespace Puli\Manager\Tests\Filesystem;
 
 use PHPUnit_Framework_TestCase;
 use Puli\Manager\Filesystem\FilesystemStorage;
+use Puli\Repository\Tests\TestUtil;
 use Symfony\Component\Filesystem\Filesystem;
 
 /**
@@ -35,9 +36,7 @@ class FilesystemStorageTest extends PHPUnit_Framework_TestCase
 
     protected function setUp()
     {
-        while (false === @mkdir($this->tempDir = sys_get_temp_dir().'/puli-manager/FilesystemStorageTest'.rand(10000, 99999), 0777, true)) {
-        }
-
+        $this->tempDir = TestUtil::makeTempDir('puli-manager', __CLASS__);
         $this->storage = new FilesystemStorage();
         $this->path = $this->tempDir.'/test-file';
 

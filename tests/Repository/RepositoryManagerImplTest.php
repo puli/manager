@@ -29,6 +29,7 @@ use Puli\Manager\Tests\ManagerTestCase;
 use Puli\Manager\Tests\TestException;
 use Puli\Repository\Resource\DirectoryResource;
 use Puli\Repository\Resource\FileResource;
+use Puli\Repository\Tests\TestUtil;
 use Symfony\Component\Filesystem\Filesystem;
 use Webmozart\Expression\Expr;
 
@@ -91,8 +92,7 @@ class RepositoryManagerImplTest extends ManagerTestCase
 
     protected function setUp()
     {
-        while (false === @mkdir($this->tempDir = sys_get_temp_dir().'/puli-repo-manager/RepositoryManagerImplTest'.rand(10000, 99999), 0777, true)) {
-        }
+        $this->tempDir = TestUtil::makeTempDir('puli-manager', __CLASS__);
 
         $filesystem = new Filesystem();
         $filesystem->mirror(__DIR__.'/Fixtures', $this->tempDir);

@@ -20,6 +20,7 @@ use Puli\Manager\Api\Server\Server;
 use Puli\Manager\Installer\SymlinkInstaller;
 use Puli\Repository\Resource\Collection\ArrayResourceCollection;
 use Puli\Repository\Resource\DirectoryResource;
+use Puli\Repository\Tests\TestUtil;
 use Symfony\Component\Filesystem\Filesystem;
 
 /**
@@ -56,9 +57,7 @@ class SymlinkInstallerTest extends PHPUnit_Framework_TestCase
 
     protected function setUp()
     {
-        while (false === @mkdir($this->tempBaseDir = sys_get_temp_dir().'/puli-web-plugin/SymlinkInstallerTest'.rand(10000, 99999), 0777, true)) {
-        }
-
+        $this->tempBaseDir = TestUtil::makeTempDir('puli-manager', __CLASS__);
         $this->tempDir = $this->tempBaseDir.'/workspace';
         $this->fixturesDir = $this->tempBaseDir.'/fixtures';
 

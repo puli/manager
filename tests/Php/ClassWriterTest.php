@@ -18,6 +18,7 @@ use Puli\Manager\Api\Php\Import;
 use Puli\Manager\Api\Php\Method;
 use Puli\Manager\Api\Php\ReturnValue;
 use Puli\Manager\Php\ClassWriter;
+use Puli\Repository\Tests\TestUtil;
 use Symfony\Component\Filesystem\Filesystem;
 
 /**
@@ -44,9 +45,7 @@ class ClassWriterTest extends PHPUnit_Framework_TestCase
 
     protected function setUp()
     {
-        while (false === @mkdir($this->tempDir = sys_get_temp_dir().'/puli-repo-manager/ClassWriterTest'.rand(10000, 99999), 0777, true)) {
-        }
-
+        $this->tempDir = TestUtil::makeTempDir('puli-manager', __CLASS__);
         $this->class = new Clazz('MyClass');
         $this->class->setDirectory($this->tempDir);
         $this->writer = new ClassWriter();
