@@ -28,7 +28,7 @@ after_script:
 
 notifications:
   webhooks:
-    urls: [https://webhooks.gitter.im/e/9ccc2378e6c0de6480f8]
+    urls: ['https://webhooks.gitter.im/e/9ccc2378e6c0de6480f8']
     on_success: change
     on_failure: always
     on_start:   never
