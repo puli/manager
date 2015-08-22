@@ -29,9 +29,9 @@ use Puli\Manager\Tests\ManagerTestCase;
 use Puli\Manager\Tests\TestException;
 use Puli\Repository\Resource\DirectoryResource;
 use Puli\Repository\Resource\FileResource;
-use Puli\Repository\Tests\TestUtil;
 use Symfony\Component\Filesystem\Filesystem;
 use Webmozart\Expression\Expr;
+use Webmozart\Glob\Test\TestUtil;
 
 /**
  * @since  1.0

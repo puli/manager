@@ -15,9 +15,9 @@ use PHPUnit_Framework_TestCase;
 use Puli\Manager\Api\Puli;
 use Puli\Manager\Tests\Api\Fixtures\BootstrapPlugin;
 use Puli\Manager\Tests\Api\Package\Fixtures\TestPlugin;
-use Puli\Repository\Tests\TestUtil;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\Filesystem\Filesystem;
+use Webmozart\Glob\Test\TestUtil;
 
 /**
  * @since  1.0

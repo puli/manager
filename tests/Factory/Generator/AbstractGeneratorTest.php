@@ -17,8 +17,8 @@ use Puli\Manager\Api\Php\Clazz;
 use Puli\Manager\Api\Php\Method;
 use Puli\Manager\Factory\Generator\DefaultGeneratorRegistry;
 use Puli\Manager\Php\ClassWriter;
-use Puli\Repository\Tests\TestUtil;
 use Symfony\Component\Filesystem\Filesystem;
+use Webmozart\Glob\Test\TestUtil;
 
 /**
  * @since  1.0

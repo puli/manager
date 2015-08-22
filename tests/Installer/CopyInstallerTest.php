@@ -19,8 +19,8 @@ use Puli\Manager\Api\Server\Server;
 use Puli\Manager\Installer\CopyInstaller;
 use Puli\Repository\Resource\Collection\ArrayResourceCollection;
 use Puli\Repository\Resource\DirectoryResource;
-use Puli\Repository\Tests\TestUtil;
 use Symfony\Component\Filesystem\Filesystem;
+use Webmozart\Glob\Test\TestUtil;
 
 /**
  * @since  1.0

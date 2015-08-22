@@ -13,8 +13,8 @@ namespace Puli\Manager\Tests\Filesystem;
 
 use PHPUnit_Framework_TestCase;
 use Puli\Manager\Filesystem\FilesystemStorage;
-use Puli\Repository\Tests\TestUtil;
 use Symfony\Component\Filesystem\Filesystem;
+use Webmozart\Glob\Test\TestUtil;
 
 /**
  * @since  1.0

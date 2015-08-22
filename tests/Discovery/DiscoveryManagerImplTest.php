@@ -31,10 +31,10 @@ use Puli\Manager\Discovery\DiscoveryManagerImpl;
 use Puli\Manager\Package\PackageFileStorage;
 use Puli\Manager\Tests\ManagerTestCase;
 use Puli\Manager\Tests\TestException;
-use Puli\Repository\Tests\TestUtil;
 use Rhumsaa\Uuid\Uuid;
 use Symfony\Component\Filesystem\Filesystem;
 use Webmozart\Expression\Expr;
+use Webmozart\Glob\Test\TestUtil;
 
 /**
  * @since  1.0
