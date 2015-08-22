@@ -28,7 +28,8 @@
         "predis/predis": "^1.0",
         "basho/riak": "^1.4",
         "doctrine/cache": "^1.4",
-        "phpunit/phpunit": "^4.6"
+        "phpunit/phpunit": "^4.6",
+        "webmozart/key-value-store": "^1.0"
     },
     "minimum-stability": "dev",
     "autoload": {
@@ -38,8 +39,7 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "Puli\\Manager\\Tests\\": "tests/",
-            "Puli\\Repository\\Tests\\": "vendor/puli/repository/tests/"
+            "Puli\\Manager\\Tests\\": "tests/"
         }
     },
     "extra": {
