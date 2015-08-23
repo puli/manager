@@ -13,6 +13,7 @@ namespace Puli\Manager\Package;
 
 use Exception;
 use Puli\Manager\Api\Context\ProjectContext;
+use Puli\Manager\Api\Environment;
 use Puli\Manager\Api\FileNotFoundException;
 use Puli\Manager\Api\InvalidConfigException;
 use Puli\Manager\Api\NoDirectoryException;
@@ -86,11 +87,11 @@ class PackageManagerImpl implements PackageManager
     /**
      * {@inheritdoc}
      */
-    public function installPackage($installPath, $name = null, $installerName = InstallInfo::DEFAULT_INSTALLER_NAME, $dev = false)
+    public function installPackage($installPath, $name = null, $installerName = InstallInfo::DEFAULT_INSTALLER_NAME, $env = Environment::PROD)
     {
         Assert::string($installPath, 'The install path must be a string. Got: %s');
         Assert::string($installerName, 'The installer name must be a string. Got: %s');
-        Assert::boolean($dev, 'The dev dependency setting must be a boolean. Got: %s');
+        Assert::oneOf($env, Environment::all(), 'The environment must be one of: %2$s. Got: %s');
         Assert::nullOrPackageName($name);
 
         $this->assertPackagesLoaded();
@@ -125,7 +126,7 @@ class PackageManagerImpl implements PackageManager
         $relInstallPath = Path::makeRelative($installPath, $this->rootDir);
         $installInfo = new InstallInfo($name, $relInstallPath);
         $installInfo->setInstallerName($installerName);
-        $installInfo->setDev($dev);
+        $installInfo->setEnvironment($env);
 
         $package = $this->loadPackage($installInfo);
 

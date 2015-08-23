@@ -12,6 +12,7 @@
 namespace Puli\Manager\Tests\Api\Package;
 
 use PHPUnit_Framework_TestCase;
+use Puli\Manager\Api\Environment;
 use Puli\Manager\Api\Package\InstallInfo;
 use Rhumsaa\Uuid\Uuid;
 
@@ -30,8 +31,9 @@ class InstallInfoTest extends PHPUnit_Framework_TestCase
         $this->assertSame('vendor/package', $installInfo->getPackageName());
         $this->assertSame('/path', $installInfo->getInstallPath());
         $this->assertSame('Composer', $installInfo->getInstallerName());
-        $this->assertFalse($installInfo->isDev());
+        $this->assertSame(Environment::PROD, $installInfo->getEnvironment());
     }
+
     /**
      * @expectedException \InvalidArgumentException
      */
@@ -104,5 +106,22 @@ class InstallInfoTest extends PHPUnit_Framework_TestCase
         $installInfo->removeDisabledBindingUuid($uuid);
 
         $this->assertSame(array(), $installInfo->getDisabledBindingUuids());
+    }
+
+    public function testSetEnvironment()
+    {
+        $installInfo = new InstallInfo('vendor/package', '/path');
+        $installInfo->setEnvironment(Environment::PROD);
+
+        $this->assertSame(Environment::PROD, $installInfo->getEnvironment());
+    }
+
+    /**
+     * @expectedException \InvalidArgumentException
+     */
+    public function testFailIfInvalidEnvironment()
+    {
+        $installInfo = new InstallInfo('vendor/package', '/path');
+        $installInfo->setEnvironment('foo');
     }
 }

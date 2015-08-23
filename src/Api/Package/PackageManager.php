@@ -12,6 +12,7 @@
 namespace Puli\Manager\Api\Package;
 
 use Puli\Manager\Api\Context\ProjectContext;
+use Puli\Manager\Api\Environment;
 use Puli\Manager\Api\InvalidConfigException;
 use Webmozart\Expression\Expression;
 
@@ -39,14 +40,14 @@ interface PackageManager
      *                                   should be read from the package's
      *                                   puli.json.
      * @param string      $installerName The name of the installer.
-     * @param bool        $dev           Whether the package is only required in
-     *                                   development contexts.
+     * @param string      $env           The environment to install the package
+     *                                   in.
      *
      * @throws InvalidConfigException If the package is not configured correctly.
      * @throws NameConflictException  If the package has the same name as another
      *                                loaded package.
      */
-    public function installPackage($installPath, $name = null, $installerName = InstallInfo::DEFAULT_INSTALLER_NAME, $dev = false);
+    public function installPackage($installPath, $name = null, $installerName = InstallInfo::DEFAULT_INSTALLER_NAME, $env = Environment::PROD);
 
     /**
      * Renames the package with the given name.

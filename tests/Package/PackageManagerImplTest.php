@@ -13,6 +13,7 @@ namespace Puli\Manager\Tests\Package;
 
 use PHPUnit_Framework_Assert;
 use PHPUnit_Framework_MockObject_MockObject;
+use Puli\Manager\Api\Environment;
 use Puli\Manager\Api\InvalidConfigException;
 use Puli\Manager\Api\Package\InstallInfo;
 use Puli\Manager\Api\Package\Package;
@@ -334,7 +335,7 @@ class PackageManagerImplTest extends ManagerTestCase
         $this->manager->installPackage($this->packageDir3, 'my/package3-custom');
     }
 
-    public function testInstallDevPackage()
+    public function testInstallPackageInDevEnvironment()
     {
         $this->initDefaultManager();
 
@@ -346,14 +347,14 @@ class PackageManagerImplTest extends ManagerTestCase
 
                 PHPUnit_Framework_Assert::assertCount(3, $installInfos);
                 PHPUnit_Framework_Assert::assertSame('../package1', $installInfos[0]->getInstallPath());
-                PHPUnit_Framework_Assert::assertFalse($installInfos[0]->isDev());
+                PHPUnit_Framework_Assert::assertSame(Environment::PROD, $installInfos[0]->getEnvironment());
                 PHPUnit_Framework_Assert::assertSame('../package2', $installInfos[1]->getInstallPath());
-                PHPUnit_Framework_Assert::assertFalse($installInfos[1]->isDev());
+                PHPUnit_Framework_Assert::assertSame(Environment::PROD, $installInfos[1]->getEnvironment());
                 PHPUnit_Framework_Assert::assertSame('../package3', $installInfos[2]->getInstallPath());
-                PHPUnit_Framework_Assert::assertTrue($installInfos[2]->isDev());
+                PHPUnit_Framework_Assert::assertSame(Environment::DEV, $installInfos[2]->getEnvironment());
             }));
 
-        $this->manager->installPackage($this->packageDir3, null, InstallInfo::DEFAULT_INSTALLER_NAME, true);
+        $this->manager->installPackage($this->packageDir3, null, InstallInfo::DEFAULT_INSTALLER_NAME, Environment::DEV);
     }
 
     /**

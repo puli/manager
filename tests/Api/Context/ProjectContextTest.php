@@ -15,6 +15,7 @@ use PHPUnit_Framework_TestCase;
 use Puli\Manager\Api\Config\Config;
 use Puli\Manager\Api\Config\ConfigFile;
 use Puli\Manager\Api\Context\ProjectContext;
+use Puli\Manager\Api\Environment;
 use Puli\Manager\Api\Package\RootPackageFile;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
@@ -36,6 +37,7 @@ class ProjectContextTest extends PHPUnit_Framework_TestCase
         $this->assertSame($config, $context->getConfig());
         $this->assertSame($rootPackageFile, $context->getRootPackageFile());
         $this->assertNull($context->getConfigFile());
+        $this->assertSame(Environment::DEV, $context->getEnvironment());
         $this->assertInstanceOf('Symfony\Component\EventDispatcher\EventDispatcherInterface', $context->getEventDispatcher());
     }
 
@@ -75,5 +77,14 @@ class ProjectContextTest extends PHPUnit_Framework_TestCase
         $context = new ProjectContext(null, __DIR__, $config, $rootPackageFile, null, $dispatcher);
 
         $this->assertSame($dispatcher, $context->getEventDispatcher());
+    }
+
+    public function testCreateWithEnvironment()
+    {
+        $config = new Config();
+        $rootPackageFile = new RootPackageFile();
+        $context = new ProjectContext(null, __DIR__, $config, $rootPackageFile, null, null, Environment::PROD);
+
+        $this->assertSame(Environment::PROD, $context->getEnvironment());
     }
 }

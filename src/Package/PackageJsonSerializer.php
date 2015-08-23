@@ -15,6 +15,7 @@ use Puli\Manager\Api\Config\Config;
 use Puli\Manager\Api\Discovery\BindingDescriptor;
 use Puli\Manager\Api\Discovery\BindingParameterDescriptor;
 use Puli\Manager\Api\Discovery\BindingTypeDescriptor;
+use Puli\Manager\Api\Environment;
 use Puli\Manager\Api\InvalidConfigException;
 use Puli\Manager\Api\Package\InstallInfo;
 use Puli\Manager\Api\Package\PackageFile;
@@ -270,8 +271,8 @@ class PackageJsonSerializer implements PackageFileSerializer
                     sort($installData->{'disabled-bindings'});
                 }
 
-                if ($installInfo->isDev()) {
-                    $installData->dev = $installInfo->isDev();
+                if (Environment::PROD !== $installInfo->getEnvironment()) {
+                    $installData->env = $installInfo->getEnvironment();
                 }
 
                 $packagesData[$installInfo->getPackageName()] = $installData;
@@ -362,7 +363,10 @@ class PackageJsonSerializer implements PackageFileSerializer
         if (isset($jsonData->packages)) {
             foreach ($jsonData->packages as $packageName => $packageData) {
                 $installInfo = new InstallInfo($packageName, $packageData->{'install-path'});
-                $installInfo->setDev(isset($packageData->dev) && $packageData->dev);
+
+                if (isset($packageData->env)) {
+                    $installInfo->setEnvironment($packageData->env);
+                }
 
                 if (isset($packageData->installer)) {
                     $installInfo->setInstallerName($packageData->installer);

@@ -13,6 +13,7 @@ namespace Puli\Manager\Tests\Api\Package;
 
 use Exception;
 use PHPUnit_Framework_TestCase;
+use Puli\Manager\Api\Environment;
 use Puli\Manager\Api\Package\InstallInfo;
 use Puli\Manager\Api\Package\Package;
 use Puli\Manager\Api\Package\PackageFile;
@@ -110,17 +111,21 @@ class PackageTest extends PHPUnit_Framework_TestCase
 
         $this->assertFalse($package->match(Expr::same('webmozart', Package::INSTALLER)));
 
+        // Packages without install info (= the root package) are assumed to be
+        // installed in the production environment
+        $this->assertTrue($package->match(Expr::same(Environment::PROD, Package::ENVIRONMENT)));
+
         $installInfo = new InstallInfo('vendor/install-info', '/path');
         $installInfo->setInstallerName('webmozart');
         $packageWithInstallInfo = new Package($packageFile, __DIR__, $installInfo);
 
         $this->assertFalse($packageWithInstallInfo->match(Expr::same('foobar', Package::INSTALLER)));
         $this->assertTrue($packageWithInstallInfo->match(Expr::same('webmozart', Package::INSTALLER)));
-        $this->assertTrue($packageWithInstallInfo->match(Expr::notsame(true, Package::DEV)));
+        $this->assertTrue($packageWithInstallInfo->match(Expr::notsame(Environment::DEV, Package::ENVIRONMENT)));
 
         $installInfo2 = new InstallInfo('vendor/install-info', '/path');
-        $installInfo2->setDev(true);
+        $installInfo2->setEnvironment(Environment::DEV);
         $packageWithInstallInfo2 = new Package($packageFile, __DIR__, $installInfo2);
-        $this->assertTrue($packageWithInstallInfo2->match(Expr::same(true, Package::DEV)));
+        $this->assertTrue($packageWithInstallInfo2->match(Expr::same(Environment::DEV, Package::ENVIRONMENT)));
     }
 }

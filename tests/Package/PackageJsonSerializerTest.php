@@ -15,6 +15,7 @@ use Puli\Manager\Api\Config\Config;
 use Puli\Manager\Api\Discovery\BindingDescriptor;
 use Puli\Manager\Api\Discovery\BindingParameterDescriptor;
 use Puli\Manager\Api\Discovery\BindingTypeDescriptor;
+use Puli\Manager\Api\Environment;
 use Puli\Manager\Api\Package\InstallInfo;
 use Puli\Manager\Api\Package\Package;
 use Puli\Manager\Api\Package\PackageFile;
@@ -142,7 +143,7 @@ JSON;
         },
         "vendor/package2": {
             "install-path": "/path/to/package2",
-            "dev": true
+            "env": "dev"
         }
     }
 }
@@ -531,7 +532,7 @@ JSON;
         $installInfo1->setInstallerName('composer');
         $installInfo1->addDisabledBindingUuid(Uuid::fromString('4d02ee67-d845-4789-a9c1-8301351c6f5a'));
         $installInfo2 = new InstallInfo('vendor/package2', '/path/to/package2');
-        $installInfo2->setDev(true);
+        $installInfo2->setEnvironment(Environment::DEV);
 
         $baseConfig = new Config();
         $packageFile = new RootPackageFile(null, null, $baseConfig);
@@ -736,7 +737,7 @@ JSON;
         $installInfo1->setInstallerName('composer');
         $installInfo1->addDisabledBindingUuid(Uuid::fromString('4d02ee67-d845-4789-a9c1-8301351c6f5a'));
         $installInfo2 = new InstallInfo('vendor/package2', '/path/to/package2');
-        $installInfo2->setDev(true);
+        $installInfo2->setEnvironment(Environment::DEV);
 
         $this->assertInstanceOf('Puli\Manager\Api\Package\RootPackageFile', $packageFile);
         $this->assertSame('/path', $packageFile->getPath());

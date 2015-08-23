@@ -12,6 +12,7 @@
 namespace Puli\Manager\Api\Package;
 
 use Exception;
+use Puli\Manager\Api\Environment;
 use Puli\Manager\Assert\Assert;
 use Webmozart\Expression\Expression;
 
@@ -45,9 +46,9 @@ class Package
     const INSTALLER = 'installer';
 
     /**
-     * The dev field in {@link Expression} instances.
+     * The environment field in {@link Expression} instances.
      */
-    const DEV = 'dev';
+    const ENVIRONMENT = 'env';
 
     /**
      * @var string
@@ -238,7 +239,7 @@ class Package
             self::INSTALL_PATH => $this->installPath,
             self::STATE => $this->state,
             self::INSTALLER => $this->installInfo ? $this->installInfo->getInstallerName() : null,
-            self::DEV => $this->installInfo ? $this->installInfo->isDev() : false,
+            self::ENVIRONMENT => $this->installInfo ? $this->installInfo->getEnvironment() : Environment::PROD,
         ));
     }
 

@@ -13,6 +13,7 @@ namespace Puli\Manager\Api\Context;
 
 use Puli\Manager\Api\Config\Config;
 use Puli\Manager\Api\Config\ConfigFile;
+use Puli\Manager\Api\Environment;
 use Puli\Manager\Api\Package\RootPackageFile;
 use Puli\Manager\Assert\Assert;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -44,6 +45,11 @@ class ProjectContext extends Context
     private $rootPackageFile;
 
     /**
+     * @var string
+     */
+    private $env;
+
+    /**
      * Creates the context.
      *
      * @param string|null              $homeDir         The path to the home
@@ -56,15 +62,19 @@ class ProjectContext extends Context
      * @param ConfigFile               $configFile      The configuration file or
      *                                                  `null` if none exists.
      * @param EventDispatcherInterface $dispatcher      The event dispatcher.
+     * @param string                   $env             The environment that
+     *                                                  Puli is running in.
      */
-    public function __construct($homeDir, $rootDir, Config $config, RootPackageFile $rootPackageFile, ConfigFile $configFile = null, EventDispatcherInterface $dispatcher = null)
+    public function __construct($homeDir, $rootDir, Config $config, RootPackageFile $rootPackageFile, ConfigFile $configFile = null, EventDispatcherInterface $dispatcher = null, $env = Environment::DEV)
     {
         Assert::directory($rootDir, 'The root directory %s is not a directory.');
+        Assert::oneOf($env, Environment::all(), 'The environment must be one of: %2$s. Got: %s');
 
         parent::__construct($homeDir, $config, $configFile, $dispatcher);
 
         $this->rootDir = Path::canonicalize($rootDir);
         $this->rootPackageFile = $rootPackageFile;
+        $this->env = $env;
     }
 
     /**
@@ -85,5 +95,15 @@ class ProjectContext extends Context
     public function getRootPackageFile()
     {
         return $this->rootPackageFile;
+    }
+
+    /**
+     * Returns the environment that Puli is running in.
+     *
+     * @return string One of the {@link Environment} constants.
+     */
+    public function getEnvironment()
+    {
+        return $this->env;
     }
 }

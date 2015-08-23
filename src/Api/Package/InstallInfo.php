@@ -13,6 +13,7 @@ namespace Puli\Manager\Api\Package;
 
 use InvalidArgumentException;
 use Puli\Manager\Api\Discovery\BindingDescriptor;
+use Puli\Manager\Api\Environment;
 use Puli\Manager\Assert\Assert;
 use Rhumsaa\Uuid\Uuid;
 
@@ -41,19 +42,14 @@ class InstallInfo
     private $packageName;
 
     /**
-     * @var bool
+     * @var string
      */
-    private $dev = false;
+    private $env = Environment::PROD;
 
     /**
      * @var string
      */
     private $installerName = self::DEFAULT_INSTALLER_NAME;
-
-    /**
-     * @var BindingDescriptor[]
-     */
-    private $enabledBindingUuids = array();
 
     /**
      * @var BindingDescriptor[]
@@ -178,24 +174,24 @@ class InstallInfo
     }
 
     /**
-     * Sets whether the package is only required in development contexts.
+     * Sets the environment that the package is installed in.
      *
-     * @param bool $dev Set to `true` if the package is only required in
-     *                  developments contexts and to `false` otherwise.
+     * @param string $env One of the {@link Environment} constants.
      */
-    public function setDev($dev)
+    public function setEnvironment($env)
     {
-        $this->dev = (bool) $dev;
+        Assert::oneOf($env, Environment::all(), 'The environment must be one of: %2$s. Got: %s');
+
+        $this->env = $env;
     }
 
     /**
-     * Returns whether the package is only required in development contexts.
+     * Returns the environment that the package is installed in.
      *
-     * @return bool Returns `true` if the package is only required in
-     *              development contexts and `false` otherwise.
+     * @return string Returns one of the {@link Environment} constants.
      */
-    public function isDev()
+    public function getEnvironment()
     {
-        return $this->dev;
+        return $this->env;
     }
 }
