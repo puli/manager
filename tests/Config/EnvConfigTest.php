@@ -28,7 +28,7 @@ class EnvConfigTest extends PHPUnit_Framework_TestCase
         putenv('PULI_DIR');
     }
 
-    public function testLoadEnvironmentVariables()
+    public function testLoadContextVariables()
     {
         putenv('PULI_DIR=my-puli-dir');
 

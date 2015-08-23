@@ -55,12 +55,12 @@ class InstallationManagerImplTest extends ManagerTestCase
 
     protected function setUp()
     {
-        $this->initEnvironment(__DIR__.'/Fixtures/home', __DIR__.'/Fixtures/root');
+        $this->initContext(__DIR__.'/Fixtures/home', __DIR__.'/Fixtures/root');
 
         $this->servers = new ServerCollection();
         $this->installerManager = $this->getMock('Puli\Manager\Api\Installer\InstallerManager');
         $this->manager = new InstallationManagerImpl(
-            $this->environment,
+            $this->context,
             $this->repo,
             $this->servers,
             $this->installerManager
@@ -109,7 +109,7 @@ class InstallationManagerImplTest extends ManagerTestCase
             $resources,
             $mapping,
             $server,
-            $this->environment->getRootDirectory()
+            $this->context->getRootDirectory()
         );
 
         $this->assertEquals($params, $this->manager->prepareInstallation($mapping));
@@ -367,7 +367,7 @@ class InstallationManagerImplTest extends ManagerTestCase
             $resources,
             $mapping,
             $server,
-            $this->environment->getRootDirectory()
+            $this->context->getRootDirectory()
         );
 
         $installer->expects($this->at(0))

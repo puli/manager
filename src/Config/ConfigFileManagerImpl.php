@@ -13,7 +13,7 @@ namespace Puli\Manager\Config;
 
 use Puli\Manager\Api\Config\ConfigFile;
 use Puli\Manager\Api\Config\ConfigFileManager;
-use Puli\Manager\Api\Environment\GlobalEnvironment;
+use Puli\Manager\Api\Context\Context;
 
 /**
  * Manages changes to the global configuration file.
@@ -28,9 +28,9 @@ use Puli\Manager\Api\Environment\GlobalEnvironment;
 class ConfigFileManagerImpl extends AbstractConfigManager implements ConfigFileManager
 {
     /**
-     * @var GlobalEnvironment
+     * @var Context
      */
-    private $environment;
+    private $context;
 
     /**
      * @var ConfigFile
@@ -45,14 +45,14 @@ class ConfigFileManagerImpl extends AbstractConfigManager implements ConfigFileM
     /**
      * Creates the configuration manager.
      *
-     * @param GlobalEnvironment $environment       The global environment.
+     * @param Context           $context           The global context.
      * @param ConfigFileStorage $configFileStorage The configuration file storage.
      */
-    public function __construct(GlobalEnvironment $environment, ConfigFileStorage $configFileStorage)
+    public function __construct(Context $context, ConfigFileStorage $configFileStorage)
     {
-        $this->environment = $environment;
+        $this->context = $context;
         $this->configFileStorage = $configFileStorage;
-        $this->configFile = $environment->getConfigFile();
+        $this->configFile = $context->getConfigFile();
     }
 
     /**
@@ -66,9 +66,9 @@ class ConfigFileManagerImpl extends AbstractConfigManager implements ConfigFileM
     /**
      * {@inheritdoc}
      */
-    public function getEnvironment()
+    public function getContext()
     {
-        return $this->environment;
+        return $this->context;
     }
 
     /**

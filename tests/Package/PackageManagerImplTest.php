@@ -123,7 +123,7 @@ class PackageManagerImplTest extends ManagerTestCase
                 array($this->packageDir3.'/puli.json', $this->packageFile3),
             ));
 
-        $this->initEnvironment(__DIR__.'/Fixtures/home', __DIR__.'/Fixtures/root');
+        $this->initContext(__DIR__.'/Fixtures/home', __DIR__.'/Fixtures/root');
     }
 
     protected function tearDown()
@@ -140,7 +140,7 @@ class PackageManagerImplTest extends ManagerTestCase
         $this->rootPackageFile->addInstallInfo($installInfo1 = new InstallInfo('vendor/package1', '../foo'));
         $this->rootPackageFile->addInstallInfo($installInfo2 = new InstallInfo('vendor/package2', $this->packageDir2));
 
-        $manager = new PackageManagerImpl($this->environment, $this->packageFileStorage);
+        $manager = new PackageManagerImpl($this->context, $this->packageFileStorage);
 
         $packages = $manager->getPackages();
 
@@ -158,7 +158,7 @@ class PackageManagerImplTest extends ManagerTestCase
 
         $installInfo1->setInstallerName('webmozart');
 
-        $manager = new PackageManagerImpl($this->environment, $this->packageFileStorage);
+        $manager = new PackageManagerImpl($this->context, $this->packageFileStorage);
 
         $expr1 = Expr::same(PackageState::ENABLED, Package::STATE);
 
@@ -187,7 +187,7 @@ class PackageManagerImplTest extends ManagerTestCase
 
     public function testGetPackagesStoresExceptionIfPackageDirectoryNotFound()
     {
-        $manager = new PackageManagerImpl($this->environment, $this->packageFileStorage);
+        $manager = new PackageManagerImpl($this->context, $this->packageFileStorage);
 
         $this->rootPackageFile->addInstallInfo(new InstallInfo('vendor/package', 'foobar'));
 
@@ -205,7 +205,7 @@ class PackageManagerImplTest extends ManagerTestCase
     {
         $this->rootPackageFile->addInstallInfo(new InstallInfo('vendor/package', __DIR__.'/Fixtures/file'));
 
-        $manager = new PackageManagerImpl($this->environment, $this->packageFileStorage);
+        $manager = new PackageManagerImpl($this->context, $this->packageFileStorage);
 
         $packages = $manager->getPackages();
 
@@ -228,7 +228,7 @@ class PackageManagerImplTest extends ManagerTestCase
             ->with($this->packageDir1.'/puli.json')
             ->willThrowException($exception);
 
-        $manager = new PackageManagerImpl($this->environment, $this->packageFileStorage);
+        $manager = new PackageManagerImpl($this->context, $this->packageFileStorage);
 
         $packages = $manager->getPackages();
 
@@ -247,7 +247,7 @@ class PackageManagerImplTest extends ManagerTestCase
             ->with($this->packageDir1.'/puli.json')
             ->willThrowException($exception);
 
-        $manager = new PackageManagerImpl($this->environment, $this->packageFileStorage);
+        $manager = new PackageManagerImpl($this->context, $this->packageFileStorage);
 
         $packages = $manager->getPackages();
 
@@ -460,7 +460,7 @@ class PackageManagerImplTest extends ManagerTestCase
      */
     public function testInstallPackageFailsIfPackageNotLoadableAndCustomNameSet()
     {
-        $manager = new PackageManagerImpl($this->environment, $this->packageFileStorage);
+        $manager = new PackageManagerImpl($this->context, $this->packageFileStorage);
         $e = new UnsupportedVersionException('The exception text.');
 
         $this->packageFileStorage->expects($this->once())
@@ -823,6 +823,6 @@ class PackageManagerImplTest extends ManagerTestCase
         $this->rootPackageFile->addInstallInfo($this->installInfo1);
         $this->rootPackageFile->addInstallInfo($this->installInfo2);
 
-        $this->manager = new PackageManagerImpl($this->environment, $this->packageFileStorage);
+        $this->manager = new PackageManagerImpl($this->context, $this->packageFileStorage);
     }
 }

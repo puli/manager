@@ -18,6 +18,7 @@ use Puli\Discovery\Api\Binding\MissingParameterException;
 use Puli\Discovery\Api\Binding\NoSuchParameterException;
 use Puli\Discovery\Api\EditableDiscovery;
 use Puli\Discovery\Api\Validation\ConstraintViolation;
+use Puli\Manager\Api\Context\ProjectContext;
 use Puli\Manager\Api\Discovery\BindingDescriptor;
 use Puli\Manager\Api\Discovery\BindingTypeDescriptor;
 use Puli\Manager\Api\Discovery\DiscoveryManager;
@@ -27,7 +28,6 @@ use Puli\Manager\Api\Discovery\DuplicateTypeException;
 use Puli\Manager\Api\Discovery\NoSuchBindingException;
 use Puli\Manager\Api\Discovery\NoSuchTypeException;
 use Puli\Manager\Api\Discovery\TypeNotEnabledException;
-use Puli\Manager\Api\Environment\ProjectEnvironment;
 use Puli\Manager\Api\NonRootPackageExpectedException;
 use Puli\Manager\Api\Package\InstallInfo;
 use Puli\Manager\Api\Package\Package;
@@ -69,9 +69,9 @@ use Webmozart\Expression\Expression;
 class DiscoveryManagerImpl implements DiscoveryManager
 {
     /**
-     * @var ProjectEnvironment
+     * @var ProjectContext
      */
-    private $environment;
+    private $context;
 
     /**
      * @var LoggerInterface
@@ -116,34 +116,34 @@ class DiscoveryManagerImpl implements DiscoveryManager
     /**
      * Creates a tag manager.
      *
-     * @param ProjectEnvironment $environment
+     * @param ProjectContext     $context
      * @param EditableDiscovery  $discovery
      * @param PackageCollection  $packages
      * @param PackageFileStorage $packageFileStorage
      * @param LoggerInterface    $logger
      */
     public function __construct(
-        ProjectEnvironment $environment,
+        ProjectContext $context,
         EditableDiscovery $discovery,
         PackageCollection $packages,
         PackageFileStorage $packageFileStorage,
         LoggerInterface $logger = null
     ) {
-        $this->environment = $environment;
+        $this->context = $context;
         $this->discovery = $discovery;
         $this->packages = $packages;
         $this->packageFileStorage = $packageFileStorage;
         $this->rootPackage = $packages->getRootPackage();
-        $this->rootPackageFile = $environment->getRootPackageFile();
+        $this->rootPackageFile = $context->getRootPackageFile();
         $this->logger = $logger ?: new NullLogger();
     }
 
     /**
      * {@inheritdoc}
      */
-    public function getEnvironment()
+    public function getContext()
     {
-        return $this->environment;
+        return $this->context;
     }
 
     /**

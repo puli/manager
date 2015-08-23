@@ -142,7 +142,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
             ->disableOriginalConstructor()
             ->getMock();
 
-        $this->initEnvironment($this->tempDir.'/home', $this->tempDir.'/root');
+        $this->initContext($this->tempDir.'/home', $this->tempDir.'/root');
     }
 
     protected function tearDown()
@@ -2221,6 +2221,6 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->packages->add(new Package($this->packageFile2, $this->packageDir2, $this->installInfo2));
         $this->packages->add(new Package($this->packageFile3, $this->packageDir3, $this->installInfo3));
 
-        $this->manager = new DiscoveryManagerImpl($this->environment, $this->discovery, $this->packages, $this->packageFileStorage, $this->logger);
+        $this->manager = new DiscoveryManagerImpl($this->context, $this->discovery, $this->packages, $this->packageFileStorage, $this->logger);
     }
 }

@@ -26,9 +26,9 @@ use Symfony\Component\Filesystem\Filesystem;
 class System
 {
     /**
-     * Parses environment variables for Puli's home directory.
+     * Parses context variables for Puli's home directory.
      *
-     * This method scans the environment variables "PULI_HOME", "HOME" and
+     * This method scans the context variables "PULI_HOME", "HOME" and
      * "APPDATA" to determine Puli's home directory:
      *
      *  * If "PULI_HOME" is found, that directory is used.
@@ -41,7 +41,7 @@ class System
      *
      * @return string The path to Puli's home directory.
      *
-     * @throws InvalidConfigException If no environment variable can be found to
+     * @throws InvalidConfigException If no context variable can be found to
      *                                determine the home directory.
      * @throws FileNotFoundException  If the home directory is not found.
      * @throws NoDirectoryException   If the home directory is not a directory.
@@ -59,7 +59,7 @@ class System
             $env = 'APPDATA';
         } else {
             throw new InvalidConfigException(sprintf(
-                'Either the environment variable PULI_HOME or %s must be set for '.
+                'Either the context variable PULI_HOME or %s must be set for '.
                 'Puli to run.',
                 defined('PHP_WINDOWS_VERSION_MAJOR') ? 'APPDATA' : 'HOME'
             ));
@@ -69,7 +69,7 @@ class System
 
         if (!file_exists($homeDir)) {
             throw new FileNotFoundException(sprintf(
-                'The home path %s defined in the environment variable %s '.
+                'The home path %s defined in the context variable %s '.
                 'does not exist.',
                 $homeDir,
                 $env
@@ -78,7 +78,7 @@ class System
 
         if (is_file($homeDir)) {
             throw new NoDirectoryException(sprintf(
-                'The home path %s defined in the environment variable %s '.
+                'The home path %s defined in the context variable %s '.
                 'points to a file. Expected a directory path.',
                 $homeDir,
                 $env

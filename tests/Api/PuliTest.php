@@ -77,7 +77,7 @@ class PuliTest extends PHPUnit_Framework_TestCase
         putenv('PULI_HOME');
     }
 
-    public function testPuliProtectsHomeWithGlobalEnvironment()
+    public function testPuliProtectsHomeWithGlobalContext()
     {
         $this->assertFileNotExists($this->tempHome.'/.htaccess');
 
@@ -87,7 +87,7 @@ class PuliTest extends PHPUnit_Framework_TestCase
         $this->assertSame('Deny from all', file_get_contents($this->tempHome.'/.htaccess'));
     }
 
-    public function testPuliProtectsHomeWithProjectEnvironment()
+    public function testPuliProtectsHomeWithProjectContext()
     {
         $this->assertFileNotExists($this->tempHome.'/.htaccess');
 
@@ -98,94 +98,94 @@ class PuliTest extends PHPUnit_Framework_TestCase
         $this->assertSame('Deny from all', file_get_contents($this->tempHome.'/.htaccess'));
     }
 
-    public function testGetGlobalEnvironment()
+    public function testGetGlobalContext()
     {
         $this->puli->start();
-        $environment = $this->puli->getEnvironment();
+        $context = $this->puli->getContext();
 
-        $this->assertInstanceOf('Puli\Manager\Api\Environment\GlobalEnvironment', $environment);
-        $this->assertInstanceOf('Puli\Manager\Api\Config\Config', $environment->getConfig());
-        $this->assertInstanceOf('Puli\Manager\Api\Config\ConfigFile', $environment->getConfigFile());
-        $this->assertInstanceOf('Symfony\Component\EventDispatcher\EventDispatcherInterface', $environment->getEventDispatcher());
-        $this->assertSame($this->tempHome, $environment->getHomeDirectory());
-        $this->assertSame($this->tempHome.'/config.json', $environment->getConfigFile()->getPath());
-        $this->assertSame($environment->getEventDispatcher(), $this->puli->getEventDispatcher());
+        $this->assertInstanceOf('Puli\Manager\Api\Context\Context', $context);
+        $this->assertInstanceOf('Puli\Manager\Api\Config\Config', $context->getConfig());
+        $this->assertInstanceOf('Puli\Manager\Api\Config\ConfigFile', $context->getConfigFile());
+        $this->assertInstanceOf('Symfony\Component\EventDispatcher\EventDispatcherInterface', $context->getEventDispatcher());
+        $this->assertSame($this->tempHome, $context->getHomeDirectory());
+        $this->assertSame($this->tempHome.'/config.json', $context->getConfigFile()->getPath());
+        $this->assertSame($context->getEventDispatcher(), $this->puli->getEventDispatcher());
     }
 
-    public function testGetGlobalEnvironmentWithEventDispatcher()
+    public function testGetGlobalContextWithEventDispatcher()
     {
         $dispatcher = new EventDispatcher();
         $this->puli->setEventDispatcher($dispatcher);
         $this->puli->start();
-        $environment = $this->puli->getEnvironment();
+        $context = $this->puli->getContext();
 
-        $this->assertSame($dispatcher, $environment->getEventDispatcher());
+        $this->assertSame($dispatcher, $context->getEventDispatcher());
     }
 
-    public function testGetGlobalEnvironmentWithoutHome()
+    public function testGetGlobalContextWithoutHome()
     {
         // Unset env variable
         putenv('PULI_HOME');
 
         $this->puli->start();
-        $environment = $this->puli->getEnvironment();
+        $context = $this->puli->getContext();
 
-        $this->assertInstanceOf('Puli\Manager\Api\Environment\GlobalEnvironment', $environment);
-        $this->assertInstanceOf('Puli\Manager\Api\Config\Config', $environment->getConfig());
-        $this->assertNull($environment->getConfigFile());
-        $this->assertInstanceOf('Symfony\Component\EventDispatcher\EventDispatcherInterface', $environment->getEventDispatcher());
-        $this->assertNull($environment->getHomeDirectory());
+        $this->assertInstanceOf('Puli\Manager\Api\Context\Context', $context);
+        $this->assertInstanceOf('Puli\Manager\Api\Config\Config', $context->getConfig());
+        $this->assertNull($context->getConfigFile());
+        $this->assertInstanceOf('Symfony\Component\EventDispatcher\EventDispatcherInterface', $context->getEventDispatcher());
+        $this->assertNull($context->getHomeDirectory());
     }
 
-    public function testGetProjectEnvironment()
+    public function testGetProjectContext()
     {
         $this->puli->setRootDirectory($this->tempRoot);
         $this->puli->start();
-        $environment = $this->puli->getEnvironment();
+        $context = $this->puli->getContext();
 
-        $this->assertInstanceOf('Puli\Manager\Api\Environment\ProjectEnvironment', $environment);
-        $this->assertInstanceOf('Puli\Manager\Api\Config\Config', $environment->getConfig());
-        $this->assertInstanceOf('Puli\Manager\Api\Config\ConfigFile', $environment->getConfigFile());
-        $this->assertInstanceOf('Puli\Manager\Api\Package\RootPackageFile', $environment->getRootPackageFile());
-        $this->assertInstanceOf('Symfony\Component\EventDispatcher\EventDispatcherInterface', $environment->getEventDispatcher());
-        $this->assertSame($this->tempHome, $environment->getHomeDirectory());
-        $this->assertSame($this->tempRoot, $environment->getRootDirectory());
-        $this->assertSame($this->tempHome.'/config.json', $environment->getConfigFile()->getPath());
-        $this->assertSame($this->tempRoot.'/puli.json', $environment->getRootPackageFile()->getPath());
-        $this->assertSame($environment->getEventDispatcher(), $this->puli->getEventDispatcher());
+        $this->assertInstanceOf('Puli\Manager\Api\Context\ProjectContext', $context);
+        $this->assertInstanceOf('Puli\Manager\Api\Config\Config', $context->getConfig());
+        $this->assertInstanceOf('Puli\Manager\Api\Config\ConfigFile', $context->getConfigFile());
+        $this->assertInstanceOf('Puli\Manager\Api\Package\RootPackageFile', $context->getRootPackageFile());
+        $this->assertInstanceOf('Symfony\Component\EventDispatcher\EventDispatcherInterface', $context->getEventDispatcher());
+        $this->assertSame($this->tempHome, $context->getHomeDirectory());
+        $this->assertSame($this->tempRoot, $context->getRootDirectory());
+        $this->assertSame($this->tempHome.'/config.json', $context->getConfigFile()->getPath());
+        $this->assertSame($this->tempRoot.'/puli.json', $context->getRootPackageFile()->getPath());
+        $this->assertSame($context->getEventDispatcher(), $this->puli->getEventDispatcher());
     }
 
-    public function testGetProjectEnvironmentWithEventDispatcher()
+    public function testGetProjectContextWithEventDispatcher()
     {
         $dispatcher = new EventDispatcher();
         $this->puli->setEventDispatcher($dispatcher);
         $this->puli->setRootDirectory($this->tempRoot);
         $this->puli->start();
-        $environment = $this->puli->getEnvironment();
+        $context = $this->puli->getContext();
 
-        $this->assertSame($dispatcher, $environment->getEventDispatcher());
+        $this->assertSame($dispatcher, $context->getEventDispatcher());
     }
 
-    public function testGetProjectEnvironmentWithoutHome()
+    public function testGetProjectContextWithoutHome()
     {
         // Unset env variable
         putenv('PULI_HOME');
 
         $this->puli->setRootDirectory($this->tempRoot);
         $this->puli->start();
-        $environment = $this->puli->getEnvironment();
+        $context = $this->puli->getContext();
 
-        $this->assertInstanceOf('Puli\Manager\Api\Environment\ProjectEnvironment', $environment);
-        $this->assertInstanceOf('Puli\Manager\Api\Config\Config', $environment->getConfig());
-        $this->assertNull($environment->getConfigFile());
-        $this->assertInstanceOf('Puli\Manager\Api\Package\RootPackageFile', $environment->getRootPackageFile());
-        $this->assertInstanceOf('Symfony\Component\EventDispatcher\EventDispatcherInterface', $environment->getEventDispatcher());
-        $this->assertNull($environment->getHomeDirectory());
-        $this->assertSame($this->tempRoot, $environment->getRootDirectory());
-        $this->assertSame($this->tempRoot.'/puli.json', $environment->getRootPackageFile()->getPath());
+        $this->assertInstanceOf('Puli\Manager\Api\Context\ProjectContext', $context);
+        $this->assertInstanceOf('Puli\Manager\Api\Config\Config', $context->getConfig());
+        $this->assertNull($context->getConfigFile());
+        $this->assertInstanceOf('Puli\Manager\Api\Package\RootPackageFile', $context->getRootPackageFile());
+        $this->assertInstanceOf('Symfony\Component\EventDispatcher\EventDispatcherInterface', $context->getEventDispatcher());
+        $this->assertNull($context->getHomeDirectory());
+        $this->assertSame($this->tempRoot, $context->getRootDirectory());
+        $this->assertSame($this->tempRoot.'/puli.json', $context->getRootPackageFile()->getPath());
     }
 
-    public function testGetRepositoryInProjectEnvironment()
+    public function testGetRepositoryInProjectContext()
     {
         $this->puli->setRootDirectory($this->tempRoot);
         $this->puli->start();
@@ -194,14 +194,14 @@ class PuliTest extends PHPUnit_Framework_TestCase
         $this->assertInstanceOf('Puli\Repository\Api\EditableRepository', $repo);
     }
 
-    public function testGetRepositoryInGlobalEnvironment()
+    public function testGetRepositoryInGlobalContext()
     {
         $this->puli->start();
 
         $this->assertNull($this->puli->getRepository());
     }
 
-    public function testGetDiscoveryInProjectEnvironment()
+    public function testGetDiscoveryInProjectContext()
     {
         $this->puli->setRootDirectory($this->tempRoot);
         $this->puli->start();
@@ -210,14 +210,14 @@ class PuliTest extends PHPUnit_Framework_TestCase
         $this->assertInstanceOf('Puli\Discovery\Api\EditableDiscovery', $discovery);
     }
 
-    public function testGetDiscoveryInGlobalEnvironment()
+    public function testGetDiscoveryInGlobalContext()
     {
         $this->puli->start();
 
         $this->assertNull($this->puli->getDiscovery());
     }
 
-    public function testGetFactoryInProjectEnvironment()
+    public function testGetFactoryInProjectContext()
     {
         $this->puli->setRootDirectory($this->tempRoot);
         $this->puli->start();
@@ -227,14 +227,14 @@ class PuliTest extends PHPUnit_Framework_TestCase
         $this->assertTrue(method_exists($factory, 'createRepository'));
     }
 
-    public function testGetFactoryInGlobalEnvironment()
+    public function testGetFactoryInGlobalContext()
     {
         $this->puli->start();
 
         $this->assertNull($this->puli->getFactory());
     }
 
-    public function testGetFactoryManagerInProjectEnvironment()
+    public function testGetFactoryManagerInProjectContext()
     {
         $this->puli->setRootDirectory($this->tempRoot);
         $this->puli->start();
@@ -243,57 +243,57 @@ class PuliTest extends PHPUnit_Framework_TestCase
         $this->assertInstanceOf('Puli\Manager\Api\Factory\FactoryManager', $manager);
     }
 
-    public function testGetFactoryManagerInGlobalEnvironment()
+    public function testGetFactoryManagerInGlobalContext()
     {
         $this->puli->start();
 
         $this->assertNull($this->puli->getFactoryManager());
     }
 
-    public function testGetConfigFileManagerInProjectEnvironment()
+    public function testGetConfigFileManagerInProjectContext()
     {
         $this->puli->setRootDirectory($this->tempRoot);
         $this->puli->start();
         $manager = $this->puli->getConfigFileManager();
 
         $this->assertInstanceOf('Puli\Manager\Api\Config\ConfigFileManager', $manager);
-        $this->assertSame($this->puli->getEnvironment($this->tempRoot), $manager->getEnvironment());
+        $this->assertSame($this->puli->getContext($this->tempRoot), $manager->getContext());
     }
 
-    public function testGetConfigFileManagerInGlobalEnvironment()
+    public function testGetConfigFileManagerInGlobalContext()
     {
         $this->puli->start();
         $manager = $this->puli->getConfigFileManager();
 
         $this->assertInstanceOf('Puli\Manager\Api\Config\ConfigFileManager', $manager);
-        $this->assertSame($this->puli->getEnvironment(), $manager->getEnvironment());
+        $this->assertSame($this->puli->getContext(), $manager->getContext());
     }
 
-    public function testGetRootPackageFileManagerInProjectEnvironment()
+    public function testGetRootPackageFileManagerInProjectContext()
     {
         $this->puli->setRootDirectory($this->tempRoot);
         $this->puli->start();
         $manager = $this->puli->getRootPackageFileManager();
 
         $this->assertInstanceOf('Puli\Manager\Api\Package\RootPackageFileManager', $manager);
-        $this->assertSame($this->puli->getEnvironment(), $manager->getEnvironment());
+        $this->assertSame($this->puli->getContext(), $manager->getContext());
     }
 
-    public function testGetRootPackageFileManagerInGlobalEnvironment()
+    public function testGetRootPackageFileManagerInGlobalContext()
     {
         $this->puli->start();
 
         $this->assertNull($this->puli->getRootPackageFileManager());
     }
 
-    public function testGetPackageManagerInProjectEnvironment()
+    public function testGetPackageManagerInProjectContext()
     {
         $this->puli->setRootDirectory($this->tempRoot);
         $this->puli->start();
         $manager = $this->puli->getPackageManager();
 
         $this->assertInstanceOf('Puli\Manager\Api\Package\PackageManager', $manager);
-        $this->assertSame($this->puli->getEnvironment(), $manager->getEnvironment());
+        $this->assertSame($this->puli->getContext(), $manager->getContext());
 
         $packages = $manager->getPackages();
 
@@ -303,48 +303,48 @@ class PuliTest extends PHPUnit_Framework_TestCase
         $this->assertTrue($packages->contains('vendor/package2'));
     }
 
-    public function testGetPackageManagerInGlobalEnvironment()
+    public function testGetPackageManagerInGlobalContext()
     {
         $this->puli->start();
 
         $this->assertNull($this->puli->getPackageManager());
     }
 
-    public function testGetRepositoryManagerInProjectEnvironment()
+    public function testGetRepositoryManagerInProjectContext()
     {
         $this->puli->setRootDirectory($this->tempRoot);
         $this->puli->start();
         $manager = $this->puli->getRepositoryManager();
 
         $this->assertInstanceOf('Puli\Manager\Api\Repository\RepositoryManager', $manager);
-        $this->assertSame($this->puli->getEnvironment(), $manager->getEnvironment());
+        $this->assertSame($this->puli->getContext(), $manager->getContext());
     }
 
-    public function testGetRepositoryManagerInGlobalEnvironment()
+    public function testGetRepositoryManagerInGlobalContext()
     {
         $this->puli->start();
 
         $this->assertNull($this->puli->getRepositoryManager());
     }
 
-    public function testGetDiscoveryManagerInProjectEnvironment()
+    public function testGetDiscoveryManagerInProjectContext()
     {
         $this->puli->setRootDirectory($this->tempRoot);
         $this->puli->start();
         $manager = $this->puli->getDiscoveryManager();
 
         $this->assertInstanceOf('Puli\Manager\Api\Discovery\DiscoveryManager', $manager);
-        $this->assertSame($this->puli->getEnvironment(), $manager->getEnvironment());
+        $this->assertSame($this->puli->getContext(), $manager->getContext());
     }
 
-    public function testGetDiscoveryManagerInGlobalEnvironment()
+    public function testGetDiscoveryManagerInGlobalContext()
     {
         $this->puli->start();
 
         $this->assertNull($this->puli->getDiscoveryManager());
     }
 
-    public function testGetAssetManagerInProjectEnvironment()
+    public function testGetAssetManagerInProjectContext()
     {
         $this->puli->setRootDirectory($this->tempRoot);
         $this->puli->start();
@@ -354,14 +354,14 @@ class PuliTest extends PHPUnit_Framework_TestCase
         $this->assertSame($manager, $this->puli->getAssetManager());
     }
 
-    public function testGetAssetManagerInGlobalEnvironment()
+    public function testGetAssetManagerInGlobalContext()
     {
         $this->puli->start();
 
         $this->assertNull($this->puli->getAssetManager());
     }
 
-    public function testGetInstallationManagerInProjectEnvironment()
+    public function testGetInstallationManagerInProjectContext()
     {
         $this->puli->setRootDirectory($this->tempRoot);
         $this->puli->start();
@@ -371,14 +371,14 @@ class PuliTest extends PHPUnit_Framework_TestCase
         $this->assertSame($manager, $this->puli->getInstallationManager());
     }
 
-    public function testGetInstallationManagerInGlobalEnvironment()
+    public function testGetInstallationManagerInGlobalContext()
     {
         $this->puli->start();
 
         $this->assertNull($this->puli->getInstallationManager());
     }
 
-    public function testGetInstallerManagerInProjectEnvironment()
+    public function testGetInstallerManagerInProjectContext()
     {
         $this->puli->setRootDirectory($this->tempRoot);
         $this->puli->start();
@@ -388,14 +388,14 @@ class PuliTest extends PHPUnit_Framework_TestCase
         $this->assertSame($manager, $this->puli->getInstallerManager());
     }
 
-    public function testGetInstallerManagerInGlobalEnvironment()
+    public function testGetInstallerManagerInGlobalContext()
     {
         $this->puli->start();
 
         $this->assertNull($this->puli->getInstallerManager());
     }
 
-    public function testGetServerManagerInProjectEnvironment()
+    public function testGetServerManagerInProjectContext()
     {
         $this->puli->setRootDirectory($this->tempRoot);
         $this->puli->start();
@@ -405,14 +405,14 @@ class PuliTest extends PHPUnit_Framework_TestCase
         $this->assertSame($manager, $this->puli->getServerManager());
     }
 
-    public function testGetServerManagerInGlobalEnvironment()
+    public function testGetServerManagerInGlobalContext()
     {
         $this->puli->start();
 
         $this->assertNull($this->puli->getServerManager());
     }
 
-    public function testGetUrlGeneratorInProjectEnvironment()
+    public function testGetUrlGeneratorInProjectContext()
     {
         $this->puli->setRootDirectory($this->tempRoot);
         $this->puli->start();
@@ -422,7 +422,7 @@ class PuliTest extends PHPUnit_Framework_TestCase
         $this->assertSame($manager, $this->puli->getUrlGenerator());
     }
 
-    public function testGetUrlGeneratorInGlobalEnvironment()
+    public function testGetUrlGeneratorInGlobalContext()
     {
         $this->puli->start();
 
@@ -435,8 +435,8 @@ class PuliTest extends PHPUnit_Framework_TestCase
         $this->puli->start();
 
         $this->assertSame($this->tempRoot, $this->puli->getRootDirectory());
-        $this->assertInstanceOf('Puli\Manager\Api\Environment\ProjectEnvironment', $this->puli->getEnvironment());
-        $this->assertSame($this->tempRoot, $this->puli->getEnvironment()->getRootDirectory());
+        $this->assertInstanceOf('Puli\Manager\Api\Context\ProjectContext', $this->puli->getContext());
+        $this->assertSame($this->tempRoot, $this->puli->getContext()->getRootDirectory());
     }
 
     public function testPassNoRootDirToConstructor()
@@ -444,7 +444,7 @@ class PuliTest extends PHPUnit_Framework_TestCase
         $this->puli->start();
 
         $this->assertNull($this->puli->getRootDirectory());
-        $this->assertInstanceOf('Puli\Manager\Api\Environment\GlobalEnvironment', $this->puli->getEnvironment());
+        $this->assertInstanceOf('Puli\Manager\Api\Context\Context', $this->puli->getContext());
     }
 
     public function testSetRootDirectory()
@@ -453,8 +453,8 @@ class PuliTest extends PHPUnit_Framework_TestCase
         $this->puli->start();
 
         $this->assertSame($this->tempRoot, $this->puli->getRootDirectory());
-        $this->assertInstanceOf('Puli\Manager\Api\Environment\ProjectEnvironment', $this->puli->getEnvironment());
-        $this->assertSame($this->tempRoot, $this->puli->getEnvironment()->getRootDirectory());
+        $this->assertInstanceOf('Puli\Manager\Api\Context\ProjectContext', $this->puli->getContext());
+        $this->assertSame($this->tempRoot, $this->puli->getContext()->getRootDirectory());
     }
 
     public function testPassNoRootDirToSetRootDirectory()
@@ -464,7 +464,7 @@ class PuliTest extends PHPUnit_Framework_TestCase
         $this->puli->start();
 
         $this->assertNull($this->puli->getRootDirectory());
-        $this->assertInstanceOf('Puli\Manager\Api\Environment\GlobalEnvironment', $this->puli->getEnvironment());
+        $this->assertInstanceOf('Puli\Manager\Api\Context\Context', $this->puli->getContext());
     }
 
     /**
@@ -496,21 +496,21 @@ class PuliTest extends PHPUnit_Framework_TestCase
         $this->puli->start();
     }
 
-    public function testActivatePluginsInProjectEnvironment()
+    public function testActivatePluginsInProjectContext()
     {
         $this->puli->setRootDirectory($this->tempRoot);
         $this->puli->start();
 
         $this->assertSame($this->puli, TestPlugin::getPuli());
-        $this->assertSame($this->puli->getEnvironment(), TestPlugin::getEnvironment());
+        $this->assertSame($this->puli->getContext(), TestPlugin::getContext());
     }
 
-    public function testDoNotActivatePluginsInGlobalEnvironment()
+    public function testDoNotActivatePluginsInGlobalContext()
     {
         $this->puli->start();
 
         $this->assertNull(TestPlugin::getPuli());
-        $this->assertNull(TestPlugin::getEnvironment());
+        $this->assertNull(TestPlugin::getContext());
     }
 
     public function testDoNotActivatePluginsIfDisabled()
@@ -520,7 +520,7 @@ class PuliTest extends PHPUnit_Framework_TestCase
         $this->puli->start();
 
         $this->assertNull(TestPlugin::getPuli());
-        $this->assertNull(TestPlugin::getEnvironment());
+        $this->assertNull(TestPlugin::getContext());
     }
 
     /**

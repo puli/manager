@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\Manager\Api\Environment;
+namespace Puli\Manager\Api\Context;
 
 use Puli\Manager\Api\Config\Config;
 use Puli\Manager\Api\Config\ConfigFile;
@@ -19,9 +19,9 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Webmozart\PathUtil\Path;
 
 /**
- * The global environment.
+ * The Puli context.
  *
- * This class contains global environment information. It provides access to
+ * This class contains context information for Puli. It provides access to
  * Puli's home directory, the global configuration and the global event
  * dispatcher.
  *
@@ -31,7 +31,7 @@ use Webmozart\PathUtil\Path;
  *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class GlobalEnvironment
+class Context
 {
     /**
      * @var string|null
@@ -54,7 +54,7 @@ class GlobalEnvironment
     private $dispatcher;
 
     /**
-     * Creates the environment.
+     * Creates the context.
      *
      * @param string|null              $homeDir    The path to the home directory
      *                                             or `null` if none exists.

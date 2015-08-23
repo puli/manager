@@ -16,7 +16,7 @@ use PHPUnit_Framework_TestCase;
 use Puli\Discovery\Api\EditableDiscovery;
 use Puli\Manager\Api\Config\Config;
 use Puli\Manager\Api\Config\ConfigFile;
-use Puli\Manager\Api\Environment\ProjectEnvironment;
+use Puli\Manager\Api\Context\ProjectContext;
 use Puli\Manager\Api\Package\RootPackageFile;
 use Puli\Manager\Config\DefaultConfig;
 use Puli\Repository\Api\EditableRepository;
@@ -71,11 +71,11 @@ abstract class ManagerTestCase extends PHPUnit_Framework_TestCase
     protected $discovery;
 
     /**
-     * @var ProjectEnvironment
+     * @var ProjectContext
      */
-    protected $environment;
+    protected $context;
 
-    protected function initEnvironment($homeDir, $rootDir, $mockDispatcher = true)
+    protected function initContext($homeDir, $rootDir, $mockDispatcher = true)
     {
         if (!$this->baseConfig) {
             $this->baseConfig = new DefaultConfig();
@@ -91,7 +91,7 @@ abstract class ManagerTestCase extends PHPUnit_Framework_TestCase
         $this->repo = $this->getMock('Puli\Repository\Api\EditableRepository');
         $this->discovery = $this->getMock('Puli\Discovery\Api\EditableDiscovery');
 
-        $this->environment = new ProjectEnvironment(
+        $this->context = new ProjectContext(
             $this->homeDir,
             $this->rootDir,
             $this->rootPackageFile->getConfig(),

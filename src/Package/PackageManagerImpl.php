@@ -12,7 +12,7 @@
 namespace Puli\Manager\Package;
 
 use Exception;
-use Puli\Manager\Api\Environment\ProjectEnvironment;
+use Puli\Manager\Api\Context\ProjectContext;
 use Puli\Manager\Api\FileNotFoundException;
 use Puli\Manager\Api\InvalidConfigException;
 use Puli\Manager\Api\NoDirectoryException;
@@ -40,9 +40,9 @@ use Webmozart\PathUtil\Path;
 class PackageManagerImpl implements PackageManager
 {
     /**
-     * @var ProjectEnvironment
+     * @var ProjectContext
      */
-    private $environment;
+    private $context;
 
     /**
      * @var string
@@ -67,7 +67,7 @@ class PackageManagerImpl implements PackageManager
     /**
      * Loads the package repository for a given project.
      *
-     * @param ProjectEnvironment $environment        The project environment.
+     * @param ProjectContext     $context            The project context.
      * @param PackageFileStorage $packageFileStorage The package file storage.
      *
      * @throws FileNotFoundException  If the install path of a package not exist.
@@ -75,11 +75,11 @@ class PackageManagerImpl implements PackageManager
      * @throws InvalidConfigException If a configuration file contains invalid configuration.
      * @throws NameConflictException  If a package has the same name as another loaded package.
      */
-    public function __construct(ProjectEnvironment $environment, PackageFileStorage $packageFileStorage)
+    public function __construct(ProjectContext $context, PackageFileStorage $packageFileStorage)
     {
-        $this->environment = $environment;
-        $this->rootDir = $environment->getRootDirectory();
-        $this->rootPackageFile = $environment->getRootPackageFile();
+        $this->context = $context;
+        $this->rootDir = $context->getRootDirectory();
+        $this->rootPackageFile = $context->getRootPackageFile();
         $this->packageFileStorage = $packageFileStorage;
     }
 
@@ -317,9 +317,9 @@ class PackageManagerImpl implements PackageManager
     /**
      * {@inheritdoc}
      */
-    public function getEnvironment()
+    public function getContext()
     {
-        return $this->environment;
+        return $this->context;
     }
 
     /**

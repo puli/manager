@@ -11,7 +11,7 @@
 
 namespace Puli\Manager\Api\Discovery;
 
-use Puli\Manager\Api\Environment\ProjectEnvironment;
+use Puli\Manager\Api\Context\ProjectContext;
 use Puli\Manager\Api\NonRootPackageExpectedException;
 use Rhumsaa\Uuid\Uuid;
 use Webmozart\Expression\Expression;
@@ -42,11 +42,11 @@ interface DiscoveryManager
     const IGNORE_TYPE_NOT_ENABLED = 4;
 
     /**
-     * Returns the manager's environment.
+     * Returns the manager's context.
      *
-     * @return ProjectEnvironment The project environment.
+     * @return ProjectContext The project context.
      */
-    public function getEnvironment();
+    public function getContext();
 
     /**
      * Adds a new binding type.

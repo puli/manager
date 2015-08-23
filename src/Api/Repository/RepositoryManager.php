@@ -11,7 +11,7 @@
 
 namespace Puli\Manager\Api\Repository;
 
-use Puli\Manager\Api\Environment\ProjectEnvironment;
+use Puli\Manager\Api\Context\ProjectContext;
 use Puli\Manager\Api\NoDirectoryException;
 use Puli\Manager\Conflict\PackageConflictException;
 use Puli\Repository\Api\EditableRepository;
@@ -37,11 +37,11 @@ interface RepositoryManager
     const IGNORE_FILE_NOT_FOUND = 2;
 
     /**
-     * Returns the manager's environment.
+     * Returns the manager's context.
      *
-     * @return ProjectEnvironment The project environment.
+     * @return ProjectContext The project context.
      */
-    public function getEnvironment();
+    public function getContext();
 
     /**
      * Returns the managed repository.

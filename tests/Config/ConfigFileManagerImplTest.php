@@ -16,7 +16,7 @@ use PHPUnit_Framework_MockObject_MockObject;
 use PHPUnit_Framework_TestCase;
 use Puli\Manager\Api\Config\Config;
 use Puli\Manager\Api\Config\ConfigFile;
-use Puli\Manager\Api\Environment\GlobalEnvironment;
+use Puli\Manager\Api\Context\Context;
 use Puli\Manager\Config\ConfigFileManagerImpl;
 use Puli\Manager\Config\ConfigFileStorage;
 use Puli\Manager\Tests\TestException;
@@ -51,9 +51,9 @@ class ConfigFileManagerImplTest extends PHPUnit_Framework_TestCase
     private $dispatcher;
 
     /**
-     * @var GlobalEnvironment
+     * @var Context
      */
-    private $environment;
+    private $context;
 
     /**
      * @var PHPUnit_Framework_MockObject_MockObject|ConfigFileStorage
@@ -72,7 +72,7 @@ class ConfigFileManagerImplTest extends PHPUnit_Framework_TestCase
         $this->configFile = new ConfigFile(null, $this->baseConfig);
         $this->dispatcher = $this->getMock('Symfony\Component\EventDispatcher\EventDispatcherInterface');
 
-        $this->environment = new GlobalEnvironment(
+        $this->context = new Context(
             $this->homeDir,
             $this->configFile->getConfig(),
             $this->configFile,
@@ -83,7 +83,7 @@ class ConfigFileManagerImplTest extends PHPUnit_Framework_TestCase
             ->disableOriginalConstructor()
             ->getMock();
 
-        $this->manager = new ConfigFileManagerImpl($this->environment, $this->configFileStorage);
+        $this->manager = new ConfigFileManagerImpl($this->context, $this->configFileStorage);
     }
 
     public function testSetConfigKey()

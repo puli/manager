@@ -52,9 +52,9 @@ class RootPackageFileManagerImplTest extends ManagerTestCase
 
         $this->baseConfig = new Config();
 
-        $this->initEnvironment(__DIR__.'/Fixtures/home', __DIR__.'/Fixtures/root');
+        $this->initContext(__DIR__.'/Fixtures/home', __DIR__.'/Fixtures/root');
 
-        $this->manager = new RootPackageFileManagerImpl($this->environment, $this->packageFileStorage);
+        $this->manager = new RootPackageFileManagerImpl($this->context, $this->packageFileStorage);
     }
 
     public function testSetConfigKey()
@@ -590,7 +590,7 @@ class RootPackageFileManagerImplTest extends ManagerTestCase
 
     public function testGetPackageName()
     {
-        // Default name set in initEnvironment()
+        // Default name set in initContext()
         $this->assertSame('vendor/root', $this->manager->getPackageName());
 
         $this->rootPackageFile->setPackageName('vendor/package');

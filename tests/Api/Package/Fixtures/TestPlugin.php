@@ -26,12 +26,12 @@ class TestPlugin implements PuliPlugin
      */
     private static $puli;
 
-    private static $environment;
+    private static $context;
 
     public static function reset()
     {
         self::$puli = null;
-        self::$environment = null;
+        self::$context = null;
     }
 
     /**
@@ -42,9 +42,9 @@ class TestPlugin implements PuliPlugin
         return self::$puli;
     }
 
-    public static function getEnvironment()
+    public static function getContext()
     {
-        return self::$environment;
+        return self::$context;
     }
 
     public function activate(Puli $puli)
@@ -52,6 +52,6 @@ class TestPlugin implements PuliPlugin
         self::$puli = $puli;
 
         // Test that Puli is started and the services are accessible
-        self::$environment = $puli->getEnvironment();
+        self::$context = $puli->getContext();
     }
 }

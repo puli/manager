@@ -12,7 +12,7 @@
 namespace Puli\Manager\Factory;
 
 use Puli\Manager\Api\Config\Config;
-use Puli\Manager\Api\Environment\ProjectEnvironment;
+use Puli\Manager\Api\Context\ProjectContext;
 use Puli\Manager\Api\Event\GenerateFactoryEvent;
 use Puli\Manager\Api\Event\PuliEvents;
 use Puli\Manager\Api\Factory\FactoryManager;
@@ -47,9 +47,9 @@ class FactoryManagerImpl implements FactoryManager
     const DISCOVERY_VAR_NAME = 'discovery';
 
     /**
-     * @var ProjectEnvironment
+     * @var ProjectContext
      */
-    private $environment;
+    private $context;
 
     /**
      * @var Config
@@ -79,19 +79,19 @@ class FactoryManagerImpl implements FactoryManager
     /**
      * Creates a new factory generator.
      *
-     * @param ProjectEnvironment $environment       The project environment.
-     * @param GeneratorRegistry  $generatorRegistry The registry providing the
-     *                                              generators for the services
-     *                                              returned by the factory.
-     * @param ClassWriter        $classWriter       The writer that writes the
-     *                                              class to a file.
-     * @param ServerCollection   $servers           The configured servers.
+     * @param ProjectContext    $context           The project context.
+     * @param GeneratorRegistry $generatorRegistry The registry providing the
+     *                                             generators for the services
+     *                                             returned by the factory.
+     * @param ClassWriter       $classWriter       The writer that writes the
+     *                                             class to a file.
+     * @param ServerCollection  $servers           The configured servers.
      */
-    public function __construct(ProjectEnvironment $environment, GeneratorRegistry $generatorRegistry, ClassWriter $classWriter, ServerCollection $servers = null)
+    public function __construct(ProjectContext $context, GeneratorRegistry $generatorRegistry, ClassWriter $classWriter, ServerCollection $servers = null)
     {
-        $this->environment = $environment;
-        $this->config = $environment->getConfig();
-        $this->rootDir = $environment->getRootDirectory();
+        $this->context = $context;
+        $this->config = $context->getConfig();
+        $this->rootDir = $context->getRootDirectory();
         $this->generatorRegistry = $generatorRegistry;
         $this->classWriter = $classWriter;
         $this->servers = $servers;
@@ -145,7 +145,7 @@ class FactoryManagerImpl implements FactoryManager
 
         $path = Path::makeAbsolute($path ?: $this->config->get(Config::FACTORY_OUT_FILE), $this->rootDir);
         $className = $className ?: $this->config->get(Config::FACTORY_OUT_CLASS);
-        $dispatcher = $this->environment->getEventDispatcher();
+        $dispatcher = $this->context->getEventDispatcher();
 
         $class = new Clazz($className);
         $class->setFilePath($path);
@@ -208,7 +208,7 @@ EOF
             return;
         }
 
-        $rootPackageFile = $this->environment->getRootPackageFile()->getPath();
+        $rootPackageFile = $this->context->getRootPackageFile()->getPath();
 
         if (!file_exists($rootPackageFile)) {
             return;
@@ -219,8 +219,8 @@ EOF
         clearstatcache(true, $rootPackageFile);
         $lastConfigChange = filemtime($rootPackageFile);
 
-        $configFile = $this->environment->getConfigFile()
-            ? $this->environment->getConfigFile()->getPath()
+        $configFile = $this->context->getConfigFile()
+            ? $this->context->getConfigFile()->getPath()
             : '';
 
         if (file_exists($configFile)) {

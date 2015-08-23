@@ -14,12 +14,12 @@ namespace Puli\Manager\Config;
 use Puli\Manager\Api\Config\Config;
 
 /**
- * Loads configuration values from environment variables.
+ * Loads configuration values from context variables.
  *
- * Configuration keys that are not set as environment variables are loaded from
+ * Configuration keys that are not set as context variables are loaded from
  * the base configuration passed to the constructor.
  *
- * Currently, only the environment variable "PULI_DIR" is supported by this
+ * Currently, only the context variable "PULI_DIR" is supported by this
  * class.
  *
  * @since  1.0

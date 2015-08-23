@@ -13,7 +13,7 @@ namespace Puli\Manager\Package;
 
 use Exception;
 use InvalidArgumentException;
-use Puli\Manager\Api\Environment\ProjectEnvironment;
+use Puli\Manager\Api\Context\ProjectContext;
 use Puli\Manager\Api\Package\RootPackageFile;
 use Puli\Manager\Api\Package\RootPackageFileManager;
 use Puli\Manager\Config\AbstractConfigManager;
@@ -35,9 +35,9 @@ use Webmozart\Expression\Expression;
 class RootPackageFileManagerImpl extends AbstractConfigManager implements RootPackageFileManager
 {
     /**
-     * @var ProjectEnvironment
+     * @var ProjectContext
      */
-    private $environment;
+    private $context;
 
     /**
      * @var RootPackageFile
@@ -52,13 +52,13 @@ class RootPackageFileManagerImpl extends AbstractConfigManager implements RootPa
     /**
      * Creates a new package file manager.
      *
-     * @param ProjectEnvironment $environment        The project environment
+     * @param ProjectContext     $context            The project context
      * @param PackageFileStorage $packageFileStorage The package file storage.
      */
-    public function __construct(ProjectEnvironment $environment, PackageFileStorage $packageFileStorage)
+    public function __construct(ProjectContext $context, PackageFileStorage $packageFileStorage)
     {
-        $this->environment = $environment;
-        $this->rootPackageFile = $environment->getRootPackageFile();
+        $this->context = $context;
+        $this->rootPackageFile = $context->getRootPackageFile();
         $this->packageFileStorage = $packageFileStorage;
     }
 
@@ -73,9 +73,9 @@ class RootPackageFileManagerImpl extends AbstractConfigManager implements RootPa
     /**
      * {@inheritdoc}
      */
-    public function getEnvironment()
+    public function getContext()
     {
-        return $this->environment;
+        return $this->context;
     }
 
     /**

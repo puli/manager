@@ -19,9 +19,9 @@ use Puli\Manager\Api\Asset\AssetManager;
 use Puli\Manager\Api\Config\Config;
 use Puli\Manager\Api\Config\ConfigFileManager;
 use Puli\Manager\Api\Config\ConfigFileSerializer;
+use Puli\Manager\Api\Context\Context;
+use Puli\Manager\Api\Context\ProjectContext;
 use Puli\Manager\Api\Discovery\DiscoveryManager;
-use Puli\Manager\Api\Environment\GlobalEnvironment;
-use Puli\Manager\Api\Environment\ProjectEnvironment;
 use Puli\Manager\Api\Factory\FactoryManager;
 use Puli\Manager\Api\Installation\InstallationManager;
 use Puli\Manager\Api\Installer\InstallerManager;
@@ -74,14 +74,14 @@ use Webmozart\PathUtil\Path;
  * $packageManager = $puli->getPackageManager();
  * ```
  *
- * The `Puli` class either operates in the global or a project environment:
+ * The `Puli` class either operates in the global or a project context:
  *
- *  * The "global environment" is not tied to a specific root package. A global
- *    environment only loads the settings of the "config.json" file in the home
- *    directory. The `Puli` class operates in the global environment if no
+ *  * The "global context" is not tied to a specific root package. A global
+ *    context only loads the settings of the "config.json" file in the home
+ *    directory. The `Puli` class operates in the global context if no
  *    project root directory is passed to the constructor. In the global
- *    environment, only the global config file manager is available.
- *  * The "project environment" is tied to a specific Puli project. You need to
+ *    context, only the global config file manager is available.
+ *  * The "project context" is tied to a specific Puli project. You need to
  *    pass the path to the project's root directory to the constructor or to
  *    {@link setRootDirectory()}. The configuration of the "puli.json" file in
  *    the root directory is used to configure the managers.
@@ -97,12 +97,12 @@ use Webmozart\PathUtil\Path;
  *    project.
  *  * The "discovery manager" manages the resource discovery of a Puli project.
  *
- * The home directory is read from the environment variable "PULI_HOME".
+ * The home directory is read from the context variable "PULI_HOME".
  * If this variable is not set, the home directory defaults to:
  *
- *  * `$HOME/.puli` on Linux, where `$HOME` is the environment variable
+ *  * `$HOME/.puli` on Linux, where `$HOME` is the context variable
  *    "HOME".
- *  * `$APPDATA/Puli` on Windows, where `$APPDATA` is the environment
+ *  * `$APPDATA/Puli` on Windows, where `$APPDATA` is the context
  *    variable "APPDATA".
  *
  * If none of these variables can be found, an exception is thrown.
@@ -127,9 +127,9 @@ class Puli
     private $dispatcher;
 
     /**
-     * @var GlobalEnvironment|ProjectEnvironment
+     * @var Context|ProjectContext
      */
-    private $environment;
+    private $context;
 
     /**
      * @var ResourceRepository
@@ -242,7 +242,7 @@ class Puli
     private $pluginsEnabled = true;
 
     /**
-     * Parses the system environment for a home directory.
+     * Parses the system context for a home directory.
      *
      * @return null|string Returns the path to the home directory or `null`
      *                     if none was found.
@@ -256,7 +256,7 @@ class Puli
 
             return $homeDir;
         } catch (InvalidConfigException $e) {
-            // Environment variable was not found -> no home directory
+            // Context variable was not found -> no home directory
             // This happens often on web servers where the home directory is
             // not set manually
             return null;
@@ -268,7 +268,7 @@ class Puli
      *
      * @param string $rootDir The root directory of the Puli project. If none is
      *                        passed, the object operates in the global
-     *                        environment. You can set or switch the root
+     *                        context. You can set or switch the root
      *                        directories later on by calling
      *                        {@link setRootDirectory()}.
      *
@@ -289,8 +289,8 @@ class Puli
         }
 
         if ($this->rootDir) {
-            $this->environment = $this->createProjectEnvironment($this->rootDir);
-            $bootstrapFile = $this->environment->getConfig()->get(Config::BOOTSTRAP_FILE);
+            $this->context = $this->createProjectContext($this->rootDir);
+            $bootstrapFile = $this->context->getConfig()->get(Config::BOOTSTRAP_FILE);
 
             // Run the project's bootstrap file to enable project-specific
             // autoloading
@@ -298,10 +298,10 @@ class Puli
                 require_once Path::makeAbsolute($bootstrapFile, $this->rootDir);
             }
         } else {
-            $this->environment = $this->createGlobalEnvironment();
+            $this->context = $this->createGlobalContext();
         }
 
-        $this->dispatcher = $this->environment->getEventDispatcher();
+        $this->dispatcher = $this->context->getEventDispatcher();
         $this->started = true;
 
         // Start plugins once the container is running
@@ -325,8 +325,8 @@ class Puli
      * Sets the root directory of the managed Puli project.
      *
      * @param string|null $rootDir The root directory of the managed Puli
-     *                             project or `null` to start Puli in the
-     *                             global environment.
+     *                             project or `null` to start Puli outside of a
+     *                             specific project.
      */
     public function setRootDirectory($rootDir)
     {
@@ -428,17 +428,17 @@ class Puli
     }
 
     /**
-     * Returns the environment.
+     * Returns the context.
      *
-     * @return GlobalEnvironment|ProjectEnvironment The environment.
+     * @return Context|ProjectContext The context.
      */
-    public function getEnvironment()
+    public function getContext()
     {
         if (!$this->started) {
             throw new LogicException('Puli was not started');
         }
 
-        return $this->environment;
+        return $this->context;
     }
 
     /**
@@ -512,7 +512,7 @@ class Puli
 
         if (!$this->factoryManager && $this->rootDir) {
             $this->factoryManager = new FactoryManagerImpl(
-                $this->environment,
+                $this->context,
                 new DefaultGeneratorRegistry(),
                 new ClassWriter()
             );
@@ -535,9 +535,9 @@ class Puli
             throw new LogicException('Puli was not started');
         }
 
-        if (!$this->configFileManager && $this->environment->getHomeDirectory()) {
+        if (!$this->configFileManager && $this->context->getHomeDirectory()) {
             $this->configFileManager = new ConfigFileManagerImpl(
-                $this->environment,
+                $this->context,
                 $this->getConfigFileStorage(),
                 $this->getFactoryManager()
             );
@@ -559,7 +559,7 @@ class Puli
 
         if (!$this->rootPackageFileManager && $this->rootDir) {
             $this->rootPackageFileManager = new RootPackageFileManagerImpl(
-                $this->environment,
+                $this->context,
                 $this->getPackageFileStorage()
             );
         }
@@ -580,7 +580,7 @@ class Puli
 
         if (!$this->packageManager && $this->rootDir) {
             $this->packageManager = new PackageManagerImpl(
-                $this->environment,
+                $this->context,
                 $this->getPackageFileStorage()
             );
         }
@@ -601,7 +601,7 @@ class Puli
 
         if (!$this->repositoryManager && $this->rootDir) {
             $this->repositoryManager = new RepositoryManagerImpl(
-                $this->environment,
+                $this->context,
                 $this->getRepository(),
                 $this->getPackageManager()->findPackages(Expr::same(PackageState::ENABLED, Package::STATE)),
                 $this->getPackageFileStorage()
@@ -624,7 +624,7 @@ class Puli
 
         if (!$this->discoveryManager && $this->rootDir) {
             $this->discoveryManager = new DiscoveryManagerImpl(
-                $this->environment,
+                $this->context,
                 $this->getDiscovery(),
                 $this->getPackageManager()->findPackages(Expr::same(PackageState::ENABLED, Package::STATE)),
                 $this->getPackageFileStorage(),
@@ -669,7 +669,7 @@ class Puli
 
         if (!$this->installationManager && $this->rootDir) {
             $this->installationManager = new InstallationManagerImpl(
-                $this->getEnvironment(),
+                $this->getContext(),
                 $this->getRepository(),
                 $this->getServerManager()->getServers(),
                 $this->getInstallerManager()
@@ -788,7 +788,7 @@ class Puli
 
     private function activatePlugins()
     {
-        foreach ($this->environment->getRootPackageFile()->getPluginClasses() as $pluginClass) {
+        foreach ($this->context->getRootPackageFile()->getPluginClasses() as $pluginClass) {
             $this->validatePluginClass($pluginClass);
 
             /** @var PuliPlugin $plugin */
@@ -797,13 +797,13 @@ class Puli
         }
     }
 
-    private function createGlobalEnvironment()
+    private function createGlobalContext()
     {
         $homeDir = self::parseHomeDirectory();
 
         if (null !== $homeDir) {
-            Assert::fileExists($homeDir, 'Could not load Puli environment: The home directory %s does not exist.');
-            Assert::directory($homeDir, 'Could not load Puli environment: The home directory %s is a file. Expected a directory.');
+            Assert::fileExists($homeDir, 'Could not load Puli context: The home directory %s does not exist.');
+            Assert::directory($homeDir, 'Could not load Puli context: The home directory %s is a file. Expected a directory.');
 
             // Create a storage without the factory manager
             $configStorage = new ConfigFileStorage($this->getStorage(), $this->getConfigFileSerializer());
@@ -817,18 +817,18 @@ class Puli
 
         $config = new EnvConfig($baseConfig);
 
-        return new GlobalEnvironment($homeDir, $config, $configFile, $this->dispatcher);
+        return new Context($homeDir, $config, $configFile, $this->dispatcher);
     }
 
     /**
-     * Creates the environment of a Puli project.
+     * Creates the context of a Puli project.
      *
-     * The home directory is read from the environment variable "PULI_HOME".
+     * The home directory is read from the context variable "PULI_HOME".
      * If this variable is not set, the home directory defaults to:
      *
-     *  * `$HOME/.puli` on Linux, where `$HOME` is the environment variable
+     *  * `$HOME/.puli` on Linux, where `$HOME` is the context variable
      *    "HOME".
-     *  * `$APPDATA/Puli` on Windows, where `$APPDATA` is the environment
+     *  * `$APPDATA/Puli` on Windows, where `$APPDATA` is the context
      *    variable "APPDATA".
      *
      * If none of these variables can be found, an exception is thrown.
@@ -838,18 +838,18 @@ class Puli
      *
      * @param string $rootDir The path to the project.
      *
-     * @return ProjectEnvironment The project environment.
+     * @return ProjectContext The project context.
      */
-    private function createProjectEnvironment($rootDir)
+    private function createProjectContext($rootDir)
     {
-        Assert::fileExists($rootDir, 'Could not load Puli environment: The root %s does not exist.');
-        Assert::directory($rootDir, 'Could not load Puli environment: The root %s is a file. Expected a directory.');
+        Assert::fileExists($rootDir, 'Could not load Puli context: The root %s does not exist.');
+        Assert::directory($rootDir, 'Could not load Puli context: The root %s is a file. Expected a directory.');
 
         $homeDir = self::parseHomeDirectory();
 
         if (null !== $homeDir) {
-            Assert::fileExists($homeDir, 'Could not load Puli environment: The home directory %s does not exist.');
-            Assert::directory($homeDir, 'Could not load Puli environment: The home directory %s is a file. Expected a directory.');
+            Assert::fileExists($homeDir, 'Could not load Puli context: The home directory %s does not exist.');
+            Assert::directory($homeDir, 'Could not load Puli context: The home directory %s is a file. Expected a directory.');
 
             // Create a storage without the factory manager
             $configStorage = new ConfigFileStorage($this->getStorage(), $this->getConfigFileSerializer());
@@ -868,7 +868,7 @@ class Puli
         $rootPackageFile = $packageFileStorage->loadRootPackageFile($rootFilePath, $baseConfig);
         $config = new EnvConfig($rootPackageFile->getConfig());
 
-        return new ProjectEnvironment($homeDir, $rootDir, $config, $rootPackageFile, $configFile, $this->dispatcher);
+        return new ProjectContext($homeDir, $rootDir, $config, $rootPackageFile, $configFile, $this->dispatcher);
     }
 
     /**

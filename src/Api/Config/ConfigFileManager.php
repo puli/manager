@@ -11,7 +11,7 @@
 
 namespace Puli\Manager\Api\Config;
 
-use Puli\Manager\Api\Environment\GlobalEnvironment;
+use Puli\Manager\Api\Context\Context;
 
 /**
  * Manages changes to the global configuration file.
@@ -26,11 +26,11 @@ use Puli\Manager\Api\Environment\GlobalEnvironment;
 interface ConfigFileManager extends ConfigManager
 {
     /**
-     * Returns the global environment.
+     * Returns the global context.
      *
-     * @return GlobalEnvironment The global environment.
+     * @return Context The global context.
      */
-    public function getEnvironment();
+    public function getContext();
 
     /**
      * Returns the managed configuration file.

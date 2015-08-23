@@ -12,7 +12,7 @@
 namespace Puli\Manager\Installation;
 
 use Puli\Manager\Api\Asset\AssetMapping;
-use Puli\Manager\Api\Environment\ProjectEnvironment;
+use Puli\Manager\Api\Context\ProjectContext;
 use Puli\Manager\Api\Installation\InstallationManager;
 use Puli\Manager\Api\Installation\InstallationParams;
 use Puli\Manager\Api\Installation\NotInstallableException;
@@ -32,9 +32,9 @@ use ReflectionClass;
 class InstallationManagerImpl implements InstallationManager
 {
     /**
-     * @var ProjectEnvironment
+     * @var ProjectContext
      */
-    private $environment;
+    private $context;
 
     /**
      * @var ResourceRepository
@@ -56,9 +56,9 @@ class InstallationManagerImpl implements InstallationManager
      */
     private $installers = array();
 
-    public function __construct(ProjectEnvironment $environment, ResourceRepository $repo, ServerCollection $servers, InstallerManager $installerManager)
+    public function __construct(ProjectContext $context, ResourceRepository $repo, ServerCollection $servers, InstallerManager $installerManager)
     {
-        $this->environment = $environment;
+        $this->context = $context;
         $this->repo = $repo;
         $this->servers = $servers;
         $this->installerManager = $installerManager;
@@ -90,7 +90,7 @@ class InstallationManagerImpl implements InstallationManager
 
         $installerDescriptor = $this->installerManager->getInstallerDescriptor($installerName);
         $installer = $this->loadInstaller($installerDescriptor);
-        $rootDir = $this->environment->getRootDirectory();
+        $rootDir = $this->context->getRootDirectory();
 
         $params = new InstallationParams($installer, $installerDescriptor, $resources, $mapping, $server, $rootDir);
 

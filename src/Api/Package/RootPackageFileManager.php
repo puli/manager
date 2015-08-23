@@ -12,7 +12,7 @@
 namespace Puli\Manager\Api\Package;
 
 use Puli\Manager\Api\Config\ConfigManager;
-use Puli\Manager\Api\Environment\ProjectEnvironment;
+use Puli\Manager\Api\Context\ProjectContext;
 use Puli\Manager\Api\Storage\StorageException;
 use Webmozart\Expression\Expression;
 
@@ -29,11 +29,11 @@ use Webmozart\Expression\Expression;
 interface RootPackageFileManager extends ConfigManager
 {
     /**
-     * Returns the project environment.
+     * Returns the project context.
      *
-     * @return ProjectEnvironment The project environment.
+     * @return ProjectContext The project context.
      */
-    public function getEnvironment();
+    public function getContext();
 
     /**
      * Returns the managed package file.

@@ -11,7 +11,7 @@
 
 namespace Puli\Manager\Api\Package;
 
-use Puli\Manager\Api\Environment\ProjectEnvironment;
+use Puli\Manager\Api\Context\ProjectContext;
 use Puli\Manager\Api\InvalidConfigException;
 use Webmozart\Expression\Expression;
 
@@ -25,11 +25,11 @@ use Webmozart\Expression\Expression;
 interface PackageManager
 {
     /**
-     * Returns the manager's environment.
+     * Returns the manager's context.
      *
-     * @return ProjectEnvironment The project environment.
+     * @return ProjectContext The project context.
      */
-    public function getEnvironment();
+    public function getContext();
 
     /**
      * Installs the package at the given path in the repository.
@@ -40,7 +40,7 @@ interface PackageManager
      *                                   puli.json.
      * @param string      $installerName The name of the installer.
      * @param bool        $dev           Whether the package is only required in
-     *                                   development environments.
+     *                                   development contexts.
      *
      * @throws InvalidConfigException If the package is not configured correctly.
      * @throws NameConflictException  If the package has the same name as another

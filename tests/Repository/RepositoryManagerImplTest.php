@@ -111,7 +111,7 @@ class RepositoryManagerImplTest extends ManagerTestCase
             ->disableOriginalConstructor()
             ->getMock();
 
-        $this->initEnvironment($this->tempDir.'/home', $this->tempDir.'/root');
+        $this->initContext($this->tempDir.'/home', $this->tempDir.'/root');
     }
 
     protected function tearDown()
@@ -1485,7 +1485,7 @@ class RepositoryManagerImplTest extends ManagerTestCase
         $testResource1 = new FileResource(__FILE__);
         $testResource2 = new FileResource(__FILE__);
 
-        $this->initEnvironment($this->homeDir, $this->rootDir, false);
+        $this->initContext($this->homeDir, $this->rootDir, false);
         $this->initDefaultManager();
 
         $this->packageFile1->addPathMapping(new PathMapping('/path', 'resources'));
@@ -1523,7 +1523,7 @@ class RepositoryManagerImplTest extends ManagerTestCase
     {
         $testResource = new FileResource(__FILE__);
 
-        $this->initEnvironment($this->homeDir, $this->rootDir, false);
+        $this->initContext($this->homeDir, $this->rootDir, false);
         $this->initDefaultManager();
 
         $this->packageFile1->addPathMapping(new PathMapping('/path', 'resources'));
@@ -1566,6 +1566,6 @@ class RepositoryManagerImplTest extends ManagerTestCase
         $this->packages->add(new Package($this->packageFile2, $this->packageDir2));
         $this->packages->add(new Package($this->packageFile3, $this->packageDir3));
 
-        $this->manager = new RepositoryManagerImpl($this->environment, $this->repo, $this->packages, $this->packageFileStorage);
+        $this->manager = new RepositoryManagerImpl($this->context, $this->repo, $this->packages, $this->packageFileStorage);
     }
 }

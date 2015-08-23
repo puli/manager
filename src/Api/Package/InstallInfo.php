@@ -178,10 +178,10 @@ class InstallInfo
     }
 
     /**
-     * Sets whether the package is only required in development environments.
+     * Sets whether the package is only required in development contexts.
      *
      * @param bool $dev Set to `true` if the package is only required in
-     *                  developments environments and to `false` otherwise.
+     *                  developments contexts and to `false` otherwise.
      */
     public function setDev($dev)
     {
@@ -189,10 +189,10 @@ class InstallInfo
     }
 
     /**
-     * Returns whether the package is only required in development environments.
+     * Returns whether the package is only required in development contexts.
      *
      * @return bool Returns `true` if the package is only required in
-     *              development environments and `false` otherwise.
+     *              development contexts and `false` otherwise.
      */
     public function isDev()
     {

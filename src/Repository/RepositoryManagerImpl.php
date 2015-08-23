@@ -13,7 +13,7 @@ namespace Puli\Manager\Repository;
 
 use Exception;
 use Puli\Manager\Api\Config\Config;
-use Puli\Manager\Api\Environment\ProjectEnvironment;
+use Puli\Manager\Api\Context\ProjectContext;
 use Puli\Manager\Api\Event\BuildRepositoryEvent;
 use Puli\Manager\Api\Event\PuliEvents;
 use Puli\Manager\Api\Package\Package;
@@ -53,9 +53,9 @@ use Webmozart\Expression\Expression;
 class RepositoryManagerImpl implements RepositoryManager
 {
     /**
-     * @var ProjectEnvironment
+     * @var ProjectContext
      */
-    private $environment;
+    private $context;
 
     /**
      * @var EventDispatcherInterface
@@ -120,20 +120,20 @@ class RepositoryManagerImpl implements RepositoryManager
     /**
      * Creates a repository manager.
      *
-     * @param ProjectEnvironment $environment
+     * @param ProjectContext     $context
      * @param EditableRepository $repo
      * @param PackageCollection  $packages
      * @param PackageFileStorage $packageFileStorage
      */
-    public function __construct(ProjectEnvironment $environment, EditableRepository $repo, PackageCollection $packages, PackageFileStorage $packageFileStorage)
+    public function __construct(ProjectContext $context, EditableRepository $repo, PackageCollection $packages, PackageFileStorage $packageFileStorage)
     {
-        $this->environment = $environment;
-        $this->dispatcher = $environment->getEventDispatcher();
+        $this->context = $context;
+        $this->dispatcher = $context->getEventDispatcher();
         $this->repo = $repo;
-        $this->config = $environment->getConfig();
-        $this->rootDir = $environment->getRootDirectory();
+        $this->config = $context->getConfig();
+        $this->rootDir = $context->getRootDirectory();
         $this->rootPackage = $packages->getRootPackage();
-        $this->rootPackageFile = $environment->getRootPackageFile();
+        $this->rootPackageFile = $context->getRootPackageFile();
         $this->packages = $packages;
         $this->packageFileStorage = $packageFileStorage;
     }
@@ -141,9 +141,9 @@ class RepositoryManagerImpl implements RepositoryManager
     /**
      * {@inheritdoc}
      */
-    public function getEnvironment()
+    public function getContext()
     {
-        return $this->environment;
+        return $this->context;
     }
 
     /**

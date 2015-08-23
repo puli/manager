@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\Manager\Api\Environment;
+namespace Puli\Manager\Api\Context;
 
 use Puli\Manager\Api\Config\Config;
 use Puli\Manager\Api\Config\ConfigFile;
@@ -19,12 +19,11 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Webmozart\PathUtil\Path;
 
 /**
- * The environment of a Puli project.
+ * The context of a Puli project.
  *
- * This class contains both global environment information (see
- * {@link GlobalEnvironment}) and information local to a Puli project. It
- * provides access to the project's root directory and the root puli.json
- * of the project.
+ * This class contains both global context information (see {@link Context}) and
+ * information local to a Puli project. It provides access to the project's root
+ * directory and the root puli.json of the project.
  *
  * Use {@link getConfig()} to access the project configuration.
  *
@@ -32,7 +31,7 @@ use Webmozart\PathUtil\Path;
  *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class ProjectEnvironment extends GlobalEnvironment
+class ProjectContext extends Context
 {
     /**
      * @var string
@@ -45,7 +44,7 @@ class ProjectEnvironment extends GlobalEnvironment
     private $rootPackageFile;
 
     /**
-     * Creates the environment.
+     * Creates the context.
      *
      * @param string|null              $homeDir         The path to the home
      *                                                  directory or `null` if

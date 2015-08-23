@@ -5,6 +5,8 @@ Changelog
 
  * renamed `InstallInfo::isDevDependency()` to `isDev()`
  * renamed `InstallInfo::setDevDependency()` to `setDev()`
+ * renamed `GlobalEnvironment` to `Context`
+ * renamed `ProjectEnvironment` to `ProjectContext`
 
 * 1.0.0-beta6 (2015-08-12)
 
