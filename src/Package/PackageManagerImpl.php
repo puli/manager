@@ -125,7 +125,7 @@ class PackageManagerImpl implements PackageManager
         $relInstallPath = Path::makeRelative($installPath, $this->rootDir);
         $installInfo = new InstallInfo($name, $relInstallPath);
         $installInfo->setInstallerName($installerName);
-        $installInfo->setDevDependency($dev);
+        $installInfo->setDev($dev);
 
         $package = $this->loadPackage($installInfo);
 

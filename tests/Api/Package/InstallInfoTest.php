@@ -30,7 +30,7 @@ class InstallInfoTest extends PHPUnit_Framework_TestCase
         $this->assertSame('vendor/package', $installInfo->getPackageName());
         $this->assertSame('/path', $installInfo->getInstallPath());
         $this->assertSame('Composer', $installInfo->getInstallerName());
-        $this->assertFalse($installInfo->isDevDependency());
+        $this->assertFalse($installInfo->isDev());
     }
     /**
      * @expectedException \InvalidArgumentException

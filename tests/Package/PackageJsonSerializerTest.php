@@ -531,7 +531,7 @@ JSON;
         $installInfo1->setInstallerName('composer');
         $installInfo1->addDisabledBindingUuid(Uuid::fromString('4d02ee67-d845-4789-a9c1-8301351c6f5a'));
         $installInfo2 = new InstallInfo('vendor/package2', '/path/to/package2');
-        $installInfo2->setDevDependency(true);
+        $installInfo2->setDev(true);
 
         $baseConfig = new Config();
         $packageFile = new RootPackageFile(null, null, $baseConfig);
@@ -736,7 +736,7 @@ JSON;
         $installInfo1->setInstallerName('composer');
         $installInfo1->addDisabledBindingUuid(Uuid::fromString('4d02ee67-d845-4789-a9c1-8301351c6f5a'));
         $installInfo2 = new InstallInfo('vendor/package2', '/path/to/package2');
-        $installInfo2->setDevDependency(true);
+        $installInfo2->setDev(true);
 
         $this->assertInstanceOf('Puli\Manager\Api\Package\RootPackageFile', $packageFile);
         $this->assertSame('/path', $packageFile->getPath());

@@ -1,6 +1,11 @@
 Changelog
 =========
 
+* 1.0.0-beta7 (@release_date@)
+
+ * renamed `InstallInfo::isDevDependency()` to `isDev()`
+ * renamed `InstallInfo::setDevDependency()` to `setDev()`
+
 * 1.0.0-beta6 (2015-08-12)
 
  * added `Storage` and `FilesystemStorage`
@@ -18,7 +23,7 @@ Changelog
    is auto-loadable
  * changed default "repository.type" to "path-mapping"
  * added `$dev` parameter to `PackageManager::installPackage()`
- * added `InstallInfo::isDev()`
+ * added `InstallInfo::isDevDependency()` and `InstallInfo::setDevDependency()`
 
 * 1.0.0-beta5 (2015-05-29)
 

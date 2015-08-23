@@ -119,7 +119,7 @@ class PackageTest extends PHPUnit_Framework_TestCase
         $this->assertTrue($packageWithInstallInfo->match(Expr::notsame(true, Package::DEV)));
 
         $installInfo2 = new InstallInfo('vendor/install-info', '/path');
-        $installInfo2->setDevDependency(true);
+        $installInfo2->setDev(true);
         $packageWithInstallInfo2 = new Package($packageFile, __DIR__, $installInfo2);
         $this->assertTrue($packageWithInstallInfo2->match(Expr::same(true, Package::DEV)));
     }

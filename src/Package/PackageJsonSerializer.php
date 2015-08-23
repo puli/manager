@@ -270,8 +270,8 @@ class PackageJsonSerializer implements PackageFileSerializer
                     sort($installData->{'disabled-bindings'});
                 }
 
-                if ($installInfo->isDevDependency()) {
-                    $installData->dev = $installInfo->isDevDependency();
+                if ($installInfo->isDev()) {
+                    $installData->dev = $installInfo->isDev();
                 }
 
                 $packagesData[$installInfo->getPackageName()] = $installData;
@@ -362,7 +362,7 @@ class PackageJsonSerializer implements PackageFileSerializer
         if (isset($jsonData->packages)) {
             foreach ($jsonData->packages as $packageName => $packageData) {
                 $installInfo = new InstallInfo($packageName, $packageData->{'install-path'});
-                $installInfo->setDevDependency(isset($packageData->dev) && $packageData->dev);
+                $installInfo->setDev(isset($packageData->dev) && $packageData->dev);
 
                 if (isset($packageData->installer)) {
                     $installInfo->setInstallerName($packageData->installer);

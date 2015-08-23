@@ -346,11 +346,11 @@ class PackageManagerImplTest extends ManagerTestCase
 
                 PHPUnit_Framework_Assert::assertCount(3, $installInfos);
                 PHPUnit_Framework_Assert::assertSame('../package1', $installInfos[0]->getInstallPath());
-                PHPUnit_Framework_Assert::assertFalse($installInfos[0]->isDevDependency());
+                PHPUnit_Framework_Assert::assertFalse($installInfos[0]->isDev());
                 PHPUnit_Framework_Assert::assertSame('../package2', $installInfos[1]->getInstallPath());
-                PHPUnit_Framework_Assert::assertFalse($installInfos[1]->isDevDependency());
+                PHPUnit_Framework_Assert::assertFalse($installInfos[1]->isDev());
                 PHPUnit_Framework_Assert::assertSame('../package3', $installInfos[2]->getInstallPath());
-                PHPUnit_Framework_Assert::assertTrue($installInfos[2]->isDevDependency());
+                PHPUnit_Framework_Assert::assertTrue($installInfos[2]->isDev());
             }));
 
         $this->manager->installPackage($this->packageDir3, null, InstallInfo::DEFAULT_INSTALLER_NAME, true);

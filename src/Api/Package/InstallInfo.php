@@ -183,7 +183,7 @@ class InstallInfo
      * @param bool $dev Set to `true` if the package is only required in
      *                  developments environments and to `false` otherwise.
      */
-    public function setDevDependency($dev)
+    public function setDev($dev)
     {
         $this->dev = (bool) $dev;
     }
@@ -194,7 +194,7 @@ class InstallInfo
      * @return bool Returns `true` if the package is only required in
      *              development environments and `false` otherwise.
      */
-    public function isDevDependency()
+    public function isDev()
     {
         return $this->dev;
     }
