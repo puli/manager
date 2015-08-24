@@ -122,6 +122,11 @@ class Puli
     private $rootDir;
 
     /**
+     * @var string
+     */
+    private $env;
+
+    /**
      * @var EventDispatcherInterface|null
      */
     private $dispatcher;
@@ -271,12 +276,14 @@ class Puli
      *                        context. You can set or switch the root
      *                        directories later on by calling
      *                        {@link setRootDirectory()}.
+     * @param string $env     One of the {@link Environment} constants.
      *
      * @see Puli, start()
      */
-    public function __construct($rootDir = null)
+    public function __construct($rootDir = null, $env = Environment::DEV)
     {
         $this->setRootDirectory($rootDir);
+        $this->setEnvironment($env);
     }
 
     /**
@@ -289,7 +296,7 @@ class Puli
         }
 
         if ($this->rootDir) {
-            $this->context = $this->createProjectContext($this->rootDir);
+            $this->context = $this->createProjectContext($this->rootDir, $this->env);
             $bootstrapFile = $this->context->getConfig()->get(Config::BOOTSTRAP_FILE);
 
             // Run the project's bootstrap file to enable project-specific
@@ -337,6 +344,32 @@ class Puli
         Assert::nullOrDirectory($rootDir);
 
         $this->rootDir = $rootDir;
+    }
+
+    /**
+     * Sets the environment of the managed Puli project.
+     *
+     * @param string $env One of the {@link Environment} constants.
+     */
+    public function setEnvironment($env)
+    {
+        if ($this->started) {
+            throw new LogicException('Puli is already started');
+        }
+
+        Assert::oneOf($env, Environment::all(), 'The environment must be one of: %2$s. Got: %s');
+
+        $this->env = $env;
+    }
+
+    /**
+     * Retturns the environment of the managed Puli project.
+     *
+     * @return string One of the {@link Environment} constants.
+     */
+    public function getEnvironment()
+    {
+        return $this->env;
     }
 
     /**
@@ -840,7 +873,7 @@ class Puli
      *
      * @return ProjectContext The project context.
      */
-    private function createProjectContext($rootDir)
+    private function createProjectContext($rootDir, $env)
     {
         Assert::fileExists($rootDir, 'Could not load Puli context: The root %s does not exist.');
         Assert::directory($rootDir, 'Could not load Puli context: The root %s is a file. Expected a directory.');
@@ -868,7 +901,7 @@ class Puli
         $rootPackageFile = $packageFileStorage->loadRootPackageFile($rootFilePath, $baseConfig);
         $config = new EnvConfig($rootPackageFile->getConfig());
 
-        return new ProjectContext($homeDir, $rootDir, $config, $rootPackageFile, $configFile, $this->dispatcher);
+        return new ProjectContext($homeDir, $rootDir, $config, $rootPackageFile, $configFile, $this->dispatcher, $env);
     }
 
     /**

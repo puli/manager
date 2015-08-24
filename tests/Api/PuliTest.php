@@ -12,6 +12,7 @@
 namespace Puli\Manager\Tests\Api;
 
 use PHPUnit_Framework_TestCase;
+use Puli\Manager\Api\Environment;
 use Puli\Manager\Api\Puli;
 use Puli\Manager\Tests\Api\Fixtures\BootstrapPlugin;
 use Puli\Manager\Tests\Api\Package\Fixtures\TestPlugin;
@@ -153,6 +154,8 @@ class PuliTest extends PHPUnit_Framework_TestCase
         $this->assertSame($this->tempHome.'/config.json', $context->getConfigFile()->getPath());
         $this->assertSame($this->tempRoot.'/puli.json', $context->getRootPackageFile()->getPath());
         $this->assertSame($context->getEventDispatcher(), $this->puli->getEventDispatcher());
+        $this->assertSame(Environment::DEV, $context->getEnvironment());
+        $this->assertSame(Environment::DEV, $this->puli->getEnvironment());
     }
 
     public function testGetProjectContextWithEventDispatcher()
@@ -164,6 +167,17 @@ class PuliTest extends PHPUnit_Framework_TestCase
         $context = $this->puli->getContext();
 
         $this->assertSame($dispatcher, $context->getEventDispatcher());
+    }
+
+    public function testGetProjectContextInProdEnvironment()
+    {
+        $this->puli->setRootDirectory($this->tempRoot);
+        $this->puli->setEnvironment(Environment::PROD);
+        $this->puli->start();
+        $context = $this->puli->getContext();
+
+        $this->assertSame(Environment::PROD, $context->getEnvironment());
+        $this->assertSame(Environment::PROD, $this->puli->getEnvironment());
     }
 
     public function testGetProjectContextWithoutHome()

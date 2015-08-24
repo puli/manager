@@ -10,6 +10,8 @@ Changelog
  * removed `InstallInfo::setDevDependency()`
  * added `InstallInfo::getEnvironment()`
  * added `InstallInfo::setEnvironment()`
+ * added `Puli::setEnvironment()` and `Puli::getEnvironment()`
+ * added `ProjectContext::getEnvironment()` 
 
 * 1.0.0-beta6 (2015-08-12)
 
