@@ -15,11 +15,12 @@
         "puli/discovery": "^1.0",
         "puli/url-generator": "^1.0",
         "webmozart/json": "^1.0",
-        "webmozart/path-util": "^2.0",
-        "webmozart/expression": "^1.0",
+        "webmozart/path-util": "^2.2",
+        "webmozart/expression": "^1.0-beta3",
         "webmozart/assert": "^1.0",
         "webmozart/glob": "^3.1",
         "symfony/event-dispatcher": "^2.3",
+        "webmozart/key-value-store": "^1.0-beta4",
         "symfony/filesystem": "^2.3",
         "ramsey/uuid": "^2.8",
         "psr/log": "^1.0"
@@ -28,8 +29,7 @@
         "predis/predis": "^1.0",
         "basho/riak": "^1.4",
         "doctrine/cache": "^1.4",
-        "phpunit/phpunit": "^4.6",
-        "webmozart/key-value-store": "^1.0"
+        "phpunit/phpunit": "^4.6"
     },
     "minimum-stability": "dev",
     "autoload": {
