@@ -1,8 +1,8 @@
 The Puli Manager Component
 ==========================
 
-[![Build Status](https://travis-ci.org/puli/manager.svg?branch=master)](https://travis-ci.org/puli/manager)
-[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/puli/manager/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/puli/manager/?branch=master)
+[![Build Status](https://travis-ci.org/puli/manager.svg?branch=1.0.0-beta7)](https://travis-ci.org/puli/manager)
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/puli/manager/badges/quality-score.png?b=1.0.0-beta7)](https://scrutinizer-ci.com/g/puli/manager/?branch=1.0.0-beta7)
 [![SensioLabsInsight](https://insight.sensiolabs.com/projects/6505ed38-0d0f-4c8d-ac85-f343f8e135a9/mini.png)](https://insight.sensiolabs.com/projects/6505ed38-0d0f-4c8d-ac85-f343f8e135a9)
 [![Latest Stable Version](https://poser.pugx.org/puli/manager/v/stable.svg)](https://packagist.org/packages/puli/manager)
 [![Total Downloads](https://poser.pugx.org/puli/manager/downloads.svg)](https://packagist.org/packages/puli/manager)
