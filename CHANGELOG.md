@@ -1,7 +1,7 @@
 Changelog
 =========
 
-* 1.0.0-beta7 (@release_date@)
+* 1.0.0-beta7 (2015-08-24)
 
  * renamed `GlobalEnvironment` to `Context`
  * renamed `ProjectEnvironment` to `ProjectContext`
@@ -11,7 +11,9 @@ Changelog
  * added `InstallInfo::getEnvironment()`
  * added `InstallInfo::setEnvironment()`
  * added `Puli::setEnvironment()` and `Puli::getEnvironment()`
- * added `ProjectContext::getEnvironment()` 
+ * added `ProjectContext::getEnvironment()`
+ * fixed minimum package versions in composer.json
+ * upgraded to webmozart/glob 3.1
 
 * 1.0.0-beta6 (2015-08-12)
 
