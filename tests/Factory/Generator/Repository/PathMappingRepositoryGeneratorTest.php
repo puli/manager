@@ -84,6 +84,7 @@ EOF;
 
         $this->assertSame($expected, $this->method->getBody());
     }
+
     public function testGenerateOptimizedServiceForTypeNull()
     {
         $this->generator->generateNewInstance('repo', $this->method, $this->registry, array(
