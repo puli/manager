@@ -19,6 +19,9 @@ use Puli\Manager\Api\Discovery\BindingDescriptor;
 use Puli\Manager\Api\Discovery\BindingState;
 use Puli\Manager\Api\Discovery\BindingTypeDescriptor;
 use Puli\Manager\Api\Discovery\DiscoveryManager;
+use Puli\Manager\Api\Event\AddAssetMappingEvent;
+use Puli\Manager\Api\Event\PuliEvents;
+use Puli\Manager\Api\Event\RemoveAssetMappingEvent;
 use Puli\Manager\Api\Package\Package;
 use Puli\Manager\Api\Package\PackageFile;
 use Puli\Manager\Api\Package\RootPackage;
@@ -28,6 +31,7 @@ use Puli\Manager\Api\Server\ServerCollection;
 use Puli\Manager\Asset\DiscoveryAssetManager;
 use Puli\UrlGenerator\DiscoveryUrlGenerator;
 use Rhumsaa\Uuid\Uuid;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Webmozart\Expression\Expr;
 
 /**
@@ -41,6 +45,11 @@ class DiscoveryAssetManagerTest extends PHPUnit_Framework_TestCase
      * @var PHPUnit_Framework_MockObject_MockObject|DiscoveryManager
      */
     private $discoveryManager;
+
+    /**
+     * @var PHPUnit_Framework_MockObject_MockObject|EventDispatcherInterface
+     */
+    private $dispatcher;
 
     /**
      * @var Server
@@ -90,10 +99,11 @@ class DiscoveryAssetManagerTest extends PHPUnit_Framework_TestCase
     protected function setUp()
     {
         $this->discoveryManager = $this->getMock('Puli\Manager\Api\Discovery\DiscoveryManager');
+        $this->dispatcher = $this->getMock('Symfony\Component\EventDispatcher\EventDispatcherInterface');
         $this->server1 = new Server('target1', 'symlink', 'public_html');
         $this->server2 = new Server('target2', 'rsync', 'ssh://server');
         $this->servers = new ServerCollection(array($this->server1, $this->server2));
-        $this->manager = new DiscoveryAssetManager($this->discoveryManager, $this->servers);
+        $this->manager = new DiscoveryAssetManager($this->discoveryManager, $this->servers, $this->dispatcher);
         $this->package = new Package(new PackageFile('vendor/package'), '/path');
         $this->rootPackage = new RootPackage(new RootPackageFile('vendor/root'), '/path');
         $this->bindingType = new BindingTypeDescriptor(DiscoveryUrlGenerator::BINDING_TYPE);
@@ -140,6 +150,29 @@ class DiscoveryAssetManagerTest extends PHPUnit_Framework_TestCase
             ->with($expectedBinding);
 
         $this->manager->addRootAssetMapping(new AssetMapping('/path', 'target1', '/css', $uuid));
+    }
+
+    public function testAddRootAssetMappingDispatchesEvent()
+    {
+        $uuid = Uuid::uuid4();
+        $mapping = new AssetMapping('/path', 'target1', '/css', $uuid);
+        $event = new AddAssetMappingEvent($mapping);
+
+        $this->discoveryManager->expects($this->once())
+            ->method('hasBindings')
+            ->with($this->uuid($uuid))
+            ->willReturn(false);
+
+        $this->dispatcher->expects($this->any())
+            ->method('hasListeners')
+            ->with(PuliEvents::POST_ADD_ASSET_MAPPING)
+            ->willReturn(true);
+
+        $this->dispatcher->expects($this->once())
+            ->method('dispatch')
+            ->with(PuliEvents::POST_ADD_ASSET_MAPPING, $event);
+
+        $this->manager->addRootAssetMapping($mapping);
     }
 
     /**
@@ -242,6 +275,36 @@ class DiscoveryAssetManagerTest extends PHPUnit_Framework_TestCase
         $this->manager->removeRootAssetMapping($uuid);
     }
 
+    public function testRemoveRootAssetMappingDispatchesEvent()
+    {
+        $uuid = $this->binding1->getUuid();
+        $mapping = new AssetMapping('/path', 'target1', '/css', $uuid);
+        $event = new RemoveAssetMappingEvent($mapping);
+
+        $this->bindingType->load($this->rootPackage);
+        $this->binding1->load($this->rootPackage, $this->bindingType);
+
+        $this->dispatcher->expects($this->any())
+            ->method('hasListeners')
+            ->with(PuliEvents::POST_REMOVE_ASSET_MAPPING)
+            ->willReturn(true);
+
+        $this->dispatcher->expects($this->once())
+            ->method('dispatch')
+            ->with(PuliEvents::POST_REMOVE_ASSET_MAPPING, $event);
+
+        $this->discoveryManager->expects($this->once())
+            ->method('findRootBindings')
+            ->with($this->uuid($uuid))
+            ->willReturn(array($this->binding1));
+
+        $this->discoveryManager->expects($this->once())
+            ->method('removeRootBindings')
+            ->with($this->uuid($uuid));
+
+        $this->manager->removeRootAssetMapping($uuid);
+    }
+
     public function testRemoveRootAssetMappings()
     {
         $this->discoveryManager->expects($this->once())
@@ -254,8 +317,77 @@ class DiscoveryAssetManagerTest extends PHPUnit_Framework_TestCase
         $this->manager->removeRootAssetMappings(Expr::same('target1', AssetMapping::SERVER_NAME));
     }
 
+    public function testRemoveRootAssetMappingsDispatchesEvent()
+    {
+        $mapping1 = new AssetMapping('/path', 'target1', '/css', $this->binding1->getUuid());
+        $mapping2 = new AssetMapping('/other/path', 'target2', '/js', $this->binding2->getUuid());
+        $event1 = new RemoveAssetMappingEvent($mapping1);
+        $event2 = new RemoveAssetMappingEvent($mapping2);
+
+        $expr = $this->defaultExpr()->andKey(
+            BindingDescriptor::PARAMETER_VALUES,
+            Expr::key(DiscoveryUrlGenerator::SERVER_PARAMETER, Expr::same('target1'))
+        );
+
+        $this->dispatcher->expects($this->at(0))
+            ->method('hasListeners')
+            ->with(PuliEvents::POST_REMOVE_ASSET_MAPPING)
+            ->willReturn(true);
+
+        $this->dispatcher->expects($this->at(1))
+            ->method('dispatch')
+            ->with(PuliEvents::POST_REMOVE_ASSET_MAPPING, $event1);
+
+        $this->dispatcher->expects($this->at(2))
+            ->method('dispatch')
+            ->with(PuliEvents::POST_REMOVE_ASSET_MAPPING, $event2);
+
+        $this->discoveryManager->expects($this->once())
+            ->method('findRootBindings')
+            ->with($expr)
+            ->willReturn(array($this->binding1, $this->binding2));
+
+        $this->discoveryManager->expects($this->once())
+            ->method('removeRootBindings')
+            ->with($expr);
+
+        $this->manager->removeRootAssetMappings(Expr::same('target1', AssetMapping::SERVER_NAME));
+    }
+
     public function testClearRootAssetMappings()
     {
+        $this->discoveryManager->expects($this->once())
+            ->method('removeRootBindings')
+            ->with($this->defaultExpr());
+
+        $this->manager->clearRootAssetMappings();
+    }
+
+    public function testClearRootAssetMappingsDispatchesEvent()
+    {
+        $mapping1 = new AssetMapping('/path', 'target1', '/css', $this->binding1->getUuid());
+        $mapping2 = new AssetMapping('/other/path', 'target2', '/js', $this->binding2->getUuid());
+        $event1 = new RemoveAssetMappingEvent($mapping1);
+        $event2 = new RemoveAssetMappingEvent($mapping2);
+
+        $this->dispatcher->expects($this->at(0))
+            ->method('hasListeners')
+            ->with(PuliEvents::POST_REMOVE_ASSET_MAPPING)
+            ->willReturn(true);
+
+        $this->dispatcher->expects($this->at(1))
+            ->method('dispatch')
+            ->with(PuliEvents::POST_REMOVE_ASSET_MAPPING, $event1);
+
+        $this->dispatcher->expects($this->at(2))
+            ->method('dispatch')
+            ->with(PuliEvents::POST_REMOVE_ASSET_MAPPING, $event2);
+
+        $this->discoveryManager->expects($this->once())
+            ->method('findRootBindings')
+            ->with($this->defaultExpr())
+            ->willReturn(array($this->binding1, $this->binding2));
+
         $this->discoveryManager->expects($this->once())
             ->method('removeRootBindings')
             ->with($this->defaultExpr());

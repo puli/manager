@@ -31,7 +31,17 @@ interface PuliEvents
     const PRE_BUILD_REPOSITORY = 'puli.pre-build-repository';
 
     /**
-     * Dispatched before the resource repository is built.
+     * Dispatched after the resource repository is built.
      */
     const POST_BUILD_REPOSITORY = 'puli.post-build-repository';
+
+    /**
+     * Dispatched after adding asset mappings.
+     */
+    const POST_ADD_ASSET_MAPPING = 'puli.post-add-asset-mapping';
+
+    /**
+     * Dispatched after removing asset mappings.
+     */
+    const POST_REMOVE_ASSET_MAPPING = 'puli.post-remove-asset-mapping';
 }
