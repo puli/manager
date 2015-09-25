@@ -11,6 +11,11 @@ enabled:
 disabled:
     - empty_return
 
+    # Puli is using a reserved keyword as a class
+    # (Puli\Repository\Api\Resource\Resource)
+    # https://github.com/puli/issues/issues/119
+    - phpdoc_types
+
     # Unusable at the moment
     # https://github.com/StyleCI/StyleCI/issues/471
     - psr0

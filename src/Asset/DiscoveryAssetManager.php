@@ -17,10 +17,14 @@ use Puli\Manager\Api\Asset\DuplicateAssetMappingException;
 use Puli\Manager\Api\Asset\NoSuchAssetMappingException;
 use Puli\Manager\Api\Discovery\BindingDescriptor;
 use Puli\Manager\Api\Discovery\DiscoveryManager;
+use Puli\Manager\Api\Event\AddAssetMappingEvent;
+use Puli\Manager\Api\Event\PuliEvents;
+use Puli\Manager\Api\Event\RemoveAssetMappingEvent;
 use Puli\Manager\Api\Server\NoSuchServerException;
 use Puli\Manager\Api\Server\ServerCollection;
 use Puli\UrlGenerator\DiscoveryUrlGenerator;
 use Rhumsaa\Uuid\Uuid;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Webmozart\Expression\Expr;
 use Webmozart\Expression\Expression;
 
@@ -48,11 +52,17 @@ class DiscoveryAssetManager implements AssetManager
      */
     private $exprBuilder;
 
-    public function __construct(DiscoveryManager $discoveryManager, ServerCollection $servers)
+    /**
+     * @var EventDispatcherInterface
+     */
+    private $dispatcher;
+
+    public function __construct(DiscoveryManager $discoveryManager, ServerCollection $servers, EventDispatcherInterface $dispatcher = null)
     {
         $this->discoveryManager = $discoveryManager;
         $this->servers = $servers;
         $this->exprBuilder = new BindingExpressionBuilder();
+        $this->dispatcher = $dispatcher;
     }
 
     /**
@@ -79,6 +89,13 @@ class DiscoveryAssetManager implements AssetManager
             'glob',
             $mapping->getUuid()
         ), ($flags & self::OVERRIDE) ? DiscoveryManager::OVERRIDE : 0);
+
+        if ($this->dispatcher && $this->dispatcher->hasListeners(PuliEvents::POST_ADD_ASSET_MAPPING)) {
+            $this->dispatcher->dispatch(
+                PuliEvents::POST_ADD_ASSET_MAPPING,
+                new AddAssetMappingEvent($mapping)
+            );
+        }
     }
 
     /**
@@ -86,10 +103,28 @@ class DiscoveryAssetManager implements AssetManager
      */
     public function removeRootAssetMapping(Uuid $uuid)
     {
+        $mapping = null;
+        $hasListener = $this->dispatcher && $this->dispatcher->hasListeners(PuliEvents::POST_REMOVE_ASSET_MAPPING);
         $expr = Expr::same($uuid->toString(), BindingDescriptor::UUID)
             ->andX($this->exprBuilder->buildExpression());
 
+        if ($hasListener) {
+            // Query the mapping for the event
+            try {
+                $mapping = $this->getRootAssetMapping($uuid);
+            } catch (NoSuchAssetMappingException $e) {
+                return;
+            }
+        }
+
         $this->discoveryManager->removeRootBindings($expr);
+
+        if ($hasListener) {
+            $this->dispatcher->dispatch(
+                PuliEvents::POST_REMOVE_ASSET_MAPPING,
+                new RemoveAssetMappingEvent($mapping)
+            );
+        }
     }
 
     /**
@@ -97,7 +132,24 @@ class DiscoveryAssetManager implements AssetManager
      */
     public function removeRootAssetMappings(Expression $expr)
     {
+        $mappings = array();
+        $hasListener = $this->dispatcher && $this->dispatcher->hasListeners(PuliEvents::POST_REMOVE_ASSET_MAPPING);
+
+        if ($hasListener) {
+            // Query the mappings for the event
+            $mappings = $this->findRootAssetMappings($expr);
+        }
+
         $this->discoveryManager->removeRootBindings($this->exprBuilder->buildExpression($expr));
+
+        if ($hasListener) {
+            foreach ($mappings as $mapping) {
+                $this->dispatcher->dispatch(
+                    PuliEvents::POST_REMOVE_ASSET_MAPPING,
+                    new RemoveAssetMappingEvent($mapping)
+                );
+            }
+        }
     }
 
     /**
@@ -105,7 +157,24 @@ class DiscoveryAssetManager implements AssetManager
      */
     public function clearRootAssetMappings()
     {
+        $mappings = array();
+        $hasListener = $this->dispatcher && $this->dispatcher->hasListeners(PuliEvents::POST_REMOVE_ASSET_MAPPING);
+
+        if ($hasListener) {
+            // Query the mappings for the event
+            $mappings = $this->getRootAssetMappings();
+        }
+
         $this->discoveryManager->removeRootBindings($this->exprBuilder->buildExpression());
+
+        if ($hasListener) {
+            foreach ($mappings as $mapping) {
+                $this->dispatcher->dispatch(
+                    PuliEvents::POST_REMOVE_ASSET_MAPPING,
+                    new RemoveAssetMappingEvent($mapping)
+                );
+            }
+        }
     }
 
     /**
