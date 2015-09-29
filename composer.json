@@ -29,7 +29,8 @@
         "predis/predis": "^1.0",
         "basho/riak": "^1.4",
         "doctrine/cache": "^1.4",
-        "phpunit/phpunit": "^4.6"
+        "phpunit/phpunit": "^4.6",
+        "sebastian/version": "^1.0.1"
     },
     "minimum-stability": "dev",
     "autoload": {
