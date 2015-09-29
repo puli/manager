@@ -6,7 +6,6 @@ finder:
 enabled:
     - ordered_use
     - strict
-    - psr4
 
 disabled:
     - empty_return
@@ -15,7 +14,3 @@ disabled:
     # (Puli\Repository\Api\Resource\Resource)
     # https://github.com/puli/issues/issues/119
     - phpdoc_types
-
-    # Unusable at the moment
-    # https://github.com/StyleCI/StyleCI/issues/471
-    - psr0
