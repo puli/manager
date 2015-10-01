@@ -11,9 +11,14 @@
 
 namespace Puli\Manager\Tests\Package;
 
+use Puli\Discovery\Api\Type\BindingParameter;
+use Puli\Discovery\Api\Type\BindingType;
+use Puli\Discovery\Binding\ClassBinding;
+use Puli\Discovery\Binding\ResourceBinding;
+use Puli\Discovery\Tests\Fixtures\Bar;
+use Puli\Discovery\Tests\Fixtures\Foo;
 use Puli\Manager\Api\Config\Config;
 use Puli\Manager\Api\Discovery\BindingDescriptor;
-use Puli\Manager\Api\Discovery\BindingParameterDescriptor;
 use Puli\Manager\Api\Discovery\BindingTypeDescriptor;
 use Puli\Manager\Api\Environment;
 use Puli\Manager\Api\Package\InstallInfo;
@@ -24,6 +29,7 @@ use Puli\Manager\Api\Puli;
 use Puli\Manager\Api\PuliPlugin;
 use Puli\Manager\Api\Repository\PathMapping;
 use Puli\Manager\Package\PackageJsonSerializer;
+use Puli\Manager\Tests\Discovery\Fixtures\Baz;
 use Puli\Manager\Tests\JsonTestCase;
 use Rhumsaa\Uuid\Uuid;
 
@@ -51,12 +57,18 @@ class PackageJsonSerializerTest extends JsonTestCase
     },
     "bindings": {
         "2438256b-c2f5-4a06-a18f-f79755e027dd": {
+            "_class": "Puli\\\\Discovery\\\\Binding\\\\ResourceBinding",
             "query": "/app/config*.yml",
-            "type": "my/type"
+            "type": "Puli\\\\Discovery\\\\Tests\\\\Fixtures\\\\Foo"
+        },
+        "ff7bbf5a-44b1-4bdb-8397-e1c601ad7a2e": {
+            "_class": "Puli\\\\Discovery\\\\Binding\\\\ClassBinding",
+            "class": "Puli\\\\Manager\\\\Tests\\\\Package\\\\PackageJsonSerializerTest",
+            "type": "Puli\\\\Discovery\\\\Tests\\\\Fixtures\\\\Bar"
         }
     },
     "binding-types": {
-        "my/type": {
+        "Puli\\\\Discovery\\\\Tests\\\\Fixtures\\\\Foo": {
             "description": "Description of my type.",
             "parameters": {
                 "param": {
@@ -86,12 +98,18 @@ JSON;
     },
     "bindings": {
         "2438256b-c2f5-4a06-a18f-f79755e027dd": {
+            "_class": "Puli\\\\Discovery\\\\Binding\\\\ResourceBinding",
             "query": "/app/config*.yml",
-            "type": "my/type"
+            "type": "Puli\\\\Discovery\\\\Tests\\\\Fixtures\\\\Foo"
+        },
+        "ff7bbf5a-44b1-4bdb-8397-e1c601ad7a2e": {
+            "_class": "Puli\\\\Discovery\\\\Binding\\\\ClassBinding",
+            "class": "Puli\\\\Manager\\\\Tests\\\\Package\\\\PackageJsonSerializerTest",
+            "type": "Puli\\\\Discovery\\\\Tests\\\\Fixtures\\\\Bar"
         }
     },
     "binding-types": {
-        "my/type": {
+        "Puli\\\\Discovery\\\\Tests\\\\Fixtures\\\\Foo": {
             "description": "Description of my type.",
             "parameters": {
                 "param": {
@@ -175,12 +193,20 @@ JSON;
 
     public function testSerializePackageFile()
     {
+        $type = new BindingType(Foo::clazz, array(
+            new BindingParameter('param', BindingParameter::OPTIONAL, 1234),
+        ));
+
+        $resourceBinding = new ResourceBinding('/app/config*.yml', Foo::clazz, array(), 'glob', Uuid::fromString(self::BINDING_UUID1));
+        $classBinding = new ClassBinding(__CLASS__, Bar::clazz, array(), Uuid::fromString(self::BINDING_UUID2));
+
         $packageFile = new PackageFile();
         $packageFile->setPackageName('my/application');
         $packageFile->addPathMapping(new PathMapping('/app', 'res'));
-        $packageFile->addBindingDescriptor(new BindingDescriptor('/app/config*.yml', 'my/type', array(), 'glob', Uuid::fromString(self::BINDING_UUID1)));
-        $packageFile->addTypeDescriptor(new BindingTypeDescriptor('my/type', 'Description of my type.', array(
-            new BindingParameterDescriptor('param', BindingParameterDescriptor::OPTIONAL, 1234, 'Description of the parameter.'),
+        $packageFile->addBindingDescriptor(new BindingDescriptor($resourceBinding));
+        $packageFile->addBindingDescriptor(new BindingDescriptor($classBinding));
+        $packageFile->addTypeDescriptor(new BindingTypeDescriptor($type, 'Description of my type.', array(
+            'param' => 'Description of the parameter.',
         )));
         $packageFile->setOverriddenPackages(array('acme/blog'));
         $packageFile->setExtraKeys(array(
@@ -197,27 +223,30 @@ JSON;
         $package = new Package($packageFile, '/path', new InstallInfo('vendor/package', '/path'));
 
         // We need to create a type and a binding in state ENABLED
-        $bindingType = new BindingTypeDescriptor('my/type', null, array(
-            new BindingParameterDescriptor('param', BindingParameterDescriptor::OPTIONAL, 'default'),
+        $type = new BindingType(Foo::clazz, array(
+            new BindingParameter('param', BindingParameter::OPTIONAL, 'default'),
         ));
-        $bindingType->load($package);
+        $typeDescriptor = new BindingTypeDescriptor($type);
+        $typeDescriptor->load($package);
 
-        $binding = new BindingDescriptor('/app/config*.yml', 'my/type', array(), 'glob', Uuid::fromString(self::BINDING_UUID1));
-        $binding->load($package, $bindingType);
+        $binding = new ResourceBinding('/app/config*.yml', Foo::clazz, array(), 'glob', Uuid::fromString(self::BINDING_UUID1));
+        $bindingDescriptor = new BindingDescriptor($binding);
+        $bindingDescriptor->load($package, $typeDescriptor);
 
         // The default value is accessible
         $this->assertSame('default', $binding->getParameterValue('param'));
 
         // But not written by the serializer
-        $packageFile->addBindingDescriptor($binding);
+        $packageFile->addBindingDescriptor($bindingDescriptor);
 
         $json = <<<JSON
 {
     "version": "1.0",
     "bindings": {
         "2438256b-c2f5-4a06-a18f-f79755e027dd": {
+            "_class": "Puli\\\\Discovery\\\\Binding\\\\ResourceBinding",
             "query": "/app/config*.yml",
-            "type": "my/type"
+            "type": "Puli\\\\Discovery\\\\Tests\\\\Fixtures\\\\Foo"
         }
     }
 }
@@ -231,13 +260,13 @@ JSON;
     {
         $baseConfig = new Config();
         $packageFile = new PackageFile(null, null, $baseConfig);
-        $packageFile->addTypeDescriptor(new BindingTypeDescriptor('my/type'));
+        $packageFile->addTypeDescriptor(new BindingTypeDescriptor(new BindingType(Foo::clazz)));
 
         $json = <<<JSON
 {
     "version": "1.0",
     "binding-types": {
-        "my/type": {}
+        "Puli\\\\Discovery\\\\Tests\\\\Fixtures\\\\Foo": {}
     }
 }
 
@@ -271,17 +300,17 @@ JSON;
     public function testSerializePackageFileSortsTypes()
     {
         $packageFile = new PackageFile();
-        $packageFile->addTypeDescriptor(new BindingTypeDescriptor('vendor/c'));
-        $packageFile->addTypeDescriptor(new BindingTypeDescriptor('vendor/a'));
-        $packageFile->addTypeDescriptor(new BindingTypeDescriptor('vendor/b'));
+        $packageFile->addTypeDescriptor(new BindingTypeDescriptor(new BindingType(Baz::clazz)));
+        $packageFile->addTypeDescriptor(new BindingTypeDescriptor(new BindingType(Foo::clazz)));
+        $packageFile->addTypeDescriptor(new BindingTypeDescriptor(new BindingType(Bar::clazz)));
 
         $json2 = <<<JSON
 {
     "version": "1.0",
     "binding-types": {
-        "vendor/a": {},
-        "vendor/b": {},
-        "vendor/c": {}
+        "Puli\\\\Discovery\\\\Tests\\\\Fixtures\\\\Bar": {},
+        "Puli\\\\Discovery\\\\Tests\\\\Fixtures\\\\Foo": {},
+        "Puli\\\\Manager\\\\Tests\\\\Discovery\\\\Fixtures\\\\Baz": {}
     }
 }
 
@@ -292,19 +321,20 @@ JSON;
 
     public function testSerializePackageFileSortsTypeParameters()
     {
+        $type = new BindingType(Foo::clazz, array(
+            new BindingParameter('c'),
+            new BindingParameter('a'),
+            new BindingParameter('b'),
+        ));
+
         $packageFile = new PackageFile();
-        $packageFile->addTypeDescriptor(new BindingTypeDescriptor('vendor/type',
-            null, array(
-                new BindingParameterDescriptor('c'),
-                new BindingParameterDescriptor('a'),
-                new BindingParameterDescriptor('b'),
-            )));
+        $packageFile->addTypeDescriptor(new BindingTypeDescriptor($type));
 
         $json = <<<JSON
 {
     "version": "1.0",
     "binding-types": {
-        "vendor/type": {
+        "Puli\\\\Discovery\\\\Tests\\\\Fixtures\\\\Foo": {
             "parameters": {
                 "a": {},
                 "b": {},
@@ -321,31 +351,41 @@ JSON;
 
     public function testSerializePackageFileSortsBindings()
     {
-        $packageFile = new PackageFile();
-        $packageFile->addBindingDescriptor(new BindingDescriptor('/vendor/c', 'vendor/a-type', array(), 'glob', Uuid::fromString(self::BINDING_UUID1)));
-        $packageFile->addBindingDescriptor(new BindingDescriptor('/vendor/a', 'vendor/b-type', array(), 'glob', Uuid::fromString(self::BINDING_UUID2)));
-        $packageFile->addBindingDescriptor(new BindingDescriptor('/vendor/b', 'vendor/b-type', array(), 'glob', Uuid::fromString(self::BINDING_UUID3)));
-        $packageFile->addBindingDescriptor(new BindingDescriptor('/vendor/a', 'vendor/a-type', array(), 'glob', Uuid::fromString(self::BINDING_UUID4)));
+        $binding1 = new ResourceBinding('/vendor/c', Foo::clazz, array(), 'glob', Uuid::fromString(self::BINDING_UUID1));
+        $binding2 = new ResourceBinding('/vendor/a', Bar::clazz, array(), 'glob', Uuid::fromString(self::BINDING_UUID2));
+        $binding3 = new ResourceBinding('/vendor/b', Foo::clazz, array(), 'glob', Uuid::fromString(self::BINDING_UUID3));
+        $binding4 = new ClassBinding(__CLASS__, Bar::clazz, array(), Uuid::fromString(self::BINDING_UUID4));
 
+        $packageFile = new PackageFile();
+        $packageFile->addBindingDescriptor(new BindingDescriptor($binding1));
+        $packageFile->addBindingDescriptor(new BindingDescriptor($binding2));
+        $packageFile->addBindingDescriptor(new BindingDescriptor($binding3));
+        $packageFile->addBindingDescriptor(new BindingDescriptor($binding4));
+
+        // sort by UUID
         $json = <<<JSON
 {
     "version": "1.0",
     "bindings": {
-        "d939ea88-01a0-4c7b-8d1e-e0dfcffd66e5": {
-            "query": "/vendor/a",
-            "type": "vendor/a-type"
-        },
-        "ff7bbf5a-44b1-4bdb-8397-e1c601ad7a2e": {
-            "query": "/vendor/a",
-            "type": "vendor/b-type"
+        "2438256b-c2f5-4a06-a18f-f79755e027dd": {
+            "_class": "Puli\\\\Discovery\\\\Binding\\\\ResourceBinding",
+            "query": "/vendor/c",
+            "type": "Puli\\\\Discovery\\\\Tests\\\\Fixtures\\\\Foo"
         },
         "93fdf1a4-45b3-4a4e-80b5-77dc1137f5ae": {
+            "_class": "Puli\\\\Discovery\\\\Binding\\\\ResourceBinding",
             "query": "/vendor/b",
-            "type": "vendor/b-type"
+            "type": "Puli\\\\Discovery\\\\Tests\\\\Fixtures\\\\Foo"
         },
-        "2438256b-c2f5-4a06-a18f-f79755e027dd": {
-            "query": "/vendor/c",
-            "type": "vendor/a-type"
+        "d939ea88-01a0-4c7b-8d1e-e0dfcffd66e5": {
+            "_class": "Puli\\\\Discovery\\\\Binding\\\\ClassBinding",
+            "class": "Puli\\\\Manager\\\\Tests\\\\Package\\\\PackageJsonSerializerTest",
+            "type": "Puli\\\\Discovery\\\\Tests\\\\Fixtures\\\\Bar"
+        },
+        "ff7bbf5a-44b1-4bdb-8397-e1c601ad7a2e": {
+            "_class": "Puli\\\\Discovery\\\\Binding\\\\ResourceBinding",
+            "query": "/vendor/a",
+            "type": "Puli\\\\Discovery\\\\Tests\\\\Fixtures\\\\Bar"
         }
     }
 }
@@ -357,20 +397,23 @@ JSON;
 
     public function testSerializePackageFileSortsBindingParameters()
     {
-        $packageFile = new PackageFile();
-        $packageFile->addBindingDescriptor(new BindingDescriptor('/path', 'vendor/type', array(
+        $binding = new ResourceBinding('/path', Foo::clazz, array(
             'c' => 'foo',
             'a' => 'foo',
             'b' => 'foo',
-        ), 'glob', Uuid::fromString(self::BINDING_UUID1)));
+        ), 'glob', Uuid::fromString(self::BINDING_UUID1));
+
+        $packageFile = new PackageFile();
+        $packageFile->addBindingDescriptor(new BindingDescriptor($binding));
 
         $json = <<<JSON
 {
     "version": "1.0",
     "bindings": {
         "2438256b-c2f5-4a06-a18f-f79755e027dd": {
+            "_class": "Puli\\\\Discovery\\\\Binding\\\\ResourceBinding",
             "query": "/path",
-            "type": "vendor/type",
+            "type": "Puli\\\\Discovery\\\\Tests\\\\Fixtures\\\\Foo",
             "parameters": {
                 "a": "foo",
                 "b": "foo",
@@ -385,57 +428,22 @@ JSON;
         $this->assertJsonEquals($json, $this->serializer->serializePackageFile($packageFile));
     }
 
-    public function testSerializeBindingParameters()
-    {
-        $baseConfig = new Config();
-        $packageFile = new PackageFile(null, null, $baseConfig);
-        $packageFile->addBindingDescriptor(new BindingDescriptor(
-            '/app/config*.yml',
-            'my/type',
-            array('param' => 'value'),
-            'glob',
-            Uuid::fromString(self::BINDING_UUID1)
-        ));
-
-        $json = <<<JSON
-{
-    "version": "1.0",
-    "bindings": {
-        "2438256b-c2f5-4a06-a18f-f79755e027dd": {
-            "query": "/app/config*.yml",
-            "type": "my/type",
-            "parameters": {
-                "param": "value"
-            }
-        }
-    }
-}
-
-JSON;
-
-        $this->assertJsonEquals($json, $this->serializer->serializePackageFile($packageFile));
-    }
-
     public function testSerializeBindingWithCustomLanguage()
     {
-        $baseConfig = new Config();
-        $packageFile = new PackageFile(null, null, $baseConfig);
-        $packageFile->addBindingDescriptor(new BindingDescriptor(
-            '//resource[name="config.yml"]',
-            'my/type',
-            array(),
-            'xpath',
-            Uuid::fromString(self::BINDING_UUID1)
-        ));
+        $binding = new ResourceBinding('//resource[name="config.yml"]', Foo::clazz, array(), 'xpath', Uuid::fromString(self::BINDING_UUID1));
+
+        $packageFile = new PackageFile();
+        $packageFile->addBindingDescriptor(new BindingDescriptor($binding));
 
         $json = <<<JSON
 {
     "version": "1.0",
     "bindings": {
         "2438256b-c2f5-4a06-a18f-f79755e027dd": {
+            "_class": "Puli\\\\Discovery\\\\Binding\\\\ResourceBinding",
             "query": "//resource[name=\"config.yml\"]",
             "language": "xpath",
-            "type": "my/type"
+            "type": "Puli\\\\Discovery\\\\Tests\\\\Fixtures\\\\Foo"
         }
     }
 }
@@ -447,17 +455,18 @@ JSON;
 
     public function testSerializeTypeParameterWithoutDescriptionNorParameters()
     {
-        $baseConfig = new Config();
-        $packageFile = new PackageFile(null, null, $baseConfig);
-        $packageFile->addTypeDescriptor(new BindingTypeDescriptor('my/type', null, array(
-            new BindingParameterDescriptor('param', BindingParameterDescriptor::OPTIONAL, 1234),
-        )));
+        $type = new BindingType(Foo::clazz, array(
+            new BindingParameter('param', BindingParameter::OPTIONAL, 1234),
+        ));
+
+        $packageFile = new PackageFile();
+        $packageFile->addTypeDescriptor(new BindingTypeDescriptor($type));
 
         $json = <<<JSON
 {
     "version": "1.0",
     "binding-types": {
-        "my/type": {
+        "Puli\\\\Discovery\\\\Tests\\\\Fixtures\\\\Foo": {
             "parameters": {
                 "param": {
                     "default": 1234
@@ -474,17 +483,20 @@ JSON;
 
     public function testSerializeTypeParameterWithoutDefaultValue()
     {
-        $baseConfig = new Config();
-        $packageFile = new PackageFile(null, null, $baseConfig);
-        $packageFile->addTypeDescriptor(new BindingTypeDescriptor('my/type', null, array(
-            new BindingParameterDescriptor('param', BindingParameterDescriptor::OPTIONAL, null, 'Description of the parameter.'),
+        $type = new BindingType(Foo::clazz, array(
+            new BindingParameter('param', BindingParameter::OPTIONAL),
+        ));
+
+        $packageFile = new PackageFile();
+        $packageFile->addTypeDescriptor(new BindingTypeDescriptor($type, null, array(
+            'param' => 'Description of the parameter.',
         )));
 
         $json = <<<JSON
 {
     "version": "1.0",
     "binding-types": {
-        "my/type": {
+        "Puli\\\\Discovery\\\\Tests\\\\Fixtures\\\\Foo": {
             "parameters": {
                 "param": {
                     "description": "Description of the parameter."
@@ -501,17 +513,18 @@ JSON;
 
     public function testSerializeRequiredTypeParameter()
     {
-        $baseConfig = new Config();
-        $packageFile = new PackageFile(null, null, $baseConfig);
-        $packageFile->addTypeDescriptor(new BindingTypeDescriptor('my/type', null, array(
-            new BindingParameterDescriptor('param', BindingParameterDescriptor::REQUIRED),
-        )));
+        $type = new BindingType(Foo::clazz, array(
+            new BindingParameter('param', BindingParameter::REQUIRED),
+        ));
+
+        $packageFile = new PackageFile();
+        $packageFile->addTypeDescriptor(new BindingTypeDescriptor($type));
 
         $json = <<<JSON
 {
     "version": "1.0",
     "binding-types": {
-        "my/type": {
+        "Puli\\\\Discovery\\\\Tests\\\\Fixtures\\\\Foo": {
             "parameters": {
                 "param": {
                     "required": true
@@ -528,6 +541,13 @@ JSON;
 
     public function testSerializeRootPackageFile()
     {
+        $type = new BindingType(Foo::clazz, array(
+            new BindingParameter('param', BindingParameter::OPTIONAL, 1234),
+        ));
+
+        $resourceBinding = new ResourceBinding('/app/config*.yml', Foo::clazz, array(), 'glob', Uuid::fromString(self::BINDING_UUID1));
+        $classBinding = new ClassBinding(__CLASS__, Bar::clazz, array(), Uuid::fromString(self::BINDING_UUID2));
+
         $installInfo1 = new InstallInfo('vendor/package1', '/path/to/package1');
         $installInfo1->setInstallerName('composer');
         $installInfo1->addDisabledBindingUuid(Uuid::fromString('4d02ee67-d845-4789-a9c1-8301351c6f5a'));
@@ -538,9 +558,10 @@ JSON;
         $packageFile = new RootPackageFile(null, null, $baseConfig);
         $packageFile->setPackageName('my/application');
         $packageFile->addPathMapping(new PathMapping('/app', 'res'));
-        $packageFile->addBindingDescriptor(new BindingDescriptor('/app/config*.yml', 'my/type', array(), 'glob', Uuid::fromString(self::BINDING_UUID1)));
-        $packageFile->addTypeDescriptor(new BindingTypeDescriptor('my/type', 'Description of my type.', array(
-            new BindingParameterDescriptor('param', BindingParameterDescriptor::OPTIONAL, 1234, 'Description of the parameter.'),
+        $packageFile->addBindingDescriptor(new BindingDescriptor($resourceBinding));
+        $packageFile->addBindingDescriptor(new BindingDescriptor($classBinding));
+        $packageFile->addTypeDescriptor(new BindingTypeDescriptor($type, 'Description of my type.', array(
+            'param' => 'Description of the parameter.',
         )));
         $packageFile->setOverriddenPackages(array('acme/blog'));
         $packageFile->setOverrideOrder(array(
@@ -785,7 +806,7 @@ JSON;
 {
     "version": "1.0",
     "binding-types": {
-        "my/type": {
+        "Puli\\\\Discovery\\\\Tests\\\\Fixtures\\\\Foo": {
             "parameters": {
                 "param": {
                     "required": true
@@ -799,12 +820,12 @@ JSON;
 
         $packageFile = $this->serializer->unserializePackageFile($json);
 
+        $type = new BindingType(Foo::clazz, array(
+            new BindingParameter('param', BindingParameter::REQUIRED),
+        ));
+
         $this->assertInstanceOf('Puli\Manager\Api\Package\PackageFile', $packageFile);
-        $this->assertEquals(array(
-            new BindingTypeDescriptor('my/type', null, array(
-                new BindingParameterDescriptor('param', BindingParameterDescriptor::REQUIRED),
-            )),
-        ), $packageFile->getTypeDescriptors());
+        $this->assertEquals(array(new BindingTypeDescriptor($type)), $packageFile->getTypeDescriptors());
     }
 
     public function testUnserializeBindingWithParameters()
@@ -815,7 +836,7 @@ JSON;
     "bindings": {
         "2438256b-c2f5-4a06-a18f-f79755e027dd": {
             "query": "/app/config*.yml",
-            "type": "my/type",
+            "type": "Puli\\\\Discovery\\\\Tests\\\\Fixtures\\\\Foo",
             "parameters": {
                 "param": "value"
             }
@@ -827,14 +848,10 @@ JSON;
 
         $packageFile = $this->serializer->unserializePackageFile($json);
 
+        $binding = new ResourceBinding('/app/config*.yml', Foo::clazz, array('param' => 'value'), 'glob', Uuid::fromString(self::BINDING_UUID1));
+
         $this->assertInstanceOf('Puli\Manager\Api\Package\PackageFile', $packageFile);
-        $this->assertEquals(array(new BindingDescriptor(
-            '/app/config*.yml',
-            'my/type',
-            array('param' => 'value'),
-            'glob',
-            Uuid::fromString(self::BINDING_UUID1)
-        )), $packageFile->getBindingDescriptors());
+        $this->assertEquals(array(new BindingDescriptor($binding)), $packageFile->getBindingDescriptors());
     }
 
     public function testUnserializeBindingWithLanguage()
@@ -846,7 +863,7 @@ JSON;
         "2438256b-c2f5-4a06-a18f-f79755e027dd": {
             "query": "//resource[name=\"config.yml\"]",
             "language": "xpath",
-            "type": "my/type"
+            "type": "Puli\\\\Discovery\\\\Tests\\\\Fixtures\\\\Foo"
         }
     }
 }
@@ -855,14 +872,59 @@ JSON;
 
         $packageFile = $this->serializer->unserializePackageFile($json);
 
+        $binding = new ResourceBinding('//resource[name="config.yml"]', Foo::clazz, array(), 'xpath', Uuid::fromString(self::BINDING_UUID1));
+
         $this->assertInstanceOf('Puli\Manager\Api\Package\PackageFile', $packageFile);
-        $this->assertEquals(array(new BindingDescriptor(
-            '//resource[name="config.yml"]',
-            'my/type',
-            array(),
-            'xpath',
-            Uuid::fromString(self::BINDING_UUID1)
-        )), $packageFile->getBindingDescriptors());
+        $this->assertEquals(array(new BindingDescriptor($binding)), $packageFile->getBindingDescriptors());
+    }
+
+    public function testUnserializeBindingWithExplicitClass()
+    {
+        $json = <<<JSON
+{
+    "version": "1.0",
+    "bindings": {
+        "2438256b-c2f5-4a06-a18f-f79755e027dd": {
+            "_class": "Puli\\\\Discovery\\\\Binding\\\\ResourceBinding",
+            "query": "//resource[name=\"config.yml\"]",
+            "language": "xpath",
+            "type": "Puli\\\\Discovery\\\\Tests\\\\Fixtures\\\\Foo"
+        }
+    }
+}
+
+JSON;
+
+        $packageFile = $this->serializer->unserializePackageFile($json);
+
+        $binding = new ResourceBinding('//resource[name="config.yml"]', Foo::clazz, array(), 'xpath', Uuid::fromString(self::BINDING_UUID1));
+
+        $this->assertInstanceOf('Puli\Manager\Api\Package\PackageFile', $packageFile);
+        $this->assertEquals(array(new BindingDescriptor($binding)), $packageFile->getBindingDescriptors());
+    }
+
+    public function testUnserializeClassBinding()
+    {
+        $json = <<<JSON
+{
+    "version": "1.0",
+    "bindings": {
+        "2438256b-c2f5-4a06-a18f-f79755e027dd": {
+            "_class": "Puli\\\\Discovery\\\\Binding\\\\ClassBinding",
+            "class": "Puli\\\\Manager\\\\Tests\\\\Package\\\\PackageJsonSerializerTest",
+            "type": "Puli\\\\Discovery\\\\Tests\\\\Fixtures\\\\Foo"
+        }
+    }
+}
+
+JSON;
+
+        $packageFile = $this->serializer->unserializePackageFile($json);
+
+        $binding = new ClassBinding(__CLASS__, Foo::clazz, array(), Uuid::fromString(self::BINDING_UUID1));
+
+        $this->assertInstanceOf('Puli\Manager\Api\Package\PackageFile', $packageFile);
+        $this->assertEquals(array(new BindingDescriptor($binding)), $packageFile->getBindingDescriptors());
     }
 
     public function testRootPackageFileInheritsBaseConfig()
@@ -1054,7 +1116,7 @@ JSON;
 {
     "version": "1.0",
     "binding-types": [
-        { "type": "my/type" }
+        { "type": "Puli\\\\Discovery\\\\Tests\\\\Fixtures\\\\Foo" }
     ]
 }
 
@@ -1075,7 +1137,7 @@ JSON;
     "bindings": [
         {
             "query": "/app/config*.yml",
-            "type": "my/type"
+            "type": "Puli\\\\Discovery\\\\Tests\\\\Fixtures\\\\Foo"
         }
     ]
 }
@@ -1173,11 +1235,18 @@ JSON;
 
     private function assertFullConfig(PackageFile $packageFile)
     {
+        $type = new BindingType(Foo::clazz, array(
+            new BindingParameter('param', BindingParameter::OPTIONAL, 1234),
+        ));
+
+        $resourceBinding = new ResourceBinding('/app/config*.yml', Foo::clazz, array(), 'glob', Uuid::fromString(self::BINDING_UUID1));
+        $classBinding = new ClassBinding(__CLASS__, Bar::clazz, array(), Uuid::fromString(self::BINDING_UUID2));
+
         $this->assertSame('my/application', $packageFile->getPackageName());
         $this->assertEquals(array('/app' => new PathMapping('/app', array('res'))), $packageFile->getPathMappings());
-        $this->assertEquals(array(new BindingDescriptor('/app/config*.yml', 'my/type', array(), 'glob', Uuid::fromString(self::BINDING_UUID1))), $packageFile->getBindingDescriptors());
-        $this->assertEquals(array(new BindingTypeDescriptor('my/type', 'Description of my type.', array(
-            new BindingParameterDescriptor('param', BindingParameterDescriptor::OPTIONAL, 1234, 'Description of the parameter.'),
+        $this->assertEquals(array(new BindingDescriptor($resourceBinding), new BindingDescriptor($classBinding)), $packageFile->getBindingDescriptors());
+        $this->assertEquals(array(new BindingTypeDescriptor($type, 'Description of my type.', array(
+            'param' => 'Description of the parameter.',
         ))), $packageFile->getTypeDescriptors());
         $this->assertSame(array('acme/blog'), $packageFile->getOverriddenPackages());
         $this->assertEquals(array(

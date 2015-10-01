@@ -24,26 +24,6 @@ use Rhumsaa\Uuid\Uuid;
 class AssetMapping
 {
     /**
-     * The UUID field in {@link Expression} instances.
-     */
-    const UUID = 'uuid';
-
-    /**
-     * The glob field in {@link Expression} instances.
-     */
-    const GLOB = 'glob';
-
-    /**
-     * The server name field in {@link Expression} instances.
-     */
-    const SERVER_NAME = 'serverName';
-
-    /**
-     * The server path field in {@link Expression} instances.
-     */
-    const SERVER_PATH = 'serverPath';
-
-    /**
      * @var Uuid
      */
     private $uuid;

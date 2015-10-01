@@ -11,17 +11,14 @@
 
 namespace Puli\Manager\Api\Discovery;
 
-use InvalidArgumentException;
-use Puli\Discovery\Api\Binding\NoSuchParameterException;
-use Puli\Discovery\Api\Validation\ConstraintViolation;
-use Puli\Discovery\Validation\SimpleParameterValidator;
+use Exception;
+use Puli\Discovery\Api\Binding\Binding;
+use Puli\Discovery\Binding\ResourceBinding;
 use Puli\Manager\Api\AlreadyLoadedException;
 use Puli\Manager\Api\NotLoadedException;
 use Puli\Manager\Api\Package\Package;
 use Puli\Manager\Api\Package\RootPackage;
-use Puli\Manager\Assert\Assert;
 use Rhumsaa\Uuid\Uuid;
-use Webmozart\Expression\Expression;
 
 /**
  * Describes a resource binding.
@@ -38,64 +35,9 @@ use Webmozart\Expression\Expression;
 class BindingDescriptor
 {
     /**
-     * The UUID field in {@link Expression} instances.
+     * @var Binding
      */
-    const UUID = 'uuid';
-
-    /**
-     * The query field in {@link Expression} instances.
-     */
-    const QUERY = 'query';
-
-    /**
-     * The language field in {@link Expression} instances.
-     */
-    const LANGUAGE = 'language';
-
-    /**
-     * The type name field in {@link Expression} instances.
-     */
-    const TYPE_NAME = 'typeName';
-
-    /**
-     * The parameter values in {@link Expression} instances.
-     */
-    const PARAMETER_VALUES = 'parameterValues';
-
-    /**
-     * The state field in {@link Expression} instances.
-     */
-    const STATE = 'state';
-
-    /**
-     * The package field in {@link Expression} instances.
-     */
-    const CONTAINING_PACKAGE = 'containingPackage';
-
-    /**
-     * @var Uuid
-     */
-    private $uuid;
-
-    /**
-     * @var string
-     */
-    private $query;
-
-    /**
-     * @var string
-     */
-    private $language;
-
-    /**
-     * @var string
-     */
-    private $typeName;
-
-    /**
-     * @var array
-     */
-    private $parameterValues;
+    private $binding;
 
     /**
      * @var int
@@ -113,65 +55,18 @@ class BindingDescriptor
     private $typeDescriptor;
 
     /**
-     * @var ConstraintViolation[]
+     * @var Exception[]
      */
-    private $violations;
-
-    /**
-     * Compares two binding descriptors.
-     *
-     * One binding descriptor is sorted before another if:
-     *
-     *  * its query is lexicographically smaller;
-     *  * the queries are the same but the type is lexicographically smaller.
-     *
-     * @param BindingDescriptor $a The first descriptor to compare.
-     * @param BindingDescriptor $b The second descriptor to compare.
-     *
-     * @return int Returns a negative value if `$a` is sorted before `$b` and
-     *             a positive value if `$b` is sorted before `$a`. If 0 is
-     *             returned, `$a` and `$b` are sorted to the same position.
-     */
-    public static function compare(self $a, self $b)
-    {
-        if ($a->query === $b->query) {
-            return strcmp($a->typeName, $b->typeName);
-        }
-
-        return strcmp($a->query, $b->query);
-    }
+    private $loadErrors;
 
     /**
      * Creates a new binding descriptor.
      *
-     * @param string $query           The query for the resources of the binding.
-     * @param string $typeName        The name of the binding type.
-     * @param array  $parameterValues The values of the binding parameters.
-     * @param string $language        The language of the query.
-     * @param Uuid   $uuid            The UUID of the binding. If no UUID is
-     *                                passed, a UUID is generated.
-     *
-     * @throws InvalidArgumentException If any of the arguments is invalid.
-     *
-     * @see ResourceBinding
+     * @param Binding $binding The described binding.
      */
-    public function __construct($query, $typeName, array $parameterValues = array(), $language = 'glob', Uuid $uuid = null)
+    public function __construct(Binding $binding)
     {
-        Assert::query($query);
-        Assert::typeName($typeName);
-        Assert::language($language);
-        Assert::allParameterName(array_keys($parameterValues));
-        Assert::allParameterValue($parameterValues);
-
-        if (null === $uuid) {
-            $uuid = Uuid::uuid4();
-        }
-
-        $this->uuid = $uuid;
-        $this->query = $query;
-        $this->language = $language;
-        $this->typeName = $typeName;
-        $this->parameterValues = $parameterValues;
+        $this->binding = $binding;
     }
 
     /**
@@ -189,21 +84,14 @@ class BindingDescriptor
             throw new AlreadyLoadedException('The binding descriptor is already loaded.');
         }
 
-        if ($typeDescriptor && $this->typeName !== $typeDescriptor->getName()) {
-            throw new InvalidArgumentException(sprintf(
-                'The passed type "%s" does not match the stored type name "%s".',
-                $typeDescriptor->getName(),
-                $this->typeName
-            ));
-        }
-
-        $this->violations = array();
+        $this->loadErrors = array();
 
         if ($typeDescriptor && $typeDescriptor->isLoaded() && $typeDescriptor->isEnabled()) {
-            $validator = new SimpleParameterValidator();
-            $bindingType = $typeDescriptor->toBindingType();
-
-            $this->violations = $validator->validate($this->parameterValues, $bindingType);
+            try {
+                $this->binding->initialize($typeDescriptor->getType());
+            } catch (Exception $e) {
+                $this->loadErrors[] = $e;
+            }
         }
 
         $this->containingPackage = $containingPackage;
@@ -227,7 +115,7 @@ class BindingDescriptor
 
         $this->containingPackage = null;
         $this->typeDescriptor = null;
-        $this->violations = null;
+        $this->loadErrors = array();
         $this->state = null;
     }
 
@@ -242,152 +130,52 @@ class BindingDescriptor
     }
 
     /**
-     * Returns the UUID of the binding.
+     * Returns the UUID of the described binding.
      *
-     * @return Uuid The universally unique ID.
+     * @return Uuid The UUID.
      */
     public function getUuid()
     {
-        return $this->uuid;
+        return $this->binding->getUuid();
     }
 
     /**
-     * Returns the query for the resources of the binding.
-     *
-     * @return string The resource query.
-     */
-    public function getQuery()
-    {
-        return $this->query;
-    }
-
-    /**
-     * Returns the language of the query.
-     *
-     * @return string The query language.
-     */
-    public function getLanguage()
-    {
-        return $this->language;
-    }
-
-    /**
-     * Returns the name of the binding type.
+     * Returns the name of the bound type.
      *
      * @return string The type name.
      */
     public function getTypeName()
     {
-        return $this->typeName;
+        return $this->binding->getTypeName();
     }
 
     /**
-     * Returns the values of the binding parameters.
+     * Returns the described binding.
      *
-     * @param bool $includeDefault Whether to include the default values set
-     *                             in the binding type.
-     *
-     * @return array The parameter values.
+     * @return Binding The binding.
      */
-    public function getParameterValues($includeDefault = true)
+    public function getBinding()
     {
-        $values = $this->parameterValues;
-
-        if ($this->typeDescriptor && $includeDefault) {
-            $values = array_replace($this->typeDescriptor->getParameterValues(), $values);
-        }
-
-        return $values;
+        return $this->binding;
     }
 
     /**
-     * Returns the value of a specific binding parameter.
-     *
-     * @param string $parameterName  The name of the binding parameter.
-     * @param bool   $includeDefault Whether to return the default value set
-     *                               in the binding type if no value is set.
-     *
-     * @return mixed The parameter value.
-     *
-     * @throws NoSuchParameterException If the parameter does not exist.
-     */
-    public function getParameterValue($parameterName, $includeDefault = true)
-    {
-        if (isset($this->parameterValues[$parameterName])) {
-            return $this->parameterValues[$parameterName];
-        }
-
-        if ($this->typeDescriptor) {
-            if ($includeDefault) {
-                return $this->typeDescriptor->getParameterValue($parameterName);
-            }
-
-            return null;
-        }
-
-        throw NoSuchParameterException::forParameterName($parameterName, $this->typeName);
-    }
-
-    /**
-     * Returns whether the descriptor has any parameter values set.
-     *
-     * @param bool $includeDefault Whether to include the default values set
-     *                             in the binding type.
-     *
-     * @return bool Returns `true` if any parameter values are set.
-     */
-    public function hasParameterValues($includeDefault = true)
-    {
-        if (count($this->parameterValues) > 0) {
-            return true;
-        }
-
-        if ($this->typeDescriptor && $includeDefault) {
-            return $this->typeDescriptor->hasParameterValues();
-        }
-
-        return false;
-    }
-
-    /**
-     * Returns whether the descriptor contains a value for a binding parameter.
-     *
-     * @param string $parameterName  The name of the binding parameter.
-     * @param bool   $includeDefault Whether to include the default values set
-     *                               in the binding type.
-     *
-     * @return bool Returns `true` if a value is set for the parameter.
-     */
-    public function hasParameterValue($parameterName, $includeDefault = true)
-    {
-        if (isset($this->parameterValues[$parameterName])) {
-            return true;
-        }
-
-        if ($this->typeDescriptor && $includeDefault) {
-            return $this->typeDescriptor->hasParameterValue($parameterName);
-        }
-
-        return false;
-    }
-
-    /**
-     * Returns the violations of the binding parameters.
+     * Returns the errors that happened during loading.
      *
      * The method {@link load()} needs to be called before calling this method,
      * otherwise an exception is thrown.
      *
-     * @return ConstraintViolation[] The violations.
+     * @return Exception[] The load errors.
      *
      * @throws NotLoadedException If the descriptor is not loaded.
      */
-    public function getViolations()
+    public function getLoadErrors()
     {
-        if (null === $this->violations) {
+        if (null === $this->loadErrors) {
             throw new NotLoadedException('The binding descriptor is not loaded.');
         }
 
-        return $this->violations;
+        return $this->loadErrors;
     }
 
     /**
@@ -555,41 +343,17 @@ class BindingDescriptor
         return BindingState::INVALID === $this->state;
     }
 
-    /**
-     * Returns whether the binding matches the given expression.
-     *
-     * @param Expression $expr The search criteria. You can use the fields
-     *                         {@link UUID}, {@link QUERY}, {@link LANGUAGE},
-     *                         {@link TYPE_NAME}, {@link STATE} and
-     *                         {@link CONTAINING_PACKAGE} in the expression.
-     *
-     * @return bool Returns `true` if the binding matches the expression and
-     *              `false` otherwise.
-     */
-    public function match(Expression $expr)
-    {
-        return $expr->evaluate(array(
-            self::UUID => $this->uuid->toString(),
-            self::QUERY => $this->query,
-            self::LANGUAGE => $this->language,
-            self::TYPE_NAME => $this->typeName,
-            self::PARAMETER_VALUES => $this->parameterValues,
-            self::STATE => $this->state,
-            self::CONTAINING_PACKAGE => $this->containingPackage->getName(),
-        ));
-    }
-
     private function refreshState()
     {
         if (null === $this->typeDescriptor || !$this->typeDescriptor->isLoaded()) {
             $this->state = BindingState::TYPE_NOT_FOUND;
         } elseif (!$this->typeDescriptor->isEnabled()) {
             $this->state = BindingState::TYPE_NOT_ENABLED;
-        } elseif (count($this->violations) > 0) {
+        } elseif (count($this->loadErrors) > 0) {
             $this->state = BindingState::INVALID;
         } elseif ($this->containingPackage instanceof RootPackage) {
             $this->state = BindingState::ENABLED;
-        } elseif ($this->containingPackage->getInstallInfo()->hasDisabledBindingUuid($this->uuid)) {
+        } elseif ($this->containingPackage->getInstallInfo()->hasDisabledBindingUuid($this->binding->getUuid())) {
             $this->state = BindingState::DISABLED;
         } else {
             $this->state = BindingState::ENABLED;

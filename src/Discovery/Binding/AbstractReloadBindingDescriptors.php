@@ -34,6 +34,9 @@ abstract class AbstractReloadBindingDescriptors implements OperationInterceptor
      */
     private $reloadedDescriptors = array();
 
+    /**
+     * @param BindingTypeDescriptorCollection $typeDescriptors
+     */
     public function __construct(BindingTypeDescriptorCollection $typeDescriptors)
     {
         $this->typeDescriptors = $typeDescriptors;

@@ -21,7 +21,6 @@ use Puli\Manager\Api\Package\PackageFile;
 use Puli\Manager\Api\Package\RootPackage;
 use Puli\Manager\Api\Package\RootPackageFile;
 use Puli\Manager\Api\Repository\PathMapping;
-use Puli\Manager\Api\Repository\PathMappingState;
 use Puli\Manager\Api\Repository\RepositoryManager;
 use Puli\Manager\Package\PackageFileStorage;
 use Puli\Manager\Repository\RepositoryManagerImpl;
@@ -885,7 +884,7 @@ class RepositoryManagerImplTest extends ManagerTestCase
                 PHPUnit_Framework_Assert::assertSame(array('/other' => $mapping3), $rootPackageFile->getPathMappings());
             }));
 
-        $this->manager->removeRootPathMappings(Expr::startsWith('/app', PathMapping::REPOSITORY_PATH));
+        $this->manager->removeRootPathMappings(Expr::method('getRepositoryPath', Expr::startsWith('/app')));
 
         $this->assertFalse($mapping1->isLoaded());
         $this->assertFalse($mapping2->isLoaded());
@@ -932,7 +931,7 @@ class RepositoryManagerImplTest extends ManagerTestCase
         $this->packageFile1->addPathMapping($mapping4 = new PathMapping('/path2', 'resources'));
 
         try {
-            $this->manager->removeRootPathMappings(Expr::startsWith('/path', PathMapping::REPOSITORY_PATH));
+            $this->manager->removeRootPathMappings(Expr::method('getRepositoryPath', Expr::startsWith('/path')));
             $this->fail('Expected a TestException');
         } catch (TestException $e) {
         }
@@ -1027,9 +1026,8 @@ class RepositoryManagerImplTest extends ManagerTestCase
         $this->rootPackageFile->addPathMapping($mapping2 = new PathMapping('/path2', 'resources'));
         $this->packageFile1->addPathMapping($mapping3 = new PathMapping('/path1', 'resources'));
 
-        $expr1 = Expr::startsWith('/path', PathMapping::REPOSITORY_PATH);
-
-        $expr2 = Expr::same('/path2', PathMapping::REPOSITORY_PATH);
+        $expr1 = Expr::method('getRepositoryPath', Expr::startsWith('/path'));
+        $expr2 = Expr::method('getRepositoryPath', Expr::same('/path2'));
 
         $this->assertSame(array($mapping1, $mapping2), $this->manager->findRootPathMappings($expr1));
         $this->assertSame(array($mapping2), $this->manager->findRootPathMappings($expr2));
@@ -1054,9 +1052,8 @@ class RepositoryManagerImplTest extends ManagerTestCase
         $this->rootPackageFile->addPathMapping(new PathMapping('/path1', 'resources'));
         $this->rootPackageFile->addPathMapping(new PathMapping('/path2', 'resources'));
 
-        $expr1 = Expr::same('/path1', PathMapping::REPOSITORY_PATH);
-
-        $expr2 = Expr::same(PathMappingState::CONFLICT, PathMapping::STATE);
+        $expr1 = Expr::method('getRepositoryPath', Expr::same('/path1'));
+        $expr2 = Expr::method('isConflict', Expr::same(true));
 
         $this->assertTrue($this->manager->hasRootPathMappings());
         $this->assertTrue($this->manager->hasRootPathMappings($expr1));
@@ -1119,11 +1116,9 @@ class RepositoryManagerImplTest extends ManagerTestCase
         $this->packageFile1->addPathMapping($mapping2 = new PathMapping('/path2', 'resources'));
         $this->packageFile2->addPathMapping($mapping3 = new PathMapping('/path1', 'resources'));
 
-        $expr1 = Expr::same('/path1', PathMapping::REPOSITORY_PATH);
-
-        $expr2 = $expr1->andSame('vendor/root', PathMapping::CONTAINING_PACKAGE);
-
-        $expr3 = $expr1->andSame('vendor/package1', PathMapping::CONTAINING_PACKAGE);
+        $expr1 = Expr::method('getRepositoryPath', Expr::same('/path1'));
+        $expr2 = $expr1->andMethod('getContainingPackage', Expr::method('getName', Expr::same('vendor/root')));
+        $expr3 = $expr1->andMethod('getContainingPackage', Expr::method('getName', Expr::same('vendor/package1')));
 
         $this->assertSame(array($mapping1, $mapping3), $this->manager->findPathMappings($expr1));
         $this->assertSame(array($mapping1), $this->manager->findPathMappings($expr2));
@@ -1152,10 +1147,8 @@ class RepositoryManagerImplTest extends ManagerTestCase
         $this->packageFile1->addPathMapping(new PathMapping('/path2', 'resources'));
         $this->packageFile2->addPathMapping(new PathMapping('/path2', 'resources'));
 
-        $expr1 = Expr::same('vendor/package1', PathMapping::CONTAINING_PACKAGE);
-
-        $expr2 = Expr::same(PathMappingState::ENABLED, PathMapping::STATE);
-
+        $expr1 = Expr::method('getContainingPackage', Expr::method('getName', Expr::same('vendor/package1')));
+        $expr2 = Expr::method('isEnabled', Expr::same(true));
         $expr3 = $expr1->andX($expr2);
 
         $this->assertTrue($this->manager->hasPathMappings());

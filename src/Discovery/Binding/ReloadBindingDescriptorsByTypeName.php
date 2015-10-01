@@ -32,6 +32,11 @@ class ReloadBindingDescriptorsByTypeName extends AbstractReloadBindingDescriptor
      */
     private $bindingDescriptors;
 
+    /**
+     * @param string                          $typeName
+     * @param BindingDescriptorCollection     $bindingDescriptors
+     * @param BindingTypeDescriptorCollection $typeDescriptors
+     */
     public function __construct($typeName, BindingDescriptorCollection $bindingDescriptors, BindingTypeDescriptorCollection $typeDescriptors)
     {
         parent::__construct($typeDescriptors);

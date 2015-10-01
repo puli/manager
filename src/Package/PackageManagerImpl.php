@@ -204,7 +204,7 @@ class PackageManagerImpl implements PackageManager
         $packages = $this->packages->toArray();
 
         foreach ($this->packages->getInstalledPackages() as $package) {
-            if ($package->match($expr)) {
+            if ($expr->evaluate($package)) {
                 $this->rootPackageFile->removeInstallInfo($package->getName());
                 $this->packages->remove($package->getName());
             }
@@ -275,7 +275,7 @@ class PackageManagerImpl implements PackageManager
         $packages = new PackageCollection();
 
         foreach ($this->packages as $package) {
-            if ($package->match($expr)) {
+            if ($expr->evaluate($package)) {
                 $packages->add($package);
             }
         }
@@ -307,7 +307,7 @@ class PackageManagerImpl implements PackageManager
         }
 
         foreach ($this->packages as $package) {
-            if ($package->match($expr)) {
+            if ($expr->evaluate($package)) {
                 return true;
             }
         }

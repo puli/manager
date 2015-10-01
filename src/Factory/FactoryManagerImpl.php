@@ -42,7 +42,7 @@ class FactoryManagerImpl implements FactoryManager
     const REPO_VAR_NAME = 'repo';
 
     /**
-     * The name of the resource discovery variable.
+     * The name of the discovery variable.
      */
     const DISCOVERY_VAR_NAME = 'discovery';
 
@@ -292,21 +292,21 @@ EOF
 
         $method->setReturnValue(new ReturnValue(
             '$'.self::DISCOVERY_VAR_NAME,
-            'ResourceDiscovery',
-            'The created resource discovery.'
+            'Discovery',
+            'The created discovery.'
         ));
 
         $method->addBody(
 <<<EOF
-if (!interface_exists('Puli\Discovery\Api\ResourceDiscovery')) {
-    throw new RuntimeException('Please install puli/discovery to create ResourceDiscovery instances.');
+if (!interface_exists('Puli\Discovery\Api\Discovery')) {
+    throw new RuntimeException('Please install puli/discovery to create Discovery instances.');
 }
 
 EOF
         );
 
         $class->addImport(new Import('Puli\Repository\Api\ResourceRepository'));
-        $class->addImport(new Import('Puli\Discovery\Api\ResourceDiscovery'));
+        $class->addImport(new Import('Puli\Discovery\Api\Discovery'));
         $class->addImport(new Import('RuntimeException'));
         $class->addMethod($method);
 
@@ -327,7 +327,7 @@ EOF
      */
     public function addCreateUrlGeneratorMethod(Clazz $class)
     {
-        $class->addImport(new Import('Puli\Discovery\Api\ResourceDiscovery'));
+        $class->addImport(new Import('Puli\Discovery\Api\Discovery'));
         $class->addImport(new Import('Puli\Manager\Api\Server\ServerCollection'));
         $class->addImport(new Import('Puli\UrlGenerator\Api\UrlGenerator'));
         $class->addImport(new Import('Puli\UrlGenerator\DiscoveryUrlGenerator'));
@@ -337,9 +337,9 @@ EOF
         $method->setDescription('Creates the URL generator.');
 
         $arg = new Argument('discovery');
-        $arg->setTypeHint('ResourceDiscovery');
-        $arg->setType('ResourceDiscovery');
-        $arg->setDescription('The resource discovery to read from.');
+        $arg->setTypeHint('Discovery');
+        $arg->setType('Discovery');
+        $arg->setDescription('The discovery to read from.');
         $method->addArgument($arg);
 
         $method->setReturnValue(new ReturnValue('$generator', 'UrlGenerator', 'The created URL generator.'));

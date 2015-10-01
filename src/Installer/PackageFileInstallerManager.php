@@ -180,7 +180,7 @@ class PackageFileInstallerManager implements InstallerManager
         try {
             // Only remove root installers
             foreach ($previousRootInstallers as $installer) {
-                if ($installer->match($expr)) {
+                if ($expr->evaluate($installer)) {
                     unset($this->installerDescriptors[$installer->getName()]);
                     unset($this->rootInstallerDescriptors[$installer->getName()]);
                 }
@@ -237,7 +237,7 @@ class PackageFileInstallerManager implements InstallerManager
         $installers = array();
 
         foreach ($this->rootInstallerDescriptors as $installer) {
-            if ($installer->match($expr)) {
+            if ($expr->evaluate($installer)) {
                 $installers[] = $installer;
             }
         }
@@ -267,7 +267,7 @@ class PackageFileInstallerManager implements InstallerManager
         }
 
         foreach ($this->rootInstallerDescriptors as $installer) {
-            if ($installer->match($expr)) {
+            if ($expr->evaluate($installer)) {
                 return true;
             }
         }
@@ -309,7 +309,7 @@ class PackageFileInstallerManager implements InstallerManager
         $installers = array();
 
         foreach ($this->installerDescriptors as $installer) {
-            if ($installer->match($expr)) {
+            if ($expr->evaluate($installer)) {
                 $installers[] = $installer;
             }
         }
@@ -339,7 +339,7 @@ class PackageFileInstallerManager implements InstallerManager
         }
 
         foreach ($this->installerDescriptors as $installer) {
-            if ($installer->match($expr)) {
+            if ($expr->evaluate($installer)) {
                 return true;
             }
         }

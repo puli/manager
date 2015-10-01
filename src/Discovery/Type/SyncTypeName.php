@@ -122,12 +122,12 @@ class SyncTypeName implements AtomicOperation
     private function syncTypeName(BindingTypeDescriptor $enabledTypeBefore = null, BindingTypeDescriptor $enabledTypeAfter = null)
     {
         if ($enabledTypeBefore && !$enabledTypeAfter) {
-            $this->discovery->undefineType($this->typeName);
+            $this->discovery->removeBindingType($this->typeName);
         } elseif (!$enabledTypeBefore && $enabledTypeAfter) {
-            $this->discovery->defineType($enabledTypeAfter->toBindingType());
+            $this->discovery->addBindingType($enabledTypeAfter->getType());
         } elseif ($enabledTypeBefore !== $enabledTypeAfter) {
-            $this->discovery->undefineType($this->typeName);
-            $this->discovery->defineType($enabledTypeAfter->toBindingType());
+            $this->discovery->removeBindingType($this->typeName);
+            $this->discovery->addBindingType($enabledTypeAfter->getType());
         }
     }
 }

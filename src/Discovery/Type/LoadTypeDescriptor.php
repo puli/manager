@@ -64,7 +64,7 @@ class LoadTypeDescriptor implements AtomicOperation
         // never fails with the check before
         $this->typeDescriptor->load($this->containingPackage);
 
-        $typeName = $this->typeDescriptor->getName();
+        $typeName = $this->typeDescriptor->getTypeName();
         $packageName = $this->containingPackage->getName();
 
         if ($this->typeDescriptors->contains($typeName, $packageName)) {
@@ -86,7 +86,7 @@ class LoadTypeDescriptor implements AtomicOperation
             return;
         }
 
-        $typeName = $this->typeDescriptor->getName();
+        $typeName = $this->typeDescriptor->getTypeName();
 
         // never fails with the check before
         $this->typeDescriptor->unload();

@@ -11,19 +11,16 @@
 
 namespace Puli\Manager\Asset;
 
-use Puli\Manager\Api\Asset\AssetMapping;
-use Puli\Manager\Api\Discovery\BindingDescriptor;
-use Puli\Manager\Api\Discovery\BindingState;
 use Puli\UrlGenerator\DiscoveryUrlGenerator;
-use Webmozart\Expression\Comparison\EndsWith;
-use Webmozart\Expression\Comparison\Equals;
-use Webmozart\Expression\Comparison\NotEquals;
-use Webmozart\Expression\Comparison\NotSame;
-use Webmozart\Expression\Comparison\Same;
+use Webmozart\Expression\Constraint\EndsWith;
+use Webmozart\Expression\Constraint\Equals;
+use Webmozart\Expression\Constraint\NotEquals;
+use Webmozart\Expression\Constraint\NotSame;
+use Webmozart\Expression\Constraint\Same;
 use Webmozart\Expression\Expr;
 use Webmozart\Expression\Expression;
 use Webmozart\Expression\Logic\Conjunction;
-use Webmozart\Expression\Selector\Key;
+use Webmozart\Expression\Selector\Method;
 use Webmozart\Expression\Traversal\ExpressionTraverser;
 use Webmozart\Expression\Traversal\ExpressionVisitor;
 
@@ -55,9 +52,9 @@ class BindingExpressionBuilder implements ExpressionVisitor
     public function buildExpression(Expression $expr = null)
     {
         if (!$this->defaultExpression) {
-            $this->defaultExpression = Expr::same(BindingState::ENABLED, BindingDescriptor::STATE)
-                ->andSame(DiscoveryUrlGenerator::BINDING_TYPE, BindingDescriptor::TYPE_NAME)
-                ->andEndsWith('{,/**/*}', BindingDescriptor::QUERY);
+            $this->defaultExpression = Expr::method('isEnabled', Expr::same(true))
+                ->andMethod('getTypeName', Expr::same(DiscoveryUrlGenerator::BINDING_TYPE))
+                ->andMethod('getQuery', Expr::endsWith('{,/**/*}'));
         }
 
         if (!$expr) {
@@ -83,12 +80,12 @@ class BindingExpressionBuilder implements ExpressionVisitor
      */
     public function leaveExpression(Expression $expr)
     {
-        if ($expr instanceof Key) {
-            switch ($expr->getKey()) {
-                case AssetMapping::UUID:
-                    return Expr::key(BindingDescriptor::UUID, $expr->getExpression());
+        if ($expr instanceof Method) {
+            switch ($expr->getMethodName()) {
+                case 'getUuid':
+                    return Expr::method('getUuid', $expr->getExpression());
 
-                case AssetMapping::GLOB:
+                case 'getGlob':
                     $queryExpr = $expr->getExpression();
 
                     if ($queryExpr instanceof Same) {
@@ -103,18 +100,20 @@ class BindingExpressionBuilder implements ExpressionVisitor
                         $queryExpr = Expr::endsWith($queryExpr->getAcceptedSuffix().'{,/**/*}');
                     }
 
-                    return Expr::key(BindingDescriptor::QUERY, $queryExpr);
+                    return Expr::method('getQuery', $queryExpr);
 
-                case AssetMapping::SERVER_NAME:
-                    return Expr::key(
-                        BindingDescriptor::PARAMETER_VALUES,
-                        Expr::key(DiscoveryUrlGenerator::SERVER_PARAMETER, $expr->getExpression())
+                case 'getServerName':
+                    return Expr::method(
+                        'getParameterValue',
+                        DiscoveryUrlGenerator::SERVER_PARAMETER,
+                        $expr->getExpression()
                     );
 
-                case AssetMapping::SERVER_PATH:
-                    return Expr::key(
-                        BindingDescriptor::PARAMETER_VALUES,
-                        Expr::key(DiscoveryUrlGenerator::PATH_PARAMETER, $expr->getExpression())
+                case 'getServerPath':
+                    return Expr::method(
+                        'getParameterValue',
+                        DiscoveryUrlGenerator::PATH_PARAMETER,
+                        $expr->getExpression()
                     );
             }
         }

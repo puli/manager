@@ -16,9 +16,7 @@ use PHPUnit_Framework_MockObject_MockObject;
 use Puli\Manager\Api\Environment;
 use Puli\Manager\Api\InvalidConfigException;
 use Puli\Manager\Api\Package\InstallInfo;
-use Puli\Manager\Api\Package\Package;
 use Puli\Manager\Api\Package\PackageFile;
-use Puli\Manager\Api\Package\PackageState;
 use Puli\Manager\Api\Package\RootPackageFile;
 use Puli\Manager\Api\Package\UnsupportedVersionException;
 use Puli\Manager\Package\PackageFileStorage;
@@ -161,10 +159,8 @@ class PackageManagerImplTest extends ManagerTestCase
 
         $manager = new PackageManagerImpl($this->context, $this->packageFileStorage);
 
-        $expr1 = Expr::same(PackageState::ENABLED, Package::STATE);
-
-        $expr2 = Expr::same('webmozart', Package::INSTALLER);
-
+        $expr1 = Expr::method('isEnabled', Expr::same(true));
+        $expr2 = Expr::method('getInstallInfo', Expr::method('getInstallerName', Expr::same('webmozart')));
         $expr3 = $expr1->andX($expr2);
 
         $packages = $manager->findPackages($expr1);
@@ -271,8 +267,8 @@ class PackageManagerImplTest extends ManagerTestCase
         $this->initDefaultManager();
 
         $this->assertTrue($this->manager->hasPackages());
-        $this->assertTrue($this->manager->hasPackages(Expr::same('vendor/root', Package::NAME)));
-        $this->assertFalse($this->manager->hasPackages(Expr::same('foobar', Package::NAME)));
+        $this->assertTrue($this->manager->hasPackages(Expr::method('getName', Expr::same('vendor/root'))));
+        $this->assertFalse($this->manager->hasPackages(Expr::method('getName', Expr::same('foobar'))));
     }
 
     public function testInstallPackage()
@@ -719,7 +715,7 @@ class PackageManagerImplTest extends ManagerTestCase
         $this->assertTrue($this->manager->hasPackage('vendor/package2'));
         $this->assertTrue($this->manager->hasPackage('vendor/package3'));
 
-        $this->manager->removePackages(Expr::key(Package::NAME, Expr::endsWith('1')->orEndsWith('2')));
+        $this->manager->removePackages(Expr::method('getName', Expr::endsWith('1')->orEndsWith('2')));
 
         $this->assertFalse($this->rootPackageFile->hasInstallInfo('vendor/package1'));
         $this->assertFalse($this->rootPackageFile->hasInstallInfo('vendor/package2'));
@@ -739,7 +735,7 @@ class PackageManagerImplTest extends ManagerTestCase
             ->willThrowException(new TestException());
 
         try {
-            $this->manager->removePackages(Expr::startsWith('vendor/package', Package::NAME));
+            $this->manager->removePackages(Expr::method('getName', Expr::startsWith('vendor/package')));
             $this->fail('Expected a TestException');
         } catch (TestException $e) {
         }

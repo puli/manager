@@ -165,7 +165,7 @@ class PackageFileServerManagerUnloadedTest extends PHPUnit_Framework_TestCase
         $server1 = new Server('localhost1', 'symlink', 'web', '/public/%s');
         $server2 = new Server('localhost2', 'copy', 'alternative', '/alternative/%s');
 
-        $collection = $this->serverManager->findServers(Expr::startsWith('localhost', Server::NAME));
+        $collection = $this->serverManager->findServers(Expr::method('getName', Expr::startsWith('localhost')));
 
         $this->assertInstanceOf('Puli\Manager\Api\Server\ServerCollection', $collection);
         $this->assertEquals(array('localhost1' => $server1, 'localhost2' => $server2), $collection->toArray());
@@ -184,8 +184,8 @@ class PackageFileServerManagerUnloadedTest extends PHPUnit_Framework_TestCase
         $this->populateDefaultManager();
 
         $this->assertTrue($this->serverManager->hasServers());
-        $this->assertTrue($this->serverManager->hasServers(Expr::same('localhost', Server::NAME)));
-        $this->assertFalse($this->serverManager->hasServers(Expr::same('foobar', Server::NAME)));
+        $this->assertTrue($this->serverManager->hasServers(Expr::method('getName', Expr::same('localhost'))));
+        $this->assertFalse($this->serverManager->hasServers(Expr::method('getName', Expr::same('foobar'))));
     }
 
     public function testHasNoServers()
@@ -449,7 +449,7 @@ class PackageFileServerManagerUnloadedTest extends PHPUnit_Framework_TestCase
                 ),
             ));
 
-        $this->serverManager->removeServers(Expr::startsWith('localhost', Server::NAME));
+        $this->serverManager->removeServers(Expr::method('getName', Expr::startsWith('localhost')));
 
         $this->assertFalse($this->serverManager->hasServer('localhost1'));
         $this->assertFalse($this->serverManager->hasServer('localhost2'));
@@ -479,7 +479,7 @@ class PackageFileServerManagerUnloadedTest extends PHPUnit_Framework_TestCase
             ->willThrowException(new TestException());
 
         try {
-            $this->serverManager->removeServers(Expr::startsWith('localhost', Server::NAME));
+            $this->serverManager->removeServers(Expr::method('getName', Expr::startsWith('localhost')));
             $this->fail('Expected a TestException');
         } catch (TestException $e) {
         }

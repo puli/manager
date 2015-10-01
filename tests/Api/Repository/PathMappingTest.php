@@ -17,8 +17,6 @@ use Puli\Manager\Api\Package\PackageCollection;
 use Puli\Manager\Api\Package\PackageFile;
 use Puli\Manager\Api\Repository\PathConflict;
 use Puli\Manager\Api\Repository\PathMapping;
-use Puli\Manager\Api\Repository\PathMappingState;
-use Webmozart\Expression\Expr;
 
 /**
  * @since  1.0
@@ -588,20 +586,5 @@ class PathMappingTest extends PHPUnit_Framework_TestCase
         $this->assertCount(2, $mapping3->getConflictingMappings());
         $this->assertContains($mapping1, $mapping3->getConflictingMappings());
         $this->assertContains($mapping2, $mapping3->getConflictingMappings());
-    }
-
-    public function testMatch()
-    {
-        $mapping = new PathMapping('/path', 'resources');
-        $mapping->load($this->package1, $this->packages);
-
-        $this->assertFalse($mapping->match(Expr::same('foobar', PathMapping::CONTAINING_PACKAGE)));
-        $this->assertTrue($mapping->match(Expr::same($this->package1->getName(), PathMapping::CONTAINING_PACKAGE)));
-
-        $this->assertFalse($mapping->match(Expr::same(PathMappingState::CONFLICT, PathMapping::STATE)));
-        $this->assertTrue($mapping->match(Expr::same(PathMappingState::ENABLED, PathMapping::STATE)));
-
-        $this->assertFalse($mapping->match(Expr::startsWith('/foo', PathMapping::REPOSITORY_PATH)));
-        $this->assertTrue($mapping->match(Expr::startsWith('/pa', PathMapping::REPOSITORY_PATH)));
     }
 }

@@ -125,19 +125,9 @@ class SyncBindingUuid implements AtomicOperation
     private function syncBindingUuid(BindingDescriptor $enabledBefore = null, BindingDescriptor $enabledAfter = null)
     {
         if (!$enabledBefore && $enabledAfter) {
-            $this->discovery->bind(
-                $enabledAfter->getQuery(),
-                $enabledAfter->getTypeName(),
-                $enabledAfter->getParameterValues(),
-                $enabledAfter->getLanguage()
-            );
+            $this->discovery->addBinding($enabledAfter->getBinding());
         } elseif ($enabledBefore && !$enabledAfter) {
-            $this->discovery->unbind(
-                $enabledBefore->getQuery(),
-                $enabledBefore->getTypeName(),
-                $enabledBefore->getParameterValues(),
-                $enabledBefore->getLanguage()
-            );
+            $this->discovery->removeBinding($enabledBefore->getUuid());
         }
     }
 }

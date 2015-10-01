@@ -63,7 +63,7 @@ class UnloadTypeDescriptor implements AtomicOperation
         // never fails with the check before
         $this->containingPackage = $this->typeDescriptor->getContainingPackage();
 
-        $typeName = $this->typeDescriptor->getName();
+        $typeName = $this->typeDescriptor->getTypeName();
         $packageName = $this->containingPackage->getName();
 
         // never fails with the check before

@@ -25,10 +25,8 @@ use Puli\Manager\Api\Discovery\DiscoveryManager;
 use Puli\Manager\Api\Factory\FactoryManager;
 use Puli\Manager\Api\Installation\InstallationManager;
 use Puli\Manager\Api\Installer\InstallerManager;
-use Puli\Manager\Api\Package\Package;
 use Puli\Manager\Api\Package\PackageFileSerializer;
 use Puli\Manager\Api\Package\PackageManager;
-use Puli\Manager\Api\Package\PackageState;
 use Puli\Manager\Api\Package\RootPackageFileManager;
 use Puli\Manager\Api\Repository\RepositoryManager;
 use Puli\Manager\Api\Server\ServerManager;
@@ -636,7 +634,7 @@ class Puli
             $this->repositoryManager = new RepositoryManagerImpl(
                 $this->context,
                 $this->getRepository(),
-                $this->getPackageManager()->findPackages(Expr::same(PackageState::ENABLED, Package::STATE)),
+                $this->getPackageManager()->findPackages(Expr::method('isEnabled', Expr::same(true))),
                 $this->getPackageFileStorage()
             );
         }
@@ -659,7 +657,7 @@ class Puli
             $this->discoveryManager = new DiscoveryManagerImpl(
                 $this->context,
                 $this->getDiscovery(),
-                $this->getPackageManager()->findPackages(Expr::same(PackageState::ENABLED, Package::STATE)),
+                $this->getPackageManager()->findPackages(Expr::method('isEnabled', Expr::same(true))),
                 $this->getPackageFileStorage(),
                 $this->logger
             );

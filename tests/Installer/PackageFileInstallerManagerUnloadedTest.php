@@ -200,9 +200,8 @@ class PackageFileInstallerManagerUnloadedTest extends PHPUnit_Framework_TestCase
         $descriptor3 = $this->manager->getInstallerDescriptor('copy');
         $descriptor4 = $this->manager->getInstallerDescriptor('symlink');
 
-        $expr1 = Expr::same('custom-symlink', InstallerDescriptor::NAME);
-
-        $expr2 = Expr::endsWith('Installer', InstallerDescriptor::CLASS_NAME);
+        $expr1 = Expr::method('getName', Expr::same('custom-symlink'));
+        $expr2 = Expr::method('getClassName', Expr::endsWith('Installer'));
 
         $this->assertEquals(array($descriptor1), $this->manager->findInstallerDescriptors($expr1));
         $this->assertEquals(array($descriptor3, $descriptor4, $descriptor2, $descriptor1), $this->manager->findInstallerDescriptors($expr2));
@@ -224,9 +223,9 @@ class PackageFileInstallerManagerUnloadedTest extends PHPUnit_Framework_TestCase
         $this->populateDefaultManager();
 
         $this->assertTrue($this->manager->hasInstallerDescriptors());
-        $this->assertTrue($this->manager->hasInstallerDescriptors(Expr::same('copy', InstallerDescriptor::NAME)));
-        $this->assertTrue($this->manager->hasInstallerDescriptors(Expr::same('custom-symlink', InstallerDescriptor::NAME)));
-        $this->assertFalse($this->manager->hasInstallerDescriptors(Expr::same('foobar', InstallerDescriptor::NAME)));
+        $this->assertTrue($this->manager->hasInstallerDescriptors(Expr::method('getName', Expr::same('copy'))));
+        $this->assertTrue($this->manager->hasInstallerDescriptors(Expr::method('getName', Expr::same('custom-symlink'))));
+        $this->assertFalse($this->manager->hasInstallerDescriptors(Expr::method('getName', Expr::same('foobar'))));
     }
 
     public function testGetRootInstallerDescriptor()
@@ -287,9 +286,8 @@ class PackageFileInstallerManagerUnloadedTest extends PHPUnit_Framework_TestCase
         $descriptor1 = new InstallerDescriptor('custom-symlink', 'CustomSymlinkInstaller');
         $descriptor2 = new InstallerDescriptor('custom-copy', 'CustomCopyInstaller');
 
-        $expr1 = Expr::same('custom-symlink', InstallerDescriptor::NAME);
-
-        $expr2 = Expr::endsWith('Installer', InstallerDescriptor::CLASS_NAME);
+        $expr1 = Expr::method('getName', Expr::same('custom-symlink'));
+        $expr2 = Expr::method('getClassName', Expr::endsWith('Installer'));
 
         $this->assertEquals(array($descriptor1), $this->manager->findRootInstallerDescriptors($expr1));
         $this->assertEquals(array($descriptor1, $descriptor2), $this->manager->findRootInstallerDescriptors($expr2));
@@ -312,9 +310,9 @@ class PackageFileInstallerManagerUnloadedTest extends PHPUnit_Framework_TestCase
         $this->populateRootManager();
 
         $this->assertTrue($this->manager->hasRootInstallerDescriptors());
-        $this->assertTrue($this->manager->hasRootInstallerDescriptors(Expr::same('custom-symlink', InstallerDescriptor::NAME)));
-        $this->assertFalse($this->manager->hasRootInstallerDescriptors(Expr::same('rsync', InstallerDescriptor::NAME)));
-        $this->assertFalse($this->manager->hasRootInstallerDescriptors(Expr::same('foobar', InstallerDescriptor::NAME)));
+        $this->assertTrue($this->manager->hasRootInstallerDescriptors(Expr::method('getName', Expr::same('custom-symlink'))));
+        $this->assertFalse($this->manager->hasRootInstallerDescriptors(Expr::method('getName', Expr::same('rsync'))));
+        $this->assertFalse($this->manager->hasRootInstallerDescriptors(Expr::method('getName', Expr::same('foobar'))));
     }
 
     public function testHasNoRootInstallerDescriptors()
@@ -628,7 +626,7 @@ class PackageFileInstallerManagerUnloadedTest extends PHPUnit_Framework_TestCase
                 ),
             ));
 
-        $this->manager->removeRootInstallerDescriptors(Expr::startsWith('custom-symlink', InstallerDescriptor::NAME));
+        $this->manager->removeRootInstallerDescriptors(Expr::method('getName', Expr::startsWith('custom-symlink')));
 
         $this->assertTrue($this->manager->hasInstallerDescriptor('cdn'));
         $this->assertTrue($this->manager->hasInstallerDescriptor('custom-symlink2'));
@@ -656,7 +654,7 @@ class PackageFileInstallerManagerUnloadedTest extends PHPUnit_Framework_TestCase
             ->willThrowException(new TestException());
 
         try {
-            $this->manager->removeRootInstallerDescriptors(Expr::startsWith('custom-symlink', InstallerDescriptor::NAME));
+            $this->manager->removeRootInstallerDescriptors(Expr::method('getName', Expr::startsWith('custom-symlink')));
             $this->fail('Expected a TestException');
         } catch (TestException $e) {
         }

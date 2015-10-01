@@ -12,9 +12,6 @@
 namespace Puli\Manager\Tests\Asset;
 
 use PHPUnit_Framework_TestCase;
-use Puli\Manager\Api\Asset\AssetMapping;
-use Puli\Manager\Api\Discovery\BindingDescriptor;
-use Puli\Manager\Api\Discovery\BindingState;
 use Puli\Manager\Asset\BindingExpressionBuilder;
 use Puli\UrlGenerator\DiscoveryUrlGenerator;
 use Webmozart\Expression\Expr;
@@ -38,31 +35,31 @@ class BindingExpressionBuilderTest extends PHPUnit_Framework_TestCase
 
     public function testBuildDefaultExpression()
     {
-        $expr = Expr::same(BindingState::ENABLED, BindingDescriptor::STATE)
-            ->andSame(DiscoveryUrlGenerator::BINDING_TYPE, BindingDescriptor::TYPE_NAME)
-            ->andEndsWith('{,/**/*}', BindingDescriptor::QUERY);
+        $expr = Expr::method('isEnabled', Expr::same(true))
+            ->andMethod('getTypeName', Expr::same(DiscoveryUrlGenerator::BINDING_TYPE))
+            ->andMethod('getQuery', Expr::endsWith('{,/**/*}'));
 
         $this->assertEquals($expr, $this->builder->buildExpression());
     }
 
     public function testBuildExpressionWithCustomCriteria()
     {
-        $expr1 = Expr::startsWith('abcd', AssetMapping::UUID)
-            ->orSame('local', AssetMapping::SERVER_NAME)
+        $expr1 = Expr::method('getUuid', Expr::startsWith('abcd'))
+            ->orMethod('getServerName', Expr::same('local'))
             ->orX(
-                Expr::same('/path', AssetMapping::GLOB)
-                    ->andSame('css', AssetMapping::SERVER_PATH)
+                Expr::method('getGlob', Expr::same('/path'))
+                    ->andMethod('getServerPath', Expr::same('css'))
             );
 
-        $expr2 = Expr::same(BindingState::ENABLED, BindingDescriptor::STATE)
-            ->andSame(DiscoveryUrlGenerator::BINDING_TYPE, BindingDescriptor::TYPE_NAME)
-            ->andEndsWith('{,/**/*}', BindingDescriptor::QUERY)
+        $expr2 = Expr::method('isEnabled', Expr::same(true))
+            ->andMethod('getTypeName', Expr::same(DiscoveryUrlGenerator::BINDING_TYPE))
+            ->andMethod('getQuery', Expr::endsWith('{,/**/*}'))
             ->andX(
-                Expr::startsWith('abcd', BindingDescriptor::UUID)
-                    ->orKey(BindingDescriptor::PARAMETER_VALUES, Expr::key(DiscoveryUrlGenerator::SERVER_PARAMETER, Expr::same('local')))
+                Expr::method('getUuid', Expr::startsWith('abcd'))
+                    ->orMethod('getParameterValue', DiscoveryUrlGenerator::SERVER_PARAMETER, Expr::same('local'))
                     ->orX(
-                        Expr::same('/path{,/**/*}', BindingDescriptor::QUERY)
-                            ->andKey(BindingDescriptor::PARAMETER_VALUES, Expr::key(DiscoveryUrlGenerator::PATH_PARAMETER, Expr::same('css')))
+                        Expr::method('getQuery', Expr::same('/path{,/**/*}'))
+                            ->andMethod('getParameterValue', DiscoveryUrlGenerator::PATH_PARAMETER, Expr::same('css'))
                     )
             );
 
@@ -71,60 +68,60 @@ class BindingExpressionBuilderTest extends PHPUnit_Framework_TestCase
 
     public function testAppendDefaultQuerySuffixForSame()
     {
-        $expr1 = Expr::same('/path', AssetMapping::GLOB);
+        $expr1 = Expr::method('getGlob', Expr::same('/path'));
 
-        $expr2 = Expr::same(BindingState::ENABLED, BindingDescriptor::STATE)
-            ->andSame(DiscoveryUrlGenerator::BINDING_TYPE, BindingDescriptor::TYPE_NAME)
-            ->andEndsWith('{,/**/*}', BindingDescriptor::QUERY)
-            ->andSame('/path{,/**/*}', BindingDescriptor::QUERY);
+        $expr2 = Expr::method('isEnabled', Expr::same(true))
+            ->andMethod('getTypeName', Expr::same(DiscoveryUrlGenerator::BINDING_TYPE))
+            ->andMethod('getQuery', Expr::endsWith('{,/**/*}'))
+            ->andMethod('getQuery', Expr::same('/path{,/**/*}'));
 
         $this->assertEquals($expr2, $this->builder->buildExpression($expr1));
     }
 
     public function testAppendDefaultQuerySuffixForEquals()
     {
-        $expr1 = Expr::equals('/path', AssetMapping::GLOB);
+        $expr1 = Expr::method('getGlob', Expr::equals('/path'));
 
-        $expr2 = Expr::same(BindingState::ENABLED, BindingDescriptor::STATE)
-            ->andSame(DiscoveryUrlGenerator::BINDING_TYPE, BindingDescriptor::TYPE_NAME)
-            ->andEndsWith('{,/**/*}', BindingDescriptor::QUERY)
-            ->andEquals('/path{,/**/*}', BindingDescriptor::QUERY);
+        $expr2 = Expr::method('isEnabled', Expr::same(true))
+            ->andMethod('getTypeName', Expr::same(DiscoveryUrlGenerator::BINDING_TYPE))
+            ->andMethod('getQuery', Expr::endsWith('{,/**/*}'))
+            ->andMethod('getQuery', Expr::equals('/path{,/**/*}'));
 
         $this->assertEquals($expr2, $this->builder->buildExpression($expr1));
     }
 
     public function testAppendDefaultQuerySuffixForNotSame()
     {
-        $expr1 = Expr::notSame('/path', AssetMapping::GLOB);
+        $expr1 = Expr::method('getGlob', Expr::notSame('/path'));
 
-        $expr2 = Expr::same(BindingState::ENABLED, BindingDescriptor::STATE)
-            ->andSame(DiscoveryUrlGenerator::BINDING_TYPE, BindingDescriptor::TYPE_NAME)
-            ->andEndsWith('{,/**/*}', BindingDescriptor::QUERY)
-            ->andNotSame('/path{,/**/*}', BindingDescriptor::QUERY);
+        $expr2 = Expr::method('isEnabled', Expr::same(true))
+            ->andMethod('getTypeName', Expr::same(DiscoveryUrlGenerator::BINDING_TYPE))
+            ->andMethod('getQuery', Expr::endsWith('{,/**/*}'))
+            ->andMethod('getQuery', Expr::notSame('/path{,/**/*}'));
 
         $this->assertEquals($expr2, $this->builder->buildExpression($expr1));
     }
 
     public function testAppendDefaultQuerySuffixForNotEquals()
     {
-        $expr1 = Expr::notEquals('/path', AssetMapping::GLOB);
+        $expr1 = Expr::method('getGlob', Expr::notEquals('/path'));
 
-        $expr2 = Expr::same(BindingState::ENABLED, BindingDescriptor::STATE)
-            ->andSame(DiscoveryUrlGenerator::BINDING_TYPE, BindingDescriptor::TYPE_NAME)
-            ->andEndsWith('{,/**/*}', BindingDescriptor::QUERY)
-            ->andNotEquals('/path{,/**/*}', BindingDescriptor::QUERY);
+        $expr2 = Expr::method('isEnabled', Expr::same(true))
+            ->andMethod('getTypeName', Expr::same(DiscoveryUrlGenerator::BINDING_TYPE))
+            ->andMethod('getQuery', Expr::endsWith('{,/**/*}'))
+            ->andMethod('getQuery', Expr::notEquals('/path{,/**/*}'));
 
         $this->assertEquals($expr2, $this->builder->buildExpression($expr1));
     }
 
     public function testAppendDefaultQuerySuffixForEndsWith()
     {
-        $expr1 = Expr::endsWith('.css', AssetMapping::GLOB);
+        $expr1 = Expr::method('getGlob', Expr::endsWith('/path'));
 
-        $expr2 = Expr::same(BindingState::ENABLED, BindingDescriptor::STATE)
-            ->andSame(DiscoveryUrlGenerator::BINDING_TYPE, BindingDescriptor::TYPE_NAME)
-            ->andEndsWith('{,/**/*}', BindingDescriptor::QUERY)
-            ->andEndsWith('.css{,/**/*}', BindingDescriptor::QUERY);
+        $expr2 = Expr::method('isEnabled', Expr::same(true))
+            ->andMethod('getTypeName', Expr::same(DiscoveryUrlGenerator::BINDING_TYPE))
+            ->andMethod('getQuery', Expr::endsWith('{,/**/*}'))
+            ->andMethod('getQuery', Expr::endsWith('/path{,/**/*}'));
 
         $this->assertEquals($expr2, $this->builder->buildExpression($expr1));
     }

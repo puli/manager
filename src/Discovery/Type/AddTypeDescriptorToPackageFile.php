@@ -47,7 +47,7 @@ class AddTypeDescriptorToPackageFile implements AtomicOperation
 
     public function execute()
     {
-        $typeName = $this->typeDescriptor->getName();
+        $typeName = $this->typeDescriptor->getTypeName();
 
         if ($this->rootPackageFile->hasTypeDescriptor($typeName)) {
             $this->previousDescriptor = $this->rootPackageFile->getTypeDescriptor($typeName);
@@ -61,7 +61,7 @@ class AddTypeDescriptorToPackageFile implements AtomicOperation
         if ($this->previousDescriptor) {
             $this->rootPackageFile->addTypeDescriptor($this->previousDescriptor);
         } else {
-            $this->rootPackageFile->removeTypeDescriptor($this->typeDescriptor->getName());
+            $this->rootPackageFile->removeTypeDescriptor($this->typeDescriptor->getTypeName());
         }
     }
 }

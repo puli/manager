@@ -242,7 +242,7 @@ class RepositoryManagerImpl implements RepositoryManager
 
         try {
             foreach ($this->getRootPathMappings() as $mapping) {
-                if ($mapping->match($expr)) {
+                if ($expr->evaluate($mapping)) {
                     $syncOp = $this->syncRepositoryPath($mapping->getRepositoryPath());
                     $syncOp->takeSnapshot();
 
@@ -285,7 +285,7 @@ class RepositoryManagerImpl implements RepositoryManager
      */
     public function findRootPathMappings(Expression $expr)
     {
-        $expr = Expr::same($this->rootPackage->getName(), PathMapping::CONTAINING_PACKAGE)
+        $expr = Expr::method('getContainingPackage', Expr::same($this->rootPackage))
             ->andX($expr);
 
         return $this->findPathMappings($expr);
@@ -323,7 +323,7 @@ class RepositoryManagerImpl implements RepositoryManager
      */
     public function hasRootPathMappings(Expression $expr = null)
     {
-        $expr2 = Expr::same($this->rootPackage->getName(), PathMapping::CONTAINING_PACKAGE);
+        $expr2 = Expr::method('getContainingPackage', Expr::same($this->rootPackage));
 
         if ($expr) {
             $expr2 = $expr2->andX($expr);
@@ -378,7 +378,7 @@ class RepositoryManagerImpl implements RepositoryManager
 
         foreach ($this->mappings->toArray() as $mappingsByPackage) {
             foreach ($mappingsByPackage as $mapping) {
-                if ($mapping->match($expr)) {
+                if ($expr->evaluate($mapping)) {
                     $mappings[] = $mapping;
                 }
             }
@@ -413,7 +413,7 @@ class RepositoryManagerImpl implements RepositoryManager
 
         foreach ($this->mappings->toArray() as $mappingsByPackage) {
             foreach ($mappingsByPackage as $mapping) {
-                if ($mapping->match($expr)) {
+                if ($expr->evaluate($mapping)) {
                     return true;
                 }
             }

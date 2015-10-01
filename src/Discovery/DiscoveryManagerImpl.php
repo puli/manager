@@ -14,10 +14,7 @@ namespace Puli\Manager\Discovery;
 use Exception;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
-use Puli\Discovery\Api\Binding\MissingParameterException;
-use Puli\Discovery\Api\Binding\NoSuchParameterException;
 use Puli\Discovery\Api\EditableDiscovery;
-use Puli\Discovery\Api\Validation\ConstraintViolation;
 use Puli\Manager\Api\Context\ProjectContext;
 use Puli\Manager\Api\Discovery\BindingDescriptor;
 use Puli\Manager\Api\Discovery\BindingTypeDescriptor;
@@ -35,8 +32,8 @@ use Puli\Manager\Api\Package\PackageCollection;
 use Puli\Manager\Api\Package\RootPackage;
 use Puli\Manager\Api\Package\RootPackageFile;
 use Puli\Manager\Assert\Assert;
+use Puli\Manager\Discovery\Binding\AddBinding;
 use Puli\Manager\Discovery\Binding\AddBindingDescriptorToPackageFile;
-use Puli\Manager\Discovery\Binding\Bind;
 use Puli\Manager\Discovery\Binding\BindingDescriptorCollection;
 use Puli\Manager\Discovery\Binding\DisableBindingUuid;
 use Puli\Manager\Discovery\Binding\EnableBindingUuid;
@@ -46,9 +43,9 @@ use Puli\Manager\Discovery\Binding\ReloadBindingDescriptorsByUuid;
 use Puli\Manager\Discovery\Binding\RemoveBindingDescriptorFromPackageFile;
 use Puli\Manager\Discovery\Binding\SyncBindingUuid;
 use Puli\Manager\Discovery\Binding\UnloadBindingDescriptor;
+use Puli\Manager\Discovery\Type\AddBindingType;
 use Puli\Manager\Discovery\Type\AddTypeDescriptorToPackageFile;
 use Puli\Manager\Discovery\Type\BindingTypeDescriptorCollection;
-use Puli\Manager\Discovery\Type\DefineType;
 use Puli\Manager\Discovery\Type\LoadTypeDescriptor;
 use Puli\Manager\Discovery\Type\RemoveTypeDescriptorFromPackageFile;
 use Puli\Manager\Discovery\Type\SyncTypeName;
@@ -149,21 +146,22 @@ class DiscoveryManagerImpl implements DiscoveryManager
     /**
      * {@inheritdoc}
      */
-    public function addRootBindingType(BindingTypeDescriptor $typeDescriptor, $flags = 0)
+    public function addRootTypeDescriptor(BindingTypeDescriptor $typeDescriptor, $flags = 0)
     {
         Assert::integer($flags, 'The argument $flags must be a boolean.');
 
         $this->assertPackagesLoaded();
         $this->emitWarningForDuplicateTypes();
 
-        if (!($flags & self::OVERRIDE) && $this->typeDescriptors->contains($typeDescriptor->getName())) {
-            throw DuplicateTypeException::forTypeName($typeDescriptor->getName());
+        $typeName = $typeDescriptor->getTypeName();
+
+        if (!($flags & self::OVERRIDE) && $this->typeDescriptors->contains($typeName)) {
+            throw DuplicateTypeException::forTypeName($typeName);
         }
 
         $tx = new Transaction();
 
         try {
-            $typeName = $typeDescriptor->getName();
             $syncBindingOps = array();
 
             foreach ($this->getUuidsByTypeName($typeName) as $uuid) {
@@ -196,7 +194,7 @@ class DiscoveryManagerImpl implements DiscoveryManager
     /**
      * {@inheritdoc}
      */
-    public function removeRootBindingType($typeName)
+    public function removeRootTypeDescriptor($typeName)
     {
         // Only check that this is a string. The error message "not found" is
         // more helpful than e.g. "type name must contain /".
@@ -247,7 +245,7 @@ class DiscoveryManagerImpl implements DiscoveryManager
     /**
      * {@inheritdoc}
      */
-    public function removeRootBindingTypes(Expression $expr)
+    public function removeRootTypeDescriptors(Expression $expr)
     {
         $this->assertPackagesLoaded();
 
@@ -255,9 +253,9 @@ class DiscoveryManagerImpl implements DiscoveryManager
         $syncBindingOps = array();
 
         try {
-            foreach ($this->getRootBindingTypes() as $typeDescriptor) {
-                if ($typeDescriptor->match($expr)) {
-                    $typeName = $typeDescriptor->getName();
+            foreach ($this->getRootTypeDescriptors() as $typeDescriptor) {
+                if ($expr->evaluate($typeDescriptor)) {
+                    $typeName = $typeDescriptor->getTypeName();
 
                     $tx->execute($this->removeTypeDescriptorFromPackageFile($typeName));
 
@@ -294,23 +292,23 @@ class DiscoveryManagerImpl implements DiscoveryManager
     /**
      * {@inheritdoc}
      */
-    public function clearRootBindingTypes()
+    public function clearRootTypeDescriptors()
     {
-        $this->removeRootBindingTypes(Expr::true());
+        $this->removeRootTypeDescriptors(Expr::true());
     }
 
     /**
      * {@inheritdoc}
      */
-    public function getRootBindingType($typeName)
+    public function getRootTypeDescriptor($typeName)
     {
-        return $this->getBindingType($typeName, $this->rootPackage->getName());
+        return $this->getTypeDescriptor($typeName, $this->rootPackage->getName());
     }
 
     /**
      * {@inheritdoc}
      */
-    public function getRootBindingTypes()
+    public function getRootTypeDescriptors()
     {
         $this->assertPackagesLoaded();
 
@@ -329,40 +327,40 @@ class DiscoveryManagerImpl implements DiscoveryManager
     /**
      * {@inheritdoc}
      */
-    public function findRootBindingTypes(Expression $expr)
+    public function findRootTypeDescriptors(Expression $expr)
     {
-        $expr = Expr::same($this->rootPackage->getName(), BindingDescriptor::CONTAINING_PACKAGE)
+        $expr = Expr::method('getContainingPackage', Expr::same($this->rootPackage))
             ->andX($expr);
 
-        return $this->findBindingTypes($expr);
+        return $this->findTypeDescriptors($expr);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function hasRootBindingType($typeName)
+    public function hasRootTypeDescriptor($typeName)
     {
-        return $this->hasBindingType($typeName, $this->rootPackage->getName());
+        return $this->hasTypeDescriptor($typeName, $this->rootPackage->getName());
     }
 
     /**
      * {@inheritdoc}
      */
-    public function hasRootBindingTypes(Expression $expr = null)
+    public function hasRootTypeDescriptors(Expression $expr = null)
     {
-        $expr2 = Expr::same($this->rootPackage->getName(), BindingTypeDescriptor::CONTAINING_PACKAGE);
+        $expr2 = Expr::method('getContainingPackage', Expr::same($this->rootPackage));
 
         if ($expr) {
             $expr2 = $expr2->andX($expr);
         }
 
-        return $this->hasBindingTypes($expr2);
+        return $this->hasTypeDescriptors($expr2);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function getBindingType($typeName, $packageName)
+    public function getTypeDescriptor($typeName, $packageName)
     {
         Assert::string($typeName, 'The type name must be a string. Got: %s');
         Assert::string($packageName, 'The package name must be a string. Got: %s');
@@ -379,7 +377,7 @@ class DiscoveryManagerImpl implements DiscoveryManager
     /**
      * {@inheritdoc}
      */
-    public function getBindingTypes()
+    public function getTypeDescriptors()
     {
         $this->assertPackagesLoaded();
 
@@ -397,27 +395,27 @@ class DiscoveryManagerImpl implements DiscoveryManager
     /**
      * {@inheritdoc}
      */
-    public function findBindingTypes(Expression $expr)
+    public function findTypeDescriptors(Expression $expr)
     {
         $this->assertPackagesLoaded();
 
-        $types = array();
+        $typeDescriptors = array();
 
-        foreach ($this->typeDescriptors->toArray() as $typeName => $typesByPackage) {
-            foreach ($typesByPackage as $type) {
-                if ($type->match($expr)) {
-                    $types[] = $type;
+        foreach ($this->typeDescriptors->toArray() as $typeName => $descriptorsByPackage) {
+            foreach ($descriptorsByPackage as $typeDescriptor) {
+                if ($expr->evaluate($typeDescriptor)) {
+                    $typeDescriptors[] = $typeDescriptor;
                 }
             }
         }
 
-        return $types;
+        return $typeDescriptors;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function hasBindingType($typeName, $packageName = null)
+    public function hasTypeDescriptor($typeName, $packageName = null)
     {
         Assert::nullOrString($packageName, 'The package name must be a string or null. Got: %s');
 
@@ -429,7 +427,7 @@ class DiscoveryManagerImpl implements DiscoveryManager
     /**
      * {@inheritdoc}
      */
-    public function hasBindingTypes(Expression $expr = null)
+    public function hasTypeDescriptors(Expression $expr = null)
     {
         $this->assertPackagesLoaded();
 
@@ -437,9 +435,9 @@ class DiscoveryManagerImpl implements DiscoveryManager
             return !$this->typeDescriptors->isEmpty();
         }
 
-        foreach ($this->typeDescriptors->toArray() as $typeName => $typesByPackage) {
-            foreach ($typesByPackage as $type) {
-                if ($type->match($expr)) {
+        foreach ($this->typeDescriptors->toArray() as $typeName => $descriptorsByPackage) {
+            foreach ($descriptorsByPackage as $typeDescriptor) {
+                if ($expr->evaluate($typeDescriptor)) {
                     return true;
                 }
             }
@@ -451,7 +449,7 @@ class DiscoveryManagerImpl implements DiscoveryManager
     /**
      * {@inheritdoc}
      */
-    public function addRootBinding(BindingDescriptor $bindingDescriptor, $flags = 0)
+    public function addRootBindingDescriptor(BindingDescriptor $bindingDescriptor, $flags = 0)
     {
         $this->assertPackagesLoaded();
 
@@ -498,7 +496,7 @@ class DiscoveryManagerImpl implements DiscoveryManager
     /**
      * {@inheritdoc}
      */
-    public function removeRootBinding(Uuid $uuid)
+    public function removeRootBindingDescriptor(Uuid $uuid)
     {
         $this->assertPackagesLoaded();
 
@@ -535,15 +533,15 @@ class DiscoveryManagerImpl implements DiscoveryManager
     /**
      * {@inheritdoc}
      */
-    public function removeRootBindings(Expression $expr)
+    public function removeRootBindingDescriptors(Expression $expr)
     {
         $this->assertPackagesLoaded();
 
         $tx = new Transaction();
 
         try {
-            foreach ($this->getRootBindings() as $bindingDescriptor) {
-                if ($bindingDescriptor->match($expr)) {
+            foreach ($this->getRootBindingDescriptors() as $bindingDescriptor) {
+                if ($expr->evaluate($bindingDescriptor)) {
                     $syncOp = $this->syncBindingUuid($bindingDescriptor->getUuid());
                     $syncOp->takeSnapshot();
 
@@ -566,17 +564,17 @@ class DiscoveryManagerImpl implements DiscoveryManager
     /**
      * {@inheritdoc}
      */
-    public function clearRootBindings()
+    public function clearRootBindingDescriptors()
     {
-        $this->removeRootBindings(Expr::true());
+        $this->removeRootBindingDescriptors(Expr::true());
     }
 
     /**
      * {@inheritdoc}
      */
-    public function getRootBinding(Uuid $uuid)
+    public function getRootBindingDescriptor(Uuid $uuid)
     {
-        $binding = $this->getBinding($uuid);
+        $binding = $this->getBindingDescriptor($uuid);
 
         if (!$binding->getContainingPackage() instanceof RootPackage) {
             throw NoSuchBindingException::forUuidAndPackage($uuid, $this->rootPackage->getName());
@@ -588,7 +586,7 @@ class DiscoveryManagerImpl implements DiscoveryManager
     /**
      * {@inheritdoc}
      */
-    public function getRootBindings()
+    public function getRootBindingDescriptors()
     {
         $this->assertPackagesLoaded();
 
@@ -606,40 +604,40 @@ class DiscoveryManagerImpl implements DiscoveryManager
     /**
      * {@inheritdoc}
      */
-    public function findRootBindings(Expression $expr)
+    public function findRootBindingDescriptors(Expression $expr)
     {
-        $expr = Expr::same($this->rootPackage->getName(), BindingDescriptor::CONTAINING_PACKAGE)
+        $expr = Expr::method('getContainingPackage', Expr::same($this->rootPackage))
             ->andX($expr);
 
-        return $this->findBindings($expr);
+        return $this->findBindingDescriptors($expr);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function hasRootBinding(Uuid $uuid)
+    public function hasRootBindingDescriptor(Uuid $uuid)
     {
-        return $this->hasBinding($uuid) && $this->getBinding($uuid)->getContainingPackage() instanceof RootPackage;
+        return $this->hasBindingDescriptor($uuid) && $this->getBindingDescriptor($uuid)->getContainingPackage() instanceof RootPackage;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function hasRootBindings(Expression $expr = null)
+    public function hasRootBindingDescriptors(Expression $expr = null)
     {
-        $expr2 = Expr::same($this->rootPackage->getName(), BindingDescriptor::CONTAINING_PACKAGE);
+        $expr2 = Expr::method('getContainingPackage', Expr::same($this->rootPackage));
 
         if ($expr) {
             $expr2 = $expr2->andX($expr);
         }
 
-        return $this->hasBindings($expr2);
+        return $this->hasBindingDescriptors($expr2);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function enableBinding(Uuid $uuid)
+    public function enableBindingDescriptor(Uuid $uuid)
     {
         $this->assertPackagesLoaded();
 
@@ -688,7 +686,7 @@ class DiscoveryManagerImpl implements DiscoveryManager
     /**
      * {@inheritdoc}
      */
-    public function disableBinding(Uuid $uuid)
+    public function disableBindingDescriptor(Uuid $uuid)
     {
         $this->assertPackagesLoaded();
 
@@ -737,7 +735,7 @@ class DiscoveryManagerImpl implements DiscoveryManager
     /**
      * {@inheritdoc}
      */
-    public function getBinding(Uuid $uuid)
+    public function getBindingDescriptor(Uuid $uuid)
     {
         $this->assertPackagesLoaded();
 
@@ -751,7 +749,7 @@ class DiscoveryManagerImpl implements DiscoveryManager
     /**
      * {@inheritdoc}
      */
-    public function getBindings()
+    public function getBindingDescriptors()
     {
         $this->assertPackagesLoaded();
 
@@ -761,25 +759,25 @@ class DiscoveryManagerImpl implements DiscoveryManager
     /**
      * {@inheritdoc}
      */
-    public function findBindings(Expression $expr)
+    public function findBindingDescriptors(Expression $expr)
     {
         $this->assertPackagesLoaded();
 
-        $bindings = array();
+        $descriptors = array();
 
-        foreach ($this->bindingDescriptors->toArray() as $binding) {
-            if ($binding->match($expr)) {
-                $bindings[] = $binding;
+        foreach ($this->bindingDescriptors->toArray() as $descriptor) {
+            if ($expr->evaluate($descriptor)) {
+                $descriptors[] = $descriptor;
             }
         }
 
-        return $bindings;
+        return $descriptors;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function hasBinding(Uuid $uuid)
+    public function hasBindingDescriptor(Uuid $uuid)
     {
         $this->assertPackagesLoaded();
 
@@ -789,7 +787,7 @@ class DiscoveryManagerImpl implements DiscoveryManager
     /**
      * {@inheritdoc}
      */
-    public function hasBindings(Expression $expr = null)
+    public function hasBindingDescriptors(Expression $expr = null)
     {
         $this->assertPackagesLoaded();
 
@@ -797,8 +795,8 @@ class DiscoveryManagerImpl implements DiscoveryManager
             return !$this->bindingDescriptors->isEmpty();
         }
 
-        foreach ($this->bindingDescriptors->toArray() as $binding) {
-            if ($binding->match($expr)) {
+        foreach ($this->bindingDescriptors->toArray() as $bindingDescriptor) {
+            if ($expr->evaluate($bindingDescriptor)) {
                 return true;
             }
         }
@@ -815,24 +813,24 @@ class DiscoveryManagerImpl implements DiscoveryManager
         $this->emitWarningForDuplicateTypes();
         $this->emitWarningForInvalidBindings();
 
-        if (count($this->discovery->getBindings()) > 0 || count($this->discovery->getDefinedTypes()) > 0) {
+        if ($this->discovery->hasBindings() || $this->discovery->hasBindingTypes()) {
             throw new DiscoveryNotEmptyException('The discovery is not empty.');
         }
 
         $tx = new Transaction();
 
         try {
-            foreach ($this->typeDescriptors->toArray() as $typeName => $typesByPackage) {
-                foreach ($typesByPackage as $typeDescriptor) {
+            foreach ($this->typeDescriptors->toArray() as $typeName => $descriptorsByPackage) {
+                foreach ($descriptorsByPackage as $typeDescriptor) {
                     if ($typeDescriptor->isEnabled()) {
-                        $tx->execute($this->defineType($typeDescriptor));
+                        $tx->execute($this->addBindingType($typeDescriptor));
                     }
                 }
             }
 
             foreach ($this->bindingDescriptors->toArray() as $bindingDescriptor) {
                 if ($bindingDescriptor->isEnabled()) {
-                    $tx->execute($this->bind($bindingDescriptor));
+                    $tx->execute($this->addBinding($bindingDescriptor));
                 }
             }
 
@@ -849,7 +847,7 @@ class DiscoveryManagerImpl implements DiscoveryManager
      */
     public function clearDiscovery()
     {
-        $this->discovery->clear();
+        $this->discovery->removeBindingTypes();
     }
 
     private function assertPackagesLoaded()
@@ -865,13 +863,8 @@ class DiscoveryManagerImpl implements DiscoveryManager
             return;
         }
 
-        foreach ($bindingDescriptor->getViolations() as $violation) {
-            switch ($violation->getCode()) {
-                case ConstraintViolation::NO_SUCH_PARAMETER:
-                    throw NoSuchParameterException::forParameterName($violation->getParameterName(), $violation->getTypeName());
-                case ConstraintViolation::MISSING_PARAMETER:
-                    throw MissingParameterException::forParameterName($violation->getParameterName(), $violation->getTypeName());
-            }
+        foreach ($bindingDescriptor->getLoadErrors() as $exception) {
+            throw $exception;
         }
     }
 
@@ -922,30 +915,12 @@ class DiscoveryManagerImpl implements DiscoveryManager
     private function emitWarningForInvalidBindings()
     {
         foreach ($this->bindingDescriptors->toArray() as $binding) {
-            foreach ($binding->getViolations() as $violation) {
-                switch ($violation->getCode()) {
-                    case ConstraintViolation::NO_SUCH_PARAMETER:
-                        $reason = sprintf(
-                            'The parameter "%s" does not exist.',
-                            $violation->getParameterName()
-                        );
-                        break;
-                    case ConstraintViolation::MISSING_PARAMETER:
-                        $reason = sprintf(
-                            'The parameter "%s" is missing.',
-                            $violation->getParameterName()
-                        );
-                        break;
-                    default:
-                        $reason = 'Unknown reason.';
-                        break;
-                }
-
+            foreach ($binding->getLoadErrors() as $exception) {
                 $this->logger->warning(sprintf(
                     'The binding "%s" in package "%s" is invalid: %s',
                     $binding->getUuid()->toString(),
                     $binding->getContainingPackage()->getName(),
-                    $reason
+                    $exception->getMessage()
                 ));
             }
         }
@@ -981,7 +956,7 @@ class DiscoveryManagerImpl implements DiscoveryManager
 
     private function loadTypeDescriptor(BindingTypeDescriptor $typeDescriptor, Package $package)
     {
-        $typeName = $typeDescriptor->getName();
+        $typeName = $typeDescriptor->getTypeName();
 
         return new InterceptedOperation(
             new LoadTypeDescriptor($typeDescriptor, $package, $this->typeDescriptors),
@@ -994,7 +969,7 @@ class DiscoveryManagerImpl implements DiscoveryManager
 
     private function unloadTypeDescriptor(BindingTypeDescriptor $typeDescriptor)
     {
-        $typeName = $typeDescriptor->getName();
+        $typeName = $typeDescriptor->getTypeName();
 
         return new InterceptedOperation(
             new UnloadTypeDescriptor($typeDescriptor, $this->typeDescriptors),
@@ -1005,9 +980,9 @@ class DiscoveryManagerImpl implements DiscoveryManager
         );
     }
 
-    private function defineType(BindingTypeDescriptor $typeDescriptor)
+    private function addBindingType(BindingTypeDescriptor $typeDescriptor)
     {
-        return new DefineType($typeDescriptor, $this->discovery);
+        return new AddBindingType($typeDescriptor, $this->discovery);
     }
 
     private function syncTypeName($typeName)
@@ -1051,9 +1026,9 @@ class DiscoveryManagerImpl implements DiscoveryManager
         );
     }
 
-    private function bind(BindingDescriptor $bindingDescriptor)
+    private function addBinding(BindingDescriptor $bindingDescriptor)
     {
-        return new Bind($bindingDescriptor, $this->discovery);
+        return new AddBinding($bindingDescriptor, $this->discovery);
     }
 
     private function syncBindingUuid(Uuid $uuid)

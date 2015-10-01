@@ -12,6 +12,9 @@
 namespace Puli\Manager\Tests\Api\Package;
 
 use PHPUnit_Framework_TestCase;
+use Puli\Discovery\Binding\ClassBinding;
+use Puli\Discovery\Binding\ResourceBinding;
+use Puli\Discovery\Tests\Fixtures\Foo;
 use Puli\Manager\Api\Discovery\BindingDescriptor;
 use Puli\Manager\Api\Package\PackageFile;
 use Puli\Manager\Api\Repository\PathMapping;
@@ -229,30 +232,40 @@ class PackageFileTest extends PHPUnit_Framework_TestCase
 
     public function testAddBindingDescriptor()
     {
-        $packageFile = new PackageFile();
-        $packageFile->addBindingDescriptor($binding = new BindingDescriptor('/path', 'my/type'));
+        $binding = new ClassBinding(__CLASS__, Foo::clazz);
+        $descriptor = new BindingDescriptor($binding);
 
-        $this->assertSame($binding, $packageFile->getBindingDescriptor($binding->getUuid()));
-        $this->assertSame(array($binding), $packageFile->getBindingDescriptors());
+        $packageFile = new PackageFile();
+        $packageFile->addBindingDescriptor($descriptor);
+
+        $this->assertSame($descriptor, $packageFile->getBindingDescriptor($binding->getUuid()));
+        $this->assertSame(array($descriptor), $packageFile->getBindingDescriptors());
     }
 
     public function testRemoveBindingDescriptor()
     {
+        $binding1 = new ClassBinding(__CLASS__, Foo::clazz);
+        $binding2 = new ResourceBinding('/path', Foo::clazz);
+        $descriptor1 = new BindingDescriptor($binding1);
+        $descriptor2 = new BindingDescriptor($binding2);
+
         $packageFile = new PackageFile();
-        $packageFile->addBindingDescriptor($binding1 = new BindingDescriptor('/path1', 'my/type'));
-        $packageFile->addBindingDescriptor($binding2 = new BindingDescriptor('/path2', 'my/type'));
+        $packageFile->addBindingDescriptor($descriptor1);
+        $packageFile->addBindingDescriptor($descriptor2);
         $packageFile->removeBindingDescriptor($binding1->getUuid());
 
-        $this->assertSame(array($binding2), $packageFile->getBindingDescriptors());
+        $this->assertSame(array($descriptor2), $packageFile->getBindingDescriptors());
     }
 
     public function testHasBindingDescriptor()
     {
+        $binding = new ClassBinding(__CLASS__, Foo::clazz);
+        $descriptor = new BindingDescriptor($binding);
+
         $packageFile = new PackageFile();
-        $binding = new BindingDescriptor('/path', 'my/type');
 
         $this->assertFalse($packageFile->hasBindingDescriptor($binding->getUuid()));
-        $packageFile->addBindingDescriptor($binding);
+        $packageFile->addBindingDescriptor($descriptor);
         $this->assertTrue($packageFile->hasBindingDescriptor($binding->getUuid()));
     }
 
