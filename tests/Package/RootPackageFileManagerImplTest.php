@@ -929,13 +929,45 @@ class RootPackageFileManagerImplTest extends ManagerTestCase
         $this->rootPackageFile->setExtraKey('key2', 'value2');
 
         $expr1 = Expr::same('key1');
-
         $expr2 = Expr::startsWith('key');
-
         $expr3 = Expr::same('foo');
 
         $this->assertSame(array('key1' => 'value1'), $this->manager->findExtraKeys($expr1));
         $this->assertSame(array('key1' => 'value1', 'key2' => 'value2'), $this->manager->findExtraKeys($expr2));
         $this->assertSame(array(), $this->manager->findExtraKeys($expr3));
+    }
+
+    public function testMigrate()
+    {
+        $this->rootPackageFile->setVersion('1.0');
+
+        $this->packageFileStorage->expects($this->once())
+            ->method('saveRootPackageFile')
+            ->with($this->rootPackageFile)
+            ->willReturnCallback(function (RootPackageFile $rootPackageFile) {
+                PHPUnit_Framework_Assert::assertSame('1.1', $rootPackageFile->getVersion());
+            });
+
+        $this->manager->migrate('1.1');
+
+        $this->assertSame('1.1', $this->rootPackageFile->getVersion());
+    }
+
+    public function testMigrateRestoresVersionIfSavingFails()
+    {
+        $this->rootPackageFile->setVersion('1.0');
+
+        $this->packageFileStorage->expects($this->once())
+            ->method('saveRootPackageFile')
+            ->with($this->rootPackageFile)
+            ->will($this->throwException(new TestException()));
+
+        try {
+            $this->manager->migrate('1.1');
+            $this->fail('Expected a TestException');
+        } catch (TestException $e) {
+        }
+
+        $this->assertSame('1.0', $this->rootPackageFile->getVersion());
     }
 }

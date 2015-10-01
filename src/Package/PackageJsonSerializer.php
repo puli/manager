@@ -26,6 +26,7 @@ use Puli\Manager\Api\Package\PackageFileSerializer;
 use Puli\Manager\Api\Package\RootPackageFile;
 use Puli\Manager\Api\Package\UnsupportedVersionException;
 use Puli\Manager\Api\Repository\PathMapping;
+use Puli\Manager\Migration\MigrationManager;
 use Rhumsaa\Uuid\Uuid;
 use stdClass;
 use Webmozart\Json\DecodingFailedException;
@@ -64,6 +65,21 @@ class PackageJsonSerializer implements PackageFileSerializer
         'packages',
     );
 
+    /**
+     * @var MigrationManager
+     */
+    private $migrationManager;
+
+    /**
+     * @var string
+     */
+    private $schemaDir;
+
+    /**
+     * @var string
+     */
+    private $targetVersion;
+
     public static function compareBindingDescriptors(BindingDescriptor $a, BindingDescriptor $b)
     {
         // Make sure that bindings are always printed in the same order
@@ -71,11 +87,32 @@ class PackageJsonSerializer implements PackageFileSerializer
     }
 
     /**
+     * Creates a new serializer.
+     *
+     * @param MigrationManager $migrationManager The manager for migrating
+     *                                           puli.json files between
+     *                                           versions.
+     * @param string           $schemaDir        The directory that contains the
+     *                                           schema files.
+     * @param string           $targetVersion    The file version that this
+     *                                           serializer reads and produces.
+     */
+    public function __construct(MigrationManager $migrationManager, $schemaDir, $targetVersion = PackageFile::DEFAULT_VERSION)
+    {
+        $this->migrationManager = $migrationManager;
+        $this->targetVersion = $targetVersion;
+
+        // We can't use realpath(), which doesn't work inside PHARs.
+        // However, we want to display nice paths if the file is not found.
+        $this->schemaDir = Path::canonicalize($schemaDir);
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function serializePackageFile(PackageFile $packageFile)
     {
-        $jsonData = new stdClass();
+        $jsonData = (object) array('version' => $this->targetVersion);
 
         $this->packageFileToJson($packageFile, $jsonData);
 
@@ -83,6 +120,8 @@ class PackageJsonSerializer implements PackageFileSerializer
         $jsonArray = (array) $jsonData;
         $orderedKeys = array_intersect_key(array_flip(self::$keyOrder), $jsonArray);
         $jsonData = (object) array_replace($orderedKeys, $jsonArray);
+
+        $this->migrationManager->migrate($jsonData, $packageFile->getVersion());
 
         return $this->encode($jsonData);
     }
@@ -92,7 +131,7 @@ class PackageJsonSerializer implements PackageFileSerializer
      */
     public function serializeRootPackageFile(RootPackageFile $packageFile)
     {
-        $jsonData = new stdClass();
+        $jsonData = (object) array('version' => $this->targetVersion);
 
         $this->packageFileToJson($packageFile, $jsonData);
         $this->rootPackageFileToJson($packageFile, $jsonData);
@@ -101,6 +140,8 @@ class PackageJsonSerializer implements PackageFileSerializer
         $jsonArray = (array) $jsonData;
         $orderedKeys = array_intersect_key(array_flip(self::$keyOrder), $jsonArray);
         $jsonData = (object) array_replace($orderedKeys, $jsonArray);
+
+        $this->migrationManager->migrate($jsonData, $packageFile->getVersion());
 
         return $this->encode($jsonData);
     }
@@ -113,6 +154,12 @@ class PackageJsonSerializer implements PackageFileSerializer
         $packageFile = new PackageFile(null, $path);
 
         $jsonData = $this->decode($serialized, $path);
+
+        // Remember original version of the package file
+        $packageFile->setVersion($jsonData->version);
+
+        // Migrate to the expected version
+        $this->migrationManager->migrate($jsonData, $this->targetVersion);
 
         $this->jsonToPackageFile($jsonData, $packageFile);
 
@@ -128,6 +175,12 @@ class PackageJsonSerializer implements PackageFileSerializer
 
         $jsonData = $this->decode($serialized, $path);
 
+        // Remember original version of the package file
+        $packageFile->setVersion($jsonData->version);
+
+        // Migrate to the expected version
+        $this->migrationManager->migrate($jsonData, $this->targetVersion);
+
         $this->jsonToPackageFile($jsonData, $packageFile);
         $this->jsonToRootPackageFile($jsonData, $packageFile);
 
@@ -141,8 +194,6 @@ class PackageJsonSerializer implements PackageFileSerializer
         $typeDescriptors = $packageFile->getTypeDescriptors();
         $overrides = $packageFile->getOverriddenPackages();
         $extra = $packageFile->getExtraKeys();
-
-        $jsonData->version = '1.0';
 
         if (null !== $packageFile->getPackageName()) {
             $jsonData->name = $packageFile->getPackageName();
@@ -435,9 +486,15 @@ class PackageJsonSerializer implements PackageFileSerializer
         $encoder->setPrettyPrinting(true);
         $encoder->setEscapeSlash(false);
         $encoder->setTerminateWithLineFeed(true);
-        // We can't use realpath(), which doesn't work inside PHARs.
-        // However, we want to display nice paths if the file is not found.
-        $schema = Path::canonicalize(__DIR__.'/../../res/schema/package-schema-1.0.json');
+
+        $schema = $this->schemaDir.'/package-schema-'.$jsonData->version.'.json';
+
+        if (!file_exists($schema)) {
+            throw UnsupportedVersionException::forVersion(
+                $jsonData->version,
+                $this->getKnownVersions()
+            );
+        }
 
         return $encoder->encode($jsonData, $schema);
     }
@@ -446,9 +503,6 @@ class PackageJsonSerializer implements PackageFileSerializer
     {
         $decoder = new JsonDecoder();
         $validator = new JsonValidator();
-        // We can't use realpath(), which doesn't work inside PHARs.
-        // However, we want to display nice paths if the file is not found.
-        $schema = Path::canonicalize(__DIR__.'/../../res/schema/package-schema-1.0.json');
 
         try {
             $jsonData = $decoder->decode($json);
@@ -460,12 +514,14 @@ class PackageJsonSerializer implements PackageFileSerializer
             ), $e->getCode(), $e);
         }
 
-        if (version_compare($jsonData->version, '1.0', '<')) {
-            throw UnsupportedVersionException::versionTooLow($jsonData->version, '1.0', $path);
-        }
+        $schema = $this->schemaDir.'/package-schema-'.$jsonData->version.'.json';
 
-        if (version_compare($jsonData->version, '1.0', '>')) {
-            throw UnsupportedVersionException::versionTooHigh($jsonData->version, '1.0', $path);
+        if (!file_exists($schema)) {
+            throw UnsupportedVersionException::forVersion(
+                $jsonData->version,
+                $this->getKnownVersions(),
+                $path
+            );
         }
 
         $errors = $validator->validate($jsonData, $schema);
@@ -490,5 +546,17 @@ class PackageJsonSerializer implements PackageFileSerializer
         }
 
         return $data;
+    }
+
+    private function getKnownVersions()
+    {
+        $versions = $this->migrationManager->getKnownVersions();
+
+        if (!in_array($this->targetVersion, $versions, true)) {
+            $versions[] = $this->targetVersion;
+            sort($versions);
+        }
+
+        return $versions;
     }
 }

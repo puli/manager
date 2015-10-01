@@ -448,6 +448,28 @@ class RootPackageFileManagerImpl extends AbstractConfigManager implements RootPa
     /**
      * {@inheritdoc}
      */
+    public function migrate($targetVersion)
+    {
+        $previousVersion = $this->rootPackageFile->getVersion();
+
+        if ($previousVersion === $targetVersion) {
+            return;
+        }
+
+        $this->rootPackageFile->setVersion($targetVersion);
+
+        try {
+            $this->packageFileStorage->saveRootPackageFile($this->rootPackageFile);
+        } catch (Exception $e) {
+            $this->rootPackageFile->setVersion($previousVersion);
+
+            throw $e;
+        }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     protected function saveConfigFile()
     {
         $this->packageFileStorage->saveRootPackageFile($this->rootPackageFile);

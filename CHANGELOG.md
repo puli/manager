@@ -72,6 +72,16 @@ Changelog
  * renamed `DiscoveryManager::findBindings()` to `findBindingDescriptors()`
  * renamed `DiscoveryManager::hasBinding()` to `hasBindingDescriptor()`
  * renamed `DiscoveryManager::hasBindings()` to `hasBindingDescriptors()`
+ * added `RootPackageFileManager::migrate()`
+ * added `MigrationManager`
+ * added `JsonMigration`
+ * added `MigrationException`
+ * added `PackageFile::DEFAULT_VERSION`
+ * added `PackageFile::getVersion()`
+ * added `PackageFile::setVersion()`
+ * removed `UnsupportedVersionException::versionTooHigh()`
+ * removed `UnsupportedVersionException::versionTooLow()`
+ * added `UnsupportedVersionException::forVersion()`
 
 * 1.0.0-beta7 (2015-08-24)
 

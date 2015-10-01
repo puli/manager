@@ -11,10 +11,11 @@
 
 namespace Puli\Manager\Api;
 
+use Puli\Manager\Migration\MigrationManager;
 use LogicException;
 use Psr\Log\LoggerInterface;
+use Puli\Discovery\Api\Discovery;
 use Puli\Discovery\Api\EditableDiscovery;
-use Puli\Discovery\Api\ResourceDiscovery;
 use Puli\Manager\Api\Asset\AssetManager;
 use Puli\Manager\Api\Config\Config;
 use Puli\Manager\Api\Config\ConfigFileManager;
@@ -140,7 +141,7 @@ class Puli
     private $repo;
 
     /**
-     * @var ResourceDiscovery
+     * @var Discovery
      */
     private $discovery;
 
@@ -811,7 +812,12 @@ class Puli
     public function getPackageFileSerializer()
     {
         if (!$this->packageFileSerializer) {
-            $this->packageFileSerializer = new PackageJsonSerializer();
+            $this->packageFileSerializer = new PackageJsonSerializer(
+                new MigrationManager(array(
+                    // Add future migrations here
+                )),
+                __DIR__.'/../../res/schema'
+            );
         }
 
         return $this->packageFileSerializer;

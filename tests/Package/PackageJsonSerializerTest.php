@@ -11,6 +11,9 @@
 
 namespace Puli\Manager\Tests\Package;
 
+use Puli\Manager\Migration\MigrationManager;
+use PHPUnit_Framework_Assert;
+use PHPUnit_Framework_MockObject_MockObject;
 use Puli\Discovery\Api\Type\BindingParameter;
 use Puli\Discovery\Api\Type\BindingType;
 use Puli\Discovery\Binding\ClassBinding;
@@ -32,6 +35,7 @@ use Puli\Manager\Package\PackageJsonSerializer;
 use Puli\Manager\Tests\Discovery\Fixtures\Baz;
 use Puli\Manager\Tests\JsonTestCase;
 use Rhumsaa\Uuid\Uuid;
+use stdClass;
 
 /**
  * @since  1.0
@@ -181,6 +185,11 @@ JSON;
     private $baseConfig;
 
     /**
+     * @var PHPUnit_Framework_MockObject_MockObject|MigrationManager
+     */
+    private $migrationManager;
+
+    /**
      * @var PackageJsonSerializer
      */
     private $serializer;
@@ -188,7 +197,17 @@ JSON;
     protected function setUp()
     {
         $this->baseConfig = new Config();
-        $this->serializer = new PackageJsonSerializer();
+        $this->migrationManager = $this->getMockBuilder('Puli\Manager\Migration\MigrationManager')
+            ->disableOriginalConstructor()
+            ->getMock();
+        $this->migrationManager->expects($this->any())
+            ->method('getKnownVersions')
+            ->willReturn(array('0.9', '1.0'));
+        $this->serializer = new PackageJsonSerializer(
+            $this->migrationManager,
+            __DIR__.'/Fixtures/schema',
+            '1.0'
+        );
     }
 
     public function testSerializePackageFile()
@@ -215,6 +234,31 @@ JSON;
         ));
 
         $this->assertJsonEquals(self::FULL_JSON, $this->serializer->serializePackageFile($packageFile));
+    }
+
+    public function testSerializePackageFileDowngradesIfLowerVersion()
+    {
+        $packageFile = new PackageFile();
+        $packageFile->setPackageName('my/application');
+        $packageFile->setVersion('0.9');
+
+        $this->migrationManager->expects($this->once())
+            ->method('migrate')
+            ->willReturnCallback(function (stdClass $data, $targetVersion) {
+                $data->version = $targetVersion;
+                $data->downgraded = true;
+            });
+
+        $json = <<<JSON
+{
+    "version": "0.9",
+    "name": "my/application",
+    "downgraded": true
+}
+
+JSON;
+
+        $this->assertJsonEquals($json, $this->serializer->serializePackageFile($packageFile));
     }
 
     public function testSerializePackageFileWritesDefaultParameterValuesOfBindings()
@@ -585,6 +629,31 @@ JSON;
         ));
 
         $this->assertJsonEquals(self::FULL_ROOT_JSON, $this->serializer->serializeRootPackageFile($packageFile));
+    }
+
+    public function testSerializeRootPackageFileDowngradesIfLowerVersion()
+    {
+        $packageFile = new RootPackageFile();
+        $packageFile->setPackageName('my/application');
+        $packageFile->setVersion('0.9');
+
+        $this->migrationManager->expects($this->once())
+            ->method('migrate')
+            ->willReturnCallback(function (stdClass $data, $targetVersion) {
+                $data->version = $targetVersion;
+                $data->downgraded = true;
+            });
+
+        $json = <<<JSON
+{
+    "version": "0.9",
+    "name": "my/application",
+    "downgraded": true
+}
+
+JSON;
+
+        $this->assertJsonEquals($json, $this->serializer->serializeRootPackageFile($packageFile));
     }
 
     public function testSerializeRootPackageFileSortsPackagesByName()
@@ -1002,11 +1071,7 @@ JSON;
         $this->serializer->unserializeRootPackageFile($json, '/path/to/win-1258.json');
     }
 
-    /**
-     * @expectedException \Puli\Manager\Api\Package\UnsupportedVersionException
-     * @expectedExceptionMessage lowest readable version
-     */
-    public function testUnserializePackageFileVersionTooLow()
+    public function testUnserializePackageFileUpgradesIfVersionTooLow()
     {
         $json = <<<JSON
 {
@@ -1016,12 +1081,23 @@ JSON;
 
 JSON;
 
-        $this->serializer->unserializePackageFile($json);
+        $this->migrationManager->expects($this->once())
+            ->method('migrate')
+            ->willReturnCallback(function (stdClass $data, $targetVersion) {
+                PHPUnit_Framework_Assert::assertSame('0.9', $data->version);
+                PHPUnit_Framework_Assert::assertSame('1.0', $targetVersion);
+                PHPUnit_Framework_Assert::assertSame('removed property', $data->some);
+            });
+
+        $packageFile = $this->serializer->unserializePackageFile($json);
+
+        // The original version was stored
+        $this->assertSame('0.9', $packageFile->getVersion());
     }
 
     /**
      * @expectedException \Puli\Manager\Api\Package\UnsupportedVersionException
-     * @expectedExceptionMessage highest readable version
+     * @expectedExceptionMessage supported versions are 0.9, 1.0.
      */
     public function testUnserializePackageFileVersionTooHigh()
     {
@@ -1036,11 +1112,7 @@ JSON;
         $this->serializer->unserializePackageFile($json);
     }
 
-    /**
-     * @expectedException \Puli\Manager\Api\Package\UnsupportedVersionException
-     * @expectedExceptionMessage lowest readable version
-     */
-    public function testUnserializeRootPackageFileVersionTooLow()
+    public function testUnserializeRootPackageFileUpgradesIfVersionTooLow()
     {
         $json = <<<JSON
 {
@@ -1050,12 +1122,23 @@ JSON;
 
 JSON;
 
-        $this->serializer->unserializeRootPackageFile($json);
+        $this->migrationManager->expects($this->once())
+            ->method('migrate')
+            ->willReturnCallback(function (stdClass $data, $targetVersion) {
+                PHPUnit_Framework_Assert::assertSame('0.9', $data->version);
+                PHPUnit_Framework_Assert::assertSame('1.0', $targetVersion);
+                PHPUnit_Framework_Assert::assertSame('removed property', $data->some);
+            });
+
+        $rootPackageFile = $this->serializer->unserializeRootPackageFile($json);
+
+        // The original version was stored
+        $this->assertSame('0.9', $rootPackageFile->getVersion());
     }
 
     /**
      * @expectedException \Puli\Manager\Api\Package\UnsupportedVersionException
-     * @expectedExceptionMessage highest readable version
+     * @expectedExceptionMessage supported versions are 0.9, 1.0.
      */
     public function testUnserializeRootPackageFileVersionTooHigh()
     {
