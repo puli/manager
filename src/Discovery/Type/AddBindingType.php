@@ -22,7 +22,7 @@ use Puli\Manager\Transaction\AtomicOperation;
  *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class DefineType implements AtomicOperation
+class AddBindingType implements AtomicOperation
 {
     /**
      * @var BindingTypeDescriptor
@@ -45,7 +45,7 @@ class DefineType implements AtomicOperation
      */
     public function execute()
     {
-        $this->discovery->defineType($this->typeDescriptor->toBindingType());
+        $this->discovery->addBindingType($this->typeDescriptor->getType());
     }
 
     /**
@@ -53,6 +53,6 @@ class DefineType implements AtomicOperation
      */
     public function rollback()
     {
-        $this->discovery->undefineType($this->typeDescriptor->getName());
+        $this->discovery->removeBindingType($this->typeDescriptor->getTypeName());
     }
 }

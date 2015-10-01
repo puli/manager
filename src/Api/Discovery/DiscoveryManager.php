@@ -27,7 +27,7 @@ interface DiscoveryManager
 {
     /**
      * Flag: Don't check whether the type exists already in
-     * {@link addBindingType()}.
+     * {@link addRootTypeDescriptor()}.
      */
     const OVERRIDE = 1;
 
@@ -59,7 +59,7 @@ interface DiscoveryManager
      *
      * @throws DuplicateTypeException If the type is already defined.
      */
-    public function addRootBindingType(BindingTypeDescriptor $typeDescriptor, $flags = 0);
+    public function addRootTypeDescriptor(BindingTypeDescriptor $typeDescriptor, $flags = 0);
 
     /**
      * Removes a binding type from the root package.
@@ -69,7 +69,7 @@ interface DiscoveryManager
      *
      * @param string $typeName The name of the type to remove.
      */
-    public function removeRootBindingType($typeName);
+    public function removeRootTypeDescriptor($typeName);
 
     /**
      * Removes all binding types matching the given expression.
@@ -78,12 +78,12 @@ interface DiscoveryManager
      *
      * @param Expression $expr The search criteria.
      */
-    public function removeRootBindingTypes(Expression $expr);
+    public function removeRootTypeDescriptors(Expression $expr);
 
     /**
      * Removes all binding types from the root package.
      */
-    public function clearRootBindingTypes();
+    public function clearRootTypeDescriptors();
 
     /**
      * Returns the binding type with the given name from the root package.
@@ -94,14 +94,14 @@ interface DiscoveryManager
      *
      * @throws NoSuchTypeException If the type does not exist.
      */
-    public function getRootBindingType($typeName);
+    public function getRootTypeDescriptor($typeName);
 
     /**
      * Returns all binding types from the root package.
      *
      * @return BindingTypeDescriptor[] The binding types.
      */
-    public function getRootBindingTypes();
+    public function getRootTypeDescriptors();
 
     /**
      * Returns all binding types from the root package that match the given
@@ -111,7 +111,7 @@ interface DiscoveryManager
      *
      * @return BindingTypeDescriptor[] The binding types matching the expression.
      */
-    public function findRootBindingTypes(Expression $expr);
+    public function findRootTypeDescriptors(Expression $expr);
 
     /**
      * Returns whether the type with the given name exists in the root package.
@@ -120,7 +120,7 @@ interface DiscoveryManager
      *
      * @return bool Returns `true` if the type exists and `false` otherwise.
      */
-    public function hasRootBindingType($typeName);
+    public function hasRootTypeDescriptor($typeName);
 
     /**
      * Returns whether the manager has any binding types in the root package.
@@ -135,7 +135,7 @@ interface DiscoveryManager
      *              this method only returns `true` if the manager has binding
      *              types matching the expression.
      */
-    public function hasRootBindingTypes(Expression $expr = null);
+    public function hasRootTypeDescriptors(Expression $expr = null);
 
     /**
      * Returns the binding type with the given name.
@@ -147,14 +147,14 @@ interface DiscoveryManager
      *
      * @throws NoSuchTypeException If the type does not exist.
      */
-    public function getBindingType($typeName, $packageName);
+    public function getTypeDescriptor($typeName, $packageName);
 
     /**
      * Returns all binding types.
      *
      * @return BindingTypeDescriptor[] The binding types.
      */
-    public function getBindingTypes();
+    public function getTypeDescriptors();
 
     /**
      * Returns all binding types matching the given expression.
@@ -163,7 +163,7 @@ interface DiscoveryManager
      *
      * @return BindingTypeDescriptor[] The binding types matching the expression.
      */
-    public function findBindingTypes(Expression $expr);
+    public function findTypeDescriptors(Expression $expr);
 
     /**
      * Returns whether the type with the given name exists.
@@ -175,7 +175,7 @@ interface DiscoveryManager
      *
      * @return bool Returns `true` if the type exists and `false` otherwise.
      */
-    public function hasBindingType($typeName, $packageName = null);
+    public function hasTypeDescriptor($typeName, $packageName = null);
 
     /**
      * Returns whether the manager has any binding types.
@@ -190,7 +190,7 @@ interface DiscoveryManager
      *              returns `true` if the manager has binding types matching the
      *              expression.
      */
-    public function hasBindingTypes(Expression $expr = null);
+    public function hasTypeDescriptors(Expression $expr = null);
 
     /**
      * Adds a new binding.
@@ -208,7 +208,7 @@ interface DiscoveryManager
      * @throws DuplicateBindingException If a binding with the same UUID exists
      *                                   already.
      */
-    public function addRootBinding(BindingDescriptor $bindingDescriptor, $flags = 0);
+    public function addRootBindingDescriptor(BindingDescriptor $bindingDescriptor, $flags = 0);
 
     /**
      * Removes a binding from the root package.
@@ -218,7 +218,7 @@ interface DiscoveryManager
      *
      * @param Uuid $uuid The UUID of the binding.
      */
-    public function removeRootBinding(Uuid $uuid);
+    public function removeRootBindingDescriptor(Uuid $uuid);
 
     /**
      * Removes all bindings matching the given expression.
@@ -227,14 +227,14 @@ interface DiscoveryManager
      *
      * @param Expression $expr The search criteria.
      */
-    public function removeRootBindings(Expression $expr);
+    public function removeRootBindingDescriptors(Expression $expr);
 
     /**
      * Removes all bindings from the root package.
      *
      * If no bindings are found, this method does nothing.
      */
-    public function clearRootBindings();
+    public function clearRootBindingDescriptors();
 
     /**
      * Returns the binding with the given UUID in the root package.
@@ -245,14 +245,14 @@ interface DiscoveryManager
      *
      * @throws NoSuchBindingException If the binding does not exist.
      */
-    public function getRootBinding(Uuid $uuid);
+    public function getRootBindingDescriptor(Uuid $uuid);
 
     /**
      * Returns all bindings in the root package.
      *
      * @return BindingDescriptor[] The bindings.
      */
-    public function getRootBindings();
+    public function getRootBindingDescriptors();
 
     /**
      * Returns all bindings from the root package that match the given expression.
@@ -261,7 +261,7 @@ interface DiscoveryManager
      *
      * @return BindingDescriptor[] The bindings matching the expression.
      */
-    public function findRootBindings(Expression $expr);
+    public function findRootBindingDescriptors(Expression $expr);
 
     /**
      * Returns whether the binding with the given UUID exists in the root
@@ -272,7 +272,7 @@ interface DiscoveryManager
      * @return bool Returns `true` if the binding exists in the root package and
      *              `false` otherwise.
      */
-    public function hasRootBinding(Uuid $uuid);
+    public function hasRootBindingDescriptor(Uuid $uuid);
 
     /**
      * Returns whether the manager has any bindings in the root package.
@@ -287,7 +287,7 @@ interface DiscoveryManager
      *              this method only returns `true` if the manager has bindings
      *              matching the expression.
      */
-    public function hasRootBindings(Expression $expr = null);
+    public function hasRootBindingDescriptors(Expression $expr = null);
 
     /**
      * Enables a binding.
@@ -305,7 +305,7 @@ interface DiscoveryManager
      *                                         bindings in the root package are
      *                                         implicitly enabled.
      */
-    public function enableBinding(Uuid $uuid);
+    public function enableBindingDescriptor(Uuid $uuid);
 
     /**
      * Disables a binding.
@@ -323,7 +323,7 @@ interface DiscoveryManager
      *                                         bindings in the root package are
      *                                         implicitly enabled.
      */
-    public function disableBinding(Uuid $uuid);
+    public function disableBindingDescriptor(Uuid $uuid);
 
     /**
      * Returns the binding with the given UUID.
@@ -334,14 +334,14 @@ interface DiscoveryManager
      *
      * @throws NoSuchBindingException If the binding does not exist.
      */
-    public function getBinding(Uuid $uuid);
+    public function getBindingDescriptor(Uuid $uuid);
 
     /**
      * Returns all bindings.
      *
      * @return BindingDescriptor[] The bindings.
      */
-    public function getBindings();
+    public function getBindingDescriptors();
 
     /**
      * Returns all bindings matching the given expression.
@@ -350,7 +350,7 @@ interface DiscoveryManager
      *
      * @return BindingDescriptor[] The bindings matching the expression.
      */
-    public function findBindings(Expression $expr);
+    public function findBindingDescriptors(Expression $expr);
 
     /**
      * Returns whether the binding with the given UUID exists.
@@ -359,7 +359,7 @@ interface DiscoveryManager
      *
      * @return bool Returns `true` if the binding exists and `false` otherwise.
      */
-    public function hasBinding(Uuid $uuid);
+    public function hasBindingDescriptor(Uuid $uuid);
 
     /**
      * Returns whether the manager has any bindings.
@@ -374,7 +374,7 @@ interface DiscoveryManager
      *              returns `true` if the manager has bindings matching the
      *              expression.
      */
-    public function hasBindings(Expression $expr = null);
+    public function hasBindingDescriptors(Expression $expr = null);
 
     /**
      * Builds the resource discovery.

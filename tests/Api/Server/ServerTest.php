@@ -13,7 +13,6 @@ namespace Puli\Manager\Tests\Api\Server;
 
 use PHPUnit_Framework_TestCase;
 use Puli\Manager\Api\Server\Server;
-use Webmozart\Expression\Expr;
 
 /**
  * @since  1.0
@@ -186,25 +185,5 @@ class ServerTest extends PHPUnit_Framework_TestCase
         $server = new Server('localhost', 'symlink', 'web', '/%s', array());
 
         $this->assertFalse($server->hasParameterValues());
-    }
-
-    public function testMatch()
-    {
-        $server = new Server('localhost', 'symlink', 'web', '/%s', array('param1' => 'value1', 'param2' => 'value2'));
-
-        $this->assertFalse($server->match(Expr::same('foobar', Server::NAME)));
-        $this->assertTrue($server->match(Expr::same('localhost', Server::NAME)));
-
-        $this->assertFalse($server->match(Expr::same('foobar', Server::INSTALLER_NAME)));
-        $this->assertTrue($server->match(Expr::same('symlink', Server::INSTALLER_NAME)));
-
-        $this->assertFalse($server->match(Expr::same('foobar', Server::DOCUMENT_ROOT)));
-        $this->assertTrue($server->match(Expr::same('web', Server::DOCUMENT_ROOT)));
-
-        $this->assertFalse($server->match(Expr::same('foobar', Server::URL_FORMAT)));
-        $this->assertTrue($server->match(Expr::same('/%s', Server::URL_FORMAT)));
-
-        $this->assertFalse($server->match(Expr::key(Server::PARAMETER_VALUES, Expr::keyExists('foobar'))));
-        $this->assertTrue($server->match(Expr::key(Server::PARAMETER_VALUES, Expr::keyExists('param1'))));
     }
 }

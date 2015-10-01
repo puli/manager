@@ -12,9 +12,7 @@
 namespace Puli\Manager\Api\Package;
 
 use Exception;
-use Puli\Manager\Api\Environment;
 use Puli\Manager\Assert\Assert;
-use Webmozart\Expression\Expression;
 
 /**
  * A configured package.
@@ -25,31 +23,6 @@ use Webmozart\Expression\Expression;
  */
 class Package
 {
-    /**
-     * The name field in {@link Expression} instances.
-     */
-    const NAME = 'name';
-
-    /**
-     * The install path field in {@link Expression} instances.
-     */
-    const INSTALL_PATH = 'installPath';
-
-    /**
-     * The state field in {@link Expression} instances.
-     */
-    const STATE = 'state';
-
-    /**
-     * The installer field in {@link Expression} instances.
-     */
-    const INSTALLER = 'installer';
-
-    /**
-     * The environment field in {@link Expression} instances.
-     */
-    const ENVIRONMENT = 'env';
-
     /**
      * @var string
      */
@@ -220,27 +193,6 @@ class Package
     public function isNotLoadable()
     {
         return PackageState::NOT_LOADABLE === $this->state;
-    }
-
-    /**
-     * Returns whether the package matches the given expression.
-     *
-     * @param Expression $expr The search criteria. You can use the fields
-     *                         {@link NAME}, {@link INSTALL_PATH} and
-     *                         {@link STATE} in the expression.
-     *
-     * @return bool Returns `true` if the package matches the expression and
-     *              `false` otherwise.
-     */
-    public function match(Expression $expr)
-    {
-        return $expr->evaluate(array(
-            self::NAME => $this->name,
-            self::INSTALL_PATH => $this->installPath,
-            self::STATE => $this->state,
-            self::INSTALLER => $this->installInfo ? $this->installInfo->getInstallerName() : null,
-            self::ENVIRONMENT => $this->installInfo ? $this->installInfo->getEnvironment() : Environment::PROD,
-        ));
     }
 
     /**

@@ -13,7 +13,6 @@ namespace Puli\Manager\Discovery\Binding;
 
 use Puli\Discovery\Api\EditableDiscovery;
 use Puli\Manager\Api\Discovery\BindingDescriptor;
-use Puli\Manager\Api\Discovery\BindingTypeDescriptor;
 use Puli\Manager\Transaction\AtomicOperation;
 
 /**
@@ -23,10 +22,10 @@ use Puli\Manager\Transaction\AtomicOperation;
  *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class Bind implements AtomicOperation
+class AddBinding implements AtomicOperation
 {
     /**
-     * @var BindingTypeDescriptor
+     * @var BindingDescriptor
      */
     private $bindingDescriptor;
 
@@ -47,12 +46,7 @@ class Bind implements AtomicOperation
      */
     public function execute()
     {
-        $this->discovery->bind(
-            $this->bindingDescriptor->getQuery(),
-            $this->bindingDescriptor->getTypeName(),
-            $this->bindingDescriptor->getParameterValues(),
-            $this->bindingDescriptor->getLanguage()
-        );
+        $this->discovery->addBinding($this->bindingDescriptor->getBinding());
     }
 
     /**
@@ -60,11 +54,6 @@ class Bind implements AtomicOperation
      */
     public function rollback()
     {
-        $this->discovery->unbind(
-            $this->bindingDescriptor->getQuery(),
-            $this->bindingDescriptor->getTypeName(),
-            $this->bindingDescriptor->getParameterValues(),
-            $this->bindingDescriptor->getLanguage()
-        );
+        $this->discovery->removeBinding($this->bindingDescriptor->getUuid());
     }
 }

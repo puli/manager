@@ -363,7 +363,7 @@ class PackageFile
      */
     public function addTypeDescriptor(BindingTypeDescriptor $descriptor)
     {
-        $this->typeDescriptors[$descriptor->getName()] = $descriptor;
+        $this->typeDescriptors[$descriptor->getTypeName()] = $descriptor;
     }
 
     /**

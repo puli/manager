@@ -96,7 +96,7 @@ class PackageFileServerManager implements ServerManager
      */
     public function removeServer($serverName)
     {
-        $this->removeServers(Expr::same($serverName, Server::NAME));
+        $this->removeServers(Expr::method('getName', Expr::same($serverName)));
     }
 
     /**
@@ -111,7 +111,7 @@ class PackageFileServerManager implements ServerManager
         $save = false;
 
         foreach ($this->servers as $server) {
-            if ($server->match($expr)) {
+            if ($expr->evaluate($server)) {
                 $this->servers->remove($server->getName());
                 unset($this->serversData[$server->getName()]);
                 $save = true;
@@ -170,7 +170,7 @@ class PackageFileServerManager implements ServerManager
         $servers = array();
 
         foreach ($this->servers as $server) {
-            if ($server->match($expr)) {
+            if ($expr->evaluate($server)) {
                 $servers[] = $server;
             }
         }
@@ -200,7 +200,7 @@ class PackageFileServerManager implements ServerManager
         }
 
         foreach ($this->servers as $server) {
-            if ($server->match($expr)) {
+            if ($expr->evaluate($server)) {
                 return true;
             }
         }

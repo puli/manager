@@ -13,7 +13,6 @@ namespace Puli\Manager\Api\Server;
 
 use Puli\Manager\Api\Installer\NoSuchParameterException;
 use Puli\Manager\Assert\Assert;
-use Webmozart\Expression\Expression;
 
 /**
  * Represents a server that serves assets.
@@ -40,31 +39,6 @@ use Webmozart\Expression\Expression;
  */
 class Server
 {
-    /**
-     * The name field in {@link Expression} instances.
-     */
-    const NAME = 'name';
-
-    /**
-     * The installer name field in {@link Expression} instances.
-     */
-    const INSTALLER_NAME = 'installerName';
-
-    /**
-     * The location field in {@link Expression} instances.
-     */
-    const DOCUMENT_ROOT = 'location';
-
-    /**
-     * The url format field in {@link Expression} instances.
-     */
-    const URL_FORMAT = 'urlFormat';
-
-    /**
-     * The parameter values field in {@link Expression} instances.
-     */
-    const PARAMETER_VALUES = 'parameterValues';
-
     /**
      * The default URL format.
      */
@@ -218,27 +192,5 @@ class Server
     public function hasParameterValues()
     {
         return count($this->parameterValues) > 0;
-    }
-
-    /**
-     * Returns whether the server matches the given expression.
-     *
-     * @param Expression $expr The search criteria. You can use the fields
-     *                         {@link NAME}, {@link INSTALLER_NAME},
-     *                         {@link DOCUMENT_ROOT}, {@link URL_FORMAT} and
-     *                         {@link PARAMETER_VALUES} in the expression.
-     *
-     * @return bool Returns `true` if the server matches the expression and
-     *              `false` otherwise.
-     */
-    public function match(Expression $expr)
-    {
-        return $expr->evaluate(array(
-            self::NAME => $this->name,
-            self::INSTALLER_NAME => $this->installerName,
-            self::DOCUMENT_ROOT => $this->documentRoot,
-            self::URL_FORMAT => $this->urlFormat,
-            self::PARAMETER_VALUES => $this->parameterValues,
-        ));
     }
 }

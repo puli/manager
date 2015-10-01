@@ -11,13 +11,13 @@
 
 namespace Puli\Manager\Api\Discovery;
 
-use Puli\Discovery\Api\Binding\BindingType;
-use Puli\Discovery\Api\Binding\NoSuchParameterException;
+use OutOfBoundsException;
+use Puli\Discovery\Api\Type\BindingType;
+use Puli\Discovery\Api\Type\NoSuchParameterException;
 use Puli\Manager\Api\AlreadyLoadedException;
 use Puli\Manager\Api\NotLoadedException;
 use Puli\Manager\Api\Package\Package;
 use Puli\Manager\Assert\Assert;
-use Webmozart\Expression\Expression;
 
 /**
  * Describes a binding type.
@@ -34,24 +34,9 @@ use Webmozart\Expression\Expression;
 class BindingTypeDescriptor
 {
     /**
-     * The name field in {@link Expression} instances.
+     * @var BindingType
      */
-    const NAME = 'name';
-
-    /**
-     * The state field in {@link Expression} instances.
-     */
-    const STATE = 'state';
-
-    /**
-     * The package field in {@link Expression} instances.
-     */
-    const CONTAINING_PACKAGE = 'containingPackage';
-
-    /**
-     * @var string
-     */
-    private $name;
+    private $type;
 
     /**
      * @var string
@@ -59,9 +44,9 @@ class BindingTypeDescriptor
     private $description;
 
     /**
-     * @var BindingParameterDescriptor[]
+     * @var string[]
      */
-    private $parameters = array();
+    private $parameterDescriptions = array();
 
     /**
      * @var int
@@ -76,25 +61,30 @@ class BindingTypeDescriptor
     /**
      * Creates a binding type descriptor.
      *
-     * @param string                       $name        The name of the type.
-     * @param string|null                  $description A human-readable
-     *                                                  description of the type.
-     * @param BindingParameterDescriptor[] $parameters  The parameters.
+     * @param BindingType $type                  The described type.
+     * @param string|null $description           A human-readable description of
+     *                                           the type.
+     * @param string[]    $parameterDescriptions Human-readable descriptions
+     *                                           indexed by the type's parameter
+     *                                           names.
      *
-     * @see BindingType
+     * @throws NoSuchParameterException If a description is passed for an unset
+     *                                  parameter.
      */
-    public function __construct($name, $description = null, array $parameters = array())
+    public function __construct(BindingType $type, $description = null, array $parameterDescriptions = array())
     {
-        Assert::typeName($name);
-        Assert::nullOrString($description, 'The description must be a string or null. Got: %s');
-        Assert::nullOrNotEmpty($description, 'The description must not be empty.');
-        Assert::allIsInstanceOf($parameters, __NAMESPACE__.'\BindingParameterDescriptor');
+        Assert::nullOrStringNotEmpty($description, 'The description must be a non-empty string or null. Got: %s');
+        Assert::allStringNotEmpty($parameterDescriptions, 'The parameter description must be a non-empty string. Got: %s');
 
-        $this->name = $name;
+        $this->type = $type;
         $this->description = $description;
 
-        foreach ($parameters as $parameter) {
-            $this->parameters[$parameter->getName()] = $parameter;
+        foreach ($parameterDescriptions as $parameterName => $parameterDescription) {
+            if (!$type->hasParameter($parameterName)) {
+                throw NoSuchParameterException::forParameterName($parameterName, $type->getName());
+            }
+
+            $this->parameterDescriptions[$parameterName] = $parameterDescription;
         }
     }
 
@@ -165,13 +155,23 @@ class BindingTypeDescriptor
     }
 
     /**
-     * Returns the type's name.
+     * Returns the name of the described type.
      *
-     * @return string The name.
+     * @return string The type name.
      */
-    public function getName()
+    public function getTypeName()
     {
-        return $this->name;
+        return $this->type->getName();
+    }
+
+    /**
+     * Returns the described type.
+     *
+     * @return BindingType The described binding type.
+     */
+    public function getType()
+    {
+        return $this->type;
     }
 
     /**
@@ -185,46 +185,54 @@ class BindingTypeDescriptor
     }
 
     /**
-     * Returns the descriptors for the parameters of the type.
+     * Returns the descriptions for the parameters of the type.
      *
-     * @return BindingParameterDescriptor[] The parameter descriptors.
+     * @return string[] The parameter descriptions.
      */
-    public function getParameters()
+    public function getParameterDescriptions()
     {
-        return $this->parameters;
+        return $this->parameterDescriptions;
     }
 
     /**
-     * Returns the descriptor for a parameter.
+     * Returns the description for a parameter.
      *
      * @param string $parameterName The parameter name.
      *
-     * @return BindingParameterDescriptor The descriptor of the parameter.
+     * @return string The description of the parameter.
      *
-     * @throws NoSuchParameterException If the parameter was not set.
+     * @throws NoSuchParameterException If the parameter does not exist.
+     * @throws OutOfBoundsException     If the parameter has no description.
      */
-    public function getParameter($parameterName)
+    public function getParameterDescription($parameterName)
     {
-        if (!isset($this->parameters[$parameterName])) {
+        if (!$this->type->hasParameter($parameterName)) {
             throw new NoSuchParameterException(sprintf(
                 'The parameter "%s" does not exist.',
                 $parameterName
             ));
         }
 
-        return $this->parameters[$parameterName];
+        if (!isset($this->parameterDescriptions[$parameterName])) {
+            throw new OutOfBoundsException(sprintf(
+                'No description exists for parameter "%s".',
+                $parameterName
+            ));
+        }
+
+        return $this->parameterDescriptions[$parameterName];
     }
 
     /**
-     * Returns whether the type has a parameter.
+     * Returns whether the type has a description for a parameter.
      *
      * @param string $parameterName The parameter name.
      *
      * @return bool Whether the type contains a parameter with that name.
      */
-    public function hasParameter($parameterName)
+    public function hasParameterDescription($parameterName)
     {
-        return isset($this->parameters[$parameterName]);
+        return isset($this->parameterDescriptions[$parameterName]);
     }
 
     /**
@@ -232,118 +240,9 @@ class BindingTypeDescriptor
      *
      * @return bool Returns `true` if the type has parameters.
      */
-    public function hasParameters()
+    public function hasParameterDescriptions()
     {
-        return count($this->parameters) > 0;
-    }
-
-    /**
-     * Returns whether the type has any required parameters.
-     *
-     * @return bool Returns `true` if the type has at least one required
-     *              parameter.
-     */
-    public function hasRequiredParameters()
-    {
-        foreach ($this->parameters as $parameter) {
-            if ($parameter->isRequired()) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * Returns whether the type has any optional parameters.
-     *
-     * @return bool Returns `true` if the type has at least one optional
-     *              parameter.
-     */
-    public function hasOptionalParameters()
-    {
-        foreach ($this->parameters as $parameter) {
-            if (!$parameter->isRequired()) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * Returns the default values of all optional parameters.
-     *
-     * @return array The default values.
-     */
-    public function getParameterValues()
-    {
-        $values = array();
-
-        foreach ($this->parameters as $name => $parameter) {
-            if (!$parameter->isRequired()) {
-                $values[$name] = $parameter->getDefaultValue();
-            }
-        }
-
-        return $values;
-    }
-
-    /**
-     * Returns the default value of a parameter.
-     *
-     * @param string $parameterName The parameter name.
-     *
-     * @return mixed The default value of the parameter.
-     *
-     * @throws NoSuchParameterException If the parameter was not set.
-     */
-    public function getParameterValue($parameterName)
-    {
-        return $this->getParameter($parameterName)->getDefaultValue();
-    }
-
-    /**
-     * Returns whether the type has any parameters with default values.
-     *
-     * This method is an alias for {@link hasOptionalParameters()}.
-     *
-     * @return bool Whether a parameter with a default value exists.
-     */
-    public function hasParameterValues()
-    {
-        return $this->hasOptionalParameters();
-    }
-
-    /**
-     * Returns whether the type has a parameter with a default value.
-     *
-     * This method checks whether the parameter exists and is optional.
-     *
-     * @param string $parameterName The parameter name.
-     *
-     * @return bool Returns `true` if the parameter exists and is optional
-     *              (not required).
-     */
-    public function hasParameterValue($parameterName)
-    {
-        return $this->hasParameter($parameterName) && !$this->getParameter($parameterName)->isRequired();
-    }
-
-    /**
-     * Converts the descriptor to a binding type.
-     *
-     * @return BindingType The created binding type.
-     */
-    public function toBindingType()
-    {
-        $parameters = array();
-
-        foreach ($this->parameters as $parameter) {
-            $parameters[] = $parameter->toBindingParameter();
-        }
-
-        return new BindingType($this->name, $parameters);
+        return count($this->parameterDescriptions) > 0;
     }
 
     /**
@@ -424,25 +323,5 @@ class BindingTypeDescriptor
         }
 
         return BindingTypeState::DUPLICATE === $this->state;
-    }
-
-    /**
-     * Returns whether the binding type matches the given expression.
-     *
-     * @param Expression $expr The search criteria. You can use the fields
-     *                         {@link NAME}, {@link PARAMETERS},
-     *                         {@link STATE} and {@link CONTAINING_PACKAGE}
-     *                         in the expression.
-     *
-     * @return bool Returns `true` if the binding type matches the expression
-     *              and `false` otherwise.
-     */
-    public function match(Expression $expr)
-    {
-        return $expr->evaluate(array(
-            self::NAME => $this->name,
-            self::STATE => $this->state,
-            self::CONTAINING_PACKAGE => $this->containingPackage->getName(),
-        ));
     }
 }

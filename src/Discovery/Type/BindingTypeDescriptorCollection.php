@@ -52,7 +52,7 @@ class BindingTypeDescriptorCollection
      */
     public function add(BindingTypeDescriptor $typeDescriptor)
     {
-        $this->map->set($typeDescriptor->getName(), $typeDescriptor->getContainingPackage()->getName(), $typeDescriptor);
+        $this->map->set($typeDescriptor->getTypeName(), $typeDescriptor->getContainingPackage()->getName(), $typeDescriptor);
     }
 
     /**

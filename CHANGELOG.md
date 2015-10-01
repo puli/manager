@@ -1,6 +1,78 @@
 Changelog
 =========
 
+* 1.0.0-beta8 (@release_date@)
+
+ * removed constants from `AssetMapping` to match changed webmozart/expression API
+ * removed constants from `BindingDescriptor` to match changed webmozart/expression API
+ * removed constants from `BindingTypeDescriptor` to match changed webmozart/expression API
+ * removed constants from `InstallerDescriptor` to match changed webmozart/expression API
+ * removed constants from `Package` to match changed webmozart/expression API
+ * removed constants from `PathMapping` to match changed webmozart/expression API
+ * removed constants from `Server` to match changed webmozart/expression API
+ * removed `BindingDescriptor::match()`
+ * removed `BindingTypeDescriptor::match()`
+ * removed `InstallerDescriptor::match()`
+ * removed `Package::match()`
+ * removed `PathMapping::match()`
+ * removed `Server::match()`
+ * changed `BindingDescriptor::__construct()` to accept a `Binding` instance
+ * removed `BindingDescriptor::getQuery()`
+ * removed `BindingDescriptor::getLanguage()`
+ * removed `BindingDescriptor::getParameterValues()`
+ * removed `BindingDescriptor::getParameterValue()`
+ * removed `BindingDescriptor::hasParameterValues()`
+ * removed `BindingDescriptor::hasParameterValue()`
+ * renamed `BindingDescriptor::getViolations()` to `getLoadErrors()`
+ * added `BindingDescriptor::getBinding()`
+ * changed `BindingTypeDescriptor::__construct()` to accept a `BindingType` instance
+ * renamed `BindingTypeDescriptor::getName()` to `getTypeName()`
+ * added `BindingTypeDescriptor::getType()`
+ * added `BindingTypeDescriptor::getParameterDescriptions()`
+ * added `BindingTypeDescriptor::getParameterDescription()`
+ * added `BindingTypeDescriptor::hasParameterDescriptions()`
+ * added `BindingTypeDescriptor::hasParameterDescription()`
+ * removed `BindingTypeDescriptor::toBindingType()`
+ * removed `BindingTypeDescriptor::getParameters()`
+ * removed `BindingTypeDescriptor::getParameter()`
+ * removed `BindingTypeDescriptor::hasParameter()`
+ * removed `BindingTypeDescriptor::hasRequiredParameters()`
+ * removed `BindingTypeDescriptor::hasOptionalParameters()`
+ * removed `BindingTypeDescriptor::getParameterValues()`
+ * removed `BindingTypeDescriptor::getParameterValue()`
+ * removed `BindingTypeDescriptor::hasParameterValues()`
+ * removed `BindingTypeDescriptor::hasParameterValue()`
+ * removed `BindingParameterDescriptor`
+ * renamed `DiscoveryManager::addRootBindingType()` to `addRootTypeDescriptor()`
+ * renamed `DiscoveryManager::removeRootBindingType()` to `removeRootTypeDescriptor()`
+ * renamed `DiscoveryManager::removeRootBindingTypes()` to `removeRootTypeDescriptors()`
+ * renamed `DiscoveryManager::clearRootBindingTypes()` to `clearRootTypeDescriptors()`
+ * renamed `DiscoveryManager::getRootBindingType()` to `getRootTypeDescriptor()`
+ * renamed `DiscoveryManager::getRootBindingTypes()` to `getRootTypeDescriptors()`
+ * renamed `DiscoveryManager::hasRootBindingType()` to `hasRootTypeDescriptor()`
+ * renamed `DiscoveryManager::hasRootBindingTypes()` to `hasRootTypeDescriptors()`
+ * renamed `DiscoveryManager::getBindingType()` to `getTypeDescriptor()`
+ * renamed `DiscoveryManager::getBindingTypes()` to `getTypeDescriptors()`
+ * renamed `DiscoveryManager::findBindingTypes()` to `findTypeDescriptors()`
+ * renamed `DiscoveryManager::hasBindingType()` to `hasTypeDescriptor()`
+ * renamed `DiscoveryManager::hasBindingTypes()` to `hasTypeDescriptors()`
+ * renamed `DiscoveryManager::addRootBinding()` to `addRootBindingDescriptor()`
+ * renamed `DiscoveryManager::removeRootBinding()` to `removeRootBindingDescriptor()`
+ * renamed `DiscoveryManager::removeRootBindings()` to `removeRootBindingDescriptors()`
+ * renamed `DiscoveryManager::clearRootBindings()` to `clearRootBindingDescriptors()`
+ * renamed `DiscoveryManager::getRootBinding()` to `getRootBindingDescriptor()`
+ * renamed `DiscoveryManager::getRootBindings()` to `getRootBindingDescriptors()`
+ * renamed `DiscoveryManager::findRootBindings()` to `findRootBindingDescriptors()`
+ * renamed `DiscoveryManager::hasRootBinding()` to `hasRootBindingDescriptor()`
+ * renamed `DiscoveryManager::hasRootBindings()` to `hasRootBindingDescriptors()`
+ * renamed `DiscoveryManager::enableBinding()` to `enableBindingDescriptor()`
+ * renamed `DiscoveryManager::disableBinding()` to `disableBindingDescriptor()`
+ * renamed `DiscoveryManager::getBinding()` to `getBindingDescriptor()`
+ * renamed `DiscoveryManager::getBindings()` to `getBindingDescriptors()`
+ * renamed `DiscoveryManager::findBindings()` to `findBindingDescriptors()`
+ * renamed `DiscoveryManager::hasBinding()` to `hasBindingDescriptor()`
+ * renamed `DiscoveryManager::hasBindings()` to `hasBindingDescriptors()`
+
 * 1.0.0-beta7 (2015-08-24)
 
  * renamed `GlobalEnvironment` to `Context`

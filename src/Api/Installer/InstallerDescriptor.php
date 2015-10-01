@@ -12,7 +12,6 @@
 namespace Puli\Manager\Api\Installer;
 
 use Puli\Manager\Assert\Assert;
-use Webmozart\Expression\Expression;
 
 /**
  * Describes a resource installer.
@@ -23,21 +22,6 @@ use Webmozart\Expression\Expression;
  */
 class InstallerDescriptor
 {
-    /**
-     * The name field in {@link Expression} instances.
-     */
-    const NAME = 'name';
-
-    /**
-     * The class name field in {@link Expression} instances.
-     */
-    const CLASS_NAME = 'className';
-
-    /**
-     * The description field in {@link Expression} instances.
-     */
-    const DESCRIPTION = 'description';
-
     /**
      * @var string
      */
@@ -257,24 +241,5 @@ class InstallerDescriptor
     public function hasParameterValue($parameterName)
     {
         return $this->hasParameter($parameterName) && !$this->getParameter($parameterName)->isRequired();
-    }
-
-    /**
-     * Returns whether the installer matches the given expression.
-     *
-     * @param Expression $expr The search criteria. You can use the fields
-     *                         {@link NAME}, {@link CLASS_NAME} and
-     *                         {@link DESCRIPTION} in the expression.
-     *
-     * @return bool Returns `true` if the installer matches the expression and
-     *              `false` otherwise.
-     */
-    public function match(Expression $expr)
-    {
-        return $expr->evaluate(array(
-            self::NAME => $this->name,
-            self::CLASS_NAME => $this->className,
-            self::DESCRIPTION => $this->description,
-        ));
     }
 }

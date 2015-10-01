@@ -15,7 +15,6 @@ use PHPUnit_Framework_TestCase;
 use Puli\Manager\Api\Installer\InstallerDescriptor;
 use Puli\Manager\Api\Installer\InstallerParameter;
 use stdClass;
-use Webmozart\Expression\Expr;
 
 /**
  * @since  1.0
@@ -297,19 +296,5 @@ class InstallerDescriptorTest extends PHPUnit_Framework_TestCase
         $this->assertTrue($descriptor->hasParameterValue('param2'));
         $this->assertTrue($descriptor->hasParameterValue('param3'));
         $this->assertFalse($descriptor->hasParameterValue('foobar'));
-    }
-
-    public function testMatch()
-    {
-        $descriptor = new InstallerDescriptor('symlink', self::SYMLINK_CLASS, 'The description');
-
-        $this->assertFalse($descriptor->match(Expr::same('copy', InstallerDescriptor::NAME)));
-        $this->assertTrue($descriptor->match(Expr::same('symlink', InstallerDescriptor::NAME)));
-
-        $this->assertFalse($descriptor->match(Expr::same('FooBar', InstallerDescriptor::CLASS_NAME)));
-        $this->assertTrue($descriptor->match(Expr::same(self::SYMLINK_CLASS, InstallerDescriptor::CLASS_NAME)));
-
-        $this->assertFalse($descriptor->match(Expr::same('Foo description', InstallerDescriptor::DESCRIPTION)));
-        $this->assertTrue($descriptor->match(Expr::same('The description', InstallerDescriptor::DESCRIPTION)));
     }
 }

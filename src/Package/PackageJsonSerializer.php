@@ -11,9 +11,12 @@
 
 namespace Puli\Manager\Package;
 
+use Puli\Discovery\Api\Type\BindingParameter;
+use Puli\Discovery\Api\Type\BindingType;
+use Puli\Discovery\Binding\ClassBinding;
+use Puli\Discovery\Binding\ResourceBinding;
 use Puli\Manager\Api\Config\Config;
 use Puli\Manager\Api\Discovery\BindingDescriptor;
-use Puli\Manager\Api\Discovery\BindingParameterDescriptor;
 use Puli\Manager\Api\Discovery\BindingTypeDescriptor;
 use Puli\Manager\Api\Environment;
 use Puli\Manager\Api\InvalidConfigException;
@@ -60,6 +63,12 @@ class PackageJsonSerializer implements PackageFileSerializer
         'extra',
         'packages',
     );
+
+    public static function compareBindingDescriptors(BindingDescriptor $a, BindingDescriptor $b)
+    {
+        // Make sure that bindings are always printed in the same order
+        return strcmp($a->getUuid()->toString(), $b->getUuid()->toString());
+    }
 
     /**
      * {@inheritdoc}
@@ -128,8 +137,8 @@ class PackageJsonSerializer implements PackageFileSerializer
     private function packageFileToJson(PackageFile $packageFile, stdClass $jsonData)
     {
         $mappings = $packageFile->getPathMappings();
-        $bindings = $packageFile->getBindingDescriptors();
-        $bindingTypes = $packageFile->getTypeDescriptors();
+        $bindingDescriptors = $packageFile->getBindingDescriptors();
+        $typeDescriptors = $packageFile->getTypeDescriptors();
         $overrides = $packageFile->getOverriddenPackages();
         $extra = $packageFile->getExtraKeys();
 
@@ -150,20 +159,29 @@ class PackageJsonSerializer implements PackageFileSerializer
             }
         }
 
-        if (count($bindings) > 0) {
-            uasort($bindings, array('Puli\Manager\Api\Discovery\BindingDescriptor', 'compare'));
+        if (count($bindingDescriptors) > 0) {
+            uasort($bindingDescriptors, array(__CLASS__, 'compareBindingDescriptors'));
 
             $jsonData->bindings = new stdClass();
 
-            foreach ($bindings as $binding) {
+            foreach ($bindingDescriptors as $bindingDescriptor) {
+                $binding = $bindingDescriptor->getBinding();
                 $bindingData = new stdClass();
-                $bindingData->query = $binding->getQuery();
+                $bindingData->_class = get_class($binding);
 
-                if ('glob' !== $binding->getLanguage()) {
-                    $bindingData->language = $binding->getLanguage();
+                // This needs to be moved to external classes to allow adding
+                // custom binding classes at some point
+                if ($binding instanceof ResourceBinding) {
+                    $bindingData->query = $binding->getQuery();
+
+                    if ('glob' !== $binding->getLanguage()) {
+                        $bindingData->language = $binding->getLanguage();
+                    }
+                } elseif ($binding instanceof ClassBinding) {
+                    $bindingData->class = $binding->getClassName();
                 }
 
-                $bindingData->type = $binding->getTypeName();
+                $bindingData->type = $bindingDescriptor->getTypeName();
 
                 // Don't include the default values of the binding type
                 if ($binding->hasParameterValues(false)) {
@@ -171,39 +189,40 @@ class PackageJsonSerializer implements PackageFileSerializer
                     ksort($bindingData->parameters);
                 }
 
-                $jsonData->bindings->{$binding->getUuid()->toString()} = $bindingData;
+                $jsonData->bindings->{$bindingDescriptor->getUuid()->toString()} = $bindingData;
             }
         }
 
-        if (count($bindingTypes) > 0) {
+        if (count($typeDescriptors) > 0) {
             $bindingTypesData = array();
 
-            foreach ($bindingTypes as $bindingType) {
+            foreach ($typeDescriptors as $typeDescriptor) {
+                $type = $typeDescriptor->getType();
                 $typeData = new stdClass();
 
-                if ($bindingType->getDescription()) {
-                    $typeData->description = $bindingType->getDescription();
+                if ($typeDescriptor->getDescription()) {
+                    $typeData->description = $typeDescriptor->getDescription();
                 }
 
-                if (count($bindingType->getParameters()) > 0) {
+                if ($type->hasParameters()) {
                     $parametersData = array();
 
-                    foreach ($bindingType->getParameters() as $parameter) {
-                        $paramData = new stdClass();
+                    foreach ($type->getParameters() as $parameter) {
+                        $parameterData = new stdClass();
 
-                        if ($parameter->getDescription()) {
-                            $paramData->description = $parameter->getDescription();
+                        if ($typeDescriptor->hasParameterDescription($parameter->getName())) {
+                            $parameterData->description = $typeDescriptor->getParameterDescription($parameter->getName());
                         }
 
                         if ($parameter->isRequired()) {
-                            $paramData->required = true;
+                            $parameterData->required = true;
                         }
 
                         if (null !== $parameter->getDefaultValue()) {
-                            $paramData->default = $parameter->getDefaultValue();
+                            $parameterData->default = $parameter->getDefaultValue();
                         }
 
-                        $parametersData[$parameter->getName()] = $paramData;
+                        $parametersData[$parameter->getName()] = $parameterData;
                     }
 
                     ksort($parametersData);
@@ -211,7 +230,7 @@ class PackageJsonSerializer implements PackageFileSerializer
                     $typeData->parameters = (object) $parametersData;
                 }
 
-                $bindingTypesData[$bindingType->getName()] = $typeData;
+                $bindingTypesData[$type->getName()] = $typeData;
             }
 
             ksort($bindingTypesData);
@@ -298,37 +317,64 @@ class PackageJsonSerializer implements PackageFileSerializer
 
         if (isset($jsonData->bindings)) {
             foreach ($jsonData->bindings as $uuid => $bindingData) {
-                $packageFile->addBindingDescriptor(new BindingDescriptor(
-                    $bindingData->query,
-                    $bindingData->type,
-                    isset($bindingData->parameters) ? (array) $bindingData->parameters : array(),
-                    isset($bindingData->language) ? $bindingData->language : 'glob',
-                    Uuid::fromString($uuid)
-                ));
+                $binding = null;
+                $class = isset($bindingData->_class)
+                    ? $bindingData->_class
+                    : 'Puli\Discovery\Binding\ResourceBinding';
+
+                // Move this code to external classes to allow use of custom
+                // bindings
+                switch ($class) {
+                    case 'Puli\Discovery\Binding\ClassBinding':
+                        $binding = new ClassBinding(
+                            $bindingData->class,
+                            $bindingData->type,
+                            isset($bindingData->parameters) ? (array) $bindingData->parameters : array(),
+                            Uuid::fromString($uuid)
+                        );
+                        break;
+                    case 'Puli\Discovery\Binding\ResourceBinding':
+                        $binding = new ResourceBinding(
+                            $bindingData->query,
+                            $bindingData->type,
+                            isset($bindingData->parameters) ? (array) $bindingData->parameters : array(),
+                            isset($bindingData->language) ? $bindingData->language : 'glob',
+                            Uuid::fromString($uuid)
+                        );
+                        break;
+                    default:
+                        continue;
+                }
+
+                $packageFile->addBindingDescriptor(new BindingDescriptor($binding));
             }
         }
 
         if (isset($jsonData->{'binding-types'})) {
             foreach ((array) $jsonData->{'binding-types'} as $typeName => $data) {
                 $parameters = array();
+                $parameterDescriptions = array();
 
                 if (isset($data->parameters)) {
-                    foreach ((array) $data->parameters as $paramName => $paramData) {
-                        $required = isset($paramData->required) ? $paramData->required : false;
+                    foreach ((array) $data->parameters as $parameterName => $parameterData) {
+                        $required = isset($parameterData->required) ? $parameterData->required : false;
 
-                        $parameters[] = new BindingParameterDescriptor(
-                            $paramName,
-                            $required ? BindingParameterDescriptor::REQUIRED : BindingParameterDescriptor::OPTIONAL,
-                            isset($paramData->default) ? $paramData->default : null,
-                            isset($paramData->description) ? $paramData->description : null
+                        $parameters[] = new BindingParameter(
+                            $parameterName,
+                            $required ? BindingParameter::REQUIRED : BindingParameter::OPTIONAL,
+                            isset($parameterData->default) ? $parameterData->default : null
                         );
+
+                        if (isset($parameterData->description)) {
+                            $parameterDescriptions[$parameterName] = $parameterData->description;
+                        };
                     }
                 }
 
                 $packageFile->addTypeDescriptor(new BindingTypeDescriptor(
-                    $typeName,
+                    new BindingType($typeName, $parameters),
                     isset($data->description) ? $data->description : null,
-                    $parameters
+                    $parameterDescriptions
                 ));
             }
         }

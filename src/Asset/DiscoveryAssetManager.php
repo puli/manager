@@ -11,6 +11,7 @@
 
 namespace Puli\Manager\Asset;
 
+use Puli\Discovery\Binding\ResourceBinding;
 use Puli\Manager\Api\Asset\AssetManager;
 use Puli\Manager\Api\Asset\AssetMapping;
 use Puli\Manager\Api\Asset\DuplicateAssetMappingException;
@@ -78,7 +79,7 @@ class DiscoveryAssetManager implements AssetManager
             throw DuplicateAssetMappingException::forUuid($mapping->getUuid());
         }
 
-        $this->discoveryManager->addRootBinding(new BindingDescriptor(
+        $binding = new ResourceBinding(
             // Match directories as well as all of their contents
             $mapping->getGlob().'{,/**/*}',
             DiscoveryUrlGenerator::BINDING_TYPE,
@@ -88,7 +89,12 @@ class DiscoveryAssetManager implements AssetManager
             ),
             'glob',
             $mapping->getUuid()
-        ), ($flags & self::OVERRIDE) ? DiscoveryManager::OVERRIDE : 0);
+        );
+
+        $this->discoveryManager->addRootBindingDescriptor(
+            new BindingDescriptor($binding),
+            ($flags & self::OVERRIDE) ? DiscoveryManager::OVERRIDE : 0
+        );
 
         if ($this->dispatcher && $this->dispatcher->hasListeners(PuliEvents::POST_ADD_ASSET_MAPPING)) {
             $this->dispatcher->dispatch(
@@ -105,7 +111,7 @@ class DiscoveryAssetManager implements AssetManager
     {
         $mapping = null;
         $hasListener = $this->dispatcher && $this->dispatcher->hasListeners(PuliEvents::POST_REMOVE_ASSET_MAPPING);
-        $expr = Expr::same($uuid->toString(), BindingDescriptor::UUID)
+        $expr = Expr::method('getUuid', Expr::method('toString', Expr::same($uuid->toString())))
             ->andX($this->exprBuilder->buildExpression());
 
         if ($hasListener) {
@@ -117,7 +123,7 @@ class DiscoveryAssetManager implements AssetManager
             }
         }
 
-        $this->discoveryManager->removeRootBindings($expr);
+        $this->discoveryManager->removeRootBindingDescriptors($expr);
 
         if ($hasListener) {
             $this->dispatcher->dispatch(
@@ -140,7 +146,7 @@ class DiscoveryAssetManager implements AssetManager
             $mappings = $this->findRootAssetMappings($expr);
         }
 
-        $this->discoveryManager->removeRootBindings($this->exprBuilder->buildExpression($expr));
+        $this->discoveryManager->removeRootBindingDescriptors($this->exprBuilder->buildExpression($expr));
 
         if ($hasListener) {
             foreach ($mappings as $mapping) {
@@ -165,7 +171,7 @@ class DiscoveryAssetManager implements AssetManager
             $mappings = $this->getRootAssetMappings();
         }
 
-        $this->discoveryManager->removeRootBindings($this->exprBuilder->buildExpression());
+        $this->discoveryManager->removeRootBindingDescriptors($this->exprBuilder->buildExpression());
 
         if ($hasListener) {
             foreach ($mappings as $mapping) {
@@ -182,7 +188,7 @@ class DiscoveryAssetManager implements AssetManager
      */
     public function getRootAssetMapping(Uuid $uuid)
     {
-        $mappings = $this->findRootAssetMappings(Expr::same($uuid->toString(), AssetMapping::UUID));
+        $mappings = $this->findRootAssetMappings(Expr::method('getUuid', Expr::method('toString', Expr::same($uuid->toString()))));
 
         if (!$mappings) {
             throw NoSuchAssetMappingException::forUuid($uuid);
@@ -204,10 +210,10 @@ class DiscoveryAssetManager implements AssetManager
      */
     public function hasRootAssetMapping(Uuid $uuid)
     {
-        $expr = Expr::same($uuid->toString(), BindingDescriptor::UUID)
+        $expr = Expr::method('getUuid', Expr::method('toString', Expr::same($uuid->toString())))
             ->andX($this->exprBuilder->buildExpression());
 
-        return $this->discoveryManager->hasRootBindings($expr);
+        return $this->discoveryManager->hasRootBindingDescriptors($expr);
     }
 
     /**
@@ -215,7 +221,7 @@ class DiscoveryAssetManager implements AssetManager
      */
     public function hasRootAssetMappings(Expression $expr = null)
     {
-        return $this->discoveryManager->hasRootBindings($this->exprBuilder->buildExpression($expr));
+        return $this->discoveryManager->hasRootBindingDescriptors($this->exprBuilder->buildExpression($expr));
     }
 
     /**
@@ -223,11 +229,11 @@ class DiscoveryAssetManager implements AssetManager
      */
     public function findRootAssetMappings(Expression $expr)
     {
-        $bindings = $this->discoveryManager->findRootBindings($this->exprBuilder->buildExpression($expr));
+        $descriptors = $this->discoveryManager->findRootBindingDescriptors($this->exprBuilder->buildExpression($expr));
         $mappings = array();
 
-        foreach ($bindings as $binding) {
-            $mappings[] = $this->bindingToMapping($binding);
+        foreach ($descriptors as $descriptor) {
+            $mappings[] = $this->bindingToMapping($descriptor->getBinding());
         }
 
         return $mappings;
@@ -238,7 +244,7 @@ class DiscoveryAssetManager implements AssetManager
      */
     public function getAssetMapping(Uuid $uuid)
     {
-        $mappings = $this->findAssetMappings(Expr::same($uuid->toString(), AssetMapping::UUID));
+        $mappings = $this->findAssetMappings(Expr::method('getUuid', Expr::method('toString', Expr::same($uuid->toString()))));
 
         if (!$mappings) {
             throw NoSuchAssetMappingException::forUuid($uuid);
@@ -260,11 +266,11 @@ class DiscoveryAssetManager implements AssetManager
      */
     public function findAssetMappings(Expression $expr)
     {
-        $bindings = $this->discoveryManager->findBindings($this->exprBuilder->buildExpression($expr));
+        $descriptors = $this->discoveryManager->findBindingDescriptors($this->exprBuilder->buildExpression($expr));
         $mappings = array();
 
-        foreach ($bindings as $binding) {
-            $mappings[] = $this->bindingToMapping($binding);
+        foreach ($descriptors as $descriptor) {
+            $mappings[] = $this->bindingToMapping($descriptor->getBinding());
         }
 
         return $mappings;
@@ -275,10 +281,10 @@ class DiscoveryAssetManager implements AssetManager
      */
     public function hasAssetMapping(Uuid $uuid)
     {
-        $expr = Expr::same($uuid->toString(), BindingDescriptor::UUID)
+        $expr = Expr::method('getUuid', Expr::method('toString', Expr::same($uuid->toString())))
             ->andX($this->exprBuilder->buildExpression());
 
-        return $this->discoveryManager->hasBindings($expr);
+        return $this->discoveryManager->hasBindingDescriptors($expr);
     }
 
     /**
@@ -286,10 +292,10 @@ class DiscoveryAssetManager implements AssetManager
      */
     public function hasAssetMappings(Expression $expr = null)
     {
-        return $this->discoveryManager->hasBindings($this->exprBuilder->buildExpression($expr));
+        return $this->discoveryManager->hasBindingDescriptors($this->exprBuilder->buildExpression($expr));
     }
 
-    private function bindingToMapping(BindingDescriptor $binding)
+    private function bindingToMapping(ResourceBinding $binding)
     {
         return new AssetMapping(
             // Remove "{,/**/*}" suffix

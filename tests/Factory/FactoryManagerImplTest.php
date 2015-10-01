@@ -121,7 +121,8 @@ class FactoryManagerImplTest extends ManagerTestCase
 
 namespace Puli;
 
-use Puli\Discovery\Api\ResourceDiscovery;
+use Puli\Discovery\Api\Discovery;
+use Puli\Discovery\Binding\Initializer\ResourceBindingInitializer;
 use Puli\Discovery\KeyValueStoreDiscovery;
 use Puli\Manager\Api\Server\ServerCollection;
 use Puli\Repository\Api\ResourceRepository;
@@ -167,16 +168,18 @@ class MyFactory
      *
      * @param ResourceRepository \$repo The resource repository to read from.
      *
-     * @return ResourceDiscovery The created resource discovery.
+     * @return Discovery The created discovery.
      */
     public function createDiscovery(ResourceRepository \$repo)
     {
-        if (!interface_exists('Puli\Discovery\Api\ResourceDiscovery')) {
-            throw new RuntimeException('Please install puli/discovery to create ResourceDiscovery instances.');
+        if (!interface_exists('Puli\Discovery\Api\Discovery')) {
+            throw new RuntimeException('Please install puli/discovery to create Discovery instances.');
         }
 
         \$store = new JsonFileStore(__DIR__.'/.puli/bindings.json', true);
-        \$discovery = new KeyValueStoreDiscovery(\$repo, \$store);
+        \$discovery = new KeyValueStoreDiscovery(\$store, array(
+            new ResourceBindingInitializer(\$repo),
+        ));
 
         return \$discovery;
     }
@@ -184,11 +187,11 @@ class MyFactory
     /**
      * Creates the URL generator.
      *
-     * @param ResourceDiscovery \$discovery The resource discovery to read from.
+     * @param Discovery \$discovery The discovery to read from.
      *
      * @return UrlGenerator The created URL generator.
      */
-    public function createUrlGenerator(ResourceDiscovery \$discovery)
+    public function createUrlGenerator(Discovery \$discovery)
     {
         if (!interface_exists('Puli\UrlGenerator\Api\UrlGenerator')) {
             throw new RuntimeException('Please install puli/url-generator to create UrlGenerator instances.');

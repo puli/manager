@@ -59,7 +59,9 @@ EOF
 
         $expected = <<<EOF
 \$store = new NullStore();
-\$discovery = new KeyValueStoreDiscovery(\$repo, \$store);
+\$discovery = new KeyValueStoreDiscovery(\$store, array(
+    new ResourceBindingInitializer(\$repo),
+));
 EOF;
 
         $this->assertSame($expected, $this->method->getBody());
@@ -82,7 +84,9 @@ EOF;
 
         $expected = <<<EOF
 \$store = new NullStore();
-\$discovery = new KeyValueStoreDiscovery(\$repo, \$store);
+\$discovery = new KeyValueStoreDiscovery(\$store, array(
+    new ResourceBindingInitializer(\$repo),
+));
 EOF;
 
         $this->assertSame($expected, $this->method->getBody());
