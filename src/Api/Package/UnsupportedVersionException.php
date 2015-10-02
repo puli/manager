@@ -35,12 +35,17 @@ class UnsupportedVersionException extends RuntimeException
      */
     public static function forVersion($version, array $knownVersions, $path = null, Exception $cause = null)
     {
+        usort($knownVersions, 'version_compare');
+
+        $isHigher = version_compare($version, end($knownVersions), '>');
+
         return new static(sprintf(
             'Cannot read package file%s at version %s. The supported versions '.
-            'are %s.',
+            'are %s.%s',
             $path ? ' '.$path : '',
             $version,
-            implode(', ', $knownVersions)
+            implode(', ', $knownVersions),
+            $isHigher ? ' Please run "puli self-update".' : ''
         ), 0, $cause);
     }
 }

@@ -1097,7 +1097,7 @@ JSON;
 
     /**
      * @expectedException \Puli\Manager\Api\Package\UnsupportedVersionException
-     * @expectedExceptionMessage supported versions are 0.9, 1.0.
+     * @expectedExceptionMessage Please run "puli self-update"
      */
     public function testUnserializePackageFileVersionTooHigh()
     {

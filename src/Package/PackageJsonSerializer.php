@@ -80,6 +80,11 @@ class PackageJsonSerializer implements PackageFileSerializer
      */
     private $targetVersion;
 
+    /**
+     * @var string[]
+     */
+    private $knownVersions;
+
     public static function compareBindingDescriptors(BindingDescriptor $a, BindingDescriptor $b)
     {
         // Make sure that bindings are always printed in the same order
@@ -101,6 +106,12 @@ class PackageJsonSerializer implements PackageFileSerializer
     {
         $this->migrationManager = $migrationManager;
         $this->targetVersion = $targetVersion;
+        $this->knownVersions = $this->migrationManager->getKnownVersions();
+
+        if (!in_array($targetVersion, $this->knownVersions, true)) {
+            $this->knownVersions[] = $targetVersion;
+            usort($this->knownVersions, 'version_compare');
+        }
 
         // We can't use realpath(), which doesn't work inside PHARs.
         // However, we want to display nice paths if the file is not found.
@@ -112,6 +123,8 @@ class PackageJsonSerializer implements PackageFileSerializer
      */
     public function serializePackageFile(PackageFile $packageFile)
     {
+        $this->assertVersionSupported($packageFile->getVersion());
+
         $jsonData = (object) array('version' => $this->targetVersion);
 
         $this->packageFileToJson($packageFile, $jsonData);
@@ -123,7 +136,7 @@ class PackageJsonSerializer implements PackageFileSerializer
 
         $this->migrationManager->migrate($jsonData, $packageFile->getVersion());
 
-        return $this->encode($jsonData);
+        return $this->encode($jsonData, $packageFile->getPath());
     }
 
     /**
@@ -131,6 +144,8 @@ class PackageJsonSerializer implements PackageFileSerializer
      */
     public function serializeRootPackageFile(RootPackageFile $packageFile)
     {
+        $this->assertVersionSupported($packageFile->getVersion());
+
         $jsonData = (object) array('version' => $this->targetVersion);
 
         $this->packageFileToJson($packageFile, $jsonData);
@@ -143,7 +158,7 @@ class PackageJsonSerializer implements PackageFileSerializer
 
         $this->migrationManager->migrate($jsonData, $packageFile->getVersion());
 
-        return $this->encode($jsonData);
+        return $this->encode($jsonData, $packageFile->getPath());
     }
 
     /**
@@ -480,29 +495,21 @@ class PackageJsonSerializer implements PackageFileSerializer
         }
     }
 
-    private function encode(stdClass $jsonData)
+    private function encode(stdClass $jsonData, $path = null)
     {
         $encoder = new JsonEncoder();
         $encoder->setPrettyPrinting(true);
         $encoder->setEscapeSlash(false);
         $encoder->setTerminateWithLineFeed(true);
 
-        $schema = $this->schemaDir.'/package-schema-'.$jsonData->version.'.json';
+        $this->validate($jsonData, $path);
 
-        if (!file_exists($schema)) {
-            throw UnsupportedVersionException::forVersion(
-                $jsonData->version,
-                $this->getKnownVersions()
-            );
-        }
-
-        return $encoder->encode($jsonData, $schema);
+        return $encoder->encode($jsonData);
     }
 
     private function decode($json, $path = null)
     {
         $decoder = new JsonDecoder();
-        $validator = new JsonValidator();
 
         try {
             $jsonData = $decoder->decode($json);
@@ -514,25 +521,9 @@ class PackageJsonSerializer implements PackageFileSerializer
             ), $e->getCode(), $e);
         }
 
-        $schema = $this->schemaDir.'/package-schema-'.$jsonData->version.'.json';
+        $this->assertVersionSupported($jsonData->version, $path);
 
-        if (!file_exists($schema)) {
-            throw UnsupportedVersionException::forVersion(
-                $jsonData->version,
-                $this->getKnownVersions(),
-                $path
-            );
-        }
-
-        $errors = $validator->validate($jsonData, $schema);
-
-        if (count($errors) > 0) {
-            throw new InvalidConfigException(sprintf(
-                "The configuration%s is invalid:\n%s",
-                $path ? ' in '.$path : '',
-                implode("\n", $errors)
-            ));
-        }
+        $this->validate($jsonData, $path);
 
         return $jsonData;
     }
@@ -548,15 +539,38 @@ class PackageJsonSerializer implements PackageFileSerializer
         return $data;
     }
 
-    private function getKnownVersions()
+    private function assertVersionSupported($version, $path = null)
     {
-        $versions = $this->migrationManager->getKnownVersions();
+        if (!in_array($version, $this->knownVersions, true)) {
+            throw UnsupportedVersionException::forVersion(
+                $version,
+                $this->knownVersions,
+                $path
+            );
+        }
+    }
 
-        if (!in_array($this->targetVersion, $versions, true)) {
-            $versions[] = $this->targetVersion;
-            sort($versions);
+    private function validate($jsonData, $path = null)
+    {
+        $validator = new JsonValidator();
+        $schema = $this->schemaDir.'/package-schema-'.$jsonData->version.'.json';
+
+        if (!file_exists($schema)) {
+            throw new InvalidConfigException(sprintf(
+                'The JSON schema file for version %s was not found%s.',
+                $jsonData->version,
+                $path ? ' in '.$path : ''
+            ));
         }
 
-        return $versions;
+        $errors = $validator->validate($jsonData, $schema);
+
+        if (count($errors) > 0) {
+            throw new InvalidConfigException(sprintf(
+                "The configuration%s is invalid:\n%s",
+                $path ? ' in '.$path : '',
+                implode("\n", $errors)
+            ));
+        }
     }
 }
