@@ -11,7 +11,6 @@
 
 namespace Puli\Manager\Tests\Package;
 
-use Puli\Manager\Migration\MigrationManager;
 use PHPUnit_Framework_Assert;
 use PHPUnit_Framework_MockObject_MockObject;
 use Puli\Discovery\Api\Type\BindingParameter;
@@ -31,6 +30,7 @@ use Puli\Manager\Api\Package\RootPackageFile;
 use Puli\Manager\Api\Puli;
 use Puli\Manager\Api\PuliPlugin;
 use Puli\Manager\Api\Repository\PathMapping;
+use Puli\Manager\Migration\MigrationManager;
 use Puli\Manager\Package\PackageJsonSerializer;
 use Puli\Manager\Tests\Discovery\Fixtures\Baz;
 use Puli\Manager\Tests\JsonTestCase;

@@ -11,7 +11,6 @@
 
 namespace Puli\Manager\Api;
 
-use Puli\Manager\Migration\MigrationManager;
 use LogicException;
 use Psr\Log\LoggerInterface;
 use Puli\Discovery\Api\Discovery;
@@ -45,6 +44,7 @@ use Puli\Manager\Factory\Generator\DefaultGeneratorRegistry;
 use Puli\Manager\Filesystem\FilesystemStorage;
 use Puli\Manager\Installation\InstallationManagerImpl;
 use Puli\Manager\Installer\PackageFileInstallerManager;
+use Puli\Manager\Migration\MigrationManager;
 use Puli\Manager\Package\PackageFileStorage;
 use Puli\Manager\Package\PackageJsonSerializer;
 use Puli\Manager\Package\PackageManagerImpl;
