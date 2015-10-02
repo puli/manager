@@ -27,6 +27,7 @@ use Rhumsaa\Uuid\Uuid;
 use Symfony\Component\Filesystem\Filesystem;
 use Webmozart\Expression\Expr;
 use Webmozart\Glob\Test\TestUtil;
+use Webmozart\PathUtil\Path;
 
 /**
  * @since  1.0
@@ -98,9 +99,9 @@ class PackageManagerImplTest extends ManagerTestCase
     protected function setUp()
     {
         $this->tempDir = TestUtil::makeTempDir('puli-manager', __CLASS__);
-        $this->packageDir1 = __DIR__.'/Fixtures/package1';
-        $this->packageDir2 = __DIR__.'/Fixtures/package2';
-        $this->packageDir3 = __DIR__.'/Fixtures/package3';
+        $this->packageDir1 = Path::normalize(__DIR__.'/Fixtures/package1');
+        $this->packageDir2 = Path::normalize(__DIR__.'/Fixtures/package2');
+        $this->packageDir3 = Path::normalize(__DIR__.'/Fixtures/package3');
 
         $this->packageFile1 = new PackageFile();
         $this->packageFile2 = new PackageFile();
@@ -462,7 +463,7 @@ class PackageManagerImplTest extends ManagerTestCase
 
         $this->packageFileStorage->expects($this->once())
             ->method('loadPackageFile')
-            ->with(__DIR__.'/Fixtures/version-too-high/puli.json')
+            ->with(Path::normalize(__DIR__).'/Fixtures/version-too-high/puli.json')
             ->willThrowException($e);
 
         $manager->installPackage(__DIR__.'/Fixtures/version-too-high', 'vendor/my-package');

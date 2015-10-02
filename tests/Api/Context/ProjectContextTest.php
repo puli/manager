@@ -18,6 +18,7 @@ use Puli\Manager\Api\Context\ProjectContext;
 use Puli\Manager\Api\Environment;
 use Puli\Manager\Api\Package\RootPackageFile;
 use Symfony\Component\EventDispatcher\EventDispatcher;
+use Webmozart\PathUtil\Path;
 
 /**
  * @since  1.0
@@ -33,7 +34,7 @@ class ProjectContextTest extends PHPUnit_Framework_TestCase
         $context = new ProjectContext(null, __DIR__, $config, $rootPackageFile);
 
         $this->assertNull($context->getHomeDirectory());
-        $this->assertSame(__DIR__, $context->getRootDirectory());
+        $this->assertSame(Path::normalize(__DIR__), $context->getRootDirectory());
         $this->assertSame($config, $context->getConfig());
         $this->assertSame($rootPackageFile, $context->getRootPackageFile());
         $this->assertNull($context->getConfigFile());
@@ -47,7 +48,7 @@ class ProjectContextTest extends PHPUnit_Framework_TestCase
         $rootPackageFile = new RootPackageFile();
         $context = new ProjectContext(null, __DIR__.'/../Context', $config, $rootPackageFile);
 
-        $this->assertSame(__DIR__, $context->getRootDirectory());
+        $this->assertSame(Path::normalize(__DIR__), $context->getRootDirectory());
     }
 
     public function testCreateWithHomeDirectory()
@@ -56,7 +57,7 @@ class ProjectContextTest extends PHPUnit_Framework_TestCase
         $rootPackageFile = new RootPackageFile();
         $context = new ProjectContext(__DIR__, __DIR__, $config, $rootPackageFile);
 
-        $this->assertSame(__DIR__, $context->getHomeDirectory());
+        $this->assertSame(Path::normalize(__DIR__), $context->getHomeDirectory());
     }
 
     public function testCreateWithConfigFile()

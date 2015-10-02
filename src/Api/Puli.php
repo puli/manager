@@ -358,7 +358,7 @@ class Puli
 
         Assert::nullOrDirectory($rootDir);
 
-        $this->rootDir = $rootDir;
+        $this->rootDir = $rootDir ? Path::canonicalize($rootDir) : null;
     }
 
     /**

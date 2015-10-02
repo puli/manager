@@ -22,6 +22,7 @@ use Puli\Repository\Resource\Collection\ArrayResourceCollection;
 use Puli\Repository\Resource\DirectoryResource;
 use Symfony\Component\Filesystem\Filesystem;
 use Webmozart\Glob\Test\TestUtil;
+use Webmozart\PathUtil\Path;
 
 /**
  * @since  1.0
@@ -58,8 +59,8 @@ class SymlinkInstallerTest extends PHPUnit_Framework_TestCase
     protected function setUp()
     {
         $this->tempBaseDir = TestUtil::makeTempDir('puli-manager', __CLASS__);
-        $this->tempDir = $this->tempBaseDir.'/workspace';
-        $this->fixturesDir = $this->tempBaseDir.'/fixtures';
+        $this->tempDir = Path::normalize($this->tempBaseDir.'/workspace');
+        $this->fixturesDir = Path::normalize($this->tempBaseDir.'/fixtures');
 
         mkdir($this->tempDir);
         mkdir($this->fixturesDir);
@@ -80,8 +81,12 @@ class SymlinkInstallerTest extends PHPUnit_Framework_TestCase
         $filesystem->remove($this->tempBaseDir);
     }
 
-    public function testInstallResource()
+    public function testInstallResourceWithRelativePath()
     {
+        if ('\\' === DIRECTORY_SEPARATOR) {
+            $this->markTestSkipped('Relative symbolic links are not supported on Windows.');
+        }
+
         $mapping = new AssetMapping('/app/public', 'localhost', '/');
         $server = new Server('localhost', 'symlink', 'public_html');
 
@@ -110,11 +115,11 @@ class SymlinkInstallerTest extends PHPUnit_Framework_TestCase
         $this->assertTrue(is_link($this->tempDir.'/public_html/js'));
         $this->assertFalse(is_link($this->tempDir.'/public_html/js/script.js'));
 
-        $this->assertSame('../../fixtures/css', readlink($this->tempDir.'/public_html/css'));
-        $this->assertSame('../../fixtures/js', readlink($this->tempDir.'/public_html/js'));
+        $this->assertSame('../../fixtures/css', $this->readLink($this->tempDir.'/public_html/css'));
+        $this->assertSame('../../fixtures/js', $this->readLink($this->tempDir.'/public_html/js'));
     }
 
-    public function testInstallResourceWithAbsolutePaths()
+    public function testInstallResourceWithAbsolutePath()
     {
         $mapping = new AssetMapping('/app/public', 'localhost', '/');
         $server = new Server('localhost', 'symlink', 'public_html', '/%s', array(
@@ -146,14 +151,16 @@ class SymlinkInstallerTest extends PHPUnit_Framework_TestCase
         $this->assertTrue(is_link($this->tempDir.'/public_html/js'));
         $this->assertFalse(is_link($this->tempDir.'/public_html/js/script.js'));
 
-        $this->assertSame($this->fixturesDir.'/css', readlink($this->tempDir.'/public_html/css'));
-        $this->assertSame($this->fixturesDir.'/js', readlink($this->tempDir.'/public_html/js'));
+        $this->assertSame($this->fixturesDir.'/css', $this->readLink($this->tempDir.'/public_html/css'));
+        $this->assertSame($this->fixturesDir.'/js', $this->readLink($this->tempDir.'/public_html/js'));
     }
 
     public function testInstallResourceWithBasePath()
     {
         $mapping = new AssetMapping('/app/public/{css,js}', 'localhost', '/');
-        $server = new Server('localhost', 'symlink', 'public_html');
+        $server = new Server('localhost', 'symlink', 'public_html', '/%s', array(
+            'relative' => false,
+        ));
 
         $resource = new DirectoryResource($this->fixturesDir.'/css', '/app/public/css');
 
@@ -178,13 +185,15 @@ class SymlinkInstallerTest extends PHPUnit_Framework_TestCase
         $this->assertTrue(is_link($this->tempDir.'/public_html/css'));
         $this->assertFalse(is_link($this->tempDir.'/public_html/css/style.css'));
 
-        $this->assertSame('../../fixtures/css', readlink($this->tempDir.'/public_html/css'));
+        $this->assertSame($this->fixturesDir.'/css', $this->readLink($this->tempDir.'/public_html/css'));
     }
 
     public function testInstallResourceTwiceToRoot()
     {
         $mapping = new AssetMapping('/app/public', 'localhost', '/');
-        $server = new Server('localhost', 'symlink', 'public_html');
+        $server = new Server('localhost', 'symlink', 'public_html', '/%s', array(
+            'relative' => false,
+        ));
 
         $resource = new DirectoryResource($this->fixturesDir, '/app/public');
 
@@ -204,14 +213,16 @@ class SymlinkInstallerTest extends PHPUnit_Framework_TestCase
         $this->assertTrue(is_link($this->tempDir.'/public_html/css'));
         $this->assertTrue(is_link($this->tempDir.'/public_html/js'));
 
-        $this->assertSame('../../fixtures/css', readlink($this->tempDir.'/public_html/css'));
-        $this->assertSame('../../fixtures/js', readlink($this->tempDir.'/public_html/js'));
+        $this->assertSame($this->fixturesDir.'/css', $this->readLink($this->tempDir.'/public_html/css'));
+        $this->assertSame($this->fixturesDir.'/js', $this->readLink($this->tempDir.'/public_html/js'));
     }
 
     public function testInstallResourceTwiceToSubPath()
     {
         $mapping = new AssetMapping('/app/public', 'localhost', '/path');
-        $server = new Server('localhost', 'symlink', 'public_html');
+        $server = new Server('localhost', 'symlink', 'public_html', '/%s', array(
+            'relative' => false,
+        ));
 
         $resource = new DirectoryResource($this->fixturesDir, '/app/public');
 
@@ -230,6 +241,16 @@ class SymlinkInstallerTest extends PHPUnit_Framework_TestCase
         // The links are correct even after calling the method twice
         $this->assertTrue(is_link($this->tempDir.'/public_html/path'));
 
-        $this->assertSame('../../fixtures', readlink($this->tempDir.'/public_html/path'));
+        $this->assertSame($this->fixturesDir, $this->readLink($this->tempDir.'/public_html/path'));
+    }
+
+    private function readLink($filesystemPath)
+    {
+        if ('\\' === DIRECTORY_SEPARATOR) {
+            // On Windows, realpath() works better with links than readlink()
+            return Path::normalize(realpath($filesystemPath));
+        }
+
+        return readlink($filesystemPath);
     }
 }

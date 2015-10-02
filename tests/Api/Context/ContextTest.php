@@ -16,6 +16,7 @@ use Puli\Manager\Api\Config\Config;
 use Puli\Manager\Api\Config\ConfigFile;
 use Puli\Manager\Api\Context\Context;
 use Symfony\Component\EventDispatcher\EventDispatcher;
+use Webmozart\PathUtil\Path;
 
 /**
  * @since  1.0
@@ -40,7 +41,7 @@ class ContextTest extends PHPUnit_Framework_TestCase
         $config = new Config();
         $context = new Context(__DIR__, $config);
 
-        $this->assertSame(__DIR__, $context->getHomeDirectory());
+        $this->assertSame(Path::normalize(__DIR__), $context->getHomeDirectory());
     }
 
     public function testCreateCanonicalizesHomeDirectory()
@@ -48,7 +49,7 @@ class ContextTest extends PHPUnit_Framework_TestCase
         $config = new Config();
         $context = new Context(__DIR__.'/../Context', $config);
 
-        $this->assertSame(__DIR__, $context->getHomeDirectory());
+        $this->assertSame(Path::normalize(__DIR__), $context->getHomeDirectory());
     }
 
     public function testCreateWithConfigFile()

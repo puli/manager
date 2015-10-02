@@ -22,6 +22,7 @@ use Puli\Manager\Config\DefaultConfig;
 use Puli\Repository\Api\EditableRepository;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Webmozart\PathUtil\Path;
 
 /**
  * @since  1.0
@@ -81,8 +82,8 @@ abstract class ManagerTestCase extends PHPUnit_Framework_TestCase
             $this->baseConfig = new DefaultConfig();
         }
 
-        $this->homeDir = $homeDir;
-        $this->rootDir = $rootDir;
+        $this->homeDir = Path::normalize($homeDir);
+        $this->rootDir = Path::normalize($rootDir);
         $this->configFile = new ConfigFile($homeDir.'/config.json', $this->baseConfig);
         $this->rootPackageFile = new RootPackageFile('vendor/root', $rootDir.'/puli.json', $this->baseConfig);
         $this->dispatcher = $mockDispatcher
