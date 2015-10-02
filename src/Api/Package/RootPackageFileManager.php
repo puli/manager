@@ -13,6 +13,7 @@ namespace Puli\Manager\Api\Package;
 
 use Puli\Manager\Api\Config\ConfigManager;
 use Puli\Manager\Api\Context\ProjectContext;
+use Puli\Manager\Api\Migration\MigrationException;
 use Puli\Manager\Api\Storage\StorageException;
 use Webmozart\Expression\Expression;
 
@@ -239,4 +240,14 @@ interface RootPackageFileManager extends ConfigManager
      * @return array A mapping of configuration keys to values.
      */
     public function findExtraKeys(Expression $expr);
+
+    /**
+     * Migrates the root package file to the given version.
+     *
+     * @param string $targetVersion The target version string.
+     *
+     * @throws MigrationException If the migration fails.
+     * @throws StorageException   If the file cannot be written.
+     */
+    public function migrate($targetVersion);
 }

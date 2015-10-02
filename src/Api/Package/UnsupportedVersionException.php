@@ -24,44 +24,23 @@ use RuntimeException;
 class UnsupportedVersionException extends RuntimeException
 {
     /**
-     * Creates an exception when the read version was too high.
+     * Creates an exception for an unknown version.
      *
-     * @param string    $version    The version that caused the exception.
-     * @param string    $maxVersion The highest readable version.
-     * @param string    $path       The path of the read package file.
-     * @param Exception $cause      The exception that caused this exception.
-     *
-     * @return static The created exception.
-     */
-    public static function versionTooHigh($version, $maxVersion, $path = null, Exception $cause = null)
-    {
-        return new static(sprintf(
-            'Cannot read package file%s at version %s. The highest readable '.
-            'version is %s. Please upgrade Puli.',
-            $path ? ' '.$path : '',
-            $version,
-            $maxVersion
-        ), 0, $cause);
-    }
-
-    /**
-     * Creates an exception when the read version was too low.
-     *
-     * @param string    $version    The version that caused the exception.
-     * @param string    $minVersion The lowest readable version.
-     * @param string    $path       The path of the read package file.
-     * @param Exception $cause      The exception that caused this exception.
+     * @param string    $version       The version that caused the exception.
+     * @param string[]  $knownVersions The known versions.
+     * @param string    $path          The path of the read package file.
+     * @param Exception $cause         The exception that caused this exception.
      *
      * @return static The created exception.
      */
-    public static function versionTooLow($version, $minVersion, $path = null, Exception $cause = null)
+    public static function forVersion($version, array $knownVersions, $path = null, Exception $cause = null)
     {
         return new static(sprintf(
-            'Cannot read package file%s at version %s. The lowest readable '.
-            'version is %s. Please upgrade the package file.',
+            'Cannot read package file%s at version %s. The supported versions '.
+            'are %s.',
             $path ? ' '.$path : '',
             $version,
-            $minVersion
+            implode(', ', $knownVersions)
         ), 0, $cause);
     }
 }

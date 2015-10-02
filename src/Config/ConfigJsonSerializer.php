@@ -19,13 +19,9 @@ use stdClass;
 use Webmozart\Json\DecodingFailedException;
 use Webmozart\Json\JsonDecoder;
 use Webmozart\Json\JsonEncoder;
-use Webmozart\Json\ValidationFailedException;
-use Webmozart\PathUtil\Path;
 
 /**
  * Serializes and unserializes to/from JSON.
- *
- * The JSON is validated against the schema `res/schema/config-schema.json`.
  *
  * @since  1.0
  *
@@ -70,31 +66,16 @@ class ConfigJsonSerializer implements ConfigFileSerializer
         $encoder->setPrettyPrinting(true);
         $encoder->setEscapeSlash(false);
         $encoder->setTerminateWithLineFeed(true);
-        $decoder = new JsonDecoder();
-        // We can't use realpath(), which doesn't work inside PHARs.
-        // However, we want to display nice paths if the file is not found.
-        $schema = $decoder->decodeFile(Path::canonicalize(__DIR__.'/../../res/schema/package-schema-1.0.json'));
-        $configSchema = $schema->properties->config;
 
-        return $encoder->encode($jsonData, $configSchema);
+        return $encoder->encode($jsonData);
     }
 
     private function decode($json, $path = null)
     {
         $decoder = new JsonDecoder();
-        // We can't use realpath(), which doesn't work inside PHARs.
-        // However, we want to display nice paths if the file is not found.
-        $schema = $decoder->decodeFile(Path::canonicalize(__DIR__.'/../../res/schema/package-schema-1.0.json'));
-        $configSchema = $schema->properties->config;
 
         try {
-            return $decoder->decode($json, $configSchema);
-        } catch (ValidationFailedException $e) {
-            throw new InvalidConfigException(sprintf(
-                "The configuration%s is invalid:\n%s",
-                $path ? ' in '.$path : '',
-                $e->getErrorsAsString()
-            ), 0, $e);
+            return $decoder->decode($json);
         } catch (DecodingFailedException $e) {
             throw new InvalidConfigException(sprintf(
                 "The configuration%s could not be decoded:\n%s",

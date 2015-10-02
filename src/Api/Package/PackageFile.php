@@ -30,6 +30,16 @@ use Rhumsaa\Uuid\Uuid;
 class PackageFile
 {
     /**
+     * The current puli.json version.
+     */
+    const DEFAULT_VERSION = '1.0';
+
+    /**
+     * @var string
+     */
+    private $version = self::DEFAULT_VERSION;
+
+    /**
      * @var string|null
      */
     private $packageName;
@@ -81,6 +91,29 @@ class PackageFile
 
         $this->path = $path;
         $this->packageName = $packageName;
+    }
+
+    /**
+     * Returns the version of the package file.
+     *
+     * @return string The package file version.
+     */
+    public function getVersion()
+    {
+        return $this->version;
+    }
+
+    /**
+     * Sets the version of the package file.
+     *
+     * @param string $version The package file version.
+     */
+    public function setVersion($version)
+    {
+        Assert::string($version, 'The package file version must be a string. Got: %s');
+        Assert::regex($version, '~^\d\.\d$~', 'The package file version must have the format "<digit>.<digit>". Got: %s</digit>');
+
+        $this->version = $version;
     }
 
     /**
