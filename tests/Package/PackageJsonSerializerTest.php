@@ -1011,6 +1011,8 @@ JSON;
      */
     public function testUnserializePackageFileValidatesSchema()
     {
+        $this->initWithRealSchemaDir();
+
         $json = <<<JSON
 {
     "version": "1.0",
@@ -1029,6 +1031,8 @@ JSON;
      */
     public function testUnserializeRootPackageFileValidatesSchema()
     {
+        $this->initWithRealSchemaDir();
+
         $json = <<<JSON
 {
     "version": "1.0",
@@ -1162,6 +1166,8 @@ JSON;
      */
     public function testNameMustBeString()
     {
+        $this->initWithRealSchemaDir();
+
         $json = <<<JSON
 {
     "version": "1.0",
@@ -1178,6 +1184,8 @@ JSON;
      */
     public function testResourcesMustBeObject()
     {
+        $this->initWithRealSchemaDir();
+
         $json = <<<JSON
 {
     "version": "1.0",
@@ -1195,6 +1203,8 @@ JSON;
      */
     public function testBindingTypesMustBeObject()
     {
+        $this->initWithRealSchemaDir();
+
         $json = <<<JSON
 {
     "version": "1.0",
@@ -1213,6 +1223,8 @@ JSON;
      */
     public function testBindingsMustBeObject()
     {
+        $this->initWithRealSchemaDir();
+
         $json = <<<JSON
 {
     "version": "1.0",
@@ -1232,6 +1244,8 @@ JSON;
 
     public function testOverrideMayBeArray()
     {
+        $this->initWithRealSchemaDir();
+
         $json = <<<JSON
 {
     "version": "1.0",
@@ -1251,6 +1265,8 @@ JSON;
      */
     public function testOverrideMustBeStringOrArray()
     {
+        $this->initWithRealSchemaDir();
+
         $json = <<<JSON
 {
     "version": "1.0",
@@ -1268,6 +1284,8 @@ JSON;
      */
     public function testOverrideEntriesMustBeStrings()
     {
+        $this->initWithRealSchemaDir();
+
         $json = <<<JSON
 {
     "version": "1.0",
@@ -1285,6 +1303,8 @@ JSON;
      */
     public function testOverrideOrderMustBeArray()
     {
+        $this->initWithRealSchemaDir();
+
         $json = <<<JSON
 {
     "version": "1.0",
@@ -1304,6 +1324,8 @@ JSON;
      */
     public function testOverrideOrderEntriesMustBeStrings()
     {
+        $this->initWithRealSchemaDir();
+
         $json = <<<JSON
 {
     "version": "1.0",
@@ -1344,6 +1366,15 @@ JSON;
         $this->assertSame(array(), $packageFile->getPathMappings());
         $this->assertSame(array(), $packageFile->getBindingDescriptors());
         $this->assertSame(array(), $packageFile->getOverriddenPackages());
+    }
+
+    private function initWithRealSchemaDir()
+    {
+        $this->serializer = new PackageJsonSerializer(
+            $this->migrationManager,
+            __DIR__.'/../../res/schema',
+            PackageFile::DEFAULT_VERSION
+        );
     }
 }
 
