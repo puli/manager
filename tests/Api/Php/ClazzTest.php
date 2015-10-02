@@ -170,7 +170,7 @@ class ClazzTest extends PHPUnit_Framework_TestCase
         $this->class->setDirectory(__DIR__);
         $this->class->setFileName('MyFile.php');
 
-        $this->assertSame(__DIR__.'/MyFile.php', $this->class->getFilePath());
+        $this->assertSame(Path::normalize(__DIR__.'/MyFile.php'), $this->class->getFilePath());
     }
 
     public function testSetFilePath()

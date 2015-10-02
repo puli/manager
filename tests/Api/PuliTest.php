@@ -63,8 +63,9 @@ class PuliTest extends PHPUnit_Framework_TestCase
 
         putenv('PULI_HOME='.$this->tempHome);
 
-        // Make sure "HOME" is not set
+        // Make sure "HOME" (Unix)/"APPDATA" (Windows) is not set
         putenv('HOME');
+        putenv('APPDATA');
 
         $this->puli = new Puli();
     }

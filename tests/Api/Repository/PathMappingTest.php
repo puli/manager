@@ -17,6 +17,7 @@ use Puli\Manager\Api\Package\PackageCollection;
 use Puli\Manager\Api\Package\PackageFile;
 use Puli\Manager\Api\Repository\PathConflict;
 use Puli\Manager\Api\Repository\PathMapping;
+use Webmozart\PathUtil\Path;
 
 /**
  * @since  1.0
@@ -62,9 +63,9 @@ class PathMappingTest extends PHPUnit_Framework_TestCase
 
     protected function setUp()
     {
-        $this->packageDir1 = __DIR__.'/Fixtures/package1';
-        $this->packageDir2 = __DIR__.'/Fixtures/package2';
-        $this->packageDir3 = __DIR__.'/Fixtures/package3';
+        $this->packageDir1 = Path::normalize(__DIR__.'/Fixtures/package1');
+        $this->packageDir2 = Path::normalize(__DIR__.'/Fixtures/package2');
+        $this->packageDir3 = Path::normalize(__DIR__.'/Fixtures/package3');
         $this->package1 = new Package(new PackageFile('vendor/package1'), $this->packageDir1);
         $this->package2 = new Package(new PackageFile('vendor/package2'), $this->packageDir2);
         $this->package3 = new Package(new PackageFile('vendor/package3'), $this->packageDir3);

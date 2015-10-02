@@ -46,6 +46,9 @@ class FilesystemStorageTest extends PHPUnit_Framework_TestCase
     protected function tearDown()
     {
         $filesystem = new Filesystem();
+
+        // Make sure everything is writable before removing
+        $filesystem->chmod($this->tempDir, 0755, 0000, true);
         $filesystem->remove($this->tempDir);
     }
 
@@ -91,8 +94,11 @@ class FilesystemStorageTest extends PHPUnit_Framework_TestCase
      */
     public function testReadFailsIfNotReadable()
     {
-        // write, no read
-        chmod($this->path, 0200);
+        if ('\\' === DIRECTORY_SEPARATOR) {
+            $this->markTestSkipped('Cannot deny read access on Windows.');
+        }
+
+        chmod($this->path, 0000);
 
         $this->storage->read($this->path);
     }
