@@ -301,7 +301,23 @@ class Puli
             // Run the project's bootstrap file to enable project-specific
             // autoloading
             if (null !== $bootstrapFile) {
+                // Backup autoload functions of the PHAR
+                $autoloadFunctions = spl_autoload_functions();
+
+                foreach ($autoloadFunctions as $autoloadFunction) {
+                    spl_autoload_unregister($autoloadFunction);
+                }
+
+                // Add project-specific autoload functions
                 require_once Path::makeAbsolute($bootstrapFile, $this->rootDir);
+
+                // Prepend autoload functions of the PHAR again
+                // This is needed if the user specific autoload functions were
+                // added with $prepend=true (as done by Composer)
+                // Classes in the PHAR should always take precedence
+                for ($i = count($autoloadFunctions) - 1; $i >= 0; --$i) {
+                    spl_autoload_register($autoloadFunctions[$i], true, true);
+                }
             }
         } else {
             $this->context = $this->createGlobalContext();
