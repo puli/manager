@@ -1,8 +1,9 @@
 Changelog
 =========
 
-* 1.0.0-beta8 (@release_date@)
+* 1.0.0-beta8 (2015-10-05)
 
+ * added `PuliEvents::POST_ADD_ASSET_MAPPING` and `PuliEvents::POST_REMOVE_ASSET_MAPPING`
  * removed constants from `AssetMapping` to match changed webmozart/expression API
  * removed constants from `BindingDescriptor` to match changed webmozart/expression API
  * removed constants from `BindingTypeDescriptor` to match changed webmozart/expression API
@@ -82,6 +83,7 @@ Changelog
  * removed `UnsupportedVersionException::versionTooHigh()`
  * removed `UnsupportedVersionException::versionTooLow()`
  * added `UnsupportedVersionException::forVersion()`
+ * fixed to register PHAR autoloaders before project-specific autoloaders
 
 * 1.0.0-beta7 (2015-08-24)
 
