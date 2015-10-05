@@ -12,8 +12,8 @@ Latest release: [1.0.0-beta7](https://packagist.org/packages/puli/manager#1.0.0-
 
 PHP >= 5.3.9
 
-The [Puli] Repository Manager Component builds a [resource repository] and
-[discovery] from a puli.json configuration in the root of your project:
+The [Puli] Manager Component builds a [resource repository] and [discovery] from 
+a puli.json configuration in the root of your project:
 
 ```json
 {
@@ -60,7 +60,10 @@ The following is a table of all managers supported by this package:
 Class                      | Description
 -------------------------- | -------------
 [`RepositoryManager`]      | Manages resource mappings and builds [`ResourceRepository`] instances
-[`DiscoveryManager`]       | Manages bindings and binding types and builds [`ResourceDiscovery`] instances
+[`DiscoveryManager`]       | Manages bindings and binding types and builds [`Discovery`] instances
+[`AssetManager`]           | Manages asset mappings used by the [`UrlGenerator`]
+[`ServerManager`]          | Manages servers used by the [`UrlGenerator`]
+[`FactoryManager`]         | Manages the generation of the `GeneratedPuliFactory` class
 [`PackageManager`]         | Manages the installed packages
 [`ConfigFileManager`]      | Manages changes to a global `config.json` file
 [`RootPackageFileManager`] | Manages changes to the `puli.json` file of the project
@@ -118,7 +121,11 @@ All contents of this package are licensed under the [MIT license].
 [`RepositoryManager`]: http://api.puli.io/latest/class-Puli.Manager.Api.Repository.RepositoryManager.html
 [`PackageManager`]: http://api.puli.io/latest/class-Puli.Manager.Api.Package.PackageManager.html
 [`DiscoveryManager`]: http://api.puli.io/latest/class-Puli.Manager.Api.Discovery.DiscoveryManager.html
+[`AssetManager`]: http://api.puli.io/latest/class-Puli.Manager.Api.Asset.AssetManager.html
+[`ServerManager`]: http://api.puli.io/latest/class-Puli.Manager.Api.Server.ServerManager.html
+[`FactoryManager`]: http://api.puli.io/latest/class-Puli.Manager.Api.Factory.FactoryManager.html
 [`ConfigFileManager`]: http://api.puli.io/latest/class-Puli.Manager.Api.Config.ConfigFileManager.html
 [`RootPackageFileManager`]: http://api.puli.io/latest/class-Puli.Manager.Api.Package.RootPackageFileManager.html
 [`ResourceRepository`]: http://api.puli.io/latest/class-Puli.Repository.Api.ResourceRepository.html
-[`ResourceDiscovery`]: http://api.puli.io/latest/class-Puli.Discovery.Api.ResourceDiscovery.html
+[`Discovery`]: http://api.puli.io/latest/class-Puli.Discovery.Api.Discovery.html
+[`UrlGenerator`]: http://api.puli.io/latest/class-Puli.UrlGenerator.Api.UrlGenerator.html
