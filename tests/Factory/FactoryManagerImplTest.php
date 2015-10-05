@@ -158,7 +158,7 @@ class MyFactory
         }
 
         \$store = new JsonFileStore(__DIR__.'/.puli/path-mappings.json', true);
-        \$repo = new PathMappingRepository(\$store);
+        \$repo = new PathMappingRepository(\$store, __DIR__);
 
         return \$repo;
     }

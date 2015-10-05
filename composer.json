@@ -15,7 +15,7 @@
         "puli/discovery": "^1.0-beta8",
         "puli/url-generator": "^1.0-beta3",
         "webmozart/json": "^1.0",
-        "webmozart/path-util": "^2.2",
+        "webmozart/path-util": "^2.2.3",
         "webmozart/expression": "^1.0-beta5",
         "webmozart/assert": "^1.0",
         "webmozart/glob": "^3.1",

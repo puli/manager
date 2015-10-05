@@ -16,6 +16,7 @@ use Puli\Manager\Api\Factory\Generator\ServiceGenerator;
 use Puli\Manager\Api\Php\Import;
 use Puli\Manager\Api\Php\Method;
 use Puli\Manager\Assert\Assert;
+use Webmozart\PathUtil\Path;
 
 /**
  * Generates the setup code for a {@link PathMappingRepository}.
@@ -47,10 +48,16 @@ class PathMappingRepositoryGenerator implements ServiceGenerator
         $kvsOptions['rootDir'] = $options['rootDir'];
         $kvsGenerator->generateNewInstance('store', $targetMethod, $generatorRegistry, $kvsOptions);
 
+        $relPath = Path::makeRelative($options['rootDir'], $targetMethod->getClass()->getDirectory());
+
+        $escPath = $relPath
+            ? '__DIR__.'.var_export('/'.$relPath, true)
+            : '__DIR__';
+
         $className = ($options['optimize'] ? 'Optimized' : '').'PathMappingRepository';
 
         $targetMethod->getClass()->addImport(new Import('Puli\\Repository\\'.$className));
 
-        $targetMethod->addBody(sprintf('$%s = new %s($store);', $varName, $className));
+        $targetMethod->addBody(sprintf('$%s = new %s($store, %s);', $varName, $className, $escPath));
     }
 }

@@ -41,7 +41,21 @@ class PathMappingRepositoryGeneratorTest extends AbstractGeneratorTest
 
         $expected = <<<EOF
 \$store = new NullStore();
-\$repo = new PathMappingRepository(\$store);
+\$repo = new PathMappingRepository(\$store, __DIR__.'/..');
+EOF;
+
+        $this->assertSame($expected, $this->method->getBody());
+    }
+
+    public function testGenerateServiceInRootDir()
+    {
+        $this->generator->generateNewInstance('repo', $this->method, $this->registry, array(
+            'rootDir' => $this->outputDir,
+        ));
+
+        $expected = <<<EOF
+\$store = new NullStore();
+\$repo = new PathMappingRepository(\$store, __DIR__);
 EOF;
 
         $this->assertSame($expected, $this->method->getBody());
@@ -56,7 +70,7 @@ EOF;
 
         $expected = <<<EOF
 \$store = new NullStore();
-\$repo = new OptimizedPathMappingRepository(\$store);
+\$repo = new OptimizedPathMappingRepository(\$store, __DIR__.'/..');
 EOF;
 
         $this->assertSame($expected, $this->method->getBody());
@@ -79,7 +93,7 @@ EOF;
 
         $expected = <<<EOF
 \$store = new NullStore();
-\$repo = new PathMappingRepository(\$store);
+\$repo = new PathMappingRepository(\$store, __DIR__.'/..');
 EOF;
 
         $this->assertSame($expected, $this->method->getBody());
@@ -95,7 +109,7 @@ EOF;
 
         $expected = <<<EOF
 \$store = new NullStore();
-\$repo = new OptimizedPathMappingRepository(\$store);
+\$repo = new OptimizedPathMappingRepository(\$store, __DIR__.'/..');
 EOF;
 
         $this->assertSame($expected, $this->method->getBody());
