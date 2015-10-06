@@ -1,6 +1,10 @@
 Changelog
 =========
 
+* 1.0.0-beta9 (2015-10-06)
+
+ * fixed regression in `BindingExpressionBuilder`
+
 * 1.0.0-beta8 (2015-10-05)
 
  * added `PuliEvents::POST_ADD_ASSET_MAPPING` and `PuliEvents::POST_REMOVE_ASSET_MAPPING`
