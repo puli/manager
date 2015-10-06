@@ -1,9 +1,9 @@
 The Puli Manager Component
 ==========================
 
-[![Build Status](https://travis-ci.org/puli/manager.svg?branch=master)](https://travis-ci.org/puli/manager)
+[![Build Status](https://travis-ci.org/puli/manager.svg?branch=1.0.0-beta9)](https://travis-ci.org/puli/manager)
 [![Build status](https://ci.appveyor.com/api/projects/status/eb5apotdnp0h021b/branch/master?svg=true)](https://ci.appveyor.com/project/webmozart/manager/branch/master)
-[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/puli/manager/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/puli/manager/?branch=master)
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/puli/manager/badges/quality-score.png?b=1.0.0-beta9)](https://scrutinizer-ci.com/g/puli/manager/?branch=1.0.0-beta9)
 [![Latest Stable Version](https://poser.pugx.org/puli/manager/v/stable.svg)](https://packagist.org/packages/puli/manager)
 [![Total Downloads](https://poser.pugx.org/puli/manager/downloads.svg)](https://packagist.org/packages/puli/manager)
 [![Dependency Status](https://www.versioneye.com/php/puli:manager/1.0.0/badge.svg)](https://www.versioneye.com/php/puli:manager/1.0.0)

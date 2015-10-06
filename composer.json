@@ -11,7 +11,7 @@
     ],
     "require": {
         "php": ">=5.3.9",
-        "puli/repository": "1.0.*",
+        "puli/repository": "^1.0-beta8",
         "puli/discovery": "^1.0-beta8",
         "puli/url-generator": "^1.0-beta3",
         "webmozart/json": "^1.0",
@@ -32,7 +32,7 @@
         "phpunit/phpunit": "^4.6",
         "sebastian/version": "^1.0.1"
     },
-    "minimum-stability": "dev",
+    "minimum-stability": "beta",
     "autoload": {
         "psr-4": {
             "Puli\\Manager\\": "src/"
