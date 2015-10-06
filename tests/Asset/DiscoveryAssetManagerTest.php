@@ -691,7 +691,7 @@ class DiscoveryAssetManagerTest extends PHPUnit_Framework_TestCase
     {
         return Expr::method('isEnabled', Expr::same(true))
             ->andMethod('getTypeName', Expr::same(DiscoveryUrlGenerator::BINDING_TYPE))
-            ->andMethod('getQuery', Expr::endsWith('{,/**/*}'));
+            ->andMethod('getBinding', Expr::method('getQuery', Expr::endsWith('{,/**/*}')));
     }
 
     private function uuid(Uuid $uuid)

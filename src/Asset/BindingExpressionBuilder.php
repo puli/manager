@@ -54,7 +54,7 @@ class BindingExpressionBuilder implements ExpressionVisitor
         if (!$this->defaultExpression) {
             $this->defaultExpression = Expr::method('isEnabled', Expr::same(true))
                 ->andMethod('getTypeName', Expr::same(DiscoveryUrlGenerator::BINDING_TYPE))
-                ->andMethod('getQuery', Expr::endsWith('{,/**/*}'));
+                ->andMethod('getBinding', Expr::method('getQuery', Expr::endsWith('{,/**/*}')));
         }
 
         if (!$expr) {
@@ -100,7 +100,7 @@ class BindingExpressionBuilder implements ExpressionVisitor
                         $queryExpr = Expr::endsWith($queryExpr->getAcceptedSuffix().'{,/**/*}');
                     }
 
-                    return Expr::method('getQuery', $queryExpr);
+                    return Expr::method('getBinding', Expr::method('getQuery', $queryExpr));
 
                 case 'getServerName':
                     return Expr::method(

@@ -37,7 +37,7 @@ class BindingExpressionBuilderTest extends PHPUnit_Framework_TestCase
     {
         $expr = Expr::method('isEnabled', Expr::same(true))
             ->andMethod('getTypeName', Expr::same(DiscoveryUrlGenerator::BINDING_TYPE))
-            ->andMethod('getQuery', Expr::endsWith('{,/**/*}'));
+            ->andMethod('getBinding', Expr::method('getQuery', Expr::endsWith('{,/**/*}')));
 
         $this->assertEquals($expr, $this->builder->buildExpression());
     }
@@ -53,12 +53,12 @@ class BindingExpressionBuilderTest extends PHPUnit_Framework_TestCase
 
         $expr2 = Expr::method('isEnabled', Expr::same(true))
             ->andMethod('getTypeName', Expr::same(DiscoveryUrlGenerator::BINDING_TYPE))
-            ->andMethod('getQuery', Expr::endsWith('{,/**/*}'))
+            ->andMethod('getBinding', Expr::method('getQuery', Expr::endsWith('{,/**/*}')))
             ->andX(
                 Expr::method('getUuid', Expr::startsWith('abcd'))
                     ->orMethod('getParameterValue', DiscoveryUrlGenerator::SERVER_PARAMETER, Expr::same('local'))
                     ->orX(
-                        Expr::method('getQuery', Expr::same('/path{,/**/*}'))
+                        Expr::method('getBinding', Expr::method('getQuery', Expr::same('/path{,/**/*}')))
                             ->andMethod('getParameterValue', DiscoveryUrlGenerator::PATH_PARAMETER, Expr::same('css'))
                     )
             );
@@ -72,8 +72,8 @@ class BindingExpressionBuilderTest extends PHPUnit_Framework_TestCase
 
         $expr2 = Expr::method('isEnabled', Expr::same(true))
             ->andMethod('getTypeName', Expr::same(DiscoveryUrlGenerator::BINDING_TYPE))
-            ->andMethod('getQuery', Expr::endsWith('{,/**/*}'))
-            ->andMethod('getQuery', Expr::same('/path{,/**/*}'));
+            ->andMethod('getBinding', Expr::method('getQuery', Expr::endsWith('{,/**/*}')))
+            ->andMethod('getBinding', Expr::method('getQuery', Expr::same('/path{,/**/*}')));
 
         $this->assertEquals($expr2, $this->builder->buildExpression($expr1));
     }
@@ -84,8 +84,8 @@ class BindingExpressionBuilderTest extends PHPUnit_Framework_TestCase
 
         $expr2 = Expr::method('isEnabled', Expr::same(true))
             ->andMethod('getTypeName', Expr::same(DiscoveryUrlGenerator::BINDING_TYPE))
-            ->andMethod('getQuery', Expr::endsWith('{,/**/*}'))
-            ->andMethod('getQuery', Expr::equals('/path{,/**/*}'));
+            ->andMethod('getBinding', Expr::method('getQuery', Expr::endsWith('{,/**/*}')))
+            ->andMethod('getBinding', Expr::method('getQuery', Expr::equals('/path{,/**/*}')));
 
         $this->assertEquals($expr2, $this->builder->buildExpression($expr1));
     }
@@ -96,8 +96,8 @@ class BindingExpressionBuilderTest extends PHPUnit_Framework_TestCase
 
         $expr2 = Expr::method('isEnabled', Expr::same(true))
             ->andMethod('getTypeName', Expr::same(DiscoveryUrlGenerator::BINDING_TYPE))
-            ->andMethod('getQuery', Expr::endsWith('{,/**/*}'))
-            ->andMethod('getQuery', Expr::notSame('/path{,/**/*}'));
+            ->andMethod('getBinding', Expr::method('getQuery', Expr::endsWith('{,/**/*}')))
+            ->andMethod('getBinding', Expr::method('getQuery', Expr::notSame('/path{,/**/*}')));
 
         $this->assertEquals($expr2, $this->builder->buildExpression($expr1));
     }
@@ -108,8 +108,8 @@ class BindingExpressionBuilderTest extends PHPUnit_Framework_TestCase
 
         $expr2 = Expr::method('isEnabled', Expr::same(true))
             ->andMethod('getTypeName', Expr::same(DiscoveryUrlGenerator::BINDING_TYPE))
-            ->andMethod('getQuery', Expr::endsWith('{,/**/*}'))
-            ->andMethod('getQuery', Expr::notEquals('/path{,/**/*}'));
+            ->andMethod('getBinding', Expr::method('getQuery', Expr::endsWith('{,/**/*}')))
+            ->andMethod('getBinding', Expr::method('getQuery', Expr::notEquals('/path{,/**/*}')));
 
         $this->assertEquals($expr2, $this->builder->buildExpression($expr1));
     }
@@ -120,8 +120,8 @@ class BindingExpressionBuilderTest extends PHPUnit_Framework_TestCase
 
         $expr2 = Expr::method('isEnabled', Expr::same(true))
             ->andMethod('getTypeName', Expr::same(DiscoveryUrlGenerator::BINDING_TYPE))
-            ->andMethod('getQuery', Expr::endsWith('{,/**/*}'))
-            ->andMethod('getQuery', Expr::endsWith('/path{,/**/*}'));
+            ->andMethod('getBinding', Expr::method('getQuery', Expr::endsWith('{,/**/*}')))
+            ->andMethod('getBinding', Expr::method('getQuery', Expr::endsWith('/path{,/**/*}')));
 
         $this->assertEquals($expr2, $this->builder->buildExpression($expr1));
     }
