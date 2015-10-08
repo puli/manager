@@ -326,6 +326,11 @@ interface DiscoveryManager
     public function disableBindingDescriptor(Uuid $uuid);
 
     /**
+     * Removes disabled binding UUIDs that were not found in any package.
+     */
+    public function removeObsoleteDisabledBindingDescriptors();
+
+    /**
      * Returns the binding with the given UUID.
      *
      * @param Uuid $uuid The UUID of the binding.

@@ -1968,6 +1968,61 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->assertSame(array(), $this->installInfo1->getDisabledBindingUuids());
     }
 
+    public function testRemoveObsoleteDisabledBindingDescriptors()
+    {
+        $this->initDefaultManager();
+
+        $binding = new ResourceBinding('/path1', Foo::clazz);
+
+        $this->packageFile1->addTypeDescriptor(new BindingTypeDescriptor(new BindingType(Foo::clazz)));
+        $this->packageFile1->addBindingDescriptor(new BindingDescriptor($binding));
+        $this->installInfo1->addDisabledBindingUuid($binding->getUuid());
+        $this->installInfo1->addDisabledBindingUuid(Uuid::uuid4());
+        $this->installInfo2->addDisabledBindingUuid(Uuid::uuid4());
+
+        $this->packageFileStorage->expects($this->once())
+            ->method('saveRootPackageFile')
+            ->with($this->rootPackageFile)
+            ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) use ($binding) {
+                $installInfo1 = $rootPackageFile->getInstallInfo('vendor/package1');
+                $installInfo2 = $rootPackageFile->getInstallInfo('vendor/package2');
+                $disabledBindingUuids1 = $installInfo1->getDisabledBindingUuids();
+                $disabledBindingUuids2 = $installInfo2->getDisabledBindingUuids();
+
+                PHPUnit_Framework_Assert::assertSame(array($binding->getUuid()), $disabledBindingUuids1);
+                PHPUnit_Framework_Assert::assertSame(array(), $disabledBindingUuids2);
+            }));
+
+        $this->manager->removeObsoleteDisabledBindingDescriptors();
+    }
+
+    public function testRemoveObsoleteDisabledBindingDescriptorsRevertsIfSavingFails()
+    {
+        $this->initDefaultManager();
+
+        $binding = new ResourceBinding('/path1', Foo::clazz);
+
+        $this->packageFile1->addTypeDescriptor(new BindingTypeDescriptor(new BindingType(Foo::clazz)));
+        $this->packageFile1->addBindingDescriptor(new BindingDescriptor($binding));
+        $this->installInfo1->addDisabledBindingUuid($binding->getUuid());
+        $this->installInfo1->addDisabledBindingUuid($uuid1 = Uuid::uuid4());
+        $this->installInfo2->addDisabledBindingUuid($uuid2 = Uuid::uuid4());
+
+        $this->packageFileStorage->expects($this->once())
+            ->method('saveRootPackageFile')
+            ->with($this->rootPackageFile)
+            ->willThrowException(new TestException('Some exception'));
+
+        try {
+            $this->manager->removeObsoleteDisabledBindingDescriptors();
+            $this->fail('Expected an exception');
+        } catch (TestException $e) {
+        }
+
+        $this->assertSame(array($binding->getUuid(), $uuid1), $this->installInfo1->getDisabledBindingUuids());
+        $this->assertSame(array($uuid2), $this->installInfo2->getDisabledBindingUuids());
+    }
+
     public function testGetBindingDescriptor()
     {
         $this->initDefaultManager();

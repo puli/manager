@@ -1,6 +1,10 @@
 Changelog
 =========
 
+* 1.0.0-beta10 (@release_date@)
+
+ * added `DiscoveryManager::removeObsoleteDisabledBindingDescriptors()`
+
 * 1.0.0-beta9 (2015-10-06)
 
  * fixed regression in `BindingExpressionBuilder`

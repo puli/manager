@@ -735,6 +735,39 @@ class DiscoveryManagerImpl implements DiscoveryManager
     /**
      * {@inheritdoc}
      */
+    public function removeObsoleteDisabledBindingDescriptors()
+    {
+        $this->assertPackagesLoaded();
+
+        $removedUuidsByPackage = array();
+
+        try {
+            foreach ($this->rootPackageFile->getInstallInfos() as $installInfo) {
+                foreach ($installInfo->getDisabledBindingUuids() as $uuid) {
+                    if (!$this->bindingDescriptors->contains($uuid)) {
+                        $installInfo->removeDisabledBindingUuid($uuid);
+                        $removedUuidsByPackage[$installInfo->getPackageName()][] = $uuid;
+                    }
+                }
+            }
+
+            $this->saveRootPackageFile();
+        } catch (Exception $e) {
+            foreach ($removedUuidsByPackage as $packageName => $removedUuids) {
+                $installInfo = $this->rootPackageFile->getInstallInfo($packageName);
+
+                foreach ($removedUuids as $uuid) {
+                    $installInfo->addDisabledBindingUuid($uuid);
+                }
+            }
+
+            throw $e;
+        }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function getBindingDescriptor(Uuid $uuid)
     {
         $this->assertPackagesLoaded();
