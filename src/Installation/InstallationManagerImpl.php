@@ -20,7 +20,7 @@ use Puli\Manager\Api\Installer\InstallerDescriptor;
 use Puli\Manager\Api\Installer\InstallerManager;
 use Puli\Manager\Api\Installer\ResourceInstaller;
 use Puli\Manager\Api\Server\ServerCollection;
-use Puli\Repository\Api\Resource\Resource;
+use Puli\Repository\Api\Resource\PuliResource;
 use Puli\Repository\Api\ResourceRepository;
 use ReflectionClass;
 
@@ -102,7 +102,7 @@ class InstallationManagerImpl implements InstallationManager
     /**
      * {@inheritdoc}
      */
-    public function installResource(Resource $resource, InstallationParams $params)
+    public function installResource(PuliResource $resource, InstallationParams $params)
     {
         // Validate, as we cannot guarantee that the installation parameters
         // were actually retrieved via prepareInstallation()

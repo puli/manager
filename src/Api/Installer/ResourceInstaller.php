@@ -13,7 +13,7 @@ namespace Puli\Manager\Api\Installer;
 
 use Puli\Manager\Api\Installation\InstallationParams;
 use Puli\Manager\Api\Installation\NotInstallableException;
-use Puli\Repository\Api\Resource\Resource;
+use Puli\Repository\Api\Resource\PuliResource;
 
 /**
  * Installs resources on a server.
@@ -42,12 +42,12 @@ interface ResourceInstaller
     /**
      * Installs a resource on a server.
      *
-     * @param Resource           $resource The resource to install.
+     * @param PuliResource       $resource The resource to install.
      * @param InstallationParams $params   The installation parameters containing
      *                                     all the additional information needed
      *                                     to perform the installation.
      *
      * @throws NotInstallableException If the installation fails.
      */
-    public function installResource(Resource $resource, InstallationParams $params);
+    public function installResource(PuliResource $resource, InstallationParams $params);
 }

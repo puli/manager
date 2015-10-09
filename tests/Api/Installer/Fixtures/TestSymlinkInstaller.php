@@ -13,7 +13,7 @@ namespace Puli\Manager\Tests\Api\Installer\Fixtures;
 
 use Puli\Manager\Api\Installer\ResourceInstaller;
 use Puli\Manager\Api\Server\Server;
-use Puli\Repository\Api\Resource\Resource;
+use Puli\Repository\Api\Resource\PuliResource;
 
 /**
  * @since  1.0
@@ -22,7 +22,7 @@ use Puli\Repository\Api\Resource\Resource;
  */
 class TestSymlinkInstaller implements ResourceInstaller
 {
-    public function installResource(Resource $resource, Server $server)
+    public function installResource(PuliResource $resource, Server $server)
     {
     }
 }

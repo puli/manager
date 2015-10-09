@@ -13,7 +13,7 @@ namespace Puli\Manager\Tests\Installation\Fixtures;
 
 use Puli\Manager\Api\Installation\InstallationParams;
 use Puli\Manager\Api\Installer\ResourceInstaller;
-use Puli\Repository\Api\Resource\Resource;
+use Puli\Repository\Api\Resource\PuliResource;
 
 /**
  * @since  1.0
@@ -30,7 +30,7 @@ class TestInstallerWithoutDefaultConstructor implements ResourceInstaller
     {
     }
 
-    public function installResource(Resource $resource, InstallationParams $params)
+    public function installResource(PuliResource $resource, InstallationParams $params)
     {
     }
 }

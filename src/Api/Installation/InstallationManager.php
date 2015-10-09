@@ -12,7 +12,7 @@
 namespace Puli\Manager\Api\Installation;
 
 use Puli\Manager\Api\Asset\AssetMapping;
-use Puli\Repository\Api\Resource\Resource;
+use Puli\Repository\Api\Resource\PuliResource;
 
 /**
  * Manages the installation of resources.
@@ -41,11 +41,11 @@ interface InstallationManager
     /**
      * Installs a resource on its server.
      *
-     * @param Resource           $resource The resource to install.
+     * @param PuliResource       $resource The resource to install.
      * @param InstallationParams $params   The installation parameters returned
      *                                     by {@link prepareInstallation()}.
      *
      * @throws NotInstallableException If the installation fails.
      */
-    public function installResource(Resource $resource, InstallationParams $params);
+    public function installResource(PuliResource $resource, InstallationParams $params);
 }

@@ -14,7 +14,7 @@ namespace Puli\Manager\Installer;
 use Puli\Manager\Api\Installation\InstallationParams;
 use Puli\Manager\Api\Installer\ResourceInstaller;
 use Puli\Repository\Api\Resource\FilesystemResource;
-use Puli\Repository\Api\Resource\Resource;
+use Puli\Repository\Api\Resource\PuliResource;
 use Puli\Repository\FilesystemRepository;
 use Webmozart\PathUtil\Path;
 
@@ -42,7 +42,7 @@ class CopyInstaller implements ResourceInstaller
     /**
      * {@inheritdoc}
      */
-    public function installResource(Resource $resource, InstallationParams $params)
+    public function installResource(PuliResource $resource, InstallationParams $params)
     {
         $documentRoot = Path::makeAbsolute($params->getDocumentRoot(), $params->getRootDirectory());
 
