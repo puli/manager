@@ -4,6 +4,8 @@ Changelog
 * 1.0.0-beta10 (@release_date@)
 
  * added `DiscoveryManager::removeObsoleteDisabledBindingDescriptors()`
+ * fixed: a meaningful exception is now thrown if an `AssetMapping` is added
+   but the "puli/url-generator" package is not installed
 
 * 1.0.0-beta9 (2015-10-06)
 

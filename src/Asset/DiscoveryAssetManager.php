@@ -25,6 +25,7 @@ use Puli\Manager\Api\Server\NoSuchServerException;
 use Puli\Manager\Api\Server\ServerCollection;
 use Puli\UrlGenerator\DiscoveryUrlGenerator;
 use Rhumsaa\Uuid\Uuid;
+use RuntimeException;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Webmozart\Expression\Expr;
 use Webmozart\Expression\Expression;
@@ -71,6 +72,15 @@ class DiscoveryAssetManager implements AssetManager
      */
     public function addRootAssetMapping(AssetMapping $mapping, $flags = 0)
     {
+        if (!$this->discoveryManager->hasTypeDescriptor(DiscoveryUrlGenerator::BINDING_TYPE)) {
+            throw new RuntimeException(sprintf(
+                'The binding type "%s" was not found. Please install the '.
+                '"puli/url-generator" package with Composer:'."\n\n".
+                '    $ composer require puli/url-generator',
+                DiscoveryUrlGenerator::BINDING_TYPE
+            ));
+        }
+
         if (!($flags & self::IGNORE_SERVER_NOT_FOUND) && !$this->servers->contains($mapping->getServerName())) {
             throw NoSuchServerException::forServerName($mapping->getServerName());
         }
