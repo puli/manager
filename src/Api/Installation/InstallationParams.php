@@ -17,7 +17,7 @@ use Puli\Manager\Api\Installer\ResourceInstaller;
 use Puli\Manager\Api\Installer\Validation\ConstraintViolation;
 use Puli\Manager\Api\Installer\Validation\InstallerParameterValidator;
 use Puli\Manager\Api\Server\Server;
-use Puli\Repository\Api\Resource\Resource;
+use Puli\Repository\Api\Resource\PuliResource;
 use Puli\Repository\Api\ResourceCollection;
 use Webmozart\Glob\Glob;
 use Webmozart\PathUtil\Path;
@@ -42,7 +42,7 @@ class InstallationParams
     private $installerDescriptor;
 
     /**
-     * @var Resource
+     * @var PuliResource
      */
     private $resources;
 
@@ -198,11 +198,11 @@ class InstallationParams
      *
      * This is a path relative to the document root of the target server.
      *
-     * @param Resource $resource The resource.
+     * @param PuliResource $resource The resource.
      *
      * @return string The server path.
      */
-    public function getServerPathForResource(Resource $resource)
+    public function getServerPathForResource(PuliResource $resource)
     {
         $relPath = Path::makeRelative($resource->getRepositoryPath(), $this->basePath);
 
