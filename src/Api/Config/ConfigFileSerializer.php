@@ -36,7 +36,7 @@ interface ConfigFileSerializer
      *
      * @param string      $serialized The serialized file.
      * @param string|null $path       The path of the configuration file.
-     * @param Config      $baseConfig The configuration that the loaded
+     * @param Config|null $baseConfig The configuration that the loaded
      *                                configuration will inherit its values
      *                                from.
      *

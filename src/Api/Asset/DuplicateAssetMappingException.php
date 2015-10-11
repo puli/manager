@@ -26,8 +26,8 @@ class DuplicateAssetMappingException extends Exception
     /**
      * Creates an exception for a UUID that exists already.
      *
-     * @param Uuid      $uuid  The UUID of the mapping.
-     * @param Exception $cause The exception that caused this exception.
+     * @param Uuid           $uuid  The UUID of the mapping.
+     * @param Exception|null $cause The exception that caused this exception.
      *
      * @return static The created exception.
      */

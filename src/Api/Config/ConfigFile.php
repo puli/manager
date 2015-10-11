@@ -39,7 +39,7 @@ class ConfigFile
      * @param string|null $path       The path where the configuration file is stored
      *                                or `null` if this configuration is not stored
      *                                on the file system.
-     * @param Config      $baseConfig The configuration that the configuration will
+     * @param Config|null $baseConfig The configuration that the configuration will
      *                                inherit its values from.
      *
      * @throws InvalidArgumentException If the path is not a string or empty.
