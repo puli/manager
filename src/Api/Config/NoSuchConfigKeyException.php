@@ -26,8 +26,8 @@ class NoSuchConfigKeyException extends RuntimeException
     /**
      * Creates an exception for a configuration key.
      *
-     * @param string    $key   The configuration key that was not found.
-     * @param Exception $cause The exception that caused this exception.
+     * @param string         $key   The configuration key that was not found.
+     * @param Exception|null $cause The exception that caused this exception.
      *
      * @return static The created exception.
      */

@@ -108,9 +108,9 @@ interface ConfigManager
      * You can optionally pass an expression to check whether the file contains
      * configuration keys matching the expression.
      *
-     * @param Expression $expr            The search criteria.
-     * @param bool       $includeFallback Whether to check the base configuration
-     *                                    if the key is not found.
+     * @param Expression|null $expr            The search criteria.
+     * @param bool            $includeFallback Whether to check the base configuration
+     *                                         if the key is not found.
      *
      * @return bool Returns `true` if the file contains configuration keys and
      *              `false` otherwise. If an expression is passed, this method

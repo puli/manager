@@ -46,11 +46,11 @@ class AssetMapping
     /**
      * Creates the mapping.
      *
-     * @param string $glob       A glob for resources in the repository.
-     * @param string $serverName The name of the asset server.
-     * @param string $serverPath The path of the resource in the document root
-     *                           of the server.
-     * @param Uuid   $uuid       The UUID of the mapping.
+     * @param string    $glob       A glob for resources in the repository.
+     * @param string    $serverName The name of the asset server.
+     * @param string    $serverPath The path of the resource in the document root
+     *                              of the server.
+     * @param Uuid|null $uuid       The UUID of the mapping.
      */
     public function __construct($glob, $serverName, $serverPath, Uuid $uuid = null)
     {

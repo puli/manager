@@ -211,9 +211,9 @@ class Config
     /**
      * Creates a new configuration.
      *
-     * @param Config $baseConfig The configuration to fall back to if a value is
-     *                           not set in here.
-     * @param array  $values     The values to initially set in the configuration.
+     * @param Config|null $baseConfig The configuration to fall back to if a value is
+     *                                not set in here.
+     * @param array       $values     The values to initially set in the configuration.
      */
     public function __construct(Config $baseConfig = null, array $values = array())
     {
@@ -556,6 +556,10 @@ class Config
             : true;
     }
 
+    /**
+     * @param string $key
+     * @param mixed  $value
+     */
     private function validate($key, $value)
     {
         switch ($key) {
@@ -593,6 +597,12 @@ class Config
         }
     }
 
+    /**
+     * @param string $key
+     * @param mixed  $value
+     *
+     * @throws InvalidConfigException If the config value isn't an array.
+     */
     private function assertArray($key, $value)
     {
         if (!is_array($value)) {
@@ -604,6 +614,12 @@ class Config
         }
     }
 
+    /**
+     * @param string $key
+     * @param mixed  $value
+     *
+     * @throws InvalidConfigException If the config value is null.
+     */
     private function assertNotNull($key, $value)
     {
         if (null === $value) {
@@ -615,6 +631,12 @@ class Config
         }
     }
 
+    /**
+     * @param string $key
+     * @param mixed  $value
+     *
+     * @throws InvalidConfigException If the config value isn't a string.
+     */
     private function assertString($key, $value)
     {
         if (!is_string($value) && null !== $value) {
@@ -626,6 +648,12 @@ class Config
         }
     }
 
+    /**
+     * @param string $key
+     * @param mixed  $value
+     *
+     * @throws InvalidConfigException If the config value isn't an integer.
+     */
     private function assertInteger($key, $value)
     {
         if (!is_int($value) && null !== $value) {
@@ -637,6 +665,12 @@ class Config
         }
     }
 
+    /**
+     * @param string $key
+     * @param mixed  $value
+     *
+     * @throws InvalidConfigException If the config value isn't a boolean.
+     */
     private function assertBoolean($key, $value)
     {
         if (!is_bool($value) && null !== $value) {
@@ -648,6 +682,12 @@ class Config
         }
     }
 
+    /**
+     * @param string $key
+     * @param mixed  $value
+     *
+     * @throws InvalidConfigException If the config value is an empty string.
+     */
     private function assertNonEmpty($key, $value)
     {
         if ('' === $value) {
@@ -658,6 +698,12 @@ class Config
         }
     }
 
+    /**
+     * @param mixed $raw
+     * @param bool  $fallback
+     *
+     * @return mixed
+     */
     private function replacePlaceholders($raw, $fallback = true)
     {
         if (is_array($raw)) {
@@ -679,6 +725,11 @@ class Config
         }, $raw);
     }
 
+    /**
+     * @param string $keyPrefix
+     *
+     * @return array
+     */
     private function filterByKeyPrefix($keyPrefix)
     {
         $values = array();
@@ -695,6 +746,11 @@ class Config
         return $values;
     }
 
+    /**
+     * @param string $keyPrefix
+     *
+     * @return bool
+     */
     private function containsKeyPrefix($keyPrefix)
     {
         foreach ($this->values as $k => $v) {
@@ -706,6 +762,9 @@ class Config
         return false;
     }
 
+    /**
+     * @param string $keyPrefix
+     */
     private function removeByKeyPrefix($keyPrefix)
     {
         foreach ($this->values as $k => $v) {
@@ -717,7 +776,12 @@ class Config
         }
     }
 
-    private function addKeyValue($key, $value, &$values)
+    /**
+     * @param string $key
+     * @param mixed  $value
+     * @param array  $values
+     */
+    private function addKeyValue($key, $value, array &$values)
     {
         $target = &$values;
         $keyParts = explode('.', $key);
