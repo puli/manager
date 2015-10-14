@@ -26,10 +26,12 @@ class UnsupportedVersionException extends RuntimeException
     /**
      * Creates an exception for an unknown version.
      *
-     * @param string    $version       The version that caused the exception.
-     * @param string[]  $knownVersions The known versions.
-     * @param string    $path          The path of the read package file.
-     * @param Exception $cause         The exception that caused this exception.
+     * @param string         $version       The version that caused the
+     *                                      exception.
+     * @param string[]       $knownVersions The known versions.
+     * @param string         $path          The path of the read package file.
+     * @param Exception|null $cause         The exception that caused this
+     *                                      exception.
      *
      * @return static The created exception.
      */

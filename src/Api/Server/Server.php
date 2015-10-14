@@ -147,7 +147,7 @@ class Server
      *
      * @param string $name The parameter name.
      *
-     * @return mixed The parameter value.
+     * @return string The parameter value.
      *
      * @throws NoSuchParameterException If the parameter was not found.
      */

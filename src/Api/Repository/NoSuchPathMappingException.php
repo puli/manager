@@ -26,8 +26,8 @@ class NoSuchPathMappingException extends RuntimeException
     /**
      * Creates an exception for a repository path.
      *
-     * @param string    $path  The repository path.
-     * @param Exception $cause The exception that caused this exception.
+     * @param string         $path  The repository path.
+     * @param Exception|null $cause The exception that caused this exception.
      *
      * @return static The created exception.
      */
@@ -42,9 +42,10 @@ class NoSuchPathMappingException extends RuntimeException
     /**
      * Creates an exception for a repository path and a package name.
      *
-     * @param string    $path        The repository path.
-     * @param string    $packageName The name of the containing package.
-     * @param Exception $cause       The exception that caused this exception.
+     * @param string         $path        The repository path.
+     * @param string         $packageName The name of the containing package.
+     * @param Exception|null $cause       The exception that caused this
+     *                                    exception.
      *
      * @return static The created exception.
      */

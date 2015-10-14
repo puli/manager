@@ -25,8 +25,9 @@ class NoSuchInstallerException extends Exception
     /**
      * Creates an exception for an installer name that was not found.
      *
-     * @param string    $installerName The installer name.
-     * @param Exception $cause         The exception that caused this exception.
+     * @param string         $installerName The installer name.
+     * @param Exception|null $cause         The exception that caused this
+     *                                      exception.
      *
      * @return static The created exception.
      */
@@ -42,9 +43,10 @@ class NoSuchInstallerException extends Exception
      * Creates an exception for an installer name that was not found in a given
      * package.
      *
-     * @param string    $installerName The installer name.
-     * @param string    $packageName   The package name.
-     * @param Exception $cause         The exception that caused this exception.
+     * @param string         $installerName The installer name.
+     * @param string         $packageName   The package name.
+     * @param Exception|null $cause         The exception that caused this
+     *                                      exception.
      *
      * @return static The created exception.
      */

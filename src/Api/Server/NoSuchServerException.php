@@ -25,8 +25,9 @@ class NoSuchServerException extends Exception
     /**
      * Creates an exception for a server name that was not found.
      *
-     * @param string    $serverName The server name.
-     * @param Exception $cause      The exception that caused this exception.
+     * @param string         $serverName The server name.
+     * @param Exception|null $cause      The exception that caused this
+     *                                   exception.
      *
      * @return static The created exception.
      */

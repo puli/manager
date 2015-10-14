@@ -134,7 +134,7 @@ interface RepositoryManager
      * You can optionally pass an expression to check whether the manager has
      * path mappings matching the expression.
      *
-     * @param Expression $expr The search criteria.
+     * @param Expression|null $expr The search criteria.
      *
      * @return bool Returns `true` if the manager has path mappings in the root
      *              package and `false` otherwise. If an expression was passed,
@@ -189,7 +189,7 @@ interface RepositoryManager
      * You can optionally pass an expression to check whether the manager has
      * path mappings matching the expression.
      *
-     * @param Expression $expr The search criteria.
+     * @param Expression|null $expr The search criteria.
      *
      * @return bool Returns `true` if the manager has path mappings and `false`
      *              otherwise. If an expression was passed, this method only

@@ -95,7 +95,7 @@ interface InstallerManager
      * You can optionally pass an expression to check whether the root package
      * has installers matching that expression.
      *
-     * @param Expression $expr The search criteria.
+     * @param Expression|null $expr The search criteria.
      *
      * @return bool Returns `true` if the manager contains installers and
      *              `false` otherwise.
@@ -144,7 +144,7 @@ interface InstallerManager
      * You can optionally pass an expression to check whether the manager has
      * installers matching that expression.
      *
-     * @param Expression $expr The search criteria.
+     * @param Expression|null $expr The search criteria.
      *
      * @return bool Returns `true` if the manager contains installers and
      *              `false` otherwise.

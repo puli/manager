@@ -113,11 +113,11 @@ class DiscoveryManagerImpl implements DiscoveryManager
     /**
      * Creates a tag manager.
      *
-     * @param ProjectContext     $context
-     * @param EditableDiscovery  $discovery
-     * @param PackageCollection  $packages
-     * @param PackageFileStorage $packageFileStorage
-     * @param LoggerInterface    $logger
+     * @param ProjectContext       $context
+     * @param EditableDiscovery    $discovery
+     * @param PackageCollection    $packages
+     * @param PackageFileStorage   $packageFileStorage
+     * @param LoggerInterface|null $logger
      */
     public function __construct(
         ProjectContext $context,

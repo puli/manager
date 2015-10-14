@@ -31,7 +31,8 @@ class EnvConfig extends Config
     /**
      * Creates the configuration.
      *
-     * @param Config $baseConfig The base configuration to use for unset values.
+     * @param Config|null $baseConfig The base configuration to use for unset
+     *                                values.
      */
     public function __construct(Config $baseConfig = null)
     {

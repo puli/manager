@@ -65,9 +65,10 @@ class NotInstallableException extends Exception
     /**
      * Creates an exception for a missing required parameter.
      *
-     * @param string    $parameterName The parameter name.
-     * @param string    $installerName The installer name.
-     * @param Exception $cause         The exception that caused this exception.
+     * @param string         $parameterName The parameter name.
+     * @param string         $installerName The installer name.
+     * @param Exception|null $cause         The exception that caused this
+     *                                      exception.
      *
      * @return static The created exception.
      */
@@ -83,9 +84,10 @@ class NotInstallableException extends Exception
     /**
      * Creates an exception for a parameter name that was not found.
      *
-     * @param string    $parameterName The parameter name.
-     * @param string    $installerName The installer name.
-     * @param Exception $cause         The exception that caused this exception.
+     * @param string         $parameterName The parameter name.
+     * @param string         $installerName The installer name.
+     * @param Exception|null $cause         The exception that caused this
+     *                                      exception.
      *
      * @return static The created exception.
      */
@@ -101,8 +103,9 @@ class NotInstallableException extends Exception
     /**
      * Creates an exception for an installer name that was not found.
      *
-     * @param string    $installerName The installer name.
-     * @param Exception $cause         The exception that caused this exception.
+     * @param string         $installerName The installer name.
+     * @param Exception|null $cause         The exception that caused this
+     *                                      exception.
      *
      * @return static The created exception.
      */
@@ -117,8 +120,8 @@ class NotInstallableException extends Exception
     /**
      * Creates an exception for an glob that did not return any matches.
      *
-     * @param string    $glob  The resource glob.
-     * @param Exception $cause The exception that caused this exception.
+     * @param string         $glob  The resource glob.
+     * @param Exception|null $cause The exception that caused this exception.
      *
      * @return static The created exception.
      */
@@ -133,8 +136,9 @@ class NotInstallableException extends Exception
     /**
      * Creates an exception for a server name that was not found.
      *
-     * @param string    $serverName The server name.
-     * @param Exception $cause      The exception that caused this exception.
+     * @param string         $serverName The server name.
+     * @param Exception|null $cause      The exception that caused this
+     *                                   exception.
      *
      * @return static The created exception.
      */
@@ -149,8 +153,9 @@ class NotInstallableException extends Exception
     /**
      * Creates an exception for an installer class that was not found.
      *
-     * @param string    $installerClass The installer class.
-     * @param Exception $cause          The exception that caused this exception.
+     * @param string         $installerClass The installer class.
+     * @param Exception|null $cause          The exception that caused this
+     *                                       exception.
      *
      * @return static The created exception.
      */
@@ -166,8 +171,9 @@ class NotInstallableException extends Exception
      * Creates an exception for an installer class that has no default
      * constructor.
      *
-     * @param string    $installerClass The installer class.
-     * @param Exception $cause          The exception that caused this exception.
+     * @param string         $installerClass The installer class.
+     * @param Exception|null $cause          The exception that caused this
+     *                                       exception.
      *
      * @return static The created exception.
      */
@@ -183,8 +189,9 @@ class NotInstallableException extends Exception
      * Creates an exception for an installer class that does not implement
      * {@link ResourceInstaller}.
      *
-     * @param string    $installerClass The installer class.
-     * @param Exception $cause          The exception that caused this exception.
+     * @param string         $installerClass The installer class.
+     * @param Exception|null $cause          The exception that caused this
+     *                                       exception.
      *
      * @return static The created exception.
      */

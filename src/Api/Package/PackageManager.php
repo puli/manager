@@ -133,7 +133,7 @@ interface PackageManager
      * You can optionally pass an expression to check whether the manager has
      * packages matching the expression.
      *
-     * @param Expression $expr The search criteria.
+     * @param Expression|null $expr The search criteria.
      *
      * @return bool Returns `true` if the manager has packages and `false`
      *              otherwise. If an expression was passed, this method only

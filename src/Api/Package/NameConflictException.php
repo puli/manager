@@ -26,8 +26,8 @@ class NameConflictException extends RuntimeException
     /**
      * Creates a new exception.
      *
-     * @param string    $name  The conflicting name.
-     * @param Exception $cause The exception that caused this exception.
+     * @param string         $name  The conflicting name.
+     * @param Exception|null $cause The exception that caused this exception.
      *
      * @return static The created exception.
      */

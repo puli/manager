@@ -49,7 +49,7 @@ class Package
     private $state;
 
     /**
-     * @var Exception|null
+     * @var Exception[]
      */
     private $loadErrors;
 
@@ -59,7 +59,7 @@ class Package
      * @param PackageFile|null $packageFile The package file or `null` if the
      *                                      package file could not be loaded.
      * @param string           $installPath The absolute install path.
-     * @param InstallInfo      $installInfo The install info of this package.
+     * @param InstallInfo|null $installInfo The install info of this package.
      * @param Exception[]      $loadErrors  The errors that happened during
      *                                      loading of the package, if any.
      */
@@ -197,8 +197,6 @@ class Package
 
     /**
      * Returns the default name of a package.
-     *
-     * @return string The default name.
      */
     protected function getDefaultName()
     {

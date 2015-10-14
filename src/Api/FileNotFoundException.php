@@ -26,8 +26,9 @@ class FileNotFoundException extends RuntimeException
     /**
      * Creates an exception for file path.
      *
-     * @param string    $path  The path of the file that could not be found.
-     * @param Exception $cause The exception that caused this exception.
+     * @param string         $path  The path of the file that could not be
+     *                              found.
+     * @param Exception|null $cause The exception that caused this exception.
      *
      * @return static The created exception.
      */

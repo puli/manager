@@ -56,12 +56,14 @@ class Context
     /**
      * Creates the context.
      *
-     * @param string|null              $homeDir    The path to the home directory
-     *                                             or `null` if none exists.
-     * @param Config                   $config     The configuration.
-     * @param ConfigFile               $configFile The configuration file or
-     *                                             `null` if none exists.
-     * @param EventDispatcherInterface $dispatcher The event dispatcher.
+     * @param string|null                   $homeDir    The path to the home
+     *                                                  directoryor `null` if
+     *                                                  none exists.
+     * @param Config                        $config     The configuration.
+     * @param ConfigFile|null               $configFile The configuration file
+     *                                                  or `null` if none
+     *                                                  exists.
+     * @param EventDispatcherInterface|null $dispatcher The event dispatcher.
      */
     public function __construct($homeDir, Config $config, ConfigFile $configFile = null, EventDispatcherInterface $dispatcher = null)
     {

@@ -26,8 +26,9 @@ class TypeNotEnabledException extends RuntimeException
     /**
      * Creates an exception for a type name.
      *
-     * @param string    $typeName The name of the type that was not enabled.
-     * @param Exception $cause    The exception that caused this exception.
+     * @param string         $typeName The name of the type that was not
+     *                                 enabled.
+     * @param Exception|null $cause    The exception that caused this exception.
      *
      * @return static The created exception.
      */

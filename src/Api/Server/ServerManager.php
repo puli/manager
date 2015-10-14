@@ -103,7 +103,7 @@ interface ServerManager
      * You can optionally pass an expression to check whether the manager has
      * servers matching that expression.
      *
-     * @param Expression $expr The search criteria.
+     * @param Expression|null $expr The search criteria.
      *
      * @return bool Returns `true` if the manager has servers and `false`
      *              otherwise.

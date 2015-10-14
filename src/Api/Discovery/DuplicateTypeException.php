@@ -26,8 +26,8 @@ class DuplicateTypeException extends RuntimeException
     /**
      * Creates an exception for a type name.
      *
-     * @param string    $typeName The name of the type.
-     * @param Exception $cause    The exception that caused this exception.
+     * @param string         $typeName The name of the type.
+     * @param Exception|null $cause    The exception that caused this exception.
      *
      * @return static The created exception.
      */

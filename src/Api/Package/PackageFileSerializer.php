@@ -61,7 +61,7 @@ interface PackageFileSerializer
      *
      * @param string      $serialized The serialized package file.
      * @param string|null $path       The path to the package file.
-     * @param Config      $baseConfig The configuration that the package will
+     * @param Config|null $baseConfig The configuration that the package will
      *                                inherit its configuration values from.
      *
      * @return RootPackageFile The root package file.

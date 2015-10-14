@@ -79,8 +79,9 @@ class PackageConflictDetector
     /**
      * Creates a new conflict detector.
      *
-     * @param OverrideGraph $overrideGraph The graph indicating which package is
-     *                                     overridden by which other package.
+     * @param OverrideGraph|null $overrideGraph The graph indicating which
+     *                                          package is overridden by which
+     *                                          other package.
      */
     public function __construct(OverrideGraph $overrideGraph = null)
     {
@@ -126,11 +127,11 @@ class PackageConflictDetector
      * to B (A is overridden by B) or from B to A (B is overridden by A).
      * Otherwise a conflict is returned.
      *
-     * @param int[]|string[] $tokens The tokens to check. If `null`, all claimed
-     *                               tokens are checked for conflicts. You are
-     *                               advised to pass tokens if possible to
-     *                               improve the performance of the conflict
-     *                               detection.
+     * @param int[]|string[]|null $tokens The tokens to check. If `null`, all
+     *                                    claimed tokens are checked for
+     *                                    conflicts. You are advised to pass
+     *                                    tokens if possible to improve the
+     *                                    performance of the conflict detection.
      *
      * @return PackageConflict[] The detected conflicts.
      */

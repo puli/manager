@@ -27,8 +27,8 @@ class DuplicateBindingException extends RuntimeException
     /**
      * Creates an exception for a duplicate UUID.
      *
-     * @param Uuid      $uuid  The UUID.
-     * @param Exception $cause The exception that caused this exception.
+     * @param Uuid           $uuid  The UUID.
+     * @param Exception|null $cause The exception that caused this exception.
      *
      * @return static The created exception.
      */

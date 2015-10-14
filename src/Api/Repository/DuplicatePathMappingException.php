@@ -26,10 +26,11 @@ class DuplicatePathMappingException extends RuntimeException
     /**
      * Creates an exception for a duplicate repository path.
      *
-     * @param string    $repositoryPath The mapped repository path.
-     * @param string    $packageName    The name of the package containing the
-     *                                  mapping.
-     * @param Exception $cause          The exception that caused this exception.
+     * @param string         $repositoryPath The mapped repository path.
+     * @param string         $packageName    The name of the package containing
+     *                                       the mapping.
+     * @param Exception|null $cause          The exception that caused this
+     *                                       exception.
      *
      * @return static The created exception.
      */

@@ -462,6 +462,13 @@ class PackageFileInstallerManager implements InstallerManager
         );
     }
 
+    /**
+     * Extracting an object containing the data from an installer descriptor.
+     * 
+     * @param InstallerDescriptor $installer The installer descriptor.
+     * 
+     * @return stdClass
+     */
     private function installerToData(InstallerDescriptor $installer)
     {
         $data = (object) array(

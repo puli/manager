@@ -25,9 +25,10 @@ class NoSuchParameterException extends Exception
     /**
      * Creates an exception for a parameter name that was not found.
      *
-     * @param string    $parameterName The parameter name.
-     * @param string    $installerName The installer name.
-     * @param Exception $cause         The exception that caused this exception.
+     * @param string         $parameterName The parameter name.
+     * @param string         $installerName The installer name.
+     * @param Exception|null $cause         The exception that caused this
+     *                                      exception.
      *
      * @return static The created exception.
      */
