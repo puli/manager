@@ -128,7 +128,7 @@ interface DiscoveryManager
      * You can optionally pass an expression to check whether the manager has
      * types matching the expression.
      *
-     * @param Expression $expr The search criteria.
+     * @param Expression|null $expr The search criteria.
      *
      * @return bool Returns `true` if the manager has binding types in the root
      *              package and `false` otherwise. If an expression was passed,
@@ -168,10 +168,10 @@ interface DiscoveryManager
     /**
      * Returns whether the type with the given name exists.
      *
-     * @param string $typeName    The name of the type.
-     * @param string $packageName The name of the package to check. Useful if
-     *                            types with the same name exist in multiple
-     *                            packages.
+     * @param string      $typeName    The name of the type.
+     * @param string|null $packageName The name of the package to check. Useful
+     *                                 if types with the same name exist in
+     *                                 multiple packages.
      *
      * @return bool Returns `true` if the type exists and `false` otherwise.
      */
@@ -280,7 +280,7 @@ interface DiscoveryManager
      * You can optionally pass an expression to check whether the manager has
      * bindings matching the expression.
      *
-     * @param Expression $expr The search criteria.
+     * @param Expression|null $expr The search criteria.
      *
      * @return bool Returns `true` if the manager has bindings in the root
      *              package and `false` otherwise. If an expression was passed,
@@ -372,7 +372,7 @@ interface DiscoveryManager
      * You can optionally pass an expression to check whether the manager has
      * bindings matching the expression.
      *
-     * @param Expression $expr The search criteria.
+     * @param Expression|null $expr The search criteria.
      *
      * @return bool Returns `true` if the manager has bindings and `false`
      *              otherwise. If an expression was passed, this method only

@@ -79,13 +79,14 @@ class FactoryManagerImpl implements FactoryManager
     /**
      * Creates a new factory generator.
      *
-     * @param ProjectContext    $context           The project context.
-     * @param GeneratorRegistry $generatorRegistry The registry providing the
-     *                                             generators for the services
-     *                                             returned by the factory.
-     * @param ClassWriter       $classWriter       The writer that writes the
-     *                                             class to a file.
-     * @param ServerCollection  $servers           The configured servers.
+     * @param ProjectContext        $context           The project context.
+     * @param GeneratorRegistry     $generatorRegistry The registry providing
+     *                                                 the generators for the
+     *                                                 services returned by the
+     *                                                 factory.
+     * @param ClassWriter           $classWriter       The writer that writes
+     *                                                 the class to a file.
+     * @param ServerCollection|null $servers           The configured servers.
      */
     public function __construct(ProjectContext $context, GeneratorRegistry $generatorRegistry, ClassWriter $classWriter, ServerCollection $servers = null)
     {

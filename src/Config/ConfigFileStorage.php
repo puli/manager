@@ -49,7 +49,7 @@ class ConfigFileStorage
      * @param Storage              $storage        The file storage.
      * @param ConfigFileSerializer $serializer     The configuration file
      *                                             serializer.
-     * @param FactoryManager       $factoryManager The manager used to regenerate
+     * @param FactoryManager|null  $factoryManager The manager used to regenerate
      *                                             the factory class after saving
      *                                             the config file.
      */
@@ -65,9 +65,10 @@ class ConfigFileStorage
      *
      * If the path does not exist, an empty configuration file is returned.
      *
-     * @param string $path       The path to the configuration file.
-     * @param Config $baseConfig The configuration that the loaded configuration
-     *                           will inherit its values from.
+     * @param string      $path       The path to the configuration file.
+     * @param Config|null $baseConfig The configuration that the loaded
+     *                                configuration will inherit its values
+     *                                from.
      *
      * @return ConfigFile The loaded configuration file.
      *

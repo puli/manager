@@ -40,9 +40,9 @@ class ReturnValue
     /**
      * Creates a new return value.
      *
-     * @param string $value       The value as source code.
-     * @param string $type        The type shown in the doc block.
-     * @param string $description The doc block description.
+     * @param string      $value       The value as source code.
+     * @param string      $type        The type shown in the doc block.
+     * @param string|null $description The doc block description.
      */
     public function __construct($value, $type = 'mixed', $description = null)
     {

@@ -29,9 +29,10 @@ class NonRootPackageExpectedException extends RuntimeException
      * Creates an exception for a binding UUID that could not be enabled in the
      * root package.
      *
-     * @param Uuid      $uuid        The UUID.
-     * @param string    $packageName The name of the package.
-     * @param Exception $cause       The exception that caused this exception.
+     * @param Uuid           $uuid        The UUID.
+     * @param string         $packageName The name of the package.
+     * @param Exception|null $cause       The exception that caused this
+     *                                    exception.
      *
      * @return static The created exception.
      */
@@ -49,9 +50,10 @@ class NonRootPackageExpectedException extends RuntimeException
      * Creates an exception for a binding UUID that could not be disabled in the
      * root package.
      *
-     * @param Uuid      $uuid        The UUID.
-     * @param string    $packageName The name of the package.
-     * @param Exception $cause       The exception that caused this exception.
+     * @param Uuid           $uuid        The UUID.
+     * @param string         $packageName The name of the package.
+     * @param Exception|null $cause       The exception that caused this
+     *                                    exception.
      *
      * @return static The created exception.
      */

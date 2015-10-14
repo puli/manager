@@ -51,7 +51,7 @@ class PackageFileStorage
      *
      * @param Storage               $storage        The file storage.
      * @param PackageFileSerializer $serializer     The package file serializer.
-     * @param FactoryManager        $factoryManager The manager used to
+     * @param FactoryManager|null   $factoryManager The manager used to
      *                                              regenerate the factory class
      *                                              after saving the root
      *                                              package file.

@@ -52,18 +52,24 @@ class ProjectContext extends Context
     /**
      * Creates the context.
      *
-     * @param string|null              $homeDir         The path to the home
-     *                                                  directory or `null` if
-     *                                                  none exists.
-     * @param string                   $rootDir         The path to the project's
-     *                                                  root directory.
-     * @param Config                   $config          The configuration.
-     * @param RootPackageFile          $rootPackageFile The root package file.
-     * @param ConfigFile               $configFile      The configuration file or
-     *                                                  `null` if none exists.
-     * @param EventDispatcherInterface $dispatcher      The event dispatcher.
-     * @param string                   $env             The environment that
-     *                                                  Puli is running in.
+     * @param string|null                   $homeDir         The path to the
+     *                                                       home directory or
+     *                                                       `null` if none
+     *                                                       exists.
+     * @param string                        $rootDir         The path to the
+     *                                                       project's root
+     *                                                       directory.
+     * @param Config                        $config          The configuration.
+     * @param RootPackageFile               $rootPackageFile The root package
+     *                                                       file.
+     * @param ConfigFile|null               $configFile      The configuration
+     *                                                       file or `null` if
+     *                                                       none exists.
+     * @param EventDispatcherInterface|null $dispatcher      The event
+     *                                                       dispatcher.
+     * @param string                        $env             The environment
+     *                                                       that Puli is
+     *                                                       running in.
      */
     public function __construct($homeDir, $rootDir, Config $config, RootPackageFile $rootPackageFile, ConfigFile $configFile = null, EventDispatcherInterface $dispatcher = null, $env = Environment::DEV)
     {

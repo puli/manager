@@ -140,8 +140,9 @@ class BindingTypeDescriptorCollection
     /**
      * Returns whether a type descriptor was set for the given name/package.
      *
-     * @param string $typeName    The name of the type.
-     * @param string $packageName The name of the package containing the type.
+     * @param string      $typeName    The name of the type.
+     * @param string|null $packageName The name of the package containing the
+     *                                 type.
      *
      * @return bool Returns `true` if a type descriptor was set for the given
      *              name/package.
@@ -154,7 +155,7 @@ class BindingTypeDescriptorCollection
     /**
      * Returns the names of the packages defining types with the given name.
      *
-     * @param string $typeName The name of the type.
+     * @param string|null $typeName The name of the type.
      *
      * @return string[] The package names.
      *

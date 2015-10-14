@@ -56,7 +56,7 @@ class RootPackageFile extends PackageFile
      * @param string|null $path        The path where the configuration is
      *                                 stored or `null` if this configuration is
      *                                 not stored on the file system.
-     * @param Config      $baseConfig  The configuration that the package will
+     * @param Config|null $baseConfig  The configuration that the package will
      *                                 inherit its configuration values from.
      */
     public function __construct($packageName = null, $path = null, Config $baseConfig = null)

@@ -270,12 +270,12 @@ class Puli
     /**
      * Creates a new instance for the given Puli project.
      *
-     * @param string $rootDir The root directory of the Puli project. If none is
-     *                        passed, the object operates in the global
-     *                        context. You can set or switch the root
-     *                        directories later on by calling
-     *                        {@link setRootDirectory()}.
-     * @param string $env     One of the {@link Environment} constants.
+     * @param string|null $rootDir The root directory of the Puli project.
+     *                             If none is passed, the object operates in
+     *                             the global context. You can set or switch
+     *                             the root directories later on by calling
+     *                             {@link setRootDirectory()}.
+     * @param string      $env     One of the {@link Environment} constants.
      *
      * @see Puli, start()
      */
@@ -441,7 +441,7 @@ class Puli
     /**
      * Returns the used event dispatcher.
      *
-     * @return EventDispatcherInterface The used logger.
+     * @return EventDispatcherInterface|null The used logger.
      */
     public function getEventDispatcher()
     {

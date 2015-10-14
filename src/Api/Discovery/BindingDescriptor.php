@@ -72,9 +72,10 @@ class BindingDescriptor
     /**
      * Loads the binding descriptor.
      *
-     * @param Package               $containingPackage The package that contains
-     *                                                 the descriptor.
-     * @param BindingTypeDescriptor $typeDescriptor    The type descriptor.
+     * @param Package                    $containingPackage The package that
+     *                                                      contains the
+     *                                                      descriptor.
+     * @param BindingTypeDescriptor|null $typeDescriptor    The type descriptor.
      *
      * @throws AlreadyLoadedException If the descriptor is already loaded.
      */

@@ -12,7 +12,6 @@
 namespace Puli\Manager\Api\Package;
 
 use InvalidArgumentException;
-use Puli\Manager\Api\Discovery\BindingDescriptor;
 use Puli\Manager\Api\Environment;
 use Puli\Manager\Assert\Assert;
 use Rhumsaa\Uuid\Uuid;
@@ -52,7 +51,7 @@ class InstallInfo
     private $installerName = self::DEFAULT_INSTALLER_NAME;
 
     /**
-     * @var BindingDescriptor[]
+     * @var Uuid[]
      */
     private $disabledBindingUuids = array();
 

@@ -42,7 +42,7 @@ class InstallationParams
     private $installerDescriptor;
 
     /**
-     * @var PuliResource
+     * @var ResourceCollection
      */
     private $resources;
 

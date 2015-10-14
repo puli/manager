@@ -103,8 +103,8 @@ class PathMappingCollection
      * Returns whether a path mapping was set for the given repository
      * path/package.
      *
-     * @param string $repositoryPath The repository path of the mapping.
-     * @param string $packageName    The package containing the mapping.
+     * @param string      $repositoryPath The repository path of the mapping.
+     * @param string|null $packageName    The package containing the mapping.
      *
      * @return bool Returns `true` if a path mapping was set for the given
      *              repository path/package.
@@ -152,7 +152,7 @@ class PathMappingCollection
      * Returns the names of the packages defining mappings with the given
      * repository path.
      *
-     * @param string $repositoryPath The repository path of the mapping.
+     * @param string|null $repositoryPath The repository path of the mapping.
      *
      * @return string[] The package names.
      *

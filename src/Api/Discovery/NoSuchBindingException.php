@@ -27,8 +27,8 @@ class NoSuchBindingException extends RuntimeException
     /**
      * Creates an exception for a UUID that was not found.
      *
-     * @param Uuid      $uuid  The UUID.
-     * @param Exception $cause The exception that caused this exception.
+     * @param Uuid           $uuid  The UUID.
+     * @param Exception|null $cause The exception that caused this exception.
      *
      * @return static The created exception.
      */
@@ -43,9 +43,10 @@ class NoSuchBindingException extends RuntimeException
     /**
      * Creates an exception for a UUID that was not found in a given package.
      *
-     * @param Uuid      $uuid        The UUID.
-     * @param string    $packageName The name of the containing package.
-     * @param Exception $cause       The exception that caused this exception.
+     * @param Uuid           $uuid        The UUID.
+     * @param string         $packageName The name of the containing package.
+     * @param Exception|null $cause       The exception that caused this
+     *                                    exception.
      *
      * @return static The created exception.
      */

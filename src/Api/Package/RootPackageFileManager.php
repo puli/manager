@@ -109,7 +109,7 @@ interface RootPackageFileManager extends ConfigManager
      * You can optionally pass an expression to check whether the manager has
      * plugin classes matching the expression.
      *
-     * @param Expression $expr The search criteria.
+     * @param Expression|null $expr The search criteria.
      *
      * @return bool Returns `true` if the manager has plugin classes in the root
      *              package and `false` otherwise. If an expression is passed,
@@ -206,7 +206,7 @@ interface RootPackageFileManager extends ConfigManager
      * You can optionally pass an expression to check whether the file contains
      * extra keys matching the expression.
      *
-     * @param Expression $expr The search criteria.
+     * @param Expression|null $expr The search criteria.
      *
      * @return bool Returns `true` if the file contains extra keys and `false`
      *              otherwise. If an expression is passed, this method only

@@ -45,7 +45,7 @@ class BindingExpressionBuilder implements ExpressionVisitor
      * Builds a {@link BindingDescriptor} expression for a given
      * {@link AssetMapping} expression.
      *
-     * @param Expression $expr The {@link AssetMapping} expression.
+     * @param Expression|null $expr The {@link AssetMapping} expression.
      *
      * @return Expression The built expression.
      */

@@ -284,7 +284,7 @@ class OverrideGraph
     /**
      * Returns all package names in the graph.
      *
-     * @return string All package names in the graph.
+     * @return array All package names in the graph.
      */
     public function getPackageNames()
     {
