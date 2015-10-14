@@ -237,9 +237,11 @@ class TwoDimensionalHashMap
     /**
      * Returns the secondary keys for the given primary key.
      *
-     * @param int|string $primaryKey The primary key.
+     * The primary key is optional. If this argument is not provided, all secondary keys will be returned.
      *
-     * @return array The secondary keys.
+     * @param int|string|null $primaryKey The primary key.
+     *
+     * @return int[]|string[] The secondary keys.
      *
      * @throws OutOfBoundsException If the primary key does not exist.
      */
@@ -270,7 +272,7 @@ class TwoDimensionalHashMap
     /**
      * Returns all primary keys.
      *
-     * @return array The primary keys.
+     * @return int[]|string[] The primary keys.
      */
     public function getPrimaryKeys()
     {
@@ -301,7 +303,7 @@ class TwoDimensionalHashMap
     /**
      * Sorts the primary keys of the map.
      *
-     * @param array $order The keys in the desired order.
+     * @param int[]|string[]|null $order The keys in the desired order.
      */
     public function sortPrimaryKeys(array $order = null)
     {
@@ -319,8 +321,8 @@ class TwoDimensionalHashMap
     /**
      * Sorts the secondary keys of a map entry.
      *
-     * @param int|string $primaryKey The primary key.
-     * @param array      $order      The keys in the desired order.
+     * @param int|string          $primaryKey The primary key.
+     * @param int[]|string[]|null $order      The keys in the desired order.
      */
     public function sortSecondaryKeys($primaryKey, array $order = null)
     {
