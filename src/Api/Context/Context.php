@@ -57,7 +57,7 @@ class Context
      * Creates the context.
      *
      * @param string|null                   $homeDir    The path to the home
-     *                                                  directoryor `null` if
+     *                                                  directory or `null` if
      *                                                  none exists.
      * @param Config                        $config     The configuration.
      * @param ConfigFile|null               $configFile The configuration file

@@ -18,6 +18,7 @@ use Puli\Manager\Api\Event\BuildRepositoryEvent;
 use Puli\Manager\Api\Event\PuliEvents;
 use Puli\Manager\Api\Package\Package;
 use Puli\Manager\Api\Package\PackageCollection;
+use Puli\Manager\Api\Package\RootPackage;
 use Puli\Manager\Api\Package\RootPackageFile;
 use Puli\Manager\Api\Repository\DuplicatePathMappingException;
 use Puli\Manager\Api\Repository\NoSuchPathMappingException;
@@ -71,6 +72,11 @@ class RepositoryManagerImpl implements RepositoryManager
      * @var string
      */
     private $rootDir;
+
+    /**
+     * @var RootPackage
+     */
+    private $rootPackage;
 
     /**
      * @var RootPackageFile

@@ -53,7 +53,7 @@ class UpdateConflicts implements AtomicOperation
     private $addedConflicts = array();
 
     /**
-     * @var PathMapping[]
+     * @var PathMapping[][]
      */
     private $removedConflicts = array();
 
