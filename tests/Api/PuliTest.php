@@ -64,8 +64,8 @@ class PuliTest extends PHPUnit_Framework_TestCase
         putenv('PULI_HOME='.$this->tempHome);
 
         // Make sure "HOME" (Unix)/"APPDATA" (Windows) is not set
-        putenv('HOME');
-        putenv('APPDATA');
+        putenv('HOME=');
+        putenv('APPDATA=');
 
         $this->puli = new Puli();
     }
@@ -76,7 +76,7 @@ class PuliTest extends PHPUnit_Framework_TestCase
         $filesystem->remove($this->tempDir);
 
         // Unset env variables
-        putenv('PULI_HOME');
+        putenv('PULI_HOME=');
     }
 
     public function testPuliProtectsHomeWithGlobalContext()
@@ -127,7 +127,7 @@ class PuliTest extends PHPUnit_Framework_TestCase
     public function testGetGlobalContextWithoutHome()
     {
         // Unset env variable
-        putenv('PULI_HOME');
+        putenv('PULI_HOME=');
 
         $this->puli->start();
         $context = $this->puli->getContext();
@@ -184,7 +184,7 @@ class PuliTest extends PHPUnit_Framework_TestCase
     public function testGetProjectContextWithoutHome()
     {
         // Unset env variable
-        putenv('PULI_HOME');
+        putenv('PULI_HOME=');
 
         $this->puli->setRootDirectory($this->tempRoot);
         $this->puli->start();
