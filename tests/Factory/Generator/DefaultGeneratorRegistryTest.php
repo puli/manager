@@ -57,4 +57,20 @@ class DefaultGeneratorRegistryTest extends PHPUnit_Framework_TestCase
 
         $this->assertInstanceOf($class, $generator);
     }
+
+    /**
+     * @expectedException RuntimeException
+     */
+    public function testGetServiceGeneratorWithInvalidType()
+    {
+        $generator = $this->registry->getServiceGenerator('foo', 'bar');
+    }
+
+    /**
+     * @expectedException RuntimeException
+     */
+    public function testGetServiceGeneratorWithUnknownService()
+    {
+        $generator = $this->registry->getServiceGenerator(GeneratorRegistry::DISCOVERY, 'foobar');
+    }
 }
