@@ -30,6 +30,7 @@ class SystemTest extends PHPUnit_Framework_TestCase
 
     protected function setUp()
     {
+        self::clearEnvironmentVariables();
         $this->tempHome = TestUtil::makeTempDir('puli-manager', __CLASS__);
     }
 
@@ -37,11 +38,18 @@ class SystemTest extends PHPUnit_Framework_TestCase
     {
         $filesystem = new Filesystem();
         $filesystem->remove($this->tempHome);
+    }
 
-        // Unset env variables
-        putenv('PULI_HOME');
-        putenv('HOME');
-        putenv('APPDATA');
+    public static function tearDownAfterClass()
+    {
+        self::clearEnvironmentVariables();
+    }
+
+    private static function clearEnvironmentVariables()
+    {
+        putenv('PULI_HOME=');
+        putenv('HOME=');
+        putenv('APPDATA=');
     }
 
     public function testParseHomeDirectory()
