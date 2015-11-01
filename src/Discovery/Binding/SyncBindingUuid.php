@@ -128,6 +128,9 @@ class SyncBindingUuid implements AtomicOperation
             $this->discovery->addBinding($enabledAfter->getBinding());
         } elseif ($enabledBefore && !$enabledAfter) {
             $this->discovery->removeBinding($enabledBefore->getUuid());
+        } elseif ($enabledBefore && $enabledAfter && $enabledBefore->getBinding() != $enabledAfter->getBinding()) {
+            $this->discovery->removeBinding($enabledBefore->getUuid());
+            $this->discovery->addBinding($enabledAfter->getBinding());
         }
     }
 }
