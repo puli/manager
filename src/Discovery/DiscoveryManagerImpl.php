@@ -465,8 +465,13 @@ class DiscoveryManagerImpl implements DiscoveryManager
         }
 
         $uuid = $bindingDescriptor->getUuid();
+        $exists = $this->bindingDescriptors->contains($uuid);
+        $existsInNonRoot = $exists
+            ? !($this->bindingDescriptors->get($uuid)->getContainingPackage() instanceof RootPackage)
+            : false;
 
-        if ($this->bindingDescriptors->contains($uuid)) {
+        // We can only override bindings in the root package
+        if ($existsInNonRoot || ($exists && !($flags & self::OVERRIDE))) {
             throw DuplicateBindingException::forUuid($uuid);
         }
 

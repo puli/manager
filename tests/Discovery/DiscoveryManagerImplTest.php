@@ -1085,6 +1085,70 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->manager->addRootBindingDescriptor($bindingDescriptor1);
     }
 
+    public function testAddRootBindingDescriptorSucceedsIfUuidDuplicatedInRootAndOverride()
+    {
+        $this->initDefaultManager();
+
+        $type = new BindingType(Foo::clazz, array(new BindingParameter('param')));
+        $uuid = Uuid::uuid4();
+        $binding1 = new ResourceBinding('/path1', Foo::clazz, array('param' => 'value'), 'xpath', $uuid);
+        $binding2 = new ResourceBinding('/path2', Foo::clazz, array('param' => 'value'), 'xpath', $uuid);
+        $bindingDescriptor1 = new BindingDescriptor($binding1);
+        $bindingDescriptor2 = new BindingDescriptor($binding2);
+
+        $this->packageFile1->addTypeDescriptor(new BindingTypeDescriptor($type));
+        $this->rootPackageFile->addBindingDescriptor($bindingDescriptor1);
+
+        $this->discovery->expects($this->once())
+            ->method('removeBinding')
+            ->with($uuid);
+
+        $this->discovery->expects($this->once())
+            ->method('addBinding')
+            ->with($binding2);
+
+        $this->packageFileStorage->expects($this->once())
+            ->method('saveRootPackageFile')
+            ->with($this->rootPackageFile)
+            ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) use ($bindingDescriptor2) {
+                $bindingDescriptors = $rootPackageFile->getBindingDescriptors();
+
+                PHPUnit_Framework_Assert::assertSame(array($bindingDescriptor2), $bindingDescriptors);
+                PHPUnit_Framework_Assert::assertTrue($bindingDescriptor2->isEnabled());
+            }));
+
+        $this->manager->addRootBindingDescriptor($bindingDescriptor2, DiscoveryManager::OVERRIDE);
+    }
+
+    /**
+     * @expectedException \Puli\Manager\Api\Discovery\DuplicateBindingException
+     */
+    public function testAddRootBindingDescriptorDoesNotOverridePackageUuids()
+    {
+        $this->initDefaultManager();
+
+        $type = new BindingType(Foo::clazz, array(new BindingParameter('param')));
+        $uuid = Uuid::uuid4();
+        $binding1 = new ResourceBinding('/path1', Foo::clazz, array('param' => 'value'), 'xpath', $uuid);
+        $binding2 = new ResourceBinding('/path2', Foo::clazz, array('param' => 'value'), 'xpath', $uuid);
+        $bindingDescriptor1 = new BindingDescriptor($binding1);
+        $bindingDescriptor2 = new BindingDescriptor($binding2);
+
+        $this->packageFile1->addTypeDescriptor(new BindingTypeDescriptor($type));
+        $this->packageFile1->addBindingDescriptor($bindingDescriptor1);
+
+        $this->discovery->expects($this->never())
+            ->method('removeBinding');
+
+        $this->discovery->expects($this->never())
+            ->method('addBinding');
+
+        $this->packageFileStorage->expects($this->never())
+            ->method('saveRootPackageFile');
+
+        $this->manager->addRootBindingDescriptor($bindingDescriptor2, DiscoveryManager::OVERRIDE);
+    }
+
     /**
      * @expectedException \Puli\Manager\Api\Discovery\NoSuchTypeException
      */
