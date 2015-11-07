@@ -45,6 +45,7 @@ class JsonFileStoreGeneratorTest extends AbstractGeneratorTest
     JsonFileStore::NO_SERIALIZE_STRINGS
         | JsonFileStore::NO_SERIALIZE_ARRAYS
         | JsonFileStore::NO_ESCAPE_SLASH
+        | JsonFileStore::PRETTY_PRINT
 );
 EOF;
 
@@ -72,6 +73,7 @@ EOF;
     JsonFileStore::NO_SERIALIZE_STRINGS
         | JsonFileStore::NO_SERIALIZE_ARRAYS
         | JsonFileStore::NO_ESCAPE_SLASH
+        | JsonFileStore::PRETTY_PRINT
 );
 EOF;
 
@@ -91,6 +93,7 @@ EOF;
     JsonFileStore::NO_SERIALIZE_STRINGS
         | JsonFileStore::NO_SERIALIZE_ARRAYS
         | JsonFileStore::NO_ESCAPE_SLASH
+        | JsonFileStore::PRETTY_PRINT
 );
 EOF;
 

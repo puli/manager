@@ -162,6 +162,7 @@ class MyFactory
             JsonFileStore::NO_SERIALIZE_STRINGS
                 | JsonFileStore::NO_SERIALIZE_ARRAYS
                 | JsonFileStore::NO_ESCAPE_SLASH
+                | JsonFileStore::PRETTY_PRINT
         );
         \$repo = new PathMappingRepository(\$store, __DIR__);
 
@@ -186,6 +187,7 @@ class MyFactory
             JsonFileStore::NO_SERIALIZE_STRINGS
                 | JsonFileStore::NO_SERIALIZE_ARRAYS
                 | JsonFileStore::NO_ESCAPE_SLASH
+                | JsonFileStore::PRETTY_PRINT
         );
         \$discovery = new KeyValueStoreDiscovery(\$store, array(
             new ResourceBindingInitializer(\$repo),
