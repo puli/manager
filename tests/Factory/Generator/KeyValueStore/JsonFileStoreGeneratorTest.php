@@ -40,7 +40,7 @@ class JsonFileStoreGeneratorTest extends AbstractGeneratorTest
         ));
 
         $expected = <<<EOF
-\$store = new JsonFileStore(__DIR__.'/../data.json');
+\$store = new JsonFileStore(__DIR__.'/../data.json', JsonFileStore::NO_SERIALIZE_STRINGS | JsonFileStore::NO_SERIALIZE_ARRAYS);
 EOF;
 
         $this->assertSame($expected, $this->method->getBody());
@@ -62,7 +62,7 @@ EOF;
         ));
 
         $expected = <<<EOF
-\$store = new JsonFileStore(__DIR__.'/data.json');
+\$store = new JsonFileStore(__DIR__.'/data.json', JsonFileStore::NO_SERIALIZE_STRINGS | JsonFileStore::NO_SERIALIZE_ARRAYS);
 EOF;
 
         $this->assertSame($expected, $this->method->getBody());
@@ -76,7 +76,7 @@ EOF;
         ));
 
         $expected = <<<EOF
-\$store = new JsonFileStore(__DIR__.'/../d\'ir/dat\'a.da\'t');
+\$store = new JsonFileStore(__DIR__.'/../d\'ir/dat\'a.da\'t', JsonFileStore::NO_SERIALIZE_STRINGS | JsonFileStore::NO_SERIALIZE_ARRAYS);
 EOF;
 
         $this->assertSame($expected, $this->method->getBody());

@@ -45,7 +45,7 @@ class JsonFileStoreGenerator implements ServiceGenerator
 
         $targetMethod->getClass()->addImport(new Import('Webmozart\KeyValueStore\JsonFileStore'));
 
-        $targetMethod->addBody(sprintf('$%s = new JsonFileStore(%s);',
+        $targetMethod->addBody(sprintf('$%s = new JsonFileStore(%s, JsonFileStore::NO_SERIALIZE_STRINGS | JsonFileStore::NO_SERIALIZE_ARRAYS);',
             $varName,
             '__DIR__.'.var_export('/'.$relPath, true)
         ));
