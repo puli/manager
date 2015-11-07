@@ -40,7 +40,12 @@ class JsonFileStoreGeneratorTest extends AbstractGeneratorTest
         ));
 
         $expected = <<<EOF
-\$store = new JsonFileStore(__DIR__.'/../data.json', JsonFileStore::NO_SERIALIZE_STRINGS | JsonFileStore::NO_SERIALIZE_ARRAYS);
+\$store = new JsonFileStore(
+    __DIR__.'/../data.json',
+    JsonFileStore::NO_SERIALIZE_STRINGS
+        | JsonFileStore::NO_SERIALIZE_ARRAYS
+        | JsonFileStore::NO_ESCAPE_SLASH
+);
 EOF;
 
         $this->assertSame($expected, $this->method->getBody());
@@ -62,7 +67,12 @@ EOF;
         ));
 
         $expected = <<<EOF
-\$store = new JsonFileStore(__DIR__.'/data.json', JsonFileStore::NO_SERIALIZE_STRINGS | JsonFileStore::NO_SERIALIZE_ARRAYS);
+\$store = new JsonFileStore(
+    __DIR__.'/data.json',
+    JsonFileStore::NO_SERIALIZE_STRINGS
+        | JsonFileStore::NO_SERIALIZE_ARRAYS
+        | JsonFileStore::NO_ESCAPE_SLASH
+);
 EOF;
 
         $this->assertSame($expected, $this->method->getBody());
@@ -76,7 +86,12 @@ EOF;
         ));
 
         $expected = <<<EOF
-\$store = new JsonFileStore(__DIR__.'/../d\'ir/dat\'a.da\'t', JsonFileStore::NO_SERIALIZE_STRINGS | JsonFileStore::NO_SERIALIZE_ARRAYS);
+\$store = new JsonFileStore(
+    __DIR__.'/../d\'ir/dat\'a.da\'t',
+    JsonFileStore::NO_SERIALIZE_STRINGS
+        | JsonFileStore::NO_SERIALIZE_ARRAYS
+        | JsonFileStore::NO_ESCAPE_SLASH
+);
 EOF;
 
         $this->assertSame($expected, $this->method->getBody());
