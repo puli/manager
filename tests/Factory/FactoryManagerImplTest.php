@@ -157,7 +157,7 @@ class MyFactory
             throw new RuntimeException('Please install puli/repository to create ResourceRepository instances.');
         }
 
-        \$store = new JsonFileStore(__DIR__.'/.puli/path-mappings.json', true);
+        \$store = new JsonFileStore(__DIR__.'/.puli/path-mappings.json');
         \$repo = new PathMappingRepository(\$store, __DIR__);
 
         return \$repo;
@@ -176,7 +176,7 @@ class MyFactory
             throw new RuntimeException('Please install puli/discovery to create Discovery instances.');
         }
 
-        \$store = new JsonFileStore(__DIR__.'/.puli/bindings.json', true);
+        \$store = new JsonFileStore(__DIR__.'/.puli/bindings.json');
         \$discovery = new KeyValueStoreDiscovery(\$store, array(
             new ResourceBindingInitializer(\$repo),
         ));

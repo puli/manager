@@ -40,7 +40,7 @@ class JsonFileStoreGeneratorTest extends AbstractGeneratorTest
         ));
 
         $expected = <<<EOF
-\$store = new JsonFileStore(__DIR__.'/../data.json', true);
+\$store = new JsonFileStore(__DIR__.'/../data.json');
 EOF;
 
         $this->assertSame($expected, $this->method->getBody());
@@ -62,7 +62,7 @@ EOF;
         ));
 
         $expected = <<<EOF
-\$store = new JsonFileStore(__DIR__.'/data.json', true);
+\$store = new JsonFileStore(__DIR__.'/data.json');
 EOF;
 
         $this->assertSame($expected, $this->method->getBody());
@@ -76,21 +76,7 @@ EOF;
         ));
 
         $expected = <<<EOF
-\$store = new JsonFileStore(__DIR__.'/../d\'ir/dat\'a.da\'t', true);
-EOF;
-
-        $this->assertSame($expected, $this->method->getBody());
-    }
-
-    public function testGenerateServiceWithoutCaching()
-    {
-        $this->generator->generateNewInstance('store', $this->method, $this->registry, array(
-            'rootDir' => $this->rootDir,
-            'cache' => false,
-        ));
-
-        $expected = <<<EOF
-\$store = new JsonFileStore(__DIR__.'/../data.json', false);
+\$store = new JsonFileStore(__DIR__.'/../d\'ir/dat\'a.da\'t');
 EOF;
 
         $this->assertSame($expected, $this->method->getBody());

@@ -29,7 +29,6 @@ class JsonFileStoreGenerator implements ServiceGenerator
 {
     private static $defaultOptions = array(
         'path' => 'data.json',
-        'cache' => true,
     );
 
     /**
@@ -46,10 +45,9 @@ class JsonFileStoreGenerator implements ServiceGenerator
 
         $targetMethod->getClass()->addImport(new Import('Webmozart\KeyValueStore\JsonFileStore'));
 
-        $targetMethod->addBody(sprintf('$%s = new JsonFileStore(%s, %s);',
+        $targetMethod->addBody(sprintf('$%s = new JsonFileStore(%s);',
             $varName,
-            '__DIR__.'.var_export('/'.$relPath, true),
-            $options['cache'] ? 'true' : 'false'
+            '__DIR__.'.var_export('/'.$relPath, true)
         ));
     }
 }

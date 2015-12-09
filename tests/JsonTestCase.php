@@ -49,7 +49,7 @@ abstract class JsonTestCase extends PHPUnit_Framework_TestCase
             // Remove all newlines + following spaces except for newline at EOF
             // Remove all single spaces after a colon that is preceded by an
             // object key
-            str_replace('/', '\/', preg_replace('/(?<=[^"]":) |\n\s*(?!$)/', '', $expected)),
+            preg_replace('/(?<=[^"]":) |\n\s*(?!$)/', '', $expected),
             $actual,
             $message,
             0,
