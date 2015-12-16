@@ -251,8 +251,9 @@ class PackageJsonSerializer implements PackageFileSerializer
 
                 // Don't include the default values of the binding type
                 if ($binding->hasParameterValues(false)) {
-                    $bindingData->parameters = $binding->getParameterValues(false);
-                    ksort($bindingData->parameters);
+                    $parameterData = $binding->getParameterValues(false);
+                    ksort($parameterData);
+                    $bindingData->parameters = (object) $parameterData;
                 }
 
                 $jsonData->bindings->{$bindingDescriptor->getUuid()->toString()} = $bindingData;
