@@ -20,11 +20,7 @@
             "additionalProperties": {
                 "type": "object",
                 "properties": {
-                    "query": {
-                        "type": "string",
-                        "required": true
-                    },
-                    "language": {
+                    "_class": {
                         "type": "string"
                     },
                     "type": {
@@ -34,6 +30,15 @@
                     "parameters": {
                         "type": "object",
                         "additionalProperties": true
+                    },
+                    "query": {
+                        "type": "string"
+                    },
+                    "language": {
+                        "type": "string"
+                    },
+                    "class": {
+                        "type": "string"
                     }
                 }
             }
@@ -105,9 +110,8 @@
                             "type": "string"
                         }
                     },
-                    "dev" : {
-                        "type": "bool",
-                        "required": false
+                    "env" : {
+                        "type": "string"
                     }
                 }
             }

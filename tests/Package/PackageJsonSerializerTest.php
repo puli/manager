@@ -205,7 +205,7 @@ JSON;
             ->willReturn(array('0.9', '1.0'));
         $this->serializer = new PackageJsonSerializer(
             $this->migrationManager,
-            __DIR__.'/Fixtures/schema',
+            __DIR__.'/../../res/schema',
             '1.0'
         );
     }
@@ -238,6 +238,13 @@ JSON;
 
     public function testSerializePackageFileDowngradesIfLowerVersion()
     {
+        // Use fixture schemas
+        $this->serializer = new PackageJsonSerializer(
+            $this->migrationManager,
+            __DIR__.'/Fixtures/schema',
+            '1.0'
+        );
+
         $packageFile = new PackageFile();
         $packageFile->setPackageName('my/application');
         $packageFile->setVersion('0.9');
@@ -633,6 +640,13 @@ JSON;
 
     public function testSerializeRootPackageFileDowngradesIfLowerVersion()
     {
+        // Use fixture schemas
+        $this->serializer = new PackageJsonSerializer(
+            $this->migrationManager,
+            __DIR__.'/Fixtures/schema',
+            '1.0'
+        );
+
         $packageFile = new RootPackageFile();
         $packageFile->setPackageName('my/application');
         $packageFile->setVersion('0.9');
@@ -1077,6 +1091,13 @@ JSON;
 
     public function testUnserializePackageFileUpgradesIfVersionTooLow()
     {
+        // Use fixture schemas
+        $this->serializer = new PackageJsonSerializer(
+            $this->migrationManager,
+            __DIR__.'/Fixtures/schema',
+            '1.0'
+        );
+
         $json = <<<JSON
 {
     "version": "0.9",
@@ -1118,6 +1139,13 @@ JSON;
 
     public function testUnserializeRootPackageFileUpgradesIfVersionTooLow()
     {
+        // Use fixture schemas
+        $this->serializer = new PackageJsonSerializer(
+            $this->migrationManager,
+            __DIR__.'/Fixtures/schema',
+            '1.0'
+        );
+
         $json = <<<JSON
 {
     "version": "0.9",
