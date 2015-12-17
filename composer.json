@@ -20,7 +20,7 @@
         "webmozart/assert": "^1.0",
         "webmozart/glob": "^3.1",
         "symfony/event-dispatcher": "^2.3|^3.0",
-        "webmozart/key-value-store": "^1.0-beta4",
+        "webmozart/key-value-store": "^1.0-beta7",
         "symfony/filesystem": "^2.3|^3.0",
         "ramsey/uuid": "^2.8",
         "psr/log": "^1.0"
