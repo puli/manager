@@ -16,7 +16,7 @@
         "puli/url-generator": "^1.0-beta3",
         "webmozart/json": "^1.1",
         "webmozart/path-util": "^2.2.3",
-        "webmozart/expression": "^1.0-beta5",
+        "webmozart/expression": "^1.0",
         "webmozart/assert": "^1.0",
         "webmozart/glob": "^3.1",
         "symfony/event-dispatcher": "^2.3|^3.0",
