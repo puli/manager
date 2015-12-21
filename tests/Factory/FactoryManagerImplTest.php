@@ -182,13 +182,7 @@ class MyFactory
             throw new RuntimeException('Please install puli/discovery to create Discovery instances.');
         }
 
-        \$store = new JsonFileStore(
-            __DIR__.'/.puli/bindings.json',
-            JsonFileStore::NO_SERIALIZE_STRINGS
-                | JsonFileStore::NO_SERIALIZE_ARRAYS
-                | JsonFileStore::NO_ESCAPE_SLASH
-                | JsonFileStore::PRETTY_PRINT
-        );
+        \$store = new JsonFileStore(__DIR__.'/.puli/bindings.json');
         \$discovery = new KeyValueStoreDiscovery(\$store, array(
             new ResourceBindingInitializer(\$repo),
         ));
