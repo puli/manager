@@ -29,6 +29,10 @@ class JsonFileStoreGenerator implements ServiceGenerator
 {
     private static $defaultOptions = array(
         'path' => 'data.json',
+        'serializeStrings' => true,
+        'serializeArrays' => true,
+        'escapeSlash' => true,
+        'prettyPrint' => false,
     );
 
     /**
@@ -43,11 +47,31 @@ class JsonFileStoreGenerator implements ServiceGenerator
         $path = Path::makeAbsolute($options['path'], $options['rootDir']);
         $relPath = Path::makeRelative($path, $targetMethod->getClass()->getDirectory());
 
+        $flags = array();
+
+        if (!$options['serializeStrings']) {
+            $flags[] = 'JsonFileStore::NO_SERIALIZE_STRINGS';
+        }
+
+        if (!$options['serializeArrays']) {
+            $flags[] = 'JsonFileStore::NO_SERIALIZE_ARRAYS';
+        }
+
+        if (!$options['serializeArrays']) {
+            $flags[] = 'JsonFileStore::NO_ESCAPE_SLASH';
+        }
+
+        if ($options['prettyPrint']) {
+            $flags[] = 'JsonFileStore::PRETTY_PRINT';
+        }
+
         $targetMethod->getClass()->addImport(new Import('Webmozart\KeyValueStore\JsonFileStore'));
 
-        $targetMethod->addBody(sprintf("$%s = new JsonFileStore(\n    %s,\n    JsonFileStore::NO_SERIALIZE_STRINGS\n        | JsonFileStore::NO_SERIALIZE_ARRAYS\n        | JsonFileStore::NO_ESCAPE_SLASH\n        | JsonFileStore::PRETTY_PRINT\n);",
+        $targetMethod->addBody(sprintf('$%s = new JsonFileStore(%s%s%s);',
             $varName,
-            '__DIR__.'.var_export('/'.$relPath, true)
+            $flags ? "\n    " : '',
+            '__DIR__.'.var_export('/'.$relPath, true),
+            $flags ? ",\n    ".implode("\n        | ", $flags)."\n" : ''
         ));
     }
 }

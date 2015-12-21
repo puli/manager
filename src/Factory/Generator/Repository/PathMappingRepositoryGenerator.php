@@ -46,6 +46,14 @@ class PathMappingRepositoryGenerator implements ServiceGenerator
         $kvsGenerator = $generatorRegistry->getServiceGenerator(GeneratorRegistry::KEY_VALUE_STORE, $options['store']['type']);
         $kvsOptions = $options['store'];
         $kvsOptions['rootDir'] = $options['rootDir'];
+
+        if ('json-file' === $kvsOptions['type']) {
+            $kvsOptions['serializeStrings'] = false;
+            $kvsOptions['serializeArrays'] = false;
+            $kvsOptions['escapeSlash'] = false;
+            $kvsOptions['prettyPrint'] = true;
+        }
+
         $kvsGenerator->generateNewInstance('store', $targetMethod, $generatorRegistry, $kvsOptions);
 
         $relPath = Path::makeRelative($options['rootDir'], $targetMethod->getClass()->getDirectory());
