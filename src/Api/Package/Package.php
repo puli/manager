@@ -66,7 +66,6 @@ class Package
     public function __construct(PackageFile $packageFile = null, $installPath, InstallInfo $installInfo = null, array $loadErrors = array())
     {
         Assert::absoluteSystemPath($installPath);
-        Assert::true($packageFile || $loadErrors, 'The load errors must be passed if the package file is null.');
         Assert::allIsInstanceOf($loadErrors, 'Exception');
 
         // If a package name was set during installation, that name wins over

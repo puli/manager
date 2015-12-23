@@ -54,10 +54,6 @@ class ConfigFileStorageTest extends PHPUnit_Framework_TestCase
         $configFile = new ConfigFile();
 
         $this->backend->expects($this->once())
-            ->method('exists')
-            ->with('/path')
-            ->willReturn(true);
-        $this->backend->expects($this->once())
             ->method('read')
             ->with('/path')
             ->willReturn('SERIALIZED');
@@ -75,10 +71,6 @@ class ConfigFileStorageTest extends PHPUnit_Framework_TestCase
         $configFile = new ConfigFile();
 
         $this->backend->expects($this->once())
-            ->method('exists')
-            ->with('/path')
-            ->willReturn(true);
-        $this->backend->expects($this->once())
             ->method('read')
             ->with('/path')
             ->willReturn('SERIALIZED');
@@ -88,23 +80,6 @@ class ConfigFileStorageTest extends PHPUnit_Framework_TestCase
             ->willReturn($configFile);
 
         $this->assertSame($configFile, $this->storage->loadConfigFile('/path', $baseConfig));
-    }
-
-    public function testLoadConfigFileCreatesNewIfNotFound()
-    {
-        $baseConfig = new Config();
-        $configFile = new ConfigFile('/path', $baseConfig);
-
-        $this->backend->expects($this->once())
-            ->method('exists')
-            ->with('/path')
-            ->willReturn(false);
-        $this->backend->expects($this->never())
-            ->method('read');
-        $this->serializer->expects($this->never())
-            ->method('unserializeConfigFile');
-
-        $this->assertEquals($configFile, $this->storage->loadConfigFile('/path', $baseConfig));
     }
 
     public function testSaveConfigFile()

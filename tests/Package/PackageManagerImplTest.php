@@ -14,6 +14,7 @@ namespace Puli\Manager\Tests\Package;
 use PHPUnit_Framework_Assert;
 use PHPUnit_Framework_MockObject_MockObject;
 use Puli\Manager\Api\Environment;
+use Puli\Manager\Api\FileNotFoundException;
 use Puli\Manager\Api\InvalidConfigException;
 use Puli\Manager\Api\Package\InstallInfo;
 use Puli\Manager\Api\Package\PackageFile;
@@ -24,9 +25,7 @@ use Puli\Manager\Package\PackageManagerImpl;
 use Puli\Manager\Tests\ManagerTestCase;
 use Puli\Manager\Tests\TestException;
 use Rhumsaa\Uuid\Uuid;
-use Symfony\Component\Filesystem\Filesystem;
 use Webmozart\Expression\Expr;
-use Webmozart\Glob\Test\TestUtil;
 use Webmozart\PathUtil\Path;
 
 /**
@@ -36,11 +35,6 @@ use Webmozart\PathUtil\Path;
  */
 class PackageManagerImplTest extends ManagerTestCase
 {
-    /**
-     * @var string
-     */
-    private $tempDir;
-
     /**
      * @var string
      */
@@ -98,7 +92,6 @@ class PackageManagerImplTest extends ManagerTestCase
 
     protected function setUp()
     {
-        $this->tempDir = TestUtil::makeTempDir('puli-manager', __CLASS__);
         $this->packageDir1 = Path::normalize(__DIR__.'/Fixtures/package1');
         $this->packageDir2 = Path::normalize(__DIR__.'/Fixtures/package2');
         $this->packageDir3 = Path::normalize(__DIR__.'/Fixtures/package3');
@@ -130,9 +123,6 @@ class PackageManagerImplTest extends ManagerTestCase
     {
         // Make sure initDefaultManager() is called again
         $this->manager = null;
-
-        $filesystem = new Filesystem();
-        $filesystem->remove($this->tempDir);
     }
 
     public function testGetPackages()
@@ -181,6 +171,25 @@ class PackageManagerImplTest extends ManagerTestCase
 
         $this->assertInstanceOf('Puli\Manager\Api\Package\PackageCollection', $packages);
         $this->assertCount(0, $packages);
+    }
+
+    public function testGetPackagesStoresNoPackageFileIfNotFound()
+    {
+        $manager = new PackageManagerImpl($this->context, $this->packageFileStorage);
+
+        $this->rootPackageFile->addInstallInfo(new InstallInfo('vendor/package', $this->packageDir1));
+
+        $exception = new FileNotFoundException();
+
+        $this->packageFileStorage->expects($this->once())
+            ->method('loadPackageFile')
+            ->with($this->packageDir1.'/puli.json')
+            ->willThrowException($exception);
+
+        $packages = $manager->getPackages();
+
+        $this->assertTrue($packages['vendor/package']->isEnabled());
+        $this->assertNull($packages['vendor/package']->getPackageFile());
     }
 
     public function testGetPackagesStoresExceptionIfPackageDirectoryNotFound()

@@ -14,12 +14,12 @@ namespace Puli\Manager\Api\Storage;
 use RuntimeException;
 
 /**
- * Thrown when file operations fail.
+ * Thrown when files could not be read.
  *
  * @since  1.0
  *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class StorageException extends RuntimeException
+class ReadException extends RuntimeException
 {
 }

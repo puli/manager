@@ -11,6 +11,8 @@
 
 namespace Puli\Manager\Api\Storage;
 
+use Puli\Manager\Api\FileNotFoundException;
+
 /**
  * Stores files.
  *
@@ -27,7 +29,8 @@ interface Storage
      *
      * @return string The file contents.
      *
-     * @throws StorageException If the file cannot be read.
+     * @throws FileNotFoundException If the file cannot be found.
+     * @throws ReadException         If the file cannot be read.
      */
     public function read($path);
 
@@ -39,7 +42,7 @@ interface Storage
      *
      * @return int The number of bytes written to the file.
      *
-     * @throws StorageException If the file cannot be written.
+     * @throws WriteException If the file cannot be written.
      */
     public function write($path, $contents);
 

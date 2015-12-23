@@ -13,13 +13,15 @@ namespace Puli\Manager\Package;
 
 use Puli\Manager\Api\Config\Config;
 use Puli\Manager\Api\Factory\FactoryManager;
+use Puli\Manager\Api\FileNotFoundException;
 use Puli\Manager\Api\InvalidConfigException;
 use Puli\Manager\Api\Package\PackageFile;
 use Puli\Manager\Api\Package\PackageFileSerializer;
 use Puli\Manager\Api\Package\RootPackageFile;
 use Puli\Manager\Api\Package\UnsupportedVersionException;
+use Puli\Manager\Api\Storage\ReadException;
 use Puli\Manager\Api\Storage\Storage;
-use Puli\Manager\Api\Storage\StorageException;
+use Puli\Manager\Api\Storage\WriteException;
 use Puli\Manager\Filesystem\FilesystemStorage;
 
 /**
@@ -75,7 +77,8 @@ class PackageFileStorage
      *
      * @return PackageFile The loaded package file.
      *
-     * @throws StorageException            If the file cannot be read.
+     * @throws FileNotFoundException       If the file does not exist.
+     * @throws ReadException               If the file cannot be read.
      * @throws InvalidConfigException      If the file contains invalid
      *                                     configuration.
      * @throws UnsupportedVersionException If the version of the package file
@@ -83,10 +86,6 @@ class PackageFileStorage
      */
     public function loadPackageFile($path)
     {
-        if (!$this->storage->exists($path)) {
-            return new PackageFile(null, $path);
-        }
-
         $serialized = $this->storage->read($path);
 
         return $this->serializer->unserializePackageFile($serialized, $path);
@@ -99,7 +98,7 @@ class PackageFileStorage
      *
      * @param PackageFile $packageFile The package file to save.
      *
-     * @throws StorageException If the file cannot be written.
+     * @throws WriteException If the file cannot be written.
      */
     public function savePackageFile(PackageFile $packageFile)
     {
@@ -119,7 +118,8 @@ class PackageFileStorage
      *
      * @return RootPackageFile The loaded package file.
      *
-     * @throws StorageException            If the file cannot be read.
+     * @throws FileNotFoundException       If the file does not exist.
+     * @throws ReadException               If the file cannot be read.
      * @throws InvalidConfigException      If the file contains invalid
      *                                     configuration.
      * @throws UnsupportedVersionException If the version of the package file
@@ -127,10 +127,6 @@ class PackageFileStorage
      */
     public function loadRootPackageFile($path, Config $baseConfig)
     {
-        if (!$this->storage->exists($path)) {
-            return new RootPackageFile(null, $path, $baseConfig);
-        }
-
         $serialized = $this->storage->read($path);
 
         return $this->serializer->unserializeRootPackageFile($serialized, $path, $baseConfig);
@@ -143,7 +139,7 @@ class PackageFileStorage
      *
      * @param RootPackageFile $packageFile The package file to save.
      *
-     * @throws StorageException If the file cannot be written.
+     * @throws WriteException If the file cannot be written.
      */
     public function saveRootPackageFile(RootPackageFile $packageFile)
     {

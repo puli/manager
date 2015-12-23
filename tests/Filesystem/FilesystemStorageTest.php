@@ -82,7 +82,7 @@ class FilesystemStorageTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\Manager\Api\Storage\StorageException
+     * @expectedException \Puli\Manager\Api\Storage\ReadException
      */
     public function testReadFailsIfDirectory()
     {
@@ -90,7 +90,15 @@ class FilesystemStorageTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\Manager\Api\Storage\StorageException
+     * @expectedException \Puli\Manager\Api\FileNotFoundException
+     */
+    public function testReadFailsIfNotExists()
+    {
+        $this->storage->read(__DIR__.'/foobar');
+    }
+
+    /**
+     * @expectedException \Puli\Manager\Api\Storage\ReadException
      */
     public function testReadFailsIfNotReadable()
     {
@@ -142,7 +150,7 @@ class FilesystemStorageTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\Manager\Api\Storage\StorageException
+     * @expectedException \Puli\Manager\Api\Storage\ReadException
      */
     public function testWriteFailsIfDirectory()
     {
@@ -150,7 +158,7 @@ class FilesystemStorageTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Puli\Manager\Api\Storage\StorageException
+     * @expectedException \Puli\Manager\Api\Storage\ReadException
      */
     public function testWriteFailsIfNotWritable()
     {

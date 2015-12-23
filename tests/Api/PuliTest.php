@@ -114,6 +114,22 @@ class PuliTest extends PHPUnit_Framework_TestCase
         $this->assertSame($context->getEventDispatcher(), $this->puli->getEventDispatcher());
     }
 
+    public function testGetGlobalContextWithoutConfigFile()
+    {
+        $filesystem = new Filesystem();
+        $filesystem->remove($this->tempHome.'/config.json');
+
+        $this->puli->start();
+        $context = $this->puli->getContext();
+
+        $this->assertInstanceOf('Puli\Manager\Api\Context\Context', $context);
+        $this->assertInstanceOf('Puli\Manager\Api\Config\Config', $context->getConfig());
+        $this->assertNull($context->getConfigFile());
+        $this->assertInstanceOf('Symfony\Component\EventDispatcher\EventDispatcherInterface', $context->getEventDispatcher());
+        $this->assertSame($this->tempHome, $context->getHomeDirectory());
+        $this->assertSame($context->getEventDispatcher(), $this->puli->getEventDispatcher());
+    }
+
     public function testGetGlobalContextWithEventDispatcher()
     {
         $dispatcher = new EventDispatcher();

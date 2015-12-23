@@ -104,9 +104,9 @@ class PackageManagerImpl implements PackageManager
             }
         }
 
-        if (null === $name) {
+        if (null === $name && $packageFile = $this->loadPackageFile($installPath)) {
             // Read the name from the package file
-            $name = $this->loadPackageFile($installPath)->getPackageName();
+            $name = $packageFile->getPackageName();
         }
 
         if (null === $name) {
@@ -376,7 +376,8 @@ class PackageManagerImpl implements PackageManager
      *
      * @param string $installPath The absolute install path of the package
      *
-     * @return PackageFile The loaded package file.
+     * @return PackageFile|null The loaded package file or `null` if none
+     *                          could be found.
      */
     private function loadPackageFile($installPath)
     {
@@ -391,7 +392,12 @@ class PackageManagerImpl implements PackageManager
             ));
         }
 
-        return $this->packageFileStorage->loadPackageFile($installPath.'/puli.json');
+        try {
+            return $this->packageFileStorage->loadPackageFile($installPath.'/puli.json');
+        } catch (FileNotFoundException $e) {
+            // Packages without package files are ok
+            return null;
+        }
     }
 
     private function assertPackagesLoaded()

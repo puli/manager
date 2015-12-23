@@ -14,7 +14,7 @@ namespace Puli\Manager\Api\Package;
 use Puli\Manager\Api\Config\ConfigManager;
 use Puli\Manager\Api\Context\ProjectContext;
 use Puli\Manager\Api\Migration\MigrationException;
-use Puli\Manager\Api\Storage\StorageException;
+use Puli\Manager\Api\Storage\WriteException;
 use Webmozart\Expression\Expression;
 
 /**
@@ -143,7 +143,7 @@ interface RootPackageFileManager extends ConfigManager
      * @param string $key   The key name.
      * @param mixed  $value The stored value.
      *
-     * @throws StorageException If the file cannot be written.
+     * @throws WriteException If the file cannot be written.
      */
     public function setExtraKey($key, $value);
 
@@ -154,7 +154,7 @@ interface RootPackageFileManager extends ConfigManager
      *
      * @param string[] $values A list of values indexed by their key names.
      *
-     * @throws StorageException If the file cannot be written.
+     * @throws WriteException If the file cannot be written.
      */
     public function setExtraKeys(array $values);
 
@@ -165,7 +165,7 @@ interface RootPackageFileManager extends ConfigManager
      *
      * @param string $key The name of the removed extra key.
      *
-     * @throws StorageException If the file cannot be written.
+     * @throws WriteException If the file cannot be written.
      */
     public function removeExtraKey($key);
 
@@ -177,7 +177,7 @@ interface RootPackageFileManager extends ConfigManager
      *
      * @param Expression $expr The search criteria.
      *
-     * @throws StorageException If the file cannot be written.
+     * @throws WriteException If the file cannot be written.
      */
     public function removeExtraKeys(Expression $expr);
 
@@ -186,7 +186,7 @@ interface RootPackageFileManager extends ConfigManager
      *
      * The file is saved directly after removing the keys.
      *
-     * @throws StorageException If the file cannot be written.
+     * @throws WriteException If the file cannot be written.
      */
     public function clearExtraKeys();
 
@@ -247,7 +247,7 @@ interface RootPackageFileManager extends ConfigManager
      * @param string $targetVersion The target version string.
      *
      * @throws MigrationException If the migration fails.
-     * @throws StorageException   If the file cannot be written.
+     * @throws WriteException     If the file cannot be written.
      */
     public function migrate($targetVersion);
 }
