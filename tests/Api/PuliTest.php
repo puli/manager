@@ -175,6 +175,20 @@ class PuliTest extends PHPUnit_Framework_TestCase
         $this->assertSame(Environment::DEV, $this->puli->getEnvironment());
     }
 
+    public function testGetProjectContextWithoutConfigFile()
+    {
+        $filesystem = new Filesystem();
+        $filesystem->remove($this->tempRoot.'/puli.json');
+
+        $this->puli->setRootDirectory($this->tempRoot);
+        $this->puli->start();
+        $context = $this->puli->getContext();
+
+        $this->assertInstanceOf('Puli\Manager\Api\Context\ProjectContext', $context);
+        $this->assertInstanceOf('Puli\Manager\Api\Package\RootPackageFile', $context->getRootPackageFile());
+        $this->assertSame($this->tempRoot.'/puli.json', $context->getRootPackageFile()->getPath());
+    }
+
     public function testGetProjectContextWithEventDispatcher()
     {
         $dispatcher = new EventDispatcher();

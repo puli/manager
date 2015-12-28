@@ -27,6 +27,7 @@ use Puli\Manager\Api\Installation\InstallationManager;
 use Puli\Manager\Api\Installer\InstallerManager;
 use Puli\Manager\Api\Package\PackageFileSerializer;
 use Puli\Manager\Api\Package\PackageManager;
+use Puli\Manager\Api\Package\RootPackageFile;
 use Puli\Manager\Api\Package\RootPackageFileManager;
 use Puli\Manager\Api\Repository\RepositoryManager;
 use Puli\Manager\Api\Server\ServerManager;
@@ -900,7 +901,13 @@ class Puli
         $packageFileStorage = new PackageFileStorage($this->getStorage(), $this->getPackageFileSerializer());
         $rootDir = Path::canonicalize($rootDir);
         $rootFilePath = $this->rootDir.'/puli.json';
-        $rootPackageFile = $packageFileStorage->loadRootPackageFile($rootFilePath, $baseConfig);
+
+        try {
+            $rootPackageFile = $packageFileStorage->loadRootPackageFile($rootFilePath, $baseConfig);
+        } catch (FileNotFoundException $e) {
+            $rootPackageFile = new RootPackageFile(null, $rootFilePath, $baseConfig);
+        }
+
         $config = new EnvConfig($rootPackageFile->getConfig());
 
         return new ProjectContext($homeDir, $rootDir, $config, $rootPackageFile, $configFile, $this->dispatcher, $env);
