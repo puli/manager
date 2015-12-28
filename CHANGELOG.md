@@ -6,6 +6,9 @@ Changelog
  * added `DiscoveryManager::removeObsoleteDisabledBindingDescriptors()`
  * fixed: a meaningful exception is now thrown if an `AssetMapping` is added
    but the "puli/url-generator" package is not installed
+ * fixed: packages whose puli.json does not exist now return `null` from
+   `Package::getPackageFile()`
+ * replaced `StorageException` by `ReadException` and `WriteException`
 
 * 1.0.0-beta9 (2015-10-06)
 

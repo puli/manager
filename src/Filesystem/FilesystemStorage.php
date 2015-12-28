@@ -11,8 +11,9 @@
 
 namespace Puli\Manager\Filesystem;
 
+use Puli\Manager\Api\FileNotFoundException;
+use Puli\Manager\Api\Storage\ReadException;
 use Puli\Manager\Api\Storage\Storage;
-use Puli\Manager\Api\Storage\StorageException;
 use Puli\Manager\Assert\Assert;
 use Symfony\Component\Filesystem\Filesystem;
 use Webmozart\PathUtil\Path;
@@ -33,14 +34,18 @@ class FilesystemStorage implements Storage
     {
         Assert::notEmpty($path, 'Cannot read an empty path.');
 
+        if (!file_exists($path)) {
+            throw new FileNotFoundException(sprintf('Cannot read %s: File not found.', $path));
+        }
+
         if (is_dir($path)) {
-            throw new StorageException(sprintf('Cannot read %s: Is a directory.', $path));
+            throw new ReadException(sprintf('Cannot read %s: Is a directory.', $path));
         }
 
         if (false === ($contents = @file_get_contents($path))) {
             $error = error_get_last();
 
-            throw new StorageException(sprintf('Could not read %s: %s.', $path, $error['message']));
+            throw new ReadException(sprintf('Could not read %s: %s.', $path, $error['message']));
         }
 
         return $contents;
@@ -54,7 +59,7 @@ class FilesystemStorage implements Storage
         Assert::notEmpty($path, 'Cannot write to an empty path.');
 
         if (is_dir($path)) {
-            throw new StorageException(sprintf('Cannot write %s: Is a directory.', $path));
+            throw new ReadException(sprintf('Cannot write %s: Is a directory.', $path));
         }
 
         if (!is_dir($dir = Path::getDirectory($path))) {
@@ -65,7 +70,7 @@ class FilesystemStorage implements Storage
         if (false === ($numBytes = @file_put_contents($path, $contents))) {
             $error = error_get_last();
 
-            throw new StorageException(sprintf('Could not write %s: %s.', $path, $error['message']));
+            throw new ReadException(sprintf('Could not write %s: %s.', $path, $error['message']));
         }
 
         return $numBytes;

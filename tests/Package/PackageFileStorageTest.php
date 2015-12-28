@@ -55,10 +55,6 @@ class PackageFileStorageTest extends PHPUnit_Framework_TestCase
         $packageFile = new PackageFile(null);
 
         $this->backend->expects($this->once())
-            ->method('exists')
-            ->with('/path')
-            ->willReturn(true);
-        $this->backend->expects($this->once())
             ->method('read')
             ->with('/path')
             ->willReturn('SERIALIZED');
@@ -68,22 +64,6 @@ class PackageFileStorageTest extends PHPUnit_Framework_TestCase
             ->will($this->returnValue($packageFile));
 
         $this->assertSame($packageFile, $this->storage->loadPackageFile('/path'));
-    }
-
-    public function testLoadPackageFileReturnsNewIfNotFound()
-    {
-        $packageFile = new PackageFile(null, '/path');
-
-        $this->backend->expects($this->once())
-            ->method('exists')
-            ->with('/path')
-            ->willReturn(false);
-        $this->backend->expects($this->never())
-            ->method('read');
-        $this->serializer->expects($this->never())
-            ->method('unserializePackageFile');
-
-        $this->assertEquals($packageFile, $this->storage->loadPackageFile('/path'));
     }
 
     public function testSavePackageFile()
@@ -107,10 +87,6 @@ class PackageFileStorageTest extends PHPUnit_Framework_TestCase
         $packageFile = new RootPackageFile(null, '/path', $baseConfig);
 
         $this->backend->expects($this->once())
-            ->method('exists')
-            ->with('/path')
-            ->willReturn(true);
-        $this->backend->expects($this->once())
             ->method('read')
             ->with('/path')
             ->willReturn('SERIALIZED');
@@ -120,23 +96,6 @@ class PackageFileStorageTest extends PHPUnit_Framework_TestCase
             ->will($this->returnValue($packageFile));
 
         $this->assertSame($packageFile, $this->storage->loadRootPackageFile('/path', $baseConfig));
-    }
-
-    public function testLoadRootPackageFileCreatesNewIfNotFound()
-    {
-        $baseConfig = new Config();
-        $packageFile = new RootPackageFile(null, '/path', $baseConfig);
-
-        $this->backend->expects($this->once())
-            ->method('exists')
-            ->with('/path')
-            ->willReturn(false);
-        $this->backend->expects($this->never())
-            ->method('read');
-        $this->serializer->expects($this->never())
-            ->method('unserializeRootPackageFile');
-
-        $this->assertEquals($packageFile, $this->storage->loadRootPackageFile('/path', $baseConfig));
     }
 
     public function testSaveRootPackageFile()

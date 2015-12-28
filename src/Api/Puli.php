@@ -294,7 +294,7 @@ class Puli
             throw new LogicException('Puli is already started');
         }
 
-        if ($this->rootDir) {
+        if (null !== $this->rootDir) {
             $this->context = $this->createProjectContext($this->rootDir, $this->env);
             $bootstrapFile = $this->context->getConfig()->get(Config::BOOTSTRAP_FILE);
 
@@ -500,7 +500,7 @@ class Puli
             throw new LogicException('Puli was not started');
         }
 
-        if (!$this->rootDir) {
+        if (!$this->context instanceof ProjectContext) {
             return null;
         }
 
@@ -522,7 +522,7 @@ class Puli
             throw new LogicException('Puli was not started');
         }
 
-        if (!$this->rootDir) {
+        if (!$this->context instanceof ProjectContext) {
             return null;
         }
 
@@ -542,7 +542,7 @@ class Puli
             throw new LogicException('Puli was not started');
         }
 
-        if (!$this->factory && $this->rootDir) {
+        if (!$this->factory && $this->context instanceof ProjectContext) {
             $this->factory = $this->getFactoryManager()->createFactory();
         }
 
@@ -558,7 +558,7 @@ class Puli
             throw new LogicException('Puli was not started');
         }
 
-        if (!$this->factoryManager && $this->rootDir) {
+        if (!$this->factoryManager && $this->context instanceof ProjectContext) {
             $this->factoryManager = new FactoryManagerImpl(
                 $this->context,
                 new DefaultGeneratorRegistry(),
@@ -605,7 +605,7 @@ class Puli
             throw new LogicException('Puli was not started');
         }
 
-        if (!$this->rootPackageFileManager && $this->rootDir) {
+        if (!$this->rootPackageFileManager && $this->context instanceof ProjectContext) {
             $this->rootPackageFileManager = new RootPackageFileManagerImpl(
                 $this->context,
                 $this->getPackageFileStorage()
@@ -626,7 +626,7 @@ class Puli
             throw new LogicException('Puli was not started');
         }
 
-        if (!$this->packageManager && $this->rootDir) {
+        if (!$this->packageManager && $this->context instanceof ProjectContext) {
             $this->packageManager = new PackageManagerImpl(
                 $this->context,
                 $this->getPackageFileStorage()
@@ -647,7 +647,7 @@ class Puli
             throw new LogicException('Puli was not started');
         }
 
-        if (!$this->repositoryManager && $this->rootDir) {
+        if (!$this->repositoryManager && $this->context instanceof ProjectContext) {
             $this->repositoryManager = new RepositoryManagerImpl(
                 $this->context,
                 $this->getRepository(),
@@ -670,7 +670,7 @@ class Puli
             throw new LogicException('Puli was not started');
         }
 
-        if (!$this->discoveryManager && $this->rootDir) {
+        if (!$this->discoveryManager && $this->context instanceof ProjectContext) {
             $this->discoveryManager = new DiscoveryManagerImpl(
                 $this->context,
                 $this->getDiscovery(),
@@ -694,7 +694,7 @@ class Puli
             throw new LogicException('Puli was not started');
         }
 
-        if (!$this->assetManager && $this->rootDir) {
+        if (!$this->assetManager && $this->context instanceof ProjectContext) {
             $this->assetManager = new DiscoveryAssetManager(
                 $this->getDiscoveryManager(),
                 $this->getServerManager()->getServers()
@@ -715,7 +715,7 @@ class Puli
             throw new LogicException('Puli was not started');
         }
 
-        if (!$this->installationManager && $this->rootDir) {
+        if (!$this->installationManager && $this->context instanceof ProjectContext) {
             $this->installationManager = new InstallationManagerImpl(
                 $this->getContext(),
                 $this->getRepository(),
@@ -738,7 +738,7 @@ class Puli
             throw new LogicException('Puli was not started');
         }
 
-        if (!$this->installerManager && $this->rootDir) {
+        if (!$this->installerManager && $this->context instanceof ProjectContext) {
             $this->installerManager = new PackageFileInstallerManager(
                 $this->getRootPackageFileManager(),
                 $this->getPackageManager()->getPackages()
@@ -759,7 +759,7 @@ class Puli
             throw new LogicException('Puli was not started');
         }
 
-        if (!$this->serverManager && $this->rootDir) {
+        if (!$this->serverManager && $this->context instanceof ProjectContext) {
             $this->serverManager = new PackageFileServerManager(
                 $this->getRootPackageFileManager(),
                 $this->getInstallerManager()
@@ -780,7 +780,7 @@ class Puli
             throw new LogicException('Puli was not started');
         }
 
-        if (!$this->urlGenerator && $this->rootDir) {
+        if (!$this->urlGenerator && $this->context instanceof ProjectContext) {
             $urlFormats = array();
             foreach ($this->getServerManager()->getServers() as $server) {
                 $urlFormats[$server->getName()] = $server->getUrlFormat();
@@ -852,20 +852,11 @@ class Puli
 
     private function createGlobalContext()
     {
+        $baseConfig = new DefaultConfig();
         $homeDir = self::parseHomeDirectory();
 
-        if (null !== $homeDir) {
-            Assert::fileExists($homeDir, 'Could not load Puli context: The home directory %s does not exist.');
-            Assert::directory($homeDir, 'Could not load Puli context: The home directory %s is a file. Expected a directory.');
-
-            // Create a storage without the factory manager
-            $configStorage = new ConfigFileStorage($this->getStorage(), $this->getConfigFileSerializer());
-            $configPath = Path::canonicalize($homeDir).'/config.json';
-            $configFile = $configStorage->loadConfigFile($configPath, new DefaultConfig());
+        if (null !== $configFile = $this->loadConfigFile($homeDir, $baseConfig)) {
             $baseConfig = $configFile->getConfig();
-        } else {
-            $configFile = null;
-            $baseConfig = new DefaultConfig();
         }
 
         $config = new EnvConfig($baseConfig);
@@ -898,20 +889,11 @@ class Puli
         Assert::fileExists($rootDir, 'Could not load Puli context: The root %s does not exist.');
         Assert::directory($rootDir, 'Could not load Puli context: The root %s is a file. Expected a directory.');
 
+        $baseConfig = new DefaultConfig();
         $homeDir = self::parseHomeDirectory();
 
-        if (null !== $homeDir) {
-            Assert::fileExists($homeDir, 'Could not load Puli context: The home directory %s does not exist.');
-            Assert::directory($homeDir, 'Could not load Puli context: The home directory %s is a file. Expected a directory.');
-
-            // Create a storage without the factory manager
-            $configStorage = new ConfigFileStorage($this->getStorage(), $this->getConfigFileSerializer());
-            $configPath = Path::canonicalize($homeDir).'/config.json';
-            $configFile = $configStorage->loadConfigFile($configPath, new DefaultConfig());
+        if (null !== $configFile = $this->loadConfigFile($homeDir, $baseConfig)) {
             $baseConfig = $configFile->getConfig();
-        } else {
-            $configFile = null;
-            $baseConfig = new DefaultConfig();
         }
 
         // Create a storage without the factory manager
@@ -979,6 +961,28 @@ class Puli
                 'The plugin class %s must implement PuliPlugin.',
                 $pluginClass
             ));
+        }
+    }
+
+    private function loadConfigFile($homeDir, Config $baseConfig)
+    {
+        if (null === $homeDir) {
+            return null;
+        }
+
+        Assert::fileExists($homeDir, 'Could not load Puli context: The home directory %s does not exist.');
+        Assert::directory($homeDir, 'Could not load Puli context: The home directory %s is a file. Expected a directory.');
+
+        // Create a storage without the factory manager
+        $configStorage = new ConfigFileStorage($this->getStorage(), $this->getConfigFileSerializer());
+        $configPath = Path::canonicalize($homeDir).'/config.json';
+
+        try {
+            return $configStorage->loadConfigFile($configPath, $baseConfig);
+        } catch (FileNotFoundException $e) {
+            // It's ok if no config.json exists. We'll work with
+            // DefaultConfig instead
+            return null;
         }
     }
 }

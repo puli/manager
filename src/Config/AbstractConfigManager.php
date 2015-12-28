@@ -15,7 +15,7 @@ use Exception;
 use Puli\Manager\Api\Config\Config;
 use Puli\Manager\Api\Config\ConfigManager;
 use Puli\Manager\Api\InvalidConfigException;
-use Puli\Manager\Api\Storage\StorageException;
+use Puli\Manager\Api\Storage\WriteException;
 use Puli\Manager\Assert\Assert;
 use Webmozart\Expression\Expr;
 use Webmozart\Expression\Expression;
@@ -218,7 +218,7 @@ abstract class AbstractConfigManager implements ConfigManager
      * Saves the file containing the managed configuration.
      *
      * @throws InvalidConfigException If the value is invalid.
-     * @throws StorageException       If the file cannot be written.
+     * @throws WriteException         If the file cannot be written.
      */
     abstract protected function saveConfigFile();
 }

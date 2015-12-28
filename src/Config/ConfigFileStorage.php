@@ -15,9 +15,11 @@ use Puli\Manager\Api\Config\Config;
 use Puli\Manager\Api\Config\ConfigFile;
 use Puli\Manager\Api\Config\ConfigFileSerializer;
 use Puli\Manager\Api\Factory\FactoryManager;
+use Puli\Manager\Api\FileNotFoundException;
 use Puli\Manager\Api\InvalidConfigException;
+use Puli\Manager\Api\Storage\ReadException;
 use Puli\Manager\Api\Storage\Storage;
-use Puli\Manager\Api\Storage\StorageException;
+use Puli\Manager\Api\Storage\WriteException;
 
 /**
  * Loads and saves configuration files.
@@ -72,15 +74,12 @@ class ConfigFileStorage
      *
      * @return ConfigFile The loaded configuration file.
      *
-     * @throws StorageException       If the file cannot be read.
+     * @throws FileNotFoundException  If the file does not exist.
+     * @throws ReadException          If the file cannot be read.
      * @throws InvalidConfigException If the file contains invalid configuration.
      */
     public function loadConfigFile($path, Config $baseConfig = null)
     {
-        if (!$this->storage->exists($path)) {
-            return new ConfigFile($path, $baseConfig);
-        }
-
         $serialized = $this->storage->read($path);
 
         return $this->serializer->unserializeConfigFile($serialized, $path, $baseConfig);
@@ -93,7 +92,7 @@ class ConfigFileStorage
      *
      * @param ConfigFile $configFile The configuration file to save.
      *
-     * @throws StorageException If the file cannot be written.
+     * @throws WriteException If the file cannot be written.
      */
     public function saveConfigFile(ConfigFile $configFile)
     {
