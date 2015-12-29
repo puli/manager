@@ -18,7 +18,7 @@
         "webmozart/path-util": "^2.2.3",
         "webmozart/expression": "^1.0",
         "webmozart/assert": "^1.0",
-        "webmozart/glob": "^3.1",
+        "webmozart/glob": "^4.0",
         "symfony/event-dispatcher": "^2.3|^3.0",
         "webmozart/key-value-store": "^1.0-beta7",
         "symfony/filesystem": "^2.3|^3.0",
