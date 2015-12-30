@@ -12,6 +12,11 @@
 namespace Puli\Manager\Tests\Conflict;
 
 use PHPUnit_Framework_TestCase;
+use Puli\Manager\Api\Package\Package;
+use Puli\Manager\Api\Package\PackageCollection;
+use Puli\Manager\Api\Package\PackageFile;
+use Puli\Manager\Api\Package\RootPackage;
+use Puli\Manager\Api\Package\RootPackageFile;
 use Puli\Manager\Conflict\OverrideGraph;
 
 /**
@@ -204,5 +209,39 @@ class OverrideGraphTest extends PHPUnit_Framework_TestCase
 
         $this->assertTrue($this->graph->hasPackageName('p1'));
         $this->assertTrue($this->graph->hasPackageName('p2'));
+    }
+
+    public function testForPackages()
+    {
+        $packages = new PackageCollection();
+        $packages->add(new RootPackage(new RootPackageFile('vendor/root'), __DIR__));
+        $packages->add(new Package(new PackageFile('vendor/package1'), __DIR__));
+        $packages->add(new Package(new PackageFile('vendor/package2'), __DIR__));
+        $packages->add(new Package(new PackageFile('vendor/package3'), __DIR__));
+
+        $packages->get('vendor/package2')->getPackageFile()->addOverriddenPackage('vendor/package1');
+        $packages->get('vendor/package3')->getPackageFile()->addOverriddenPackage('vendor/package1');
+        $packages->get('vendor/package3')->getPackageFile()->addOverriddenPackage('vendor/package2');
+
+        $this->graph = OverrideGraph::forPackages($packages);
+
+        $this->assertTrue($this->graph->hasPackageName('vendor/root'));
+        $this->assertTrue($this->graph->hasPackageName('vendor/package1'));
+        $this->assertTrue($this->graph->hasPackageName('vendor/package2'));
+        $this->assertTrue($this->graph->hasPackageName('vendor/package3'));
+        $this->assertTrue($this->graph->hasEdge('vendor/package1', 'vendor/package2'));
+        $this->assertTrue($this->graph->hasEdge('vendor/package1', 'vendor/package3'));
+        $this->assertTrue($this->graph->hasEdge('vendor/package2', 'vendor/package3'));
+    }
+
+    public function testForPackagesIgnoresPackagesWithoutPackageFile()
+    {
+        $packages = new PackageCollection();
+        $packages->add(new RootPackage(new RootPackageFile('vendor/root'), __DIR__));
+        $packages->add(new Package(null, __DIR__));
+
+        $this->graph = OverrideGraph::forPackages($packages);
+
+        $this->assertTrue($this->graph->hasPackageName('vendor/root'));
     }
 }

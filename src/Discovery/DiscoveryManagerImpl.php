@@ -913,6 +913,10 @@ class DiscoveryManagerImpl implements DiscoveryManager
 
         // First load all the types
         foreach ($this->packages as $package) {
+            if (null === $package->getPackageFile()) {
+                continue;
+            }
+
             foreach ($package->getPackageFile()->getTypeDescriptors() as $typeDescriptor) {
                 $this->loadTypeDescriptor($typeDescriptor, $package)->execute();
             }
@@ -920,6 +924,10 @@ class DiscoveryManagerImpl implements DiscoveryManager
 
         // Then the bindings for the loaded types
         foreach ($this->packages as $package) {
+            if (null === $package->getPackageFile()) {
+                continue;
+            }
+
             foreach ($package->getPackageFile()->getBindingDescriptors() as $bindingDescriptor) {
                 // This REALLY shouldn't happen
                 if ($this->bindingDescriptors->contains($bindingDescriptor->getUuid())) {

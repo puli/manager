@@ -94,6 +94,10 @@ class OverrideGraph
         $graph = new static($packages->getPackageNames());
 
         foreach ($packages as $package) {
+            if (null === $package->getPackageFile()) {
+                continue;
+            }
+
             foreach ($package->getPackageFile()->getOverriddenPackages() as $overriddenPackage) {
                 if ($graph->hasPackageName($overriddenPackage)) {
                     $graph->addEdge($overriddenPackage, $package->getName());

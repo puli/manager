@@ -119,6 +119,16 @@ class RepositoryManagerImplTest extends ManagerTestCase
         $filesystem->remove($this->tempDir);
     }
 
+    public function testLoadIgnoresPackagesWithoutPackageFile()
+    {
+        $this->packages->add(new RootPackage($this->rootPackageFile, $this->rootDir));
+        $this->packages->add(new Package(null, $this->packageDir1));
+
+        $this->manager = new RepositoryManagerImpl($this->context, $this->repo, $this->packages, $this->packageFileStorage);
+
+        $this->assertEmpty($this->manager->getPathMappings());
+    }
+
     public function testAddRootPathMappingWithDirectoryPath()
     {
         $this->initDefaultManager();

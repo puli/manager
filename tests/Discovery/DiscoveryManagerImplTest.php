@@ -168,6 +168,19 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->manager->getBindingDescriptors();
     }
 
+    public function testLoadIgnoresPackagesWithoutPackageFile()
+    {
+        $this->rootPackageFile->addInstallInfo($this->installInfo1);
+
+        $this->packages->add(new RootPackage($this->rootPackageFile, $this->rootDir));
+        $this->packages->add(new Package(null, $this->packageDir1, $this->installInfo1));
+
+        $this->manager = new DiscoveryManagerImpl($this->context, $this->discovery, $this->packages, $this->packageFileStorage, $this->logger);
+
+        $this->assertEmpty($this->manager->getBindingDescriptors());
+        $this->assertEmpty($this->manager->getTypeDescriptors());
+    }
+
     public function testAddRootTypeDescriptor()
     {
         $this->initDefaultManager();

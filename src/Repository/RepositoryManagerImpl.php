@@ -480,6 +480,10 @@ class RepositoryManagerImpl implements RepositoryManager
 
         // Load mappings
         foreach ($this->packages as $package) {
+            if (null === $package->getPackageFile()) {
+                continue;
+            }
+
             foreach ($package->getPackageFile()->getPathMappings() as $mapping) {
                 $this->loadPathMapping($mapping, $package)->execute();
             }
