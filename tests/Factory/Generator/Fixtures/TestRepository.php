@@ -51,4 +51,8 @@ class TestRepository implements ResourceRepository
     public function listChildren($path)
     {
     }
+
+    public function getStack($path)
+    {
+    }
 }

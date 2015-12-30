@@ -72,6 +72,7 @@ class CopyInstaller implements ResourceInstaller
             $filesystemRepo->remove($serverPath);
         }
 
-        $filesystemRepo->add($serverPath, $resource);
+        // Don't attach the original resource to the repository we just created
+        $filesystemRepo->add($serverPath, clone $resource);
     }
 }
