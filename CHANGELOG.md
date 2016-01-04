@@ -9,6 +9,7 @@ Changelog
  * fixed: packages whose puli.json does not exist now return `null` from
    `Package::getPackageFile()`
  * replaced `StorageException` by `ReadException` and `WriteException`
+ * added `GeneratedPuliFactory::getPackageOrder()`
 
 * 1.0.0-beta9 (2015-10-06)
 
