@@ -68,8 +68,6 @@ Class                      | Description
 [`ConfigFileManager`]      | Manages changes to a global `config.json` file
 [`RootPackageFileManager`] | Manages changes to the `puli.json` file of the project
 
-Read [Puli at a Glance] if you want to learn more about Puli.
-
 Authors
 -------
 
@@ -79,7 +77,7 @@ Authors
 Installation
 ------------
 
-Follow the [Getting Started] guide to install Puli in your project.
+Follow the [Installation guide] guide to install Puli in your project.
 
 Documentation
 -------------
@@ -111,7 +109,7 @@ All contents of this package are licensed under the [MIT license].
 [Composer Plugin]: https://github.com/puli/composer-plugin
 [Bernhard Schussek]: http://webmozarts.com
 [The Community Contributors]: https://github.com/puli/manager/graphs/contributors
-[Getting Started]: http://docs.puli.io/en/latest/getting-started.html
+[Installation guide]: http://docs.puli.io/en/latest/installation.html
 [Puli Documentation]: http://docs.puli.io/en/latest/index.html
 [Puli at a Glance]: http://docs.puli.io/en/latest/at-a-glance.html
 [issue tracker]: https://github.com/puli/issues/issues
