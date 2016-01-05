@@ -20,17 +20,21 @@
         "webmozart/assert": "^1.0",
         "webmozart/glob": "^4.0",
         "symfony/event-dispatcher": "^2.3|^3.0",
-        "webmozart/key-value-store": "^1.0-beta7",
         "symfony/filesystem": "^2.3|^3.0",
         "ramsey/uuid": "^2.8",
         "psr/log": "^1.0"
     },
     "require-dev": {
+        "webmozart/key-value-store": "^1.0-beta7",
         "predis/predis": "^1.0",
         "basho/riak": "^1.4",
-        "doctrine/cache": "^1.4",
         "phpunit/phpunit": "^4.6",
         "sebastian/version": "^1.0.1"
+    },
+    "suggest": {
+        "webmozart/key-value-store": "to use key-value store change streams/discoveries",
+        "predis/predis": "to use Predis based key-value stores",
+        "basho/riak": "to use Riak based key-value stores"
     },
     "minimum-stability": "dev",
     "autoload": {
