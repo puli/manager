@@ -14,7 +14,7 @@ namespace Puli\Manager\Tests\Discovery\Fixtures;
 /**
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-interface Baz
+interface Bar
 {
     const clazz = __CLASS__;
 }

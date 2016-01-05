@@ -15,7 +15,6 @@ use PHPUnit_Framework_TestCase;
 use Puli\Discovery\Api\Type\BindingParameter;
 use Puli\Discovery\Api\Type\BindingType;
 use Puli\Discovery\Binding\ClassBinding;
-use Puli\Discovery\Tests\Fixtures\Foo;
 use Puli\Manager\Api\Discovery\BindingDescriptor;
 use Puli\Manager\Api\Discovery\BindingState;
 use Puli\Manager\Api\Discovery\BindingTypeDescriptor;
@@ -24,6 +23,7 @@ use Puli\Manager\Api\Package\Package;
 use Puli\Manager\Api\Package\PackageFile;
 use Puli\Manager\Api\Package\RootPackage;
 use Puli\Manager\Api\Package\RootPackageFile;
+use Puli\Manager\Tests\Discovery\Fixtures\Foo;
 use Rhumsaa\Uuid\Uuid;
 
 /**

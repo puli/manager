@@ -11,9 +11,9 @@
     ],
     "require": {
         "php": "^5.3.9|^7.0",
-        "puli/repository": "^1.0-beta9,<1.1",
-        "puli/discovery": "^1.0-beta8",
-        "puli/url-generator": "^1.0-beta3",
+        "puli/repository": "^1.0-beta9@dev,<1.1",
+        "puli/discovery": "^1.0-beta8@dev",
+        "puli/url-generator": "^1.0-beta3@dev",
         "webmozart/json": "^1.1.1",
         "webmozart/path-util": "^2.2.3",
         "webmozart/expression": "^1.0",
@@ -25,7 +25,7 @@
         "psr/log": "^1.0"
     },
     "require-dev": {
-        "webmozart/key-value-store": "^1.0-beta7",
+        "webmozart/key-value-store": "^1.0-beta7@dev",
         "predis/predis": "^1.0",
         "basho/riak": "^1.4",
         "phpunit/phpunit": "^4.6",
@@ -37,7 +37,6 @@
         "predis/predis": "to use Predis based key-value stores",
         "basho/riak": "to use Riak based key-value stores"
     },
-    "minimum-stability": "dev",
     "autoload": {
         "psr-4": {
             "Puli\\Manager\\": "src/"
@@ -45,8 +44,7 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "Puli\\Manager\\Tests\\": "tests/",
-            "Puli\\Discovery\\Tests\\": "vendor/puli/discovery/tests"
+            "Puli\\Manager\\Tests\\": "tests/"
         }
     },
     "extra": {

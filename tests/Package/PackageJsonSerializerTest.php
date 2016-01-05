@@ -17,8 +17,6 @@ use Puli\Discovery\Api\Type\BindingParameter;
 use Puli\Discovery\Api\Type\BindingType;
 use Puli\Discovery\Binding\ClassBinding;
 use Puli\Discovery\Binding\ResourceBinding;
-use Puli\Discovery\Tests\Fixtures\Bar;
-use Puli\Discovery\Tests\Fixtures\Foo;
 use Puli\Manager\Api\Config\Config;
 use Puli\Manager\Api\Discovery\BindingDescriptor;
 use Puli\Manager\Api\Discovery\BindingTypeDescriptor;
@@ -32,7 +30,9 @@ use Puli\Manager\Api\PuliPlugin;
 use Puli\Manager\Api\Repository\PathMapping;
 use Puli\Manager\Migration\MigrationManager;
 use Puli\Manager\Package\PackageJsonSerializer;
+use Puli\Manager\Tests\Discovery\Fixtures\Bar;
 use Puli\Manager\Tests\Discovery\Fixtures\Baz;
+use Puli\Manager\Tests\Discovery\Fixtures\Foo;
 use Puli\Manager\Tests\JsonTestCase;
 use Rhumsaa\Uuid\Uuid;
 use stdClass;
@@ -63,16 +63,16 @@ class PackageJsonSerializerTest extends JsonTestCase
         "2438256b-c2f5-4a06-a18f-f79755e027dd": {
             "_class": "Puli\\\\Discovery\\\\Binding\\\\ResourceBinding",
             "query": "/app/config*.yml",
-            "type": "Puli\\\\Discovery\\\\Tests\\\\Fixtures\\\\Foo"
+            "type": "Puli\\\\Manager\\\\Tests\\\\Discovery\\\\Fixtures\\\\Foo"
         },
         "ff7bbf5a-44b1-4bdb-8397-e1c601ad7a2e": {
             "_class": "Puli\\\\Discovery\\\\Binding\\\\ClassBinding",
             "class": "Puli\\\\Manager\\\\Tests\\\\Package\\\\PackageJsonSerializerTest",
-            "type": "Puli\\\\Discovery\\\\Tests\\\\Fixtures\\\\Bar"
+            "type": "Puli\\\\Manager\\\\Tests\\\\Discovery\\\\Fixtures\\\\Bar"
         }
     },
     "binding-types": {
-        "Puli\\\\Discovery\\\\Tests\\\\Fixtures\\\\Foo": {
+        "Puli\\\\Manager\\\\Tests\\\\Discovery\\\\Fixtures\\\\Foo": {
             "description": "Description of my type.",
             "parameters": {
                 "param": {
@@ -104,16 +104,16 @@ JSON;
         "2438256b-c2f5-4a06-a18f-f79755e027dd": {
             "_class": "Puli\\\\Discovery\\\\Binding\\\\ResourceBinding",
             "query": "/app/config*.yml",
-            "type": "Puli\\\\Discovery\\\\Tests\\\\Fixtures\\\\Foo"
+            "type": "Puli\\\\Manager\\\\Tests\\\\Discovery\\\\Fixtures\\\\Foo"
         },
         "ff7bbf5a-44b1-4bdb-8397-e1c601ad7a2e": {
             "_class": "Puli\\\\Discovery\\\\Binding\\\\ClassBinding",
             "class": "Puli\\\\Manager\\\\Tests\\\\Package\\\\PackageJsonSerializerTest",
-            "type": "Puli\\\\Discovery\\\\Tests\\\\Fixtures\\\\Bar"
+            "type": "Puli\\\\Manager\\\\Tests\\\\Discovery\\\\Fixtures\\\\Bar"
         }
     },
     "binding-types": {
-        "Puli\\\\Discovery\\\\Tests\\\\Fixtures\\\\Foo": {
+        "Puli\\\\Manager\\\\Tests\\\\Discovery\\\\Fixtures\\\\Foo": {
             "description": "Description of my type.",
             "parameters": {
                 "param": {
@@ -297,7 +297,7 @@ JSON;
         "2438256b-c2f5-4a06-a18f-f79755e027dd": {
             "_class": "Puli\\\\Discovery\\\\Binding\\\\ResourceBinding",
             "query": "/app/config*.yml",
-            "type": "Puli\\\\Discovery\\\\Tests\\\\Fixtures\\\\Foo"
+            "type": "Puli\\\\Manager\\\\Tests\\\\Discovery\\\\Fixtures\\\\Foo"
         }
     }
 }
@@ -317,7 +317,7 @@ JSON;
 {
     "version": "1.0",
     "binding-types": {
-        "Puli\\\\Discovery\\\\Tests\\\\Fixtures\\\\Foo": {}
+        "Puli\\\\Manager\\\\Tests\\\\Discovery\\\\Fixtures\\\\Foo": {}
     }
 }
 
@@ -359,9 +359,9 @@ JSON;
 {
     "version": "1.0",
     "binding-types": {
-        "Puli\\\\Discovery\\\\Tests\\\\Fixtures\\\\Bar": {},
-        "Puli\\\\Discovery\\\\Tests\\\\Fixtures\\\\Foo": {},
-        "Puli\\\\Manager\\\\Tests\\\\Discovery\\\\Fixtures\\\\Baz": {}
+        "Puli\\\\Manager\\\\Tests\\\\Discovery\\\\Fixtures\\\\Bar": {},
+        "Puli\\\\Manager\\\\Tests\\\\Discovery\\\\Fixtures\\\\Baz": {},
+        "Puli\\\\Manager\\\\Tests\\\\Discovery\\\\Fixtures\\\\Foo": {}
     }
 }
 
@@ -385,7 +385,7 @@ JSON;
 {
     "version": "1.0",
     "binding-types": {
-        "Puli\\\\Discovery\\\\Tests\\\\Fixtures\\\\Foo": {
+        "Puli\\\\Manager\\\\Tests\\\\Discovery\\\\Fixtures\\\\Foo": {
             "parameters": {
                 "a": {},
                 "b": {},
@@ -421,22 +421,22 @@ JSON;
         "2438256b-c2f5-4a06-a18f-f79755e027dd": {
             "_class": "Puli\\\\Discovery\\\\Binding\\\\ResourceBinding",
             "query": "/vendor/c",
-            "type": "Puli\\\\Discovery\\\\Tests\\\\Fixtures\\\\Foo"
+            "type": "Puli\\\\Manager\\\\Tests\\\\Discovery\\\\Fixtures\\\\Foo"
         },
         "93fdf1a4-45b3-4a4e-80b5-77dc1137f5ae": {
             "_class": "Puli\\\\Discovery\\\\Binding\\\\ResourceBinding",
             "query": "/vendor/b",
-            "type": "Puli\\\\Discovery\\\\Tests\\\\Fixtures\\\\Foo"
+            "type": "Puli\\\\Manager\\\\Tests\\\\Discovery\\\\Fixtures\\\\Foo"
         },
         "d939ea88-01a0-4c7b-8d1e-e0dfcffd66e5": {
             "_class": "Puli\\\\Discovery\\\\Binding\\\\ClassBinding",
             "class": "Puli\\\\Manager\\\\Tests\\\\Package\\\\PackageJsonSerializerTest",
-            "type": "Puli\\\\Discovery\\\\Tests\\\\Fixtures\\\\Bar"
+            "type": "Puli\\\\Manager\\\\Tests\\\\Discovery\\\\Fixtures\\\\Bar"
         },
         "ff7bbf5a-44b1-4bdb-8397-e1c601ad7a2e": {
             "_class": "Puli\\\\Discovery\\\\Binding\\\\ResourceBinding",
             "query": "/vendor/a",
-            "type": "Puli\\\\Discovery\\\\Tests\\\\Fixtures\\\\Bar"
+            "type": "Puli\\\\Manager\\\\Tests\\\\Discovery\\\\Fixtures\\\\Bar"
         }
     }
 }
@@ -464,7 +464,7 @@ JSON;
         "2438256b-c2f5-4a06-a18f-f79755e027dd": {
             "_class": "Puli\\\\Discovery\\\\Binding\\\\ResourceBinding",
             "query": "/path",
-            "type": "Puli\\\\Discovery\\\\Tests\\\\Fixtures\\\\Foo",
+            "type": "Puli\\\\Manager\\\\Tests\\\\Discovery\\\\Fixtures\\\\Foo",
             "parameters": {
                 "a": "foo",
                 "b": "foo",
@@ -494,7 +494,7 @@ JSON;
             "_class": "Puli\\\\Discovery\\\\Binding\\\\ResourceBinding",
             "query": "//resource[name=\"config.yml\"]",
             "language": "xpath",
-            "type": "Puli\\\\Discovery\\\\Tests\\\\Fixtures\\\\Foo"
+            "type": "Puli\\\\Manager\\\\Tests\\\\Discovery\\\\Fixtures\\\\Foo"
         }
     }
 }
@@ -517,7 +517,7 @@ JSON;
 {
     "version": "1.0",
     "binding-types": {
-        "Puli\\\\Discovery\\\\Tests\\\\Fixtures\\\\Foo": {
+        "Puli\\\\Manager\\\\Tests\\\\Discovery\\\\Fixtures\\\\Foo": {
             "parameters": {
                 "param": {
                     "default": 1234
@@ -547,7 +547,7 @@ JSON;
 {
     "version": "1.0",
     "binding-types": {
-        "Puli\\\\Discovery\\\\Tests\\\\Fixtures\\\\Foo": {
+        "Puli\\\\Manager\\\\Tests\\\\Discovery\\\\Fixtures\\\\Foo": {
             "parameters": {
                 "param": {
                     "description": "Description of the parameter."
@@ -575,7 +575,7 @@ JSON;
 {
     "version": "1.0",
     "binding-types": {
-        "Puli\\\\Discovery\\\\Tests\\\\Fixtures\\\\Foo": {
+        "Puli\\\\Manager\\\\Tests\\\\Discovery\\\\Fixtures\\\\Foo": {
             "parameters": {
                 "param": {
                     "required": true
@@ -889,7 +889,7 @@ JSON;
 {
     "version": "1.0",
     "binding-types": {
-        "Puli\\\\Discovery\\\\Tests\\\\Fixtures\\\\Foo": {
+        "Puli\\\\Manager\\\\Tests\\\\Discovery\\\\Fixtures\\\\Foo": {
             "parameters": {
                 "param": {
                     "required": true
@@ -919,7 +919,7 @@ JSON;
     "bindings": {
         "2438256b-c2f5-4a06-a18f-f79755e027dd": {
             "query": "/app/config*.yml",
-            "type": "Puli\\\\Discovery\\\\Tests\\\\Fixtures\\\\Foo",
+            "type": "Puli\\\\Manager\\\\Tests\\\\Discovery\\\\Fixtures\\\\Foo",
             "parameters": {
                 "param": "value"
             }
@@ -946,7 +946,7 @@ JSON;
         "2438256b-c2f5-4a06-a18f-f79755e027dd": {
             "query": "//resource[name=\"config.yml\"]",
             "language": "xpath",
-            "type": "Puli\\\\Discovery\\\\Tests\\\\Fixtures\\\\Foo"
+            "type": "Puli\\\\Manager\\\\Tests\\\\Discovery\\\\Fixtures\\\\Foo"
         }
     }
 }
@@ -971,7 +971,7 @@ JSON;
             "_class": "Puli\\\\Discovery\\\\Binding\\\\ResourceBinding",
             "query": "//resource[name=\"config.yml\"]",
             "language": "xpath",
-            "type": "Puli\\\\Discovery\\\\Tests\\\\Fixtures\\\\Foo"
+            "type": "Puli\\\\Manager\\\\Tests\\\\Discovery\\\\Fixtures\\\\Foo"
         }
     }
 }
@@ -995,7 +995,7 @@ JSON;
         "2438256b-c2f5-4a06-a18f-f79755e027dd": {
             "_class": "Puli\\\\Discovery\\\\Binding\\\\ClassBinding",
             "class": "Puli\\\\Manager\\\\Tests\\\\Package\\\\PackageJsonSerializerTest",
-            "type": "Puli\\\\Discovery\\\\Tests\\\\Fixtures\\\\Foo"
+            "type": "Puli\\\\Manager\\\\Tests\\\\Discovery\\\\Fixtures\\\\Foo"
         }
     }
 }
@@ -1237,7 +1237,7 @@ JSON;
 {
     "version": "1.0",
     "binding-types": [
-        { "type": "Puli\\\\Discovery\\\\Tests\\\\Fixtures\\\\Foo" }
+        { "type": "Puli\\\\Manager\\\\Tests\\\\Discovery\\\\Fixtures\\\\Foo" }
     ]
 }
 
@@ -1260,7 +1260,7 @@ JSON;
     "bindings": [
         {
             "query": "/app/config*.yml",
-            "type": "Puli\\\\Discovery\\\\Tests\\\\Fixtures\\\\Foo"
+            "type": "Puli\\\\Manager\\\\Tests\\\\Discovery\\\\Fixtures\\\\Foo"
         }
     ]
 }

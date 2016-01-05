@@ -14,10 +14,10 @@ namespace Puli\Manager\Tests\Api\Package;
 use PHPUnit_Framework_TestCase;
 use Puli\Discovery\Binding\ClassBinding;
 use Puli\Discovery\Binding\ResourceBinding;
-use Puli\Discovery\Tests\Fixtures\Foo;
 use Puli\Manager\Api\Discovery\BindingDescriptor;
 use Puli\Manager\Api\Package\PackageFile;
 use Puli\Manager\Api\Repository\PathMapping;
+use Puli\Manager\Tests\Discovery\Fixtures\Foo;
 use Rhumsaa\Uuid\Uuid;
 
 /**

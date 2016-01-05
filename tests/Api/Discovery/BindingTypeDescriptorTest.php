@@ -14,12 +14,12 @@ namespace Puli\Manager\Tests\Api\Discovery;
 use PHPUnit_Framework_TestCase;
 use Puli\Discovery\Api\Type\BindingParameter;
 use Puli\Discovery\Api\Type\BindingType;
-use Puli\Discovery\Tests\Fixtures\Foo;
 use Puli\Manager\Api\Discovery\BindingTypeDescriptor;
 use Puli\Manager\Api\Discovery\BindingTypeState;
 use Puli\Manager\Api\Package\InstallInfo;
 use Puli\Manager\Api\Package\Package;
 use Puli\Manager\Api\Package\PackageFile;
+use Puli\Manager\Tests\Discovery\Fixtures\Foo;
 
 /**
  * @since  1.0
