@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the puli/manager package.
+ * This file is part of the vendor/project package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\Manager\Factory\Generator\Repository;
+namespace Puli\Manager\Factory\Generator\ChangeStream;
 
 use Puli\Manager\Api\Factory\Generator\GeneratorRegistry;
 use Puli\Manager\Api\Factory\Generator\ServiceGenerator;
@@ -19,18 +19,14 @@ use Puli\Manager\Assert\Assert;
 use Webmozart\PathUtil\Path;
 
 /**
- * Generates the setup code for a {@link FilesystemRepository}.
+ * Generates the setup code for a {@link JsonChangeStream}.
  *
  * @since  1.0
  *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class FilesystemRepositoryGenerator implements ServiceGenerator
+class JsonChangeStreamGenerator implements ServiceGenerator
 {
-    private static $defaultOptions = array(
-        'symlink' => true,
-    );
-
     /**
      * {@inheritdoc}
      */
@@ -38,41 +34,24 @@ class FilesystemRepositoryGenerator implements ServiceGenerator
     {
         Assert::keyExists($options, 'root-dir', 'The "root-dir" option is missing.');
 
-        $options = array_replace(self::$defaultOptions, $options);
-
         if (!isset($options['path'])) {
-            $options['path'] = $targetMethod->getClass()->getDirectory().'/repository';
+            $options['path'] = $targetMethod->getClass()->getDirectory().'/change-stream.json';
         }
 
-        Assert::stringNotEmpty($options['path'], 'The "path" option should be a non-empty string. Got: %s');
         Assert::stringNotEmpty($options['root-dir'], 'The "root-dir" option should be a non-empty string. Got: %s');
-        Assert::boolean($options['symlink'], 'The "symlink" option should be a boolean. Got: %s');
+        Assert::stringNotEmpty($options['path'], 'The "path" option should be a non-empty string. Got: %s');
 
         $path = Path::makeAbsolute($options['path'], $options['root-dir']);
         $relPath = Path::makeRelative($path, $targetMethod->getClass()->getDirectory());
 
-        $escPath = $relPath
-            ? '__DIR__.'.var_export('/'.$relPath, true)
-            : '__DIR__';
+        $escPath = '__DIR__.'.var_export('/'.$relPath, true);
 
-        if ($relPath) {
-            $targetMethod->addBody(
-<<<EOF
-if (!file_exists($escPath)) {
-    mkdir($escPath, 0777, true);
-}
-
-EOF
-            );
-        }
-
-        $targetMethod->getClass()->addImport(new Import('Puli\Repository\FilesystemRepository'));
+        $targetMethod->getClass()->addImport(new Import('Puli\Repository\ChangeStream\JsonChangeStream'));
 
         $targetMethod->addBody(sprintf(
-            '$%s = new FilesystemRepository(%s, %s);',
+            '$%s = new JsonChangeStream(%s);',
             $varName,
-            $escPath,
-            var_export($options['symlink'], true)
+            $escPath
         ));
     }
 }

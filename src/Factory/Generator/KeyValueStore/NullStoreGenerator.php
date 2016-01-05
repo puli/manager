@@ -32,6 +32,9 @@ class NullStoreGenerator implements ServiceGenerator
     {
         $targetMethod->getClass()->addImport(new Import('Webmozart\KeyValueStore\NullStore'));
 
-        $targetMethod->addBody('$'.$varName.' = new NullStore();');
+        $targetMethod->addBody(sprintf(
+            '$%s = new NullStore();',
+            $varName
+        ));
     }
 }

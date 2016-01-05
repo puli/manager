@@ -93,6 +93,46 @@ EOF;
         $this->assertSame($expected, $this->method->getBody());
     }
 
+    /**
+     * @expectedException \InvalidArgumentException
+     */
+    public function testGenerateServiceFailsIfNoBucket()
+    {
+        $this->generator->generateNewInstance('store', $this->method, $this->registry);
+    }
+
+    /**
+     * @expectedException \InvalidArgumentException
+     */
+    public function testGenerateServiceFailsIfBucketNoString()
+    {
+        $this->generator->generateNewInstance('store', $this->method, $this->registry, array(
+            'bucket' => 1234,
+        ));
+    }
+
+    /**
+     * @expectedException \InvalidArgumentException
+     */
+    public function testGenerateServiceFailsIfHostNoString()
+    {
+        $this->generator->generateNewInstance('store', $this->method, $this->registry, array(
+            'bucket' => 'the-bucket',
+            'host' => 1234,
+        ));
+    }
+
+    /**
+     * @expectedException \InvalidArgumentException
+     */
+    public function testGenerateServiceFailsIfPortNoInteger()
+    {
+        $this->generator->generateNewInstance('store', $this->method, $this->registry, array(
+            'bucket' => 'the-bucket',
+            'port' => false,
+        ));
+    }
+
     public function testRunGeneratedCode()
     {
         $this->generator->generateNewInstance('store', $this->method, $this->registry, array(

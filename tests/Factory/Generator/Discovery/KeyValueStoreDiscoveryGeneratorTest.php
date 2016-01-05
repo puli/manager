@@ -54,7 +54,24 @@ EOF
     public function testGenerateService()
     {
         $this->generator->generateNewInstance('discovery', $this->method, $this->registry, array(
-            'rootDir' => $this->rootDir,
+            'root-dir' => $this->rootDir,
+        ));
+
+        $expected = <<<EOF
+\$store = new JsonFileStore(__DIR__.'/bindings.json');
+\$discovery = new KeyValueStoreDiscovery(\$store, array(
+    new ResourceBindingInitializer(\$repo),
+));
+EOF;
+
+        $this->assertSame($expected, $this->method->getBody());
+    }
+
+    public function testGenerateServiceForTypeNull()
+    {
+        $this->generator->generateNewInstance('discovery', $this->method, $this->registry, array(
+            'root-dir' => $this->rootDir,
+            'store' => array('type' => null),
         ));
 
         $expected = <<<EOF
@@ -75,27 +92,31 @@ EOF;
         $this->generator->generateNewInstance('discovery', $this->method, $this->registry);
     }
 
-    public function testGenerateServiceForTypeNull()
+    /**
+     * @expectedException \InvalidArgumentException
+     */
+    public function testGenerateServiceFailsIfRootDirNoString()
     {
         $this->generator->generateNewInstance('discovery', $this->method, $this->registry, array(
-            'rootDir' => $this->rootDir,
-            'store' => array('type' => null),
+            'root-dir' => 1234,
         ));
+    }
 
-        $expected = <<<EOF
-\$store = new NullStore();
-\$discovery = new KeyValueStoreDiscovery(\$store, array(
-    new ResourceBindingInitializer(\$repo),
-));
-EOF;
-
-        $this->assertSame($expected, $this->method->getBody());
+    /**
+     * @expectedException \InvalidArgumentException
+     */
+    public function testGenerateServiceFailsIfStoreNotArray()
+    {
+        $this->generator->generateNewInstance('discovery', $this->method, $this->registry, array(
+            'root-dir' => $this->rootDir,
+            'store' => 1234,
+        ));
     }
 
     public function testRunGeneratedCode()
     {
         $this->generator->generateNewInstance('discovery', $this->method, $this->registry, array(
-            'rootDir' => $this->rootDir,
+            'root-dir' => $this->rootDir,
         ));
 
         $this->putCode($this->outputPath, $this->method);

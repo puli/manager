@@ -105,6 +105,26 @@ EOF;
         $this->assertSame($expected, $this->method->getBody());
     }
 
+    /**
+     * @expectedException \InvalidArgumentException
+     */
+    public function testGenerateServiceFailsIfHostNoString()
+    {
+        $this->generator->generateNewInstance('store', $this->method, $this->registry, array(
+            'host' => 1234,
+        ));
+    }
+
+    /**
+     * @expectedException \InvalidArgumentException
+     */
+    public function testGenerateServiceFailsIfPortNoInteger()
+    {
+        $this->generator->generateNewInstance('store', $this->method, $this->registry, array(
+            'port' => false,
+        ));
+    }
+
     public function testRunGeneratedCode()
     {
         $this->generator->generateNewInstance('store', $this->method, $this->registry);

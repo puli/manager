@@ -124,9 +124,31 @@ class Config
 
     const REPOSITORY_STORE_CACHE = 'repository.store.cache';
 
+    const CHANGE_STREAM = 'change-stream';
+
+    const CHANGE_STREAM_TYPE = 'change-stream.type';
+
+    const CHANGE_STREAM_PATH = 'change-stream.path';
+
+    const CHANGE_STREAM_STORE = 'change-stream.store';
+
+    const CHANGE_STREAM_STORE_TYPE = 'change-stream.store.type';
+
+    const CHANGE_STREAM_STORE_PATH = 'change-stream.store.path';
+
+    const CHANGE_STREAM_STORE_HOST = 'change-stream.store.host';
+
+    const CHANGE_STREAM_STORE_PORT = 'change-stream.store.port';
+
+    const CHANGE_STREAM_STORE_BUCKET = 'change-stream.store.bucket';
+
+    const CHANGE_STREAM_STORE_CACHE = 'change-stream.store.cache';
+
     const DISCOVERY = 'discovery';
 
     const DISCOVERY_TYPE = 'discovery.type';
+
+    const DISCOVERY_PATH = 'discovery.path';
 
     const DISCOVERY_STORE = 'discovery.store';
 
@@ -165,7 +187,16 @@ class Config
         self::REPOSITORY_STORE_PORT => true,
         self::REPOSITORY_STORE_BUCKET => true,
         self::REPOSITORY_STORE_CACHE => true,
+        self::CHANGE_STREAM_TYPE => true,
+        self::CHANGE_STREAM_PATH => true,
+        self::CHANGE_STREAM_STORE_TYPE => true,
+        self::CHANGE_STREAM_STORE_PATH => true,
+        self::CHANGE_STREAM_STORE_HOST => true,
+        self::CHANGE_STREAM_STORE_PORT => true,
+        self::CHANGE_STREAM_STORE_BUCKET => true,
+        self::CHANGE_STREAM_STORE_CACHE => true,
         self::DISCOVERY_TYPE => true,
+        self::DISCOVERY_PATH => true,
         self::DISCOVERY_STORE_TYPE => true,
         self::DISCOVERY_STORE_PATH => true,
         self::DISCOVERY_STORE_HOST => true,
@@ -180,6 +211,8 @@ class Config
         self::FACTORY_OUT => true,
         self::REPOSITORY => true,
         self::REPOSITORY_STORE => true,
+        self::CHANGE_STREAM => true,
+        self::CHANGE_STREAM_STORE => true,
         self::DISCOVERY => true,
         self::DISCOVERY_STORE => true,
     );
@@ -567,12 +600,14 @@ class Config
             case self::REPOSITORY_SYMLINK:
             case self::REPOSITORY_OPTIMIZE:
             case self::REPOSITORY_STORE_CACHE:
+            case self::CHANGE_STREAM_STORE_CACHE:
             case self::DISCOVERY_STORE_CACHE:
                 $this->assertNotNull($key, $value);
                 $this->assertBoolean($key, $value);
                 break;
 
             case self::REPOSITORY_STORE_PORT:
+            case self::CHANGE_STREAM_STORE_PORT:
             case self::DISCOVERY_STORE_PORT:
                 $this->assertNotNull($key, $value);
                 $this->assertInteger($key, $value);
@@ -581,6 +616,7 @@ class Config
             case self::BOOTSTRAP_FILE:
             case self::FACTORY_IN_FILE:
             case self::REPOSITORY_STORE_TYPE:
+            case self::CHANGE_STREAM_STORE_TYPE:
             case self::DISCOVERY_STORE_TYPE:
                 if (null !== $value) {
                     $this->assertString($key, $value);

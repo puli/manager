@@ -32,6 +32,9 @@ class ArrayStoreGenerator implements ServiceGenerator
     {
         $targetMethod->getClass()->addImport(new Import('Webmozart\KeyValueStore\ArrayStore'));
 
-        $targetMethod->addBody('$'.$varName.' = new ArrayStore();');
+        $targetMethod->addBody(sprintf(
+            '$%s = new ArrayStore();',
+            $varName
+        ));
     }
 }

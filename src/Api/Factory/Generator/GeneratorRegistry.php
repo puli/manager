@@ -31,6 +31,11 @@ interface GeneratorRegistry
     const REPOSITORY = 'repository';
 
     /**
+     * Type: A generator for implementations of {@link ChangeStream}.
+     */
+    const CHANGE_STREAM = 'change-stream';
+
+    /**
      * Type: A generator for implementations of {@link KeyValueStore}.
      */
     const KEY_VALUE_STORE = 'key-value-store';

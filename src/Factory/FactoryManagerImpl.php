@@ -268,7 +268,8 @@ EOF
         $config = $this->config;
         $type = $config->get(Config::REPOSITORY_TYPE);
         $options = $this->camelizeKeys($config->get(Config::REPOSITORY));
-        $options['rootDir'] = $this->rootDir;
+        $options['root-dir'] = $this->rootDir;
+        $options['change-stream'] = $config->get(Config::CHANGE_STREAM);
 
         $generator = $this->generatorRegistry->getServiceGenerator(GeneratorRegistry::REPOSITORY, $type);
         $generator->generateNewInstance(self::REPO_VAR_NAME, $method, $this->generatorRegistry, $options);
@@ -315,7 +316,7 @@ EOF
         $config = $this->config;
         $type = $config->get(Config::DISCOVERY_TYPE);
         $options = $this->camelizeKeys($config->get(Config::DISCOVERY));
-        $options['rootDir'] = $this->rootDir;
+        $options['root-dir'] = $this->rootDir;
 
         $generator = $this->generatorRegistry->getServiceGenerator(GeneratorRegistry::DISCOVERY, $type);
         $generator->generateNewInstance(self::DISCOVERY_VAR_NAME, $method, $this->generatorRegistry, $options);

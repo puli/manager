@@ -40,9 +40,9 @@ class RiakStoreGenerator implements ServiceGenerator
 
         $options = array_replace(self::$defaultOptions, $options);
 
-        Assert::string($options['bucket'], 'The bucket must be a string. Got: %s');
-        Assert::string($options['host'], 'The host must be a string. Got: %s');
-        Assert::integer($options['port'], 'The port must be an integer. Got: %s');
+        Assert::stringNotEmpty($options['bucket'], 'The "bucket" option must be a non-empty string. Got: %s');
+        Assert::stringNotEmpty($options['host'], 'The "host" option must be a non-empty string. Got: %s');
+        Assert::integer($options['port'], 'The "port" option must be an integer. Got: %s');
 
         $escBucket = var_export($options['bucket'], true);
         $escHost = var_export($options['host'], true);
