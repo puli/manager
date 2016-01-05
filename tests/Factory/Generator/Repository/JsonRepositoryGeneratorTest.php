@@ -40,7 +40,7 @@ class JsonRepositoryGeneratorTest extends AbstractGeneratorTest
         ));
 
         $expected = <<<EOF
-\$repo = new JsonRepository(__DIR__.'/path-mappings.json', __DIR__.'/..');
+\$repo = new JsonRepository(__DIR__.'/path-mappings.json', __DIR__.'/..', true);
 EOF;
 
         $this->assertSame($expected, $this->method->getBody());
@@ -54,7 +54,7 @@ EOF;
         ));
 
         $expected = <<<EOF
-\$repo = new JsonRepository(__DIR__.'/../store/repository.json', __DIR__.'/..');
+\$repo = new JsonRepository(__DIR__.'/../store/repository.json', __DIR__.'/..', true);
 EOF;
 
         $this->assertSame($expected, $this->method->getBody());
@@ -69,7 +69,7 @@ EOF;
 
         $expected = <<<EOF
 \$stream = new JsonChangeStream(__DIR__.'/change-stream.json');
-\$repo = new OptimizedJsonRepository(__DIR__.'/path-mappings.json', __DIR__.'/..', \$stream);
+\$repo = new OptimizedJsonRepository(__DIR__.'/path-mappings.json', __DIR__.'/..', false, \$stream);
 EOF;
 
         $this->assertSame($expected, $this->method->getBody());
@@ -85,7 +85,7 @@ EOF;
 
         $expected = <<<EOF
 \$stream = new JsonChangeStream(__DIR__.'/change-stream.json');
-\$repo = new OptimizedJsonRepository(__DIR__.'/../store/repository.json', __DIR__.'/..', \$stream);
+\$repo = new OptimizedJsonRepository(__DIR__.'/../store/repository.json', __DIR__.'/..', false, \$stream);
 EOF;
 
         $this->assertSame($expected, $this->method->getBody());
@@ -104,7 +104,7 @@ EOF;
         $expected = <<<EOF
 \$store = new JsonFileStore(__DIR__.'/change-stream.json');
 \$stream = new KeyValueStoreChangeStream(\$store);
-\$repo = new OptimizedJsonRepository(__DIR__.'/path-mappings.json', __DIR__.'/..', \$stream);
+\$repo = new OptimizedJsonRepository(__DIR__.'/path-mappings.json', __DIR__.'/..', false, \$stream);
 EOF;
 
         $this->assertSame($expected, $this->method->getBody());

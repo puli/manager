@@ -156,7 +156,7 @@ class MyFactory
             throw new RuntimeException('Please install puli/repository to create ResourceRepository instances.');
         }
 
-        \$repo = new JsonRepository(__DIR__.'/.puli/path-mappings.json', __DIR__);
+        \$repo = new JsonRepository(__DIR__.'/.puli/path-mappings.json', __DIR__, true);
 
         return \$repo;
     }
@@ -264,7 +264,7 @@ EOF;
 
         \$store = new JsonFileStore(__DIR__.'/.puli/changelog.json');
         \$stream = new KeyValueStoreChangeStream(\$store);
-        \$repo = new OptimizedJsonRepository(__DIR__.'/.puli/path-mappings.json', __DIR__, \$stream);
+        \$repo = new OptimizedJsonRepository(__DIR__.'/.puli/path-mappings.json', __DIR__, false, \$stream);
 
         return \$repo;
     }

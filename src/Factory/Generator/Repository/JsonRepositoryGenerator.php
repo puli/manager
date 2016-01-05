@@ -70,7 +70,8 @@ class JsonRepositoryGenerator implements ServiceGenerator
             $targetMethod->getClass()->addImport(new Import('Puli\\Repository\\OptimizedJsonRepository'));
 
             $targetMethod->addBody(sprintf(
-                '$%s = new OptimizedJsonRepository(%s, %s, $stream);',
+                // Deactivate schema validation for performance
+                '$%s = new OptimizedJsonRepository(%s, %s, false, $stream);',
                 $varName,
                 $escPath,
                 $escBaseDir
@@ -79,7 +80,8 @@ class JsonRepositoryGenerator implements ServiceGenerator
             $targetMethod->getClass()->addImport(new Import('Puli\\Repository\\JsonRepository'));
 
             $targetMethod->addBody(sprintf(
-                '$%s = new JsonRepository(%s, %s);',
+                // Activate schema validation
+                '$%s = new JsonRepository(%s, %s, true);',
                 $varName,
                 $escPath,
                 $escBaseDir
