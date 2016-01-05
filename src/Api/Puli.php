@@ -566,7 +566,8 @@ class Puli
                 new ClassWriter()
             );
 
-            // Don't set via the constructor to prevent a cyclic dependency
+            // Don't set via the constructor to prevent cyclic dependencies
+            $this->factoryManager->setPackages($this->getPackageManager()->getPackages());
             $this->factoryManager->setServers($this->getServerManager()->getServers());
         }
 

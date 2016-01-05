@@ -105,6 +105,11 @@ class OverrideGraph
             }
         }
 
+        // Do we have a root package?
+        if (null === $packages->getRootPackage()) {
+            return $graph;
+        }
+
         // Make sure we have numeric, ascending keys here
         $packageOrder = array_values($packages->getRootPackage()->getPackageFile()->getOverrideOrder());
 
@@ -209,7 +214,7 @@ class OverrideGraph
 
             throw new CyclicDependencyException(sprintf(
                 'A cyclic dependency was discovered between the packages "%s" '.
-                'and "%s". Please check the "override" keys defined in these'.
+                'and "%s". Please check the "override" keys defined in these '.
                 'packages.',
                 implode('", "', $path),
                 $last

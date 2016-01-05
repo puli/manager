@@ -17,6 +17,7 @@ use Puli\Manager\Api\Event\GenerateFactoryEvent;
 use Puli\Manager\Api\Event\PuliEvents;
 use Puli\Manager\Api\Factory\FactoryManager;
 use Puli\Manager\Api\Factory\Generator\GeneratorRegistry;
+use Puli\Manager\Api\Package\PackageCollection;
 use Puli\Manager\Api\Php\Argument;
 use Puli\Manager\Api\Php\Clazz;
 use Puli\Manager\Api\Php\Import;
@@ -24,6 +25,7 @@ use Puli\Manager\Api\Php\Method;
 use Puli\Manager\Api\Php\ReturnValue;
 use Puli\Manager\Api\Server\ServerCollection;
 use Puli\Manager\Assert\Assert;
+use Puli\Manager\Conflict\OverrideGraph;
 use Puli\Manager\Php\ClassWriter;
 use Webmozart\PathUtil\Path;
 
@@ -72,6 +74,11 @@ class FactoryManagerImpl implements FactoryManager
     private $classWriter;
 
     /**
+     * @var PackageCollection
+     */
+    private $packages;
+
+    /**
      * @var ServerCollection
      */
     private $servers;
@@ -79,23 +86,35 @@ class FactoryManagerImpl implements FactoryManager
     /**
      * Creates a new factory generator.
      *
-     * @param ProjectContext        $context           The project context.
-     * @param GeneratorRegistry     $generatorRegistry The registry providing
-     *                                                 the generators for the
-     *                                                 services returned by the
-     *                                                 factory.
-     * @param ClassWriter           $classWriter       The writer that writes
-     *                                                 the class to a file.
-     * @param ServerCollection|null $servers           The configured servers.
+     * @param ProjectContext         $context           The project context.
+     * @param GeneratorRegistry      $generatorRegistry The registry providing
+     *                                                  the generators for the
+     *                                                  services returned by the
+     *                                                  factory.
+     * @param ClassWriter            $classWriter       The writer that writes
+     *                                                  the class to a file.
+     * @param PackageCollection|null $packages          The loaded packages.
+     * @param ServerCollection|null  $servers           The configured servers.
      */
-    public function __construct(ProjectContext $context, GeneratorRegistry $generatorRegistry, ClassWriter $classWriter, ServerCollection $servers = null)
+    public function __construct(ProjectContext $context, GeneratorRegistry $generatorRegistry, ClassWriter $classWriter, PackageCollection $packages = null, ServerCollection $servers = null)
     {
         $this->context = $context;
         $this->config = $context->getConfig();
         $this->rootDir = $context->getRootDirectory();
         $this->generatorRegistry = $generatorRegistry;
         $this->classWriter = $classWriter;
+        $this->packages = $packages;
         $this->servers = $servers;
+    }
+
+    /**
+     * Sets the packages included in the getPackageOrder() method.
+     *
+     * @param PackageCollection $packages The loaded packages.
+     */
+    public function setPackages(PackageCollection $packages)
+    {
+        $this->packages = $packages;
     }
 
     /**
@@ -168,6 +187,7 @@ EOF
         $this->addCreateRepositoryMethod($class);
         $this->addCreateDiscoveryMethod($class);
         $this->addCreateUrlGeneratorMethod($class);
+        $this->addGetPackageOrderMethod($class);
 
         if ($dispatcher->hasListeners(PuliEvents::GENERATE_FACTORY)) {
             $dispatcher->dispatch(PuliEvents::GENERATE_FACTORY, new GenerateFactoryEvent($class));
@@ -370,6 +390,44 @@ EOF
         }
 
         $method->addBody("\$generator = new DiscoveryUrlGenerator(\$discovery, array($urlFormatsString));");
+
+        $class->addMethod($method);
+    }
+
+    /**
+     * Adds the getPackageOrder() method.
+     *
+     * @param Clazz $class The factory class model.
+     */
+    public function addGetPackageOrderMethod(Clazz $class)
+    {
+        $class->addImport(new Import('Puli\Discovery\Api\Discovery'));
+        $class->addImport(new Import('Puli\Manager\Api\Server\ServerCollection'));
+        $class->addImport(new Import('Puli\UrlGenerator\Api\UrlGenerator'));
+        $class->addImport(new Import('Puli\UrlGenerator\DiscoveryUrlGenerator'));
+        $class->addImport(new Import('RuntimeException'));
+
+        $method = new Method('getPackageOrder');
+        $method->setDescription("Returns the order in which the installed packages should be loaded\naccording to the override statements.");
+
+        $method->setReturnValue(new ReturnValue('$order', 'string[]', 'The sorted package names.'));
+
+        $packageOrderString = '';
+
+        if (count($this->packages) > 0) {
+            $overrideGraph = OverrideGraph::forPackages($this->packages);
+
+            foreach ($overrideGraph->getSortedPackageNames() as $packageName) {
+                $packageOrderString .= sprintf(
+                    "\n    %s,",
+                    var_export($packageName, true)
+                );
+            }
+
+            $packageOrderString .= "\n";
+        }
+
+        $method->addBody("\$order = array($packageOrderString);");
 
         $class->addMethod($method);
     }

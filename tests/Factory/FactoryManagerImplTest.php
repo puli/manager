@@ -16,6 +16,9 @@ use PHPUnit_Framework_MockObject_MockObject;
 use Puli\Manager\Api\Config\Config;
 use Puli\Manager\Api\Event\GenerateFactoryEvent;
 use Puli\Manager\Api\Event\PuliEvents;
+use Puli\Manager\Api\Package\Package;
+use Puli\Manager\Api\Package\PackageCollection;
+use Puli\Manager\Api\Package\PackageFile;
 use Puli\Manager\Api\Php\Clazz;
 use Puli\Manager\Api\Php\Method;
 use Puli\Manager\Api\Server\Server;
@@ -55,6 +58,11 @@ class FactoryManagerImplTest extends ManagerTestCase
     private $fakeWriter;
 
     /**
+     * @var PackageCollection
+     */
+    private $packages;
+
+    /**
      * @var ServerCollection
      */
     private $servers;
@@ -83,11 +91,18 @@ class FactoryManagerImplTest extends ManagerTestCase
         $this->fakeWriter = $this->getMockBuilder('Puli\Manager\Php\ClassWriter')
             ->disableOriginalConstructor()
             ->getMock();
+        $this->packages = new PackageCollection();
+        $this->packages->add(new Package(new PackageFile('vendor/package1'), __DIR__));
+        $this->packages->add(new Package(new PackageFile('vendor/package2'), __DIR__));
+        $this->packages->add(new Package(new PackageFile('vendor/package3'), __DIR__));
+        $this->packages->add(new Package(new PackageFile('vendor/package4'), __DIR__));
+        $this->packages->get('vendor/package1')->getPackageFile()->setOverriddenPackages(array('vendor/package2', 'vendor/package4'));
+        $this->packages->get('vendor/package3')->getPackageFile()->setOverriddenPackages(array('vendor/package1'));
         $this->servers = new ServerCollection(array(
             new Server('localhost', 'symlink', 'public_html', '/%s'),
             new Server('example.com', 'rsync', 'ssh://example.com', 'http://example.com/%s'),
         ));
-        $this->manager = new FactoryManagerImpl($this->context, $this->registry, $this->realWriter, $this->servers);
+        $this->manager = new FactoryManagerImpl($this->context, $this->registry, $this->realWriter, $this->packages, $this->servers);
     }
 
     protected function tearDown()
@@ -200,6 +215,24 @@ class MyFactory
         ));
 
         return \$generator;
+    }
+
+    /**
+     * Returns the order in which the installed packages should be loaded
+     * according to the override statements.
+     *
+     * @return string[] The sorted package names.
+     */
+    public function getPackageOrder()
+    {
+        \$order = array(
+            'vendor/package2',
+            'vendor/package4',
+            'vendor/package1',
+            'vendor/package3',
+        );
+
+        return \$order;
     }
 }
 
@@ -363,7 +396,7 @@ EOF;
     public function testRefreshFactoryClassGeneratesClassIfFileNotFound()
     {
         $rootDir = $this->rootDir;
-        $manager = new FactoryManagerImpl($this->context, $this->registry, $this->fakeWriter, $this->servers);
+        $manager = new FactoryManagerImpl($this->context, $this->registry, $this->fakeWriter, $this->packages, $this->servers);
 
         $this->fakeWriter->expects($this->once())
             ->method('writeClass')
@@ -379,7 +412,7 @@ EOF;
     public function testRefreshFactoryClassGeneratesClassIfFileNotFoundAtCustomRelativePath()
     {
         $rootDir = $this->rootDir;
-        $manager = new FactoryManagerImpl($this->context, $this->registry, $this->fakeWriter, $this->servers);
+        $manager = new FactoryManagerImpl($this->context, $this->registry, $this->fakeWriter, $this->packages, $this->servers);
 
         $this->fakeWriter->expects($this->once())
             ->method('writeClass')
@@ -395,7 +428,7 @@ EOF;
     public function testRefreshFactoryClassGeneratesClassIfFileNotFoundAtCustomAbsolutePath()
     {
         $rootDir = $this->rootDir;
-        $manager = new FactoryManagerImpl($this->context, $this->registry, $this->fakeWriter, $this->servers);
+        $manager = new FactoryManagerImpl($this->context, $this->registry, $this->fakeWriter, $this->packages, $this->servers);
 
         $this->fakeWriter->expects($this->once())
             ->method('writeClass')
@@ -411,7 +444,7 @@ EOF;
     public function testRefreshFactoryClassGeneratesClassIfFileNotFoundWithCustomClass()
     {
         $rootDir = $this->rootDir;
-        $manager = new FactoryManagerImpl($this->context, $this->registry, $this->fakeWriter, $this->servers);
+        $manager = new FactoryManagerImpl($this->context, $this->registry, $this->fakeWriter, $this->packages, $this->servers);
 
         $this->fakeWriter->expects($this->once())
             ->method('writeClass')
@@ -426,7 +459,7 @@ EOF;
 
     public function testRefreshFactoryClassGeneratesIfOlderThanRootPackageFile()
     {
-        $manager = new FactoryManagerImpl($this->context, $this->registry, $this->fakeWriter, $this->servers);
+        $manager = new FactoryManagerImpl($this->context, $this->registry, $this->fakeWriter, $this->packages, $this->servers);
 
         touch($this->rootDir.'/MyFactory.php');
         sleep(1);
@@ -440,7 +473,7 @@ EOF;
 
     public function testRefreshFactoryClassDoesNotRegenerateIfNoRootPackageFile()
     {
-        $manager = new FactoryManagerImpl($this->context, $this->registry, $this->fakeWriter, $this->servers);
+        $manager = new FactoryManagerImpl($this->context, $this->registry, $this->fakeWriter, $this->packages, $this->servers);
 
         // The class has been generated. No need to refresh it as no puli.json
         // exists.
@@ -455,7 +488,7 @@ EOF;
     public function testRefreshFactoryClassGeneratesWithCustomParameters()
     {
         $rootDir = $this->rootDir;
-        $manager = new FactoryManagerImpl($this->context, $this->registry, $this->fakeWriter, $this->servers);
+        $manager = new FactoryManagerImpl($this->context, $this->registry, $this->fakeWriter, $this->packages, $this->servers);
 
         touch($this->rootDir.'/MyCustomFile.php');
         sleep(1);
@@ -474,7 +507,7 @@ EOF;
 
     public function testRefreshFactoryClassDoesNotGenerateIfNewerThanRootPackageFile()
     {
-        $manager = new FactoryManagerImpl($this->context, $this->registry, $this->fakeWriter, $this->servers);
+        $manager = new FactoryManagerImpl($this->context, $this->registry, $this->fakeWriter, $this->packages, $this->servers);
 
         touch($this->rootPackageFile->getPath());
         sleep(1);
@@ -488,7 +521,7 @@ EOF;
 
     public function testRefreshFactoryClassGeneratesIfOlderThanConfigFile()
     {
-        $manager = new FactoryManagerImpl($this->context, $this->registry, $this->fakeWriter, $this->servers);
+        $manager = new FactoryManagerImpl($this->context, $this->registry, $this->fakeWriter, $this->packages, $this->servers);
 
         touch($this->rootPackageFile->getPath());
         touch($this->rootDir.'/MyFactory.php');
@@ -503,7 +536,7 @@ EOF;
 
     public function testRefreshFactoryClassDoesNotGenerateIfNewerThanConfigFile()
     {
-        $manager = new FactoryManagerImpl($this->context, $this->registry, $this->fakeWriter, $this->servers);
+        $manager = new FactoryManagerImpl($this->context, $this->registry, $this->fakeWriter, $this->packages, $this->servers);
 
         touch($this->rootPackageFile->getPath());
         touch($this->configFile->getPath());
@@ -518,7 +551,7 @@ EOF;
 
     public function testRefreshFactoryClassDoesNotGenerateIfAutoGenerateDisabled()
     {
-        $manager = new FactoryManagerImpl($this->context, $this->registry, $this->fakeWriter, $this->servers);
+        $manager = new FactoryManagerImpl($this->context, $this->registry, $this->fakeWriter, $this->packages, $this->servers);
 
         // Older than config file -> would normally be generated
         touch($this->rootDir.'/MyFactory.php');
