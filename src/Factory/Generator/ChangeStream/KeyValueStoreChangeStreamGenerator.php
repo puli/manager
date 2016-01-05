@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the puli/manager package.
+ * This file is part of the vendor/project package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *
@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\Manager\Factory\Generator\Discovery;
+namespace Puli\Manager\Factory\Generator\ChangeStream;
 
 use Puli\Manager\Api\Factory\Generator\GeneratorRegistry;
 use Puli\Manager\Api\Factory\Generator\ServiceGenerator;
@@ -18,13 +18,13 @@ use Puli\Manager\Api\Php\Method;
 use Puli\Manager\Assert\Assert;
 
 /**
- * Generates the setup code for a {@link KeyValueStoreDiscovery}.
+ * Generates the setup code for a {@link KeyValueStoreChangeStream}.
  *
  * @since  1.0
  *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class KeyValueStoreDiscoveryGenerator implements ServiceGenerator
+class KeyValueStoreChangeStreamGenerator implements ServiceGenerator
 {
     private static $defaultOptions = array(
         'store' => array(
@@ -45,7 +45,7 @@ class KeyValueStoreDiscoveryGenerator implements ServiceGenerator
         Assert::isArray($options['store'], 'The "store" option should be an array. Got: %s');
 
         if (!isset($options['store']['path'])) {
-            $options['store']['path'] = $targetMethod->getClass()->getDirectory().'/bindings.json';
+            $options['store']['path'] = $targetMethod->getClass()->getDirectory().'/change-stream.json';
         }
 
         $kvsGenerator = $generatorRegistry->getServiceGenerator(GeneratorRegistry::KEY_VALUE_STORE, $options['store']['type']);
@@ -53,11 +53,10 @@ class KeyValueStoreDiscoveryGenerator implements ServiceGenerator
         $kvsOptions['root-dir'] = $options['root-dir'];
         $kvsGenerator->generateNewInstance('store', $targetMethod, $generatorRegistry, $kvsOptions);
 
-        $targetMethod->getClass()->addImport(new Import('Puli\Discovery\KeyValueStoreDiscovery'));
-        $targetMethod->getClass()->addImport(new Import('Puli\Discovery\Binding\Initializer\ResourceBindingInitializer'));
+        $targetMethod->getClass()->addImport(new Import('Puli\Repository\ChangeStream\KeyValueStoreChangeStream'));
 
         $targetMethod->addBody(sprintf(
-            "$%s = new KeyValueStoreDiscovery(\$store, array(\n    new ResourceBindingInitializer(\$repo),\n));",
+            '$%s = new KeyValueStoreChangeStream($store);',
             $varName
         ));
     }

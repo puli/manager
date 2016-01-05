@@ -52,7 +52,7 @@ class TestRepository implements ResourceRepository
     {
     }
 
-    public function getStack($path)
+    public function getVersions($path)
     {
     }
 }

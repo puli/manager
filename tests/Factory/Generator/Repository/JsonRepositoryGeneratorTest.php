@@ -9,9 +9,9 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\Manager\Tests\Factory\Generator\Discovery;
+namespace Puli\Manager\Tests\Factory\Generator\Repository;
 
-use Puli\Manager\Factory\Generator\Repository\FilesystemRepositoryGenerator;
+use Puli\Manager\Factory\Generator\Repository\JsonRepositoryGenerator;
 use Puli\Manager\Tests\Factory\Generator\AbstractGeneratorTest;
 
 /**
@@ -19,10 +19,10 @@ use Puli\Manager\Tests\Factory\Generator\AbstractGeneratorTest;
  *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class FilesystemRepositoryGeneratorTest extends AbstractGeneratorTest
+class JsonRepositoryGeneratorTest extends AbstractGeneratorTest
 {
     /**
-     * @var FilesystemRepositoryGenerator
+     * @var JsonRepositoryGenerator
      */
     private $generator;
 
@@ -30,7 +30,7 @@ class FilesystemRepositoryGeneratorTest extends AbstractGeneratorTest
     {
         parent::setUp();
 
-        $this->generator = new FilesystemRepositoryGenerator();
+        $this->generator = new JsonRepositoryGenerator();
     }
 
     public function testGenerateService()
@@ -40,79 +40,71 @@ class FilesystemRepositoryGeneratorTest extends AbstractGeneratorTest
         ));
 
         $expected = <<<EOF
-if (!file_exists(__DIR__.'/repository')) {
-    mkdir(__DIR__.'/repository', 0777, true);
-}
-
-\$repo = new FilesystemRepository(__DIR__.'/repository', true);
+\$repo = new JsonRepository(__DIR__.'/path-mappings.json', __DIR__.'/..');
 EOF;
 
         $this->assertSame($expected, $this->method->getBody());
     }
 
-    public function testGenerateServiceInOutputDir()
+    public function testGenerateServiceWithPath()
     {
         $this->generator->generateNewInstance('repo', $this->method, $this->registry, array(
             'root-dir' => $this->rootDir,
-            'path' => $this->outputDir,
+            'path' => 'store/repository.json',
         ));
 
         $expected = <<<EOF
-\$repo = new FilesystemRepository(__DIR__, true);
+\$repo = new JsonRepository(__DIR__.'/../store/repository.json', __DIR__.'/..');
 EOF;
 
         $this->assertSame($expected, $this->method->getBody());
     }
 
-    public function testGenerateServiceInCustomDir()
+    public function testGenerateOptimizedService()
     {
         $this->generator->generateNewInstance('repo', $this->method, $this->registry, array(
             'root-dir' => $this->rootDir,
-            'path' => 'my/repository',
+            'optimize' => true,
         ));
 
         $expected = <<<EOF
-if (!file_exists(__DIR__.'/../my/repository')) {
-    mkdir(__DIR__.'/../my/repository', 0777, true);
-}
-
-\$repo = new FilesystemRepository(__DIR__.'/../my/repository', true);
+\$stream = new JsonChangeStream(__DIR__.'/change-stream.json');
+\$repo = new OptimizedJsonRepository(__DIR__.'/path-mappings.json', __DIR__.'/..', \$stream);
 EOF;
 
         $this->assertSame($expected, $this->method->getBody());
     }
 
-    public function testGenerateServiceWithSymlinkTrue()
+    public function testGenerateOptimizedServiceWithPath()
     {
         $this->generator->generateNewInstance('repo', $this->method, $this->registry, array(
             'root-dir' => $this->rootDir,
-            'symlink' => true,
+            'optimize' => true,
+            'path' => 'store/repository.json',
         ));
 
         $expected = <<<EOF
-if (!file_exists(__DIR__.'/repository')) {
-    mkdir(__DIR__.'/repository', 0777, true);
-}
-
-\$repo = new FilesystemRepository(__DIR__.'/repository', true);
+\$stream = new JsonChangeStream(__DIR__.'/change-stream.json');
+\$repo = new OptimizedJsonRepository(__DIR__.'/../store/repository.json', __DIR__.'/..', \$stream);
 EOF;
 
         $this->assertSame($expected, $this->method->getBody());
     }
 
-    public function testGenerateServiceWithSymlinkFalse()
+    public function testGenerateOptimizedServiceWithChangeStream()
     {
         $this->generator->generateNewInstance('repo', $this->method, $this->registry, array(
             'root-dir' => $this->rootDir,
-            'symlink' => false,
+            'optimize' => true,
+            'change-stream' => array(
+                'type' => 'key-value-store',
+            ),
         ));
 
         $expected = <<<EOF
-if (!file_exists(__DIR__.'/repository')) {
-    mkdir(__DIR__.'/repository', 0777, true);
-}
-
-\$repo = new FilesystemRepository(__DIR__.'/repository', false);
+\$store = new JsonFileStore(__DIR__.'/change-stream.json');
+\$stream = new KeyValueStoreChangeStream(\$store);
+\$repo = new OptimizedJsonRepository(__DIR__.'/path-mappings.json', __DIR__.'/..', \$stream);
 EOF;
 
         $this->assertSame($expected, $this->method->getBody());
@@ -150,11 +142,22 @@ EOF;
     /**
      * @expectedException \InvalidArgumentException
      */
-    public function testGenerateServiceFailsIfSymlinkNotBoolean()
+    public function testGenerateServiceFailsIfOptimizeNoBoolean()
     {
         $this->generator->generateNewInstance('repo', $this->method, $this->registry, array(
             'root-dir' => $this->rootDir,
-            'symlink' => 'true',
+            'optimize' => 1234,
+        ));
+    }
+
+    /**
+     * @expectedException \InvalidArgumentException
+     */
+    public function testGenerateServiceFailsIfChangeStreamNoArray()
+    {
+        $this->generator->generateNewInstance('repo', $this->method, $this->registry, array(
+            'root-dir' => $this->rootDir,
+            'change-stream' => 1234,
         ));
     }
 
@@ -169,6 +172,21 @@ EOF;
         require $this->outputPath;
 
         $this->assertTrue(isset($repo));
-        $this->assertInstanceOf('Puli\Repository\FilesystemRepository', $repo);
+        $this->assertInstanceOf('Puli\Repository\JsonRepository', $repo);
+    }
+
+    public function testRunGeneratedCodeWithOptimizeOption()
+    {
+        $this->generator->generateNewInstance('repo', $this->method, $this->registry, array(
+            'root-dir' => $this->rootDir,
+            'optimize' => true,
+        ));
+
+        $this->putCode($this->outputPath, $this->method);
+
+        require $this->outputPath;
+
+        $this->assertTrue(isset($repo));
+        $this->assertInstanceOf('Puli\Repository\OptimizedJsonRepository', $repo);
     }
 }

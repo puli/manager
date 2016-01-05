@@ -27,7 +27,7 @@ class PhpRedisStoreGeneratorTest extends AbstractGeneratorTest
     /**
      * @var PhpRedisStoreGenerator
      */
-    private $provider;
+    private $generator;
 
     public static function setUpBeforeClass()
     {
@@ -52,12 +52,12 @@ class PhpRedisStoreGeneratorTest extends AbstractGeneratorTest
 
         parent::setUp();
 
-        $this->provider = new PhpRedisStoreGenerator();
+        $this->generator = new PhpRedisStoreGenerator();
     }
 
     public function testGenerateService()
     {
-        $this->provider->generateNewInstance('store', $this->method, $this->registry);
+        $this->generator->generateNewInstance('store', $this->method, $this->registry);
 
         $expected = <<<EOF
 \$client = new Redis();
@@ -70,7 +70,7 @@ EOF;
 
     public function testGenerateServiceWithCustomHost()
     {
-        $this->provider->generateNewInstance('store', $this->method, $this->registry, array(
+        $this->generator->generateNewInstance('store', $this->method, $this->registry, array(
             'host' => 'localhost',
         ));
 
@@ -85,7 +85,7 @@ EOF;
 
     public function testGenerateServiceWithCustomPort()
     {
-        $this->provider->generateNewInstance('store', $this->method, $this->registry, array(
+        $this->generator->generateNewInstance('store', $this->method, $this->registry, array(
             'port' => 1234,
         ));
 
@@ -98,9 +98,29 @@ EOF;
         $this->assertSame($expected, $this->method->getBody());
     }
 
+    /**
+     * @expectedException \InvalidArgumentException
+     */
+    public function testGenerateServiceFailsIfHostNoString()
+    {
+        $this->generator->generateNewInstance('store', $this->method, $this->registry, array(
+            'host' => 1234,
+        ));
+    }
+
+    /**
+     * @expectedException \InvalidArgumentException
+     */
+    public function testGenerateServiceFailsIfPortNoInteger()
+    {
+        $this->generator->generateNewInstance('store', $this->method, $this->registry, array(
+            'port' => false,
+        ));
+    }
+
     public function testRunGeneratedCode()
     {
-        $this->provider->generateNewInstance('store', $this->method, $this->registry);
+        $this->generator->generateNewInstance('store', $this->method, $this->registry);
 
         $this->putCode($this->outputPath, $this->method);
 

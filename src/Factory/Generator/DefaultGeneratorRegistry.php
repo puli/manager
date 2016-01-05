@@ -29,19 +29,28 @@ class DefaultGeneratorRegistry implements GeneratorRegistry
     private static $classNames = array(
         self::REPOSITORY => array(
             'filesystem' => 'Puli\Manager\Factory\Generator\Repository\FilesystemRepositoryGenerator',
-            'path-mapping' => 'Puli\Manager\Factory\Generator\Repository\PathMappingRepositoryGenerator',
+            'json' => 'Puli\Manager\Factory\Generator\Repository\JsonRepositoryGenerator',
+            // for BC
+            'path-mapping' => 'Puli\Manager\Factory\Generator\Repository\JsonRepositoryGenerator',
         ),
         self::DISCOVERY => array(
+            'json' => 'Puli\Manager\Factory\Generator\Discovery\JsonDiscoveryGenerator',
             'key-value-store' => 'Puli\Manager\Factory\Generator\Discovery\KeyValueStoreDiscoveryGenerator',
         ),
         self::KEY_VALUE_STORE => array(
             null => 'Puli\Manager\Factory\Generator\KeyValueStore\NullStoreGenerator',
             'null' => 'Puli\Manager\Factory\Generator\KeyValueStore\NullStoreGenerator',
             'array' => 'Puli\Manager\Factory\Generator\KeyValueStore\ArrayStoreGenerator',
+            'json' => 'Puli\Manager\Factory\Generator\KeyValueStore\JsonFileStoreGenerator',
+            // for BC
             'json-file' => 'Puli\Manager\Factory\Generator\KeyValueStore\JsonFileStoreGenerator',
             'php-redis' => 'Puli\Manager\Factory\Generator\KeyValueStore\PhpRedisStoreGenerator',
             'predis' => 'Puli\Manager\Factory\Generator\KeyValueStore\PredisStoreGenerator',
             'riak' => 'Puli\Manager\Factory\Generator\KeyValueStore\RiakStoreGenerator',
+        ),
+        self::CHANGE_STREAM => array(
+            'json' => 'Puli\Manager\Factory\Generator\ChangeStream\JsonChangeStreamGenerator',
+            'key-value-store' => 'Puli\Manager\Factory\Generator\ChangeStream\KeyValueStoreChangeStreamGenerator',
         ),
     );
 

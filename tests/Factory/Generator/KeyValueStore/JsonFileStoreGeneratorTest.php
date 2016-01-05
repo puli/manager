@@ -36,7 +36,7 @@ class JsonFileStoreGeneratorTest extends AbstractGeneratorTest
     public function testGenerateService()
     {
         $this->generator->generateNewInstance('store', $this->method, $this->registry, array(
-            'rootDir' => $this->rootDir,
+            'root-dir' => $this->rootDir,
         ));
 
         $expected = <<<EOF
@@ -57,7 +57,7 @@ EOF;
     public function testGenerateServiceInOutputDir()
     {
         $this->generator->generateNewInstance('store', $this->method, $this->registry, array(
-            'rootDir' => $this->rootDir,
+            'root-dir' => $this->rootDir,
             'path' => $this->outputDir.'/data.json',
         ));
 
@@ -71,7 +71,7 @@ EOF;
     public function testEscapeOutput()
     {
         $this->generator->generateNewInstance('store', $this->method, $this->registry, array(
-            'rootDir' => $this->rootDir,
+            'root-dir' => $this->rootDir,
             'path' => 'd\'ir/dat\'a.da\'t',
         ));
 
@@ -82,10 +82,83 @@ EOF;
         $this->assertSame($expected, $this->method->getBody());
     }
 
+    /**
+     * @expectedException \InvalidArgumentException
+     */
+    public function testGenerateServiceFailsIfNoRootDir()
+    {
+        $this->generator->generateNewInstance('store', $this->method, $this->registry);
+    }
+
+    /**
+     * @expectedException \InvalidArgumentException
+     */
+    public function testGenerateServiceFailsIfRootDirNoString()
+    {
+        $this->generator->generateNewInstance('store', $this->method, $this->registry, array(
+            'root-dir' => 1234,
+        ));
+    }
+
+    /**
+     * @expectedException \InvalidArgumentException
+     */
+    public function testGenerateServiceFailsIfPathNoString()
+    {
+        $this->generator->generateNewInstance('store', $this->method, $this->registry, array(
+            'root-dir' => $this->rootDir,
+            'path' => 1234,
+        ));
+    }
+
+    /**
+     * @expectedException \InvalidArgumentException
+     */
+    public function testGenerateServiceFailsIfSerializeStringsNoBoolean()
+    {
+        $this->generator->generateNewInstance('store', $this->method, $this->registry, array(
+            'root-dir' => $this->rootDir,
+            'serialize-strings' => 1234,
+        ));
+    }
+
+    /**
+     * @expectedException \InvalidArgumentException
+     */
+    public function testGenerateServiceFailsIfSerializeArraysNoBoolean()
+    {
+        $this->generator->generateNewInstance('store', $this->method, $this->registry, array(
+            'root-dir' => $this->rootDir,
+            'serialize-arrays' => 1234,
+        ));
+    }
+
+    /**
+     * @expectedException \InvalidArgumentException
+     */
+    public function testGenerateServiceFailsIfEscapeSlashNoBoolean()
+    {
+        $this->generator->generateNewInstance('store', $this->method, $this->registry, array(
+            'root-dir' => $this->rootDir,
+            'escape-slash' => 1234,
+        ));
+    }
+
+    /**
+     * @expectedException \InvalidArgumentException
+     */
+    public function testGenerateServiceFailsIfPrettyPrintNoBoolean()
+    {
+        $this->generator->generateNewInstance('store', $this->method, $this->registry, array(
+            'root-dir' => $this->rootDir,
+            'pretty-print' => 1234,
+        ));
+    }
+
     public function testRunGeneratedCode()
     {
         $this->generator->generateNewInstance('store', $this->method, $this->registry, array(
-            'rootDir' => $this->rootDir,
+            'root-dir' => $this->rootDir,
         ));
 
         $this->putCode($this->outputPath, $this->method);

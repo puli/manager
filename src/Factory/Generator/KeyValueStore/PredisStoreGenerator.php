@@ -38,8 +38,8 @@ class PredisStoreGenerator implements ServiceGenerator
     {
         $options = array_replace(self::$defaultOptions, $options);
 
-        Assert::string($options['host'], 'The host must be a string. Got: %s');
-        Assert::integer($options['port'], 'The port must be an integer. Got: %s');
+        Assert::stringNotEmpty($options['host'], 'The "host" option must be a non-empty string. Got: %s');
+        Assert::integer($options['port'], 'The "port" option must be an integer. Got: %s');
 
         $escHost = var_export($options['host'], true);
         $escPort = var_export($options['port'], true);

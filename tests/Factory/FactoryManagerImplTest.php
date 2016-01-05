@@ -123,14 +123,13 @@ namespace Puli;
 
 use Puli\Discovery\Api\Discovery;
 use Puli\Discovery\Binding\Initializer\ResourceBindingInitializer;
-use Puli\Discovery\KeyValueStoreDiscovery;
+use Puli\Discovery\JsonDiscovery;
 use Puli\Manager\Api\Server\ServerCollection;
 use Puli\Repository\Api\ResourceRepository;
-use Puli\Repository\PathMappingRepository;
+use Puli\Repository\JsonRepository;
 use Puli\UrlGenerator\Api\UrlGenerator;
 use Puli\UrlGenerator\DiscoveryUrlGenerator;
 use RuntimeException;
-use Webmozart\KeyValueStore\JsonFileStore;
 
 /**
  * Creates Puli's core services.
@@ -157,14 +156,7 @@ class MyFactory
             throw new RuntimeException('Please install puli/repository to create ResourceRepository instances.');
         }
 
-        \$store = new JsonFileStore(
-            __DIR__.'/.puli/path-mappings.json',
-            JsonFileStore::NO_SERIALIZE_STRINGS
-                | JsonFileStore::NO_SERIALIZE_ARRAYS
-                | JsonFileStore::NO_ESCAPE_SLASH
-                | JsonFileStore::PRETTY_PRINT
-        );
-        \$repo = new PathMappingRepository(\$store, __DIR__);
+        \$repo = new JsonRepository(__DIR__.'/.puli/path-mappings.json', __DIR__);
 
         return \$repo;
     }
@@ -182,8 +174,7 @@ class MyFactory
             throw new RuntimeException('Please install puli/discovery to create Discovery instances.');
         }
 
-        \$store = new JsonFileStore(__DIR__.'/.puli/bindings.json');
-        \$discovery = new KeyValueStoreDiscovery(\$store, array(
+        \$discovery = new JsonDiscovery(__DIR__.'/.puli/bindings.json', array(
             new ResourceBindingInitializer(\$repo),
         ));
 
@@ -245,6 +236,41 @@ EOF;
         $contents = file_get_contents($this->rootDir.'/MyFactory.php');
         $this->assertStringStartsWith('<?php', $contents);
         $this->assertContains('class MyCustomClass', $contents);
+    }
+
+    public function testGenerateFactoryClassWithChangeStream()
+    {
+        $this->context->getConfig()->set(Config::REPOSITORY_OPTIMIZE, true);
+        $this->context->getConfig()->set(Config::CHANGE_STREAM_TYPE, 'key-value-store');
+        $this->context->getConfig()->set(Config::CHANGE_STREAM_STORE_TYPE, 'json');
+        $this->context->getConfig()->set(Config::CHANGE_STREAM_STORE_PATH, '{$puli-dir}/changelog.json');
+
+        $this->manager->generateFactoryClass();
+
+        $this->assertFileExists($this->rootDir.'/MyFactory.php');
+        $contents = file_get_contents($this->rootDir.'/MyFactory.php');
+
+        $expected = <<<EOF
+    /**
+     * Creates the resource repository.
+     *
+     * @return ResourceRepository The created resource repository.
+     */
+    public function createRepository()
+    {
+        if (!interface_exists('Puli\Repository\Api\ResourceRepository')) {
+            throw new RuntimeException('Please install puli/repository to create ResourceRepository instances.');
+        }
+
+        \$store = new JsonFileStore(__DIR__.'/.puli/changelog.json');
+        \$stream = new KeyValueStoreChangeStream(\$store);
+        \$repo = new OptimizedJsonRepository(__DIR__.'/.puli/path-mappings.json', __DIR__, \$stream);
+
+        return \$repo;
+    }
+EOF;
+
+        $this->assertContains($expected, $contents);
     }
 
     public function testGenerateFactoryClassDispatchesEvent()
