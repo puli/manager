@@ -29,7 +29,8 @@
         "predis/predis": "^1.0",
         "basho/riak": "^1.4",
         "phpunit/phpunit": "^4.6",
-        "sebastian/version": "^1.0.1"
+        "sebastian/version": "^1.0.1",
+        "sebastian/comparator": "^1.2"
     },
     "suggest": {
         "webmozart/key-value-store": "to use key-value store change streams/discoveries",
