@@ -1,15 +1,34 @@
 Changelog
 =========
 
-* 1.0.0-beta10 (@release_date@)
+* 1.0.0-beta10 (2016-01-14)
 
+ * made compatible with Symfony 3.0
+ * fixed `puli.json` schema file `package-schema-1.0.json`
+ * fixed: disabled binding UUIDs are now removed if the referenced bindings
+   don't exist
  * added `DiscoveryManager::removeObsoleteDisabledBindingDescriptors()`
  * fixed: a meaningful exception is now thrown if an `AssetMapping` is added
    but the "puli/url-generator" package is not installed
  * fixed: packages whose puli.json does not exist now return `null` from
    `Package::getPackageFile()`
  * replaced `StorageException` by `ReadException` and `WriteException`
- * added `GeneratedPuliFactory::getPackageOrder()`
+ * added `getPackageOrder()` to generated `GeneratedPuliFactory` class
+ * added support for `ChangeStream` and implementations
+ * added support for `JsonRepository`
+ * added support for `OptimizedJsonRepository`
+ * added support for `JsonDiscovery`
+ * added `Config::CHANGE_STREAM`
+ * added `Config::CHANGE_STREAM_TYPE`
+ * added `Config::CHANGE_STREAM_PATH`
+ * added `Config::CHANGE_STREAM_STORE`
+ * added `Config::CHANGE_STREAM_STORE_TYPE`
+ * added `Config::CHANGE_STREAM_STORE_PATH`
+ * added `Config::CHANGE_STREAM_STORE_HOST`
+ * added `Config::CHANGE_STREAM_STORE_PORT`
+ * added `Config::CHANGE_STREAM_STORE_BUCKET`
+ * added `Config::CHANGE_STREAM_STORE_CACHE`
+ * added `Config::DISCOVERY_PATH`
 
 * 1.0.0-beta9 (2015-10-06)
 
