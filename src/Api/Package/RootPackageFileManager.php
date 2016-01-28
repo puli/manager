@@ -13,9 +13,9 @@ namespace Puli\Manager\Api\Package;
 
 use Puli\Manager\Api\Config\ConfigManager;
 use Puli\Manager\Api\Context\ProjectContext;
-use Puli\Manager\Api\Migration\MigrationException;
 use Puli\Manager\Api\Storage\WriteException;
 use Webmozart\Expression\Expression;
+use Webmozart\Json\Migration\MigrationException;
 
 /**
  * Manages changes to the root package file.

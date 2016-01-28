@@ -15,10 +15,17 @@ use PHPUnit_Framework_MockObject_MockObject;
 use PHPUnit_Framework_TestCase;
 use Puli\Manager\Api\Config\Config;
 use Puli\Manager\Api\Package\PackageFile;
-use Puli\Manager\Api\Package\PackageFileSerializer;
+use Puli\Manager\Api\Package\PackageFileTransformer;
 use Puli\Manager\Api\Package\RootPackageFile;
 use Puli\Manager\Api\Storage\Storage;
 use Puli\Manager\Package\PackageFileStorage;
+use stdClass;
+use Webmozart\Json\Conversion\ConversionException;
+use Webmozart\Json\Conversion\JsonConverter;
+use Webmozart\Json\DecodingFailedException;
+use Webmozart\Json\EncodingFailedException;
+use Webmozart\Json\JsonDecoder;
+use Webmozart\Json\JsonEncoder;
 
 /**
  * @since  1.0
@@ -33,9 +40,24 @@ class PackageFileStorageTest extends PHPUnit_Framework_TestCase
     private $storage;
 
     /**
-     * @var PHPUnit_Framework_MockObject_MockObject|PackageFileSerializer
+     * @var PHPUnit_Framework_MockObject_MockObject|JsonConverter
      */
-    private $serializer;
+    private $packageFileConverter;
+
+    /**
+     * @var PHPUnit_Framework_MockObject_MockObject|JsonConverter
+     */
+    private $rootPackageFileConverter;
+
+    /**
+     * @var PHPUnit_Framework_MockObject_MockObject|JsonEncoder
+     */
+    private $jsonEncoder;
+
+    /**
+     * @var PHPUnit_Framework_MockObject_MockObject|JsonDecoder
+     */
+    private $jsonDecoder;
 
     /**
      * @var PHPUnit_Framework_MockObject_MockObject|Storage
@@ -44,39 +66,160 @@ class PackageFileStorageTest extends PHPUnit_Framework_TestCase
 
     protected function setUp()
     {
-        $this->serializer = $this->getMock('Puli\Manager\Api\Package\PackageFileSerializer');
+        $this->packageFileConverter = $this->getMock('Webmozart\Json\Conversion\JsonConverter');
+        $this->rootPackageFileConverter = $this->getMock('Webmozart\Json\Conversion\JsonConverter');
+        $this->jsonEncoder = $this->getMockBuilder('Webmozart\Json\JsonEncoder')
+            ->disableOriginalConstructor()
+            ->getMock();
+        $this->jsonDecoder = $this->getMockBuilder('Webmozart\Json\JsonDecoder')
+            ->disableOriginalConstructor()
+            ->getMock();
         $this->backend = $this->getMock('Puli\Manager\Api\Storage\Storage');
 
-        $this->storage = new PackageFileStorage($this->backend, $this->serializer);
+        $this->storage = new PackageFileStorage(
+            $this->backend,
+            $this->packageFileConverter,
+            $this->rootPackageFileConverter,
+            $this->jsonEncoder,
+            $this->jsonDecoder
+        );
     }
 
     public function testLoadPackageFile()
     {
         $packageFile = new PackageFile(null);
+        $jsonData = new stdClass();
 
         $this->backend->expects($this->once())
             ->method('read')
             ->with('/path')
             ->willReturn('SERIALIZED');
-        $this->serializer->expects($this->once())
-            ->method('unserializePackageFile')
-            ->with('SERIALIZED', '/path')
+
+        $this->jsonDecoder->expects($this->once())
+            ->method('decode')
+            ->with('SERIALIZED')
+            ->willReturn($jsonData);
+
+        $this->packageFileConverter->expects($this->once())
+            ->method('fromJson')
+            ->with($jsonData, array('path' => '/path'))
             ->will($this->returnValue($packageFile));
 
         $this->assertSame($packageFile, $this->storage->loadPackageFile('/path'));
     }
 
+    /**
+     * @expectedException \Puli\Manager\Api\InvalidConfigException
+     */
+    public function testLoadPackageFileConvertsDecodingFailedException()
+    {
+        $this->backend->expects($this->once())
+            ->method('read')
+            ->with('/path')
+            ->willReturn('SERIALIZED');
+
+        $this->jsonDecoder->expects($this->once())
+            ->method('decode')
+            ->with('SERIALIZED')
+            ->willThrowException(new DecodingFailedException());
+
+        $this->packageFileConverter->expects($this->never())
+            ->method('fromJson');
+
+        $this->storage->loadPackageFile('/path');
+    }
+
+    /**
+     * @expectedException \Puli\Manager\Api\InvalidConfigException
+     */
+    public function testLoadPackageFileConvertsConversionException()
+    {
+        $jsonData = new stdClass();
+
+        $this->backend->expects($this->once())
+            ->method('read')
+            ->with('/path')
+            ->willReturn('SERIALIZED');
+
+        $this->jsonDecoder->expects($this->once())
+            ->method('decode')
+            ->with('SERIALIZED')
+            ->willReturn($jsonData);
+
+        $this->packageFileConverter->expects($this->once())
+            ->method('fromJson')
+            ->with($jsonData, array('path' => '/path'))
+            ->willThrowException(new ConversionException());
+
+        $this->storage->loadPackageFile('/path');
+    }
+
     public function testSavePackageFile()
     {
         $packageFile = new PackageFile(null, '/path');
+        $packageFile->setVersion('1.0');
+        $jsonData = new stdClass();
 
-        $this->serializer->expects($this->once())
-            ->method('serializePackageFile')
-            ->with($packageFile)
+        $this->packageFileConverter->expects($this->once())
+            ->method('toJson')
+            ->with($packageFile, array('targetVersion' => '1.0'))
+            ->willReturn($jsonData);
+
+        $this->jsonEncoder->expects($this->once())
+            ->method('encode')
+            ->with($jsonData)
             ->willReturn('SERIALIZED');
+
         $this->backend->expects($this->once())
             ->method('write')
             ->with('/path', 'SERIALIZED');
+
+        $this->storage->savePackageFile($packageFile);
+    }
+
+    /**
+     * @expectedException \Puli\Manager\Api\InvalidConfigException
+     */
+    public function testSavePackageFileConvertsEncodingFailedException()
+    {
+        $packageFile = new PackageFile(null, '/path');
+        $packageFile->setVersion('1.0');
+        $jsonData = new stdClass();
+
+        $this->packageFileConverter->expects($this->once())
+            ->method('toJson')
+            ->with($packageFile, array('targetVersion' => '1.0'))
+            ->willReturn($jsonData);
+
+        $this->jsonEncoder->expects($this->once())
+            ->method('encode')
+            ->with($jsonData)
+            ->willThrowException(new EncodingFailedException());
+
+        $this->backend->expects($this->never())
+            ->method('write');
+
+        $this->storage->savePackageFile($packageFile);
+    }
+
+    /**
+     * @expectedException \Puli\Manager\Api\InvalidConfigException
+     */
+    public function testSavePackageFileConvertsConversionException()
+    {
+        $packageFile = new PackageFile(null, '/path');
+        $packageFile->setVersion('1.0');
+
+        $this->packageFileConverter->expects($this->once())
+            ->method('toJson')
+            ->with($packageFile, array('targetVersion' => '1.0'))
+            ->willThrowException(new ConversionException());
+
+        $this->jsonEncoder->expects($this->never())
+            ->method('encode');
+
+        $this->backend->expects($this->never())
+            ->method('write');
 
         $this->storage->savePackageFile($packageFile);
     }
@@ -85,28 +228,91 @@ class PackageFileStorageTest extends PHPUnit_Framework_TestCase
     {
         $baseConfig = new Config();
         $packageFile = new RootPackageFile(null, '/path', $baseConfig);
+        $jsonData = new stdClass();
 
         $this->backend->expects($this->once())
             ->method('read')
             ->with('/path')
             ->willReturn('SERIALIZED');
-        $this->serializer->expects($this->once())
-            ->method('unserializeRootPackageFile')
-            ->with('SERIALIZED', '/path', $baseConfig)
+
+        $this->jsonDecoder->expects($this->once())
+            ->method('decode')
+            ->with('SERIALIZED')
+            ->willReturn($jsonData);
+
+        $this->rootPackageFileConverter->expects($this->once())
+            ->method('fromJson')
+            ->with($jsonData, array('path' => '/path', 'baseConfig' => $baseConfig))
             ->will($this->returnValue($packageFile));
 
         $this->assertSame($packageFile, $this->storage->loadRootPackageFile('/path', $baseConfig));
+    }
+
+    /**
+     * @expectedException \Puli\Manager\Api\InvalidConfigException
+     */
+    public function testLoadRootPackageFileConvertsDecodingFailedException()
+    {
+        $baseConfig = new Config();
+
+        $this->backend->expects($this->once())
+            ->method('read')
+            ->with('/path')
+            ->willReturn('SERIALIZED');
+
+        $this->jsonDecoder->expects($this->once())
+            ->method('decode')
+            ->with('SERIALIZED')
+            ->willThrowException(new DecodingFailedException());
+
+        $this->rootPackageFileConverter->expects($this->never())
+            ->method('fromJson');
+
+        $this->storage->loadRootPackageFile('/path', $baseConfig);
+    }
+
+    /**
+     * @expectedException \Puli\Manager\Api\InvalidConfigException
+     */
+    public function testLoadRootPackageFileConvertsConversionException()
+    {
+        $baseConfig = new Config();
+        $jsonData = new stdClass();
+
+        $this->backend->expects($this->once())
+            ->method('read')
+            ->with('/path')
+            ->willReturn('SERIALIZED');
+
+        $this->jsonDecoder->expects($this->once())
+            ->method('decode')
+            ->with('SERIALIZED')
+            ->willReturn($jsonData);
+
+        $this->rootPackageFileConverter->expects($this->once())
+            ->method('fromJson')
+            ->with($jsonData, array('path' => '/path', 'baseConfig' => $baseConfig))
+            ->willThrowException(new ConversionException());
+
+        $this->storage->loadRootPackageFile('/path', $baseConfig);
     }
 
     public function testSaveRootPackageFile()
     {
         $baseConfig = new Config();
         $packageFile = new RootPackageFile(null, '/path', $baseConfig);
+        $jsonData = new stdClass();
 
-        $this->serializer->expects($this->once())
-            ->method('serializeRootPackageFile')
-            ->with($packageFile)
+        $this->rootPackageFileConverter->expects($this->once())
+            ->method('toJson')
+            ->with($packageFile, array('targetVersion' => '1.0'))
+            ->willReturn($jsonData);
+
+        $this->jsonEncoder->expects($this->once())
+            ->method('encode')
+            ->with($jsonData)
             ->willReturn('SERIALIZED');
+
         $this->backend->expects($this->once())
             ->method('write')
             ->with('/path', 'SERIALIZED');
@@ -114,17 +320,88 @@ class PackageFileStorageTest extends PHPUnit_Framework_TestCase
         $this->storage->saveRootPackageFile($packageFile);
     }
 
-    public function testSaveRootPackageFileGeneratesFactoryIfManagerAvailable()
+    /**
+     * @expectedException \Puli\Manager\Api\InvalidConfigException
+     */
+    public function testSaveRootPackageFileConvertsEncodingFailedException()
     {
         $baseConfig = new Config();
         $packageFile = new RootPackageFile(null, '/path', $baseConfig);
+        $packageFile->setVersion('1.0');
+        $jsonData = new stdClass();
 
+        $this->rootPackageFileConverter->expects($this->once())
+            ->method('toJson')
+            ->with($packageFile, array('targetVersion' => '1.0'))
+            ->willReturn($jsonData);
+
+        $this->jsonEncoder->expects($this->once())
+            ->method('encode')
+            ->with($jsonData)
+            ->willThrowException(new EncodingFailedException());
+
+        $this->backend->expects($this->never())
+            ->method('write');
+
+        $this->storage->saveRootPackageFile($packageFile);
+    }
+
+    /**
+     * @expectedException \Puli\Manager\Api\InvalidConfigException
+     */
+    public function testSaveRootPackageFileConvertsConversionException()
+    {
+        $baseConfig = new Config();
+        $packageFile = new RootPackageFile(null, '/path', $baseConfig);
+        $packageFile->setVersion('1.0');
+
+        $this->rootPackageFileConverter->expects($this->once())
+            ->method('toJson')
+            ->with($packageFile, array('targetVersion' => '1.0'))
+            ->willThrowException(new ConversionException());
+
+        $this->jsonEncoder->expects($this->never())
+            ->method('encode');
+
+        $this->backend->expects($this->never())
+            ->method('write');
+
+        $this->storage->saveRootPackageFile($packageFile);
+    }
+
+    public function testSaveRootPackageFileGeneratesFactoryIfManagerAvailable()
+    {
         $factoryManager = $this->getMock('Puli\Manager\Api\Factory\FactoryManager');
-        $storage = new PackageFileStorage($this->backend, $this->serializer, $factoryManager);
+        $baseConfig = new Config();
+        $packageFile = new RootPackageFile(null, '/path', $baseConfig);
+        $jsonData = new stdClass();
+
+        $this->storage = new PackageFileStorage(
+            $this->backend,
+            $this->packageFileConverter,
+            $this->rootPackageFileConverter,
+            $this->jsonEncoder,
+            $this->jsonDecoder,
+            $factoryManager
+        );
+
+        $this->rootPackageFileConverter->expects($this->once())
+            ->method('toJson')
+            ->with($packageFile, array('targetVersion' => '1.0'))
+            ->willReturn($jsonData);
+
+        $this->jsonEncoder->expects($this->once())
+            ->method('encode')
+            ->with($jsonData)
+            ->willReturn('SERIALIZED');
+
+        $this->backend->expects($this->once())
+            ->method('write')
+            ->with('/path', 'SERIALIZED');
 
         $factoryManager->expects($this->once())
             ->method('autoGenerateFactoryClass');
 
-        $storage->saveRootPackageFile($packageFile);
+        $this->storage->saveRootPackageFile($packageFile);
     }
 }
