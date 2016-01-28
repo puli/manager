@@ -11,16 +11,9 @@
 
 namespace Puli\Manager\Config;
 
-use Puli\Manager\Api\Config\Config;
 use Puli\Manager\Api\Config\ConfigFile;
-use Puli\Manager\Api\Config\ConfigFileSerializer;
-use Puli\Manager\Api\InvalidConfigException;
 use Puli\Manager\Assert\Assert;
-use stdClass;
 use Webmozart\Json\Conversion\JsonConverter;
-use Webmozart\Json\DecodingFailedException;
-use Webmozart\Json\JsonDecoder;
-use Webmozart\Json\JsonEncoder;
 
 /**
  * Converts config files to JSON and back.

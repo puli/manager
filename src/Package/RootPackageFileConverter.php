@@ -11,22 +11,12 @@
 
 namespace Puli\Manager\Package;
 
-use Puli\Discovery\Api\Type\BindingParameter;
-use Puli\Discovery\Api\Type\BindingType;
-use Puli\Discovery\Binding\ClassBinding;
-use Puli\Discovery\Binding\ResourceBinding;
-use Puli\Manager\Api\Config\Config;
-use Puli\Manager\Api\Discovery\BindingDescriptor;
-use Puli\Manager\Api\Discovery\BindingTypeDescriptor;
 use Puli\Manager\Api\Environment;
 use Puli\Manager\Api\Package\InstallInfo;
-use Puli\Manager\Api\Package\PackageFile;
 use Puli\Manager\Api\Package\RootPackageFile;
-use Puli\Manager\Api\Repository\PathMapping;
 use Puli\Manager\Assert\Assert;
 use Rhumsaa\Uuid\Uuid;
 use stdClass;
-use Webmozart\Json\Conversion\JsonConverter;
 
 /**
  * Converts root package files to JSON and back.

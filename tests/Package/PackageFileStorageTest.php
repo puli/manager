@@ -20,7 +20,7 @@ use Puli\Manager\Api\Package\RootPackageFile;
 use Puli\Manager\Api\Storage\Storage;
 use Puli\Manager\Package\PackageFileStorage;
 use stdClass;
-use Webmozart\Json\Conversion\ConversionException;
+use Webmozart\Json\Conversion\ConversionFailedException;
 use Webmozart\Json\Conversion\JsonConverter;
 use Webmozart\Json\DecodingFailedException;
 use Webmozart\Json\EncodingFailedException;
@@ -132,7 +132,7 @@ class PackageFileStorageTest extends PHPUnit_Framework_TestCase
     /**
      * @expectedException \Puli\Manager\Api\InvalidConfigException
      */
-    public function testLoadPackageFileConvertsConversionException()
+    public function testLoadPackageFileConvertsConversionFailedException()
     {
         $jsonData = new stdClass();
 
@@ -149,7 +149,7 @@ class PackageFileStorageTest extends PHPUnit_Framework_TestCase
         $this->packageFileConverter->expects($this->once())
             ->method('fromJson')
             ->with($jsonData, array('path' => '/path'))
-            ->willThrowException(new ConversionException());
+            ->willThrowException(new ConversionFailedException());
 
         $this->storage->loadPackageFile('/path');
     }
@@ -205,7 +205,7 @@ class PackageFileStorageTest extends PHPUnit_Framework_TestCase
     /**
      * @expectedException \Puli\Manager\Api\InvalidConfigException
      */
-    public function testSavePackageFileConvertsConversionException()
+    public function testSavePackageFileConvertsConversionFailedException()
     {
         $packageFile = new PackageFile(null, '/path');
         $packageFile->setVersion('1.0');
@@ -213,7 +213,7 @@ class PackageFileStorageTest extends PHPUnit_Framework_TestCase
         $this->packageFileConverter->expects($this->once())
             ->method('toJson')
             ->with($packageFile, array('targetVersion' => '1.0'))
-            ->willThrowException(new ConversionException());
+            ->willThrowException(new ConversionFailedException());
 
         $this->jsonEncoder->expects($this->never())
             ->method('encode');
@@ -274,7 +274,7 @@ class PackageFileStorageTest extends PHPUnit_Framework_TestCase
     /**
      * @expectedException \Puli\Manager\Api\InvalidConfigException
      */
-    public function testLoadRootPackageFileConvertsConversionException()
+    public function testLoadRootPackageFileConvertsConversionFailedException()
     {
         $baseConfig = new Config();
         $jsonData = new stdClass();
@@ -292,7 +292,7 @@ class PackageFileStorageTest extends PHPUnit_Framework_TestCase
         $this->rootPackageFileConverter->expects($this->once())
             ->method('fromJson')
             ->with($jsonData, array('path' => '/path', 'baseConfig' => $baseConfig))
-            ->willThrowException(new ConversionException());
+            ->willThrowException(new ConversionFailedException());
 
         $this->storage->loadRootPackageFile('/path', $baseConfig);
     }
@@ -349,7 +349,7 @@ class PackageFileStorageTest extends PHPUnit_Framework_TestCase
     /**
      * @expectedException \Puli\Manager\Api\InvalidConfigException
      */
-    public function testSaveRootPackageFileConvertsConversionException()
+    public function testSaveRootPackageFileConvertsConversionFailedException()
     {
         $baseConfig = new Config();
         $packageFile = new RootPackageFile(null, '/path', $baseConfig);
@@ -358,7 +358,7 @@ class PackageFileStorageTest extends PHPUnit_Framework_TestCase
         $this->rootPackageFileConverter->expects($this->once())
             ->method('toJson')
             ->with($packageFile, array('targetVersion' => '1.0'))
-            ->willThrowException(new ConversionException());
+            ->willThrowException(new ConversionFailedException());
 
         $this->jsonEncoder->expects($this->never())
             ->method('encode');

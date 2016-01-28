@@ -15,11 +15,10 @@ use PHPUnit_Framework_MockObject_MockObject;
 use PHPUnit_Framework_TestCase;
 use Puli\Manager\Api\Config\Config;
 use Puli\Manager\Api\Config\ConfigFile;
-use Puli\Manager\Api\Config\ConfigFileSerializer;
 use Puli\Manager\Api\Storage\Storage;
 use Puli\Manager\Config\ConfigFileStorage;
 use stdClass;
-use Webmozart\Json\Conversion\ConversionException;
+use Webmozart\Json\Conversion\ConversionFailedException;
 use Webmozart\Json\Conversion\JsonConverter;
 use Webmozart\Json\DecodingFailedException;
 use Webmozart\Json\EncodingFailedException;
@@ -127,7 +126,7 @@ class ConfigFileStorageTest extends PHPUnit_Framework_TestCase
     /**
      * @expectedException \Puli\Manager\Api\InvalidConfigException
      */
-    public function testLoadConfigFileConvertsConversionException()
+    public function testLoadConfigFileConvertsConversionFailedException()
     {
         $baseConfig = new Config();
         $jsonData = new stdClass();
@@ -145,7 +144,7 @@ class ConfigFileStorageTest extends PHPUnit_Framework_TestCase
         $this->configFileConverter->expects($this->once())
             ->method('fromJson')
             ->with($jsonData, array('path' => '/path', 'baseConfig' => $baseConfig))
-            ->willThrowException(new ConversionException());
+            ->willThrowException(new ConversionFailedException());
 
         $this->storage->loadConfigFile('/path', $baseConfig);
     }
@@ -201,7 +200,7 @@ class ConfigFileStorageTest extends PHPUnit_Framework_TestCase
     /**
      * @expectedException \Puli\Manager\Api\InvalidConfigException
      */
-    public function testSaveConfigFileConvertsConversionException()
+    public function testSaveConfigFileConvertsConversionFailedException()
     {
         $baseConfig = new Config();
         $configFile = new ConfigFile('/path', $baseConfig);
@@ -209,7 +208,7 @@ class ConfigFileStorageTest extends PHPUnit_Framework_TestCase
         $this->configFileConverter->expects($this->once())
             ->method('toJson')
             ->with($configFile)
-            ->willThrowException(new ConversionException());
+            ->willThrowException(new ConversionFailedException());
 
         $this->jsonEncoder->expects($this->never())
             ->method('encode');

@@ -19,13 +19,11 @@ use Puli\Manager\Api\Package\PackageFile;
 use Puli\Manager\Api\Package\PackageFileSerializer;
 use Puli\Manager\Api\Package\PackageFileTransformer;
 use Puli\Manager\Api\Package\RootPackageFile;
-use Puli\Manager\Api\Package\UnsupportedVersionException;
 use Puli\Manager\Api\Storage\ReadException;
 use Puli\Manager\Api\Storage\Storage;
 use Puli\Manager\Api\Storage\WriteException;
-use Puli\Manager\Filesystem\FilesystemStorage;
 use stdClass;
-use Webmozart\Json\Conversion\ConversionException;
+use Webmozart\Json\Conversion\ConversionFailedException;
 use Webmozart\Json\Conversion\JsonConverter;
 use Webmozart\Json\DecodingFailedException;
 use Webmozart\Json\EncodingFailedException;
@@ -130,7 +128,7 @@ class PackageFileStorage
             return $this->packageFileConverter->fromJson($jsonData, array(
                 'path' => $path,
             ));
-        } catch (ConversionException $e) {
+        } catch (ConversionFailedException $e) {
             throw new InvalidConfigException(sprintf(
                 'The JSON in %s could not be converted: %s',
                 $path,
@@ -155,7 +153,7 @@ class PackageFileStorage
             $jsonData = $this->packageFileConverter->toJson($packageFile, array(
                 'targetVersion' => $packageFile->getVersion(),
             ));
-        } catch (ConversionException $e) {
+        } catch (ConversionFailedException $e) {
             throw new InvalidConfigException(sprintf(
                 'The data written to %s could not be converted: %s',
                 $packageFile->getPath(),
@@ -193,7 +191,7 @@ class PackageFileStorage
                 'path' => $path,
                 'baseConfig' => $baseConfig,
             ));
-        } catch (ConversionException $e) {
+        } catch (ConversionFailedException $e) {
             throw new InvalidConfigException(sprintf(
                 'The JSON in %s could not be converted: %s',
                 $path,
@@ -218,7 +216,7 @@ class PackageFileStorage
             $jsonData = $this->rootPackageFileConverter->toJson($packageFile, array(
                 'targetVersion' => $packageFile->getVersion(),
             ));
-        } catch (ConversionException $e) {
+        } catch (ConversionFailedException $e) {
             throw new InvalidConfigException(sprintf(
                 'The data written to %s could not be converted: %s',
                 $packageFile->getPath(),

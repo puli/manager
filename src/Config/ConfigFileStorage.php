@@ -13,7 +13,6 @@ namespace Puli\Manager\Config;
 
 use Puli\Manager\Api\Config\Config;
 use Puli\Manager\Api\Config\ConfigFile;
-use Puli\Manager\Api\Config\ConfigFileSerializer;
 use Puli\Manager\Api\Factory\FactoryManager;
 use Puli\Manager\Api\FileNotFoundException;
 use Puli\Manager\Api\InvalidConfigException;
@@ -21,7 +20,7 @@ use Puli\Manager\Api\Storage\ReadException;
 use Puli\Manager\Api\Storage\Storage;
 use Puli\Manager\Api\Storage\WriteException;
 use stdClass;
-use Webmozart\Json\Conversion\ConversionException;
+use Webmozart\Json\Conversion\ConversionFailedException;
 use Webmozart\Json\Conversion\JsonConverter;
 use Webmozart\Json\DecodingFailedException;
 use Webmozart\Json\EncodingFailedException;
@@ -117,7 +116,7 @@ class ConfigFileStorage
                 'path' => $path,
                 'baseConfig' => $baseConfig,
             ));
-        } catch (ConversionException $e) {
+        } catch (ConversionFailedException $e) {
             throw new InvalidConfigException(sprintf(
                 'The JSON in %s could not be converted: %s',
                 $path,
@@ -140,7 +139,7 @@ class ConfigFileStorage
     {
         try {
             $jsonData = $this->configFileConverter->toJson($configFile);
-        } catch (ConversionException $e) {
+        } catch (ConversionFailedException $e) {
             throw new InvalidConfigException(sprintf(
                 'The data written to %s could not be converted: %s',
                 $configFile->getPath(),
