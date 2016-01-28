@@ -11,51 +11,29 @@
 
 namespace Puli\Manager\Tests\Config;
 
+use PHPUnit_Framework_TestCase;
 use Puli\Manager\Api\Config\Config;
 use Puli\Manager\Api\Config\ConfigFile;
-use Puli\Manager\Config\ConfigJsonSerializer;
-use Puli\Manager\Tests\JsonTestCase;
+use Puli\Manager\Config\ConfigFileConverter;
 
 /**
  * @since  1.0
  *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class ConfigJsonSerializerTest extends JsonTestCase
+class ConfigFileConverterTest extends PHPUnit_Framework_TestCase
 {
-    const CONFIG_JSON = <<<JSON
-{
-    "puli-dir": "puli-dir",
-    "factory": {
-        "out": {
-            "class": "Puli\\\\MyFactory",
-            "file": "{\$puli-dir}/MyFactory.php"
-        }
-    },
-    "repository": {
-        "type": "my-type",
-        "path": "{\$puli-dir}/my-repo"
-    },
-    "discovery": {
-        "store": {
-            "type": "my-store-type"
-        }
-    }
-}
-
-JSON;
-
     /**
-     * @var ConfigJsonSerializer
+     * @var ConfigFileConverter
      */
-    private $serializer;
+    private $converter;
 
     protected function setUp()
     {
-        $this->serializer = new ConfigJsonSerializer();
+        $this->converter = new ConfigFileConverter();
     }
 
-    public function testSerializeConfig()
+    public function testToJson()
     {
         $configFile = new ConfigFile();
         $configFile->getConfig()->merge(array(
@@ -67,19 +45,59 @@ JSON;
             Config::DISCOVERY_STORE_TYPE => 'my-store-type',
         ));
 
-        $this->assertJsonEquals(self::CONFIG_JSON, $this->serializer->serializeConfigFile($configFile));
+        $jsonData = (object) array(
+            'puli-dir' => 'puli-dir',
+            'factory' => (object) array(
+                'out' => (object) array(
+                    'class' => 'Puli\MyFactory',
+                    'file' => '{$puli-dir}/MyFactory.php',
+                ),
+            ),
+            'repository' => (object) array(
+                'type' => 'my-type',
+                'path' => '{$puli-dir}/my-repo',
+            ),
+            'discovery' => (object) array(
+                'store' => (object) array(
+                    'type' => 'my-store-type',
+                ),
+            ),
+        );
+
+        $this->assertEquals($jsonData, $this->converter->toJson($configFile));
     }
 
-    public function testSerializeEmptyConfig()
+    public function testToJsonEmptyConfig()
     {
         $configFile = new ConfigFile();
 
-        $this->assertJsonEquals("{}\n", $this->serializer->serializeConfigFile($configFile));
+        $this->assertEquals((object) array(), $this->converter->toJson($configFile));
     }
 
-    public function testUnserializeConfigFile()
+    public function testFromJson()
     {
-        $configFile = $this->serializer->unserializeConfigFile(self::CONFIG_JSON, '/path');
+        $jsonData = (object) array(
+            'puli-dir' => 'puli-dir',
+            'factory' => (object) array(
+                'out' => (object) array(
+                    'class' => 'Puli\MyFactory',
+                    'file' => '{$puli-dir}/MyFactory.php',
+                ),
+            ),
+            'repository' => (object) array(
+                'type' => 'my-type',
+                'path' => '{$puli-dir}/my-repo',
+            ),
+            'discovery' => (object) array(
+                'store' => (object) array(
+                    'type' => 'my-store-type',
+                ),
+            ),
+        );
+
+        $configFile = $this->converter->fromJson($jsonData, array(
+            'path' => '/path',
+        ));
 
         $this->assertInstanceOf('Puli\Manager\Api\Config\ConfigFile', $configFile);
         $this->assertSame('/path', $configFile->getPath());
@@ -93,18 +111,21 @@ JSON;
         $this->assertSame('my-store-type', $config->get(Config::DISCOVERY_STORE_TYPE));
     }
 
-    public function testUnserializeConfigFileWithEmptyPath()
+    public function testFromJsonWithEmptyPath()
     {
-        $configFile = $this->serializer->unserializeConfigFile(self::CONFIG_JSON);
+        $configFile = $this->converter->fromJson((object) array());
 
         $this->assertNull($configFile->getPath());
     }
 
-    public function testUnserializeMinimalConfigFile()
+    public function testFromJsonMinimal()
     {
-        $configFile = $this->serializer->unserializeConfigFile("{}\n");
+        $configFile = $this->converter->fromJson((object) array(), array(
+            'path' => '/path',
+        ));
 
         $this->assertInstanceOf('Puli\Manager\Api\Config\ConfigFile', $configFile);
+        $this->assertSame('/path', $configFile->getPath());
 
         // default values
         $config = $configFile->getConfig();
@@ -116,10 +137,13 @@ JSON;
         $this->assertNull($config->get(Config::DISCOVERY_STORE_TYPE));
     }
 
-    public function testUnserializeMinimalConfigFileWithBaseConfig()
+    public function testFromJsonWithBaseConfig()
     {
         $baseConfig = new Config();
-        $configFile = $this->serializer->unserializeConfigFile("{}\n", null, $baseConfig);
+        $configFile = $this->converter->fromJson((object) array(), array(
+            'path' => '/path',
+            'baseConfig' => $baseConfig,
+        ));
         $config = $configFile->getConfig();
 
         $this->assertNotSame($baseConfig, $config);
@@ -128,18 +152,5 @@ JSON;
 
         $this->assertSame('my-puli-dir', $config->get(Config::PULI_DIR));
         $this->assertNull($config->get(Config::PULI_DIR, null, false));
-    }
-
-    /**
-     * @expectedException \Puli\Manager\Api\InvalidConfigException
-     * @expectedExceptionMessage /path/to/win-1258.json
-     */
-    public function testUnserializeConfigFileFailsIfDecodingNotPossible()
-    {
-        if (defined('JSON_C_VERSION')) {
-            $this->markTestSkipped('This error is not reported when using JSONC.');
-        }
-
-        $this->serializer->unserializeConfigFile(__DIR__.'/Fixtures/win-1258.json', '/path/to/win-1258.json');
     }
 }

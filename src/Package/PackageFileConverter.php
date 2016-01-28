@@ -27,8 +27,6 @@ use Webmozart\Json\Conversion\JsonConverter;
 /**
  * Converts package files to JSON and back.
  *
- * The JSON is validated against the schema `res/schema/package-schema.json`.
- *
  * @since  1.0
  *
  * @author Bernhard Schussek <bschussek@gmail.com>

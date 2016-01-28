@@ -18,7 +18,6 @@ use Puli\Discovery\Api\EditableDiscovery;
 use Puli\Manager\Api\Asset\AssetManager;
 use Puli\Manager\Api\Config\Config;
 use Puli\Manager\Api\Config\ConfigFileManager;
-use Puli\Manager\Api\Config\ConfigFileSerializer;
 use Puli\Manager\Api\Context\Context;
 use Puli\Manager\Api\Context\ProjectContext;
 use Puli\Manager\Api\Discovery\DiscoveryManager;
@@ -35,7 +34,7 @@ use Puli\Manager\Assert\Assert;
 use Puli\Manager\Asset\DiscoveryAssetManager;
 use Puli\Manager\Config\ConfigFileManagerImpl;
 use Puli\Manager\Config\ConfigFileStorage;
-use Puli\Manager\Config\ConfigJsonSerializer;
+use Puli\Manager\Config\ConfigFileConverter;
 use Puli\Manager\Config\DefaultConfig;
 use Puli\Manager\Config\EnvConfig;
 use Puli\Manager\Discovery\DiscoveryManagerImpl;
@@ -223,9 +222,9 @@ class Puli
     private $configFileStorage;
 
     /**
-     * @var ConfigFileSerializer|null
+     * @var ConfigFileConverter|null
      */
-    private $configFileSerializer;
+    private $configFileConverter;
 
     /**
      * @var PackageFileStorage|null
@@ -619,8 +618,7 @@ class Puli
         if (!$this->configFileManager && $this->context->getHomeDirectory()) {
             $this->configFileManager = new ConfigFileManagerImpl(
                 $this->context,
-                $this->getConfigFileStorage(),
-                $this->getFactoryManager()
+                $this->getConfigFileStorage()
             );
         }
 
@@ -842,15 +840,15 @@ class Puli
     /**
      * Returns the configuration file serializer.
      *
-     * @return ConfigFileSerializer The configuration file serializer.
+     * @return ConfigFileConverter The configuration file serializer.
      */
-    public function getConfigFileSerializer()
+    public function getConfigFileConverter()
     {
-        if (!$this->configFileSerializer) {
-            $this->configFileSerializer = new ConfigJsonSerializer();
+        if (!$this->configFileConverter) {
+            $this->configFileConverter = new ConfigFileConverter();
         }
 
-        return $this->configFileSerializer;
+        return $this->configFileConverter;
     }
 
     /**
@@ -1058,7 +1056,9 @@ class Puli
         if (!$this->configFileStorage) {
             $this->configFileStorage = new ConfigFileStorage(
                 $this->getStorage(),
-                $this->getConfigFileSerializer(),
+                $this->getConfigFileConverter(),
+                $this->getJsonEncoder(),
+                $this->getJsonDecoder(),
                 $this->getFactoryManager()
             );
         }
@@ -1119,7 +1119,13 @@ class Puli
         Assert::directory($homeDir, 'Could not load Puli context: The home directory %s is a file. Expected a directory.');
 
         // Create a storage without the factory manager
-        $configStorage = new ConfigFileStorage($this->getStorage(), $this->getConfigFileSerializer());
+        $configStorage = new ConfigFileStorage(
+            $this->getStorage(),
+            $this->getConfigFileConverter(),
+            $this->getJsonEncoder(),
+            $this->getJsonDecoder()
+        );
+
         $configPath = Path::canonicalize($homeDir).'/config.json';
 
         try {
