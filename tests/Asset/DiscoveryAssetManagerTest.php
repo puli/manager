@@ -24,10 +24,10 @@ use Puli\Manager\Api\Discovery\DiscoveryManager;
 use Puli\Manager\Api\Event\AddAssetMappingEvent;
 use Puli\Manager\Api\Event\PuliEvents;
 use Puli\Manager\Api\Event\RemoveAssetMappingEvent;
-use Puli\Manager\Api\Package\Package;
-use Puli\Manager\Api\Package\PackageFile;
-use Puli\Manager\Api\Package\RootPackage;
-use Puli\Manager\Api\Package\RootPackageFile;
+use Puli\Manager\Api\Module\Module;
+use Puli\Manager\Api\Module\ModuleFile;
+use Puli\Manager\Api\Module\RootModule;
+use Puli\Manager\Api\Module\RootModuleFile;
 use Puli\Manager\Api\Server\Server;
 use Puli\Manager\Api\Server\ServerCollection;
 use Puli\Manager\Asset\DiscoveryAssetManager;
@@ -69,14 +69,14 @@ class DiscoveryAssetManagerTest extends PHPUnit_Framework_TestCase
     private $servers;
 
     /**
-     * @var Package
+     * @var Module
      */
-    private $package;
+    private $module;
 
     /**
-     * @var RootPackage
+     * @var RootModule
      */
-    private $rootPackage;
+    private $rootModule;
 
     /**
      * @var BindingType
@@ -121,8 +121,8 @@ class DiscoveryAssetManagerTest extends PHPUnit_Framework_TestCase
         $this->server2 = new Server('target2', 'rsync', 'ssh://server');
         $this->servers = new ServerCollection(array($this->server1, $this->server2));
         $this->manager = new DiscoveryAssetManager($this->discoveryManager, $this->servers, $this->dispatcher);
-        $this->package = new Package(new PackageFile('vendor/package'), '/path');
-        $this->rootPackage = new RootPackage(new RootPackageFile('vendor/root'), '/path');
+        $this->module = new Module(new ModuleFile('vendor/module'), '/path');
+        $this->rootModule = new RootModule(new RootModuleFile('vendor/root'), '/path');
         $this->bindingType = new BindingType(DiscoveryUrlGenerator::BINDING_TYPE);
         $this->typeDescriptor = new BindingTypeDescriptor($this->bindingType);
         $this->binding1 = new ResourceBinding(
@@ -335,8 +335,8 @@ class DiscoveryAssetManagerTest extends PHPUnit_Framework_TestCase
     {
         $uuid = $this->binding1->getUuid();
 
-        $this->typeDescriptor->load($this->rootPackage);
-        $this->bindingDescriptor1->load($this->rootPackage, $this->typeDescriptor);
+        $this->typeDescriptor->load($this->rootModule);
+        $this->bindingDescriptor1->load($this->rootModule, $this->typeDescriptor);
 
         $this->discoveryManager->expects($this->at(0))
             ->method('removeRootBindingDescriptors')
@@ -351,8 +351,8 @@ class DiscoveryAssetManagerTest extends PHPUnit_Framework_TestCase
         $mapping = new AssetMapping('/path', 'target1', '/css', $uuid);
         $event = new RemoveAssetMappingEvent($mapping);
 
-        $this->typeDescriptor->load($this->rootPackage);
-        $this->bindingDescriptor1->load($this->rootPackage, $this->typeDescriptor);
+        $this->typeDescriptor->load($this->rootModule);
+        $this->bindingDescriptor1->load($this->rootModule, $this->typeDescriptor);
 
         $this->dispatcher->expects($this->any())
             ->method('hasListeners')

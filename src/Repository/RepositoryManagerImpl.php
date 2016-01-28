@@ -16,25 +16,25 @@ use Puli\Manager\Api\Config\Config;
 use Puli\Manager\Api\Context\ProjectContext;
 use Puli\Manager\Api\Event\BuildRepositoryEvent;
 use Puli\Manager\Api\Event\PuliEvents;
-use Puli\Manager\Api\Package\Package;
-use Puli\Manager\Api\Package\PackageCollection;
-use Puli\Manager\Api\Package\RootPackage;
-use Puli\Manager\Api\Package\RootPackageFile;
+use Puli\Manager\Api\Module\Module;
+use Puli\Manager\Api\Module\ModuleCollection;
+use Puli\Manager\Api\Module\RootModule;
+use Puli\Manager\Api\Module\RootModuleFile;
 use Puli\Manager\Api\Repository\DuplicatePathMappingException;
 use Puli\Manager\Api\Repository\NoSuchPathMappingException;
 use Puli\Manager\Api\Repository\PathMapping;
 use Puli\Manager\Api\Repository\RepositoryManager;
 use Puli\Manager\Assert\Assert;
+use Puli\Manager\Conflict\ModuleConflictDetector;
 use Puli\Manager\Conflict\OverrideGraph;
-use Puli\Manager\Conflict\PackageConflictDetector;
-use Puli\Manager\Package\PackageFileStorage;
-use Puli\Manager\Repository\Mapping\AddPathMappingToPackageFile;
+use Puli\Manager\Module\ModuleFileStorage;
+use Puli\Manager\Repository\Mapping\AddPathMappingToModuleFile;
 use Puli\Manager\Repository\Mapping\ConflictCollection;
 use Puli\Manager\Repository\Mapping\LoadPathMapping;
-use Puli\Manager\Repository\Mapping\OverrideConflictingPackages;
+use Puli\Manager\Repository\Mapping\OverrideConflictingModules;
 use Puli\Manager\Repository\Mapping\PathMappingCollection;
 use Puli\Manager\Repository\Mapping\PopulateRepository;
-use Puli\Manager\Repository\Mapping\RemovePathMappingFromPackageFile;
+use Puli\Manager\Repository\Mapping\RemovePathMappingFromModuleFile;
 use Puli\Manager\Repository\Mapping\SyncRepositoryPath;
 use Puli\Manager\Repository\Mapping\UnloadPathMapping;
 use Puli\Manager\Repository\Mapping\UpdateConflicts;
@@ -74,14 +74,14 @@ class RepositoryManagerImpl implements RepositoryManager
     private $rootDir;
 
     /**
-     * @var RootPackage
+     * @var RootModule
      */
-    private $rootPackage;
+    private $rootModule;
 
     /**
-     * @var RootPackageFile
+     * @var RootModuleFile
      */
-    private $rootPackageFile;
+    private $rootModuleFile;
 
     /**
      * @var EditableRepository
@@ -89,14 +89,14 @@ class RepositoryManagerImpl implements RepositoryManager
     private $repo;
 
     /**
-     * @var PackageCollection
+     * @var ModuleCollection
      */
-    private $packages;
+    private $modules;
 
     /**
-     * @var PackageFileStorage
+     * @var ModuleFileStorage
      */
-    private $packageFileStorage;
+    private $moduleFileStorage;
 
     /**
      * @var OverrideGraph
@@ -104,7 +104,7 @@ class RepositoryManagerImpl implements RepositoryManager
     private $overrideGraph;
 
     /**
-     * @var PackageConflictDetector
+     * @var ModuleConflictDetector
      */
     private $conflictDetector;
 
@@ -128,20 +128,20 @@ class RepositoryManagerImpl implements RepositoryManager
      *
      * @param ProjectContext     $context
      * @param EditableRepository $repo
-     * @param PackageCollection  $packages
-     * @param PackageFileStorage $packageFileStorage
+     * @param ModuleCollection   $modules
+     * @param ModuleFileStorage  $moduleFileStorage
      */
-    public function __construct(ProjectContext $context, EditableRepository $repo, PackageCollection $packages, PackageFileStorage $packageFileStorage)
+    public function __construct(ProjectContext $context, EditableRepository $repo, ModuleCollection $modules, ModuleFileStorage $moduleFileStorage)
     {
         $this->context = $context;
         $this->dispatcher = $context->getEventDispatcher();
         $this->repo = $repo;
         $this->config = $context->getConfig();
         $this->rootDir = $context->getRootDirectory();
-        $this->rootPackage = $packages->getRootPackage();
-        $this->rootPackageFile = $context->getRootPackageFile();
-        $this->packages = $packages;
-        $this->packageFileStorage = $packageFileStorage;
+        $this->rootModule = $modules->getRootModule();
+        $this->rootModuleFile = $context->getRootModuleFile();
+        $this->modules = $modules;
+        $this->moduleFileStorage = $moduleFileStorage;
     }
 
     /**
@@ -169,8 +169,8 @@ class RepositoryManagerImpl implements RepositoryManager
 
         $this->assertMappingsLoaded();
 
-        if (!($flags & self::OVERRIDE) && $this->rootPackageFile->hasPathMapping($mapping->getRepositoryPath())) {
-            throw DuplicatePathMappingException::forRepositoryPath($mapping->getRepositoryPath(), $this->rootPackage->getName());
+        if (!($flags & self::OVERRIDE) && $this->rootModuleFile->hasPathMapping($mapping->getRepositoryPath())) {
+            throw DuplicatePathMappingException::forRepositoryPath($mapping->getRepositoryPath(), $this->rootModule->getName());
         }
 
         $tx = new Transaction();
@@ -179,19 +179,19 @@ class RepositoryManagerImpl implements RepositoryManager
             $syncOp = $this->syncRepositoryPath($mapping->getRepositoryPath());
             $syncOp->takeSnapshot();
 
-            $tx->execute($this->loadPathMapping($mapping, $this->rootPackage));
+            $tx->execute($this->loadPathMapping($mapping, $this->rootModule));
 
             if (!($flags & self::IGNORE_FILE_NOT_FOUND)) {
                 $this->assertNoLoadErrors($mapping);
             }
 
             $tx->execute($this->updateConflicts($mapping->listRepositoryPaths()));
-            $tx->execute($this->overrideConflictingPackages($mapping));
+            $tx->execute($this->overrideConflictingModules($mapping));
             $tx->execute($this->updateConflicts());
-            $tx->execute($this->addPathMappingToPackageFile($mapping));
+            $tx->execute($this->addPathMappingToModuleFile($mapping));
             $tx->execute($syncOp);
 
-            $this->saveRootPackageFile();
+            $this->saveRootModuleFile();
 
             $tx->commit();
         } catch (Exception $e) {
@@ -210,11 +210,11 @@ class RepositoryManagerImpl implements RepositoryManager
 
         $this->assertMappingsLoaded();
 
-        if (!$this->mappings->contains($repositoryPath, $this->rootPackage->getName())) {
+        if (!$this->mappings->contains($repositoryPath, $this->rootModule->getName())) {
             return;
         }
 
-        $mapping = $this->mappings->get($repositoryPath, $this->rootPackage->getName());
+        $mapping = $this->mappings->get($repositoryPath, $this->rootModule->getName());
         $tx = new Transaction();
 
         try {
@@ -222,10 +222,10 @@ class RepositoryManagerImpl implements RepositoryManager
             $syncOp->takeSnapshot();
 
             $tx->execute($this->unloadPathMapping($mapping));
-            $tx->execute($this->removePathMappingFromPackageFile($repositoryPath));
+            $tx->execute($this->removePathMappingFromModuleFile($repositoryPath));
             $tx->execute($syncOp);
 
-            $this->saveRootPackageFile();
+            $this->saveRootModuleFile();
 
             $tx->commit();
         } catch (Exception $e) {
@@ -253,12 +253,12 @@ class RepositoryManagerImpl implements RepositoryManager
                     $syncOp->takeSnapshot();
 
                     $tx->execute($this->unloadPathMapping($mapping));
-                    $tx->execute($this->removePathMappingFromPackageFile($mapping->getRepositoryPath()));
+                    $tx->execute($this->removePathMappingFromModuleFile($mapping->getRepositoryPath()));
                     $tx->execute($syncOp);
                 }
             }
 
-            $this->saveRootPackageFile();
+            $this->saveRootModuleFile();
 
             $tx->commit();
         } catch (Exception $e) {
@@ -283,7 +283,7 @@ class RepositoryManagerImpl implements RepositoryManager
      */
     public function getRootPathMapping($repositoryPath)
     {
-        return $this->getPathMapping($repositoryPath, $this->rootPackage->getName());
+        return $this->getPathMapping($repositoryPath, $this->rootModule->getName());
     }
 
     /**
@@ -291,7 +291,7 @@ class RepositoryManagerImpl implements RepositoryManager
      */
     public function findRootPathMappings(Expression $expr)
     {
-        $expr = Expr::method('getContainingPackage', Expr::same($this->rootPackage))
+        $expr = Expr::method('getContainingModule', Expr::same($this->rootModule))
             ->andX($expr);
 
         return $this->findPathMappings($expr);
@@ -305,11 +305,11 @@ class RepositoryManagerImpl implements RepositoryManager
         $this->assertMappingsLoaded();
 
         $mappings = array();
-        $rootPackageName = $this->rootPackage->getName();
+        $rootModuleName = $this->rootModule->getName();
 
-        foreach ($this->mappings->toArray() as $mappingsByPackage) {
-            if (isset($mappingsByPackage[$rootPackageName])) {
-                $mappings[] = $mappingsByPackage[$rootPackageName];
+        foreach ($this->mappings->toArray() as $mappingsByModule) {
+            if (isset($mappingsByModule[$rootModuleName])) {
+                $mappings[] = $mappingsByModule[$rootModuleName];
             }
         }
 
@@ -321,7 +321,7 @@ class RepositoryManagerImpl implements RepositoryManager
      */
     public function hasRootPathMapping($repositoryPath)
     {
-        return $this->hasPathMapping($repositoryPath, $this->rootPackage->getName());
+        return $this->hasPathMapping($repositoryPath, $this->rootModule->getName());
     }
 
     /**
@@ -329,7 +329,7 @@ class RepositoryManagerImpl implements RepositoryManager
      */
     public function hasRootPathMappings(Expression $expr = null)
     {
-        $expr2 = Expr::method('getContainingPackage', Expr::same($this->rootPackage));
+        $expr2 = Expr::method('getContainingModule', Expr::same($this->rootModule));
 
         if ($expr) {
             $expr2 = $expr2->andX($expr);
@@ -341,18 +341,18 @@ class RepositoryManagerImpl implements RepositoryManager
     /**
      * {@inheritdoc}
      */
-    public function getPathMapping($repositoryPath, $packageName)
+    public function getPathMapping($repositoryPath, $moduleName)
     {
         Assert::string($repositoryPath, 'The repository path must be a string. Got: %s');
-        Assert::string($packageName, 'The package name must be a string. Got: %s');
+        Assert::string($moduleName, 'The module name must be a string. Got: %s');
 
         $this->assertMappingsLoaded();
 
-        if (!$this->mappings->contains($repositoryPath, $packageName)) {
-            throw NoSuchPathMappingException::forRepositoryPathAndPackage($repositoryPath, $packageName);
+        if (!$this->mappings->contains($repositoryPath, $moduleName)) {
+            throw NoSuchPathMappingException::forRepositoryPathAndModule($repositoryPath, $moduleName);
         }
 
-        return $this->mappings->get($repositoryPath, $packageName);
+        return $this->mappings->get($repositoryPath, $moduleName);
     }
 
     /**
@@ -364,8 +364,8 @@ class RepositoryManagerImpl implements RepositoryManager
 
         $mappings = array();
 
-        foreach ($this->mappings->toArray() as $mappingsByPackage) {
-            foreach ($mappingsByPackage as $mapping) {
+        foreach ($this->mappings->toArray() as $mappingsByModule) {
+            foreach ($mappingsByModule as $mapping) {
                 $mappings[] = $mapping;
             }
         }
@@ -382,8 +382,8 @@ class RepositoryManagerImpl implements RepositoryManager
 
         $mappings = array();
 
-        foreach ($this->mappings->toArray() as $mappingsByPackage) {
-            foreach ($mappingsByPackage as $mapping) {
+        foreach ($this->mappings->toArray() as $mappingsByModule) {
+            foreach ($mappingsByModule as $mapping) {
                 if ($expr->evaluate($mapping)) {
                     $mappings[] = $mapping;
                 }
@@ -396,14 +396,14 @@ class RepositoryManagerImpl implements RepositoryManager
     /**
      * {@inheritdoc}
      */
-    public function hasPathMapping($repositoryPath, $packageName)
+    public function hasPathMapping($repositoryPath, $moduleName)
     {
         Assert::string($repositoryPath, 'The repository path must be a string. Got: %s');
-        Assert::string($packageName, 'The package name must be a string. Got: %s');
+        Assert::string($moduleName, 'The module name must be a string. Got: %s');
 
         $this->assertMappingsLoaded();
 
-        return $this->mappings->contains($repositoryPath, $packageName);
+        return $this->mappings->contains($repositoryPath, $moduleName);
     }
 
     /**
@@ -417,8 +417,8 @@ class RepositoryManagerImpl implements RepositoryManager
             return !$this->mappings->isEmpty();
         }
 
-        foreach ($this->mappings->toArray() as $mappingsByPackage) {
-            foreach ($mappingsByPackage as $mapping) {
+        foreach ($this->mappings->toArray() as $mappingsByModule) {
+            foreach ($mappingsByModule as $mapping) {
                 if ($expr->evaluate($mapping)) {
                     return true;
                 }
@@ -472,20 +472,20 @@ class RepositoryManagerImpl implements RepositoryManager
 
     private function loadPathMappings()
     {
-        $this->overrideGraph = OverrideGraph::forPackages($this->packages);
-        $this->conflictDetector = new PackageConflictDetector($this->overrideGraph);
+        $this->overrideGraph = OverrideGraph::forModules($this->modules);
+        $this->conflictDetector = new ModuleConflictDetector($this->overrideGraph);
         $this->mappings = new PathMappingCollection();
         $this->mappingsByResource = new PathMappingCollection();
         $this->conflicts = new ConflictCollection();
 
         // Load mappings
-        foreach ($this->packages as $package) {
-            if (null === $package->getPackageFile()) {
+        foreach ($this->modules as $module) {
+            if (null === $module->getModuleFile()) {
                 continue;
             }
 
-            foreach ($package->getPackageFile()->getPathMappings() as $mapping) {
-                $this->loadPathMapping($mapping, $package)->execute();
+            foreach ($module->getModuleFile()->getPathMappings() as $mapping) {
+                $this->loadPathMapping($mapping, $module)->execute();
             }
         }
 
@@ -493,24 +493,24 @@ class RepositoryManagerImpl implements RepositoryManager
         $this->updateConflicts($this->mappingsByResource->getRepositoryPaths())->execute();
     }
 
-    private function addPathMappingToPackageFile(PathMapping $mapping)
+    private function addPathMappingToModuleFile(PathMapping $mapping)
     {
-        return new AddPathMappingToPackageFile($mapping, $this->rootPackageFile);
+        return new AddPathMappingToModuleFile($mapping, $this->rootModuleFile);
     }
 
-    private function removePathMappingFromPackageFile($repositoryPath)
+    private function removePathMappingFromModuleFile($repositoryPath)
     {
-        return new RemovePathMappingFromPackageFile($repositoryPath, $this->rootPackageFile);
+        return new RemovePathMappingFromModuleFile($repositoryPath, $this->rootModuleFile);
     }
 
-    private function loadPathMapping(PathMapping $mapping, Package $package)
+    private function loadPathMapping(PathMapping $mapping, Module $module)
     {
-        return new LoadPathMapping($mapping, $package, $this->packages, $this->mappings, $this->mappingsByResource, $this->conflictDetector);
+        return new LoadPathMapping($mapping, $module, $this->modules, $this->mappings, $this->mappingsByResource, $this->conflictDetector);
     }
 
     private function unloadPathMapping(PathMapping $mapping)
     {
-        return new UnloadPathMapping($mapping, $this->packages, $this->mappings, $this->mappingsByResource, $this->conflictDetector);
+        return new UnloadPathMapping($mapping, $this->modules, $this->mappings, $this->mappingsByResource, $this->conflictDetector);
     }
 
     private function syncRepositoryPath($repositoryPath)
@@ -528,14 +528,14 @@ class RepositoryManagerImpl implements RepositoryManager
         return new UpdateConflicts($repositoryPaths, $this->conflictDetector, $this->conflicts, $this->mappingsByResource);
     }
 
-    private function overrideConflictingPackages(PathMapping $mapping)
+    private function overrideConflictingModules(PathMapping $mapping)
     {
-        return new OverrideConflictingPackages($mapping, $this->rootPackage, $this->overrideGraph);
+        return new OverrideConflictingModules($mapping, $this->rootModule, $this->overrideGraph);
     }
 
-    private function saveRootPackageFile()
+    private function saveRootModuleFile()
     {
-        $this->packageFileStorage->saveRootPackageFile($this->rootPackageFile);
+        $this->moduleFileStorage->saveRootModuleFile($this->rootModuleFile);
     }
 
     private function removeResolvedConflicts()

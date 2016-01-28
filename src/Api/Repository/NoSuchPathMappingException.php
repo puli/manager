@@ -40,21 +40,21 @@ class NoSuchPathMappingException extends RuntimeException
     }
 
     /**
-     * Creates an exception for a repository path and a package name.
+     * Creates an exception for a repository path and a module name.
      *
-     * @param string         $path        The repository path.
-     * @param string         $packageName The name of the containing package.
-     * @param Exception|null $cause       The exception that caused this
-     *                                    exception.
+     * @param string         $path       The repository path.
+     * @param string         $moduleName The name of the containing module.
+     * @param Exception|null $cause      The exception that caused this
+     *                                   exception.
      *
      * @return static The created exception.
      */
-    public static function forRepositoryPathAndPackage($path, $packageName, Exception $cause = null)
+    public static function forRepositoryPathAndModule($path, $moduleName, Exception $cause = null)
     {
         return new static(sprintf(
-            'The repository path "%s" is not mapped in package "%s".',
+            'The repository path "%s" is not mapped in module "%s".',
             $path,
-            $packageName
+            $moduleName
         ), 0, $cause);
     }
 }

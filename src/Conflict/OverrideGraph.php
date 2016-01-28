@@ -11,22 +11,22 @@
 
 namespace Puli\Manager\Conflict;
 
-use Puli\Manager\Api\Package\PackageCollection;
+use Puli\Manager\Api\Module\ModuleCollection;
 use RuntimeException;
 
 /**
- * A directed, acyclic graph of package names.
+ * A directed, acyclic graph of module names.
  *
- * Packages can be added with {@link addPackageName()}. Edges between these packages
+ * Modules can be added with {@link addModuleName()}. Edges between these modules
  * can then be added using {@link addEdge()}. Both ends of an edge must have
  * been defined before the edge is added.
  *
  * ```php
  * $graph = new OverrideGraph();
- * $graph->addPackageName('acme/core');
- * $graph->addPackageName('acme/blog');
- * $graph->addPackageName('acme/blog-extension1');
- * $graph->addPackageName('acme/blog-extension2');
+ * $graph->addModuleName('acme/core');
+ * $graph->addModuleName('acme/blog');
+ * $graph->addModuleName('acme/blog-extension1');
+ * $graph->addModuleName('acme/blog-extension2');
  * $graph->addEdge('acme/core', 'acme/blog');
  * $graph->addEdge('acme/blog', 'acme/blog-extension1');
  * $graph->addEdge('acme/blog', 'acme/blog-extension2');
@@ -34,7 +34,7 @@ use RuntimeException;
  * ```
  *
  * You can use {@link getPath()} and {@link hasPath()} to check whether a path
- * exists from one package to the other:
+ * exists from one module to the other:
  *
  * ```php
  * // ...
@@ -49,13 +49,13 @@ use RuntimeException;
  * // => array('acme/core', 'acme/blog', 'acme/blog-extension2')
  * ```
  *
- * With {@link getSortedPackageNames()}, you can sort the packages such that the
+ * With {@link getSortedModuleNames()}, you can sort the modules such that the
  * dependencies defined via the edges are respected:
  *
  * ```php
  * // ...
  *
- * $graph->getSortedPackageNames();
+ * $graph->getSortedModuleNames();
  * // => array('acme/core', 'acme/blog', 'acme/blog-extension1', 'acme/blog-extension2')
  * ```
  *
@@ -66,11 +66,11 @@ use RuntimeException;
 class OverrideGraph
 {
     /**
-     * Stores the names of all packages (vertices) as keys.
+     * Stores the names of all modules (vertices) as keys.
      *
      * @var array
      */
-    private $packageNames = array();
+    private $moduleNames = array();
 
     /**
      * Stores the edges in the keys of a multi-dimensional array.
@@ -83,43 +83,43 @@ class OverrideGraph
     private $edges = array();
 
     /**
-     * Creates an override graph for the given packages.
+     * Creates an override graph for the given modules.
      *
-     * @param PackageCollection $packages The packages to load.
+     * @param ModuleCollection $modules The modules to load.
      *
      * @return static The created override graph.
      */
-    public static function forPackages(PackageCollection $packages)
+    public static function forModules(ModuleCollection $modules)
     {
-        $graph = new static($packages->getPackageNames());
+        $graph = new static($modules->getModuleNames());
 
-        foreach ($packages as $package) {
-            if (null === $package->getPackageFile()) {
+        foreach ($modules as $module) {
+            if (null === $module->getModuleFile()) {
                 continue;
             }
 
-            foreach ($package->getPackageFile()->getOverriddenPackages() as $overriddenPackage) {
-                if ($graph->hasPackageName($overriddenPackage)) {
-                    $graph->addEdge($overriddenPackage, $package->getName());
+            foreach ($module->getModuleFile()->getOverriddenModules() as $overriddenModule) {
+                if ($graph->hasModuleName($overriddenModule)) {
+                    $graph->addEdge($overriddenModule, $module->getName());
                 }
             }
         }
 
-        // Do we have a root package?
-        if (null === $packages->getRootPackage()) {
+        // Do we have a root module?
+        if (null === $modules->getRootModule()) {
             return $graph;
         }
 
         // Make sure we have numeric, ascending keys here
-        $packageOrder = array_values($packages->getRootPackage()->getPackageFile()->getOverrideOrder());
+        $moduleOrder = array_values($modules->getRootModule()->getModuleFile()->getOverrideOrder());
 
-        // Each package overrides the previous one in the list
-        for ($i = 1, $l = count($packageOrder); $i < $l; ++$i) {
-            $overriddenPackage = $packageOrder[$i - 1];
-            $overridingPackage = $packageOrder[$i];
+        // Each module overrides the previous one in the list
+        for ($i = 1, $l = count($moduleOrder); $i < $l; ++$i) {
+            $overriddenModule = $moduleOrder[$i - 1];
+            $overridingModule = $moduleOrder[$i];
 
-            if ($graph->hasPackageName($overriddenPackage)) {
-                $graph->addEdge($overriddenPackage, $overridingPackage);
+            if ($graph->hasModuleName($overriddenModule)) {
+                $graph->addEdge($overriddenModule, $overridingModule);
             }
         }
 
@@ -129,82 +129,82 @@ class OverrideGraph
     /**
      * Creates a new graph.
      *
-     * @param string[] $packageNames The package names stored in the nodes of
-     *                               the graph.
+     * @param string[] $moduleNames The module names stored in the nodes of
+     *                              the graph.
      */
-    public function __construct(array $packageNames = array())
+    public function __construct(array $moduleNames = array())
     {
-        $this->addPackageNames($packageNames);
+        $this->addModuleNames($moduleNames);
     }
 
     /**
-     * Adds a package name to the graph.
+     * Adds a module name to the graph.
      *
-     * @param string $packageName The package name.
+     * @param string $moduleName The module name.
      *
-     * @throws RuntimeException If the package name already exists.
+     * @throws RuntimeException If the module name already exists.
      */
-    public function addPackageName($packageName)
+    public function addModuleName($moduleName)
     {
-        if (isset($this->packageNames[$packageName])) {
+        if (isset($this->moduleNames[$moduleName])) {
             throw new RuntimeException(sprintf(
-                'The package "%s" was added to the graph twice.',
-                $packageName
+                'The module "%s" was added to the graph twice.',
+                $moduleName
             ));
         }
 
-        $this->packageNames[$packageName] = true;
-        $this->edges[$packageName] = array();
+        $this->moduleNames[$moduleName] = true;
+        $this->edges[$moduleName] = array();
     }
 
     /**
-     * Adds a list of package names to the graph.
+     * Adds a list of module names to the graph.
      *
-     * @param string[] $packageNames The package names.
+     * @param string[] $moduleNames The module names.
      *
-     * @throws RuntimeException If a package name already exists.
+     * @throws RuntimeException If a module name already exists.
      */
-    public function addPackageNames(array $packageNames)
+    public function addModuleNames(array $moduleNames)
     {
-        foreach ($packageNames as $packageName) {
-            $this->addPackageName($packageName);
+        foreach ($moduleNames as $moduleName) {
+            $this->addModuleName($moduleName);
         }
     }
 
     /**
-     * Returns whether a package name exists in the graph.
+     * Returns whether a module name exists in the graph.
      *
-     * @param string $packageName The package name.
+     * @param string $moduleName The module name.
      *
-     * @return bool Whether the package name exists.
+     * @return bool Whether the module name exists.
      */
-    public function hasPackageName($packageName)
+    public function hasModuleName($moduleName)
     {
-        return isset($this->packageNames[$packageName]);
+        return isset($this->moduleNames[$moduleName]);
     }
 
     /**
-     * Adds a directed edge from one to another package.
+     * Adds a directed edge from one to another module.
      *
-     * @param string $from The start package name.
-     * @param string $to   The end package name.
+     * @param string $from The start module name.
+     * @param string $to   The end module name.
      *
-     * @throws RuntimeException          If any of the packages does not exist in the
-     *                                   graph. Each package must have been added first.
+     * @throws RuntimeException          If any of the modules does not exist in the
+     *                                   graph. Each module must have been added first.
      * @throws CyclicDependencyException If adding the edge would create a cycle.
      */
     public function addEdge($from, $to)
     {
-        if (!isset($this->packageNames[$from])) {
+        if (!isset($this->moduleNames[$from])) {
             throw new RuntimeException(sprintf(
-                'The package "%s" does not exist in the graph.',
+                'The module "%s" does not exist in the graph.',
                 $from
             ));
         }
 
-        if (!isset($this->packageNames[$to])) {
+        if (!isset($this->moduleNames[$to])) {
             throw new RuntimeException(sprintf(
-                'The package "%s" does not exist in the graph.',
+                'The module "%s" does not exist in the graph.',
                 $to
             ));
         }
@@ -213,9 +213,9 @@ class OverrideGraph
             $last = array_pop($path);
 
             throw new CyclicDependencyException(sprintf(
-                'A cyclic dependency was discovered between the packages "%s" '.
+                'A cyclic dependency was discovered between the modules "%s" '.
                 'and "%s". Please check the "override" keys defined in these '.
-                'packages.',
+                'modules.',
                 implode('", "', $path),
                 $last
             ));
@@ -230,12 +230,12 @@ class OverrideGraph
     }
 
     /**
-     * Returns whether an edge exists between two packages.
+     * Returns whether an edge exists between two modules.
      *
-     * @param string $from The start package name.
-     * @param string $to   The end package name.
+     * @param string $from The start module name.
+     * @param string $to   The end module name.
      *
-     * @return bool Whether an edge exists from the origin to the target package.
+     * @return bool Whether an edge exists from the origin to the target module.
      */
     public function hasEdge($from, $to)
     {
@@ -243,12 +243,12 @@ class OverrideGraph
     }
 
     /**
-     * Returns whether a path exists from one to another package.
+     * Returns whether a path exists from one to another module.
      *
-     * @param string $from The start package name.
-     * @param string $to   The end package name.
+     * @param string $from The start module name.
+     * @param string $to   The end module name.
      *
-     * @return bool Whether a path exists from the origin to the target package.
+     * @return bool Whether a path exists from the origin to the target module.
      */
     public function hasPath($from, $to)
     {
@@ -273,12 +273,12 @@ class OverrideGraph
     }
 
     /**
-     * Returns the path from one to another package.
+     * Returns the path from one to another module.
      *
-     * @param string $from The start package name.
-     * @param string $to   The end package name.
+     * @param string $from The start module name.
+     * @param string $to   The end module name.
      *
-     * @return string[]|null The path of package names or `null`, if no path
+     * @return string[]|null The path of module names or `null`, if no path
      *                       was found.
      */
     public function getPath($from, $to)
@@ -291,63 +291,63 @@ class OverrideGraph
     }
 
     /**
-     * Returns all package names in the graph.
+     * Returns all module names in the graph.
      *
-     * @return array All package names in the graph.
+     * @return array All module names in the graph.
      */
-    public function getPackageNames()
+    public function getModuleNames()
     {
-        return $this->packageNames;
+        return $this->moduleNames;
     }
 
     /**
-     * Sorts package names according to the defined edges.
+     * Sorts module names according to the defined edges.
      *
-     * The names are sorted such that if two packages p1 and p2 have an edge
+     * The names are sorted such that if two modules p1 and p2 have an edge
      * (p1, p2) in the graph, then p1 comes before p2 in the sorted set.
      *
-     * If no package names are passed, all names are sorted.
+     * If no module names are passed, all names are sorted.
      *
-     * @param string[] $namesToSort The package names which should be sorted.
+     * @param string[] $namesToSort The module names which should be sorted.
      *
-     * @return string[] The sorted package names.
+     * @return string[] The sorted module names.
      *
-     * @throws RuntimeException If any of the passed package names does not
+     * @throws RuntimeException If any of the passed module names does not
      *                          exist in the graph.
      */
-    public function getSortedPackageNames(array $namesToSort = array())
+    public function getSortedModuleNames(array $namesToSort = array())
     {
         if (count($namesToSort) > 0) {
             $namesToSort = array_flip($namesToSort);
 
-            foreach ($namesToSort as $package => $_) {
-                if (!isset($this->packageNames[$package])) {
+            foreach ($namesToSort as $module => $_) {
+                if (!isset($this->moduleNames[$module])) {
                     throw new RuntimeException(sprintf(
-                        'The package "%s" does not exist in the graph.',
-                        $package
+                        'The module "%s" does not exist in the graph.',
+                        $module
                     ));
                 }
             }
         } else {
-            $namesToSort = $this->packageNames;
+            $namesToSort = $this->moduleNames;
         }
 
         $sorted = array();
 
         // Do a topologic sort
-        // Start with any package and process until no more are left
+        // Start with any module and process until no more are left
         while (false !== reset($namesToSort)) {
-            $this->sortPackagesDFS(key($namesToSort), $namesToSort, $sorted);
+            $this->sortModulesDFS(key($namesToSort), $namesToSort, $sorted);
         }
 
         return $sorted;
     }
 
     /**
-     * Finds a path between packages using Depth-First Search.
+     * Finds a path between modules using Depth-First Search.
      *
-     * @param string $from        The start package name.
-     * @param string $to          The end package name.
+     * @param string $from        The start module name.
+     * @param string $to          The end module name.
      * @param array  $reversePath The path in reverse order.
      *
      * @return bool Whether a path was found.
@@ -379,28 +379,28 @@ class OverrideGraph
     }
 
     /**
-     * Topologically sorts the given package name into the output array.
+     * Topologically sorts the given module name into the output array.
      *
-     * The resulting array is sorted such that all predecessors of the package
-     * come before the package (and their predecessors before them, and so on).
+     * The resulting array is sorted such that all predecessors of the module
+     * come before the module (and their predecessors before them, and so on).
      *
-     * @param string $currentName The current package name to sort.
-     * @param array  $namesToSort The package names yet to be sorted.
+     * @param string $currentName The current module name to sort.
+     * @param array  $namesToSort The module names yet to be sorted.
      * @param array  $output      The output array.
      */
-    private function sortPackagesDFS($currentName, array &$namesToSort, array &$output)
+    private function sortModulesDFS($currentName, array &$namesToSort, array &$output)
     {
         unset($namesToSort[$currentName]);
 
-        // Before adding the package itself to the path, add all predecessors.
-        // Do so recursively, then we make sure that each package is visited
+        // Before adding the module itself to the path, add all predecessors.
+        // Do so recursively, then we make sure that each module is visited
         // in the path before any of its successors.
         foreach ($this->edges[$currentName] as $predecessor => $_) {
-            // The package was already processed. Either the package is on the
+            // The module was already processed. Either the module is on the
             // path already, then we're good. Otherwise, we have a cycle.
             // However, addEdge() guarantees that the graph is cycle-free.
             if (isset($namesToSort[$predecessor])) {
-                $this->sortPackagesDFS($predecessor, $namesToSort, $output);
+                $this->sortModulesDFS($predecessor, $namesToSort, $output);
             }
         }
 

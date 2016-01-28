@@ -11,11 +11,11 @@
 
 namespace Puli\Manager\Repository\Mapping;
 
-use Puli\Manager\Api\Package\Package;
-use Puli\Manager\Api\Package\PackageCollection;
+use Puli\Manager\Api\Module\Module;
+use Puli\Manager\Api\Module\ModuleCollection;
 use Puli\Manager\Api\Repository\PathConflict;
 use Puli\Manager\Api\Repository\PathMapping;
-use Puli\Manager\Conflict\PackageConflictDetector;
+use Puli\Manager\Conflict\ModuleConflictDetector;
 use Puli\Manager\Transaction\AtomicOperation;
 
 /**
@@ -33,14 +33,14 @@ class UnloadPathMapping implements AtomicOperation
     private $mapping;
 
     /**
-     * @var Package
+     * @var Module
      */
-    private $containingPackage;
+    private $containingModule;
 
     /**
-     * @var PackageCollection
+     * @var ModuleCollection
      */
-    private $packages;
+    private $modules;
 
     /**
      * @var PathMappingCollection
@@ -53,7 +53,7 @@ class UnloadPathMapping implements AtomicOperation
     private $mappingsByResource;
 
     /**
-     * @var PackageConflictDetector
+     * @var ModuleConflictDetector
      */
     private $conflictDetector;
 
@@ -67,10 +67,10 @@ class UnloadPathMapping implements AtomicOperation
      */
     private $conflictingMappings = array();
 
-    public function __construct(PathMapping $mapping, PackageCollection $packages, PathMappingCollection $mappings, PathMappingCollection $mappingsByResource, PackageConflictDetector $conflictDetector)
+    public function __construct(PathMapping $mapping, ModuleCollection $modules, PathMappingCollection $mappings, PathMappingCollection $mappingsByResource, ModuleConflictDetector $conflictDetector)
     {
         $this->mapping = $mapping;
-        $this->packages = $packages;
+        $this->modules = $modules;
         $this->mappings = $mappings;
         $this->mappingsByResource = $mappingsByResource;
         $this->conflictDetector = $conflictDetector;
@@ -85,7 +85,7 @@ class UnloadPathMapping implements AtomicOperation
             return;
         }
 
-        $this->containingPackage = $this->mapping->getContainingPackage();
+        $this->containingModule = $this->mapping->getContainingModule();
 
         // Remember the conflicts that will be adjusted during unload()
         foreach ($this->mapping->getConflicts() as $conflict) {
@@ -93,13 +93,13 @@ class UnloadPathMapping implements AtomicOperation
             $this->conflictingMappings[$conflict->getRepositoryPath()] = $conflict->getMappings();
         }
 
-        $packageName = $this->containingPackage->getName();
+        $moduleName = $this->containingModule->getName();
 
-        $this->mappings->remove($this->mapping->getRepositoryPath(), $packageName);
+        $this->mappings->remove($this->mapping->getRepositoryPath(), $moduleName);
 
         foreach ($this->mapping->listRepositoryPaths() as $repositoryPath) {
-            $this->mappingsByResource->remove($repositoryPath, $packageName);
-            $this->conflictDetector->release($repositoryPath, $packageName);
+            $this->mappingsByResource->remove($repositoryPath, $moduleName);
+            $this->conflictDetector->release($repositoryPath, $moduleName);
         }
 
         // Unload after iterating, otherwise the paths are gone
@@ -111,17 +111,17 @@ class UnloadPathMapping implements AtomicOperation
      */
     public function rollback()
     {
-        if ($this->mapping->isLoaded() || !$this->containingPackage) {
+        if ($this->mapping->isLoaded() || !$this->containingModule) {
             return;
         }
 
-        $this->mapping->load($this->containingPackage, $this->packages);
+        $this->mapping->load($this->containingModule, $this->modules);
 
-        $packageName = $this->containingPackage->getName();
+        $moduleName = $this->containingModule->getName();
 
         foreach ($this->mapping->listRepositoryPaths() as $repositoryPath) {
             $this->mappings->add($this->mapping);
-            $this->conflictDetector->claim($repositoryPath, $packageName);
+            $this->conflictDetector->claim($repositoryPath, $moduleName);
         }
 
         // Restore conflicts

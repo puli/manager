@@ -16,9 +16,9 @@ use Puli\Discovery\Api\Type\BindingParameter;
 use Puli\Discovery\Api\Type\BindingType;
 use Puli\Manager\Api\Discovery\BindingTypeDescriptor;
 use Puli\Manager\Api\Discovery\BindingTypeState;
-use Puli\Manager\Api\Package\InstallInfo;
-use Puli\Manager\Api\Package\Package;
-use Puli\Manager\Api\Package\PackageFile;
+use Puli\Manager\Api\Module\InstallInfo;
+use Puli\Manager\Api\Module\Module;
+use Puli\Manager\Api\Module\ModuleFile;
 use Puli\Manager\Tests\Discovery\Fixtures\Foo;
 
 /**
@@ -29,13 +29,13 @@ use Puli\Manager\Tests\Discovery\Fixtures\Foo;
 class BindingTypeDescriptorTest extends PHPUnit_Framework_TestCase
 {
     /**
-     * @var Package
+     * @var Module
      */
-    private $package;
+    private $module;
 
     protected function setUp()
     {
-        $this->package = new Package(new PackageFile(), '/path', new InstallInfo('vendor/package', '/path'));
+        $this->module = new Module(new ModuleFile(), '/path', new InstallInfo('vendor/module', '/path'));
     }
 
     public function testCreate()
@@ -148,7 +148,7 @@ class BindingTypeDescriptorTest extends PHPUnit_Framework_TestCase
     public function testEnabledIfLoaded()
     {
         $descriptor = new BindingTypeDescriptor(new BindingType(Foo::clazz));
-        $descriptor->load($this->package);
+        $descriptor->load($this->module);
 
         $this->assertSame(BindingTypeState::ENABLED, $descriptor->getState());
     }
@@ -156,7 +156,7 @@ class BindingTypeDescriptorTest extends PHPUnit_Framework_TestCase
     public function testDuplicateIfMarkedDuplicate()
     {
         $descriptor = new BindingTypeDescriptor(new BindingType(Foo::clazz));
-        $descriptor->load($this->package);
+        $descriptor->load($this->module);
         $descriptor->markDuplicate(true);
 
         $this->assertSame(BindingTypeState::DUPLICATE, $descriptor->getState());

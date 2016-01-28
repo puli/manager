@@ -15,10 +15,10 @@ use Exception;
 use InvalidArgumentException;
 use Puli\Manager\Api\AlreadyLoadedException;
 use Puli\Manager\Api\FileNotFoundException;
+use Puli\Manager\Api\Module\Module;
+use Puli\Manager\Api\Module\ModuleCollection;
+use Puli\Manager\Api\Module\NoSuchModuleException;
 use Puli\Manager\Api\NotLoadedException;
-use Puli\Manager\Api\Package\NoSuchPackageException;
-use Puli\Manager\Api\Package\Package;
-use Puli\Manager\Api\Package\PackageCollection;
 use Puli\Manager\Assert\Assert;
 use RecursiveIteratorIterator;
 use Webmozart\Glob\Iterator\RecursiveDirectoryIterator;
@@ -28,9 +28,9 @@ use Webmozart\PathUtil\Path;
  * Maps a repository path to one or more filesystem paths.
  *
  * The filesystem paths are passed in the form of *path references* that are
- * either paths relative to the package's root directory or paths relative
- * to another packages's root directory prefixed with `@vendor/package:`,
- * where "vendor/package" is the name of the referenced package.
+ * either paths relative to the module's root directory or paths relative
+ * to another modules's root directory prefixed with `@vendor/module:`,
+ * where "vendor/module" is the name of the referenced module.
  *
  * The path references are turned into absolute filesystem paths when
  * {@link load()} is called.
@@ -67,9 +67,9 @@ class PathMapping
     private $repositoryPaths = array();
 
     /**
-     * @var Package
+     * @var Module
      */
-    private $containingPackage;
+    private $containingModule;
 
     /**
      * @var int|null
@@ -111,16 +111,16 @@ class PathMapping
     /**
      * Loads the mapping.
      *
-     * @param Package           $containingPackage The package that contains the
-     *                                             mapping.
-     * @param PackageCollection $packages          A list of packages that can
-     *                                             be referenced using
-     *                                             `@vendor/package:` prefixes
-     *                                             in the path references.
+     * @param Module           $containingModule The module that contains the
+     *                                           mapping.
+     * @param ModuleCollection $modules          A list of modules that can
+     *                                           be referenced using
+     *                                           `@vendor/module:` prefixes
+     *                                           in the path references.
      *
      * @throws AlreadyLoadedException If the mapping is already loaded.
      */
-    public function load(Package $containingPackage, PackageCollection $packages)
+    public function load(Module $containingModule, ModuleCollection $modules)
     {
         if (null !== $this->state) {
             throw new AlreadyLoadedException('The mapping is already loaded.');
@@ -134,11 +134,11 @@ class PathMapping
             $loadError = null;
 
             try {
-                $absolutePath = $this->makeAbsolute($relativePath, $containingPackage, $packages);
-                $this->assertFileExists($absolutePath, $relativePath, $containingPackage);
+                $absolutePath = $this->makeAbsolute($relativePath, $containingModule, $modules);
+                $this->assertFileExists($absolutePath, $relativePath, $containingModule);
 
                 $filesystemPaths[] = $absolutePath;
-            } catch (NoSuchPackageException $loadError) {
+            } catch (NoSuchModuleException $loadError) {
             } catch (FileNotFoundException $loadError) {
             }
 
@@ -178,7 +178,7 @@ class PathMapping
         $this->filesystemPaths = $filesystemPaths;
         $this->pathMappings = $pathMappings;
         $this->loadErrors = $loadErrors;
-        $this->containingPackage = $containingPackage;
+        $this->containingModule = $containingModule;
 
         sort($this->repositoryPaths);
 
@@ -211,7 +211,7 @@ class PathMapping
         $this->pathMappings = array();
         $this->repositoryPaths = array();
         $this->loadErrors = array();
-        $this->containingPackage = null;
+        $this->containingModule = null;
         $this->state = null;
     }
 
@@ -241,10 +241,10 @@ class PathMapping
      * The path references refer to filesystem paths. A path reference is
      * either:
      *
-     *  * a path relative to the root directory of the containing package;
-     *  * a path relative to the root directory of another package, prefixed
-     *    with `@vendor/package:`, where "vendor/package" is the name of the
-     *    referenced package.
+     *  * a path relative to the root directory of the containing module;
+     *  * a path relative to the root directory of another module, prefixed
+     *    with `@vendor/module:`, where "vendor/module" is the name of the
+     *    referenced module.
      *
      * @return string[] The path references.
      */
@@ -307,23 +307,23 @@ class PathMapping
     }
 
     /**
-     * Returns the package that contains the mapping.
+     * Returns the module that contains the mapping.
      *
      * The method {@link load()} needs to be called before calling this method,
      * otherwise an exception is thrown.
      *
-     * @return Package The containing package or `null` if the mapping has not
-     *                 been loaded.
+     * @return Module The containing module or `null` if the mapping has not
+     *                been loaded.
      *
      * @throws NotLoadedException If the mapping is not loaded.
      */
-    public function getContainingPackage()
+    public function getContainingModule()
     {
         if (null === $this->state) {
             throw new NotLoadedException('The mapping is not loaded.');
         }
 
-        return $this->containingPackage;
+        return $this->containingModule;
     }
 
     /**
@@ -450,22 +450,22 @@ class PathMapping
     }
 
     /**
-     * Returns all packages with conflicting path mappings.
+     * Returns all modules with conflicting path mappings.
      *
      * The method {@link load()} needs to be called before calling this method,
      * otherwise an exception is thrown.
      *
-     * @return PackageCollection The conflicting packages.
+     * @return ModuleCollection The conflicting modules.
      *
      * @throws NotLoadedException If the mapping is not loaded.
      */
-    public function getConflictingPackages()
+    public function getConflictingModules()
     {
         if (null === $this->state) {
             throw new NotLoadedException('The mapping is not loaded.');
         }
 
-        $collection = new PackageCollection();
+        $collection = new ModuleCollection();
 
         foreach ($this->conflicts as $conflict) {
             foreach ($conflict->getMappings() as $mapping) {
@@ -473,7 +473,7 @@ class PathMapping
                     continue;
                 }
 
-                $collection->add($mapping->getContainingPackage());
+                $collection->add($mapping->getContainingModule());
             }
         }
 
@@ -576,7 +576,7 @@ class PathMapping
     }
 
     /**
-     * Returns whether the mapping conflicts with a mapping in another package.
+     * Returns whether the mapping conflicts with a mapping in another module.
      *
      * The method {@link load()} needs to be called before calling this method,
      * otherwise an exception is thrown.
@@ -608,37 +608,37 @@ class PathMapping
         }
     }
 
-    private function makeAbsolute($relativePath, Package $containingPackage, PackageCollection $packages)
+    private function makeAbsolute($relativePath, Module $containingModule, ModuleCollection $modules)
     {
-        // Reference to install path of other package
+        // Reference to install path of other module
         if ('@' !== $relativePath[0] || false === ($pos = strpos($relativePath, ':'))) {
-            return $containingPackage->getInstallPath().'/'.$relativePath;
+            return $containingModule->getInstallPath().'/'.$relativePath;
         }
 
-        $refPackageName = substr($relativePath, 1, $pos - 1);
+        $refModuleName = substr($relativePath, 1, $pos - 1);
 
-        if (!$packages->contains($refPackageName)) {
-            throw new NoSuchPackageException(sprintf(
-                'The package "%s" referenced in the resource path "%s" was not '.
-                'found. Maybe the package is not installed?',
-                $refPackageName,
+        if (!$modules->contains($refModuleName)) {
+            throw new NoSuchModuleException(sprintf(
+                'The module "%s" referenced in the resource path "%s" was not '.
+                'found. Maybe the module is not installed?',
+                $refModuleName,
                 $relativePath
             ));
         }
 
-        $refPackage = $packages->get($refPackageName);
+        $refModule = $modules->get($refModuleName);
 
-        return $refPackage->getInstallPath().'/'.substr($relativePath, $pos + 1);
+        return $refModule->getInstallPath().'/'.substr($relativePath, $pos + 1);
     }
 
-    private function assertFileExists($absolutePath, $relativePath, Package $containingPackage)
+    private function assertFileExists($absolutePath, $relativePath, Module $containingModule)
     {
         if (!file_exists($absolutePath)) {
             throw new FileNotFoundException(sprintf(
-                'The path %s mapped to %s by package "%s" does not exist.',
+                'The path %s mapped to %s by module "%s" does not exist.',
                 $relativePath,
                 $this->repositoryPath,
-                $containingPackage->getName()
+                $containingModule->getName()
             ));
         }
     }

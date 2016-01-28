@@ -68,8 +68,8 @@ class PathConflict
             throw new NotLoadedException('The passed mapping must be loaded.');
         }
 
-        $packageName = $mapping->getContainingPackage()->getName();
-        $previousMapping = isset($this->mappings[$packageName]) ? $this->mappings[$packageName] : null;
+        $moduleName = $mapping->getContainingModule()->getName();
+        $previousMapping = isset($this->mappings[$moduleName]) ? $this->mappings[$moduleName] : null;
 
         if ($previousMapping === $mapping) {
             return;
@@ -79,7 +79,7 @@ class PathConflict
             $previousMapping->removeConflict($this);
         }
 
-        $this->mappings[$packageName] = $mapping;
+        $this->mappings[$moduleName] = $mapping;
         $mapping->addConflict($this);
     }
 
@@ -113,13 +113,13 @@ class PathConflict
             throw new NotLoadedException('The passed mapping must be loaded.');
         }
 
-        $packageName = $mapping->getContainingPackage()->getName();
+        $moduleName = $mapping->getContainingModule()->getName();
 
-        if (!isset($this->mappings[$packageName]) || $mapping !== $this->mappings[$packageName]) {
+        if (!isset($this->mappings[$moduleName]) || $mapping !== $this->mappings[$moduleName]) {
             return;
         }
 
-        unset($this->mappings[$packageName]);
+        unset($this->mappings[$moduleName]);
         $mapping->removeConflict($this);
 
         // Conflict was resolved

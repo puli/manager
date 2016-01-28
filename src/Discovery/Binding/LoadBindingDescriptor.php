@@ -12,7 +12,7 @@
 namespace Puli\Manager\Discovery\Binding;
 
 use Puli\Manager\Api\Discovery\BindingDescriptor;
-use Puli\Manager\Api\Package\Package;
+use Puli\Manager\Api\Module\Module;
 use Puli\Manager\Discovery\Type\BindingTypeDescriptorCollection;
 use Puli\Manager\Transaction\AtomicOperation;
 
@@ -31,9 +31,9 @@ class LoadBindingDescriptor implements AtomicOperation
     private $bindingDescriptor;
 
     /**
-     * @var Package
+     * @var Module
      */
-    private $containingPackage;
+    private $containingModule;
 
     /**
      * @var BindingDescriptorCollection
@@ -50,10 +50,10 @@ class LoadBindingDescriptor implements AtomicOperation
      */
     private $previousDescriptor;
 
-    public function __construct(BindingDescriptor $bindingDescriptor, Package $containingPackage, BindingDescriptorCollection $bindingDescriptors, BindingTypeDescriptorCollection $typeDescriptors)
+    public function __construct(BindingDescriptor $bindingDescriptor, Module $containingModule, BindingDescriptorCollection $bindingDescriptors, BindingTypeDescriptorCollection $typeDescriptors)
     {
         $this->bindingDescriptor = $bindingDescriptor;
-        $this->containingPackage = $containingPackage;
+        $this->containingModule = $containingModule;
         $this->bindingDescriptors = $bindingDescriptors;
         $this->typeDescriptors = $typeDescriptors;
     }
@@ -73,7 +73,7 @@ class LoadBindingDescriptor implements AtomicOperation
             ? $this->typeDescriptors->getFirst($typeName)
             : null;
 
-        $this->bindingDescriptor->load($this->containingPackage, $typeDescriptor);
+        $this->bindingDescriptor->load($this->containingModule, $typeDescriptor);
 
         $uuid = $this->bindingDescriptor->getUuid();
 

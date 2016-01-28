@@ -12,7 +12,7 @@
 namespace Puli\Manager\Discovery\Type;
 
 use Puli\Manager\Api\Discovery\BindingTypeDescriptor;
-use Puli\Manager\Api\Package\Package;
+use Puli\Manager\Api\Module\Module;
 use Puli\Manager\Transaction\AtomicOperation;
 
 /**
@@ -30,9 +30,9 @@ class LoadTypeDescriptor implements AtomicOperation
     private $typeDescriptor;
 
     /**
-     * @var Package
+     * @var Module
      */
-    private $containingPackage;
+    private $containingModule;
 
     /**
      * @var BindingTypeDescriptorCollection
@@ -44,10 +44,10 @@ class LoadTypeDescriptor implements AtomicOperation
      */
     private $previousDescriptor;
 
-    public function __construct(BindingTypeDescriptor $typeDescriptor, Package $containingPackage, BindingTypeDescriptorCollection $types)
+    public function __construct(BindingTypeDescriptor $typeDescriptor, Module $containingModule, BindingTypeDescriptorCollection $types)
     {
         $this->typeDescriptor = $typeDescriptor;
-        $this->containingPackage = $containingPackage;
+        $this->containingModule = $containingModule;
         $this->typeDescriptors = $types;
     }
 
@@ -62,14 +62,14 @@ class LoadTypeDescriptor implements AtomicOperation
         }
 
         // never fails with the check before
-        $this->typeDescriptor->load($this->containingPackage);
+        $this->typeDescriptor->load($this->containingModule);
 
         $typeName = $this->typeDescriptor->getTypeName();
-        $packageName = $this->containingPackage->getName();
+        $moduleName = $this->containingModule->getName();
 
-        if ($this->typeDescriptors->contains($typeName, $packageName)) {
+        if ($this->typeDescriptors->contains($typeName, $moduleName)) {
             // never fails with the check before
-            $this->previousDescriptor = $this->typeDescriptors->get($typeName, $packageName);
+            $this->previousDescriptor = $this->typeDescriptors->get($typeName, $moduleName);
         }
 
         // never fails
@@ -96,7 +96,7 @@ class LoadTypeDescriptor implements AtomicOperation
             $this->typeDescriptors->add($this->previousDescriptor);
         } else {
             // never fails
-            $this->typeDescriptors->remove($typeName, $this->containingPackage->getName());
+            $this->typeDescriptors->remove($typeName, $this->containingModule->getName());
         }
     }
 }

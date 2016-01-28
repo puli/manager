@@ -27,19 +27,19 @@ class DuplicatePathMappingException extends RuntimeException
      * Creates an exception for a duplicate repository path.
      *
      * @param string         $repositoryPath The mapped repository path.
-     * @param string         $packageName    The name of the package containing
+     * @param string         $moduleName     The name of the module containing
      *                                       the mapping.
      * @param Exception|null $cause          The exception that caused this
      *                                       exception.
      *
      * @return static The created exception.
      */
-    public static function forRepositoryPath($repositoryPath, $packageName, Exception $cause = null)
+    public static function forRepositoryPath($repositoryPath, $moduleName, Exception $cause = null)
     {
         return new static(sprintf(
-            'The path "%s" is already mapped in package "%s".',
+            'The path "%s" is already mapped in module "%s".',
             $repositoryPath,
-            $packageName
+            $moduleName
         ), 0, $cause);
     }
 }

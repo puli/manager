@@ -15,15 +15,15 @@ use OutOfBoundsException;
 use Puli\Discovery\Api\Type\BindingType;
 use Puli\Discovery\Api\Type\NoSuchParameterException;
 use Puli\Manager\Api\AlreadyLoadedException;
+use Puli\Manager\Api\Module\Module;
 use Puli\Manager\Api\NotLoadedException;
-use Puli\Manager\Api\Package\Package;
 use Puli\Manager\Assert\Assert;
 
 /**
  * Describes a binding type.
  *
  * This class contains a high-level model of {@link BindingType} as it is used
- * in this package.
+ * in this module.
  *
  * @since  1.0
  *
@@ -54,9 +54,9 @@ class BindingTypeDescriptor
     private $state;
 
     /**
-     * @var Package
+     * @var Module
      */
-    private $containingPackage;
+    private $containingModule;
 
     /**
      * Creates a binding type descriptor.
@@ -91,18 +91,18 @@ class BindingTypeDescriptor
     /**
      * Loads the type descriptor.
      *
-     * @param Package $containingPackage The package that contains the type
-     *                                   descriptor.
+     * @param Module $containingModule The module that contains the type
+     *                                 descriptor.
      *
      * @throws AlreadyLoadedException If the descriptor is already loaded.
      */
-    public function load(Package $containingPackage)
+    public function load(Module $containingModule)
     {
         if (null !== $this->state) {
             throw new AlreadyLoadedException('The type descriptor is already loaded.');
         }
 
-        $this->containingPackage = $containingPackage;
+        $this->containingModule = $containingModule;
         $this->state = BindingTypeState::ENABLED;
     }
 
@@ -119,7 +119,7 @@ class BindingTypeDescriptor
             throw new NotLoadedException('The type descriptor is not loaded.');
         }
 
-        $this->containingPackage = null;
+        $this->containingModule = null;
         $this->state = null;
     }
 
@@ -246,22 +246,22 @@ class BindingTypeDescriptor
     }
 
     /**
-     * Returns the package that contains the descriptor.
+     * Returns the module that contains the descriptor.
      *
      * The method {@link load()} needs to be called before calling this method,
      * otherwise an exception is thrown.
      *
-     * @return Package The containing package.
+     * @return Module The containing module.
      *
      * @throws NotLoadedException If the descriptor is not loaded.
      */
-    public function getContainingPackage()
+    public function getContainingModule()
     {
-        if (null === $this->containingPackage) {
+        if (null === $this->containingModule) {
             throw new NotLoadedException('The type descriptor is not loaded.');
         }
 
-        return $this->containingPackage;
+        return $this->containingModule;
     }
 
     /**

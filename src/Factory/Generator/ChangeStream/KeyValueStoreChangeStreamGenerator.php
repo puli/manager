@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the vendor/project package.
+ * This file is part of the puli/manager package.
  *
  * (c) Bernhard Schussek <bschussek@gmail.com>
  *

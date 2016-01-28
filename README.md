@@ -37,20 +37,20 @@ $repoManager->buildRepository();
 
 The [`RepositoryManager`] also supports methods to manipulate the puli.json.
 
-Packages
---------
+Modules
+-------
 
-A puli.json configuration can also be placed in any package installed in your
-project. This package needs to be registered with Puli with the 
-[`PackageManager`]:
+A puli.json configuration can also be placed in any module installed in your
+project. This module needs to be registered with Puli with the 
+[`ModuleManager`]:
 
 ```php
-$packageManager = $puli->getPackageManager();
+$moduleManager = $puli->getModuleManager();
 
-$packageManager->installPackage('path/to/package', 'vendor/package-name');
+$moduleManager->installModule('path/to/module', 'vendor/module-name');
 ```
 
-Usually, packages are installed automatically by Puli's [Composer Plugin].
+Usually, modules are installed automatically by Puli's [Composer Plugin].
 
 Managers
 --------
@@ -64,9 +64,9 @@ Class                      | Description
 [`AssetManager`]           | Manages asset mappings used by the [`UrlGenerator`]
 [`ServerManager`]          | Manages servers used by the [`UrlGenerator`]
 [`FactoryManager`]         | Manages the generation of the `GeneratedPuliFactory` class
-[`PackageManager`]         | Manages the installed packages
+[`ModuleManager`]          | Manages the installed modules
 [`ConfigFileManager`]      | Manages changes to a global `config.json` file
-[`RootPackageFileManager`] | Manages changes to the `puli.json` file of the project
+[`RootModuleFileManager`]  | Manages changes to the `puli.json` file of the project
 
 Authors
 -------
@@ -117,13 +117,13 @@ All contents of this package are licensed under the [MIT license].
 [@webmozart]: https://twitter.com/webmozart
 [MIT license]: LICENSE
 [`RepositoryManager`]: http://api.puli.io/latest/class-Puli.Manager.Api.Repository.RepositoryManager.html
-[`PackageManager`]: http://api.puli.io/latest/class-Puli.Manager.Api.Package.PackageManager.html
+[`ModuleManager`]: http://api.puli.io/latest/class-Puli.Manager.Api.Module.ModuleManager.html
 [`DiscoveryManager`]: http://api.puli.io/latest/class-Puli.Manager.Api.Discovery.DiscoveryManager.html
 [`AssetManager`]: http://api.puli.io/latest/class-Puli.Manager.Api.Asset.AssetManager.html
 [`ServerManager`]: http://api.puli.io/latest/class-Puli.Manager.Api.Server.ServerManager.html
 [`FactoryManager`]: http://api.puli.io/latest/class-Puli.Manager.Api.Factory.FactoryManager.html
 [`ConfigFileManager`]: http://api.puli.io/latest/class-Puli.Manager.Api.Config.ConfigFileManager.html
-[`RootPackageFileManager`]: http://api.puli.io/latest/class-Puli.Manager.Api.Package.RootPackageFileManager.html
+[`RootModuleFileManager`]: http://api.puli.io/latest/class-Puli.Manager.Api.Module.RootModuleFileManager.html
 [`ResourceRepository`]: http://api.puli.io/latest/class-Puli.Repository.Api.ResourceRepository.html
 [`Discovery`]: http://api.puli.io/latest/class-Puli.Discovery.Api.Discovery.html
 [`UrlGenerator`]: http://api.puli.io/latest/class-Puli.UrlGenerator.Api.UrlGenerator.html

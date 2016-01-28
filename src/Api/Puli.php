@@ -24,9 +24,9 @@ use Puli\Manager\Api\Discovery\DiscoveryManager;
 use Puli\Manager\Api\Factory\FactoryManager;
 use Puli\Manager\Api\Installation\InstallationManager;
 use Puli\Manager\Api\Installer\InstallerManager;
-use Puli\Manager\Api\Package\PackageManager;
-use Puli\Manager\Api\Package\RootPackageFile;
-use Puli\Manager\Api\Package\RootPackageFileManager;
+use Puli\Manager\Api\Module\ModuleManager;
+use Puli\Manager\Api\Module\RootModuleFile;
+use Puli\Manager\Api\Module\RootModuleFileManager;
 use Puli\Manager\Api\Repository\RepositoryManager;
 use Puli\Manager\Api\Server\ServerManager;
 use Puli\Manager\Api\Storage\Storage;
@@ -42,15 +42,15 @@ use Puli\Manager\Factory\FactoryManagerImpl;
 use Puli\Manager\Factory\Generator\DefaultGeneratorRegistry;
 use Puli\Manager\Filesystem\FilesystemStorage;
 use Puli\Manager\Installation\InstallationManagerImpl;
-use Puli\Manager\Installer\PackageFileInstallerManager;
-use Puli\Manager\Package\PackageFileConverter;
-use Puli\Manager\Package\PackageFileStorage;
-use Puli\Manager\Package\PackageManagerImpl;
-use Puli\Manager\Package\RootPackageFileConverter;
-use Puli\Manager\Package\RootPackageFileManagerImpl;
+use Puli\Manager\Installer\ModuleFileInstallerManager;
+use Puli\Manager\Module\ModuleFileConverter;
+use Puli\Manager\Module\ModuleFileStorage;
+use Puli\Manager\Module\ModuleManagerImpl;
+use Puli\Manager\Module\RootModuleFileConverter;
+use Puli\Manager\Module\RootModuleFileManagerImpl;
 use Puli\Manager\Php\ClassWriter;
 use Puli\Manager\Repository\RepositoryManagerImpl;
-use Puli\Manager\Server\PackageFileServerManager;
+use Puli\Manager\Server\ModuleFileServerManager;
 use Puli\Manager\Util\System;
 use Puli\Repository\Api\EditableRepository;
 use Puli\Repository\Api\ResourceRepository;
@@ -70,18 +70,18 @@ use Webmozart\PathUtil\Path;
 /**
  * The Puli service locator.
  *
- * Use this class to access the managers provided by this package:
+ * Use this class to access the managers provided by this module:
  *
  * ```php
  * $puli = new Puli(getcwd());
  * $puli->start();
  *
- * $packageManager = $puli->getPackageManager();
+ * $moduleManager = $puli->getModuleManager();
  * ```
  *
  * The `Puli` class either operates in the global or a project context:
  *
- *  * The "global context" is not tied to a specific root package. A global
+ *  * The "global context" is not tied to a specific root module. A global
  *    context only loads the settings of the "config.json" file in the home
  *    directory. The `Puli` class operates in the global context if no
  *    project root directory is passed to the constructor. In the global
@@ -95,9 +95,9 @@ use Webmozart\PathUtil\Path;
  *
  *  * The "config file manager" allows you to modify entries of the
  *    "config.json" file in the home directory.
- *  * The "package file manager" manages modifications to the "puli.json" file
+ *  * The "module file manager" manages modifications to the "puli.json" file
  *    of a Puli project.
- *  * The "package manager" manages the package repository of a Puli project.
+ *  * The "module manager" manages the module repository of a Puli project.
  *  * The "repository manager" manages the resource repository of a Puli
  *    project.
  *  * The "discovery manager" manages the resource discovery of a Puli project.
@@ -167,14 +167,14 @@ class Puli
     private $configFileManager;
 
     /**
-     * @var RootPackageFileManager
+     * @var RootModuleFileManager
      */
-    private $rootPackageFileManager;
+    private $rootModuleFileManager;
 
     /**
-     * @var PackageManager
+     * @var ModuleManager
      */
-    private $packageManager;
+    private $moduleManager;
 
     /**
      * @var RepositoryManager
@@ -227,29 +227,29 @@ class Puli
     private $configFileConverter;
 
     /**
-     * @var PackageFileStorage|null
+     * @var ModuleFileStorage|null
      */
-    private $packageFileStorage;
+    private $moduleFileStorage;
 
     /**
      * @var JsonConverter|null
      */
-    private $packageFileConverter;
+    private $moduleFileConverter;
 
     /**
      * @var JsonConverter|null
      */
-    private $legacyPackageFileConverter;
+    private $legacyModuleFileConverter;
 
     /**
      * @var JsonConverter|null
      */
-    private $rootPackageFileConverter;
+    private $rootModuleFileConverter;
 
     /**
      * @var JsonConverter|null
      */
-    private $legacyRootPackageFileConverter;
+    private $legacyRootModuleFileConverter;
 
     /**
      * @var JsonEncoder
@@ -597,7 +597,7 @@ class Puli
             );
 
             // Don't set via the constructor to prevent cyclic dependencies
-            $this->factoryManager->setPackages($this->getPackageManager()->getPackages());
+            $this->factoryManager->setModules($this->getModuleManager()->getModules());
             $this->factoryManager->setServers($this->getServerManager()->getServers());
         }
 
@@ -626,45 +626,45 @@ class Puli
     }
 
     /**
-     * Returns the root package file manager.
+     * Returns the root module file manager.
      *
-     * @return RootPackageFileManager The package file manager.
+     * @return RootModuleFileManager The module file manager.
      */
-    public function getRootPackageFileManager()
+    public function getRootModuleFileManager()
     {
         if (!$this->started) {
             throw new LogicException('Puli was not started');
         }
 
-        if (!$this->rootPackageFileManager && $this->context instanceof ProjectContext) {
-            $this->rootPackageFileManager = new RootPackageFileManagerImpl(
+        if (!$this->rootModuleFileManager && $this->context instanceof ProjectContext) {
+            $this->rootModuleFileManager = new RootModuleFileManagerImpl(
                 $this->context,
-                $this->getPackageFileStorage()
+                $this->getModuleFileStorage()
             );
         }
 
-        return $this->rootPackageFileManager;
+        return $this->rootModuleFileManager;
     }
 
     /**
-     * Returns the package manager.
+     * Returns the module manager.
      *
-     * @return PackageManager The package manager.
+     * @return ModuleManager The module manager.
      */
-    public function getPackageManager()
+    public function getModuleManager()
     {
         if (!$this->started) {
             throw new LogicException('Puli was not started');
         }
 
-        if (!$this->packageManager && $this->context instanceof ProjectContext) {
-            $this->packageManager = new PackageManagerImpl(
+        if (!$this->moduleManager && $this->context instanceof ProjectContext) {
+            $this->moduleManager = new ModuleManagerImpl(
                 $this->context,
-                $this->getPackageFileStorage()
+                $this->getModuleFileStorage()
             );
         }
 
-        return $this->packageManager;
+        return $this->moduleManager;
     }
 
     /**
@@ -682,8 +682,8 @@ class Puli
             $this->repositoryManager = new RepositoryManagerImpl(
                 $this->context,
                 $this->getRepository(),
-                $this->getPackageManager()->findPackages(Expr::method('isEnabled', Expr::same(true))),
-                $this->getPackageFileStorage()
+                $this->getModuleManager()->findModules(Expr::method('isEnabled', Expr::same(true))),
+                $this->getModuleFileStorage()
             );
         }
 
@@ -705,8 +705,8 @@ class Puli
             $this->discoveryManager = new DiscoveryManagerImpl(
                 $this->context,
                 $this->getDiscovery(),
-                $this->getPackageManager()->findPackages(Expr::method('isEnabled', Expr::same(true))),
-                $this->getPackageFileStorage(),
+                $this->getModuleManager()->findModules(Expr::method('isEnabled', Expr::same(true))),
+                $this->getModuleFileStorage(),
                 $this->logger
             );
         }
@@ -770,9 +770,9 @@ class Puli
         }
 
         if (!$this->installerManager && $this->context instanceof ProjectContext) {
-            $this->installerManager = new PackageFileInstallerManager(
-                $this->getRootPackageFileManager(),
-                $this->getPackageManager()->getPackages()
+            $this->installerManager = new ModuleFileInstallerManager(
+                $this->getRootModuleFileManager(),
+                $this->getModuleManager()->getModules()
             );
         }
 
@@ -791,8 +791,8 @@ class Puli
         }
 
         if (!$this->serverManager && $this->context instanceof ProjectContext) {
-            $this->serverManager = new PackageFileServerManager(
-                $this->getRootPackageFileManager(),
+            $this->serverManager = new ModuleFileServerManager(
+                $this->getRootModuleFileManager(),
                 $this->getInstallerManager()
             );
         }
@@ -852,87 +852,87 @@ class Puli
     }
 
     /**
-     * Returns the package file converter.
+     * Returns the module file converter.
      *
-     * @return JsonConverter The package file converter.
+     * @return JsonConverter The module file converter.
      */
-    public function getPackageFileConverter()
+    public function getModuleFileConverter()
     {
-        if (!$this->packageFileConverter) {
-            $this->packageFileConverter = new ValidatingConverter(
-                new PackageFileConverter(),
-                __DIR__.'/../../res/schema/package-schema-'.PackageFileConverter::VERSION.'.json'
+        if (!$this->moduleFileConverter) {
+            $this->moduleFileConverter = new ValidatingConverter(
+                new ModuleFileConverter(),
+                __DIR__.'/../../res/schema/module-schema-'.ModuleFileConverter::VERSION.'.json'
             );
         }
 
-        return $this->packageFileConverter;
+        return $this->moduleFileConverter;
     }
 
     /**
-     * Returns the package file serializer with support for legacy versions.
+     * Returns the module file serializer with support for legacy versions.
      *
-     * @return JsonConverter The package file converter.
+     * @return JsonConverter The module file converter.
      */
-    public function getLegacyPackageFileConverter()
+    public function getLegacyModuleFileConverter()
     {
-        if (!$this->legacyPackageFileConverter) {
-            $this->legacyPackageFileConverter = new ValidatingConverter(
+        if (!$this->legacyModuleFileConverter) {
+            $this->legacyModuleFileConverter = new ValidatingConverter(
                 new MigratingConverter(
-                    $this->getPackageFileConverter(),
-                    PackageFileConverter::VERSION,
+                    $this->getModuleFileConverter(),
+                    ModuleFileConverter::VERSION,
                     new MigrationManager(array(
                         // add future migrations here
                     ))
                 ),
                 function (stdClass $jsonData) {
-                    return __DIR__.'/../../res/schema/package-schema-'.$jsonData->version.'.json';
+                    return __DIR__.'/../../res/schema/module-schema-'.$jsonData->version.'.json';
                 }
             );
         }
 
-        return $this->legacyPackageFileConverter;
+        return $this->legacyModuleFileConverter;
     }
 
     /**
-     * Returns the package file converter.
+     * Returns the module file converter.
      *
-     * @return JsonConverter The package file converter.
+     * @return JsonConverter The module file converter.
      */
-    public function getRootPackageFileConverter()
+    public function getRootModuleFileConverter()
     {
-        if (!$this->rootPackageFileConverter) {
-            $this->rootPackageFileConverter = new ValidatingConverter(
-                new RootPackageFileConverter(),
-                __DIR__.'/../../res/schema/package-schema-'.RootPackageFileConverter::VERSION.'.json'
+        if (!$this->rootModuleFileConverter) {
+            $this->rootModuleFileConverter = new ValidatingConverter(
+                new RootModuleFileConverter(),
+                __DIR__.'/../../res/schema/module-schema-'.RootModuleFileConverter::VERSION.'.json'
             );
         }
 
-        return $this->rootPackageFileConverter;
+        return $this->rootModuleFileConverter;
     }
 
     /**
-     * Returns the package file serializer with support for legacy versions.
+     * Returns the module file serializer with support for legacy versions.
      *
-     * @return JsonConverter The package file converter.
+     * @return JsonConverter The module file converter.
      */
-    public function getLegacyRootPackageFileConverter()
+    public function getLegacyRootModuleFileConverter()
     {
-        if (!$this->legacyRootPackageFileConverter) {
-            $this->legacyRootPackageFileConverter = new ValidatingConverter(
+        if (!$this->legacyRootModuleFileConverter) {
+            $this->legacyRootModuleFileConverter = new ValidatingConverter(
                 new MigratingConverter(
-                    $this->getRootPackageFileConverter(),
-                    RootPackageFileConverter::VERSION,
+                    $this->getRootModuleFileConverter(),
+                    RootModuleFileConverter::VERSION,
                     new MigrationManager(array(
                         // add future migrations here
                     ))
                 ),
                 function (stdClass $jsonData) {
-                    return __DIR__.'/../../res/schema/package-schema-'.$jsonData->version.'.json';
+                    return __DIR__.'/../../res/schema/module-schema-'.$jsonData->version.'.json';
                 }
             );
         }
 
-        return $this->legacyRootPackageFileConverter;
+        return $this->legacyRootModuleFileConverter;
     }
 
     /**
@@ -968,7 +968,7 @@ class Puli
 
     private function activatePlugins()
     {
-        foreach ($this->context->getRootPackageFile()->getPluginClasses() as $pluginClass) {
+        foreach ($this->context->getRootModuleFile()->getPluginClasses() as $pluginClass) {
             $this->validatePluginClass($pluginClass);
 
             /** @var PuliPlugin $plugin */
@@ -1024,10 +1024,10 @@ class Puli
         }
 
         // Create a storage without the factory manager
-        $packageFileStorage = new PackageFileStorage(
+        $moduleFileStorage = new ModuleFileStorage(
             $this->getStorage(),
-            $this->getLegacyPackageFileConverter(),
-            $this->getLegacyRootPackageFileConverter(),
+            $this->getLegacyModuleFileConverter(),
+            $this->getLegacyRootModuleFileConverter(),
             $this->getJsonEncoder(),
             $this->getJsonDecoder()
         );
@@ -1036,14 +1036,14 @@ class Puli
         $rootFilePath = $this->rootDir.'/puli.json';
 
         try {
-            $rootPackageFile = $packageFileStorage->loadRootPackageFile($rootFilePath, $baseConfig);
+            $rootModuleFile = $moduleFileStorage->loadRootModuleFile($rootFilePath, $baseConfig);
         } catch (FileNotFoundException $e) {
-            $rootPackageFile = new RootPackageFile(null, $rootFilePath, $baseConfig);
+            $rootModuleFile = new RootModuleFile(null, $rootFilePath, $baseConfig);
         }
 
-        $config = new EnvConfig($rootPackageFile->getConfig());
+        $config = new EnvConfig($rootModuleFile->getConfig());
 
-        return new ProjectContext($homeDir, $rootDir, $config, $rootPackageFile, $configFile, $this->dispatcher, $env);
+        return new ProjectContext($homeDir, $rootDir, $config, $rootModuleFile, $configFile, $this->dispatcher, $env);
     }
 
     /**
@@ -1067,24 +1067,24 @@ class Puli
     }
 
     /**
-     * Returns the package file storage.
+     * Returns the module file storage.
      *
-     * @return PackageFileStorage The package file storage.
+     * @return ModuleFileStorage The module file storage.
      */
-    private function getPackageFileStorage()
+    private function getModuleFileStorage()
     {
-        if (!$this->packageFileStorage) {
-            $this->packageFileStorage = new PackageFileStorage(
+        if (!$this->moduleFileStorage) {
+            $this->moduleFileStorage = new ModuleFileStorage(
                 $this->getStorage(),
-                $this->getLegacyPackageFileConverter(),
-                $this->getLegacyRootPackageFileConverter(),
+                $this->getLegacyModuleFileConverter(),
+                $this->getLegacyRootModuleFileConverter(),
                 $this->getJsonEncoder(),
                 $this->getJsonDecoder(),
                 $this->getFactoryManager()
             );
         }
 
-        return $this->packageFileStorage;
+        return $this->moduleFileStorage;
     }
 
     /**

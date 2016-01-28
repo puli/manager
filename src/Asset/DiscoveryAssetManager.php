@@ -75,7 +75,7 @@ class DiscoveryAssetManager implements AssetManager
         if (!$this->discoveryManager->hasTypeDescriptor(DiscoveryUrlGenerator::BINDING_TYPE)) {
             throw new RuntimeException(sprintf(
                 'The binding type "%s" was not found. Please install the '.
-                '"puli/url-generator" package with Composer:'."\n\n".
+                '"puli/url-generator" module with Composer:'."\n\n".
                 '    $ composer require puli/url-generator',
                 DiscoveryUrlGenerator::BINDING_TYPE
             ));

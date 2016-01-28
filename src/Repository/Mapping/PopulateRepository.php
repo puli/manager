@@ -61,15 +61,15 @@ class PopulateRepository implements AtomicOperation
     public function execute()
     {
         // Quit if no mappings exist
-        if (!$packageNames = $this->mappings->getPackageNames()) {
+        if (!$moduleNames = $this->mappings->getModuleNames()) {
             return;
         }
 
-        $sortedNames = $this->overrideGraph->getSortedPackageNames($packageNames);
+        $sortedNames = $this->overrideGraph->getSortedModuleNames($moduleNames);
 
         try {
-            foreach ($sortedNames as $packageName) {
-                foreach ($this->getEnabledMappingsByPackageName($packageName) as $repositoryPath => $mapping) {
+            foreach ($sortedNames as $moduleName) {
+                foreach ($this->getEnabledMappingsByModuleName($moduleName) as $repositoryPath => $mapping) {
                     foreach ($mapping->getFilesystemPaths() as $filesystemPath) {
                         $this->repo->add($repositoryPath, $this->createResource($filesystemPath));
                         $this->added = true;
@@ -94,15 +94,15 @@ class PopulateRepository implements AtomicOperation
     }
 
     /**
-     * @param string $packageName
+     * @param string $moduleName
      *
      * @return PathMapping[]
      */
-    private function getEnabledMappingsByPackageName($packageName)
+    private function getEnabledMappingsByModuleName($moduleName)
     {
         $mappingsToAdd = array();
 
-        foreach ($this->mappings->listByPackageName($packageName) as $repositoryPath => $mapping) {
+        foreach ($this->mappings->listByModuleName($moduleName) as $repositoryPath => $mapping) {
             if ($mapping->isEnabled()) {
                 // Remove duplicates
                 $mappingsToAdd[$mapping->getRepositoryPath()] = $mapping;

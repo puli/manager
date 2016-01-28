@@ -14,7 +14,7 @@ namespace Puli\Manager\Conflict;
 use RuntimeException;
 
 /**
- * Thrown when a cyclic dependency is detected in the package graph.
+ * Thrown when a cyclic dependency is detected in the module graph.
  *
  * @since  1.0
  *

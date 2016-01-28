@@ -31,7 +31,7 @@ final class PathMappingState
     const NOT_FOUND = 2;
 
     /**
-     * State: The mapping conflicts with a mapping in another package.
+     * State: The mapping conflicts with a mapping in another module.
      */
     const CONFLICT = 3;
 

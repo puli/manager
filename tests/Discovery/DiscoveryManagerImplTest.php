@@ -20,14 +20,14 @@ use Puli\Discovery\Binding\ResourceBinding;
 use Puli\Manager\Api\Discovery\BindingDescriptor;
 use Puli\Manager\Api\Discovery\BindingTypeDescriptor;
 use Puli\Manager\Api\Discovery\DiscoveryManager;
-use Puli\Manager\Api\Package\InstallInfo;
-use Puli\Manager\Api\Package\Package;
-use Puli\Manager\Api\Package\PackageCollection;
-use Puli\Manager\Api\Package\PackageFile;
-use Puli\Manager\Api\Package\RootPackage;
-use Puli\Manager\Api\Package\RootPackageFile;
+use Puli\Manager\Api\Module\InstallInfo;
+use Puli\Manager\Api\Module\Module;
+use Puli\Manager\Api\Module\ModuleCollection;
+use Puli\Manager\Api\Module\ModuleFile;
+use Puli\Manager\Api\Module\RootModule;
+use Puli\Manager\Api\Module\RootModuleFile;
 use Puli\Manager\Discovery\DiscoveryManagerImpl;
-use Puli\Manager\Package\PackageFileStorage;
+use Puli\Manager\Module\ModuleFileStorage;
 use Puli\Manager\Tests\Discovery\Fixtures\Bar;
 use Puli\Manager\Tests\Discovery\Fixtures\Baz;
 use Puli\Manager\Tests\Discovery\Fixtures\Foo;
@@ -55,32 +55,32 @@ class DiscoveryManagerImplTest extends ManagerTestCase
     /**
      * @var string
      */
-    private $packageDir1;
+    private $moduleDir1;
 
     /**
      * @var string
      */
-    private $packageDir2;
+    private $moduleDir2;
 
     /**
      * @var string
      */
-    private $packageDir3;
+    private $moduleDir3;
 
     /**
-     * @var PackageFile
+     * @var ModuleFile
      */
-    private $packageFile1;
+    private $moduleFile1;
 
     /**
-     * @var PackageFile
+     * @var ModuleFile
      */
-    private $packageFile2;
+    private $moduleFile2;
 
     /**
-     * @var PackageFile
+     * @var ModuleFile
      */
-    private $packageFile3;
+    private $moduleFile3;
 
     /**
      * @var InstallInfo
@@ -98,14 +98,14 @@ class DiscoveryManagerImplTest extends ManagerTestCase
     private $installInfo3;
 
     /**
-     * @var PackageCollection
+     * @var ModuleCollection
      */
-    private $packages;
+    private $modules;
 
     /**
-     * @var PHPUnit_Framework_MockObject_MockObject|PackageFileStorage
+     * @var PHPUnit_Framework_MockObject_MockObject|ModuleFileStorage
      */
-    private $packageFileStorage;
+    private $moduleFileStorage;
 
     /**
      * @var PHPUnit_Framework_MockObject_MockObject|LoggerInterface
@@ -124,23 +124,23 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $filesystem = new Filesystem();
         $filesystem->mirror(__DIR__.'/Fixtures', $this->tempDir);
 
-        $this->packageDir1 = $this->tempDir.'/package1';
-        $this->packageDir2 = $this->tempDir.'/package2';
-        $this->packageDir3 = $this->tempDir.'/package3';
+        $this->moduleDir1 = $this->tempDir.'/module1';
+        $this->moduleDir2 = $this->tempDir.'/module2';
+        $this->moduleDir3 = $this->tempDir.'/module3';
 
-        $this->packageFile1 = new PackageFile();
-        $this->packageFile2 = new PackageFile();
-        $this->packageFile3 = new PackageFile();
+        $this->moduleFile1 = new ModuleFile();
+        $this->moduleFile2 = new ModuleFile();
+        $this->moduleFile3 = new ModuleFile();
 
-        $this->installInfo1 = new InstallInfo('vendor/package1', $this->packageDir1);
-        $this->installInfo2 = new InstallInfo('vendor/package2', $this->packageDir2);
-        $this->installInfo3 = new InstallInfo('vendor/package3', $this->packageDir3);
+        $this->installInfo1 = new InstallInfo('vendor/module1', $this->moduleDir1);
+        $this->installInfo2 = new InstallInfo('vendor/module2', $this->moduleDir2);
+        $this->installInfo3 = new InstallInfo('vendor/module3', $this->moduleDir3);
 
-        $this->packages = new PackageCollection();
+        $this->modules = new ModuleCollection();
 
         $this->logger = $this->getMock('Psr\Log\LoggerInterface');
 
-        $this->packageFileStorage = $this->getMockBuilder('Puli\Manager\Package\PackageFileStorage')
+        $this->moduleFileStorage = $this->getMockBuilder('Puli\Manager\Module\ModuleFileStorage')
             ->disableOriginalConstructor()
             ->getMock();
 
@@ -162,20 +162,20 @@ class DiscoveryManagerImplTest extends ManagerTestCase
 
         $binding = new ResourceBinding('/path', Foo::clazz);
 
-        $this->rootPackageFile->addBindingDescriptor(new BindingDescriptor($binding));
-        $this->packageFile1->addBindingDescriptor(new BindingDescriptor($binding));
+        $this->rootModuleFile->addBindingDescriptor(new BindingDescriptor($binding));
+        $this->moduleFile1->addBindingDescriptor(new BindingDescriptor($binding));
 
         $this->manager->getBindingDescriptors();
     }
 
-    public function testLoadIgnoresPackagesWithoutPackageFile()
+    public function testLoadIgnoresModulesWithoutModuleFile()
     {
-        $this->rootPackageFile->addInstallInfo($this->installInfo1);
+        $this->rootModuleFile->addInstallInfo($this->installInfo1);
 
-        $this->packages->add(new RootPackage($this->rootPackageFile, $this->rootDir));
-        $this->packages->add(new Package(null, $this->packageDir1, $this->installInfo1));
+        $this->modules->add(new RootModule($this->rootModuleFile, $this->rootDir));
+        $this->modules->add(new Module(null, $this->moduleDir1, $this->installInfo1));
 
-        $this->manager = new DiscoveryManagerImpl($this->context, $this->discovery, $this->packages, $this->packageFileStorage, $this->logger);
+        $this->manager = new DiscoveryManagerImpl($this->context, $this->discovery, $this->modules, $this->moduleFileStorage, $this->logger);
 
         $this->assertEmpty($this->manager->getBindingDescriptors());
         $this->assertEmpty($this->manager->getTypeDescriptors());
@@ -191,11 +191,11 @@ class DiscoveryManagerImplTest extends ManagerTestCase
             ->method('addBindingType')
             ->with($typeDescriptor->getType());
 
-        $this->packageFileStorage->expects($this->once())
-            ->method('saveRootPackageFile')
-            ->with($this->rootPackageFile)
-            ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) use ($typeDescriptor) {
-                $typeDescriptors = $rootPackageFile->getTypeDescriptors();
+        $this->moduleFileStorage->expects($this->once())
+            ->method('saveRootModuleFile')
+            ->with($this->rootModuleFile)
+            ->will($this->returnCallback(function (RootModuleFile $rootModuleFile) use ($typeDescriptor) {
+                $typeDescriptors = $rootModuleFile->getTypeDescriptors();
 
                 PHPUnit_Framework_Assert::assertSame(array($typeDescriptor), $typeDescriptors);
             }));
@@ -214,13 +214,13 @@ class DiscoveryManagerImplTest extends ManagerTestCase
 
         $type = new BindingType(Foo::clazz);
 
-        $this->packageFile1->addTypeDescriptor($typeDescriptor = new BindingTypeDescriptor($type));
+        $this->moduleFile1->addTypeDescriptor($typeDescriptor = new BindingTypeDescriptor($type));
 
         $this->discovery->expects($this->never())
             ->method('addBindingType');
 
-        $this->packageFileStorage->expects($this->never())
-            ->method('saveRootPackageFile');
+        $this->moduleFileStorage->expects($this->never())
+            ->method('saveRootModuleFile');
 
         $this->manager->addRootTypeDescriptor($typeDescriptor);
 
@@ -235,7 +235,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $typeDescriptor1 = new BindingTypeDescriptor($type);
         $typeDescriptor2 = clone $typeDescriptor1;
 
-        $this->packageFile1->addTypeDescriptor($typeDescriptor1);
+        $this->moduleFile1->addTypeDescriptor($typeDescriptor1);
 
         $this->discovery->expects($this->never())
             ->method('addBindingType');
@@ -245,11 +245,11 @@ class DiscoveryManagerImplTest extends ManagerTestCase
             ->method('removeBindingType')
             ->with(Foo::clazz);
 
-        $this->packageFileStorage->expects($this->once())
-            ->method('saveRootPackageFile')
-            ->with($this->rootPackageFile)
-            ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) use ($typeDescriptor2) {
-                $typeDescriptors = $rootPackageFile->getTypeDescriptors();
+        $this->moduleFileStorage->expects($this->once())
+            ->method('saveRootModuleFile')
+            ->with($this->rootModuleFile)
+            ->will($this->returnCallback(function (RootModuleFile $rootModuleFile) use ($typeDescriptor2) {
+                $typeDescriptors = $rootModuleFile->getTypeDescriptors();
 
                 PHPUnit_Framework_Assert::assertSame(array($typeDescriptor2), $typeDescriptors);
             }));
@@ -267,7 +267,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $type = new BindingType(Foo::clazz);
         $binding = new ResourceBinding('/path', Foo::clazz);
 
-        $this->rootPackageFile->addBindingDescriptor(new BindingDescriptor($binding));
+        $this->rootModuleFile->addBindingDescriptor(new BindingDescriptor($binding));
 
         $typeDescriptor = new BindingTypeDescriptor($type);
 
@@ -279,11 +279,11 @@ class DiscoveryManagerImplTest extends ManagerTestCase
             ->method('addBinding')
             ->with($binding);
 
-        $this->packageFileStorage->expects($this->once())
-            ->method('saveRootPackageFile')
-            ->with($this->rootPackageFile)
-            ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) use ($typeDescriptor) {
-                $typeDescriptors = $rootPackageFile->getTypeDescriptors();
+        $this->moduleFileStorage->expects($this->once())
+            ->method('saveRootModuleFile')
+            ->with($this->rootModuleFile)
+            ->will($this->returnCallback(function (RootModuleFile $rootModuleFile) use ($typeDescriptor) {
+                $typeDescriptors = $rootModuleFile->getTypeDescriptors();
 
                 PHPUnit_Framework_Assert::assertSame(array($typeDescriptor), $typeDescriptors);
             }));
@@ -297,7 +297,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
 
         $existingDescriptor = new BindingTypeDescriptor(new BindingType(Bar::clazz));
 
-        $this->rootPackageFile->addTypeDescriptor($existingDescriptor);
+        $this->rootModuleFile->addTypeDescriptor($existingDescriptor);
 
         $typeDescriptor = new BindingTypeDescriptor(new BindingType(Foo::clazz));
 
@@ -309,9 +309,9 @@ class DiscoveryManagerImplTest extends ManagerTestCase
             ->method('removeBindingType')
             ->with(Foo::clazz);
 
-        $this->packageFileStorage->expects($this->once())
-            ->method('saveRootPackageFile')
-            ->with($this->rootPackageFile)
+        $this->moduleFileStorage->expects($this->once())
+            ->method('saveRootModuleFile')
+            ->with($this->rootModuleFile)
             ->willThrowException(new TestException('Some exception'));
 
         try {
@@ -320,7 +320,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         } catch (TestException $e) {
         }
 
-        $this->assertSame(array($existingDescriptor), $this->rootPackageFile->getTypeDescriptors());
+        $this->assertSame(array($existingDescriptor), $this->rootModuleFile->getTypeDescriptors());
 
         $this->assertTrue($existingDescriptor->isEnabled());
         $this->assertFalse($typeDescriptor->isLoaded());
@@ -332,17 +332,17 @@ class DiscoveryManagerImplTest extends ManagerTestCase
 
         $type = new BindingType(Foo::clazz);
 
-        $this->rootPackageFile->addTypeDescriptor($typeDescriptor = new BindingTypeDescriptor($type));
+        $this->rootModuleFile->addTypeDescriptor($typeDescriptor = new BindingTypeDescriptor($type));
 
         $this->discovery->expects($this->once())
             ->method('removeBindingType')
             ->with(Foo::clazz);
 
-        $this->packageFileStorage->expects($this->once())
-            ->method('saveRootPackageFile')
-            ->with($this->rootPackageFile)
-            ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) {
-                $typeDescriptors = $rootPackageFile->getTypeDescriptors();
+        $this->moduleFileStorage->expects($this->once())
+            ->method('saveRootModuleFile')
+            ->with($this->rootModuleFile)
+            ->will($this->returnCallback(function (RootModuleFile $rootModuleFile) {
+                $typeDescriptors = $rootModuleFile->getTypeDescriptors();
 
                 PHPUnit_Framework_Assert::assertSame(array(), $typeDescriptors);
             }));
@@ -359,25 +359,25 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->discovery->expects($this->never())
             ->method('removeBindingType');
 
-        $this->packageFileStorage->expects($this->never())
-            ->method('saveRootPackageFile');
+        $this->moduleFileStorage->expects($this->never())
+            ->method('saveRootModuleFile');
 
         $this->manager->removeRootTypeDescriptor(Foo::clazz);
     }
 
-    public function testRemoveRootTypeDescriptorIgnoresIfNotInRootPackage()
+    public function testRemoveRootTypeDescriptorIgnoresIfNotInRootModule()
     {
         $this->initDefaultManager();
 
         $type = new BindingType(Foo::clazz);
 
-        $this->packageFile1->addTypeDescriptor($typeDescriptor = new BindingTypeDescriptor($type));
+        $this->moduleFile1->addTypeDescriptor($typeDescriptor = new BindingTypeDescriptor($type));
 
         $this->discovery->expects($this->never())
             ->method('removeBindingType');
 
-        $this->packageFileStorage->expects($this->never())
-            ->method('saveRootPackageFile');
+        $this->moduleFileStorage->expects($this->never())
+            ->method('saveRootModuleFile');
 
         $this->manager->removeRootTypeDescriptor(Foo::clazz);
 
@@ -390,8 +390,8 @@ class DiscoveryManagerImplTest extends ManagerTestCase
 
         $type = new BindingType(Foo::clazz);
 
-        $this->rootPackageFile->addTypeDescriptor($typeDescriptor1 = new BindingTypeDescriptor($type));
-        $this->packageFile1->addTypeDescriptor($typeDescriptor2 = clone $typeDescriptor1);
+        $this->rootModuleFile->addTypeDescriptor($typeDescriptor1 = new BindingTypeDescriptor($type));
+        $this->moduleFile1->addTypeDescriptor($typeDescriptor2 = clone $typeDescriptor1);
 
         $this->discovery->expects($this->once())
             ->method('addBindingType')
@@ -400,11 +400,11 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->discovery->expects($this->never())
             ->method('removeBindingType');
 
-        $this->packageFileStorage->expects($this->once())
-            ->method('saveRootPackageFile')
-            ->with($this->rootPackageFile)
-            ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) {
-                $typeDescriptors = $rootPackageFile->getTypeDescriptors();
+        $this->moduleFileStorage->expects($this->once())
+            ->method('saveRootModuleFile')
+            ->with($this->rootModuleFile)
+            ->will($this->returnCallback(function (RootModuleFile $rootModuleFile) {
+                $typeDescriptors = $rootModuleFile->getTypeDescriptors();
 
                 PHPUnit_Framework_Assert::assertSame(array(), $typeDescriptors);
             }));
@@ -421,9 +421,9 @@ class DiscoveryManagerImplTest extends ManagerTestCase
 
         $type = new BindingType(Foo::clazz);
 
-        $this->rootPackageFile->addTypeDescriptor($typeDescriptor1 = new BindingTypeDescriptor($type));
-        $this->packageFile1->addTypeDescriptor($typeDescriptor2 = clone $typeDescriptor1);
-        $this->packageFile2->addTypeDescriptor($typeDescriptor3 = clone $typeDescriptor1);
+        $this->rootModuleFile->addTypeDescriptor($typeDescriptor1 = new BindingTypeDescriptor($type));
+        $this->moduleFile1->addTypeDescriptor($typeDescriptor2 = clone $typeDescriptor1);
+        $this->moduleFile2->addTypeDescriptor($typeDescriptor3 = clone $typeDescriptor1);
 
         $this->discovery->expects($this->never())
             ->method('addBindingType');
@@ -431,11 +431,11 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->discovery->expects($this->never())
             ->method('removeBindingType');
 
-        $this->packageFileStorage->expects($this->once())
-            ->method('saveRootPackageFile')
-            ->with($this->rootPackageFile)
-            ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) {
-                $typeDescriptors = $rootPackageFile->getTypeDescriptors();
+        $this->moduleFileStorage->expects($this->once())
+            ->method('saveRootModuleFile')
+            ->with($this->rootModuleFile)
+            ->will($this->returnCallback(function (RootModuleFile $rootModuleFile) {
+                $typeDescriptors = $rootModuleFile->getTypeDescriptors();
 
                 PHPUnit_Framework_Assert::assertSame(array(), $typeDescriptors);
             }));
@@ -454,8 +454,8 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $type = new BindingType(Foo::clazz);
         $binding = new ResourceBinding('/path', Foo::clazz);
 
-        $this->rootPackageFile->addTypeDescriptor(new BindingTypeDescriptor($type));
-        $this->rootPackageFile->addBindingDescriptor(new BindingDescriptor($binding));
+        $this->rootModuleFile->addTypeDescriptor(new BindingTypeDescriptor($type));
+        $this->rootModuleFile->addBindingDescriptor(new BindingDescriptor($binding));
 
         $this->discovery->expects($this->once())
             ->method('removeBindingType')
@@ -465,11 +465,11 @@ class DiscoveryManagerImplTest extends ManagerTestCase
             ->method('removeBinding')
             ->with($binding->getUuid());
 
-        $this->packageFileStorage->expects($this->once())
-            ->method('saveRootPackageFile')
-            ->with($this->rootPackageFile)
-            ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) {
-                $typeDescriptors = $rootPackageFile->getTypeDescriptors();
+        $this->moduleFileStorage->expects($this->once())
+            ->method('saveRootModuleFile')
+            ->with($this->rootModuleFile)
+            ->will($this->returnCallback(function (RootModuleFile $rootModuleFile) {
+                $typeDescriptors = $rootModuleFile->getTypeDescriptors();
 
                 PHPUnit_Framework_Assert::assertSame(array(), $typeDescriptors);
             }));
@@ -484,9 +484,9 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $type = new BindingType(Foo::clazz);
         $binding = new ResourceBinding('/path', Foo::clazz);
 
-        $this->rootPackageFile->addTypeDescriptor($typeDescriptor1 = new BindingTypeDescriptor($type));
-        $this->packageFile1->addTypeDescriptor($typeDescriptor2 = clone $typeDescriptor1);
-        $this->rootPackageFile->addBindingDescriptor(new BindingDescriptor($binding));
+        $this->rootModuleFile->addTypeDescriptor($typeDescriptor1 = new BindingTypeDescriptor($type));
+        $this->moduleFile1->addTypeDescriptor($typeDescriptor2 = clone $typeDescriptor1);
+        $this->rootModuleFile->addBindingDescriptor(new BindingDescriptor($binding));
 
         $this->discovery->expects($this->once())
             ->method('addBindingType')
@@ -499,11 +499,11 @@ class DiscoveryManagerImplTest extends ManagerTestCase
             ->method('addBinding')
             ->with($binding);
 
-        $this->packageFileStorage->expects($this->once())
-            ->method('saveRootPackageFile')
-            ->with($this->rootPackageFile)
-            ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) use ($typeDescriptor1) {
-                $typeDescriptors = $rootPackageFile->getTypeDescriptors();
+        $this->moduleFileStorage->expects($this->once())
+            ->method('saveRootModuleFile')
+            ->with($this->rootModuleFile)
+            ->will($this->returnCallback(function (RootModuleFile $rootModuleFile) use ($typeDescriptor1) {
+                $typeDescriptors = $rootModuleFile->getTypeDescriptors();
 
                 PHPUnit_Framework_Assert::assertSame(array(), $typeDescriptors);
             }));
@@ -518,10 +518,10 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $type = new BindingType(Foo::clazz);
         $binding = new ResourceBinding('/path', Foo::clazz);
 
-        $this->rootPackageFile->addTypeDescriptor($typeDescriptor1 = new BindingTypeDescriptor($type));
-        $this->packageFile1->addTypeDescriptor($typeDescriptor2 = clone $typeDescriptor1);
-        $this->packageFile2->addTypeDescriptor($typeDescriptor3 = clone $typeDescriptor1);
-        $this->rootPackageFile->addBindingDescriptor(new BindingDescriptor($binding));
+        $this->rootModuleFile->addTypeDescriptor($typeDescriptor1 = new BindingTypeDescriptor($type));
+        $this->moduleFile1->addTypeDescriptor($typeDescriptor2 = clone $typeDescriptor1);
+        $this->moduleFile2->addTypeDescriptor($typeDescriptor3 = clone $typeDescriptor1);
+        $this->rootModuleFile->addBindingDescriptor(new BindingDescriptor($binding));
 
         $this->discovery->expects($this->never())
             ->method('addBindingType');
@@ -532,11 +532,11 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->discovery->expects($this->never())
             ->method('addBinding');
 
-        $this->packageFileStorage->expects($this->once())
-            ->method('saveRootPackageFile')
-            ->with($this->rootPackageFile)
-            ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) use ($typeDescriptor1) {
-                $typeDescriptors = $rootPackageFile->getTypeDescriptors();
+        $this->moduleFileStorage->expects($this->once())
+            ->method('saveRootModuleFile')
+            ->with($this->rootModuleFile)
+            ->will($this->returnCallback(function (RootModuleFile $rootModuleFile) use ($typeDescriptor1) {
+                $typeDescriptors = $rootModuleFile->getTypeDescriptors();
 
                 PHPUnit_Framework_Assert::assertSame(array(), $typeDescriptors);
             }));
@@ -550,13 +550,13 @@ class DiscoveryManagerImplTest extends ManagerTestCase
 
         $type = new BindingType(Foo::clazz);
 
-        $this->rootPackageFile->addTypeDescriptor($typeDescriptor1 = new BindingTypeDescriptor($type));
-        $this->packageFile1->addTypeDescriptor($typeDescriptor2 = clone $typeDescriptor1);
+        $this->rootModuleFile->addTypeDescriptor($typeDescriptor1 = new BindingTypeDescriptor($type));
+        $this->moduleFile1->addTypeDescriptor($typeDescriptor2 = clone $typeDescriptor1);
 
         $this->logger->expects($this->never())
             ->method('warning');
 
-        // The descriptor from the package becomes active
+        // The descriptor from the module becomes active
         $this->discovery->expects($this->once())
             ->method('addBindingType')
             ->with($typeDescriptor2->getType());
@@ -564,11 +564,11 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->discovery->expects($this->never())
             ->method('removeBindingType');
 
-        $this->packageFileStorage->expects($this->once())
-            ->method('saveRootPackageFile')
-            ->with($this->rootPackageFile)
-            ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) {
-                $typeDescriptors = $rootPackageFile->getTypeDescriptors();
+        $this->moduleFileStorage->expects($this->once())
+            ->method('saveRootModuleFile')
+            ->with($this->rootModuleFile)
+            ->will($this->returnCallback(function (RootModuleFile $rootModuleFile) {
+                $typeDescriptors = $rootModuleFile->getTypeDescriptors();
 
                 PHPUnit_Framework_Assert::assertSame(array(), $typeDescriptors);
             }));
@@ -580,9 +580,9 @@ class DiscoveryManagerImplTest extends ManagerTestCase
     {
         $this->initDefaultManager();
 
-        $this->rootPackageFile->addTypeDescriptor(new BindingTypeDescriptor(new BindingType(Foo::clazz)));
-        $this->packageFile1->addTypeDescriptor(new BindingTypeDescriptor(new BindingType(Foo::clazz)));
-        $this->packageFile2->addTypeDescriptor(new BindingTypeDescriptor(new BindingType(Foo::clazz)));
+        $this->rootModuleFile->addTypeDescriptor(new BindingTypeDescriptor(new BindingType(Foo::clazz)));
+        $this->moduleFile1->addTypeDescriptor(new BindingTypeDescriptor(new BindingType(Foo::clazz)));
+        $this->moduleFile2->addTypeDescriptor(new BindingTypeDescriptor(new BindingType(Foo::clazz)));
 
         $this->logger->expects($this->once())
             ->method('warning');
@@ -593,11 +593,11 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->discovery->expects($this->never())
             ->method('removeBindingType');
 
-        $this->packageFileStorage->expects($this->once())
-            ->method('saveRootPackageFile')
-            ->with($this->rootPackageFile)
-            ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) {
-                $typeDescriptors = $rootPackageFile->getTypeDescriptors();
+        $this->moduleFileStorage->expects($this->once())
+            ->method('saveRootModuleFile')
+            ->with($this->rootModuleFile)
+            ->will($this->returnCallback(function (RootModuleFile $rootModuleFile) {
+                $typeDescriptors = $rootModuleFile->getTypeDescriptors();
 
                 PHPUnit_Framework_Assert::assertSame(array(), $typeDescriptors);
             }));
@@ -611,7 +611,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
 
         $type = new BindingType(Foo::clazz);
 
-        $this->rootPackageFile->addTypeDescriptor($typeDescriptor = new BindingTypeDescriptor($type));
+        $this->rootModuleFile->addTypeDescriptor($typeDescriptor = new BindingTypeDescriptor($type));
 
         $this->discovery->expects($this->once())
             ->method('removeBindingType')
@@ -621,9 +621,9 @@ class DiscoveryManagerImplTest extends ManagerTestCase
             ->method('addBindingType')
             ->with($type);
 
-        $this->packageFileStorage->expects($this->once())
-            ->method('saveRootPackageFile')
-            ->with($this->rootPackageFile)
+        $this->moduleFileStorage->expects($this->once())
+            ->method('saveRootModuleFile')
+            ->with($this->rootModuleFile)
             ->willThrowException(new TestException('Some exception'));
 
         try {
@@ -632,7 +632,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         } catch (TestException $e) {
         }
 
-        $this->assertSame(array($typeDescriptor), $this->rootPackageFile->getTypeDescriptors());
+        $this->assertSame(array($typeDescriptor), $this->rootModuleFile->getTypeDescriptors());
 
         $this->assertTrue($typeDescriptor->isEnabled());
     }
@@ -645,9 +645,9 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $type2 = new BindingType(Bar::clazz);
         $type3 = new BindingType(Foo::clazz);
 
-        $this->rootPackageFile->addTypeDescriptor($typeDescriptor1 = new BindingTypeDescriptor($type1));
-        $this->rootPackageFile->addTypeDescriptor($typeDescriptor2 = new BindingTypeDescriptor($type2));
-        $this->rootPackageFile->addTypeDescriptor($typeDescriptor3 = new BindingTypeDescriptor($type3));
+        $this->rootModuleFile->addTypeDescriptor($typeDescriptor1 = new BindingTypeDescriptor($type1));
+        $this->rootModuleFile->addTypeDescriptor($typeDescriptor2 = new BindingTypeDescriptor($type2));
+        $this->rootModuleFile->addTypeDescriptor($typeDescriptor3 = new BindingTypeDescriptor($type3));
 
         $this->discovery->expects($this->at(0))
             ->method('removeBindingType')
@@ -657,11 +657,11 @@ class DiscoveryManagerImplTest extends ManagerTestCase
             ->method('removeBindingType')
             ->with(Bar::clazz);
 
-        $this->packageFileStorage->expects($this->once())
-            ->method('saveRootPackageFile')
-            ->with($this->rootPackageFile)
-            ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) use ($typeDescriptor3) {
-                PHPUnit_Framework_Assert::assertSame(array($typeDescriptor3), $rootPackageFile->getTypeDescriptors());
+        $this->moduleFileStorage->expects($this->once())
+            ->method('saveRootModuleFile')
+            ->with($this->rootModuleFile)
+            ->will($this->returnCallback(function (RootModuleFile $rootModuleFile) use ($typeDescriptor3) {
+                PHPUnit_Framework_Assert::assertSame(array($typeDescriptor3), $rootModuleFile->getTypeDescriptors());
             }));
 
         $this->manager->removeRootTypeDescriptors(Expr::method('getTypeName', Expr::contains('Fixtures\Ba')));
@@ -680,10 +680,10 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $bindingDescriptor1 = new ResourceBinding('/path1', Foo::clazz);
         $bindingDescriptor2 = new ResourceBinding('/path2', Bar::clazz);
 
-        $this->rootPackageFile->addTypeDescriptor(new BindingTypeDescriptor($type1));
-        $this->rootPackageFile->addTypeDescriptor(new BindingTypeDescriptor($type2));
-        $this->rootPackageFile->addBindingDescriptor(new BindingDescriptor($bindingDescriptor1));
-        $this->rootPackageFile->addBindingDescriptor(new BindingDescriptor($bindingDescriptor2));
+        $this->rootModuleFile->addTypeDescriptor(new BindingTypeDescriptor($type1));
+        $this->rootModuleFile->addTypeDescriptor(new BindingTypeDescriptor($type2));
+        $this->rootModuleFile->addBindingDescriptor(new BindingDescriptor($bindingDescriptor1));
+        $this->rootModuleFile->addBindingDescriptor(new BindingDescriptor($bindingDescriptor2));
 
         $this->discovery->expects($this->at(0))
             ->method('removeBindingType')
@@ -701,11 +701,11 @@ class DiscoveryManagerImplTest extends ManagerTestCase
             ->method('removeBinding')
             ->with($bindingDescriptor2->getUuid());
 
-        $this->packageFileStorage->expects($this->once())
-            ->method('saveRootPackageFile')
-            ->with($this->rootPackageFile)
-            ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) {
-                PHPUnit_Framework_Assert::assertFalse($rootPackageFile->hasTypeDescriptors());
+        $this->moduleFileStorage->expects($this->once())
+            ->method('saveRootModuleFile')
+            ->with($this->rootModuleFile)
+            ->will($this->returnCallback(function (RootModuleFile $rootModuleFile) {
+                PHPUnit_Framework_Assert::assertFalse($rootModuleFile->hasTypeDescriptors());
             }));
 
         $this->manager->removeRootTypeDescriptors(Expr::method('getTypeName', Expr::startsWith('Puli')));
@@ -718,8 +718,8 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $type1 = new BindingType(Foo::clazz);
         $type2 = new BindingType(Bar::clazz);
 
-        $this->rootPackageFile->addTypeDescriptor($typeDescriptor1 = new BindingTypeDescriptor($type1));
-        $this->rootPackageFile->addTypeDescriptor($typeDescriptor2 = new BindingTypeDescriptor($type2));
+        $this->rootModuleFile->addTypeDescriptor($typeDescriptor1 = new BindingTypeDescriptor($type1));
+        $this->rootModuleFile->addTypeDescriptor($typeDescriptor2 = new BindingTypeDescriptor($type2));
 
         $this->discovery->expects($this->at(0))
             ->method('removeBindingType')
@@ -737,9 +737,9 @@ class DiscoveryManagerImplTest extends ManagerTestCase
             ->method('addBindingType')
             ->with($type1);
 
-        $this->packageFileStorage->expects($this->once())
-            ->method('saveRootPackageFile')
-            ->with($this->rootPackageFile)
+        $this->moduleFileStorage->expects($this->once())
+            ->method('saveRootModuleFile')
+            ->with($this->rootModuleFile)
             ->willThrowException(new TestException('Some exception'));
 
         try {
@@ -748,9 +748,9 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         } catch (TestException $e) {
         }
 
-        $this->assertSame($typeDescriptor1, $this->rootPackageFile->getTypeDescriptor(Foo::clazz));
-        $this->assertSame($typeDescriptor2, $this->rootPackageFile->getTypeDescriptor(Bar::clazz));
-        $this->assertCount(2, $this->rootPackageFile->getTypeDescriptors());
+        $this->assertSame($typeDescriptor1, $this->rootModuleFile->getTypeDescriptor(Foo::clazz));
+        $this->assertSame($typeDescriptor2, $this->rootModuleFile->getTypeDescriptor(Bar::clazz));
+        $this->assertCount(2, $this->rootModuleFile->getTypeDescriptors());
 
         $this->assertTrue($typeDescriptor1->isEnabled());
         $this->assertTrue($typeDescriptor2->isEnabled());
@@ -763,8 +763,8 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $type1 = new BindingType(Foo::clazz);
         $type2 = new BindingType(Bar::clazz);
 
-        $this->rootPackageFile->addTypeDescriptor($typeDescriptor1 = new BindingTypeDescriptor($type1));
-        $this->rootPackageFile->addTypeDescriptor($typeDescriptor2 = new BindingTypeDescriptor($type2));
+        $this->rootModuleFile->addTypeDescriptor($typeDescriptor1 = new BindingTypeDescriptor($type1));
+        $this->rootModuleFile->addTypeDescriptor($typeDescriptor2 = new BindingTypeDescriptor($type2));
 
         $this->discovery->expects($this->at(0))
             ->method('removeBindingType')
@@ -774,11 +774,11 @@ class DiscoveryManagerImplTest extends ManagerTestCase
             ->method('removeBindingType')
             ->with(Bar::clazz);
 
-        $this->packageFileStorage->expects($this->once())
-            ->method('saveRootPackageFile')
-            ->with($this->rootPackageFile)
-            ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) {
-                PHPUnit_Framework_Assert::assertFalse($rootPackageFile->hasTypeDescriptors());
+        $this->moduleFileStorage->expects($this->once())
+            ->method('saveRootModuleFile')
+            ->with($this->rootModuleFile)
+            ->will($this->returnCallback(function (RootModuleFile $rootModuleFile) {
+                PHPUnit_Framework_Assert::assertFalse($rootModuleFile->hasTypeDescriptors());
             }));
 
         $this->manager->clearRootTypeDescriptors();
@@ -791,7 +791,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
     {
         $this->initDefaultManager();
 
-        $this->rootPackageFile->addTypeDescriptor($type = new BindingTypeDescriptor(new BindingType(Foo::clazz)));
+        $this->rootModuleFile->addTypeDescriptor($type = new BindingTypeDescriptor(new BindingType(Foo::clazz)));
 
         $this->assertSame($type, $this->manager->getRootTypeDescriptor(Foo::clazz));
     }
@@ -805,7 +805,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
 
         $type = new BindingType(Foo::clazz);
 
-        $this->packageFile1->addTypeDescriptor(new BindingTypeDescriptor($type));
+        $this->moduleFile1->addTypeDescriptor(new BindingTypeDescriptor($type));
 
         $this->manager->getRootTypeDescriptor(Foo::clazz);
     }
@@ -818,9 +818,9 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $type2 = new BindingType(Bar::clazz);
         $type3 = new BindingType(Baz::clazz);
 
-        $this->rootPackageFile->addTypeDescriptor($typeDescriptor1 = new BindingTypeDescriptor($type1));
-        $this->rootPackageFile->addTypeDescriptor($typeDescriptor2 = new BindingTypeDescriptor($type2));
-        $this->packageFile2->addTypeDescriptor($typeDescriptor3 = new BindingTypeDescriptor($type3));
+        $this->rootModuleFile->addTypeDescriptor($typeDescriptor1 = new BindingTypeDescriptor($type1));
+        $this->rootModuleFile->addTypeDescriptor($typeDescriptor2 = new BindingTypeDescriptor($type2));
+        $this->moduleFile2->addTypeDescriptor($typeDescriptor3 = new BindingTypeDescriptor($type3));
 
         $this->assertSame(array(
             $typeDescriptor1,
@@ -836,10 +836,10 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $type2 = new BindingType(Bar::clazz);
         $type3 = new BindingType(Baz::clazz);
 
-        $this->rootPackageFile->addTypeDescriptor($typeDescriptor1 = new BindingTypeDescriptor($type1));
-        $this->rootPackageFile->addTypeDescriptor($typeDescriptor2 = new BindingTypeDescriptor($type2));
-        $this->packageFile1->addTypeDescriptor($typeDescriptor3 = clone $typeDescriptor2);
-        $this->packageFile2->addTypeDescriptor($typeDescriptor4 = new BindingTypeDescriptor($type3));
+        $this->rootModuleFile->addTypeDescriptor($typeDescriptor1 = new BindingTypeDescriptor($type1));
+        $this->rootModuleFile->addTypeDescriptor($typeDescriptor2 = new BindingTypeDescriptor($type2));
+        $this->moduleFile1->addTypeDescriptor($typeDescriptor3 = clone $typeDescriptor2);
+        $this->moduleFile2->addTypeDescriptor($typeDescriptor4 = new BindingTypeDescriptor($type3));
 
         $expr1 = Expr::method('getTypeName', Expr::startsWith('Puli'));
         $expr2 = Expr::method('isDuplicate', Expr::same(true));
@@ -857,8 +857,8 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $type1 = new BindingType(Foo::clazz);
         $type2 = new BindingType(Bar::clazz);
 
-        $this->rootPackageFile->addTypeDescriptor(new BindingTypeDescriptor($type1));
-        $this->packageFile1->addTypeDescriptor(new BindingTypeDescriptor($type2));
+        $this->rootModuleFile->addTypeDescriptor(new BindingTypeDescriptor($type1));
+        $this->moduleFile1->addTypeDescriptor(new BindingTypeDescriptor($type2));
 
         $this->assertTrue($this->manager->hasRootTypeDescriptor(Foo::clazz));
         $this->assertFalse($this->manager->hasRootTypeDescriptor(Bar::clazz));
@@ -872,8 +872,8 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $type1 = new BindingType(Foo::clazz);
         $type2 = new BindingType(Bar::clazz);
 
-        $this->rootPackageFile->addTypeDescriptor(new BindingTypeDescriptor($type1));
-        $this->rootPackageFile->addTypeDescriptor(new BindingTypeDescriptor($type2));
+        $this->rootModuleFile->addTypeDescriptor(new BindingTypeDescriptor($type1));
+        $this->rootModuleFile->addTypeDescriptor(new BindingTypeDescriptor($type2));
 
         $expr1 = Expr::method('isEnabled', Expr::same(true));
         $expr2 = Expr::method('isDuplicate', Expr::same(true));
@@ -890,13 +890,13 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $type1 = new BindingType(Foo::clazz);
         $type2 = new BindingType(Bar::clazz);
 
-        $this->rootPackageFile->addTypeDescriptor($typeDescriptor1 = new BindingTypeDescriptor($type1));
-        $this->packageFile1->addTypeDescriptor($typeDescriptor2 = new BindingTypeDescriptor($type2));
-        $this->packageFile2->addTypeDescriptor($typeDescriptor3 = clone $typeDescriptor2); // duplicate
+        $this->rootModuleFile->addTypeDescriptor($typeDescriptor1 = new BindingTypeDescriptor($type1));
+        $this->moduleFile1->addTypeDescriptor($typeDescriptor2 = new BindingTypeDescriptor($type2));
+        $this->moduleFile2->addTypeDescriptor($typeDescriptor3 = clone $typeDescriptor2); // duplicate
 
         $this->assertSame($typeDescriptor1, $this->manager->getTypeDescriptor(Foo::clazz, 'vendor/root'));
-        $this->assertSame($typeDescriptor2, $this->manager->getTypeDescriptor(Bar::clazz, 'vendor/package1'));
-        $this->assertSame($typeDescriptor3, $this->manager->getTypeDescriptor(Bar::clazz, 'vendor/package2'));
+        $this->assertSame($typeDescriptor2, $this->manager->getTypeDescriptor(Bar::clazz, 'vendor/module1'));
+        $this->assertSame($typeDescriptor3, $this->manager->getTypeDescriptor(Bar::clazz, 'vendor/module2'));
     }
 
     /**
@@ -922,7 +922,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
     /**
      * @expectedException \InvalidArgumentException
      */
-    public function testGetTypeDescriptorFailsIfPackageNoString()
+    public function testGetTypeDescriptorFailsIfModuleNoString()
     {
         $this->initDefaultManager();
 
@@ -937,10 +937,10 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $type2 = new BindingType(Bar::clazz);
         $type3 = new BindingType(Baz::clazz);
 
-        $this->rootPackageFile->addTypeDescriptor($typeDescriptor1 = new BindingTypeDescriptor($type1));
-        $this->packageFile1->addTypeDescriptor($typeDescriptor2 = new BindingTypeDescriptor($type2));
-        $this->packageFile2->addTypeDescriptor($typeDescriptor3 = clone $typeDescriptor2); // duplicate
-        $this->packageFile3->addTypeDescriptor($typeDescriptor4 = new BindingTypeDescriptor($type3));
+        $this->rootModuleFile->addTypeDescriptor($typeDescriptor1 = new BindingTypeDescriptor($type1));
+        $this->moduleFile1->addTypeDescriptor($typeDescriptor2 = new BindingTypeDescriptor($type2));
+        $this->moduleFile2->addTypeDescriptor($typeDescriptor3 = clone $typeDescriptor2); // duplicate
+        $this->moduleFile3->addTypeDescriptor($typeDescriptor4 = new BindingTypeDescriptor($type3));
 
         $this->assertSame(array(
             $typeDescriptor1,
@@ -958,12 +958,12 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $type2 = new BindingType(Bar::clazz);
         $type3 = new BindingType(Baz::clazz);
 
-        $this->rootPackageFile->addTypeDescriptor($typeDescriptor1 = new BindingTypeDescriptor($type1));
-        $this->packageFile1->addTypeDescriptor($typeDescriptor2 = new BindingTypeDescriptor($type2));
-        $this->packageFile2->addTypeDescriptor($typeDescriptor3 = clone $typeDescriptor2); // duplicate
-        $this->packageFile3->addTypeDescriptor($typeDescriptor4 = new BindingTypeDescriptor($type3));
+        $this->rootModuleFile->addTypeDescriptor($typeDescriptor1 = new BindingTypeDescriptor($type1));
+        $this->moduleFile1->addTypeDescriptor($typeDescriptor2 = new BindingTypeDescriptor($type2));
+        $this->moduleFile2->addTypeDescriptor($typeDescriptor3 = clone $typeDescriptor2); // duplicate
+        $this->moduleFile3->addTypeDescriptor($typeDescriptor4 = new BindingTypeDescriptor($type3));
 
-        $expr1 = Expr::method('getContainingPackage', Expr::method('getName', Expr::same('vendor/package1')));
+        $expr1 = Expr::method('getContainingModule', Expr::method('getName', Expr::same('vendor/module1')));
         $expr2 = Expr::method('isDuplicate', Expr::same(true));
         $expr3 = $expr1->andX($expr2);
 
@@ -979,19 +979,19 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $type1 = new BindingType(Foo::clazz);
         $type2 = new BindingType(Bar::clazz);
 
-        $this->rootPackageFile->addTypeDescriptor(new BindingTypeDescriptor($type1));
-        $this->packageFile1->addTypeDescriptor(new BindingTypeDescriptor($type2));
+        $this->rootModuleFile->addTypeDescriptor(new BindingTypeDescriptor($type1));
+        $this->moduleFile1->addTypeDescriptor(new BindingTypeDescriptor($type2));
 
         $this->assertTrue($this->manager->hasTypeDescriptor(Foo::clazz));
-        $this->assertTrue($this->manager->hasTypeDescriptor(Bar::clazz, 'vendor/package1'));
-        $this->assertFalse($this->manager->hasTypeDescriptor(Bar::clazz, 'vendor/package2'));
+        $this->assertTrue($this->manager->hasTypeDescriptor(Bar::clazz, 'vendor/module1'));
+        $this->assertFalse($this->manager->hasTypeDescriptor(Bar::clazz, 'vendor/module2'));
         $this->assertFalse($this->manager->hasTypeDescriptor(Baz::clazz));
     }
 
     /**
      * @expectedException \InvalidArgumentException
      */
-    public function testHasTypeDescriptorFailsIfPackageNoString()
+    public function testHasTypeDescriptorFailsIfModuleNoString()
     {
         $this->initDefaultManager();
 
@@ -1005,13 +1005,13 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $type1 = new BindingType(Foo::clazz);
         $type2 = new BindingType(Bar::clazz);
 
-        $this->rootPackageFile->addTypeDescriptor($typeDescriptor1 = new BindingTypeDescriptor($type1));
-        $this->packageFile1->addTypeDescriptor($typeDescriptor2 = new BindingTypeDescriptor($type2));
-        $this->packageFile1->addTypeDescriptor($typeDescriptor3 = clone $typeDescriptor2); // duplicate
+        $this->rootModuleFile->addTypeDescriptor($typeDescriptor1 = new BindingTypeDescriptor($type1));
+        $this->moduleFile1->addTypeDescriptor($typeDescriptor2 = new BindingTypeDescriptor($type2));
+        $this->moduleFile1->addTypeDescriptor($typeDescriptor3 = clone $typeDescriptor2); // duplicate
 
-        $expr1 = Expr::method('getContainingPackage', Expr::method('getName', Expr::same('vendor/package1')))
+        $expr1 = Expr::method('getContainingModule', Expr::method('getName', Expr::same('vendor/module1')))
             ->andMethod('isEnabled', Expr::same(true));
-        $expr2 = Expr::method('getContainingPackage', Expr::method('getName', Expr::same('vendor/package2')))
+        $expr2 = Expr::method('getContainingModule', Expr::method('getName', Expr::same('vendor/module2')))
             ->andMethod('isDuplicate', Expr::same(true));
 
         $this->assertTrue($this->manager->hasTypeDescriptors());
@@ -1033,7 +1033,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $type = new BindingType(Foo::clazz, array(new BindingParameter('param')));
         $binding = new ResourceBinding('/path', Foo::clazz, array('param' => 'value'), 'xpath');
 
-        $this->packageFile1->addTypeDescriptor(new BindingTypeDescriptor($type));
+        $this->moduleFile1->addTypeDescriptor(new BindingTypeDescriptor($type));
 
         $bindingDescriptor = new BindingDescriptor($binding);
 
@@ -1041,11 +1041,11 @@ class DiscoveryManagerImplTest extends ManagerTestCase
             ->method('addBinding')
             ->with($binding);
 
-        $this->packageFileStorage->expects($this->once())
-            ->method('saveRootPackageFile')
-            ->with($this->rootPackageFile)
-            ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) use ($bindingDescriptor) {
-                $bindingDescriptors = $rootPackageFile->getBindingDescriptors();
+        $this->moduleFileStorage->expects($this->once())
+            ->method('saveRootModuleFile')
+            ->with($this->rootModuleFile)
+            ->will($this->returnCallback(function (RootModuleFile $rootModuleFile) use ($bindingDescriptor) {
+                $bindingDescriptors = $rootModuleFile->getBindingDescriptors();
 
                 PHPUnit_Framework_Assert::assertSame(array($bindingDescriptor), $bindingDescriptors);
                 PHPUnit_Framework_Assert::assertTrue($bindingDescriptor->isEnabled());
@@ -1057,21 +1057,21 @@ class DiscoveryManagerImplTest extends ManagerTestCase
     /**
      * @expectedException \Puli\Manager\Api\Discovery\DuplicateBindingException
      */
-    public function testAddRootBindingDescriptorFailsIfUuidDuplicatedInPackage()
+    public function testAddRootBindingDescriptorFailsIfUuidDuplicatedInModule()
     {
         $this->initDefaultManager();
 
         $binding = new ResourceBinding('/path', Foo::clazz);
         $bindingDescriptor1 = new BindingDescriptor($binding);
 
-        $this->packageFile1->addTypeDescriptor(new BindingTypeDescriptor(new BindingType(Foo::clazz)));
-        $this->packageFile1->addBindingDescriptor($bindingDescriptor2 = clone $bindingDescriptor1);
+        $this->moduleFile1->addTypeDescriptor(new BindingTypeDescriptor(new BindingType(Foo::clazz)));
+        $this->moduleFile1->addBindingDescriptor($bindingDescriptor2 = clone $bindingDescriptor1);
 
         $this->discovery->expects($this->never())
             ->method('addBinding');
 
-        $this->packageFileStorage->expects($this->never())
-            ->method('saveRootPackageFile');
+        $this->moduleFileStorage->expects($this->never())
+            ->method('saveRootModuleFile');
 
         $this->manager->addRootBindingDescriptor($bindingDescriptor1);
     }
@@ -1086,14 +1086,14 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $binding = new ResourceBinding('/path', Foo::clazz);
         $bindingDescriptor1 = new BindingDescriptor($binding);
 
-        $this->packageFile1->addTypeDescriptor(new BindingTypeDescriptor(new BindingType(Foo::clazz)));
-        $this->rootPackageFile->addBindingDescriptor($bindingDescriptor2 = clone $bindingDescriptor1);
+        $this->moduleFile1->addTypeDescriptor(new BindingTypeDescriptor(new BindingType(Foo::clazz)));
+        $this->rootModuleFile->addBindingDescriptor($bindingDescriptor2 = clone $bindingDescriptor1);
 
         $this->discovery->expects($this->never())
             ->method('addBinding');
 
-        $this->packageFileStorage->expects($this->never())
-            ->method('saveRootPackageFile');
+        $this->moduleFileStorage->expects($this->never())
+            ->method('saveRootModuleFile');
 
         $this->manager->addRootBindingDescriptor($bindingDescriptor1);
     }
@@ -1109,8 +1109,8 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $bindingDescriptor1 = new BindingDescriptor($binding1);
         $bindingDescriptor2 = new BindingDescriptor($binding2);
 
-        $this->packageFile1->addTypeDescriptor(new BindingTypeDescriptor($type));
-        $this->rootPackageFile->addBindingDescriptor($bindingDescriptor1);
+        $this->moduleFile1->addTypeDescriptor(new BindingTypeDescriptor($type));
+        $this->rootModuleFile->addBindingDescriptor($bindingDescriptor1);
 
         $this->discovery->expects($this->once())
             ->method('removeBinding')
@@ -1120,11 +1120,11 @@ class DiscoveryManagerImplTest extends ManagerTestCase
             ->method('addBinding')
             ->with($binding2);
 
-        $this->packageFileStorage->expects($this->once())
-            ->method('saveRootPackageFile')
-            ->with($this->rootPackageFile)
-            ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) use ($bindingDescriptor2) {
-                $bindingDescriptors = $rootPackageFile->getBindingDescriptors();
+        $this->moduleFileStorage->expects($this->once())
+            ->method('saveRootModuleFile')
+            ->with($this->rootModuleFile)
+            ->will($this->returnCallback(function (RootModuleFile $rootModuleFile) use ($bindingDescriptor2) {
+                $bindingDescriptors = $rootModuleFile->getBindingDescriptors();
 
                 PHPUnit_Framework_Assert::assertSame(array($bindingDescriptor2), $bindingDescriptors);
                 PHPUnit_Framework_Assert::assertTrue($bindingDescriptor2->isEnabled());
@@ -1136,7 +1136,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
     /**
      * @expectedException \Puli\Manager\Api\Discovery\DuplicateBindingException
      */
-    public function testAddRootBindingDescriptorDoesNotOverridePackageUuids()
+    public function testAddRootBindingDescriptorDoesNotOverrideModuleUuids()
     {
         $this->initDefaultManager();
 
@@ -1147,8 +1147,8 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $bindingDescriptor1 = new BindingDescriptor($binding1);
         $bindingDescriptor2 = new BindingDescriptor($binding2);
 
-        $this->packageFile1->addTypeDescriptor(new BindingTypeDescriptor($type));
-        $this->packageFile1->addBindingDescriptor($bindingDescriptor1);
+        $this->moduleFile1->addTypeDescriptor(new BindingTypeDescriptor($type));
+        $this->moduleFile1->addBindingDescriptor($bindingDescriptor1);
 
         $this->discovery->expects($this->never())
             ->method('removeBinding');
@@ -1156,8 +1156,8 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->discovery->expects($this->never())
             ->method('addBinding');
 
-        $this->packageFileStorage->expects($this->never())
-            ->method('saveRootPackageFile');
+        $this->moduleFileStorage->expects($this->never())
+            ->method('saveRootModuleFile');
 
         $this->manager->addRootBindingDescriptor($bindingDescriptor2, DiscoveryManager::OVERRIDE);
     }
@@ -1172,8 +1172,8 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->discovery->expects($this->never())
             ->method('addBinding');
 
-        $this->packageFileStorage->expects($this->never())
-            ->method('saveRootPackageFile');
+        $this->moduleFileStorage->expects($this->never())
+            ->method('saveRootModuleFile');
 
         $this->manager->addRootBindingDescriptor(new BindingDescriptor(new ResourceBinding('/path', Foo::clazz)));
     }
@@ -1188,8 +1188,8 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->discovery->expects($this->never())
             ->method('addBinding');
 
-        $this->packageFileStorage->expects($this->never())
-            ->method('saveRootPackageFile');
+        $this->moduleFileStorage->expects($this->never())
+            ->method('saveRootModuleFile');
 
         $this->manager->addRootBindingDescriptor(new BindingDescriptor(new ResourceBinding('/path', Foo::clazz)), DiscoveryManager::IGNORE_TYPE_NOT_ENABLED);
     }
@@ -1205,11 +1205,11 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->discovery->expects($this->never())
             ->method('addBinding');
 
-        $this->packageFileStorage->expects($this->once())
-            ->method('saveRootPackageFile')
-            ->with($this->rootPackageFile)
-            ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) use ($bindingDescriptor) {
-                $bindingDescriptors = $rootPackageFile->getBindingDescriptors();
+        $this->moduleFileStorage->expects($this->once())
+            ->method('saveRootModuleFile')
+            ->with($this->rootModuleFile)
+            ->will($this->returnCallback(function (RootModuleFile $rootModuleFile) use ($bindingDescriptor) {
+                $bindingDescriptors = $rootModuleFile->getBindingDescriptors();
 
                 PHPUnit_Framework_Assert::assertSame(array($bindingDescriptor), $bindingDescriptors);
                 PHPUnit_Framework_Assert::assertTrue($bindingDescriptor->isTypeNotFound());
@@ -1225,14 +1225,14 @@ class DiscoveryManagerImplTest extends ManagerTestCase
     {
         $this->initDefaultManager();
 
-        $this->rootPackageFile->addTypeDescriptor(new BindingTypeDescriptor(new BindingType(Foo::clazz)));
-        $this->packageFile1->addTypeDescriptor(new BindingTypeDescriptor(new BindingType(Foo::clazz)));
+        $this->rootModuleFile->addTypeDescriptor(new BindingTypeDescriptor(new BindingType(Foo::clazz)));
+        $this->moduleFile1->addTypeDescriptor(new BindingTypeDescriptor(new BindingType(Foo::clazz)));
 
         $this->discovery->expects($this->never())
             ->method('addBinding');
 
-        $this->packageFileStorage->expects($this->never())
-            ->method('saveRootPackageFile');
+        $this->moduleFileStorage->expects($this->never())
+            ->method('saveRootModuleFile');
 
         $this->manager->addRootBindingDescriptor(new BindingDescriptor(new ResourceBinding('/path', Foo::clazz)));
     }
@@ -1244,14 +1244,14 @@ class DiscoveryManagerImplTest extends ManagerTestCase
     {
         $this->initDefaultManager();
 
-        $this->rootPackageFile->addTypeDescriptor(new BindingTypeDescriptor(new BindingType(Foo::clazz)));
-        $this->packageFile1->addTypeDescriptor(new BindingTypeDescriptor(new BindingType(Foo::clazz)));
+        $this->rootModuleFile->addTypeDescriptor(new BindingTypeDescriptor(new BindingType(Foo::clazz)));
+        $this->moduleFile1->addTypeDescriptor(new BindingTypeDescriptor(new BindingType(Foo::clazz)));
 
         $this->discovery->expects($this->never())
             ->method('addBinding');
 
-        $this->packageFileStorage->expects($this->never())
-            ->method('saveRootPackageFile');
+        $this->moduleFileStorage->expects($this->never())
+            ->method('saveRootModuleFile');
 
         $this->manager->addRootBindingDescriptor(new BindingDescriptor(new ResourceBinding('/path', Foo::clazz)), DiscoveryManager::IGNORE_TYPE_NOT_FOUND);
     }
@@ -1262,18 +1262,18 @@ class DiscoveryManagerImplTest extends ManagerTestCase
 
         $bindingDescriptor = new BindingDescriptor(new ResourceBinding('/path', Foo::clazz));
 
-        $this->rootPackageFile->addTypeDescriptor(new BindingTypeDescriptor(new BindingType(Foo::clazz)));
-        $this->packageFile1->addTypeDescriptor(new BindingTypeDescriptor(new BindingType(Foo::clazz)));
+        $this->rootModuleFile->addTypeDescriptor(new BindingTypeDescriptor(new BindingType(Foo::clazz)));
+        $this->moduleFile1->addTypeDescriptor(new BindingTypeDescriptor(new BindingType(Foo::clazz)));
 
         // The type is not enabled
         $this->discovery->expects($this->never())
             ->method('addBinding');
 
-        $this->packageFileStorage->expects($this->once())
-            ->method('saveRootPackageFile')
-            ->with($this->rootPackageFile)
-            ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) use ($bindingDescriptor) {
-                $bindingDescriptors = $rootPackageFile->getBindingDescriptors();
+        $this->moduleFileStorage->expects($this->once())
+            ->method('saveRootModuleFile')
+            ->with($this->rootModuleFile)
+            ->will($this->returnCallback(function (RootModuleFile $rootModuleFile) use ($bindingDescriptor) {
+                $bindingDescriptors = $rootModuleFile->getBindingDescriptors();
 
                 PHPUnit_Framework_Assert::assertSame(array($bindingDescriptor), $bindingDescriptors);
                 PHPUnit_Framework_Assert::assertTrue($bindingDescriptor->isTypeNotEnabled());
@@ -1293,13 +1293,13 @@ class DiscoveryManagerImplTest extends ManagerTestCase
             new BindingParameter('param', BindingParameter::REQUIRED),
         ));
 
-        $this->packageFile1->addTypeDescriptor(new BindingTypeDescriptor($type));
+        $this->moduleFile1->addTypeDescriptor(new BindingTypeDescriptor($type));
 
         $this->discovery->expects($this->never())
             ->method('addBinding');
 
-        $this->packageFileStorage->expects($this->never())
-            ->method('saveRootPackageFile');
+        $this->moduleFileStorage->expects($this->never())
+            ->method('saveRootModuleFile');
 
         $this->manager->addRootBindingDescriptor(new BindingDescriptor(new ResourceBinding('/path', Foo::clazz)));
     }
@@ -1313,8 +1313,8 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $binding = new ResourceBinding('/path', Foo::clazz);
         $bindingDescriptor = new BindingDescriptor($binding);
 
-        $this->rootPackageFile->addBindingDescriptor($existingDescriptor);
-        $this->packageFile1->addTypeDescriptor(new BindingTypeDescriptor(new BindingType(Foo::clazz)));
+        $this->rootModuleFile->addBindingDescriptor($existingDescriptor);
+        $this->moduleFile1->addTypeDescriptor(new BindingTypeDescriptor(new BindingType(Foo::clazz)));
 
         $this->discovery->expects($this->once())
             ->method('addBinding')
@@ -1324,9 +1324,9 @@ class DiscoveryManagerImplTest extends ManagerTestCase
             ->method('removeBinding')
             ->with($binding->getUuid());
 
-        $this->packageFileStorage->expects($this->once())
-            ->method('saveRootPackageFile')
-            ->with($this->rootPackageFile)
+        $this->moduleFileStorage->expects($this->once())
+            ->method('saveRootModuleFile')
+            ->with($this->rootModuleFile)
             ->willThrowException(new TestException('Some exception'));
 
         try {
@@ -1335,7 +1335,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         } catch (TestException $e) {
         }
 
-        $this->assertSame(array($existingDescriptor), $this->rootPackageFile->getBindingDescriptors());
+        $this->assertSame(array($existingDescriptor), $this->rootModuleFile->getBindingDescriptors());
         $this->assertFalse($bindingDescriptor->isLoaded());
     }
 
@@ -1346,18 +1346,18 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $binding = new ResourceBinding('/path', Foo::clazz);
         $bindingDescriptor = new BindingDescriptor($binding);
 
-        $this->packageFile1->addTypeDescriptor(new BindingTypeDescriptor(new BindingType(Foo::clazz)));
-        $this->rootPackageFile->addBindingDescriptor($bindingDescriptor);
+        $this->moduleFile1->addTypeDescriptor(new BindingTypeDescriptor(new BindingType(Foo::clazz)));
+        $this->rootModuleFile->addBindingDescriptor($bindingDescriptor);
 
         $this->discovery->expects($this->once())
             ->method('removeBinding')
             ->with($binding->getUuid());
 
-        $this->packageFileStorage->expects($this->once())
-            ->method('saveRootPackageFile')
-            ->with($this->rootPackageFile)
-            ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) {
-                $bindingDescriptors = $rootPackageFile->getBindingDescriptors();
+        $this->moduleFileStorage->expects($this->once())
+            ->method('saveRootModuleFile')
+            ->with($this->rootModuleFile)
+            ->will($this->returnCallback(function (RootModuleFile $rootModuleFile) {
+                $bindingDescriptors = $rootModuleFile->getBindingDescriptors();
 
                 PHPUnit_Framework_Assert::assertSame(array(), $bindingDescriptors);
             }));
@@ -1374,27 +1374,27 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->discovery->expects($this->never())
             ->method('removeBinding');
 
-        $this->packageFileStorage->expects($this->never())
-            ->method('saveRootPackageFile');
+        $this->moduleFileStorage->expects($this->never())
+            ->method('saveRootModuleFile');
 
         $this->manager->removeRootBindingDescriptor(Uuid::uuid4());
     }
 
-    public function testRemoveRootBindingDescriptorIgnoresIfBindingNotInRootPackage()
+    public function testRemoveRootBindingDescriptorIgnoresIfBindingNotInRootModule()
     {
         $this->initDefaultManager();
 
         $binding = new ResourceBinding('/path', Foo::clazz);
         $bindingDescriptor = new BindingDescriptor($binding);
 
-        $this->packageFile1->addTypeDescriptor(new BindingTypeDescriptor(new BindingType(Foo::clazz)));
-        $this->packageFile1->addBindingDescriptor($bindingDescriptor);
+        $this->moduleFile1->addTypeDescriptor(new BindingTypeDescriptor(new BindingType(Foo::clazz)));
+        $this->moduleFile1->addBindingDescriptor($bindingDescriptor);
 
         $this->discovery->expects($this->never())
             ->method('removeBinding');
 
-        $this->packageFileStorage->expects($this->never())
-            ->method('saveRootPackageFile');
+        $this->moduleFileStorage->expects($this->never())
+            ->method('saveRootModuleFile');
 
         $this->manager->removeRootBindingDescriptor($binding->getUuid());
 
@@ -1408,16 +1408,16 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $binding = new ResourceBinding('/path', Foo::clazz);
         $bindingDescriptor = new BindingDescriptor($binding);
 
-        $this->rootPackageFile->addBindingDescriptor($bindingDescriptor);
+        $this->rootModuleFile->addBindingDescriptor($bindingDescriptor);
 
         $this->discovery->expects($this->never())
             ->method('removeBinding');
 
-        $this->packageFileStorage->expects($this->once())
-            ->method('saveRootPackageFile')
-            ->with($this->rootPackageFile)
-            ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) {
-                $bindingDescriptors = $rootPackageFile->getBindingDescriptors();
+        $this->moduleFileStorage->expects($this->once())
+            ->method('saveRootModuleFile')
+            ->with($this->rootModuleFile)
+            ->will($this->returnCallback(function (RootModuleFile $rootModuleFile) {
+                $bindingDescriptors = $rootModuleFile->getBindingDescriptors();
 
                 PHPUnit_Framework_Assert::assertSame(array(), $bindingDescriptors);
             }));
@@ -1432,18 +1432,18 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $binding = new ResourceBinding('/path', Foo::clazz);
         $bindingDescriptor = new BindingDescriptor($binding);
 
-        $this->rootPackageFile->addTypeDescriptor(new BindingTypeDescriptor(new BindingType(Foo::clazz)));
-        $this->packageFile1->addTypeDescriptor(new BindingTypeDescriptor(new BindingType(Foo::clazz)));
-        $this->rootPackageFile->addBindingDescriptor($bindingDescriptor);
+        $this->rootModuleFile->addTypeDescriptor(new BindingTypeDescriptor(new BindingType(Foo::clazz)));
+        $this->moduleFile1->addTypeDescriptor(new BindingTypeDescriptor(new BindingType(Foo::clazz)));
+        $this->rootModuleFile->addBindingDescriptor($bindingDescriptor);
 
         $this->discovery->expects($this->never())
             ->method('removeBinding');
 
-        $this->packageFileStorage->expects($this->once())
-            ->method('saveRootPackageFile')
-            ->with($this->rootPackageFile)
-            ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) {
-                $bindingDescriptors = $rootPackageFile->getBindingDescriptors();
+        $this->moduleFileStorage->expects($this->once())
+            ->method('saveRootModuleFile')
+            ->with($this->rootModuleFile)
+            ->will($this->returnCallback(function (RootModuleFile $rootModuleFile) {
+                $bindingDescriptors = $rootModuleFile->getBindingDescriptors();
 
                 PHPUnit_Framework_Assert::assertSame(array(), $bindingDescriptors);
             }));
@@ -1458,8 +1458,8 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $binding = new ResourceBinding('/path', Foo::clazz);
         $bindingDescriptor = new BindingDescriptor($binding);
 
-        $this->packageFile1->addTypeDescriptor(new BindingTypeDescriptor(new BindingType(Foo::clazz)));
-        $this->rootPackageFile->addBindingDescriptor($bindingDescriptor);
+        $this->moduleFile1->addTypeDescriptor(new BindingTypeDescriptor(new BindingType(Foo::clazz)));
+        $this->rootModuleFile->addBindingDescriptor($bindingDescriptor);
 
         $this->discovery->expects($this->once())
             ->method('removeBinding')
@@ -1469,9 +1469,9 @@ class DiscoveryManagerImplTest extends ManagerTestCase
             ->method('addBinding')
             ->with($binding);
 
-        $this->packageFileStorage->expects($this->once())
-            ->method('saveRootPackageFile')
-            ->with($this->rootPackageFile)
+        $this->moduleFileStorage->expects($this->once())
+            ->method('saveRootModuleFile')
+            ->with($this->rootModuleFile)
             ->willThrowException(new TestException('Some exception'));
 
         try {
@@ -1480,7 +1480,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         } catch (TestException $e) {
         }
 
-        $this->assertSame(array($bindingDescriptor), $this->rootPackageFile->getBindingDescriptors());
+        $this->assertSame(array($bindingDescriptor), $this->rootModuleFile->getBindingDescriptors());
         $this->assertTrue($bindingDescriptor->isLoaded());
     }
 
@@ -1492,10 +1492,10 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $binding2 = new ResourceBinding('/path2', Foo::clazz);
         $binding3 = new ResourceBinding('/other3', Foo::clazz);
 
-        $this->packageFile1->addTypeDescriptor(new BindingTypeDescriptor(new BindingType(Foo::clazz)));
-        $this->rootPackageFile->addBindingDescriptor($bindingDescriptor1 = new BindingDescriptor($binding1));
-        $this->rootPackageFile->addBindingDescriptor($bindingDescriptor2 = new BindingDescriptor($binding2));
-        $this->rootPackageFile->addBindingDescriptor($bindingDescriptor3 = new BindingDescriptor($binding3));
+        $this->moduleFile1->addTypeDescriptor(new BindingTypeDescriptor(new BindingType(Foo::clazz)));
+        $this->rootModuleFile->addBindingDescriptor($bindingDescriptor1 = new BindingDescriptor($binding1));
+        $this->rootModuleFile->addBindingDescriptor($bindingDescriptor2 = new BindingDescriptor($binding2));
+        $this->rootModuleFile->addBindingDescriptor($bindingDescriptor3 = new BindingDescriptor($binding3));
 
         $this->discovery->expects($this->at(0))
             ->method('removeBinding')
@@ -1505,11 +1505,11 @@ class DiscoveryManagerImplTest extends ManagerTestCase
             ->method('removeBinding')
             ->with($binding2->getUuid());
 
-        $this->packageFileStorage->expects($this->once())
-            ->method('saveRootPackageFile')
-            ->with($this->rootPackageFile)
-            ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) use ($bindingDescriptor3) {
-                PHPUnit_Framework_Assert::assertSame(array($bindingDescriptor3), $rootPackageFile->getBindingDescriptors());
+        $this->moduleFileStorage->expects($this->once())
+            ->method('saveRootModuleFile')
+            ->with($this->rootModuleFile)
+            ->will($this->returnCallback(function (RootModuleFile $rootModuleFile) use ($bindingDescriptor3) {
+                PHPUnit_Framework_Assert::assertSame(array($bindingDescriptor3), $rootModuleFile->getBindingDescriptors());
             }));
 
         $this->manager->removeRootBindingDescriptors(Expr::method('getBinding', Expr::method('getQuery', Expr::startsWith('/path'))));
@@ -1526,9 +1526,9 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $binding1 = new ResourceBinding('/path1', Foo::clazz);
         $binding2 = new ResourceBinding('/path2', Foo::clazz);
 
-        $this->packageFile1->addTypeDescriptor(new BindingTypeDescriptor(new BindingType(Foo::clazz)));
-        $this->rootPackageFile->addBindingDescriptor($bindingDescriptor1 = new BindingDescriptor($binding1));
-        $this->rootPackageFile->addBindingDescriptor($bindingDescriptor2 = new BindingDescriptor($binding2));
+        $this->moduleFile1->addTypeDescriptor(new BindingTypeDescriptor(new BindingType(Foo::clazz)));
+        $this->rootModuleFile->addBindingDescriptor($bindingDescriptor1 = new BindingDescriptor($binding1));
+        $this->rootModuleFile->addBindingDescriptor($bindingDescriptor2 = new BindingDescriptor($binding2));
 
         $this->discovery->expects($this->at(0))
             ->method('removeBinding')
@@ -1546,9 +1546,9 @@ class DiscoveryManagerImplTest extends ManagerTestCase
             ->method('addBinding')
             ->with($binding1);
 
-        $this->packageFileStorage->expects($this->once())
-            ->method('saveRootPackageFile')
-            ->with($this->rootPackageFile)
+        $this->moduleFileStorage->expects($this->once())
+            ->method('saveRootModuleFile')
+            ->with($this->rootModuleFile)
             ->willThrowException(new TestException('Some exception'));
 
         try {
@@ -1557,9 +1557,9 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         } catch (TestException $e) {
         }
 
-        $this->assertSame($bindingDescriptor1, $this->rootPackageFile->getBindingDescriptor($bindingDescriptor1->getUuid()));
-        $this->assertSame($bindingDescriptor2, $this->rootPackageFile->getBindingDescriptor($bindingDescriptor2->getUuid()));
-        $this->assertCount(2, $this->rootPackageFile->getBindingDescriptors());
+        $this->assertSame($bindingDescriptor1, $this->rootModuleFile->getBindingDescriptor($bindingDescriptor1->getUuid()));
+        $this->assertSame($bindingDescriptor2, $this->rootModuleFile->getBindingDescriptor($bindingDescriptor2->getUuid()));
+        $this->assertCount(2, $this->rootModuleFile->getBindingDescriptors());
         $this->assertTrue($bindingDescriptor1->isLoaded());
         $this->assertTrue($bindingDescriptor2->isLoaded());
     }
@@ -1571,9 +1571,9 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $binding1 = new ResourceBinding('/path1', Foo::clazz);
         $binding2 = new ResourceBinding('/path2', Foo::clazz);
 
-        $this->packageFile1->addTypeDescriptor(new BindingTypeDescriptor(new BindingType(Foo::clazz)));
-        $this->rootPackageFile->addBindingDescriptor($bindingDescriptor1 = new BindingDescriptor($binding1));
-        $this->rootPackageFile->addBindingDescriptor($bindingDescriptor2 = new BindingDescriptor($binding2));
+        $this->moduleFile1->addTypeDescriptor(new BindingTypeDescriptor(new BindingType(Foo::clazz)));
+        $this->rootModuleFile->addBindingDescriptor($bindingDescriptor1 = new BindingDescriptor($binding1));
+        $this->rootModuleFile->addBindingDescriptor($bindingDescriptor2 = new BindingDescriptor($binding2));
 
         $this->discovery->expects($this->at(0))
             ->method('removeBinding')
@@ -1583,11 +1583,11 @@ class DiscoveryManagerImplTest extends ManagerTestCase
             ->method('removeBinding')
             ->with($binding2->getUuid());
 
-        $this->packageFileStorage->expects($this->once())
-            ->method('saveRootPackageFile')
-            ->with($this->rootPackageFile)
-            ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) {
-                PHPUnit_Framework_Assert::assertFalse($rootPackageFile->hasBindingDescriptors());
+        $this->moduleFileStorage->expects($this->once())
+            ->method('saveRootModuleFile')
+            ->with($this->rootModuleFile)
+            ->will($this->returnCallback(function (RootModuleFile $rootModuleFile) {
+                PHPUnit_Framework_Assert::assertFalse($rootModuleFile->hasBindingDescriptors());
             }));
 
         $this->manager->clearRootBindingDescriptors();
@@ -1603,9 +1603,9 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $binding1 = new ResourceBinding('/path1', Foo::clazz);
         $binding2 = new ResourceBinding('/path2', Foo::clazz);
 
-        $this->packageFile1->addTypeDescriptor(new BindingTypeDescriptor(new BindingType(Foo::clazz)));
-        $this->rootPackageFile->addBindingDescriptor($bindingDescriptor1 = new BindingDescriptor($binding1));
-        $this->packageFile1->addBindingDescriptor($bindingDescriptor2 = new BindingDescriptor($binding2));
+        $this->moduleFile1->addTypeDescriptor(new BindingTypeDescriptor(new BindingType(Foo::clazz)));
+        $this->rootModuleFile->addBindingDescriptor($bindingDescriptor1 = new BindingDescriptor($binding1));
+        $this->moduleFile1->addBindingDescriptor($bindingDescriptor2 = new BindingDescriptor($binding2));
 
         $this->assertTrue($this->manager->hasRootBindingDescriptor($bindingDescriptor1->getUuid()));
         $this->assertFalse($this->manager->hasRootBindingDescriptor($bindingDescriptor2->getUuid()));
@@ -1624,10 +1624,10 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $binding2 = new ResourceBinding('/path2', Foo::clazz, array(), 'glob', $uuid2);
         $binding3 = new ResourceBinding('/path3', Foo::clazz, array(), 'glob', $uuid3);
 
-        $this->packageFile1->addTypeDescriptor(new BindingTypeDescriptor(new BindingType(Foo::clazz)));
-        $this->rootPackageFile->addBindingDescriptor($bindingDescriptor1 = new BindingDescriptor($binding1));
-        $this->rootPackageFile->addBindingDescriptor($bindingDescriptor2 = new BindingDescriptor($binding2));
-        $this->packageFile1->addBindingDescriptor($bindingDescriptor3 = new BindingDescriptor($binding3));
+        $this->moduleFile1->addTypeDescriptor(new BindingTypeDescriptor(new BindingType(Foo::clazz)));
+        $this->rootModuleFile->addBindingDescriptor($bindingDescriptor1 = new BindingDescriptor($binding1));
+        $this->rootModuleFile->addBindingDescriptor($bindingDescriptor2 = new BindingDescriptor($binding2));
+        $this->moduleFile1->addBindingDescriptor($bindingDescriptor3 = new BindingDescriptor($binding3));
 
         $expr1 = Expr::method('getUuid', Expr::startsWith('ecc'));
         $expr2 = Expr::method('getTypeName', Expr::same(Foo::clazz));
@@ -1645,9 +1645,9 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $binding1 = new ResourceBinding('/path1', Foo::clazz);
         $binding2 = new ResourceBinding('/path2', Foo::clazz);
 
-        $this->rootPackageFile->addTypeDescriptor(new BindingTypeDescriptor(new BindingType(Foo::clazz)));
-        $this->rootPackageFile->addBindingDescriptor($bindingDescriptor1 = new BindingDescriptor($binding1));
-        $this->rootPackageFile->addBindingDescriptor($bindingDescriptor2 = new BindingDescriptor($binding2));
+        $this->rootModuleFile->addTypeDescriptor(new BindingTypeDescriptor(new BindingType(Foo::clazz)));
+        $this->rootModuleFile->addBindingDescriptor($bindingDescriptor1 = new BindingDescriptor($binding1));
+        $this->rootModuleFile->addBindingDescriptor($bindingDescriptor2 = new BindingDescriptor($binding2));
 
         $expr1 = Expr::method('isEnabled', Expr::same(true));
         $expr2 = Expr::method('isTypeNotFound', Expr::same(true));
@@ -1663,19 +1663,19 @@ class DiscoveryManagerImplTest extends ManagerTestCase
 
         $binding = new ResourceBinding('/path1', Foo::clazz);
 
-        $this->packageFile1->addTypeDescriptor(new BindingTypeDescriptor(new BindingType(Foo::clazz)));
-        $this->packageFile1->addBindingDescriptor($bindingDescriptor = new BindingDescriptor($binding));
+        $this->moduleFile1->addTypeDescriptor(new BindingTypeDescriptor(new BindingType(Foo::clazz)));
+        $this->moduleFile1->addBindingDescriptor($bindingDescriptor = new BindingDescriptor($binding));
         $this->installInfo1->addDisabledBindingUuid($binding->getUuid());
 
         $this->discovery->expects($this->once())
             ->method('addBinding')
             ->with($binding);
 
-        $this->packageFileStorage->expects($this->once())
-            ->method('saveRootPackageFile')
-            ->with($this->rootPackageFile)
-            ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) use ($binding) {
-                $installInfo = $rootPackageFile->getInstallInfo('vendor/package1');
+        $this->moduleFileStorage->expects($this->once())
+            ->method('saveRootModuleFile')
+            ->with($this->rootModuleFile)
+            ->will($this->returnCallback(function (RootModuleFile $rootModuleFile) use ($binding) {
+                $installInfo = $rootModuleFile->getInstallInfo('vendor/module1');
                 $disabledBindingUuids = $installInfo->getDisabledBindingUuids();
 
                 PHPUnit_Framework_Assert::assertSame(array(), $disabledBindingUuids);
@@ -1692,14 +1692,14 @@ class DiscoveryManagerImplTest extends ManagerTestCase
 
         $binding = new ResourceBinding('/path1', Foo::clazz);
 
-        $this->packageFile1->addTypeDescriptor(new BindingTypeDescriptor(new BindingType(Foo::clazz)));
-        $this->packageFile1->addBindingDescriptor($bindingDescriptor = new BindingDescriptor($binding));
+        $this->moduleFile1->addTypeDescriptor(new BindingTypeDescriptor(new BindingType(Foo::clazz)));
+        $this->moduleFile1->addBindingDescriptor($bindingDescriptor = new BindingDescriptor($binding));
 
         $this->discovery->expects($this->never())
             ->method('addBinding');
 
-        $this->packageFileStorage->expects($this->never())
-            ->method('saveRootPackageFile');
+        $this->moduleFileStorage->expects($this->never())
+            ->method('saveRootModuleFile');
 
         $this->manager->enableBindingDescriptor($binding->getUuid());
 
@@ -1717,29 +1717,29 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->discovery->expects($this->never())
             ->method('addBinding');
 
-        $this->packageFileStorage->expects($this->never())
-            ->method('saveRootPackageFile');
+        $this->moduleFileStorage->expects($this->never())
+            ->method('saveRootModuleFile');
 
         $this->manager->enableBindingDescriptor(Uuid::fromString('8546da2c-dfec-48be-8cd3-93798c41b72f'));
     }
 
     /**
-     * @expectedException \Puli\Manager\Api\NonRootPackageExpectedException
+     * @expectedException \Puli\Manager\Api\NonRootModuleExpectedException
      */
-    public function testEnableBindingDescriptorFailsIfBindingInRootPackage()
+    public function testEnableBindingDescriptorFailsIfBindingInRootModule()
     {
         $this->initDefaultManager();
 
         $binding = new ResourceBinding('/path1', Foo::clazz);
 
-        $this->packageFile1->addTypeDescriptor(new BindingTypeDescriptor(new BindingType(Foo::clazz)));
-        $this->rootPackageFile->addBindingDescriptor(new BindingDescriptor($binding));
+        $this->moduleFile1->addTypeDescriptor(new BindingTypeDescriptor(new BindingType(Foo::clazz)));
+        $this->rootModuleFile->addBindingDescriptor(new BindingDescriptor($binding));
 
         $this->discovery->expects($this->never())
             ->method('addBinding');
 
-        $this->packageFileStorage->expects($this->never())
-            ->method('saveRootPackageFile');
+        $this->moduleFileStorage->expects($this->never())
+            ->method('saveRootModuleFile');
 
         $this->manager->enableBindingDescriptor($binding->getUuid());
     }
@@ -1753,13 +1753,13 @@ class DiscoveryManagerImplTest extends ManagerTestCase
 
         $binding = new ResourceBinding('/path1', Foo::clazz);
 
-        $this->packageFile1->addBindingDescriptor(new BindingDescriptor($binding));
+        $this->moduleFile1->addBindingDescriptor(new BindingDescriptor($binding));
 
         $this->discovery->expects($this->never())
             ->method('addBinding');
 
-        $this->packageFileStorage->expects($this->never())
-            ->method('saveRootPackageFile');
+        $this->moduleFileStorage->expects($this->never())
+            ->method('saveRootModuleFile');
 
         $this->manager->enableBindingDescriptor($binding->getUuid());
     }
@@ -1773,15 +1773,15 @@ class DiscoveryManagerImplTest extends ManagerTestCase
 
         $binding = new ResourceBinding('/path1', Foo::clazz);
 
-        $this->rootPackageFile->addTypeDescriptor(new BindingTypeDescriptor(new BindingType(Foo::clazz)));
-        $this->packageFile1->addTypeDescriptor(new BindingTypeDescriptor(new BindingType(Foo::clazz)));
-        $this->packageFile1->addBindingDescriptor(new BindingDescriptor($binding));
+        $this->rootModuleFile->addTypeDescriptor(new BindingTypeDescriptor(new BindingType(Foo::clazz)));
+        $this->moduleFile1->addTypeDescriptor(new BindingTypeDescriptor(new BindingType(Foo::clazz)));
+        $this->moduleFile1->addBindingDescriptor(new BindingDescriptor($binding));
 
         $this->discovery->expects($this->never())
             ->method('addBinding');
 
-        $this->packageFileStorage->expects($this->never())
-            ->method('saveRootPackageFile');
+        $this->moduleFileStorage->expects($this->never())
+            ->method('saveRootModuleFile');
 
         $this->manager->enableBindingDescriptor($binding->getUuid());
     }
@@ -1792,9 +1792,9 @@ class DiscoveryManagerImplTest extends ManagerTestCase
 
         $binding = new ResourceBinding('/path1', Foo::clazz);
 
-        $this->packageFile1->addTypeDescriptor(new BindingTypeDescriptor(new BindingType(Foo::clazz)));
-        $this->packageFile1->addBindingDescriptor($existingDescriptor = new BindingDescriptor(new ResourceBinding('/existing', Foo::clazz)));
-        $this->packageFile1->addBindingDescriptor($bindingDescriptor = new BindingDescriptor($binding));
+        $this->moduleFile1->addTypeDescriptor(new BindingTypeDescriptor(new BindingType(Foo::clazz)));
+        $this->moduleFile1->addBindingDescriptor($existingDescriptor = new BindingDescriptor(new ResourceBinding('/existing', Foo::clazz)));
+        $this->moduleFile1->addBindingDescriptor($bindingDescriptor = new BindingDescriptor($binding));
         $this->installInfo1->addDisabledBindingUuid($binding->getUuid());
 
         $this->discovery->expects($this->once())
@@ -1805,9 +1805,9 @@ class DiscoveryManagerImplTest extends ManagerTestCase
             ->method('removeBinding')
             ->with($binding->getUuid());
 
-        $this->packageFileStorage->expects($this->once())
-            ->method('saveRootPackageFile')
-            ->with($this->rootPackageFile)
+        $this->moduleFileStorage->expects($this->once())
+            ->method('saveRootModuleFile')
+            ->with($this->rootModuleFile)
             ->willThrowException(new TestException('Some exception'));
 
         try {
@@ -1825,8 +1825,8 @@ class DiscoveryManagerImplTest extends ManagerTestCase
 
         $binding = new ResourceBinding('/path1', Foo::clazz);
 
-        $this->packageFile1->addTypeDescriptor(new BindingTypeDescriptor(new BindingType(Foo::clazz)));
-        $this->packageFile1->addBindingDescriptor($bindingDescriptor = new BindingDescriptor($binding));
+        $this->moduleFile1->addTypeDescriptor(new BindingTypeDescriptor(new BindingType(Foo::clazz)));
+        $this->moduleFile1->addBindingDescriptor($bindingDescriptor = new BindingDescriptor($binding));
         $this->installInfo1->addDisabledBindingUuid($binding->getUuid());
 
         $this->discovery->expects($this->once())
@@ -1837,9 +1837,9 @@ class DiscoveryManagerImplTest extends ManagerTestCase
             ->method('removeBinding')
             ->with($binding->getUuid());
 
-        $this->packageFileStorage->expects($this->once())
-            ->method('saveRootPackageFile')
-            ->with($this->rootPackageFile)
+        $this->moduleFileStorage->expects($this->once())
+            ->method('saveRootModuleFile')
+            ->with($this->rootModuleFile)
             ->willThrowException(new TestException('Some exception'));
 
         try {
@@ -1857,18 +1857,18 @@ class DiscoveryManagerImplTest extends ManagerTestCase
 
         $binding = new ResourceBinding('/path1', Foo::clazz);
 
-        $this->packageFile1->addTypeDescriptor(new BindingTypeDescriptor(new BindingType(Foo::clazz)));
-        $this->packageFile1->addBindingDescriptor($bindingDescriptor = new BindingDescriptor($binding));
+        $this->moduleFile1->addTypeDescriptor(new BindingTypeDescriptor(new BindingType(Foo::clazz)));
+        $this->moduleFile1->addBindingDescriptor($bindingDescriptor = new BindingDescriptor($binding));
 
         $this->discovery->expects($this->once())
             ->method('removeBinding')
             ->with($binding->getUuid());
 
-        $this->packageFileStorage->expects($this->once())
-            ->method('saveRootPackageFile')
-            ->with($this->rootPackageFile)
-            ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) use ($binding) {
-                $installInfo = $rootPackageFile->getInstallInfo('vendor/package1');
+        $this->moduleFileStorage->expects($this->once())
+            ->method('saveRootModuleFile')
+            ->with($this->rootModuleFile)
+            ->will($this->returnCallback(function (RootModuleFile $rootModuleFile) use ($binding) {
+                $installInfo = $rootModuleFile->getInstallInfo('vendor/module1');
                 $disabledBindingUuids = $installInfo->getDisabledBindingUuids();
 
                 PHPUnit_Framework_Assert::assertSame(array($binding->getUuid()), $disabledBindingUuids);
@@ -1885,15 +1885,15 @@ class DiscoveryManagerImplTest extends ManagerTestCase
 
         $binding = new ResourceBinding('/path1', Foo::clazz);
 
-        $this->packageFile1->addTypeDescriptor(new BindingTypeDescriptor(new BindingType(Foo::clazz)));
-        $this->packageFile1->addBindingDescriptor($bindingDescriptor = new BindingDescriptor($binding));
+        $this->moduleFile1->addTypeDescriptor(new BindingTypeDescriptor(new BindingType(Foo::clazz)));
+        $this->moduleFile1->addBindingDescriptor($bindingDescriptor = new BindingDescriptor($binding));
         $this->installInfo1->addDisabledBindingUuid($binding->getUuid());
 
         $this->discovery->expects($this->never())
             ->method('removeBinding');
 
-        $this->packageFileStorage->expects($this->never())
-            ->method('saveRootPackageFile');
+        $this->moduleFileStorage->expects($this->never())
+            ->method('saveRootModuleFile');
 
         $this->manager->disableBindingDescriptor($binding->getUuid());
 
@@ -1911,29 +1911,29 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->discovery->expects($this->never())
             ->method('removeBinding');
 
-        $this->packageFileStorage->expects($this->never())
-            ->method('saveRootPackageFile');
+        $this->moduleFileStorage->expects($this->never())
+            ->method('saveRootModuleFile');
 
         $this->manager->disableBindingDescriptor(Uuid::fromString('8546da2c-dfec-48be-8cd3-93798c41b72f'));
     }
 
     /**
-     * @expectedException \Puli\Manager\Api\NonRootPackageExpectedException
+     * @expectedException \Puli\Manager\Api\NonRootModuleExpectedException
      */
-    public function testDisableBindingDescriptorFailsIfBindingInRootPackage()
+    public function testDisableBindingDescriptorFailsIfBindingInRootModule()
     {
         $this->initDefaultManager();
 
         $binding = new ResourceBinding('/path1', Foo::clazz);
 
-        $this->packageFile1->addTypeDescriptor(new BindingTypeDescriptor(new BindingType(Foo::clazz)));
-        $this->rootPackageFile->addBindingDescriptor(new BindingDescriptor($binding));
+        $this->moduleFile1->addTypeDescriptor(new BindingTypeDescriptor(new BindingType(Foo::clazz)));
+        $this->rootModuleFile->addBindingDescriptor(new BindingDescriptor($binding));
 
         $this->discovery->expects($this->never())
             ->method('removeBinding');
 
-        $this->packageFileStorage->expects($this->never())
-            ->method('saveRootPackageFile');
+        $this->moduleFileStorage->expects($this->never())
+            ->method('saveRootModuleFile');
 
         $this->manager->disableBindingDescriptor($binding->getUuid());
     }
@@ -1947,13 +1947,13 @@ class DiscoveryManagerImplTest extends ManagerTestCase
 
         $binding = new ResourceBinding('/path1', Foo::clazz);
 
-        $this->packageFile1->addBindingDescriptor(new BindingDescriptor($binding));
+        $this->moduleFile1->addBindingDescriptor(new BindingDescriptor($binding));
 
         $this->discovery->expects($this->never())
             ->method('removeBinding');
 
-        $this->packageFileStorage->expects($this->never())
-            ->method('saveRootPackageFile');
+        $this->moduleFileStorage->expects($this->never())
+            ->method('saveRootModuleFile');
 
         $this->manager->disableBindingDescriptor($binding->getUuid());
     }
@@ -1967,15 +1967,15 @@ class DiscoveryManagerImplTest extends ManagerTestCase
 
         $binding = new ResourceBinding('/path1', Foo::clazz);
 
-        $this->rootPackageFile->addTypeDescriptor(new BindingTypeDescriptor(new BindingType(Foo::clazz)));
-        $this->packageFile1->addTypeDescriptor(new BindingTypeDescriptor(new BindingType(Foo::clazz)));
-        $this->packageFile1->addBindingDescriptor(new BindingDescriptor($binding));
+        $this->rootModuleFile->addTypeDescriptor(new BindingTypeDescriptor(new BindingType(Foo::clazz)));
+        $this->moduleFile1->addTypeDescriptor(new BindingTypeDescriptor(new BindingType(Foo::clazz)));
+        $this->moduleFile1->addBindingDescriptor(new BindingDescriptor($binding));
 
         $this->discovery->expects($this->never())
             ->method('removeBinding');
 
-        $this->packageFileStorage->expects($this->never())
-            ->method('saveRootPackageFile');
+        $this->moduleFileStorage->expects($this->never())
+            ->method('saveRootModuleFile');
 
         $this->manager->disableBindingDescriptor($binding->getUuid());
     }
@@ -1987,10 +1987,10 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $binding = new ResourceBinding('/path1', Foo::clazz);
         $existing = new ResourceBinding('/existing', Foo::clazz);
 
-        $this->packageFile1->addTypeDescriptor(new BindingTypeDescriptor(new BindingType(Foo::clazz)));
-        $this->packageFile1->addBindingDescriptor(new BindingDescriptor($existing));
+        $this->moduleFile1->addTypeDescriptor(new BindingTypeDescriptor(new BindingType(Foo::clazz)));
+        $this->moduleFile1->addBindingDescriptor(new BindingDescriptor($existing));
         $this->installInfo1->addDisabledBindingUuid($existing->getUuid());
-        $this->packageFile1->addBindingDescriptor(new BindingDescriptor($binding));
+        $this->moduleFile1->addBindingDescriptor(new BindingDescriptor($binding));
 
         $this->discovery->expects($this->once())
             ->method('removeBinding')
@@ -2000,9 +2000,9 @@ class DiscoveryManagerImplTest extends ManagerTestCase
             ->method('addBinding')
             ->with($binding);
 
-        $this->packageFileStorage->expects($this->once())
-            ->method('saveRootPackageFile')
-            ->with($this->rootPackageFile)
+        $this->moduleFileStorage->expects($this->once())
+            ->method('saveRootModuleFile')
+            ->with($this->rootModuleFile)
             ->willThrowException(new TestException('Some exception'));
 
         try {
@@ -2020,8 +2020,8 @@ class DiscoveryManagerImplTest extends ManagerTestCase
 
         $binding = new ResourceBinding('/path1', Foo::clazz);
 
-        $this->packageFile1->addTypeDescriptor(new BindingTypeDescriptor(new BindingType(Foo::clazz)));
-        $this->packageFile1->addBindingDescriptor(new BindingDescriptor($binding));
+        $this->moduleFile1->addTypeDescriptor(new BindingTypeDescriptor(new BindingType(Foo::clazz)));
+        $this->moduleFile1->addBindingDescriptor(new BindingDescriptor($binding));
 
         $this->discovery->expects($this->once())
             ->method('removeBinding')
@@ -2031,9 +2031,9 @@ class DiscoveryManagerImplTest extends ManagerTestCase
             ->method('addBinding')
             ->with($binding);
 
-        $this->packageFileStorage->expects($this->once())
-            ->method('saveRootPackageFile')
-            ->with($this->rootPackageFile)
+        $this->moduleFileStorage->expects($this->once())
+            ->method('saveRootModuleFile')
+            ->with($this->rootModuleFile)
             ->willThrowException(new TestException('Some exception'));
 
         try {
@@ -2051,18 +2051,18 @@ class DiscoveryManagerImplTest extends ManagerTestCase
 
         $binding = new ResourceBinding('/path1', Foo::clazz);
 
-        $this->packageFile1->addTypeDescriptor(new BindingTypeDescriptor(new BindingType(Foo::clazz)));
-        $this->packageFile1->addBindingDescriptor(new BindingDescriptor($binding));
+        $this->moduleFile1->addTypeDescriptor(new BindingTypeDescriptor(new BindingType(Foo::clazz)));
+        $this->moduleFile1->addBindingDescriptor(new BindingDescriptor($binding));
         $this->installInfo1->addDisabledBindingUuid($binding->getUuid());
         $this->installInfo1->addDisabledBindingUuid(Uuid::uuid4());
         $this->installInfo2->addDisabledBindingUuid(Uuid::uuid4());
 
-        $this->packageFileStorage->expects($this->once())
-            ->method('saveRootPackageFile')
-            ->with($this->rootPackageFile)
-            ->will($this->returnCallback(function (RootPackageFile $rootPackageFile) use ($binding) {
-                $installInfo1 = $rootPackageFile->getInstallInfo('vendor/package1');
-                $installInfo2 = $rootPackageFile->getInstallInfo('vendor/package2');
+        $this->moduleFileStorage->expects($this->once())
+            ->method('saveRootModuleFile')
+            ->with($this->rootModuleFile)
+            ->will($this->returnCallback(function (RootModuleFile $rootModuleFile) use ($binding) {
+                $installInfo1 = $rootModuleFile->getInstallInfo('vendor/module1');
+                $installInfo2 = $rootModuleFile->getInstallInfo('vendor/module2');
                 $disabledBindingUuids1 = $installInfo1->getDisabledBindingUuids();
                 $disabledBindingUuids2 = $installInfo2->getDisabledBindingUuids();
 
@@ -2079,15 +2079,15 @@ class DiscoveryManagerImplTest extends ManagerTestCase
 
         $binding = new ResourceBinding('/path1', Foo::clazz);
 
-        $this->packageFile1->addTypeDescriptor(new BindingTypeDescriptor(new BindingType(Foo::clazz)));
-        $this->packageFile1->addBindingDescriptor(new BindingDescriptor($binding));
+        $this->moduleFile1->addTypeDescriptor(new BindingTypeDescriptor(new BindingType(Foo::clazz)));
+        $this->moduleFile1->addBindingDescriptor(new BindingDescriptor($binding));
         $this->installInfo1->addDisabledBindingUuid($binding->getUuid());
         $this->installInfo1->addDisabledBindingUuid($uuid1 = Uuid::uuid4());
         $this->installInfo2->addDisabledBindingUuid($uuid2 = Uuid::uuid4());
 
-        $this->packageFileStorage->expects($this->once())
-            ->method('saveRootPackageFile')
-            ->with($this->rootPackageFile)
+        $this->moduleFileStorage->expects($this->once())
+            ->method('saveRootModuleFile')
+            ->with($this->rootModuleFile)
             ->willThrowException(new TestException('Some exception'));
 
         try {
@@ -2107,9 +2107,9 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $binding1 = new ResourceBinding('/path1', Foo::clazz);
         $binding2 = new ResourceBinding('/path2', Foo::clazz);
 
-        $this->rootPackageFile->addTypeDescriptor(new BindingTypeDescriptor(new BindingType(Foo::clazz)));
-        $this->rootPackageFile->addBindingDescriptor($bindingDescriptor1 = new BindingDescriptor($binding1));
-        $this->packageFile1->addBindingDescriptor($bindingDescriptor2 = new BindingDescriptor($binding2));
+        $this->rootModuleFile->addTypeDescriptor(new BindingTypeDescriptor(new BindingType(Foo::clazz)));
+        $this->rootModuleFile->addBindingDescriptor($bindingDescriptor1 = new BindingDescriptor($binding1));
+        $this->moduleFile1->addBindingDescriptor($bindingDescriptor2 = new BindingDescriptor($binding2));
 
         $this->assertSame($bindingDescriptor1, $this->manager->getBindingDescriptor($binding1->getUuid()));
         $this->assertSame($bindingDescriptor2, $this->manager->getBindingDescriptor($binding2->getUuid()));
@@ -2133,11 +2133,11 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $binding2 = new ResourceBinding('/path2', Foo::clazz);
         $binding3 = new ResourceBinding('/path3', Foo::clazz);
 
-        $this->rootPackageFile->addTypeDescriptor(new BindingTypeDescriptor(new BindingType(Foo::clazz)));
-        $this->rootPackageFile->addBindingDescriptor($bindingDescriptor1 = new BindingDescriptor($binding1));
-        $this->packageFile1->addBindingDescriptor($bindingDescriptor2 = new BindingDescriptor($binding2));
+        $this->rootModuleFile->addTypeDescriptor(new BindingTypeDescriptor(new BindingType(Foo::clazz)));
+        $this->rootModuleFile->addBindingDescriptor($bindingDescriptor1 = new BindingDescriptor($binding1));
+        $this->moduleFile1->addBindingDescriptor($bindingDescriptor2 = new BindingDescriptor($binding2));
         $this->installInfo1->addDisabledBindingUuid($binding2->getUuid());
-        $this->packageFile3->addBindingDescriptor($bindingDescriptor3 = new BindingDescriptor($binding3));
+        $this->moduleFile3->addBindingDescriptor($bindingDescriptor3 = new BindingDescriptor($binding3));
 
         $this->assertSame(array(
             $bindingDescriptor1,
@@ -2158,14 +2158,14 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $binding2 = new ResourceBinding('/path2', Foo::clazz, array(), 'glob', $uuid2);
         $binding3 = new ResourceBinding('/path3', Foo::clazz, array(), 'glob', $uuid3);
 
-        $this->rootPackageFile->addTypeDescriptor(new BindingTypeDescriptor(new BindingType(Foo::clazz)));
-        $this->rootPackageFile->addBindingDescriptor($bindingDescriptor1 = new BindingDescriptor($binding1));
-        $this->packageFile1->addBindingDescriptor($bindingDescriptor2 = new BindingDescriptor($binding2));
-        $this->packageFile2->addBindingDescriptor($bindingDescriptor3 = new BindingDescriptor($binding3));
+        $this->rootModuleFile->addTypeDescriptor(new BindingTypeDescriptor(new BindingType(Foo::clazz)));
+        $this->rootModuleFile->addBindingDescriptor($bindingDescriptor1 = new BindingDescriptor($binding1));
+        $this->moduleFile1->addBindingDescriptor($bindingDescriptor2 = new BindingDescriptor($binding2));
+        $this->moduleFile2->addBindingDescriptor($bindingDescriptor3 = new BindingDescriptor($binding3));
 
         $expr1 = Expr::method('getUuid', Expr::startsWith('ecc'));
-        $expr2 = $expr1->andMethod('getContainingPackage', Expr::method('getName', Expr::same('vendor/package1')));
-        $expr3 = $expr1->andMethod('getContainingPackage', Expr::method('getName', Expr::same('vendor/root')));
+        $expr2 = $expr1->andMethod('getContainingModule', Expr::method('getName', Expr::same('vendor/module1')));
+        $expr3 = $expr1->andMethod('getContainingModule', Expr::method('getName', Expr::same('vendor/root')));
 
         $this->assertSame(array($bindingDescriptor2, $bindingDescriptor3), $this->manager->findBindingDescriptors($expr1));
         $this->assertSame(array($bindingDescriptor2), $this->manager->findBindingDescriptors($expr2));
@@ -2179,9 +2179,9 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $binding1 = new ResourceBinding('/path1', Foo::clazz);
         $binding2 = new ResourceBinding('/path2', Foo::clazz);
 
-        $this->rootPackageFile->addTypeDescriptor(new BindingTypeDescriptor(new BindingType(Foo::clazz)));
-        $this->rootPackageFile->addBindingDescriptor($bindingDescriptor1 = new BindingDescriptor($binding1));
-        $this->packageFile1->addBindingDescriptor($bindingDescriptor2 = new BindingDescriptor($binding2));
+        $this->rootModuleFile->addTypeDescriptor(new BindingTypeDescriptor(new BindingType(Foo::clazz)));
+        $this->rootModuleFile->addBindingDescriptor($bindingDescriptor1 = new BindingDescriptor($binding1));
+        $this->moduleFile1->addBindingDescriptor($bindingDescriptor2 = new BindingDescriptor($binding2));
 
         $this->assertTrue($this->manager->hasBindingDescriptor($bindingDescriptor1->getUuid()));
         $this->assertTrue($this->manager->hasBindingDescriptor($bindingDescriptor2->getUuid()));
@@ -2195,11 +2195,11 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $binding1 = new ResourceBinding('/path1', Foo::clazz);
         $binding2 = new ResourceBinding('/path2', Bar::clazz);
 
-        $this->rootPackageFile->addTypeDescriptor(new BindingTypeDescriptor(new BindingType(Foo::clazz)));
-        $this->rootPackageFile->addBindingDescriptor($bindingDescriptor1 = new BindingDescriptor($binding1));
-        $this->packageFile1->addBindingDescriptor($bindingDescriptor2 = new BindingDescriptor($binding2));
+        $this->rootModuleFile->addTypeDescriptor(new BindingTypeDescriptor(new BindingType(Foo::clazz)));
+        $this->rootModuleFile->addBindingDescriptor($bindingDescriptor1 = new BindingDescriptor($binding1));
+        $this->moduleFile1->addBindingDescriptor($bindingDescriptor2 = new BindingDescriptor($binding2));
 
-        $expr1 = Expr::method('getContainingPackage', Expr::method('getName', Expr::same('vendor/package1')));
+        $expr1 = Expr::method('getContainingModule', Expr::method('getName', Expr::same('vendor/module1')));
         $expr2 = Expr::method('isEnabled', Expr::same(true));
         $expr3 = $expr1->andX($expr2);
 
@@ -2223,8 +2223,8 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $type = new BindingType(Foo::clazz);
         $binding = new ResourceBinding('/path', Foo::clazz);
 
-        $this->rootPackageFile->addBindingDescriptor($bindingDescriptor = new BindingDescriptor($binding));
-        $this->packageFile1->addTypeDescriptor($typeDescriptor = new BindingTypeDescriptor($type));
+        $this->rootModuleFile->addBindingDescriptor($bindingDescriptor = new BindingDescriptor($binding));
+        $this->moduleFile1->addTypeDescriptor($typeDescriptor = new BindingTypeDescriptor($type));
 
         $this->discovery->expects($this->once())
             ->method('addBindingType')
@@ -2237,7 +2237,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->manager->buildDiscovery();
     }
 
-    public function testBuildDiscoveryOnlyIncludesEnabledBindingsOfInstalledPackages()
+    public function testBuildDiscoveryOnlyIncludesEnabledBindingsOfInstalledModules()
     {
         $this->initDefaultManager();
 
@@ -2245,9 +2245,9 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $binding1 = new ResourceBinding('/path1', Foo::clazz);
         $binding2 = new ResourceBinding('/path2', Foo::clazz);
 
-        $this->packageFile1->addTypeDescriptor($typeDescriptor = new BindingTypeDescriptor($type));
-        $this->packageFile1->addBindingDescriptor($bindingDescriptor1 = new BindingDescriptor($binding1));
-        $this->packageFile1->addBindingDescriptor($bindingDescriptor2 = new BindingDescriptor($binding2));
+        $this->moduleFile1->addTypeDescriptor($typeDescriptor = new BindingTypeDescriptor($type));
+        $this->moduleFile1->addBindingDescriptor($bindingDescriptor1 = new BindingDescriptor($binding1));
+        $this->moduleFile1->addBindingDescriptor($bindingDescriptor2 = new BindingDescriptor($binding2));
         $this->installInfo1->addDisabledBindingUuid($bindingDescriptor2->getUuid());
 
         $this->discovery->expects($this->once())
@@ -2265,10 +2265,10 @@ class DiscoveryManagerImplTest extends ManagerTestCase
     {
         $this->initDefaultManager();
 
-        // The type could be defined in an optional package
+        // The type could be defined in an optional module
         $binding = new ResourceBinding('/path', Foo::clazz);
 
-        $this->rootPackageFile->addBindingDescriptor(new BindingDescriptor($binding));
+        $this->rootModuleFile->addBindingDescriptor(new BindingDescriptor($binding));
 
         $this->discovery->expects($this->never())
             ->method('addBinding');
@@ -2284,8 +2284,8 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $type = new BindingType(Foo::clazz);
         $binding = new ResourceBinding('/path1', Foo::clazz, array('param' => 'value'));
 
-        $this->packageFile1->addTypeDescriptor(new BindingTypeDescriptor($type));
-        $this->packageFile1->addBindingDescriptor(new BindingDescriptor($binding));
+        $this->moduleFile1->addTypeDescriptor(new BindingTypeDescriptor($type));
+        $this->moduleFile1->addBindingDescriptor(new BindingDescriptor($binding));
 
         $this->discovery->expects($this->never())
             ->method('addBinding');
@@ -2307,8 +2307,8 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         ));
         $binding = new ResourceBinding('/path1', Foo::clazz);
 
-        $this->packageFile1->addTypeDescriptor(new BindingTypeDescriptor($type));
-        $this->packageFile1->addBindingDescriptor(new BindingDescriptor($binding));
+        $this->moduleFile1->addTypeDescriptor(new BindingTypeDescriptor($type));
+        $this->moduleFile1->addBindingDescriptor(new BindingDescriptor($binding));
 
         $this->discovery->expects($this->never())
             ->method('addBinding');
@@ -2324,8 +2324,8 @@ class DiscoveryManagerImplTest extends ManagerTestCase
     {
         $this->initDefaultManager();
 
-        $this->packageFile1->addTypeDescriptor(new BindingTypeDescriptor(new BindingType(Foo::clazz)));
-        $this->packageFile2->addTypeDescriptor(new BindingTypeDescriptor(new BindingType(Foo::clazz)));
+        $this->moduleFile1->addTypeDescriptor(new BindingTypeDescriptor(new BindingType(Foo::clazz)));
+        $this->moduleFile2->addTypeDescriptor(new BindingTypeDescriptor(new BindingType(Foo::clazz)));
 
         $this->discovery->expects($this->never())
             ->method('addBindingType');
@@ -2382,15 +2382,15 @@ class DiscoveryManagerImplTest extends ManagerTestCase
 
     private function initDefaultManager()
     {
-        $this->rootPackageFile->addInstallInfo($this->installInfo1);
-        $this->rootPackageFile->addInstallInfo($this->installInfo2);
-        $this->rootPackageFile->addInstallInfo($this->installInfo3);
+        $this->rootModuleFile->addInstallInfo($this->installInfo1);
+        $this->rootModuleFile->addInstallInfo($this->installInfo2);
+        $this->rootModuleFile->addInstallInfo($this->installInfo3);
 
-        $this->packages->add(new RootPackage($this->rootPackageFile, $this->rootDir));
-        $this->packages->add(new Package($this->packageFile1, $this->packageDir1, $this->installInfo1));
-        $this->packages->add(new Package($this->packageFile2, $this->packageDir2, $this->installInfo2));
-        $this->packages->add(new Package($this->packageFile3, $this->packageDir3, $this->installInfo3));
+        $this->modules->add(new RootModule($this->rootModuleFile, $this->rootDir));
+        $this->modules->add(new Module($this->moduleFile1, $this->moduleDir1, $this->installInfo1));
+        $this->modules->add(new Module($this->moduleFile2, $this->moduleDir2, $this->installInfo2));
+        $this->modules->add(new Module($this->moduleFile3, $this->moduleDir3, $this->installInfo3));
 
-        $this->manager = new DiscoveryManagerImpl($this->context, $this->discovery, $this->packages, $this->packageFileStorage, $this->logger);
+        $this->manager = new DiscoveryManagerImpl($this->context, $this->discovery, $this->modules, $this->moduleFileStorage, $this->logger);
     }
 }

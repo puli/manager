@@ -1,0 +1,120 @@
+{
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+        "version": {
+            "type": "string",
+            "required": true
+        },
+        "name": {
+            "type": "string"
+        },
+        "path-mappings": {
+            "type": "object",
+            "additionalProperties": {
+                "type": [ "string", "array" ]
+            }
+        },
+        "bindings": {
+            "type": "object",
+            "additionalProperties": {
+                "type": "object",
+                "properties": {
+                    "_class": {
+                        "type": "string"
+                    },
+                    "type": {
+                        "type": "string",
+                        "required": true
+                    },
+                    "parameters": {
+                        "type": "object",
+                        "additionalProperties": true
+                    },
+                    "query": {
+                        "type": "string"
+                    },
+                    "language": {
+                        "type": "string"
+                    },
+                    "class": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "binding-types": {
+            "type": "object",
+            "additionalProperties": {
+                "type": "object",
+                "properties": {
+                    "description": {
+                        "type": "string"
+                    },
+                    "parameters": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "object",
+                            "properties": {
+                                "description": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "override": {
+            "type": [ "string", "array" ],
+            "items": {
+                "type": "string"
+            }
+        },
+        "override-order": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
+        },
+        "config": {
+            "type": "object",
+            "additionalProperties": true
+        },
+        "plugins": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
+        },
+        "extra": {
+            "type": "object",
+            "additionalProperties": true
+        },
+        "modules": {
+            "type": "object",
+            "additionalProperties": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                    "install-path": {
+                        "type": "string",
+                        "required": true
+                    },
+                    "installer": {
+                        "type": "string"
+                    },
+                    "disabled-bindings": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "env" : {
+                        "type": "string"
+                    }
+                }
+            }
+        }
+    }
+}

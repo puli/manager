@@ -52,7 +52,7 @@ interface InstallerManager
 
     /**
      * Returns the installer descriptor with the given name from the root
-     * package.
+     * module.
      *
      * @param string $name The installer name.
      *
@@ -61,14 +61,14 @@ interface InstallerManager
     public function getRootInstallerDescriptor($name);
 
     /**
-     * Returns all installer descriptors in the root package.
+     * Returns all installer descriptors in the root module.
      *
      * @return InstallerDescriptor[] The installer descriptors.
      */
     public function getRootInstallerDescriptors();
 
     /**
-     * Returns all installer descriptors in the root package that match the
+     * Returns all installer descriptors in the root module that match the
      * given expression.
      *
      * @param Expression $expr The search criteria.
@@ -80,7 +80,7 @@ interface InstallerManager
 
     /**
      * Returns whether the installer descriptor with the given name exists in
-     * the root package.
+     * the root module.
      *
      * @param string $name The installer name.
      *
@@ -90,9 +90,9 @@ interface InstallerManager
     public function hasRootInstallerDescriptor($name);
 
     /**
-     * Returns whether the root package contains any installer descriptors.
+     * Returns whether the root module contains any installer descriptors.
      *
-     * You can optionally pass an expression to check whether the root package
+     * You can optionally pass an expression to check whether the root module
      * has installers matching that expression.
      *
      * @param Expression|null $expr The search criteria.

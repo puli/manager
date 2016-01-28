@@ -15,7 +15,7 @@ use PHPUnit_Framework_TestCase;
 use Puli\Manager\Api\Environment;
 use Puli\Manager\Api\Puli;
 use Puli\Manager\Tests\Api\Fixtures\BootstrapPlugin;
-use Puli\Manager\Tests\Api\Package\Fixtures\TestPlugin;
+use Puli\Manager\Tests\Api\Module\Fixtures\TestPlugin;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\Filesystem\Filesystem;
 use Webmozart\Glob\Test\TestUtil;
@@ -164,12 +164,12 @@ class PuliTest extends PHPUnit_Framework_TestCase
         $this->assertInstanceOf('Puli\Manager\Api\Context\ProjectContext', $context);
         $this->assertInstanceOf('Puli\Manager\Api\Config\Config', $context->getConfig());
         $this->assertInstanceOf('Puli\Manager\Api\Config\ConfigFile', $context->getConfigFile());
-        $this->assertInstanceOf('Puli\Manager\Api\Package\RootPackageFile', $context->getRootPackageFile());
+        $this->assertInstanceOf('Puli\Manager\Api\Module\RootModuleFile', $context->getRootModuleFile());
         $this->assertInstanceOf('Symfony\Component\EventDispatcher\EventDispatcherInterface', $context->getEventDispatcher());
         $this->assertSame($this->tempHome, $context->getHomeDirectory());
         $this->assertSame($this->tempRoot, $context->getRootDirectory());
         $this->assertSame($this->tempHome.'/config.json', $context->getConfigFile()->getPath());
-        $this->assertSame($this->tempRoot.'/puli.json', $context->getRootPackageFile()->getPath());
+        $this->assertSame($this->tempRoot.'/puli.json', $context->getRootModuleFile()->getPath());
         $this->assertSame($context->getEventDispatcher(), $this->puli->getEventDispatcher());
         $this->assertSame(Environment::DEV, $context->getEnvironment());
         $this->assertSame(Environment::DEV, $this->puli->getEnvironment());
@@ -185,8 +185,8 @@ class PuliTest extends PHPUnit_Framework_TestCase
         $context = $this->puli->getContext();
 
         $this->assertInstanceOf('Puli\Manager\Api\Context\ProjectContext', $context);
-        $this->assertInstanceOf('Puli\Manager\Api\Package\RootPackageFile', $context->getRootPackageFile());
-        $this->assertSame($this->tempRoot.'/puli.json', $context->getRootPackageFile()->getPath());
+        $this->assertInstanceOf('Puli\Manager\Api\Module\RootModuleFile', $context->getRootModuleFile());
+        $this->assertSame($this->tempRoot.'/puli.json', $context->getRootModuleFile()->getPath());
     }
 
     public function testGetProjectContextWithEventDispatcher()
@@ -223,11 +223,11 @@ class PuliTest extends PHPUnit_Framework_TestCase
         $this->assertInstanceOf('Puli\Manager\Api\Context\ProjectContext', $context);
         $this->assertInstanceOf('Puli\Manager\Api\Config\Config', $context->getConfig());
         $this->assertNull($context->getConfigFile());
-        $this->assertInstanceOf('Puli\Manager\Api\Package\RootPackageFile', $context->getRootPackageFile());
+        $this->assertInstanceOf('Puli\Manager\Api\Module\RootModuleFile', $context->getRootModuleFile());
         $this->assertInstanceOf('Symfony\Component\EventDispatcher\EventDispatcherInterface', $context->getEventDispatcher());
         $this->assertNull($context->getHomeDirectory());
         $this->assertSame($this->tempRoot, $context->getRootDirectory());
-        $this->assertSame($this->tempRoot.'/puli.json', $context->getRootPackageFile()->getPath());
+        $this->assertSame($this->tempRoot.'/puli.json', $context->getRootModuleFile()->getPath());
     }
 
     public function testGetRepositoryInProjectContext()
@@ -314,45 +314,45 @@ class PuliTest extends PHPUnit_Framework_TestCase
         $this->assertSame($this->puli->getContext(), $manager->getContext());
     }
 
-    public function testGetRootPackageFileManagerInProjectContext()
+    public function testGetRootModuleFileManagerInProjectContext()
     {
         $this->puli->setRootDirectory($this->tempRoot);
         $this->puli->start();
-        $manager = $this->puli->getRootPackageFileManager();
+        $manager = $this->puli->getRootModuleFileManager();
 
-        $this->assertInstanceOf('Puli\Manager\Api\Package\RootPackageFileManager', $manager);
+        $this->assertInstanceOf('Puli\Manager\Api\Module\RootModuleFileManager', $manager);
         $this->assertSame($this->puli->getContext(), $manager->getContext());
     }
 
-    public function testGetRootPackageFileManagerInGlobalContext()
+    public function testGetRootModuleFileManagerInGlobalContext()
     {
         $this->puli->start();
 
-        $this->assertNull($this->puli->getRootPackageFileManager());
+        $this->assertNull($this->puli->getRootModuleFileManager());
     }
 
-    public function testGetPackageManagerInProjectContext()
+    public function testGetModuleManagerInProjectContext()
     {
         $this->puli->setRootDirectory($this->tempRoot);
         $this->puli->start();
-        $manager = $this->puli->getPackageManager();
+        $manager = $this->puli->getModuleManager();
 
-        $this->assertInstanceOf('Puli\Manager\Api\Package\PackageManager', $manager);
+        $this->assertInstanceOf('Puli\Manager\Api\Module\ModuleManager', $manager);
         $this->assertSame($this->puli->getContext(), $manager->getContext());
 
-        $packages = $manager->getPackages();
+        $modules = $manager->getModules();
 
-        $this->assertCount(3, $packages);
-        $this->assertTrue($packages->contains('vendor/root'));
-        $this->assertTrue($packages->contains('vendor/package1'));
-        $this->assertTrue($packages->contains('vendor/package2'));
+        $this->assertCount(3, $modules);
+        $this->assertTrue($modules->contains('vendor/root'));
+        $this->assertTrue($modules->contains('vendor/module1'));
+        $this->assertTrue($modules->contains('vendor/module2'));
     }
 
-    public function testGetPackageManagerInGlobalContext()
+    public function testGetModuleManagerInGlobalContext()
     {
         $this->puli->start();
 
-        $this->assertNull($this->puli->getPackageManager());
+        $this->assertNull($this->puli->getModuleManager());
     }
 
     public function testGetRepositoryManagerInProjectContext()

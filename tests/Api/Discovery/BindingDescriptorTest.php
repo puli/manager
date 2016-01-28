@@ -18,11 +18,11 @@ use Puli\Discovery\Binding\ClassBinding;
 use Puli\Manager\Api\Discovery\BindingDescriptor;
 use Puli\Manager\Api\Discovery\BindingState;
 use Puli\Manager\Api\Discovery\BindingTypeDescriptor;
-use Puli\Manager\Api\Package\InstallInfo;
-use Puli\Manager\Api\Package\Package;
-use Puli\Manager\Api\Package\PackageFile;
-use Puli\Manager\Api\Package\RootPackage;
-use Puli\Manager\Api\Package\RootPackageFile;
+use Puli\Manager\Api\Module\InstallInfo;
+use Puli\Manager\Api\Module\Module;
+use Puli\Manager\Api\Module\ModuleFile;
+use Puli\Manager\Api\Module\RootModule;
+use Puli\Manager\Api\Module\RootModuleFile;
 use Puli\Manager\Tests\Discovery\Fixtures\Foo;
 use Rhumsaa\Uuid\Uuid;
 
@@ -36,20 +36,20 @@ class BindingDescriptorTest extends PHPUnit_Framework_TestCase
     private $uuid;
 
     /**
-     * @var Package
+     * @var Module
      */
-    private $package;
+    private $module;
 
     /**
-     * @var Package
+     * @var Module
      */
-    private $rootPackage;
+    private $rootModule;
 
     protected function setUp()
     {
         $this->uuid = Uuid::uuid4();
-        $this->package = new Package(new PackageFile(), '/path', new InstallInfo('vendor/package', '/path'));
-        $this->rootPackage = new RootPackage(new RootPackageFile(), '/root');
+        $this->module = new Module(new ModuleFile(), '/path', new InstallInfo('vendor/module', '/path'));
+        $this->rootModule = new RootModule(new RootModuleFile(), '/root');
     }
 
     public function testCreate()
@@ -68,12 +68,12 @@ class BindingDescriptorTest extends PHPUnit_Framework_TestCase
         ));
 
         $typeDescriptor = new BindingTypeDescriptor($type);
-        $typeDescriptor->load($this->package);
+        $typeDescriptor->load($this->module);
 
         $binding = new ClassBinding(__CLASS__, Foo::clazz);
 
         $descriptor = new BindingDescriptor($binding);
-        $descriptor->load($this->package, $typeDescriptor);
+        $descriptor->load($this->module, $typeDescriptor);
 
         $this->assertTrue($binding->isInitialized());
         $this->assertSame($type, $binding->getType());
@@ -83,7 +83,7 @@ class BindingDescriptorTest extends PHPUnit_Framework_TestCase
     {
         $binding = new ClassBinding(__CLASS__, Foo::clazz);
         $descriptor = new BindingDescriptor($binding);
-        $descriptor->load($this->package);
+        $descriptor->load($this->module);
 
         $this->assertSame(BindingState::TYPE_NOT_FOUND, $descriptor->getState());
     }
@@ -95,7 +95,7 @@ class BindingDescriptorTest extends PHPUnit_Framework_TestCase
 
         $binding = new ClassBinding(__CLASS__, Foo::clazz);
         $descriptor = new BindingDescriptor($binding);
-        $descriptor->load($this->package, $typeDescriptor);
+        $descriptor->load($this->module, $typeDescriptor);
 
         $this->assertSame(BindingState::TYPE_NOT_FOUND, $descriptor->getState());
     }
@@ -104,12 +104,12 @@ class BindingDescriptorTest extends PHPUnit_Framework_TestCase
     {
         $type = new BindingType(Foo::clazz);
         $typeDescriptor = new BindingTypeDescriptor($type);
-        $typeDescriptor->load($this->package);
+        $typeDescriptor->load($this->module);
         $typeDescriptor->markDuplicate(true);
 
         $binding = new ClassBinding(__CLASS__, Foo::clazz);
         $descriptor = new BindingDescriptor($binding);
-        $descriptor->load($this->package, $typeDescriptor);
+        $descriptor->load($this->module, $typeDescriptor);
 
         $this->assertSame(BindingState::TYPE_NOT_ENABLED, $descriptor->getState());
     }
@@ -120,12 +120,12 @@ class BindingDescriptorTest extends PHPUnit_Framework_TestCase
             new BindingParameter('param', BindingParameter::REQUIRED),
         ));
         $typeDescriptor = new BindingTypeDescriptor($type);
-        $typeDescriptor->load($this->package);
+        $typeDescriptor->load($this->module);
 
         // Parameter is missing
         $binding = new ClassBinding(__CLASS__, Foo::clazz);
         $descriptor = new BindingDescriptor($binding);
-        $descriptor->load($this->package, $typeDescriptor);
+        $descriptor->load($this->module, $typeDescriptor);
 
         $this->assertSame(BindingState::INVALID, $descriptor->getState());
         $this->assertCount(1, $descriptor->getLoadErrors());
@@ -137,27 +137,27 @@ class BindingDescriptorTest extends PHPUnit_Framework_TestCase
             new BindingParameter('param', BindingParameter::REQUIRED),
         ));
         $typeDescriptor = new BindingTypeDescriptor($type);
-        $typeDescriptor->load($this->package);
+        $typeDescriptor->load($this->module);
         $typeDescriptor->markDuplicate(true);
 
         // Parameter is missing
         $binding = new ClassBinding(__CLASS__, Foo::clazz);
         $descriptor = new BindingDescriptor($binding);
-        $descriptor->load($this->package, $typeDescriptor);
+        $descriptor->load($this->module, $typeDescriptor);
 
         $this->assertSame(BindingState::TYPE_NOT_ENABLED, $descriptor->getState());
         $this->assertCount(0, $descriptor->getLoadErrors());
     }
 
-    public function testEnabledInRootPackage()
+    public function testEnabledInRootModule()
     {
         $type = new BindingType(Foo::clazz);
         $typeDescriptor = new BindingTypeDescriptor($type);
-        $typeDescriptor->load($this->package);
+        $typeDescriptor->load($this->module);
 
         $binding = new ClassBinding(__CLASS__, Foo::clazz);
         $descriptor = new BindingDescriptor($binding);
-        $descriptor->load($this->rootPackage, $typeDescriptor);
+        $descriptor->load($this->rootModule, $typeDescriptor);
 
         $this->assertSame(BindingState::ENABLED, $descriptor->getState());
     }
@@ -166,13 +166,13 @@ class BindingDescriptorTest extends PHPUnit_Framework_TestCase
     {
         $type = new BindingType(Foo::clazz);
         $typeDescriptor = new BindingTypeDescriptor($type);
-        $typeDescriptor->load($this->package);
+        $typeDescriptor->load($this->module);
 
-        $this->package->getInstallInfo()->addDisabledBindingUuid($this->uuid);
+        $this->module->getInstallInfo()->addDisabledBindingUuid($this->uuid);
 
         $binding = new ClassBinding(__CLASS__, Foo::clazz, array(), $this->uuid);
         $descriptor = new BindingDescriptor($binding);
-        $descriptor->load($this->package, $typeDescriptor);
+        $descriptor->load($this->module, $typeDescriptor);
 
         $this->assertSame(BindingState::DISABLED, $descriptor->getState());
     }
@@ -181,11 +181,11 @@ class BindingDescriptorTest extends PHPUnit_Framework_TestCase
     {
         $type = new BindingType(Foo::clazz);
         $typeDescriptor = new BindingTypeDescriptor($type);
-        $typeDescriptor->load($this->package);
+        $typeDescriptor->load($this->module);
 
         $binding = new ClassBinding(__CLASS__, Foo::clazz);
         $descriptor = new BindingDescriptor($binding);
-        $descriptor->load($this->package, $typeDescriptor);
+        $descriptor->load($this->module, $typeDescriptor);
 
         $this->assertSame(BindingState::ENABLED, $descriptor->getState());
     }
