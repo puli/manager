@@ -81,8 +81,7 @@ class ConfigFileStorage
         JsonEncoder $jsonEncoder,
         JsonDecoder $jsonDecoder,
         FactoryManager $factoryManager = null
-    )
-    {
+    ) {
         $this->storage = $storage;
         $this->configFileConverter = $configFileConverter;
         $this->jsonEncoder = $jsonEncoder;

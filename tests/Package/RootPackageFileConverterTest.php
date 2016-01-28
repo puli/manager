@@ -163,7 +163,7 @@ class RootPackageFileConverterTest extends PHPUnit_Framework_TestCase
                 ),
             ),
             'plugins' => array(
-                'Puli\Manager\Tests\Api\Package\Fixtures\TestPlugin'
+                'Puli\Manager\Tests\Api\Package\Fixtures\TestPlugin',
             ),
             'packages' => (object) array(
                 'vendor/package1' => (object) array(
@@ -332,7 +332,7 @@ class RootPackageFileConverterTest extends PHPUnit_Framework_TestCase
                 ),
             ),
             'plugins' => array(
-                'Puli\Manager\Tests\Api\Package\Fixtures\TestPlugin'
+                'Puli\Manager\Tests\Api\Package\Fixtures\TestPlugin',
             ),
             'packages' => (object) array(
                 'vendor/package1' => (object) array(

@@ -282,9 +282,9 @@ class MethodTest extends PHPUnit_Framework_TestCase
         $this->method->setBody("\$foo = 'bar';");
         $this->method->addBody('$baz = $foo;');
 
-        $expected = <<<EOF
-\$foo = 'bar';
-\$baz = \$foo;
+        $expected = <<<'EOF'
+$foo = 'bar';
+$baz = $foo;
 EOF;
 
         $this->assertSame($expected, $this->method->getBody());
@@ -294,8 +294,8 @@ EOF;
     {
         $this->method->addBody('$baz = $foo;');
 
-        $expected = <<<EOF
-\$baz = \$foo;
+        $expected = <<<'EOF'
+$baz = $foo;
 EOF;
 
         $this->assertSame($expected, $this->method->getBody());

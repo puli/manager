@@ -37,8 +37,8 @@ class NullStoreGeneratorTest extends AbstractGeneratorTest
     {
         $this->generator->generateNewInstance('store', $this->method, $this->registry);
 
-        $expected = <<<EOF
-\$store = new NullStore();
+        $expected = <<<'EOF'
+$store = new NullStore();
 EOF;
 
         $this->assertSame($expected, $this->method->getBody());

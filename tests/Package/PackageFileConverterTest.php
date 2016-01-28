@@ -212,7 +212,7 @@ class PackageFileConverterTest extends PHPUnit_Framework_TestCase
                         'a' => (object) array(),
                         'b' => (object) array(),
                         'c' => (object) array(),
-                    )
+                    ),
                 ),
             ),
         );
@@ -343,7 +343,7 @@ class PackageFileConverterTest extends PHPUnit_Framework_TestCase
                         'param' => (object) array(
                             'default' => 1234,
                         ),
-                    )
+                    ),
                 ),
             ),
         );
@@ -369,7 +369,7 @@ class PackageFileConverterTest extends PHPUnit_Framework_TestCase
                         'param' => (object) array(
                             'description' => 'Description of the parameter.',
                         ),
-                    )
+                    ),
                 ),
             ),
         );
@@ -393,7 +393,7 @@ class PackageFileConverterTest extends PHPUnit_Framework_TestCase
                         'param' => (object) array(
                             'required' => true,
                         ),
-                    )
+                    ),
                 ),
             ),
         );
@@ -473,7 +473,6 @@ class PackageFileConverterTest extends PHPUnit_Framework_TestCase
             'path' => '/path',
         ));
 
-
         $type = new BindingType(Foo::clazz, array(
             new BindingParameter('param', BindingParameter::OPTIONAL, 1234),
         ));
@@ -529,7 +528,7 @@ class PackageFileConverterTest extends PHPUnit_Framework_TestCase
                         'param' => (object) array(
                             'required' => true,
                         ),
-                    )
+                    ),
                 ),
             ),
         );

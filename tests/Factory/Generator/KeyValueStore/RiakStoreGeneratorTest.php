@@ -55,9 +55,9 @@ class RiakStoreGeneratorTest extends AbstractGeneratorTest
             'bucket' => 'puli',
         ));
 
-        $expected = <<<EOF
-\$client = new Riak('127.0.0.1', 8098);
-\$store = new RiakStore('puli', \$client);
+        $expected = <<<'EOF'
+$client = new Riak('127.0.0.1', 8098);
+$store = new RiakStore('puli', $client);
 EOF;
 
         $this->assertSame($expected, $this->method->getBody());
@@ -70,9 +70,9 @@ EOF;
             'host' => 'localhost',
         ));
 
-        $expected = <<<EOF
-\$client = new Riak('localhost', 8098);
-\$store = new RiakStore('puli', \$client);
+        $expected = <<<'EOF'
+$client = new Riak('localhost', 8098);
+$store = new RiakStore('puli', $client);
 EOF;
 
         $this->assertSame($expected, $this->method->getBody());
@@ -85,9 +85,9 @@ EOF;
             'port' => 1234,
         ));
 
-        $expected = <<<EOF
-\$client = new Riak('127.0.0.1', 1234);
-\$store = new RiakStore('puli', \$client);
+        $expected = <<<'EOF'
+$client = new Riak('127.0.0.1', 1234);
+$store = new RiakStore('puli', $client);
 EOF;
 
         $this->assertSame($expected, $this->method->getBody());

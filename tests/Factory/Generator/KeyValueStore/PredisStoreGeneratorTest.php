@@ -60,12 +60,12 @@ class PredisStoreGeneratorTest extends AbstractGeneratorTest
     {
         $this->generator->generateNewInstance('store', $this->method, $this->registry);
 
-        $expected = <<<EOF
-\$client = new Client(array(
+        $expected = <<<'EOF'
+$client = new Client(array(
     'host' => '127.0.0.1',
     'port' => 6379,
 ));
-\$store = new PredisStore(\$client);
+$store = new PredisStore($client);
 EOF;
 
         $this->assertSame($expected, $this->method->getBody());
@@ -77,12 +77,12 @@ EOF;
             'host' => 'localhost',
         ));
 
-        $expected = <<<EOF
-\$client = new Client(array(
+        $expected = <<<'EOF'
+$client = new Client(array(
     'host' => 'localhost',
     'port' => 6379,
 ));
-\$store = new PredisStore(\$client);
+$store = new PredisStore($client);
 EOF;
 
         $this->assertSame($expected, $this->method->getBody());
@@ -94,12 +94,12 @@ EOF;
             'port' => 1234,
         ));
 
-        $expected = <<<EOF
-\$client = new Client(array(
+        $expected = <<<'EOF'
+$client = new Client(array(
     'host' => '127.0.0.1',
     'port' => 1234,
 ));
-\$store = new PredisStore(\$client);
+$store = new PredisStore($client);
 EOF;
 
         $this->assertSame($expected, $this->method->getBody());

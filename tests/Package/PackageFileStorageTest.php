@@ -15,7 +15,6 @@ use PHPUnit_Framework_MockObject_MockObject;
 use PHPUnit_Framework_TestCase;
 use Puli\Manager\Api\Config\Config;
 use Puli\Manager\Api\Package\PackageFile;
-use Puli\Manager\Api\Package\PackageFileTransformer;
 use Puli\Manager\Api\Package\RootPackageFile;
 use Puli\Manager\Api\Storage\Storage;
 use Puli\Manager\Package\PackageFileStorage;

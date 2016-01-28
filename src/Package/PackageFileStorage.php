@@ -16,8 +16,6 @@ use Puli\Manager\Api\Factory\FactoryManager;
 use Puli\Manager\Api\FileNotFoundException;
 use Puli\Manager\Api\InvalidConfigException;
 use Puli\Manager\Api\Package\PackageFile;
-use Puli\Manager\Api\Package\PackageFileSerializer;
-use Puli\Manager\Api\Package\PackageFileTransformer;
 use Puli\Manager\Api\Package\RootPackageFile;
 use Puli\Manager\Api\Storage\ReadException;
 use Puli\Manager\Api\Storage\Storage;
@@ -93,8 +91,7 @@ class PackageFileStorage
         JsonEncoder $jsonEncoder,
         JsonDecoder $jsonDecoder,
         FactoryManager $factoryManager = null
-    )
-    {
+    ) {
         $this->storage = $storage;
         $this->packageFileConverter = $packageFileConverter;
         $this->rootPackageFileConverter = $rootPackageFileConverter;
