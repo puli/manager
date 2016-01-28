@@ -22,7 +22,7 @@ use Puli\Manager\Api\Discovery\BindingTypeDescriptor;
 use Puli\Manager\Api\Discovery\DiscoveryManager;
 use Puli\Manager\Api\Module\InstallInfo;
 use Puli\Manager\Api\Module\Module;
-use Puli\Manager\Api\Module\ModuleCollection;
+use Puli\Manager\Api\Module\ModuleList;
 use Puli\Manager\Api\Module\ModuleFile;
 use Puli\Manager\Api\Module\RootModule;
 use Puli\Manager\Api\Module\RootModuleFile;
@@ -98,7 +98,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
     private $installInfo3;
 
     /**
-     * @var ModuleCollection
+     * @var ModuleList
      */
     private $modules;
 
@@ -136,7 +136,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->installInfo2 = new InstallInfo('vendor/module2', $this->moduleDir2);
         $this->installInfo3 = new InstallInfo('vendor/module3', $this->moduleDir3);
 
-        $this->modules = new ModuleCollection();
+        $this->modules = new ModuleList();
 
         $this->logger = $this->getMock('Psr\Log\LoggerInterface');
 

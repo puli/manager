@@ -17,7 +17,7 @@ use Puli\Manager\Api\Context\ProjectContext;
 use Puli\Manager\Api\Event\BuildRepositoryEvent;
 use Puli\Manager\Api\Event\PuliEvents;
 use Puli\Manager\Api\Module\Module;
-use Puli\Manager\Api\Module\ModuleCollection;
+use Puli\Manager\Api\Module\ModuleList;
 use Puli\Manager\Api\Module\RootModule;
 use Puli\Manager\Api\Module\RootModuleFile;
 use Puli\Manager\Api\Repository\DuplicatePathMappingException;
@@ -89,7 +89,7 @@ class RepositoryManagerImpl implements RepositoryManager
     private $repo;
 
     /**
-     * @var ModuleCollection
+     * @var ModuleList
      */
     private $modules;
 
@@ -128,10 +128,10 @@ class RepositoryManagerImpl implements RepositoryManager
      *
      * @param ProjectContext     $context
      * @param EditableRepository $repo
-     * @param ModuleCollection   $modules
+     * @param ModuleList         $modules
      * @param ModuleFileStorage  $moduleFileStorage
      */
-    public function __construct(ProjectContext $context, EditableRepository $repo, ModuleCollection $modules, ModuleFileStorage $moduleFileStorage)
+    public function __construct(ProjectContext $context, EditableRepository $repo, ModuleList $modules, ModuleFileStorage $moduleFileStorage)
     {
         $this->context = $context;
         $this->dispatcher = $context->getEventDispatcher();

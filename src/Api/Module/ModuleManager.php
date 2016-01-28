@@ -105,7 +105,7 @@ interface ModuleManager
     /**
      * Returns all installed modules.
      *
-     * @return ModuleCollection The installed modules.
+     * @return ModuleList The installed modules.
      */
     public function getModules();
 
@@ -114,7 +114,7 @@ interface ModuleManager
      *
      * @param Expression $expr The search criteria.
      *
-     * @return ModuleCollection The modules matching the expression.
+     * @return ModuleList The modules matching the expression.
      */
     public function findModules(Expression $expr);
 

@@ -12,7 +12,7 @@
 namespace Puli\Manager\Repository\Mapping;
 
 use Puli\Manager\Api\Module\Module;
-use Puli\Manager\Api\Module\ModuleCollection;
+use Puli\Manager\Api\Module\ModuleList;
 use Puli\Manager\Api\Repository\PathMapping;
 use Puli\Manager\Conflict\ModuleConflictDetector;
 use Puli\Manager\Transaction\AtomicOperation;
@@ -37,7 +37,7 @@ class LoadPathMapping implements AtomicOperation
     private $containingModule;
 
     /**
-     * @var ModuleCollection
+     * @var ModuleList
      */
     private $modules;
 
@@ -56,7 +56,7 @@ class LoadPathMapping implements AtomicOperation
      */
     private $conflictDetector;
 
-    public function __construct(PathMapping $mapping, Module $containingModule, ModuleCollection $modules, PathMappingCollection $mappings, PathMappingCollection $mappingsByResource, ModuleConflictDetector $conflictDetector)
+    public function __construct(PathMapping $mapping, Module $containingModule, ModuleList $modules, PathMappingCollection $mappings, PathMappingCollection $mappingsByResource, ModuleConflictDetector $conflictDetector)
     {
         $this->mapping = $mapping;
         $this->containingModule = $containingModule;

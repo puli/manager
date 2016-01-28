@@ -134,7 +134,7 @@ class ModuleManagerImplTest extends ManagerTestCase
 
         $modules = $manager->getModules();
 
-        $this->assertInstanceOf('Puli\Manager\Api\Module\ModuleCollection', $modules);
+        $this->assertInstanceOf('Puli\Manager\Api\Module\ModuleList', $modules);
         $this->assertTrue($modules->contains('vendor/root'));
         $this->assertTrue($modules->contains('vendor/module1'));
         $this->assertTrue($modules->contains('vendor/module2'));
@@ -156,20 +156,20 @@ class ModuleManagerImplTest extends ManagerTestCase
 
         $modules = $manager->findModules($expr1);
 
-        $this->assertInstanceOf('Puli\Manager\Api\Module\ModuleCollection', $modules);
+        $this->assertInstanceOf('Puli\Manager\Api\Module\ModuleList', $modules);
         $this->assertTrue($modules->contains('vendor/root'));
         $this->assertTrue($modules->contains('vendor/module2'));
         $this->assertCount(2, $modules);
 
         $modules = $manager->findModules($expr2);
 
-        $this->assertInstanceOf('Puli\Manager\Api\Module\ModuleCollection', $modules);
+        $this->assertInstanceOf('Puli\Manager\Api\Module\ModuleList', $modules);
         $this->assertTrue($modules->contains('vendor/module1'));
         $this->assertCount(1, $modules);
 
         $modules = $manager->findModules($expr3);
 
-        $this->assertInstanceOf('Puli\Manager\Api\Module\ModuleCollection', $modules);
+        $this->assertInstanceOf('Puli\Manager\Api\Module\ModuleList', $modules);
         $this->assertCount(0, $modules);
     }
 

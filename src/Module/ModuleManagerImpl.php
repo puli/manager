@@ -18,7 +18,7 @@ use Puli\Manager\Api\FileNotFoundException;
 use Puli\Manager\Api\InvalidConfigException;
 use Puli\Manager\Api\Module\InstallInfo;
 use Puli\Manager\Api\Module\Module;
-use Puli\Manager\Api\Module\ModuleCollection;
+use Puli\Manager\Api\Module\ModuleList;
 use Puli\Manager\Api\Module\ModuleFile;
 use Puli\Manager\Api\Module\ModuleManager;
 use Puli\Manager\Api\Module\NameConflictException;
@@ -61,7 +61,7 @@ class ModuleManagerImpl implements ModuleManager
     private $moduleFileStorage;
 
     /**
-     * @var ModuleCollection
+     * @var ModuleList
      */
     private $modules;
 
@@ -272,7 +272,7 @@ class ModuleManagerImpl implements ModuleManager
     {
         $this->assertModulesLoaded();
 
-        $modules = new ModuleCollection();
+        $modules = new ModuleList();
 
         foreach ($this->modules as $module) {
             if ($expr->evaluate($module)) {
@@ -335,7 +335,7 @@ class ModuleManagerImpl implements ModuleManager
      */
     private function loadModules()
     {
-        $this->modules = new ModuleCollection();
+        $this->modules = new ModuleList();
         $this->modules->add(new RootModule($this->rootModuleFile, $this->rootDir));
 
         foreach ($this->rootModuleFile->getInstallInfos() as $installInfo) {

@@ -17,7 +17,7 @@ use Puli\Manager\Api\Config\Config;
 use Puli\Manager\Api\Event\GenerateFactoryEvent;
 use Puli\Manager\Api\Event\PuliEvents;
 use Puli\Manager\Api\Module\Module;
-use Puli\Manager\Api\Module\ModuleCollection;
+use Puli\Manager\Api\Module\ModuleList;
 use Puli\Manager\Api\Module\ModuleFile;
 use Puli\Manager\Api\Php\Clazz;
 use Puli\Manager\Api\Php\Method;
@@ -58,7 +58,7 @@ class FactoryManagerImplTest extends ManagerTestCase
     private $fakeWriter;
 
     /**
-     * @var ModuleCollection
+     * @var ModuleList
      */
     private $modules;
 
@@ -91,7 +91,7 @@ class FactoryManagerImplTest extends ManagerTestCase
         $this->fakeWriter = $this->getMockBuilder('Puli\Manager\Php\ClassWriter')
             ->disableOriginalConstructor()
             ->getMock();
-        $this->modules = new ModuleCollection();
+        $this->modules = new ModuleList();
         $this->modules->add(new Module(new ModuleFile('vendor/module1'), __DIR__));
         $this->modules->add(new Module(new ModuleFile('vendor/module2'), __DIR__));
         $this->modules->add(new Module(new ModuleFile('vendor/module3'), __DIR__));

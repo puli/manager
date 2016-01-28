@@ -13,7 +13,7 @@ namespace Puli\Manager\Tests\Api\Repository;
 
 use PHPUnit_Framework_TestCase;
 use Puli\Manager\Api\Module\Module;
-use Puli\Manager\Api\Module\ModuleCollection;
+use Puli\Manager\Api\Module\ModuleList;
 use Puli\Manager\Api\Module\ModuleFile;
 use Puli\Manager\Api\Repository\PathConflict;
 use Puli\Manager\Api\Repository\PathMapping;
@@ -57,7 +57,7 @@ class PathMappingTest extends PHPUnit_Framework_TestCase
     private $module3;
 
     /**
-     * @var ModuleCollection
+     * @var ModuleList
      */
     private $modules;
 
@@ -69,7 +69,7 @@ class PathMappingTest extends PHPUnit_Framework_TestCase
         $this->module1 = new Module(new ModuleFile('vendor/module1'), $this->moduleDir1);
         $this->module2 = new Module(new ModuleFile('vendor/module2'), $this->moduleDir2);
         $this->module3 = new Module(new ModuleFile('vendor/module3'), $this->moduleDir3);
-        $this->modules = new ModuleCollection(array(
+        $this->modules = new ModuleList(array(
             $this->module1,
             $this->module2,
             $this->module3,
@@ -523,7 +523,7 @@ class PathMappingTest extends PHPUnit_Framework_TestCase
         $mapping1 = new PathMapping('/path', 'resources');
         $mapping1->load($this->module1, $this->modules);
 
-        $this->assertInstanceOf('Puli\Manager\Api\Module\ModuleCollection', $mapping1->getConflictingModules());
+        $this->assertInstanceOf('Puli\Manager\Api\Module\ModuleList', $mapping1->getConflictingModules());
         $this->assertCount(0, $mapping1->getConflictingModules());
 
         $mapping2 = new PathMapping('/path', 'resources');

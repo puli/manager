@@ -27,7 +27,7 @@ use Puli\Manager\Api\Discovery\NoSuchTypeException;
 use Puli\Manager\Api\Discovery\TypeNotEnabledException;
 use Puli\Manager\Api\Module\InstallInfo;
 use Puli\Manager\Api\Module\Module;
-use Puli\Manager\Api\Module\ModuleCollection;
+use Puli\Manager\Api\Module\ModuleList;
 use Puli\Manager\Api\Module\RootModule;
 use Puli\Manager\Api\Module\RootModuleFile;
 use Puli\Manager\Api\NonRootModuleExpectedException;
@@ -81,7 +81,7 @@ class DiscoveryManagerImpl implements DiscoveryManager
     private $discovery;
 
     /**
-     * @var ModuleCollection
+     * @var ModuleList
      */
     private $modules;
 
@@ -115,14 +115,14 @@ class DiscoveryManagerImpl implements DiscoveryManager
      *
      * @param ProjectContext       $context
      * @param EditableDiscovery    $discovery
-     * @param ModuleCollection     $modules
+     * @param ModuleList           $modules
      * @param ModuleFileStorage    $moduleFileStorage
      * @param LoggerInterface|null $logger
      */
     public function __construct(
         ProjectContext $context,
         EditableDiscovery $discovery,
-        ModuleCollection $modules,
+        ModuleList $modules,
         ModuleFileStorage $moduleFileStorage,
         LoggerInterface $logger = null
     ) {

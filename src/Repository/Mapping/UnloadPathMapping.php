@@ -12,7 +12,7 @@
 namespace Puli\Manager\Repository\Mapping;
 
 use Puli\Manager\Api\Module\Module;
-use Puli\Manager\Api\Module\ModuleCollection;
+use Puli\Manager\Api\Module\ModuleList;
 use Puli\Manager\Api\Repository\PathConflict;
 use Puli\Manager\Api\Repository\PathMapping;
 use Puli\Manager\Conflict\ModuleConflictDetector;
@@ -38,7 +38,7 @@ class UnloadPathMapping implements AtomicOperation
     private $containingModule;
 
     /**
-     * @var ModuleCollection
+     * @var ModuleList
      */
     private $modules;
 
@@ -67,7 +67,7 @@ class UnloadPathMapping implements AtomicOperation
      */
     private $conflictingMappings = array();
 
-    public function __construct(PathMapping $mapping, ModuleCollection $modules, PathMappingCollection $mappings, PathMappingCollection $mappingsByResource, ModuleConflictDetector $conflictDetector)
+    public function __construct(PathMapping $mapping, ModuleList $modules, PathMappingCollection $mappings, PathMappingCollection $mappingsByResource, ModuleConflictDetector $conflictDetector)
     {
         $this->mapping = $mapping;
         $this->modules = $modules;

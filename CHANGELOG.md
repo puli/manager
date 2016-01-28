@@ -4,6 +4,7 @@ Changelog
 * 1.0.0-beta11 (@release_date@)
 
  * renamed `Package` to `Module` everywhere
+ * renamed `PackageCollection` to `ModuleList`
  * removed `MigrationException`
  * removed `JsonMigration`
  * removed `MigrationManager`

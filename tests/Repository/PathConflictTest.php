@@ -13,7 +13,7 @@ namespace Puli\Manager\Tests\Repository;
 
 use PHPUnit_Framework_TestCase;
 use Puli\Manager\Api\Module\Module;
-use Puli\Manager\Api\Module\ModuleCollection;
+use Puli\Manager\Api\Module\ModuleList;
 use Puli\Manager\Api\Module\ModuleFile;
 use Puli\Manager\Api\Repository\PathConflict;
 use Puli\Manager\Api\Repository\PathMapping;
@@ -41,7 +41,7 @@ class PathConflictTest extends PHPUnit_Framework_TestCase
     private $module3;
 
     /**
-     * @var ModuleCollection
+     * @var ModuleList
      */
     private $modules;
 
@@ -50,7 +50,7 @@ class PathConflictTest extends PHPUnit_Framework_TestCase
         $this->module1 = new Module(new ModuleFile('vendor/module1'), __DIR__.'/Fixtures/module1');
         $this->module2 = new Module(new ModuleFile('vendor/module2'), __DIR__.'/Fixtures/module2');
         $this->module3 = new Module(new ModuleFile('vendor/module3'), __DIR__.'/Fixtures/module3');
-        $this->modules = new ModuleCollection(array($this->module1, $this->module2, $this->module3));
+        $this->modules = new ModuleList(array($this->module1, $this->module2, $this->module3));
     }
 
     public function testAddMapping()

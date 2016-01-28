@@ -16,7 +16,7 @@ use InvalidArgumentException;
 use Puli\Manager\Api\AlreadyLoadedException;
 use Puli\Manager\Api\FileNotFoundException;
 use Puli\Manager\Api\Module\Module;
-use Puli\Manager\Api\Module\ModuleCollection;
+use Puli\Manager\Api\Module\ModuleList;
 use Puli\Manager\Api\Module\NoSuchModuleException;
 use Puli\Manager\Api\NotLoadedException;
 use Puli\Manager\Assert\Assert;
@@ -111,16 +111,16 @@ class PathMapping
     /**
      * Loads the mapping.
      *
-     * @param Module           $containingModule The module that contains the
+     * @param Module     $containingModule       The module that contains the
      *                                           mapping.
-     * @param ModuleCollection $modules          A list of modules that can
+     * @param ModuleList $modules                A list of modules that can
      *                                           be referenced using
      *                                           `@vendor/module:` prefixes
      *                                           in the path references.
      *
      * @throws AlreadyLoadedException If the mapping is already loaded.
      */
-    public function load(Module $containingModule, ModuleCollection $modules)
+    public function load(Module $containingModule, ModuleList $modules)
     {
         if (null !== $this->state) {
             throw new AlreadyLoadedException('The mapping is already loaded.');
@@ -455,7 +455,7 @@ class PathMapping
      * The method {@link load()} needs to be called before calling this method,
      * otherwise an exception is thrown.
      *
-     * @return ModuleCollection The conflicting modules.
+     * @return ModuleList The conflicting modules.
      *
      * @throws NotLoadedException If the mapping is not loaded.
      */
@@ -465,7 +465,7 @@ class PathMapping
             throw new NotLoadedException('The mapping is not loaded.');
         }
 
-        $collection = new ModuleCollection();
+        $collection = new ModuleList();
 
         foreach ($this->conflicts as $conflict) {
             foreach ($conflict->getMappings() as $mapping) {
@@ -608,7 +608,7 @@ class PathMapping
         }
     }
 
-    private function makeAbsolute($relativePath, Module $containingModule, ModuleCollection $modules)
+    private function makeAbsolute($relativePath, Module $containingModule, ModuleList $modules)
     {
         // Reference to install path of other module
         if ('@' !== $relativePath[0] || false === ($pos = strpos($relativePath, ':'))) {

@@ -17,7 +17,7 @@ use Puli\Manager\Api\Event\GenerateFactoryEvent;
 use Puli\Manager\Api\Event\PuliEvents;
 use Puli\Manager\Api\Factory\FactoryManager;
 use Puli\Manager\Api\Factory\Generator\GeneratorRegistry;
-use Puli\Manager\Api\Module\ModuleCollection;
+use Puli\Manager\Api\Module\ModuleList;
 use Puli\Manager\Api\Php\Argument;
 use Puli\Manager\Api\Php\Clazz;
 use Puli\Manager\Api\Php\Import;
@@ -74,7 +74,7 @@ class FactoryManagerImpl implements FactoryManager
     private $classWriter;
 
     /**
-     * @var ModuleCollection
+     * @var ModuleList
      */
     private $modules;
 
@@ -93,10 +93,10 @@ class FactoryManagerImpl implements FactoryManager
      *                                                 factory.
      * @param ClassWriter           $classWriter       The writer that writes
      *                                                 the class to a file.
-     * @param ModuleCollection|null $modules           The loaded modules.
+     * @param ModuleList|null       $modules           The loaded modules.
      * @param ServerCollection|null $servers           The configured servers.
      */
-    public function __construct(ProjectContext $context, GeneratorRegistry $generatorRegistry, ClassWriter $classWriter, ModuleCollection $modules = null, ServerCollection $servers = null)
+    public function __construct(ProjectContext $context, GeneratorRegistry $generatorRegistry, ClassWriter $classWriter, ModuleList $modules = null, ServerCollection $servers = null)
     {
         $this->context = $context;
         $this->config = $context->getConfig();
@@ -110,9 +110,9 @@ class FactoryManagerImpl implements FactoryManager
     /**
      * Sets the modules included in the getModuleOrder() method.
      *
-     * @param ModuleCollection $modules The loaded modules.
+     * @param ModuleList $modules The loaded modules.
      */
-    public function setModules(ModuleCollection $modules)
+    public function setModules(ModuleList $modules)
     {
         $this->modules = $modules;
     }

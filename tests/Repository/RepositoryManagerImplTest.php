@@ -16,7 +16,7 @@ use PHPUnit_Framework_MockObject_MockObject;
 use Puli\Manager\Api\Event\BuildRepositoryEvent;
 use Puli\Manager\Api\Event\PuliEvents;
 use Puli\Manager\Api\Module\Module;
-use Puli\Manager\Api\Module\ModuleCollection;
+use Puli\Manager\Api\Module\ModuleList;
 use Puli\Manager\Api\Module\ModuleFile;
 use Puli\Manager\Api\Module\RootModule;
 use Puli\Manager\Api\Module\RootModuleFile;
@@ -75,7 +75,7 @@ class RepositoryManagerImplTest extends ManagerTestCase
     private $moduleFile3;
 
     /**
-     * @var ModuleCollection
+     * @var ModuleList
      */
     private $modules;
 
@@ -104,7 +104,7 @@ class RepositoryManagerImplTest extends ManagerTestCase
         $this->moduleFile2 = new ModuleFile('vendor/module2');
         $this->moduleFile3 = new ModuleFile('vendor/module3');
 
-        $this->modules = new ModuleCollection();
+        $this->modules = new ModuleList();
 
         $this->moduleFileStorage = $this->getMockBuilder('Puli\Manager\Module\ModuleFileStorage')
             ->disableOriginalConstructor()
