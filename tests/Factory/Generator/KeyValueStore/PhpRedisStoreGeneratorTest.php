@@ -59,10 +59,10 @@ class PhpRedisStoreGeneratorTest extends AbstractGeneratorTest
     {
         $this->generator->generateNewInstance('store', $this->method, $this->registry);
 
-        $expected = <<<EOF
-\$client = new Redis();
-\$client->connect('127.0.0.1', 6379);
-\$store = new PhpRedisStore(\$client);
+        $expected = <<<'EOF'
+$client = new Redis();
+$client->connect('127.0.0.1', 6379);
+$store = new PhpRedisStore($client);
 EOF;
 
         $this->assertSame($expected, $this->method->getBody());
@@ -74,10 +74,10 @@ EOF;
             'host' => 'localhost',
         ));
 
-        $expected = <<<EOF
-\$client = new Redis();
-\$client->connect('localhost', 6379);
-\$store = new PhpRedisStore(\$client);
+        $expected = <<<'EOF'
+$client = new Redis();
+$client->connect('localhost', 6379);
+$store = new PhpRedisStore($client);
 EOF;
 
         $this->assertSame($expected, $this->method->getBody());
@@ -89,10 +89,10 @@ EOF;
             'port' => 1234,
         ));
 
-        $expected = <<<EOF
-\$client = new Redis();
-\$client->connect('127.0.0.1', 1234);
-\$store = new PhpRedisStore(\$client);
+        $expected = <<<'EOF'
+$client = new Redis();
+$client->connect('127.0.0.1', 1234);
+$store = new PhpRedisStore($client);
 EOF;
 
         $this->assertSame($expected, $this->method->getBody());

@@ -39,8 +39,8 @@ class JsonChangeStreamGeneratorTest extends AbstractGeneratorTest
             'root-dir' => $this->rootDir,
         ));
 
-        $expected = <<<EOF
-\$stream = new JsonChangeStream(__DIR__.'/change-stream.json');
+        $expected = <<<'EOF'
+$stream = new JsonChangeStream(__DIR__.'/change-stream.json');
 EOF;
 
         $this->assertSame($expected, $this->method->getBody());
@@ -53,8 +53,8 @@ EOF;
             'path' => 'change/stream.json',
         ));
 
-        $expected = <<<EOF
-\$stream = new JsonChangeStream(__DIR__.'/../change/stream.json');
+        $expected = <<<'EOF'
+$stream = new JsonChangeStream(__DIR__.'/../change/stream.json');
 EOF;
 
         $this->assertSame($expected, $this->method->getBody());

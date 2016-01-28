@@ -16,13 +16,17 @@ use Puli\Manager\Api\Factory\FactoryManager;
 use Puli\Manager\Api\FileNotFoundException;
 use Puli\Manager\Api\InvalidConfigException;
 use Puli\Manager\Api\Package\PackageFile;
-use Puli\Manager\Api\Package\PackageFileSerializer;
 use Puli\Manager\Api\Package\RootPackageFile;
-use Puli\Manager\Api\Package\UnsupportedVersionException;
 use Puli\Manager\Api\Storage\ReadException;
 use Puli\Manager\Api\Storage\Storage;
 use Puli\Manager\Api\Storage\WriteException;
-use Puli\Manager\Filesystem\FilesystemStorage;
+use stdClass;
+use Webmozart\Json\Conversion\ConversionFailedException;
+use Webmozart\Json\Conversion\JsonConverter;
+use Webmozart\Json\DecodingFailedException;
+use Webmozart\Json\EncodingFailedException;
+use Webmozart\Json\JsonDecoder;
+use Webmozart\Json\JsonEncoder;
 
 /**
  * Loads and saves package files.
@@ -34,14 +38,29 @@ use Puli\Manager\Filesystem\FilesystemStorage;
 class PackageFileStorage
 {
     /**
-     * @var FilesystemStorage
+     * @var Storage
      */
     private $storage;
 
     /**
-     * @var PackageFileSerializer
+     * @var JsonConverter
      */
-    private $serializer;
+    private $packageFileConverter;
+
+    /**
+     * @var JsonConverter
+     */
+    private $rootPackageFileConverter;
+
+    /**
+     * @var JsonEncoder
+     */
+    private $jsonEncoder;
+
+    /**
+     * @var JsonDecoder
+     */
+    private $jsonDecoder;
 
     /**
      * @var FactoryManager
@@ -51,17 +70,33 @@ class PackageFileStorage
     /**
      * Creates a new storage.
      *
-     * @param Storage               $storage        The file storage.
-     * @param PackageFileSerializer $serializer     The package file serializer.
-     * @param FactoryManager|null   $factoryManager The manager used to
-     *                                              regenerate the factory class
-     *                                              after saving the root
-     *                                              package file.
+     * @param Storage             $storage                  The file storage.
+     * @param JsonConverter       $packageFileConverter     The JSON converter for
+     *                                                      {@link PackageFile}
+     *                                                      instances.
+     * @param JsonConverter       $rootPackageFileConverter The JSON converter
+     *                                                      for {@link RootPackageFile}
+     *                                                      instances.
+     * @param JsonEncoder         $jsonEncoder              The JSON encoder.
+     * @param JsonDecoder         $jsonDecoder              The JSON decoder.
+     * @param FactoryManager|null $factoryManager           The manager used to
+     *                                                      regenerate the factory
+     *                                                      class after saving
+     *                                                      the root package file.
      */
-    public function __construct(Storage $storage, PackageFileSerializer $serializer, FactoryManager $factoryManager = null)
-    {
+    public function __construct(
+        Storage $storage,
+        JsonConverter $packageFileConverter,
+        JsonConverter $rootPackageFileConverter,
+        JsonEncoder $jsonEncoder,
+        JsonDecoder $jsonDecoder,
+        FactoryManager $factoryManager = null
+    ) {
         $this->storage = $storage;
-        $this->serializer = $serializer;
+        $this->packageFileConverter = $packageFileConverter;
+        $this->rootPackageFileConverter = $rootPackageFileConverter;
+        $this->jsonEncoder = $jsonEncoder;
+        $this->jsonDecoder = $jsonDecoder;
         $this->factoryManager = $factoryManager;
     }
 
@@ -77,18 +112,26 @@ class PackageFileStorage
      *
      * @return PackageFile The loaded package file.
      *
-     * @throws FileNotFoundException       If the file does not exist.
-     * @throws ReadException               If the file cannot be read.
-     * @throws InvalidConfigException      If the file contains invalid
-     *                                     configuration.
-     * @throws UnsupportedVersionException If the version of the package file
-     *                                     is not supported.
+     * @throws FileNotFoundException  If the file does not exist.
+     * @throws ReadException          If the file cannot be read.
+     * @throws InvalidConfigException If the file contains invalid configuration.
      */
     public function loadPackageFile($path)
     {
-        $serialized = $this->storage->read($path);
+        $json = $this->storage->read($path);
+        $jsonData = $this->decode($json, $path);
 
-        return $this->serializer->unserializePackageFile($serialized, $path);
+        try {
+            return $this->packageFileConverter->fromJson($jsonData, array(
+                'path' => $path,
+            ));
+        } catch (ConversionFailedException $e) {
+            throw new InvalidConfigException(sprintf(
+                'The JSON in %s could not be converted: %s',
+                $path,
+                $e->getMessage()
+            ), 0, $e);
+        }
     }
 
     /**
@@ -98,13 +141,26 @@ class PackageFileStorage
      *
      * @param PackageFile $packageFile The package file to save.
      *
-     * @throws WriteException If the file cannot be written.
+     * @throws WriteException         If the file cannot be written.
+     * @throws InvalidConfigException If the file contains invalid configuration.
      */
     public function savePackageFile(PackageFile $packageFile)
     {
-        $serialized = $this->serializer->serializePackageFile($packageFile);
+        try {
+            $jsonData = $this->packageFileConverter->toJson($packageFile, array(
+                'targetVersion' => $packageFile->getVersion(),
+            ));
+        } catch (ConversionFailedException $e) {
+            throw new InvalidConfigException(sprintf(
+                'The data written to %s could not be converted: %s',
+                $packageFile->getPath(),
+                $e->getMessage()
+            ), 0, $e);
+        }
 
-        $this->storage->write($packageFile->getPath(), $serialized);
+        $json = $this->encode($jsonData, $packageFile->getPath());
+
+        $this->storage->write($packageFile->getPath(), $json);
     }
 
     /**
@@ -118,18 +174,27 @@ class PackageFileStorage
      *
      * @return RootPackageFile The loaded package file.
      *
-     * @throws FileNotFoundException       If the file does not exist.
-     * @throws ReadException               If the file cannot be read.
-     * @throws InvalidConfigException      If the file contains invalid
-     *                                     configuration.
-     * @throws UnsupportedVersionException If the version of the package file
-     *                                     is not supported.
+     * @throws FileNotFoundException  If the file does not exist.
+     * @throws ReadException          If the file cannot be read.
+     * @throws InvalidConfigException If the file contains invalid configuration.
      */
     public function loadRootPackageFile($path, Config $baseConfig)
     {
-        $serialized = $this->storage->read($path);
+        $json = $this->storage->read($path);
+        $jsonData = $this->decode($json, $path);
 
-        return $this->serializer->unserializeRootPackageFile($serialized, $path, $baseConfig);
+        try {
+            return $this->rootPackageFileConverter->fromJson($jsonData, array(
+                'path' => $path,
+                'baseConfig' => $baseConfig,
+            ));
+        } catch (ConversionFailedException $e) {
+            throw new InvalidConfigException(sprintf(
+                'The JSON in %s could not be converted: %s',
+                $path,
+                $e->getMessage()
+            ), 0, $e);
+        }
     }
 
     /**
@@ -139,16 +204,55 @@ class PackageFileStorage
      *
      * @param RootPackageFile $packageFile The package file to save.
      *
-     * @throws WriteException If the file cannot be written.
+     * @throws WriteException         If the file cannot be written.
+     * @throws InvalidConfigException If the file contains invalid configuration.
      */
     public function saveRootPackageFile(RootPackageFile $packageFile)
     {
-        $serialized = $this->serializer->serializeRootPackageFile($packageFile);
+        try {
+            $jsonData = $this->rootPackageFileConverter->toJson($packageFile, array(
+                'targetVersion' => $packageFile->getVersion(),
+            ));
+        } catch (ConversionFailedException $e) {
+            throw new InvalidConfigException(sprintf(
+                'The data written to %s could not be converted: %s',
+                $packageFile->getPath(),
+                $e->getMessage()
+            ), 0, $e);
+        }
 
-        $this->storage->write($packageFile->getPath(), $serialized);
+        $json = $this->encode($jsonData, $packageFile->getPath());
+
+        $this->storage->write($packageFile->getPath(), $json);
 
         if ($this->factoryManager) {
             $this->factoryManager->autoGenerateFactoryClass();
+        }
+    }
+
+    private function encode(stdClass $jsonData, $path)
+    {
+        try {
+            return $this->jsonEncoder->encode($jsonData);
+        } catch (EncodingFailedException $e) {
+            throw new InvalidConfigException(sprintf(
+                'The configuration in %s could not be encoded: %s',
+                $path,
+                $e->getMessage()
+            ), 0, $e);
+        }
+    }
+
+    private function decode($json, $path)
+    {
+        try {
+            return $this->jsonDecoder->decode($json);
+        } catch (DecodingFailedException $e) {
+            throw new InvalidConfigException(sprintf(
+                'The configuration in %s could not be decoded: %s',
+                $path,
+                $e->getMessage()
+            ), 0, $e);
         }
     }
 }

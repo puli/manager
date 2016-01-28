@@ -13,9 +13,9 @@ namespace Puli\Manager\Api\Package;
 
 use Puli\Manager\Api\Config\ConfigManager;
 use Puli\Manager\Api\Context\ProjectContext;
-use Puli\Manager\Api\Migration\MigrationException;
 use Puli\Manager\Api\Storage\WriteException;
 use Webmozart\Expression\Expression;
+use Webmozart\Json\Migration\MigrationFailedException;
 
 /**
  * Manages changes to the root package file.
@@ -246,8 +246,8 @@ interface RootPackageFileManager extends ConfigManager
      *
      * @param string $targetVersion The target version string.
      *
-     * @throws MigrationException If the migration fails.
-     * @throws WriteException     If the file cannot be written.
+     * @throws MigrationFailedException If the migration fails.
+     * @throws WriteException           If the file cannot be written.
      */
     public function migrate($targetVersion);
 }

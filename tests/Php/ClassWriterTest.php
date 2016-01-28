@@ -71,7 +71,7 @@ class ClassWriterTest extends PHPUnit_Framework_TestCase
     {
         $this->writer->writeClass($this->class);
 
-        $expected = <<<EOF
+        $expected = <<<'EOF'
 <?php
 
 class MyClass
@@ -89,7 +89,7 @@ EOF;
 
         $this->writer->writeClass($this->class);
 
-        $expected = <<<EOF
+        $expected = <<<'EOF'
 <?php
 
 class MyClass
@@ -107,7 +107,7 @@ EOF;
 
         $this->writer->writeClass($this->class);
 
-        $expected = <<<EOF
+        $expected = <<<'EOF'
 <?php
 
 class MyClass
@@ -125,7 +125,7 @@ EOF;
 
         $this->writer->writeClass($this->class);
 
-        $expected = <<<EOF
+        $expected = <<<'EOF'
 <?php
 
 namespace Puli;
@@ -214,7 +214,7 @@ EOF;
 
         $this->writer->writeClass($this->class);
 
-        $expected = <<<EOF
+        $expected = <<<'EOF'
 <?php
 
 class MyClass extends MyParentClass
@@ -233,7 +233,7 @@ EOF;
 
         $this->writer->writeClass($this->class);
 
-        $expected = <<<EOF
+        $expected = <<<'EOF'
 <?php
 
 class MyClass implements SomeInterface, OtherInterface
@@ -253,7 +253,7 @@ EOF;
 
         $this->writer->writeClass($this->class);
 
-        $expected = <<<EOF
+        $expected = <<<'EOF'
 <?php
 
 class MyClass extends MyParentClass implements SomeInterface, OtherInterface
@@ -271,7 +271,7 @@ EOF;
 
         $this->writer->writeClass($this->class);
 
-        $expected = <<<EOF
+        $expected = <<<'EOF'
 <?php
 
 /**
@@ -295,7 +295,7 @@ EOF;
 
         $this->writer->writeClass($this->class);
 
-        $expected = <<<EOF
+        $expected = <<<'EOF'
 <?php
 
 class MyClass
@@ -317,7 +317,7 @@ EOF;
 
         $this->writer->writeClass($this->class);
 
-        $expected = <<<EOF
+        $expected = <<<'EOF'
 <?php
 
 class MyClass
@@ -345,15 +345,15 @@ EOF;
 
         $this->writer->writeClass($this->class);
 
-        $expected = <<<EOF
+        $expected = <<<'EOF'
 <?php
 
 class MyClass
 {
     /**
-     * @param mixed \$arg1
+     * @param mixed $arg1
      */
-    public function doSomething(\$arg1)
+    public function doSomething($arg1)
     {
     }
 }
@@ -373,16 +373,16 @@ EOF;
 
         $this->writer->writeClass($this->class);
 
-        $expected = <<<EOF
+        $expected = <<<'EOF'
 <?php
 
 class MyClass
 {
     /**
-     * @param mixed \$arg1
-     * @param mixed \$arg2
+     * @param mixed $arg1
+     * @param mixed $arg2
      */
-    public function doSomething(\$arg1, \$arg2)
+    public function doSomething($arg1, $arg2)
     {
     }
 }
@@ -404,15 +404,15 @@ EOF;
 
         $this->writer->writeClass($this->class);
 
-        $expected = <<<EOF
+        $expected = <<<'EOF'
 <?php
 
 class MyClass
 {
     /**
-     * @param mixed \$arg
+     * @param mixed $arg
      */
-    public function doSomething(MyType \$arg)
+    public function doSomething(MyType $arg)
     {
     }
 }
@@ -434,15 +434,15 @@ EOF;
 
         $this->writer->writeClass($this->class);
 
-        $expected = <<<EOF
+        $expected = <<<'EOF'
 <?php
 
 class MyClass
 {
     /**
-     * @param MyType \$arg
+     * @param MyType $arg
      */
-    public function doSomething(\$arg)
+    public function doSomething($arg)
     {
     }
 }
@@ -464,15 +464,15 @@ EOF;
 
         $this->writer->writeClass($this->class);
 
-        $expected = <<<EOF
+        $expected = <<<'EOF'
 <?php
 
 class MyClass
 {
     /**
-     * @param mixed \$arg The description
+     * @param mixed $arg The description
      */
-    public function doSomething(\$arg)
+    public function doSomething($arg)
     {
     }
 }
@@ -494,15 +494,15 @@ EOF;
 
         $this->writer->writeClass($this->class);
 
-        $expected = <<<EOF
+        $expected = <<<'EOF'
 <?php
 
 class MyClass
 {
     /**
-     * @param mixed \$arg
+     * @param mixed $arg
      */
-    public function doSomething(\$arg = 'The default')
+    public function doSomething($arg = 'The default')
     {
     }
 }
@@ -521,7 +521,7 @@ EOF;
 
         $this->writer->writeClass($this->class);
 
-        $expected = <<<EOF
+        $expected = <<<'EOF'
 <?php
 
 class MyClass
@@ -549,7 +549,7 @@ EOF;
 
         $this->writer->writeClass($this->class);
 
-        $expected = <<<EOF
+        $expected = <<<'EOF'
 <?php
 
 class MyClass
@@ -577,7 +577,7 @@ EOF;
 
         $this->writer->writeClass($this->class);
 
-        $expected = <<<EOF
+        $expected = <<<'EOF'
 <?php
 
 class MyClass
@@ -606,17 +606,17 @@ EOF;
 
         $this->writer->writeClass($this->class);
 
-        $expected = <<<EOF
+        $expected = <<<'EOF'
 <?php
 
 class MyClass
 {
     /**
-     * @param mixed \$arg
+     * @param mixed $arg
      *
      * @return mixed
      */
-    public function doSomething(\$arg)
+    public function doSomething($arg)
     {
         return 'The return value';
     }
@@ -636,14 +636,14 @@ EOF;
 
         $this->writer->writeClass($this->class);
 
-        $expected = <<<EOF
+        $expected = <<<'EOF'
 <?php
 
 class MyClass
 {
     public function doSomething()
     {
-        \$foo = 'bar';
+        $foo = 'bar';
     }
 }
 
@@ -656,10 +656,10 @@ EOF;
     {
         $method = new Method('doSomething');
         $method->setBody(
-<<<EOF
-\$foo = 'bar';
+<<<'EOF'
+$foo = 'bar';
 
-\$bar = 'baz';
+$bar = 'baz';
 EOF
         );
 
@@ -667,16 +667,16 @@ EOF
 
         $this->writer->writeClass($this->class);
 
-        $expected = <<<EOF
+        $expected = <<<'EOF'
 <?php
 
 class MyClass
 {
     public function doSomething()
     {
-        \$foo = 'bar';
+        $foo = 'bar';
 
-        \$bar = 'baz';
+        $bar = 'baz';
     }
 }
 
@@ -695,7 +695,7 @@ EOF;
 
         $this->writer->writeClass($this->class);
 
-        $expected = <<<EOF
+        $expected = <<<'EOF'
 <?php
 
 class MyClass
@@ -705,9 +705,9 @@ class MyClass
      */
     public function doSomething()
     {
-        \$foo = 'bar';
+        $foo = 'bar';
 
-        return \$foo;
+        return $foo;
     }
 }
 
@@ -725,7 +725,7 @@ EOF;
 
         $this->writer->writeClass($this->class);
 
-        $expected = <<<EOF
+        $expected = <<<'EOF'
 <?php
 
 class MyClass
@@ -756,7 +756,7 @@ EOF;
 
         $this->writer->writeClass($this->class);
 
-        $expected = <<<EOF
+        $expected = <<<'EOF'
 <?php
 
 class MyClass
@@ -766,9 +766,9 @@ class MyClass
      *   Doc
      *     Block
      *
-     * @param mixed \$arg
+     * @param mixed $arg
      */
-    public function doSomething(\$arg)
+    public function doSomething($arg)
     {
     }
 }
@@ -788,7 +788,7 @@ EOF;
 
         $this->writer->writeClass($this->class);
 
-        $expected = <<<EOF
+        $expected = <<<'EOF'
 <?php
 
 class MyClass

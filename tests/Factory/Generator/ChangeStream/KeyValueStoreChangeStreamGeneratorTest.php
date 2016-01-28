@@ -39,9 +39,9 @@ class KeyValueStoreChangeStreamGeneratorTest extends AbstractGeneratorTest
             'root-dir' => $this->rootDir,
         ));
 
-        $expected = <<<EOF
-\$store = new JsonFileStore(__DIR__.'/change-stream.json');
-\$stream = new KeyValueStoreChangeStream(\$store);
+        $expected = <<<'EOF'
+$store = new JsonFileStore(__DIR__.'/change-stream.json');
+$stream = new KeyValueStoreChangeStream($store);
 EOF;
 
         $this->assertSame($expected, $this->method->getBody());
@@ -54,9 +54,9 @@ EOF;
             'store' => array('type' => null),
         ));
 
-        $expected = <<<EOF
-\$store = new NullStore();
-\$stream = new KeyValueStoreChangeStream(\$store);
+        $expected = <<<'EOF'
+$store = new NullStore();
+$stream = new KeyValueStoreChangeStream($store);
 EOF;
 
         $this->assertSame($expected, $this->method->getBody());

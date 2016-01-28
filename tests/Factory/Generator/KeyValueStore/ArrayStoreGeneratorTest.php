@@ -37,8 +37,8 @@ class ArrayStoreGeneratorTest extends AbstractGeneratorTest
     {
         $this->generator->generateNewInstance('store', $this->method, $this->registry);
 
-        $expected = <<<EOF
-\$store = new ArrayStore();
+        $expected = <<<'EOF'
+$store = new ArrayStore();
 EOF;
 
         $this->assertSame($expected, $this->method->getBody());

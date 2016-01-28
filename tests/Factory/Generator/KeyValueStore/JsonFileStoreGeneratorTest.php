@@ -39,8 +39,8 @@ class JsonFileStoreGeneratorTest extends AbstractGeneratorTest
             'root-dir' => $this->rootDir,
         ));
 
-        $expected = <<<EOF
-\$store = new JsonFileStore(__DIR__.'/../data.json');
+        $expected = <<<'EOF'
+$store = new JsonFileStore(__DIR__.'/../data.json');
 EOF;
 
         $this->assertSame($expected, $this->method->getBody());
@@ -61,8 +61,8 @@ EOF;
             'path' => $this->outputDir.'/data.json',
         ));
 
-        $expected = <<<EOF
-\$store = new JsonFileStore(__DIR__.'/data.json');
+        $expected = <<<'EOF'
+$store = new JsonFileStore(__DIR__.'/data.json');
 EOF;
 
         $this->assertSame($expected, $this->method->getBody());

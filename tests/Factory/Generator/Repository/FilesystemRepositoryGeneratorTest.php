@@ -39,12 +39,12 @@ class FilesystemRepositoryGeneratorTest extends AbstractGeneratorTest
             'root-dir' => $this->rootDir,
         ));
 
-        $expected = <<<EOF
+        $expected = <<<'EOF'
 if (!file_exists(__DIR__.'/repository')) {
     mkdir(__DIR__.'/repository', 0777, true);
 }
 
-\$repo = new FilesystemRepository(__DIR__.'/repository', true);
+$repo = new FilesystemRepository(__DIR__.'/repository', true);
 EOF;
 
         $this->assertSame($expected, $this->method->getBody());
@@ -57,8 +57,8 @@ EOF;
             'path' => $this->outputDir,
         ));
 
-        $expected = <<<EOF
-\$repo = new FilesystemRepository(__DIR__, true);
+        $expected = <<<'EOF'
+$repo = new FilesystemRepository(__DIR__, true);
 EOF;
 
         $this->assertSame($expected, $this->method->getBody());
@@ -71,12 +71,12 @@ EOF;
             'path' => 'my/repository',
         ));
 
-        $expected = <<<EOF
+        $expected = <<<'EOF'
 if (!file_exists(__DIR__.'/../my/repository')) {
     mkdir(__DIR__.'/../my/repository', 0777, true);
 }
 
-\$repo = new FilesystemRepository(__DIR__.'/../my/repository', true);
+$repo = new FilesystemRepository(__DIR__.'/../my/repository', true);
 EOF;
 
         $this->assertSame($expected, $this->method->getBody());
@@ -89,12 +89,12 @@ EOF;
             'symlink' => true,
         ));
 
-        $expected = <<<EOF
+        $expected = <<<'EOF'
 if (!file_exists(__DIR__.'/repository')) {
     mkdir(__DIR__.'/repository', 0777, true);
 }
 
-\$repo = new FilesystemRepository(__DIR__.'/repository', true);
+$repo = new FilesystemRepository(__DIR__.'/repository', true);
 EOF;
 
         $this->assertSame($expected, $this->method->getBody());
@@ -107,12 +107,12 @@ EOF;
             'symlink' => false,
         ));
 
-        $expected = <<<EOF
+        $expected = <<<'EOF'
 if (!file_exists(__DIR__.'/repository')) {
     mkdir(__DIR__.'/repository', 0777, true);
 }
 
-\$repo = new FilesystemRepository(__DIR__.'/repository', false);
+$repo = new FilesystemRepository(__DIR__.'/repository', false);
 EOF;
 
         $this->assertSame($expected, $this->method->getBody());

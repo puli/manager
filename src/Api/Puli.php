@@ -18,14 +18,12 @@ use Puli\Discovery\Api\EditableDiscovery;
 use Puli\Manager\Api\Asset\AssetManager;
 use Puli\Manager\Api\Config\Config;
 use Puli\Manager\Api\Config\ConfigFileManager;
-use Puli\Manager\Api\Config\ConfigFileSerializer;
 use Puli\Manager\Api\Context\Context;
 use Puli\Manager\Api\Context\ProjectContext;
 use Puli\Manager\Api\Discovery\DiscoveryManager;
 use Puli\Manager\Api\Factory\FactoryManager;
 use Puli\Manager\Api\Installation\InstallationManager;
 use Puli\Manager\Api\Installer\InstallerManager;
-use Puli\Manager\Api\Package\PackageFileSerializer;
 use Puli\Manager\Api\Package\PackageManager;
 use Puli\Manager\Api\Package\RootPackageFile;
 use Puli\Manager\Api\Package\RootPackageFileManager;
@@ -34,9 +32,9 @@ use Puli\Manager\Api\Server\ServerManager;
 use Puli\Manager\Api\Storage\Storage;
 use Puli\Manager\Assert\Assert;
 use Puli\Manager\Asset\DiscoveryAssetManager;
+use Puli\Manager\Config\ConfigFileConverter;
 use Puli\Manager\Config\ConfigFileManagerImpl;
 use Puli\Manager\Config\ConfigFileStorage;
-use Puli\Manager\Config\ConfigJsonSerializer;
 use Puli\Manager\Config\DefaultConfig;
 use Puli\Manager\Config\EnvConfig;
 use Puli\Manager\Discovery\DiscoveryManagerImpl;
@@ -45,10 +43,10 @@ use Puli\Manager\Factory\Generator\DefaultGeneratorRegistry;
 use Puli\Manager\Filesystem\FilesystemStorage;
 use Puli\Manager\Installation\InstallationManagerImpl;
 use Puli\Manager\Installer\PackageFileInstallerManager;
-use Puli\Manager\Migration\MigrationManager;
+use Puli\Manager\Package\PackageFileConverter;
 use Puli\Manager\Package\PackageFileStorage;
-use Puli\Manager\Package\PackageJsonSerializer;
 use Puli\Manager\Package\PackageManagerImpl;
+use Puli\Manager\Package\RootPackageFileConverter;
 use Puli\Manager\Package\RootPackageFileManagerImpl;
 use Puli\Manager\Php\ClassWriter;
 use Puli\Manager\Repository\RepositoryManagerImpl;
@@ -58,8 +56,15 @@ use Puli\Repository\Api\EditableRepository;
 use Puli\Repository\Api\ResourceRepository;
 use Puli\UrlGenerator\Api\UrlGenerator;
 use Puli\UrlGenerator\DiscoveryUrlGenerator;
+use stdClass;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Webmozart\Expression\Expr;
+use Webmozart\Json\Conversion\JsonConverter;
+use Webmozart\Json\JsonDecoder;
+use Webmozart\Json\JsonEncoder;
+use Webmozart\Json\Migration\MigratingConverter;
+use Webmozart\Json\Migration\MigrationManager;
+use Webmozart\Json\Validation\ValidatingConverter;
 use Webmozart\PathUtil\Path;
 
 /**
@@ -217,9 +222,9 @@ class Puli
     private $configFileStorage;
 
     /**
-     * @var ConfigFileSerializer|null
+     * @var ConfigFileConverter|null
      */
-    private $configFileSerializer;
+    private $configFileConverter;
 
     /**
      * @var PackageFileStorage|null
@@ -227,9 +232,34 @@ class Puli
     private $packageFileStorage;
 
     /**
-     * @var PackageFileSerializer|null
+     * @var JsonConverter|null
      */
-    private $packageFileSerializer;
+    private $packageFileConverter;
+
+    /**
+     * @var JsonConverter|null
+     */
+    private $legacyPackageFileConverter;
+
+    /**
+     * @var JsonConverter|null
+     */
+    private $rootPackageFileConverter;
+
+    /**
+     * @var JsonConverter|null
+     */
+    private $legacyRootPackageFileConverter;
+
+    /**
+     * @var JsonEncoder
+     */
+    private $jsonEncoder;
+
+    /**
+     * @var JsonDecoder
+     */
+    private $jsonDecoder;
 
     /**
      * @var LoggerInterface
@@ -416,9 +446,9 @@ class Puli
     }
 
     /**
-     * Returns the used logger.
+     * Returns the logger.
      *
-     * @return LoggerInterface The used logger.
+     * @return LoggerInterface The logger.
      */
     public function getLogger()
     {
@@ -588,8 +618,7 @@ class Puli
         if (!$this->configFileManager && $this->context->getHomeDirectory()) {
             $this->configFileManager = new ConfigFileManagerImpl(
                 $this->context,
-                $this->getConfigFileStorage(),
-                $this->getFactoryManager()
+                $this->getConfigFileStorage()
             );
         }
 
@@ -795,7 +824,7 @@ class Puli
     }
 
     /**
-     * Returns the cached file storage.
+     * Returns the file storage.
      *
      * @return Storage The storage.
      */
@@ -809,36 +838,132 @@ class Puli
     }
 
     /**
-     * Returns the cached configuration file serializer.
+     * Returns the configuration file serializer.
      *
-     * @return ConfigFileSerializer The configuration file serializer.
+     * @return ConfigFileConverter The configuration file serializer.
      */
-    public function getConfigFileSerializer()
+    public function getConfigFileConverter()
     {
-        if (!$this->configFileSerializer) {
-            $this->configFileSerializer = new ConfigJsonSerializer();
+        if (!$this->configFileConverter) {
+            $this->configFileConverter = new ConfigFileConverter();
         }
 
-        return $this->configFileSerializer;
+        return $this->configFileConverter;
     }
 
     /**
-     * Returns the cached package file serializer.
+     * Returns the package file converter.
      *
-     * @return PackageFileSerializer The package file serializer.
+     * @return JsonConverter The package file converter.
      */
-    public function getPackageFileSerializer()
+    public function getPackageFileConverter()
     {
-        if (!$this->packageFileSerializer) {
-            $this->packageFileSerializer = new PackageJsonSerializer(
-                new MigrationManager(array(
-                    // Add future migrations here
-                )),
-                __DIR__.'/../../res/schema'
+        if (!$this->packageFileConverter) {
+            $this->packageFileConverter = new ValidatingConverter(
+                new PackageFileConverter(),
+                __DIR__.'/../../res/schema/package-schema-'.PackageFileConverter::VERSION.'.json'
             );
         }
 
-        return $this->packageFileSerializer;
+        return $this->packageFileConverter;
+    }
+
+    /**
+     * Returns the package file serializer with support for legacy versions.
+     *
+     * @return JsonConverter The package file converter.
+     */
+    public function getLegacyPackageFileConverter()
+    {
+        if (!$this->legacyPackageFileConverter) {
+            $this->legacyPackageFileConverter = new ValidatingConverter(
+                new MigratingConverter(
+                    $this->getPackageFileConverter(),
+                    PackageFileConverter::VERSION,
+                    new MigrationManager(array(
+                        // add future migrations here
+                    ))
+                ),
+                function (stdClass $jsonData) {
+                    return __DIR__.'/../../res/schema/package-schema-'.$jsonData->version.'.json';
+                }
+            );
+        }
+
+        return $this->legacyPackageFileConverter;
+    }
+
+    /**
+     * Returns the package file converter.
+     *
+     * @return JsonConverter The package file converter.
+     */
+    public function getRootPackageFileConverter()
+    {
+        if (!$this->rootPackageFileConverter) {
+            $this->rootPackageFileConverter = new ValidatingConverter(
+                new RootPackageFileConverter(),
+                __DIR__.'/../../res/schema/package-schema-'.RootPackageFileConverter::VERSION.'.json'
+            );
+        }
+
+        return $this->rootPackageFileConverter;
+    }
+
+    /**
+     * Returns the package file serializer with support for legacy versions.
+     *
+     * @return JsonConverter The package file converter.
+     */
+    public function getLegacyRootPackageFileConverter()
+    {
+        if (!$this->legacyRootPackageFileConverter) {
+            $this->legacyRootPackageFileConverter = new ValidatingConverter(
+                new MigratingConverter(
+                    $this->getRootPackageFileConverter(),
+                    RootPackageFileConverter::VERSION,
+                    new MigrationManager(array(
+                        // add future migrations here
+                    ))
+                ),
+                function (stdClass $jsonData) {
+                    return __DIR__.'/../../res/schema/package-schema-'.$jsonData->version.'.json';
+                }
+            );
+        }
+
+        return $this->legacyRootPackageFileConverter;
+    }
+
+    /**
+     * Returns the JSON encoder.
+     *
+     * @return JsonEncoder The JSON encoder.
+     */
+    public function getJsonEncoder()
+    {
+        if (!$this->jsonEncoder) {
+            $this->jsonEncoder = new JsonEncoder();
+            $this->jsonEncoder->setPrettyPrinting(true);
+            $this->jsonEncoder->setEscapeSlash(false);
+            $this->jsonEncoder->setTerminateWithLineFeed(true);
+        }
+
+        return $this->jsonEncoder;
+    }
+
+    /**
+     * Returns the JSON decoder.
+     *
+     * @return JsonDecoder The JSON decoder.
+     */
+    public function getJsonDecoder()
+    {
+        if (!$this->jsonDecoder) {
+            $this->jsonDecoder = new JsonDecoder();
+        }
+
+        return $this->jsonDecoder;
     }
 
     private function activatePlugins()
@@ -899,7 +1024,14 @@ class Puli
         }
 
         // Create a storage without the factory manager
-        $packageFileStorage = new PackageFileStorage($this->getStorage(), $this->getPackageFileSerializer());
+        $packageFileStorage = new PackageFileStorage(
+            $this->getStorage(),
+            $this->getLegacyPackageFileConverter(),
+            $this->getLegacyRootPackageFileConverter(),
+            $this->getJsonEncoder(),
+            $this->getJsonDecoder()
+        );
+
         $rootDir = Path::canonicalize($rootDir);
         $rootFilePath = $this->rootDir.'/puli.json';
 
@@ -915,7 +1047,7 @@ class Puli
     }
 
     /**
-     * Returns the cached configuration file storage.
+     * Returns the configuration file storage.
      *
      * @return ConfigFileStorage The configuration file storage.
      */
@@ -924,7 +1056,9 @@ class Puli
         if (!$this->configFileStorage) {
             $this->configFileStorage = new ConfigFileStorage(
                 $this->getStorage(),
-                $this->getConfigFileSerializer(),
+                $this->getConfigFileConverter(),
+                $this->getJsonEncoder(),
+                $this->getJsonDecoder(),
                 $this->getFactoryManager()
             );
         }
@@ -933,7 +1067,7 @@ class Puli
     }
 
     /**
-     * Returns the cached package file storage.
+     * Returns the package file storage.
      *
      * @return PackageFileStorage The package file storage.
      */
@@ -942,7 +1076,10 @@ class Puli
         if (!$this->packageFileStorage) {
             $this->packageFileStorage = new PackageFileStorage(
                 $this->getStorage(),
-                $this->getPackageFileSerializer(),
+                $this->getLegacyPackageFileConverter(),
+                $this->getLegacyRootPackageFileConverter(),
+                $this->getJsonEncoder(),
+                $this->getJsonDecoder(),
                 $this->getFactoryManager()
             );
         }
@@ -982,7 +1119,13 @@ class Puli
         Assert::directory($homeDir, 'Could not load Puli context: The home directory %s is a file. Expected a directory.');
 
         // Create a storage without the factory manager
-        $configStorage = new ConfigFileStorage($this->getStorage(), $this->getConfigFileSerializer());
+        $configStorage = new ConfigFileStorage(
+            $this->getStorage(),
+            $this->getConfigFileConverter(),
+            $this->getJsonEncoder(),
+            $this->getJsonDecoder()
+        );
+
         $configPath = Path::canonicalize($homeDir).'/config.json';
 
         try {

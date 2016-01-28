@@ -57,10 +57,10 @@ EOF
             'root-dir' => $this->rootDir,
         ));
 
-        $expected = <<<EOF
-\$store = new JsonFileStore(__DIR__.'/bindings.json');
-\$discovery = new KeyValueStoreDiscovery(\$store, array(
-    new ResourceBindingInitializer(\$repo),
+        $expected = <<<'EOF'
+$store = new JsonFileStore(__DIR__.'/bindings.json');
+$discovery = new KeyValueStoreDiscovery($store, array(
+    new ResourceBindingInitializer($repo),
 ));
 EOF;
 
@@ -74,10 +74,10 @@ EOF;
             'store' => array('type' => null),
         ));
 
-        $expected = <<<EOF
-\$store = new NullStore();
-\$discovery = new KeyValueStoreDiscovery(\$store, array(
-    new ResourceBindingInitializer(\$repo),
+        $expected = <<<'EOF'
+$store = new NullStore();
+$discovery = new KeyValueStoreDiscovery($store, array(
+    new ResourceBindingInitializer($repo),
 ));
 EOF;
 
