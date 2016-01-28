@@ -1,6 +1,16 @@
 Changelog
 =========
 
+* 1.0.0-beta11 (@release_date@)
+
+ * removed `MigrationException`
+ * removed `JsonMigration`
+ * removed `MigrationManager`
+ * replaced `PackageFileSerializer` and `PackageJsonSerializer` by 
+   `PackageFileConverter` and `RootPackageFileConverter`
+ * replaced `ConfigFileSerializer` and `ConfigJsonSerializer` by 
+   `ConfigFileConverter`
+
 * 1.0.0-beta10 (2016-01-14)
 
  * made compatible with Symfony 3.0
