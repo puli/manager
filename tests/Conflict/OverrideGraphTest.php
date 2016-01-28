@@ -12,11 +12,11 @@
 namespace Puli\Manager\Tests\Conflict;
 
 use PHPUnit_Framework_TestCase;
-use Puli\Manager\Api\Package\Package;
-use Puli\Manager\Api\Package\PackageCollection;
-use Puli\Manager\Api\Package\PackageFile;
-use Puli\Manager\Api\Package\RootPackage;
-use Puli\Manager\Api\Package\RootPackageFile;
+use Puli\Manager\Api\Module\Module;
+use Puli\Manager\Api\Module\ModuleCollection;
+use Puli\Manager\Api\Module\ModuleFile;
+use Puli\Manager\Api\Module\RootModule;
+use Puli\Manager\Api\Module\RootModuleFile;
 use Puli\Manager\Conflict\OverrideGraph;
 
 /**
@@ -44,12 +44,12 @@ class OverrideGraphTest extends PHPUnit_Framework_TestCase
         //
         //        (p6)
 
-        $this->graph->addPackageName('p1');
-        $this->graph->addPackageName('p2');
-        $this->graph->addPackageName('p3');
-        $this->graph->addPackageName('p4');
-        $this->graph->addPackageName('p5');
-        $this->graph->addPackageName('p6');
+        $this->graph->addModuleName('p1');
+        $this->graph->addModuleName('p2');
+        $this->graph->addModuleName('p3');
+        $this->graph->addModuleName('p4');
+        $this->graph->addModuleName('p5');
+        $this->graph->addModuleName('p6');
 
         $this->graph->addEdge('p1', 'p2');
         $this->graph->addEdge('p2', 'p3');
@@ -109,27 +109,27 @@ class OverrideGraphTest extends PHPUnit_Framework_TestCase
     /**
      * @expectedException \RuntimeException
      */
-    public function testAddPackageFailsIfAlreadyDefined()
+    public function testAddModuleFailsIfAlreadyDefined()
     {
-        $this->graph->addPackageName('p1');
-        $this->graph->addPackageName('p1');
+        $this->graph->addModuleName('p1');
+        $this->graph->addModuleName('p1');
     }
 
     /**
      * @expectedException \RuntimeException
      */
-    public function testAddEdgeFailsIfLeftPackageDoesNotExist()
+    public function testAddEdgeFailsIfLeftModuleDoesNotExist()
     {
-        $this->graph->addPackageName('p2');
+        $this->graph->addModuleName('p2');
         $this->graph->addEdge('p1', 'p2');
     }
 
     /**
      * @expectedException \RuntimeException
      */
-    public function testAddEdgeFailsIfRightPackageDoesNotExist()
+    public function testAddEdgeFailsIfRightModuleDoesNotExist()
     {
-        $this->graph->addPackageName('p1');
+        $this->graph->addModuleName('p1');
         $this->graph->addEdge('p1', 'p2');
     }
 
@@ -138,41 +138,41 @@ class OverrideGraphTest extends PHPUnit_Framework_TestCase
      */
     public function testAddEdgeFailsIfCycle()
     {
-        $this->graph->addPackageName('p1');
-        $this->graph->addPackageName('p2');
+        $this->graph->addModuleName('p1');
+        $this->graph->addModuleName('p2');
         $this->graph->addEdge('p1', 'p2');
         $this->graph->addEdge('p2', 'p1');
     }
 
-    public function testGetSortedPackages()
+    public function testGetSortedModules()
     {
         $this->initializeGraph();
 
-        $this->assertSame(array('p1', 'p5', 'p2', 'p4', 'p3', 'p6'), $this->graph->getSortedPackageNames());
+        $this->assertSame(array('p1', 'p5', 'p2', 'p4', 'p3', 'p6'), $this->graph->getSortedModuleNames());
     }
 
-    public function testGetSortedPackagesOfSubset()
+    public function testGetSortedModulesOfSubset()
     {
         $this->initializeGraph();
 
-        $this->assertSame(array('p1', 'p4', 'p3', 'p5', 'p6'), $this->graph->getSortedPackageNames(array('p1', 'p3', 'p4', 'p5', 'p6')));
+        $this->assertSame(array('p1', 'p4', 'p3', 'p5', 'p6'), $this->graph->getSortedModuleNames(array('p1', 'p3', 'p4', 'p5', 'p6')));
     }
 
     /**
      * @expectedException \RuntimeException
      */
-    public function testGetSortedPackagesExpectsValidPackages()
+    public function testGetSortedModulesExpectsValidModules()
     {
-        $this->graph->getSortedPackageNames(array('foo'));
+        $this->graph->getSortedModuleNames(array('foo'));
     }
 
-    public function testHasPackage()
+    public function testHasModule()
     {
-        $this->assertFalse($this->graph->hasPackageName('p1'));
+        $this->assertFalse($this->graph->hasModuleName('p1'));
 
-        $this->graph->addPackageName('p1');
+        $this->graph->addModuleName('p1');
 
-        $this->assertTrue($this->graph->hasPackageName('p1'));
+        $this->assertTrue($this->graph->hasModuleName('p1'));
     }
 
     public function testHasEdge()
@@ -180,8 +180,8 @@ class OverrideGraphTest extends PHPUnit_Framework_TestCase
         $this->assertFalse($this->graph->hasEdge('p1', 'p2'));
         $this->assertFalse($this->graph->hasEdge('p2', 'p1'));
 
-        $this->graph->addPackageName('p1');
-        $this->graph->addPackageName('p2');
+        $this->graph->addModuleName('p1');
+        $this->graph->addModuleName('p2');
 
         $this->assertFalse($this->graph->hasEdge('p1', 'p2'));
         $this->assertFalse($this->graph->hasEdge('p2', 'p1'));
@@ -192,56 +192,56 @@ class OverrideGraphTest extends PHPUnit_Framework_TestCase
         $this->assertFalse($this->graph->hasEdge('p2', 'p1'));
     }
 
-    public function testAddPackageNames()
+    public function testAddModuleNames()
     {
-        $this->assertFalse($this->graph->hasPackageName('p1'));
-        $this->assertFalse($this->graph->hasPackageName('p2'));
+        $this->assertFalse($this->graph->hasModuleName('p1'));
+        $this->assertFalse($this->graph->hasModuleName('p2'));
 
-        $this->graph->addPackageNames(array('p1', 'p2'));
+        $this->graph->addModuleNames(array('p1', 'p2'));
 
-        $this->assertTrue($this->graph->hasPackageName('p1'));
-        $this->assertTrue($this->graph->hasPackageName('p2'));
+        $this->assertTrue($this->graph->hasModuleName('p1'));
+        $this->assertTrue($this->graph->hasModuleName('p2'));
     }
 
-    public function testCreateWithPackageNames()
+    public function testCreateWithModuleNames()
     {
         $this->graph = new OverrideGraph(array('p1', 'p2'));
 
-        $this->assertTrue($this->graph->hasPackageName('p1'));
-        $this->assertTrue($this->graph->hasPackageName('p2'));
+        $this->assertTrue($this->graph->hasModuleName('p1'));
+        $this->assertTrue($this->graph->hasModuleName('p2'));
     }
 
-    public function testForPackages()
+    public function testForModules()
     {
-        $packages = new PackageCollection();
-        $packages->add(new RootPackage(new RootPackageFile('vendor/root'), __DIR__));
-        $packages->add(new Package(new PackageFile('vendor/package1'), __DIR__));
-        $packages->add(new Package(new PackageFile('vendor/package2'), __DIR__));
-        $packages->add(new Package(new PackageFile('vendor/package3'), __DIR__));
+        $modules = new ModuleCollection();
+        $modules->add(new RootModule(new RootModuleFile('vendor/root'), __DIR__));
+        $modules->add(new Module(new ModuleFile('vendor/module1'), __DIR__));
+        $modules->add(new Module(new ModuleFile('vendor/module2'), __DIR__));
+        $modules->add(new Module(new ModuleFile('vendor/module3'), __DIR__));
 
-        $packages->get('vendor/package2')->getPackageFile()->addOverriddenPackage('vendor/package1');
-        $packages->get('vendor/package3')->getPackageFile()->addOverriddenPackage('vendor/package1');
-        $packages->get('vendor/package3')->getPackageFile()->addOverriddenPackage('vendor/package2');
+        $modules->get('vendor/module2')->getModuleFile()->addOverriddenModule('vendor/module1');
+        $modules->get('vendor/module3')->getModuleFile()->addOverriddenModule('vendor/module1');
+        $modules->get('vendor/module3')->getModuleFile()->addOverriddenModule('vendor/module2');
 
-        $this->graph = OverrideGraph::forPackages($packages);
+        $this->graph = OverrideGraph::forModules($modules);
 
-        $this->assertTrue($this->graph->hasPackageName('vendor/root'));
-        $this->assertTrue($this->graph->hasPackageName('vendor/package1'));
-        $this->assertTrue($this->graph->hasPackageName('vendor/package2'));
-        $this->assertTrue($this->graph->hasPackageName('vendor/package3'));
-        $this->assertTrue($this->graph->hasEdge('vendor/package1', 'vendor/package2'));
-        $this->assertTrue($this->graph->hasEdge('vendor/package1', 'vendor/package3'));
-        $this->assertTrue($this->graph->hasEdge('vendor/package2', 'vendor/package3'));
+        $this->assertTrue($this->graph->hasModuleName('vendor/root'));
+        $this->assertTrue($this->graph->hasModuleName('vendor/module1'));
+        $this->assertTrue($this->graph->hasModuleName('vendor/module2'));
+        $this->assertTrue($this->graph->hasModuleName('vendor/module3'));
+        $this->assertTrue($this->graph->hasEdge('vendor/module1', 'vendor/module2'));
+        $this->assertTrue($this->graph->hasEdge('vendor/module1', 'vendor/module3'));
+        $this->assertTrue($this->graph->hasEdge('vendor/module2', 'vendor/module3'));
     }
 
-    public function testForPackagesIgnoresPackagesWithoutPackageFile()
+    public function testForModulesIgnoresModulesWithoutModuleFile()
     {
-        $packages = new PackageCollection();
-        $packages->add(new RootPackage(new RootPackageFile('vendor/root'), __DIR__));
-        $packages->add(new Package(null, __DIR__));
+        $modules = new ModuleCollection();
+        $modules->add(new RootModule(new RootModuleFile('vendor/root'), __DIR__));
+        $modules->add(new Module(null, __DIR__));
 
-        $this->graph = OverrideGraph::forPackages($packages);
+        $this->graph = OverrideGraph::forModules($modules);
 
-        $this->assertTrue($this->graph->hasPackageName('vendor/root'));
+        $this->assertTrue($this->graph->hasModuleName('vendor/root'));
     }
 }

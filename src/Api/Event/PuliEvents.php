@@ -12,7 +12,7 @@
 namespace Puli\Manager\Api\Event;
 
 /**
- * Contains the events triggered by this package.
+ * Contains the events triggered by this module.
  *
  * @since  1.0
  *

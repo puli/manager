@@ -22,7 +22,7 @@ use Webmozart\PathUtil\Path;
  *
  * @method static void nullOrSystemPath($value, $message = null, $propertyPath = null)
  * @method static void nullOrAbsoluteSystemPath($value, $message = null, $propertyPath = null)
- * @method static void nullOrPackageName($value, $message = null, $propertyPath = null)
+ * @method static void nullOrModuleName($value, $message = null, $propertyPath = null)
  * @method static void nullOrQuery($value, $message = null, $propertyPath = null)
  * @method static void nullOrLanguage($value, $message = null, $propertyPath = null)
  * @method static void nullOrTypeName($value, $message = null, $propertyPath = null)
@@ -30,7 +30,7 @@ use Webmozart\PathUtil\Path;
  * @method static void nullOrParameterValue($value, $message = null, $propertyPath = null)
  * @method static void allSystemPath($value, $object, $message = null, $propertyPath = null)
  * @method static void allAbsoluteSystemPath($value, $object, $message = null, $propertyPath = null)
- * @method static void allPackageName($value, $object, $message = null, $propertyPath = null)
+ * @method static void allModuleName($value, $object, $message = null, $propertyPath = null)
  * @method static void allQuery($value, $message = null, $propertyPath = null)
  * @method static void allLanguage($value, $message = null, $propertyPath = null)
  * @method static void allTypeName($value, $message = null, $propertyPath = null)
@@ -59,12 +59,12 @@ class Assert extends \Webmozart\Assert\Assert
         ));
     }
 
-    public static function packageName($value)
+    public static function moduleName($value)
     {
-        self::stringNotEmpty($value, 'The package name must be a non-empty string. Got: %s');
+        self::stringNotEmpty($value, 'The module name must be a non-empty string. Got: %s');
 
         if ('__root__' !== $value) {
-            self::contains($value, '/', 'The package name %s must contain a vendor name followed by a "/".');
+            self::contains($value, '/', 'The module name %s must contain a vendor name followed by a "/".');
         }
     }
 

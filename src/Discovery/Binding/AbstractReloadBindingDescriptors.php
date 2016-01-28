@@ -73,8 +73,8 @@ abstract class AbstractReloadBindingDescriptors implements OperationInterceptor
             return;
         }
 
-        // Keep backup of containing package before calling unload()
-        $containingPackage = $bindingDescriptor->getContainingPackage();
+        // Keep backup of containing module before calling unload()
+        $containingModule = $bindingDescriptor->getContainingModule();
         $typeName = $bindingDescriptor->getTypeName();
         $typeDescriptor = $this->typeDescriptors->getEnabled($typeName);
 
@@ -83,7 +83,7 @@ abstract class AbstractReloadBindingDescriptors implements OperationInterceptor
 
         // never fails after unloading, given that the type name matches
         // (which we can guarantee here)
-        $bindingDescriptor->load($containingPackage, $typeDescriptor);
+        $bindingDescriptor->load($containingModule, $typeDescriptor);
 
         $this->reloadedDescriptors[] = $bindingDescriptor;
     }

@@ -3,11 +3,12 @@ Changelog
 
 * 1.0.0-beta11 (@release_date@)
 
+ * renamed `Package` to `Module` everywhere
  * removed `MigrationException`
  * removed `JsonMigration`
  * removed `MigrationManager`
  * replaced `PackageFileSerializer` and `PackageJsonSerializer` by 
-   `PackageFileConverter` and `RootPackageFileConverter`
+   `ModuleFileConverter` and `RootModuleFileConverter`
  * replaced `ConfigFileSerializer` and `ConfigJsonSerializer` by 
    `ConfigFileConverter`
 

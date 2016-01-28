@@ -13,8 +13,8 @@ namespace Puli\Manager\Repository\Mapping;
 
 use Puli\Manager\Api\Repository\PathConflict;
 use Puli\Manager\Api\Repository\PathMapping;
-use Puli\Manager\Conflict\PackageConflict;
-use Puli\Manager\Conflict\PackageConflictDetector;
+use Puli\Manager\Conflict\ModuleConflict;
+use Puli\Manager\Conflict\ModuleConflictDetector;
 use Puli\Manager\Transaction\AtomicOperation;
 use Webmozart\PathUtil\Path;
 
@@ -33,7 +33,7 @@ class UpdateConflicts implements AtomicOperation
     private $repositoryPaths;
 
     /**
-     * @var PackageConflictDetector
+     * @var ModuleConflictDetector
      */
     private $conflictDetector;
 
@@ -57,7 +57,7 @@ class UpdateConflicts implements AtomicOperation
      */
     private $removedConflicts = array();
 
-    public function __construct(array $repositoryPaths, PackageConflictDetector $conflictDetector, ConflictCollection $conflicts, PathMappingCollection $mappingsByResource)
+    public function __construct(array $repositoryPaths, ModuleConflictDetector $conflictDetector, ConflictCollection $conflicts, PathMappingCollection $mappingsByResource)
     {
         $this->repositoryPaths = $repositoryPaths;
         $this->conflictDetector = $conflictDetector;
@@ -85,16 +85,16 @@ class UpdateConflicts implements AtomicOperation
             }
         }
 
-        $packageConflicts = $this->conflictDetector->detectConflicts($this->repositoryPaths);
+        $moduleConflicts = $this->conflictDetector->detectConflicts($this->repositoryPaths);
 
-        $this->deduplicatePackageConflicts($packageConflicts);
+        $this->deduplicateModuleConflicts($moduleConflicts);
 
-        foreach ($packageConflicts as $packageConflict) {
-            $repositoryPath = $packageConflict->getConflictingToken();
+        foreach ($moduleConflicts as $moduleConflict) {
+            $repositoryPath = $moduleConflict->getConflictingToken();
             $conflict = new PathConflict($repositoryPath);
 
-            foreach ($packageConflict->getPackageNames() as $packageName) {
-                $conflict->addMapping($this->mappingsByResource->get($repositoryPath, $packageName));
+            foreach ($moduleConflict->getModuleNames() as $moduleName) {
+                $conflict->addMapping($this->mappingsByResource->get($repositoryPath, $moduleName));
             }
 
             $this->conflicts->add($conflict);
@@ -123,15 +123,15 @@ class UpdateConflicts implements AtomicOperation
     }
 
     /**
-     * @param PackageConflict[] $packageConflicts
+     * @param ModuleConflict[] $moduleConflicts
      */
-    private function deduplicatePackageConflicts(array &$packageConflicts)
+    private function deduplicateModuleConflicts(array &$moduleConflicts)
     {
         $indicesByPath = array();
         $indicesToRemove = array();
 
-        foreach ($packageConflicts as $index => $packageConflict) {
-            $indicesByPath[$packageConflict->getConflictingToken()] = $index;
+        foreach ($moduleConflicts as $index => $moduleConflict) {
+            $indicesByPath[$moduleConflict->getConflictingToken()] = $index;
         }
 
         foreach ($indicesByPath as $repositoryPath => $index) {
@@ -143,10 +143,10 @@ class UpdateConflicts implements AtomicOperation
         }
 
         foreach ($indicesToRemove as $index => $true) {
-            unset($packageConflicts[$index]);
+            unset($moduleConflicts[$index]);
         }
 
         // Reorganize indices
-        $packageConflicts = array_values($packageConflicts);
+        $moduleConflicts = array_values($moduleConflicts);
     }
 }

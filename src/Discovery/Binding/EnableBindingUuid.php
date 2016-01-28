@@ -11,7 +11,7 @@
 
 namespace Puli\Manager\Discovery\Binding;
 
-use Puli\Manager\Api\Package\InstallInfo;
+use Puli\Manager\Api\Module\InstallInfo;
 use Puli\Manager\Transaction\AtomicOperation;
 use Rhumsaa\Uuid\Uuid;
 

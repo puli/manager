@@ -11,10 +11,10 @@
 
 namespace Puli\Manager\Repository\Mapping;
 
-use Puli\Manager\Api\Package\Package;
-use Puli\Manager\Api\Package\PackageCollection;
+use Puli\Manager\Api\Module\Module;
+use Puli\Manager\Api\Module\ModuleCollection;
 use Puli\Manager\Api\Repository\PathMapping;
-use Puli\Manager\Conflict\PackageConflictDetector;
+use Puli\Manager\Conflict\ModuleConflictDetector;
 use Puli\Manager\Transaction\AtomicOperation;
 
 /**
@@ -32,14 +32,14 @@ class LoadPathMapping implements AtomicOperation
     private $mapping;
 
     /**
-     * @var Package
+     * @var Module
      */
-    private $containingPackage;
+    private $containingModule;
 
     /**
-     * @var PackageCollection
+     * @var ModuleCollection
      */
-    private $packages;
+    private $modules;
 
     /**
      * @var PathMappingCollection
@@ -52,15 +52,15 @@ class LoadPathMapping implements AtomicOperation
     private $mappingsByResource;
 
     /**
-     * @var PackageConflictDetector
+     * @var ModuleConflictDetector
      */
     private $conflictDetector;
 
-    public function __construct(PathMapping $mapping, Package $containingPackage, PackageCollection $packages, PathMappingCollection $mappings, PathMappingCollection $mappingsByResource, PackageConflictDetector $conflictDetector)
+    public function __construct(PathMapping $mapping, Module $containingModule, ModuleCollection $modules, PathMappingCollection $mappings, PathMappingCollection $mappingsByResource, ModuleConflictDetector $conflictDetector)
     {
         $this->mapping = $mapping;
-        $this->containingPackage = $containingPackage;
-        $this->packages = $packages;
+        $this->containingModule = $containingModule;
+        $this->modules = $modules;
         $this->mappings = $mappings;
         $this->mappingsByResource = $mappingsByResource;
         $this->conflictDetector = $conflictDetector;
@@ -75,15 +75,15 @@ class LoadPathMapping implements AtomicOperation
             return;
         }
 
-        $this->mapping->load($this->containingPackage, $this->packages);
+        $this->mapping->load($this->containingModule, $this->modules);
 
-        $packageName = $this->containingPackage->getName();
+        $moduleName = $this->containingModule->getName();
 
         $this->mappings->add($this->mapping);
 
         foreach ($this->mapping->listRepositoryPaths() as $repositoryPath) {
             $this->mappingsByResource->set($repositoryPath, $this->mapping);
-            $this->conflictDetector->claim($repositoryPath, $packageName);
+            $this->conflictDetector->claim($repositoryPath, $moduleName);
         }
     }
 
@@ -96,13 +96,13 @@ class LoadPathMapping implements AtomicOperation
             return;
         }
 
-        $packageName = $this->containingPackage->getName();
+        $moduleName = $this->containingModule->getName();
 
-        $this->mappings->remove($this->mapping->getRepositoryPath(), $packageName);
+        $this->mappings->remove($this->mapping->getRepositoryPath(), $moduleName);
 
         foreach ($this->mapping->listRepositoryPaths() as $repositoryPath) {
-            $this->mappingsByResource->remove($repositoryPath, $packageName);
-            $this->conflictDetector->release($repositoryPath, $packageName);
+            $this->mappingsByResource->remove($repositoryPath, $moduleName);
+            $this->conflictDetector->release($repositoryPath, $moduleName);
         }
 
         // Unload after iterating, otherwise the paths are gone

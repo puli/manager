@@ -37,7 +37,7 @@ interface AssetManager
     /**
      * Adds an asset mapping to the repository.
      *
-     * The mapping is added to the root package.
+     * The mapping is added to the root module.
      *
      * @param AssetMapping $mapping The asset mapping.
      * @param int          $flags   A bitwise combination of the flag constants
@@ -53,7 +53,7 @@ interface AssetManager
     /**
      * Removes an asset mapping from the repository.
      *
-     * The mapping is removed from the root package. If the UUID is not found,
+     * The mapping is removed from the root module. If the UUID is not found,
      * this method does nothing.
      *
      * @param Uuid $uuid The UUID of the mapping.
@@ -63,7 +63,7 @@ interface AssetManager
     /**
      * Removes all asset mappings matching the given expression.
      *
-     * The mappings are removed from the root package. If no matching mappings
+     * The mappings are removed from the root module. If no matching mappings
      * are found, this method does nothing.
      *
      * @param Expression $expr The search criteria.
@@ -73,41 +73,41 @@ interface AssetManager
     /**
      * Removes all asset mappings from the repository.
      *
-     * The mappings are removed from the root package. If no matching mappings
+     * The mappings are removed from the root module. If no matching mappings
      * are found, this method does nothing.
      */
     public function clearRootAssetMappings();
 
     /**
-     * Returns the asset mapping from the root package.
+     * Returns the asset mapping from the root module.
      *
      * @param Uuid $uuid The UUID of the mapping.
      *
      * @return AssetMapping The corresponding asset mapping.
      *
      * @throws NoSuchAssetMappingException If the UUID is not found in the root
-     *                                     package.
+     *                                     module.
      */
     public function getRootAssetMapping(Uuid $uuid);
 
     /**
-     * Returns all asset mappings in the root package.
+     * Returns all asset mappings in the root module.
      *
      * @return AssetMapping[] The asset mappings.
      */
     public function getRootAssetMappings();
 
     /**
-     * Returns whether the root package contains a mapping with the given UUID.
+     * Returns whether the root module contains a mapping with the given UUID.
      *
      * @param Uuid $uuid The UUID of the mapping.
      *
-     * @return bool Returns `true` if the UUID exists in the root package.
+     * @return bool Returns `true` if the UUID exists in the root module.
      */
     public function hasRootAssetMapping(Uuid $uuid);
 
     /**
-     * Returns all asset mappings in the root package matching the given
+     * Returns all asset mappings in the root module matching the given
      * expression.
      *
      * @param Expression $expr The search criteria.
@@ -117,14 +117,14 @@ interface AssetManager
     public function findRootAssetMappings(Expression $expr);
 
     /**
-     * Returns whether the root package contains any asset mappings.
+     * Returns whether the root module contains any asset mappings.
      *
      * You can optionally pass an expression to check whether the manager has
      * mappings matching that expression.
      *
      * @param Expression|null $expr The search criteria.
      *
-     * @return bool Returns `true` if the root package contains any asset mappings.
+     * @return bool Returns `true` if the root module contains any asset mappings.
      */
     public function hasRootAssetMappings(Expression $expr = null);
 

@@ -12,7 +12,7 @@
 namespace Puli\Manager\Api\Discovery;
 
 use Puli\Manager\Api\Context\ProjectContext;
-use Puli\Manager\Api\NonRootPackageExpectedException;
+use Puli\Manager\Api\NonRootModuleExpectedException;
 use Rhumsaa\Uuid\Uuid;
 use Webmozart\Expression\Expression;
 
@@ -51,7 +51,7 @@ interface DiscoveryManager
     /**
      * Adds a new binding type.
      *
-     * The type definition is added to the root package file.
+     * The type definition is added to the root module file.
      *
      * @param BindingTypeDescriptor $typeDescriptor The type to add.
      * @param int                   $flags          A bitwise combination of the
@@ -62,9 +62,9 @@ interface DiscoveryManager
     public function addRootTypeDescriptor(BindingTypeDescriptor $typeDescriptor, $flags = 0);
 
     /**
-     * Removes a binding type from the root package.
+     * Removes a binding type from the root module.
      *
-     * The type definition is removed from the root package file. If the type
+     * The type definition is removed from the root module file. If the type
      * is not found, this method does nothing.
      *
      * @param string $typeName The name of the type to remove.
@@ -81,12 +81,12 @@ interface DiscoveryManager
     public function removeRootTypeDescriptors(Expression $expr);
 
     /**
-     * Removes all binding types from the root package.
+     * Removes all binding types from the root module.
      */
     public function clearRootTypeDescriptors();
 
     /**
-     * Returns the binding type with the given name from the root package.
+     * Returns the binding type with the given name from the root module.
      *
      * @param string $typeName The name of the type.
      *
@@ -97,14 +97,14 @@ interface DiscoveryManager
     public function getRootTypeDescriptor($typeName);
 
     /**
-     * Returns all binding types from the root package.
+     * Returns all binding types from the root module.
      *
      * @return BindingTypeDescriptor[] The binding types.
      */
     public function getRootTypeDescriptors();
 
     /**
-     * Returns all binding types from the root package that match the given
+     * Returns all binding types from the root module that match the given
      * expression.
      *
      * @param Expression $expr The search criteria.
@@ -114,7 +114,7 @@ interface DiscoveryManager
     public function findRootTypeDescriptors(Expression $expr);
 
     /**
-     * Returns whether the type with the given name exists in the root package.
+     * Returns whether the type with the given name exists in the root module.
      *
      * @param string $typeName The name of the type.
      *
@@ -123,7 +123,7 @@ interface DiscoveryManager
     public function hasRootTypeDescriptor($typeName);
 
     /**
-     * Returns whether the manager has any binding types in the root package.
+     * Returns whether the manager has any binding types in the root module.
      *
      * You can optionally pass an expression to check whether the manager has
      * types matching the expression.
@@ -131,7 +131,7 @@ interface DiscoveryManager
      * @param Expression|null $expr The search criteria.
      *
      * @return bool Returns `true` if the manager has binding types in the root
-     *              package and `false` otherwise. If an expression was passed,
+     *              module and `false` otherwise. If an expression was passed,
      *              this method only returns `true` if the manager has binding
      *              types matching the expression.
      */
@@ -140,14 +140,14 @@ interface DiscoveryManager
     /**
      * Returns the binding type with the given name.
      *
-     * @param string $typeName    The name of the type.
-     * @param string $packageName The name of the package to check.
+     * @param string $typeName   The name of the type.
+     * @param string $moduleName The name of the module to check.
      *
      * @return BindingTypeDescriptor The binding type.
      *
      * @throws NoSuchTypeException If the type does not exist.
      */
-    public function getTypeDescriptor($typeName, $packageName);
+    public function getTypeDescriptor($typeName, $moduleName);
 
     /**
      * Returns all binding types.
@@ -168,14 +168,14 @@ interface DiscoveryManager
     /**
      * Returns whether the type with the given name exists.
      *
-     * @param string      $typeName    The name of the type.
-     * @param string|null $packageName The name of the package to check. Useful
-     *                                 if types with the same name exist in
-     *                                 multiple packages.
+     * @param string      $typeName   The name of the type.
+     * @param string|null $moduleName The name of the module to check. Useful
+     *                                if types with the same name exist in
+     *                                multiple modules.
      *
      * @return bool Returns `true` if the type exists and `false` otherwise.
      */
-    public function hasTypeDescriptor($typeName, $packageName = null);
+    public function hasTypeDescriptor($typeName, $moduleName = null);
 
     /**
      * Returns whether the manager has any binding types.
@@ -195,7 +195,7 @@ interface DiscoveryManager
     /**
      * Adds a new binding.
      *
-     * The binding descriptor is added to the root package file.
+     * The binding descriptor is added to the root module file.
      *
      * @param BindingDescriptor $bindingDescriptor The binding to add.
      * @param int               $flags             A bitwise combination of the
@@ -211,9 +211,9 @@ interface DiscoveryManager
     public function addRootBindingDescriptor(BindingDescriptor $bindingDescriptor, $flags = 0);
 
     /**
-     * Removes a binding from the root package.
+     * Removes a binding from the root module.
      *
-     * The binding descriptor is removed from the root package file. If the
+     * The binding descriptor is removed from the root module file. If the
      * binding is not found, this method does nothing.
      *
      * @param Uuid $uuid The UUID of the binding.
@@ -230,14 +230,14 @@ interface DiscoveryManager
     public function removeRootBindingDescriptors(Expression $expr);
 
     /**
-     * Removes all bindings from the root package.
+     * Removes all bindings from the root module.
      *
      * If no bindings are found, this method does nothing.
      */
     public function clearRootBindingDescriptors();
 
     /**
-     * Returns the binding with the given UUID in the root package.
+     * Returns the binding with the given UUID in the root module.
      *
      * @param Uuid $uuid The UUID of the binding.
      *
@@ -248,14 +248,14 @@ interface DiscoveryManager
     public function getRootBindingDescriptor(Uuid $uuid);
 
     /**
-     * Returns all bindings in the root package.
+     * Returns all bindings in the root module.
      *
      * @return BindingDescriptor[] The bindings.
      */
     public function getRootBindingDescriptors();
 
     /**
-     * Returns all bindings from the root package that match the given expression.
+     * Returns all bindings from the root module that match the given expression.
      *
      * @param Expression $expr The search criteria.
      *
@@ -265,17 +265,17 @@ interface DiscoveryManager
 
     /**
      * Returns whether the binding with the given UUID exists in the root
-     * package.
+     * module.
      *
      * @param Uuid $uuid The UUID of the binding.
      *
-     * @return bool Returns `true` if the binding exists in the root package and
+     * @return bool Returns `true` if the binding exists in the root module and
      *              `false` otherwise.
      */
     public function hasRootBindingDescriptor(Uuid $uuid);
 
     /**
-     * Returns whether the manager has any bindings in the root package.
+     * Returns whether the manager has any bindings in the root module.
      *
      * You can optionally pass an expression to check whether the manager has
      * bindings matching the expression.
@@ -283,7 +283,7 @@ interface DiscoveryManager
      * @param Expression|null $expr The search criteria.
      *
      * @return bool Returns `true` if the manager has bindings in the root
-     *              package and `false` otherwise. If an expression was passed,
+     *              module and `false` otherwise. If an expression was passed,
      *              this method only returns `true` if the manager has bindings
      *              matching the expression.
      */
@@ -294,16 +294,16 @@ interface DiscoveryManager
      *
      * @param Uuid $uuid The UUID of the binding.
      *
-     * @throws NoSuchBindingException          If the binding does not exist.
-     * @throws NoSuchTypeException             If the type referenced by the descriptor does
-     *                                         not exist.
-     * @throws TypeNotEnabledException         If the type referenced by the descriptor
-     *                                         is not enabled.
-     * @throws NonRootPackageExpectedException If the binding is in the root
-     *                                         package. Can only enable bindings
-     *                                         in non-root packages, because the
-     *                                         bindings in the root package are
-     *                                         implicitly enabled.
+     * @throws NoSuchBindingException         If the binding does not exist.
+     * @throws NoSuchTypeException            If the type referenced by the descriptor does
+     *                                        not exist.
+     * @throws TypeNotEnabledException        If the type referenced by the descriptor
+     *                                        is not enabled.
+     * @throws NonRootModuleExpectedException If the binding is in the root
+     *                                        module. Can only enable bindings
+     *                                        in non-root modules, because the
+     *                                        bindings in the root module are
+     *                                        implicitly enabled.
      */
     public function enableBindingDescriptor(Uuid $uuid);
 
@@ -312,21 +312,21 @@ interface DiscoveryManager
      *
      * @param Uuid $uuid The UUID of the binding.
      *
-     * @throws NoSuchBindingException          If the binding does not exist.
-     * @throws NoSuchTypeException             If the type referenced by the descriptor does
-     *                                         not exist.
-     * @throws TypeNotEnabledException         If the type referenced by the descriptor
-     *                                         is not enabled.
-     * @throws NonRootPackageExpectedException If the binding is in the root
-     *                                         package. Can only disable bindings
-     *                                         in non-root packages, because the
-     *                                         bindings in the root package are
-     *                                         implicitly enabled.
+     * @throws NoSuchBindingException         If the binding does not exist.
+     * @throws NoSuchTypeException            If the type referenced by the descriptor does
+     *                                        not exist.
+     * @throws TypeNotEnabledException        If the type referenced by the descriptor
+     *                                        is not enabled.
+     * @throws NonRootModuleExpectedException If the binding is in the root
+     *                                        module. Can only disable bindings
+     *                                        in non-root modules, because the
+     *                                        bindings in the root module are
+     *                                        implicitly enabled.
      */
     public function disableBindingDescriptor(Uuid $uuid);
 
     /**
-     * Removes disabled binding UUIDs that were not found in any package.
+     * Removes disabled binding UUIDs that were not found in any module.
      */
     public function removeObsoleteDisabledBindingDescriptors();
 

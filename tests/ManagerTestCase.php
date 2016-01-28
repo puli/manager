@@ -17,7 +17,7 @@ use Puli\Discovery\Api\EditableDiscovery;
 use Puli\Manager\Api\Config\Config;
 use Puli\Manager\Api\Config\ConfigFile;
 use Puli\Manager\Api\Context\ProjectContext;
-use Puli\Manager\Api\Package\RootPackageFile;
+use Puli\Manager\Api\Module\RootModuleFile;
 use Puli\Manager\Config\DefaultConfig;
 use Puli\Repository\Api\EditableRepository;
 use Symfony\Component\EventDispatcher\EventDispatcher;
@@ -52,9 +52,9 @@ abstract class ManagerTestCase extends PHPUnit_Framework_TestCase
     protected $configFile;
 
     /**
-     * @var RootPackageFile
+     * @var RootModuleFile
      */
-    protected $rootPackageFile;
+    protected $rootModuleFile;
 
     /**
      * @var PHPUnit_Framework_MockObject_MockObject|EventDispatcherInterface
@@ -85,7 +85,7 @@ abstract class ManagerTestCase extends PHPUnit_Framework_TestCase
         $this->homeDir = Path::normalize($homeDir);
         $this->rootDir = Path::normalize($rootDir);
         $this->configFile = new ConfigFile($homeDir.'/config.json', $this->baseConfig);
-        $this->rootPackageFile = new RootPackageFile('vendor/root', $rootDir.'/puli.json', $this->baseConfig);
+        $this->rootModuleFile = new RootModuleFile('vendor/root', $rootDir.'/puli.json', $this->baseConfig);
         $this->dispatcher = $mockDispatcher
             ? $this->getMock('Symfony\Component\EventDispatcher\EventDispatcherInterface')
             : new EventDispatcher();
@@ -95,8 +95,8 @@ abstract class ManagerTestCase extends PHPUnit_Framework_TestCase
         $this->context = new ProjectContext(
             $this->homeDir,
             $this->rootDir,
-            $this->rootPackageFile->getConfig(),
-            $this->rootPackageFile,
+            $this->rootModuleFile->getConfig(),
+            $this->rootModuleFile,
             $this->configFile,
             $this->dispatcher
         );

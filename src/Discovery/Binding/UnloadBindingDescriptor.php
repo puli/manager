@@ -13,7 +13,7 @@ namespace Puli\Manager\Discovery\Binding;
 
 use Puli\Manager\Api\Discovery\BindingDescriptor;
 use Puli\Manager\Api\Discovery\BindingTypeDescriptor;
-use Puli\Manager\Api\Package\Package;
+use Puli\Manager\Api\Module\Module;
 use Puli\Manager\Transaction\AtomicOperation;
 
 /**
@@ -36,9 +36,9 @@ class UnloadBindingDescriptor implements AtomicOperation
     private $bindingDescriptors;
 
     /**
-     * @var Package
+     * @var Module
      */
-    private $containingPackage;
+    private $containingModule;
 
     /**
      * @var BindingTypeDescriptor
@@ -66,7 +66,7 @@ class UnloadBindingDescriptor implements AtomicOperation
             return;
         }
 
-        $this->containingPackage = $this->bindingDescriptor->getContainingPackage();
+        $this->containingModule = $this->bindingDescriptor->getContainingModule();
         $this->typeDescriptor = $this->bindingDescriptor->getTypeDescriptor();
 
         $uuid = $this->bindingDescriptor->getUuid();
@@ -87,14 +87,14 @@ class UnloadBindingDescriptor implements AtomicOperation
      */
     public function rollback()
     {
-        if ($this->bindingDescriptor->isLoaded() || !$this->containingPackage || !$this->typeDescriptor) {
+        if ($this->bindingDescriptor->isLoaded() || !$this->containingModule || !$this->typeDescriptor) {
             return;
         }
 
         // never fails with the check before, given that the type name of
         // the description/type didn't changed, which is impossible since
         // they're immutable
-        $this->bindingDescriptor->load($this->containingPackage, $this->typeDescriptor);
+        $this->bindingDescriptor->load($this->containingModule, $this->typeDescriptor);
 
         if ($this->wasRemoved) {
             // never fails

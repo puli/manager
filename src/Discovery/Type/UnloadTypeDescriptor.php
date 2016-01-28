@@ -12,7 +12,7 @@
 namespace Puli\Manager\Discovery\Type;
 
 use Puli\Manager\Api\Discovery\BindingTypeDescriptor;
-use Puli\Manager\Api\Package\Package;
+use Puli\Manager\Api\Module\Module;
 use Puli\Manager\Transaction\AtomicOperation;
 
 /**
@@ -35,9 +35,9 @@ class UnloadTypeDescriptor implements AtomicOperation
     private $typeDescriptors;
 
     /**
-     * @var Package
+     * @var Module
      */
-    private $containingPackage;
+    private $containingModule;
 
     /**
      * @var bool
@@ -61,18 +61,18 @@ class UnloadTypeDescriptor implements AtomicOperation
         }
 
         // never fails with the check before
-        $this->containingPackage = $this->typeDescriptor->getContainingPackage();
+        $this->containingModule = $this->typeDescriptor->getContainingModule();
 
         $typeName = $this->typeDescriptor->getTypeName();
-        $packageName = $this->containingPackage->getName();
+        $moduleName = $this->containingModule->getName();
 
         // never fails with the check before
         $this->typeDescriptor->unload();
 
-        if ($this->typeDescriptors->contains($typeName, $packageName)
-            && $this->typeDescriptor === $this->typeDescriptors->get($typeName, $packageName)) {
+        if ($this->typeDescriptors->contains($typeName, $moduleName)
+            && $this->typeDescriptor === $this->typeDescriptors->get($typeName, $moduleName)) {
             // never fails
-            $this->typeDescriptors->remove($typeName, $packageName);
+            $this->typeDescriptors->remove($typeName, $moduleName);
             $this->wasRemoved = true;
         }
     }
@@ -83,12 +83,12 @@ class UnloadTypeDescriptor implements AtomicOperation
     public function rollback()
     {
         // sanity check
-        if ($this->typeDescriptor->isLoaded() || !$this->containingPackage) {
+        if ($this->typeDescriptor->isLoaded() || !$this->containingModule) {
             return;
         }
 
         // never fails with the check before
-        $this->typeDescriptor->load($this->containingPackage);
+        $this->typeDescriptor->load($this->containingModule);
 
         if ($this->wasRemoved) {
             // never fails

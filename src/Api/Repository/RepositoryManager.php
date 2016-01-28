@@ -13,7 +13,7 @@ namespace Puli\Manager\Api\Repository;
 
 use Puli\Manager\Api\Context\ProjectContext;
 use Puli\Manager\Api\NoDirectoryException;
-use Puli\Manager\Conflict\PackageConflictException;
+use Puli\Manager\Conflict\ModuleConflictException;
 use Puli\Repository\Api\EditableRepository;
 use Webmozart\Expression\Expression;
 
@@ -58,14 +58,14 @@ interface RepositoryManager
      *                             in this class.
      *
      * @throws DuplicatePathMappingException If the repository path is already
-     *                                       mapped in the root package.
+     *                                       mapped in the root module.
      */
     public function addRootPathMapping(PathMapping $mapping, $flags = 0);
 
     /**
      * Removes a path mapping from the repository.
      *
-     * The path mapping is removed from the root package file. If the mapping
+     * The path mapping is removed from the root module file. If the mapping
      * is not found, this method does nothing.
      *
      * @param string $repositoryPath The repository path.
@@ -90,19 +90,19 @@ interface RepositoryManager
     public function clearRootPathMappings();
 
     /**
-     * Returns the path mapping for a repository path in the root package.
+     * Returns the path mapping for a repository path in the root module.
      *
      * @param string $repositoryPath The repository path.
      *
      * @return PathMapping The corresponding path mapping.
      *
      * @throws NoSuchPathMappingException If the repository path is not mapped
-     *                                    in the given package.
+     *                                    in the given module.
      */
     public function getRootPathMapping($repositoryPath);
 
     /**
-     * Returns all path mappings in the root package that match the given
+     * Returns all path mappings in the root module that match the given
      * expression.
      *
      * @param Expression $expr The search criteria.
@@ -112,24 +112,24 @@ interface RepositoryManager
     public function findRootPathMappings(Expression $expr);
 
     /**
-     * Returns all path mappings in the root package.
+     * Returns all path mappings in the root module.
      *
      * @return PathMapping[] The path mappings.
      */
     public function getRootPathMappings();
 
     /**
-     * Returns whether a repository path is mapped in the root package.
+     * Returns whether a repository path is mapped in the root module.
      *
      * @param string $repositoryPath The repository path.
      *
      * @return bool Returns `true` if the repository path is mapped in the root
-     *              package and `false` otherwise.
+     *              module and `false` otherwise.
      */
     public function hasRootPathMapping($repositoryPath);
 
     /**
-     * Returns whether the manager has any path mappings in the root package.
+     * Returns whether the manager has any path mappings in the root module.
      *
      * You can optionally pass an expression to check whether the manager has
      * path mappings matching the expression.
@@ -137,7 +137,7 @@ interface RepositoryManager
      * @param Expression|null $expr The search criteria.
      *
      * @return bool Returns `true` if the manager has path mappings in the root
-     *              package and `false` otherwise. If an expression was passed,
+     *              module and `false` otherwise. If an expression was passed,
      *              this method only returns `true` if the manager has path
      *              mappings matching the expression.
      */
@@ -147,14 +147,14 @@ interface RepositoryManager
      * Returns the path mapping for a repository path.
      *
      * @param string $repositoryPath The repository path.
-     * @param string $packageName    The name of the containing package.
+     * @param string $moduleName     The name of the containing module.
      *
      * @return PathMapping The corresponding path mapping.
      *
      * @throws NoSuchPathMappingException If the repository path is not mapped
-     *                                    in the given package.
+     *                                    in the given module.
      */
-    public function getPathMapping($repositoryPath, $packageName);
+    public function getPathMapping($repositoryPath, $moduleName);
 
     /**
      * Returns all path mappings.
@@ -176,12 +176,12 @@ interface RepositoryManager
      * Returns whether a repository path is mapped.
      *
      * @param string $repositoryPath The repository path.
-     * @param string $packageName    The name of the containing package.
+     * @param string $moduleName     The name of the containing module.
      *
      * @return bool Returns `true` if the repository path is mapped in the given
-     *              package and `false` otherwise.
+     *              module and `false` otherwise.
      */
-    public function hasPathMapping($repositoryPath, $packageName);
+    public function hasPathMapping($repositoryPath, $moduleName);
 
     /**
      * Returns whether the manager has any path mappings.
@@ -208,10 +208,10 @@ interface RepositoryManager
     /**
      * Builds the resource repository.
      *
-     * @throws NoDirectoryException     If the dump directory exists and is not a
-     *                                  directory.
-     * @throws PackageConflictException If two packages contain conflicting
-     *                                  resource definitions.
+     * @throws NoDirectoryException    If the dump directory exists and is not a
+     *                                 directory.
+     * @throws ModuleConflictException If two modules contain conflicting
+     *                                 resource definitions.
      */
     public function buildRepository();
 

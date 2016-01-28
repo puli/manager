@@ -1,12 +1,12 @@
 {
     "version": "1.0",
     "name": "vendor/root",
-    "packages": {
-        "vendor/package1": {
-            "install-path": "package1"
+    "modules": {
+        "vendor/module1": {
+            "install-path": "module1"
         },
-        "vendor/package2": {
-            "install-path": "package2"
+        "vendor/module2": {
+            "install-path": "module2"
         }
     },
     "config": {

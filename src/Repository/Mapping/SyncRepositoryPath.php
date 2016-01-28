@@ -133,7 +133,7 @@ class SyncRepositoryPath implements AtomicOperation
 
     private function addInOrder(array $filesystemPaths)
     {
-        foreach ($filesystemPaths as $packageName => $filesystemPathsByRepoPath) {
+        foreach ($filesystemPaths as $moduleName => $filesystemPathsByRepoPath) {
             foreach ($filesystemPathsByRepoPath as $repoPath => $filesystemPaths) {
                 foreach ($filesystemPaths as $filesystemPath) {
                     $this->repo->add($repoPath, $this->createResource($filesystemPath));
@@ -148,9 +148,9 @@ class SyncRepositoryPath implements AtomicOperation
         $filesystemPathsAfterPrefix = array_splice($filesystemPathsAfterSuffix, 0, count($filesystemPathsBefore));
 
         if ($filesystemPathsBefore === $filesystemPathsAfterPrefix) {
-            // Optimization: If the package names before are a prefix of the
-            // package names after, we can simply add the mappings for the
-            // remaining package names
+            // Optimization: If the module names before are a prefix of the
+            // module names after, we can simply add the mappings for the
+            // remaining module names
             // Note: array_splice() already removed the prefix of $filesystemPathsAfterSuffix
             $this->addInOrder($filesystemPathsAfterSuffix);
 
@@ -215,9 +215,9 @@ class SyncRepositoryPath implements AtomicOperation
 
         $this->filterEnabledMappings($repositoryPath, $inMappings, $outMappings);
 
-        foreach ($outMappings as $mappingPath => $mappingsByPackage) {
-            foreach ($mappingsByPackage as $packageName => $mapping) {
-                $filesystemPaths[$packageName][$mappingPath] = $mapping->getFilesystemPaths();
+        foreach ($outMappings as $mappingPath => $mappingsByModule) {
+            foreach ($mappingsByModule as $moduleName => $mapping) {
+                $filesystemPaths[$moduleName][$mappingPath] = $mapping->getFilesystemPaths();
             }
         }
 
@@ -225,13 +225,13 @@ class SyncRepositoryPath implements AtomicOperation
             return array();
         }
 
-        // Sort primary keys (package names)
-        $sortedNames = $this->overrideGraph->getSortedPackageNames(array_keys($filesystemPaths));
+        // Sort primary keys (module names)
+        $sortedNames = $this->overrideGraph->getSortedModuleNames(array_keys($filesystemPaths));
         $filesystemPaths = array_replace(array_flip($sortedNames), $filesystemPaths);
 
         // Sort secondary keys (repository paths)
-        foreach ($filesystemPaths as $packageName => $pathsByPackage) {
-            ksort($filesystemPaths[$packageName]);
+        foreach ($filesystemPaths as $moduleName => $pathsByModule) {
+            ksort($filesystemPaths[$moduleName]);
         }
 
         return $filesystemPaths;
@@ -248,8 +248,8 @@ class SyncRepositoryPath implements AtomicOperation
         $repositoryPaths = array();
         $processedPaths[$repositoryPath] = true;
 
-        foreach ($inMappings as $mappingPath => $mappingsByPackage) {
-            foreach ($mappingsByPackage as $packageName => $mapping) {
+        foreach ($inMappings as $mappingPath => $mappingsByModule) {
+            foreach ($mappingsByModule as $moduleName => $mapping) {
                 if (!$mapping->isEnabled()) {
                     continue;
                 }
@@ -262,14 +262,14 @@ class SyncRepositoryPath implements AtomicOperation
                 }
 
                 // Don't check this mapping anymore in recursive calls
-                unset($inMappings[$mappingPath][$packageName]);
+                unset($inMappings[$mappingPath][$moduleName]);
 
                 if (empty($inMappings[$mappingPath])) {
                     unset($inMappings[$mappingPath]);
                 }
 
                 // Add mapping to output
-                $outMappings[$mappingPath][$packageName] = $mapping;
+                $outMappings[$mappingPath][$moduleName] = $mapping;
 
                 foreach ($nestedMappingPaths as $nestedMappingPath) {
                     $repositoryPaths[$nestedMappingPath] = true;

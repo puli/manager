@@ -21,7 +21,7 @@ use Puli\Manager\Util\TwoDimensionalHashMap;
  * Each mapping has a composite key:
  *
  *  * The repository path of the mapping.
- *  * The package that defines the mapping.
+ *  * The module that defines the mapping.
  *
  * @since  1.0
  *
@@ -54,7 +54,7 @@ class PathMappingCollection
      */
     public function add(PathMapping $mapping)
     {
-        $this->map->set($mapping->getRepositoryPath(), $mapping->getContainingPackage()->getName(), $mapping);
+        $this->map->set($mapping->getRepositoryPath(), $mapping->getContainingModule()->getName(), $mapping);
         $this->primaryKeysSorted = false;
     }
 
@@ -66,7 +66,7 @@ class PathMappingCollection
      */
     public function set($repositoryPath, PathMapping $mapping)
     {
-        $this->map->set($repositoryPath, $mapping->getContainingPackage()->getName(), $mapping);
+        $this->map->set($repositoryPath, $mapping->getContainingModule()->getName(), $mapping);
         $this->primaryKeysSorted = false;
     }
 
@@ -76,42 +76,42 @@ class PathMappingCollection
      * This method ignores non-existing path mappings.
      *
      * @param string $repositoryPath The repository path of the mapping.
-     * @param string $packageName    The package containing the mapping.
+     * @param string $moduleName     The module containing the mapping.
      */
-    public function remove($repositoryPath, $packageName)
+    public function remove($repositoryPath, $moduleName)
     {
-        $this->map->remove($repositoryPath, $packageName);
+        $this->map->remove($repositoryPath, $moduleName);
     }
 
     /**
      * Returns a path mapping.
      *
      * @param string $repositoryPath The repository path of the mapping.
-     * @param string $packageName    The package containing the mapping.
+     * @param string $moduleName     The module containing the mapping.
      *
      * @return PathMapping The path mapping.
      *
      * @throws OutOfBoundsException If no path mapping was set for the
-     *                              given repository path/package.
+     *                              given repository path/module.
      */
-    public function get($repositoryPath, $packageName)
+    public function get($repositoryPath, $moduleName)
     {
-        return $this->map->get($repositoryPath, $packageName);
+        return $this->map->get($repositoryPath, $moduleName);
     }
 
     /**
      * Returns whether a path mapping was set for the given repository
-     * path/package.
+     * path/module.
      *
      * @param string      $repositoryPath The repository path of the mapping.
-     * @param string|null $packageName    The package containing the mapping.
+     * @param string|null $moduleName     The module containing the mapping.
      *
      * @return bool Returns `true` if a path mapping was set for the given
-     *              repository path/package.
+     *              repository path/module.
      */
-    public function contains($repositoryPath, $packageName = null)
+    public function contains($repositoryPath, $moduleName = null)
     {
-        return $this->map->contains($repositoryPath, $packageName);
+        return $this->map->contains($repositoryPath, $moduleName);
     }
 
     /**
@@ -130,36 +130,36 @@ class PathMappingCollection
     }
 
     /**
-     * Returns all path mappings set for the given package name.
+     * Returns all path mappings set for the given module name.
      *
-     * @param string $packageName The package name.
+     * @param string $moduleName The module name.
      *
      * @return PathMapping[] The path mappings.
      *
      * @throws OutOfBoundsException If no path mapping was set for the
-     *                              given package name.
+     *                              given module name.
      */
-    public function listByPackageName($packageName)
+    public function listByModuleName($moduleName)
     {
         if ($this->primaryKeysSorted) {
             $this->lazySortPrimaryKeys();
         }
 
-        return $this->map->listBySecondaryKey($packageName);
+        return $this->map->listBySecondaryKey($moduleName);
     }
 
     /**
-     * Returns the names of the packages defining mappings with the given
+     * Returns the names of the modules defining mappings with the given
      * repository path.
      *
      * @param string|null $repositoryPath The repository path of the mapping.
      *
-     * @return string[] The package names.
+     * @return string[] The module names.
      *
      * @throws OutOfBoundsException If no path mapping was set for the
      *                              given repository path.
      */
-    public function getPackageNames($repositoryPath = null)
+    public function getModuleNames($repositoryPath = null)
     {
         return $this->map->getSecondaryKeys($repositoryPath);
     }
@@ -182,7 +182,7 @@ class PathMappingCollection
      * Returns the contents of the collection as array.
      *
      * @return PathMapping[][] An array containing all path mappings indexed
-     *                         first by repository, then by package name.
+     *                         first by repository, then by module name.
      */
     public function toArray()
     {

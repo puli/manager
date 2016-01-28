@@ -15,16 +15,16 @@ use Exception;
 use Puli\Discovery\Api\Binding\Binding;
 use Puli\Discovery\Binding\ResourceBinding;
 use Puli\Manager\Api\AlreadyLoadedException;
+use Puli\Manager\Api\Module\Module;
+use Puli\Manager\Api\Module\RootModule;
 use Puli\Manager\Api\NotLoadedException;
-use Puli\Manager\Api\Package\Package;
-use Puli\Manager\Api\Package\RootPackage;
 use Rhumsaa\Uuid\Uuid;
 
 /**
  * Describes a resource binding.
  *
  * This class contains a high-level model of {@link ResourceBinding} as it is
- * used in this package.
+ * used in this module.
  *
  * @since  1.0
  *
@@ -45,9 +45,9 @@ class BindingDescriptor
     private $state;
 
     /**
-     * @var Package
+     * @var Module
      */
-    private $containingPackage;
+    private $containingModule;
 
     /**
      * @var BindingTypeDescriptor
@@ -72,14 +72,14 @@ class BindingDescriptor
     /**
      * Loads the binding descriptor.
      *
-     * @param Package                    $containingPackage The package that
-     *                                                      contains the
-     *                                                      descriptor.
-     * @param BindingTypeDescriptor|null $typeDescriptor    The type descriptor.
+     * @param Module                     $containingModule The module that
+     *                                                     contains the
+     *                                                     descriptor.
+     * @param BindingTypeDescriptor|null $typeDescriptor   The type descriptor.
      *
      * @throws AlreadyLoadedException If the descriptor is already loaded.
      */
-    public function load(Package $containingPackage, BindingTypeDescriptor $typeDescriptor = null)
+    public function load(Module $containingModule, BindingTypeDescriptor $typeDescriptor = null)
     {
         if (null !== $this->state) {
             throw new AlreadyLoadedException('The binding descriptor is already loaded.');
@@ -95,7 +95,7 @@ class BindingDescriptor
             }
         }
 
-        $this->containingPackage = $containingPackage;
+        $this->containingModule = $containingModule;
         $this->typeDescriptor = $typeDescriptor;
 
         $this->refreshState();
@@ -114,7 +114,7 @@ class BindingDescriptor
             throw new NotLoadedException('The binding descriptor is not loaded.');
         }
 
-        $this->containingPackage = null;
+        $this->containingModule = null;
         $this->typeDescriptor = null;
         $this->loadErrors = array();
         $this->state = null;
@@ -180,22 +180,22 @@ class BindingDescriptor
     }
 
     /**
-     * Returns the package that contains the descriptor.
+     * Returns the module that contains the descriptor.
      *
      * The method {@link load()} needs to be called before calling this method,
      * otherwise an exception is thrown.
      *
-     * @return Package The containing package.
+     * @return Module The containing module.
      *
      * @throws NotLoadedException If the descriptor is not loaded.
      */
-    public function getContainingPackage()
+    public function getContainingModule()
     {
-        if (null === $this->containingPackage) {
+        if (null === $this->containingModule) {
             throw new NotLoadedException('The binding descriptor is not loaded.');
         }
 
-        return $this->containingPackage;
+        return $this->containingModule;
     }
 
     /**
@@ -212,8 +212,8 @@ class BindingDescriptor
      */
     public function getTypeDescriptor()
     {
-        // Check containing package, as the type descriptor may be null
-        if (null === $this->containingPackage) {
+        // Check containing module, as the type descriptor may be null
+        if (null === $this->containingModule) {
             throw new NotLoadedException('The binding descriptor is not loaded.');
         }
 
@@ -352,9 +352,9 @@ class BindingDescriptor
             $this->state = BindingState::TYPE_NOT_ENABLED;
         } elseif (count($this->loadErrors) > 0) {
             $this->state = BindingState::INVALID;
-        } elseif ($this->containingPackage instanceof RootPackage) {
+        } elseif ($this->containingModule instanceof RootModule) {
             $this->state = BindingState::ENABLED;
-        } elseif ($this->containingPackage->getInstallInfo()->hasDisabledBindingUuid($this->binding->getUuid())) {
+        } elseif ($this->containingModule->getInstallInfo()->hasDisabledBindingUuid($this->binding->getUuid())) {
             $this->state = BindingState::DISABLED;
         } else {
             $this->state = BindingState::ENABLED;

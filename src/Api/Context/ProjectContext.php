@@ -14,7 +14,7 @@ namespace Puli\Manager\Api\Context;
 use Puli\Manager\Api\Config\Config;
 use Puli\Manager\Api\Config\ConfigFile;
 use Puli\Manager\Api\Environment;
-use Puli\Manager\Api\Package\RootPackageFile;
+use Puli\Manager\Api\Module\RootModuleFile;
 use Puli\Manager\Assert\Assert;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Webmozart\PathUtil\Path;
@@ -40,9 +40,9 @@ class ProjectContext extends Context
     private $rootDir;
 
     /**
-     * @var RootPackageFile
+     * @var RootModuleFile
      */
-    private $rootPackageFile;
+    private $rootModuleFile;
 
     /**
      * @var string
@@ -52,26 +52,26 @@ class ProjectContext extends Context
     /**
      * Creates the context.
      *
-     * @param string|null                   $homeDir         The path to the
-     *                                                       home directory or
-     *                                                       `null` if none
-     *                                                       exists.
-     * @param string                        $rootDir         The path to the
-     *                                                       project's root
-     *                                                       directory.
-     * @param Config                        $config          The configuration.
-     * @param RootPackageFile               $rootPackageFile The root package
-     *                                                       file.
-     * @param ConfigFile|null               $configFile      The configuration
-     *                                                       file or `null` if
-     *                                                       none exists.
-     * @param EventDispatcherInterface|null $dispatcher      The event
-     *                                                       dispatcher.
-     * @param string                        $env             The environment
-     *                                                       that Puli is
-     *                                                       running in.
+     * @param string|null                   $homeDir        The path to the
+     *                                                      home directory or
+     *                                                      `null` if none
+     *                                                      exists.
+     * @param string                        $rootDir        The path to the
+     *                                                      project's root
+     *                                                      directory.
+     * @param Config                        $config         The configuration.
+     * @param RootModuleFile                $rootModuleFile The root module
+     *                                                      file.
+     * @param ConfigFile|null               $configFile     The configuration
+     *                                                      file or `null` if
+     *                                                      none exists.
+     * @param EventDispatcherInterface|null $dispatcher     The event
+     *                                                      dispatcher.
+     * @param string                        $env            The environment
+     *                                                      that Puli is
+     *                                                      running in.
      */
-    public function __construct($homeDir, $rootDir, Config $config, RootPackageFile $rootPackageFile, ConfigFile $configFile = null, EventDispatcherInterface $dispatcher = null, $env = Environment::DEV)
+    public function __construct($homeDir, $rootDir, Config $config, RootModuleFile $rootModuleFile, ConfigFile $configFile = null, EventDispatcherInterface $dispatcher = null, $env = Environment::DEV)
     {
         Assert::directory($rootDir, 'The root directory %s is not a directory.');
         Assert::oneOf($env, Environment::all(), 'The environment must be one of: %2$s. Got: %s');
@@ -79,7 +79,7 @@ class ProjectContext extends Context
         parent::__construct($homeDir, $config, $configFile, $dispatcher);
 
         $this->rootDir = Path::canonicalize($rootDir);
-        $this->rootPackageFile = $rootPackageFile;
+        $this->rootModuleFile = $rootModuleFile;
         $this->env = $env;
     }
 
@@ -94,13 +94,13 @@ class ProjectContext extends Context
     }
 
     /**
-     * Returns the root package file of the project.
+     * Returns the root module file of the project.
      *
-     * @return RootPackageFile The root package file.
+     * @return RootModuleFile The root module file.
      */
-    public function getRootPackageFile()
+    public function getRootModuleFile()
     {
-        return $this->rootPackageFile;
+        return $this->rootModuleFile;
     }
 
     /**

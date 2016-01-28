@@ -21,10 +21,10 @@ use Puli\Manager\Util\TwoDimensionalHashMap;
  * Each descriptor has a composite key:
  *
  *  * The name of the type.
- *  * The package that defines the type.
+ *  * The module that defines the type.
  *
  * The store implements transparent merging of types defined within different
- * packages, but with the same type name.
+ * modules, but with the same type name.
  *
  * @since  1.0
  *
@@ -52,7 +52,7 @@ class BindingTypeDescriptorCollection
      */
     public function add(BindingTypeDescriptor $typeDescriptor)
     {
-        $this->map->set($typeDescriptor->getTypeName(), $typeDescriptor->getContainingPackage()->getName(), $typeDescriptor);
+        $this->map->set($typeDescriptor->getTypeName(), $typeDescriptor->getContainingModule()->getName(), $typeDescriptor);
     }
 
     /**
@@ -60,28 +60,28 @@ class BindingTypeDescriptorCollection
      *
      * This method ignores non-existing type descriptors.
      *
-     * @param string $typeName    The name of the type.
-     * @param string $packageName The name of the package containing the type.
+     * @param string $typeName   The name of the type.
+     * @param string $moduleName The name of the module containing the type.
      */
-    public function remove($typeName, $packageName)
+    public function remove($typeName, $moduleName)
     {
-        $this->map->remove($typeName, $packageName);
+        $this->map->remove($typeName, $moduleName);
     }
 
     /**
      * Returns a type descriptor.
      *
-     * @param string $typeName    The name of the type.
-     * @param string $packageName The name of the package containing the type.
+     * @param string $typeName   The name of the type.
+     * @param string $moduleName The name of the module containing the type.
      *
      * @return BindingTypeDescriptor The type descriptor.
      *
      * @throws OutOfBoundsException If no type descriptor was set for the
-     *                              given name/package.
+     *                              given name/module.
      */
-    public function get($typeName, $packageName)
+    public function get($typeName, $moduleName)
     {
-        return $this->map->get($typeName, $packageName);
+        return $this->map->get($typeName, $moduleName);
     }
 
     /**
@@ -138,31 +138,31 @@ class BindingTypeDescriptorCollection
     }
 
     /**
-     * Returns whether a type descriptor was set for the given name/package.
+     * Returns whether a type descriptor was set for the given name/module.
      *
-     * @param string      $typeName    The name of the type.
-     * @param string|null $packageName The name of the package containing the
-     *                                 type.
+     * @param string      $typeName   The name of the type.
+     * @param string|null $moduleName The name of the module containing the
+     *                                type.
      *
      * @return bool Returns `true` if a type descriptor was set for the given
-     *              name/package.
+     *              name/module.
      */
-    public function contains($typeName, $packageName = null)
+    public function contains($typeName, $moduleName = null)
     {
-        return $this->map->contains($typeName, $packageName);
+        return $this->map->contains($typeName, $moduleName);
     }
 
     /**
-     * Returns the names of the packages defining types with the given name.
+     * Returns the names of the modules defining types with the given name.
      *
      * @param string|null $typeName The name of the type.
      *
-     * @return string[] The package names.
+     * @return string[] The module names.
      *
      * @throws OutOfBoundsException If no type descriptor was set for the
      *                              given name.
      */
-    public function getPackageNames($typeName = null)
+    public function getModuleNames($typeName = null)
     {
         return $this->map->getSecondaryKeys($typeName);
     }
@@ -182,7 +182,7 @@ class BindingTypeDescriptorCollection
      *
      * @return BindingTypeDescriptor[][] A multi-dimensional array containing
      *                                   all types indexed first by name, then
-     *                                   by package name.
+     *                                   by module name.
      */
     public function toArray()
     {

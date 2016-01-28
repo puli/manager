@@ -17,7 +17,7 @@ use Puli\Manager\Api\Event\GenerateFactoryEvent;
 use Puli\Manager\Api\Event\PuliEvents;
 use Puli\Manager\Api\Factory\FactoryManager;
 use Puli\Manager\Api\Factory\Generator\GeneratorRegistry;
-use Puli\Manager\Api\Package\PackageCollection;
+use Puli\Manager\Api\Module\ModuleCollection;
 use Puli\Manager\Api\Php\Argument;
 use Puli\Manager\Api\Php\Clazz;
 use Puli\Manager\Api\Php\Import;
@@ -74,9 +74,9 @@ class FactoryManagerImpl implements FactoryManager
     private $classWriter;
 
     /**
-     * @var PackageCollection
+     * @var ModuleCollection
      */
-    private $packages;
+    private $modules;
 
     /**
      * @var ServerCollection
@@ -86,35 +86,35 @@ class FactoryManagerImpl implements FactoryManager
     /**
      * Creates a new factory generator.
      *
-     * @param ProjectContext         $context           The project context.
-     * @param GeneratorRegistry      $generatorRegistry The registry providing
-     *                                                  the generators for the
-     *                                                  services returned by the
-     *                                                  factory.
-     * @param ClassWriter            $classWriter       The writer that writes
-     *                                                  the class to a file.
-     * @param PackageCollection|null $packages          The loaded packages.
-     * @param ServerCollection|null  $servers           The configured servers.
+     * @param ProjectContext        $context           The project context.
+     * @param GeneratorRegistry     $generatorRegistry The registry providing
+     *                                                 the generators for the
+     *                                                 services returned by the
+     *                                                 factory.
+     * @param ClassWriter           $classWriter       The writer that writes
+     *                                                 the class to a file.
+     * @param ModuleCollection|null $modules           The loaded modules.
+     * @param ServerCollection|null $servers           The configured servers.
      */
-    public function __construct(ProjectContext $context, GeneratorRegistry $generatorRegistry, ClassWriter $classWriter, PackageCollection $packages = null, ServerCollection $servers = null)
+    public function __construct(ProjectContext $context, GeneratorRegistry $generatorRegistry, ClassWriter $classWriter, ModuleCollection $modules = null, ServerCollection $servers = null)
     {
         $this->context = $context;
         $this->config = $context->getConfig();
         $this->rootDir = $context->getRootDirectory();
         $this->generatorRegistry = $generatorRegistry;
         $this->classWriter = $classWriter;
-        $this->packages = $packages;
+        $this->modules = $modules;
         $this->servers = $servers;
     }
 
     /**
-     * Sets the packages included in the getPackageOrder() method.
+     * Sets the modules included in the getModuleOrder() method.
      *
-     * @param PackageCollection $packages The loaded packages.
+     * @param ModuleCollection $modules The loaded modules.
      */
-    public function setPackages(PackageCollection $packages)
+    public function setModules(ModuleCollection $modules)
     {
-        $this->packages = $packages;
+        $this->modules = $modules;
     }
 
     /**
@@ -187,7 +187,7 @@ EOF
         $this->addCreateRepositoryMethod($class);
         $this->addCreateDiscoveryMethod($class);
         $this->addCreateUrlGeneratorMethod($class);
-        $this->addGetPackageOrderMethod($class);
+        $this->addGetModuleOrderMethod($class);
 
         if ($dispatcher->hasListeners(PuliEvents::GENERATE_FACTORY)) {
             $dispatcher->dispatch(PuliEvents::GENERATE_FACTORY, new GenerateFactoryEvent($class));
@@ -229,16 +229,16 @@ EOF
             return;
         }
 
-        $rootPackageFile = $this->context->getRootPackageFile()->getPath();
+        $rootModuleFile = $this->context->getRootModuleFile()->getPath();
 
-        if (!file_exists($rootPackageFile)) {
+        if (!file_exists($rootModuleFile)) {
             return;
         }
 
         // Regenerate file if the configuration has changed and
         // auto-generation is enabled
-        clearstatcache(true, $rootPackageFile);
-        $lastConfigChange = filemtime($rootPackageFile);
+        clearstatcache(true, $rootModuleFile);
+        $lastConfigChange = filemtime($rootModuleFile);
 
         $configFile = $this->context->getConfigFile()
             ? $this->context->getConfigFile()->getPath()
@@ -395,11 +395,11 @@ EOF
     }
 
     /**
-     * Adds the getPackageOrder() method.
+     * Adds the getModuleOrder() method.
      *
      * @param Clazz $class The factory class model.
      */
-    public function addGetPackageOrderMethod(Clazz $class)
+    public function addGetModuleOrderMethod(Clazz $class)
     {
         $class->addImport(new Import('Puli\Discovery\Api\Discovery'));
         $class->addImport(new Import('Puli\Manager\Api\Server\ServerCollection'));
@@ -407,27 +407,27 @@ EOF
         $class->addImport(new Import('Puli\UrlGenerator\DiscoveryUrlGenerator'));
         $class->addImport(new Import('RuntimeException'));
 
-        $method = new Method('getPackageOrder');
-        $method->setDescription("Returns the order in which the installed packages should be loaded\naccording to the override statements.");
+        $method = new Method('getModuleOrder');
+        $method->setDescription("Returns the order in which the installed modules should be loaded\naccording to the override statements.");
 
-        $method->setReturnValue(new ReturnValue('$order', 'string[]', 'The sorted package names.'));
+        $method->setReturnValue(new ReturnValue('$order', 'string[]', 'The sorted module names.'));
 
-        $packageOrderString = '';
+        $moduleOrderString = '';
 
-        if (count($this->packages) > 0) {
-            $overrideGraph = OverrideGraph::forPackages($this->packages);
+        if (count($this->modules) > 0) {
+            $overrideGraph = OverrideGraph::forModules($this->modules);
 
-            foreach ($overrideGraph->getSortedPackageNames() as $packageName) {
-                $packageOrderString .= sprintf(
+            foreach ($overrideGraph->getSortedModuleNames() as $moduleName) {
+                $moduleOrderString .= sprintf(
                     "\n    %s,",
-                    var_export($packageName, true)
+                    var_export($moduleName, true)
                 );
             }
 
-            $packageOrderString .= "\n";
+            $moduleOrderString .= "\n";
         }
 
-        $method->addBody("\$order = array($packageOrderString);");
+        $method->addBody("\$order = array($moduleOrderString);");
 
         $class->addMethod($method);
     }
