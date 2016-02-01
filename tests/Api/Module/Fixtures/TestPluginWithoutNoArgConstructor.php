@@ -11,7 +11,7 @@
 
 namespace Puli\Manager\Tests\Api\Module\Fixtures;
 
-use Puli\Manager\Api\Puli;
+use Puli\Manager\Api\Container;
 use Puli\Manager\Api\PuliPlugin;
 
 /**
@@ -25,7 +25,7 @@ class TestPluginWithoutNoArgConstructor implements PuliPlugin
     {
     }
 
-    public function activate(Puli $puli)
+    public function activate(Container $container)
     {
     }
 }

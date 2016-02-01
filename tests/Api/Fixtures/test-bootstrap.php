@@ -11,7 +11,7 @@
 
 namespace Puli\Manager\Tests\Api\Fixtures;
 
-use Puli\Manager\Api\Puli;
+use Puli\Manager\Api\Container;
 use Puli\Manager\Api\PuliPlugin;
 
 /**
@@ -21,7 +21,7 @@ class BootstrapPlugin implements PuliPlugin
 {
     public static $activated = false;
 
-    public function activate(Puli $puli)
+    public function activate(Container $container)
     {
         self::$activated = true;
     }

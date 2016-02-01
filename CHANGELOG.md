@@ -13,6 +13,7 @@ Changelog
  * replaced `ConfigFileSerializer` and `ConfigJsonSerializer` by 
    `ConfigFileConverter`
  * replaced `ConfigFileStorage` and `ModuleFileStorage` by `JsonStorage`
+ * renamed `Puli` to `Container`
 
 * 1.0.0-beta10 (2016-01-14)
 

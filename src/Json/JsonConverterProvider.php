@@ -12,7 +12,7 @@
 namespace Puli\Manager\Json;
 
 use InvalidArgumentException;
-use Puli\Manager\Api\Puli;
+use Puli\Manager\Api\Container;
 use Webmozart\Json\Conversion\JsonConverter;
 
 /**
@@ -23,13 +23,13 @@ use Webmozart\Json\Conversion\JsonConverter;
 class JsonConverterProvider
 {
     /**
-     * @var Puli
+     * @var Container
      */
-    private $puli;
+    private $container;
 
-    public function __construct(Puli $puli)
+    public function __construct(Container $container)
     {
-        $this->puli = $puli;
+        $this->container = $container;
     }
 
     /**
@@ -41,13 +41,13 @@ class JsonConverterProvider
     {
         switch ($className) {
             case 'Puli\Manager\Api\Config\ConfigFile':
-                return $this->puli->getConfigFileConverter();
+                return $this->container->getConfigFileConverter();
 
             case 'Puli\Manager\Api\Module\ModuleFile':
-                return $this->puli->getLegacyModuleFileConverter();
+                return $this->container->getLegacyModuleFileConverter();
 
             case 'Puli\Manager\Api\Module\RootModuleFile':
-                return $this->puli->getLegacyRootModuleFileConverter();
+                return $this->container->getLegacyRootModuleFileConverter();
 
             default:
                 throw new InvalidArgumentException(sprintf(

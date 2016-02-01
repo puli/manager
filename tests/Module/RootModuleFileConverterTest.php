@@ -18,12 +18,12 @@ use Puli\Discovery\Api\Type\BindingType;
 use Puli\Discovery\Binding\ClassBinding;
 use Puli\Discovery\Binding\ResourceBinding;
 use Puli\Manager\Api\Config\Config;
+use Puli\Manager\Api\Container;
 use Puli\Manager\Api\Discovery\BindingDescriptor;
 use Puli\Manager\Api\Discovery\BindingTypeDescriptor;
 use Puli\Manager\Api\Environment;
 use Puli\Manager\Api\Module\InstallInfo;
 use Puli\Manager\Api\Module\RootModuleFile;
-use Puli\Manager\Api\Puli;
 use Puli\Manager\Api\PuliPlugin;
 use Puli\Manager\Api\Repository\PathMapping;
 use Puli\Manager\Module\ModuleFileConverter;
@@ -467,21 +467,21 @@ class RootModuleFileConverterTest extends PHPUnit_Framework_TestCase
 
 class PluginA implements PuliPlugin
 {
-    public function activate(Puli $puli)
+    public function activate(Container $container)
     {
     }
 }
 
 class PluginB implements PuliPlugin
 {
-    public function activate(Puli $puli)
+    public function activate(Container $container)
     {
     }
 }
 
 class PluginC implements PuliPlugin
 {
-    public function activate(Puli $puli)
+    public function activate(Container $container)
     {
     }
 }

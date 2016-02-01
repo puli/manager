@@ -23,7 +23,7 @@ interface PuliPlugin
     /**
      * Activates the plugin.
      *
-     * @param Puli $puli The {@link Puli} instance.
+     * @param Container $container The Puli service container.
      */
-    public function activate(Puli $puli);
+    public function activate(Container $container);
 }
