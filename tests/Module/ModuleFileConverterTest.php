@@ -94,7 +94,7 @@ class ModuleFileConverterTest extends PHPUnit_Framework_TestCase
         $jsonData = (object) array(
             '$schema' => 'http://puli.io/schema/2.0/manager/module',
             'name' => 'my/application',
-            'path-mappings' => (object) array(
+            'resources' => (object) array(
                 '/app' => 'res',
             ),
             'bindings' => (object) array(
@@ -177,7 +177,7 @@ class ModuleFileConverterTest extends PHPUnit_Framework_TestCase
 
         $jsonData = (object) array(
             '$schema' => 'http://puli.io/schema/2.0/manager/module',
-            'path-mappings' => (object) array(
+            'resources' => (object) array(
                 '/vendor/a' => 'foo',
                 '/vendor/b' => 'foo',
                 '/vendor/c' => 'foo',
@@ -428,7 +428,7 @@ class ModuleFileConverterTest extends PHPUnit_Framework_TestCase
 
         $jsonData = (object) array(
             '$schema' => 'http://puli.io/schema/2.0/manager/module',
-            'path-mappings' => (object) array(
+            'resources' => (object) array(
                 '/app' => array('res', 'assets'),
             ),
         );
@@ -456,7 +456,7 @@ class ModuleFileConverterTest extends PHPUnit_Framework_TestCase
     {
         $jsonData = (object) array(
             'name' => 'my/application',
-            'path-mappings' => (object) array(
+            'resources' => (object) array(
                 '/app' => 'res',
             ),
             'bindings' => (object) array(

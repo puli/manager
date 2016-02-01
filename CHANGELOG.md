@@ -14,6 +14,7 @@ Changelog
    `ConfigFileConverter`
  * replaced `ConfigFileStorage` and `ModuleFileStorage` by `JsonStorage`
  * renamed `Puli` to `Container`
+ * renamed puli.json key "path-mappings" to "resources"
 
 * 1.0.0-beta10 (2016-01-14)
 

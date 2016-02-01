@@ -42,6 +42,11 @@ class ModuleFile10To20Migration implements JsonMigration
             $data->modules = $data->packages;
             unset($data->packages);
         }
+
+        if (isset($data->{'path-mappings'})) {
+            $data->resources = $data->{'path-mappings'};
+            unset($data->{'path-mappings'});
+        }
     }
 
     public function down(stdClass $data)
@@ -53,6 +58,11 @@ class ModuleFile10To20Migration implements JsonMigration
         if (isset($data->modules)) {
             $data->packages = $data->modules;
             unset($data->modules);
+        }
+
+        if (isset($data->resources)) {
+            $data->{'path-mappings'} = $data->resources;
+            unset($data->resources);
         }
     }
 }

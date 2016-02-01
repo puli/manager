@@ -52,7 +52,7 @@ class ModuleFileConverter implements JsonConverter
     private static $keyOrder = array(
         '$schema',
         'name',
-        'path-mappings',
+        'resources',
         'bindings',
         'binding-types',
         'override',
@@ -128,13 +128,13 @@ class ModuleFileConverter implements JsonConverter
         }
 
         if (count($mappings) > 0) {
-            $jsonData->{'path-mappings'} = new stdClass();
+            $jsonData->resources = new stdClass();
 
             foreach ($mappings as $mapping) {
                 $puliPath = $mapping->getRepositoryPath();
                 $localPaths = $mapping->getPathReferences();
 
-                $jsonData->{'path-mappings'}->$puliPath = count($localPaths) > 1 ? $localPaths : reset($localPaths);
+                $jsonData->resources->$puliPath = count($localPaths) > 1 ? $localPaths : reset($localPaths);
             }
         }
 
@@ -233,8 +233,8 @@ class ModuleFileConverter implements JsonConverter
             $moduleFile->setModuleName($jsonData->name);
         }
 
-        if (isset($jsonData->{'path-mappings'})) {
-            foreach ($jsonData->{'path-mappings'} as $path => $relativePaths) {
+        if (isset($jsonData->resources)) {
+            foreach ($jsonData->resources as $path => $relativePaths) {
                 $moduleFile->addPathMapping(new PathMapping($path, (array) $relativePaths));
             }
         }
