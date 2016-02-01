@@ -17,8 +17,8 @@ use PHPUnit_Framework_TestCase;
 use Puli\Manager\Api\Installer\InstallerDescriptor;
 use Puli\Manager\Api\Installer\InstallerParameter;
 use Puli\Manager\Api\Module\Module;
-use Puli\Manager\Api\Module\ModuleCollection;
 use Puli\Manager\Api\Module\ModuleFile;
+use Puli\Manager\Api\Module\ModuleList;
 use Puli\Manager\Api\Module\RootModule;
 use Puli\Manager\Api\Module\RootModuleFile;
 use Puli\Manager\Api\Module\RootModuleFileManager;
@@ -69,7 +69,7 @@ class ModuleFileInstallerManagerUnloadedTest extends PHPUnit_Framework_TestCase
     protected $module3;
 
     /**
-     * @var ModuleCollection
+     * @var ModuleList
      */
     protected $modules;
 
@@ -93,7 +93,7 @@ class ModuleFileInstallerManagerUnloadedTest extends PHPUnit_Framework_TestCase
         $this->module1 = new Module($this->moduleFile1, '/path');
         $this->module2 = new Module($this->moduleFile2, '/path');
         $this->module3 = new Module(null, '/path', null, array(new Exception()));
-        $this->modules = new ModuleCollection(array(
+        $this->modules = new ModuleList(array(
             $this->rootModule,
             $this->module1,
             $this->module2,

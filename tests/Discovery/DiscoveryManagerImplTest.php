@@ -22,12 +22,12 @@ use Puli\Manager\Api\Discovery\BindingTypeDescriptor;
 use Puli\Manager\Api\Discovery\DiscoveryManager;
 use Puli\Manager\Api\Module\InstallInfo;
 use Puli\Manager\Api\Module\Module;
-use Puli\Manager\Api\Module\ModuleCollection;
 use Puli\Manager\Api\Module\ModuleFile;
+use Puli\Manager\Api\Module\ModuleList;
 use Puli\Manager\Api\Module\RootModule;
 use Puli\Manager\Api\Module\RootModuleFile;
 use Puli\Manager\Discovery\DiscoveryManagerImpl;
-use Puli\Manager\Module\ModuleFileStorage;
+use Puli\Manager\Json\JsonStorage;
 use Puli\Manager\Tests\Discovery\Fixtures\Bar;
 use Puli\Manager\Tests\Discovery\Fixtures\Baz;
 use Puli\Manager\Tests\Discovery\Fixtures\Foo;
@@ -98,14 +98,14 @@ class DiscoveryManagerImplTest extends ManagerTestCase
     private $installInfo3;
 
     /**
-     * @var ModuleCollection
+     * @var ModuleList
      */
     private $modules;
 
     /**
-     * @var PHPUnit_Framework_MockObject_MockObject|ModuleFileStorage
+     * @var PHPUnit_Framework_MockObject_MockObject|JsonStorage
      */
-    private $moduleFileStorage;
+    private $jsonStorage;
 
     /**
      * @var PHPUnit_Framework_MockObject_MockObject|LoggerInterface
@@ -136,11 +136,11 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->installInfo2 = new InstallInfo('vendor/module2', $this->moduleDir2);
         $this->installInfo3 = new InstallInfo('vendor/module3', $this->moduleDir3);
 
-        $this->modules = new ModuleCollection();
+        $this->modules = new ModuleList();
 
         $this->logger = $this->getMock('Psr\Log\LoggerInterface');
 
-        $this->moduleFileStorage = $this->getMockBuilder('Puli\Manager\Module\ModuleFileStorage')
+        $this->jsonStorage = $this->getMockBuilder('Puli\Manager\Json\JsonStorage')
             ->disableOriginalConstructor()
             ->getMock();
 
@@ -175,7 +175,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->modules->add(new RootModule($this->rootModuleFile, $this->rootDir));
         $this->modules->add(new Module(null, $this->moduleDir1, $this->installInfo1));
 
-        $this->manager = new DiscoveryManagerImpl($this->context, $this->discovery, $this->modules, $this->moduleFileStorage, $this->logger);
+        $this->manager = new DiscoveryManagerImpl($this->context, $this->discovery, $this->modules, $this->jsonStorage, $this->logger);
 
         $this->assertEmpty($this->manager->getBindingDescriptors());
         $this->assertEmpty($this->manager->getTypeDescriptors());
@@ -191,7 +191,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
             ->method('addBindingType')
             ->with($typeDescriptor->getType());
 
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveRootModuleFile')
             ->with($this->rootModuleFile)
             ->will($this->returnCallback(function (RootModuleFile $rootModuleFile) use ($typeDescriptor) {
@@ -219,7 +219,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->discovery->expects($this->never())
             ->method('addBindingType');
 
-        $this->moduleFileStorage->expects($this->never())
+        $this->jsonStorage->expects($this->never())
             ->method('saveRootModuleFile');
 
         $this->manager->addRootTypeDescriptor($typeDescriptor);
@@ -245,7 +245,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
             ->method('removeBindingType')
             ->with(Foo::clazz);
 
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveRootModuleFile')
             ->with($this->rootModuleFile)
             ->will($this->returnCallback(function (RootModuleFile $rootModuleFile) use ($typeDescriptor2) {
@@ -279,7 +279,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
             ->method('addBinding')
             ->with($binding);
 
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveRootModuleFile')
             ->with($this->rootModuleFile)
             ->will($this->returnCallback(function (RootModuleFile $rootModuleFile) use ($typeDescriptor) {
@@ -309,7 +309,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
             ->method('removeBindingType')
             ->with(Foo::clazz);
 
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveRootModuleFile')
             ->with($this->rootModuleFile)
             ->willThrowException(new TestException('Some exception'));
@@ -338,7 +338,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
             ->method('removeBindingType')
             ->with(Foo::clazz);
 
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveRootModuleFile')
             ->with($this->rootModuleFile)
             ->will($this->returnCallback(function (RootModuleFile $rootModuleFile) {
@@ -359,7 +359,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->discovery->expects($this->never())
             ->method('removeBindingType');
 
-        $this->moduleFileStorage->expects($this->never())
+        $this->jsonStorage->expects($this->never())
             ->method('saveRootModuleFile');
 
         $this->manager->removeRootTypeDescriptor(Foo::clazz);
@@ -376,7 +376,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->discovery->expects($this->never())
             ->method('removeBindingType');
 
-        $this->moduleFileStorage->expects($this->never())
+        $this->jsonStorage->expects($this->never())
             ->method('saveRootModuleFile');
 
         $this->manager->removeRootTypeDescriptor(Foo::clazz);
@@ -400,7 +400,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->discovery->expects($this->never())
             ->method('removeBindingType');
 
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveRootModuleFile')
             ->with($this->rootModuleFile)
             ->will($this->returnCallback(function (RootModuleFile $rootModuleFile) {
@@ -431,7 +431,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->discovery->expects($this->never())
             ->method('removeBindingType');
 
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveRootModuleFile')
             ->with($this->rootModuleFile)
             ->will($this->returnCallback(function (RootModuleFile $rootModuleFile) {
@@ -465,7 +465,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
             ->method('removeBinding')
             ->with($binding->getUuid());
 
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveRootModuleFile')
             ->with($this->rootModuleFile)
             ->will($this->returnCallback(function (RootModuleFile $rootModuleFile) {
@@ -499,7 +499,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
             ->method('addBinding')
             ->with($binding);
 
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveRootModuleFile')
             ->with($this->rootModuleFile)
             ->will($this->returnCallback(function (RootModuleFile $rootModuleFile) use ($typeDescriptor1) {
@@ -532,7 +532,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->discovery->expects($this->never())
             ->method('addBinding');
 
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveRootModuleFile')
             ->with($this->rootModuleFile)
             ->will($this->returnCallback(function (RootModuleFile $rootModuleFile) use ($typeDescriptor1) {
@@ -564,7 +564,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->discovery->expects($this->never())
             ->method('removeBindingType');
 
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveRootModuleFile')
             ->with($this->rootModuleFile)
             ->will($this->returnCallback(function (RootModuleFile $rootModuleFile) {
@@ -593,7 +593,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->discovery->expects($this->never())
             ->method('removeBindingType');
 
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveRootModuleFile')
             ->with($this->rootModuleFile)
             ->will($this->returnCallback(function (RootModuleFile $rootModuleFile) {
@@ -621,7 +621,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
             ->method('addBindingType')
             ->with($type);
 
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveRootModuleFile')
             ->with($this->rootModuleFile)
             ->willThrowException(new TestException('Some exception'));
@@ -657,7 +657,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
             ->method('removeBindingType')
             ->with(Bar::clazz);
 
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveRootModuleFile')
             ->with($this->rootModuleFile)
             ->will($this->returnCallback(function (RootModuleFile $rootModuleFile) use ($typeDescriptor3) {
@@ -701,7 +701,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
             ->method('removeBinding')
             ->with($bindingDescriptor2->getUuid());
 
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveRootModuleFile')
             ->with($this->rootModuleFile)
             ->will($this->returnCallback(function (RootModuleFile $rootModuleFile) {
@@ -737,7 +737,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
             ->method('addBindingType')
             ->with($type1);
 
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveRootModuleFile')
             ->with($this->rootModuleFile)
             ->willThrowException(new TestException('Some exception'));
@@ -774,7 +774,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
             ->method('removeBindingType')
             ->with(Bar::clazz);
 
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveRootModuleFile')
             ->with($this->rootModuleFile)
             ->will($this->returnCallback(function (RootModuleFile $rootModuleFile) {
@@ -1041,7 +1041,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
             ->method('addBinding')
             ->with($binding);
 
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveRootModuleFile')
             ->with($this->rootModuleFile)
             ->will($this->returnCallback(function (RootModuleFile $rootModuleFile) use ($bindingDescriptor) {
@@ -1070,7 +1070,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->discovery->expects($this->never())
             ->method('addBinding');
 
-        $this->moduleFileStorage->expects($this->never())
+        $this->jsonStorage->expects($this->never())
             ->method('saveRootModuleFile');
 
         $this->manager->addRootBindingDescriptor($bindingDescriptor1);
@@ -1092,7 +1092,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->discovery->expects($this->never())
             ->method('addBinding');
 
-        $this->moduleFileStorage->expects($this->never())
+        $this->jsonStorage->expects($this->never())
             ->method('saveRootModuleFile');
 
         $this->manager->addRootBindingDescriptor($bindingDescriptor1);
@@ -1120,7 +1120,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
             ->method('addBinding')
             ->with($binding2);
 
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveRootModuleFile')
             ->with($this->rootModuleFile)
             ->will($this->returnCallback(function (RootModuleFile $rootModuleFile) use ($bindingDescriptor2) {
@@ -1156,7 +1156,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->discovery->expects($this->never())
             ->method('addBinding');
 
-        $this->moduleFileStorage->expects($this->never())
+        $this->jsonStorage->expects($this->never())
             ->method('saveRootModuleFile');
 
         $this->manager->addRootBindingDescriptor($bindingDescriptor2, DiscoveryManager::OVERRIDE);
@@ -1172,7 +1172,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->discovery->expects($this->never())
             ->method('addBinding');
 
-        $this->moduleFileStorage->expects($this->never())
+        $this->jsonStorage->expects($this->never())
             ->method('saveRootModuleFile');
 
         $this->manager->addRootBindingDescriptor(new BindingDescriptor(new ResourceBinding('/path', Foo::clazz)));
@@ -1188,7 +1188,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->discovery->expects($this->never())
             ->method('addBinding');
 
-        $this->moduleFileStorage->expects($this->never())
+        $this->jsonStorage->expects($this->never())
             ->method('saveRootModuleFile');
 
         $this->manager->addRootBindingDescriptor(new BindingDescriptor(new ResourceBinding('/path', Foo::clazz)), DiscoveryManager::IGNORE_TYPE_NOT_ENABLED);
@@ -1205,7 +1205,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->discovery->expects($this->never())
             ->method('addBinding');
 
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveRootModuleFile')
             ->with($this->rootModuleFile)
             ->will($this->returnCallback(function (RootModuleFile $rootModuleFile) use ($bindingDescriptor) {
@@ -1231,7 +1231,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->discovery->expects($this->never())
             ->method('addBinding');
 
-        $this->moduleFileStorage->expects($this->never())
+        $this->jsonStorage->expects($this->never())
             ->method('saveRootModuleFile');
 
         $this->manager->addRootBindingDescriptor(new BindingDescriptor(new ResourceBinding('/path', Foo::clazz)));
@@ -1250,7 +1250,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->discovery->expects($this->never())
             ->method('addBinding');
 
-        $this->moduleFileStorage->expects($this->never())
+        $this->jsonStorage->expects($this->never())
             ->method('saveRootModuleFile');
 
         $this->manager->addRootBindingDescriptor(new BindingDescriptor(new ResourceBinding('/path', Foo::clazz)), DiscoveryManager::IGNORE_TYPE_NOT_FOUND);
@@ -1269,7 +1269,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->discovery->expects($this->never())
             ->method('addBinding');
 
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveRootModuleFile')
             ->with($this->rootModuleFile)
             ->will($this->returnCallback(function (RootModuleFile $rootModuleFile) use ($bindingDescriptor) {
@@ -1298,7 +1298,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->discovery->expects($this->never())
             ->method('addBinding');
 
-        $this->moduleFileStorage->expects($this->never())
+        $this->jsonStorage->expects($this->never())
             ->method('saveRootModuleFile');
 
         $this->manager->addRootBindingDescriptor(new BindingDescriptor(new ResourceBinding('/path', Foo::clazz)));
@@ -1324,7 +1324,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
             ->method('removeBinding')
             ->with($binding->getUuid());
 
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveRootModuleFile')
             ->with($this->rootModuleFile)
             ->willThrowException(new TestException('Some exception'));
@@ -1353,7 +1353,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
             ->method('removeBinding')
             ->with($binding->getUuid());
 
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveRootModuleFile')
             ->with($this->rootModuleFile)
             ->will($this->returnCallback(function (RootModuleFile $rootModuleFile) {
@@ -1374,7 +1374,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->discovery->expects($this->never())
             ->method('removeBinding');
 
-        $this->moduleFileStorage->expects($this->never())
+        $this->jsonStorage->expects($this->never())
             ->method('saveRootModuleFile');
 
         $this->manager->removeRootBindingDescriptor(Uuid::uuid4());
@@ -1393,7 +1393,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->discovery->expects($this->never())
             ->method('removeBinding');
 
-        $this->moduleFileStorage->expects($this->never())
+        $this->jsonStorage->expects($this->never())
             ->method('saveRootModuleFile');
 
         $this->manager->removeRootBindingDescriptor($binding->getUuid());
@@ -1413,7 +1413,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->discovery->expects($this->never())
             ->method('removeBinding');
 
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveRootModuleFile')
             ->with($this->rootModuleFile)
             ->will($this->returnCallback(function (RootModuleFile $rootModuleFile) {
@@ -1439,7 +1439,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->discovery->expects($this->never())
             ->method('removeBinding');
 
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveRootModuleFile')
             ->with($this->rootModuleFile)
             ->will($this->returnCallback(function (RootModuleFile $rootModuleFile) {
@@ -1469,7 +1469,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
             ->method('addBinding')
             ->with($binding);
 
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveRootModuleFile')
             ->with($this->rootModuleFile)
             ->willThrowException(new TestException('Some exception'));
@@ -1505,7 +1505,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
             ->method('removeBinding')
             ->with($binding2->getUuid());
 
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveRootModuleFile')
             ->with($this->rootModuleFile)
             ->will($this->returnCallback(function (RootModuleFile $rootModuleFile) use ($bindingDescriptor3) {
@@ -1546,7 +1546,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
             ->method('addBinding')
             ->with($binding1);
 
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveRootModuleFile')
             ->with($this->rootModuleFile)
             ->willThrowException(new TestException('Some exception'));
@@ -1583,7 +1583,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
             ->method('removeBinding')
             ->with($binding2->getUuid());
 
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveRootModuleFile')
             ->with($this->rootModuleFile)
             ->will($this->returnCallback(function (RootModuleFile $rootModuleFile) {
@@ -1671,7 +1671,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
             ->method('addBinding')
             ->with($binding);
 
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveRootModuleFile')
             ->with($this->rootModuleFile)
             ->will($this->returnCallback(function (RootModuleFile $rootModuleFile) use ($binding) {
@@ -1698,7 +1698,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->discovery->expects($this->never())
             ->method('addBinding');
 
-        $this->moduleFileStorage->expects($this->never())
+        $this->jsonStorage->expects($this->never())
             ->method('saveRootModuleFile');
 
         $this->manager->enableBindingDescriptor($binding->getUuid());
@@ -1717,7 +1717,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->discovery->expects($this->never())
             ->method('addBinding');
 
-        $this->moduleFileStorage->expects($this->never())
+        $this->jsonStorage->expects($this->never())
             ->method('saveRootModuleFile');
 
         $this->manager->enableBindingDescriptor(Uuid::fromString('8546da2c-dfec-48be-8cd3-93798c41b72f'));
@@ -1738,7 +1738,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->discovery->expects($this->never())
             ->method('addBinding');
 
-        $this->moduleFileStorage->expects($this->never())
+        $this->jsonStorage->expects($this->never())
             ->method('saveRootModuleFile');
 
         $this->manager->enableBindingDescriptor($binding->getUuid());
@@ -1758,7 +1758,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->discovery->expects($this->never())
             ->method('addBinding');
 
-        $this->moduleFileStorage->expects($this->never())
+        $this->jsonStorage->expects($this->never())
             ->method('saveRootModuleFile');
 
         $this->manager->enableBindingDescriptor($binding->getUuid());
@@ -1780,7 +1780,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->discovery->expects($this->never())
             ->method('addBinding');
 
-        $this->moduleFileStorage->expects($this->never())
+        $this->jsonStorage->expects($this->never())
             ->method('saveRootModuleFile');
 
         $this->manager->enableBindingDescriptor($binding->getUuid());
@@ -1805,7 +1805,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
             ->method('removeBinding')
             ->with($binding->getUuid());
 
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveRootModuleFile')
             ->with($this->rootModuleFile)
             ->willThrowException(new TestException('Some exception'));
@@ -1837,7 +1837,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
             ->method('removeBinding')
             ->with($binding->getUuid());
 
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveRootModuleFile')
             ->with($this->rootModuleFile)
             ->willThrowException(new TestException('Some exception'));
@@ -1864,7 +1864,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
             ->method('removeBinding')
             ->with($binding->getUuid());
 
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveRootModuleFile')
             ->with($this->rootModuleFile)
             ->will($this->returnCallback(function (RootModuleFile $rootModuleFile) use ($binding) {
@@ -1892,7 +1892,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->discovery->expects($this->never())
             ->method('removeBinding');
 
-        $this->moduleFileStorage->expects($this->never())
+        $this->jsonStorage->expects($this->never())
             ->method('saveRootModuleFile');
 
         $this->manager->disableBindingDescriptor($binding->getUuid());
@@ -1911,7 +1911,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->discovery->expects($this->never())
             ->method('removeBinding');
 
-        $this->moduleFileStorage->expects($this->never())
+        $this->jsonStorage->expects($this->never())
             ->method('saveRootModuleFile');
 
         $this->manager->disableBindingDescriptor(Uuid::fromString('8546da2c-dfec-48be-8cd3-93798c41b72f'));
@@ -1932,7 +1932,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->discovery->expects($this->never())
             ->method('removeBinding');
 
-        $this->moduleFileStorage->expects($this->never())
+        $this->jsonStorage->expects($this->never())
             ->method('saveRootModuleFile');
 
         $this->manager->disableBindingDescriptor($binding->getUuid());
@@ -1952,7 +1952,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->discovery->expects($this->never())
             ->method('removeBinding');
 
-        $this->moduleFileStorage->expects($this->never())
+        $this->jsonStorage->expects($this->never())
             ->method('saveRootModuleFile');
 
         $this->manager->disableBindingDescriptor($binding->getUuid());
@@ -1974,7 +1974,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->discovery->expects($this->never())
             ->method('removeBinding');
 
-        $this->moduleFileStorage->expects($this->never())
+        $this->jsonStorage->expects($this->never())
             ->method('saveRootModuleFile');
 
         $this->manager->disableBindingDescriptor($binding->getUuid());
@@ -2000,7 +2000,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
             ->method('addBinding')
             ->with($binding);
 
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveRootModuleFile')
             ->with($this->rootModuleFile)
             ->willThrowException(new TestException('Some exception'));
@@ -2031,7 +2031,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
             ->method('addBinding')
             ->with($binding);
 
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveRootModuleFile')
             ->with($this->rootModuleFile)
             ->willThrowException(new TestException('Some exception'));
@@ -2057,7 +2057,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->installInfo1->addDisabledBindingUuid(Uuid::uuid4());
         $this->installInfo2->addDisabledBindingUuid(Uuid::uuid4());
 
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveRootModuleFile')
             ->with($this->rootModuleFile)
             ->will($this->returnCallback(function (RootModuleFile $rootModuleFile) use ($binding) {
@@ -2085,7 +2085,7 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->installInfo1->addDisabledBindingUuid($uuid1 = Uuid::uuid4());
         $this->installInfo2->addDisabledBindingUuid($uuid2 = Uuid::uuid4());
 
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveRootModuleFile')
             ->with($this->rootModuleFile)
             ->willThrowException(new TestException('Some exception'));
@@ -2391,6 +2391,6 @@ class DiscoveryManagerImplTest extends ManagerTestCase
         $this->modules->add(new Module($this->moduleFile2, $this->moduleDir2, $this->installInfo2));
         $this->modules->add(new Module($this->moduleFile3, $this->moduleDir3, $this->installInfo3));
 
-        $this->manager = new DiscoveryManagerImpl($this->context, $this->discovery, $this->modules, $this->moduleFileStorage, $this->logger);
+        $this->manager = new DiscoveryManagerImpl($this->context, $this->discovery, $this->modules, $this->jsonStorage, $this->logger);
     }
 }

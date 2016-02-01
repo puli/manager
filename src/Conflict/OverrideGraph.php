@@ -11,7 +11,7 @@
 
 namespace Puli\Manager\Conflict;
 
-use Puli\Manager\Api\Module\ModuleCollection;
+use Puli\Manager\Api\Module\ModuleList;
 use RuntimeException;
 
 /**
@@ -85,11 +85,11 @@ class OverrideGraph
     /**
      * Creates an override graph for the given modules.
      *
-     * @param ModuleCollection $modules The modules to load.
+     * @param ModuleList $modules The modules to load.
      *
      * @return static The created override graph.
      */
-    public static function forModules(ModuleCollection $modules)
+    public static function forModules(ModuleList $modules)
     {
         $graph = new static($modules->getModuleNames());
 

@@ -27,7 +27,7 @@ use Puli\Manager\Api\Discovery\NoSuchTypeException;
 use Puli\Manager\Api\Discovery\TypeNotEnabledException;
 use Puli\Manager\Api\Module\InstallInfo;
 use Puli\Manager\Api\Module\Module;
-use Puli\Manager\Api\Module\ModuleCollection;
+use Puli\Manager\Api\Module\ModuleList;
 use Puli\Manager\Api\Module\RootModule;
 use Puli\Manager\Api\Module\RootModuleFile;
 use Puli\Manager\Api\NonRootModuleExpectedException;
@@ -51,7 +51,7 @@ use Puli\Manager\Discovery\Type\RemoveTypeDescriptorFromModuleFile;
 use Puli\Manager\Discovery\Type\SyncTypeName;
 use Puli\Manager\Discovery\Type\UnloadTypeDescriptor;
 use Puli\Manager\Discovery\Type\UpdateDuplicateMarksForTypeName;
-use Puli\Manager\Module\ModuleFileStorage;
+use Puli\Manager\Json\JsonStorage;
 use Puli\Manager\Transaction\InterceptedOperation;
 use Puli\Manager\Transaction\Transaction;
 use Rhumsaa\Uuid\Uuid;
@@ -81,14 +81,14 @@ class DiscoveryManagerImpl implements DiscoveryManager
     private $discovery;
 
     /**
-     * @var ModuleCollection
+     * @var ModuleList
      */
     private $modules;
 
     /**
-     * @var ModuleFileStorage
+     * @var JsonStorage
      */
-    private $moduleFileStorage;
+    private $jsonStorage;
 
     /**
      * @var RootModule
@@ -115,21 +115,21 @@ class DiscoveryManagerImpl implements DiscoveryManager
      *
      * @param ProjectContext       $context
      * @param EditableDiscovery    $discovery
-     * @param ModuleCollection     $modules
-     * @param ModuleFileStorage    $moduleFileStorage
+     * @param ModuleList           $modules
+     * @param JsonStorage          $jsonStorage
      * @param LoggerInterface|null $logger
      */
     public function __construct(
         ProjectContext $context,
         EditableDiscovery $discovery,
-        ModuleCollection $modules,
-        ModuleFileStorage $moduleFileStorage,
+        ModuleList $modules,
+        JsonStorage $jsonStorage,
         LoggerInterface $logger = null
     ) {
         $this->context = $context;
         $this->discovery = $discovery;
         $this->modules = $modules;
-        $this->moduleFileStorage = $moduleFileStorage;
+        $this->jsonStorage = $jsonStorage;
         $this->rootModule = $modules->getRootModule();
         $this->rootModuleFile = $context->getRootModuleFile();
         $this->logger = $logger ?: new NullLogger();
@@ -987,7 +987,7 @@ class DiscoveryManagerImpl implements DiscoveryManager
 
     private function saveRootModuleFile()
     {
-        $this->moduleFileStorage->saveRootModuleFile($this->rootModuleFile);
+        $this->jsonStorage->saveRootModuleFile($this->rootModuleFile);
     }
 
     private function addTypeDescriptorToModuleFile(BindingTypeDescriptor $typeDescriptor)

@@ -20,7 +20,7 @@ use Puli\Manager\Api\Module\InstallInfo;
 use Puli\Manager\Api\Module\ModuleFile;
 use Puli\Manager\Api\Module\RootModuleFile;
 use Puli\Manager\Api\Module\UnsupportedVersionException;
-use Puli\Manager\Module\ModuleFileStorage;
+use Puli\Manager\Json\JsonStorage;
 use Puli\Manager\Module\ModuleManagerImpl;
 use Puli\Manager\Tests\ManagerTestCase;
 use Puli\Manager\Tests\TestException;
@@ -81,9 +81,9 @@ class ModuleManagerImplTest extends ManagerTestCase
     private $installInfo3;
 
     /**
-     * @var PHPUnit_Framework_MockObject_MockObject|ModuleFileStorage
+     * @var PHPUnit_Framework_MockObject_MockObject|JsonStorage
      */
-    private $moduleFileStorage;
+    private $jsonStorage;
 
     /**
      * @var ModuleManagerImpl
@@ -104,11 +104,11 @@ class ModuleManagerImplTest extends ManagerTestCase
         $this->installInfo2 = new InstallInfo('vendor/module2', '../module2');
         $this->installInfo3 = new InstallInfo('vendor/module3', '../module3');
 
-        $this->moduleFileStorage = $this->getMockBuilder('Puli\Manager\Module\ModuleFileStorage')
+        $this->jsonStorage = $this->getMockBuilder('Puli\Manager\Json\JsonStorage')
             ->disableOriginalConstructor()
             ->getMock();
 
-        $this->moduleFileStorage->expects($this->any())
+        $this->jsonStorage->expects($this->any())
             ->method('loadModuleFile')
             ->willReturnMap(array(
                 array($this->moduleDir1.'/puli.json', $this->moduleFile1),
@@ -130,11 +130,11 @@ class ModuleManagerImplTest extends ManagerTestCase
         $this->rootModuleFile->addInstallInfo($installInfo1 = new InstallInfo('vendor/module1', '../foo'));
         $this->rootModuleFile->addInstallInfo($installInfo2 = new InstallInfo('vendor/module2', $this->moduleDir2));
 
-        $manager = new ModuleManagerImpl($this->context, $this->moduleFileStorage);
+        $manager = new ModuleManagerImpl($this->context, $this->jsonStorage);
 
         $modules = $manager->getModules();
 
-        $this->assertInstanceOf('Puli\Manager\Api\Module\ModuleCollection', $modules);
+        $this->assertInstanceOf('Puli\Manager\Api\Module\ModuleList', $modules);
         $this->assertTrue($modules->contains('vendor/root'));
         $this->assertTrue($modules->contains('vendor/module1'));
         $this->assertTrue($modules->contains('vendor/module2'));
@@ -148,7 +148,7 @@ class ModuleManagerImplTest extends ManagerTestCase
 
         $installInfo1->setInstallerName('webmozart');
 
-        $manager = new ModuleManagerImpl($this->context, $this->moduleFileStorage);
+        $manager = new ModuleManagerImpl($this->context, $this->jsonStorage);
 
         $expr1 = Expr::method('isEnabled', Expr::same(true));
         $expr2 = Expr::method('getInstallInfo', Expr::method('getInstallerName', Expr::same('webmozart')));
@@ -156,32 +156,32 @@ class ModuleManagerImplTest extends ManagerTestCase
 
         $modules = $manager->findModules($expr1);
 
-        $this->assertInstanceOf('Puli\Manager\Api\Module\ModuleCollection', $modules);
+        $this->assertInstanceOf('Puli\Manager\Api\Module\ModuleList', $modules);
         $this->assertTrue($modules->contains('vendor/root'));
         $this->assertTrue($modules->contains('vendor/module2'));
         $this->assertCount(2, $modules);
 
         $modules = $manager->findModules($expr2);
 
-        $this->assertInstanceOf('Puli\Manager\Api\Module\ModuleCollection', $modules);
+        $this->assertInstanceOf('Puli\Manager\Api\Module\ModuleList', $modules);
         $this->assertTrue($modules->contains('vendor/module1'));
         $this->assertCount(1, $modules);
 
         $modules = $manager->findModules($expr3);
 
-        $this->assertInstanceOf('Puli\Manager\Api\Module\ModuleCollection', $modules);
+        $this->assertInstanceOf('Puli\Manager\Api\Module\ModuleList', $modules);
         $this->assertCount(0, $modules);
     }
 
     public function testGetModulesStoresNoModuleFileIfNotFound()
     {
-        $manager = new ModuleManagerImpl($this->context, $this->moduleFileStorage);
+        $manager = new ModuleManagerImpl($this->context, $this->jsonStorage);
 
         $this->rootModuleFile->addInstallInfo(new InstallInfo('vendor/module', $this->moduleDir1));
 
         $exception = new FileNotFoundException();
 
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('loadModuleFile')
             ->with($this->moduleDir1.'/puli.json')
             ->willThrowException($exception);
@@ -194,7 +194,7 @@ class ModuleManagerImplTest extends ManagerTestCase
 
     public function testGetModulesStoresExceptionIfModuleDirectoryNotFound()
     {
-        $manager = new ModuleManagerImpl($this->context, $this->moduleFileStorage);
+        $manager = new ModuleManagerImpl($this->context, $this->jsonStorage);
 
         $this->rootModuleFile->addInstallInfo(new InstallInfo('vendor/module', 'foobar'));
 
@@ -212,7 +212,7 @@ class ModuleManagerImplTest extends ManagerTestCase
     {
         $this->rootModuleFile->addInstallInfo(new InstallInfo('vendor/module', __DIR__.'/Fixtures/file'));
 
-        $manager = new ModuleManagerImpl($this->context, $this->moduleFileStorage);
+        $manager = new ModuleManagerImpl($this->context, $this->jsonStorage);
 
         $modules = $manager->getModules();
 
@@ -230,12 +230,12 @@ class ModuleManagerImplTest extends ManagerTestCase
 
         $exception = new UnsupportedVersionException();
 
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('loadModuleFile')
             ->with($this->moduleDir1.'/puli.json')
             ->willThrowException($exception);
 
-        $manager = new ModuleManagerImpl($this->context, $this->moduleFileStorage);
+        $manager = new ModuleManagerImpl($this->context, $this->jsonStorage);
 
         $modules = $manager->getModules();
 
@@ -249,12 +249,12 @@ class ModuleManagerImplTest extends ManagerTestCase
 
         $exception = new InvalidConfigException();
 
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('loadModuleFile')
             ->with($this->moduleDir1.'/puli.json')
             ->willThrowException($exception);
 
-        $manager = new ModuleManagerImpl($this->context, $this->moduleFileStorage);
+        $manager = new ModuleManagerImpl($this->context, $this->jsonStorage);
 
         $modules = $manager->getModules();
 
@@ -285,7 +285,7 @@ class ModuleManagerImplTest extends ManagerTestCase
     {
         $this->initDefaultManager();
 
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveRootModuleFile')
             ->with($this->rootModuleFile)
             ->will($this->returnCallback(function (RootModuleFile $rootModuleFile) {
@@ -304,7 +304,7 @@ class ModuleManagerImplTest extends ManagerTestCase
     {
         $this->initDefaultManager();
 
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveRootModuleFile')
             ->with($this->rootModuleFile)
             ->will($this->returnCallback(function (RootModuleFile $rootModuleFile) {
@@ -323,7 +323,7 @@ class ModuleManagerImplTest extends ManagerTestCase
     {
         $this->initDefaultManager();
 
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveRootModuleFile')
             ->with($this->rootModuleFile)
             ->will($this->returnCallback(function (RootModuleFile $rootModuleFile) {
@@ -345,7 +345,7 @@ class ModuleManagerImplTest extends ManagerTestCase
     {
         $this->initDefaultManager();
 
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveRootModuleFile')
             ->with($this->rootModuleFile)
             ->will($this->returnCallback(function (RootModuleFile $rootModuleFile) {
@@ -371,7 +371,7 @@ class ModuleManagerImplTest extends ManagerTestCase
     {
         $this->initDefaultManager();
 
-        $this->moduleFileStorage->expects($this->never())
+        $this->jsonStorage->expects($this->never())
             ->method('saveRootModuleFile');
 
         $this->manager->installModule($this->moduleDir3, 'module3');
@@ -381,7 +381,7 @@ class ModuleManagerImplTest extends ManagerTestCase
     {
         $this->initDefaultManager();
 
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveRootModuleFile')
             ->with($this->rootModuleFile)
             ->will($this->returnCallback(function (RootModuleFile $rootModuleFile) {
@@ -403,7 +403,7 @@ class ModuleManagerImplTest extends ManagerTestCase
     {
         $this->initDefaultManager();
 
-        $this->moduleFileStorage->expects($this->never())
+        $this->jsonStorage->expects($this->never())
             ->method('saveRootModuleFile');
 
         $this->manager->installModule($this->moduleDir2);
@@ -418,7 +418,7 @@ class ModuleManagerImplTest extends ManagerTestCase
 
         $this->moduleFile3->setModuleName('vendor/module2');
 
-        $this->moduleFileStorage->expects($this->never())
+        $this->jsonStorage->expects($this->never())
             ->method('saveRootModuleFile');
 
         $this->manager->installModule($this->moduleDir3);
@@ -455,7 +455,7 @@ class ModuleManagerImplTest extends ManagerTestCase
 
         $this->moduleFile3->setModuleName(null);
 
-        $this->moduleFileStorage->expects($this->never())
+        $this->jsonStorage->expects($this->never())
             ->method('saveRootModuleFile');
 
         $this->manager->installModule($this->moduleDir3);
@@ -467,10 +467,10 @@ class ModuleManagerImplTest extends ManagerTestCase
      */
     public function testInstallModuleFailsIfModuleNotLoadableAndCustomNameSet()
     {
-        $manager = new ModuleManagerImpl($this->context, $this->moduleFileStorage);
+        $manager = new ModuleManagerImpl($this->context, $this->jsonStorage);
         $e = new UnsupportedVersionException('The exception text.');
 
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('loadModuleFile')
             ->with(Path::normalize(__DIR__).'/Fixtures/version-too-high/puli.json')
             ->willThrowException($e);
@@ -482,7 +482,7 @@ class ModuleManagerImplTest extends ManagerTestCase
     {
         $this->initDefaultManager();
 
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveRootModuleFile')
             ->with($this->rootModuleFile)
             ->will($this->returnCallback(function (RootModuleFile $rootModuleFile) {
@@ -509,7 +509,7 @@ class ModuleManagerImplTest extends ManagerTestCase
     {
         $this->initDefaultManager();
 
-        $this->moduleFileStorage->expects($this->never())
+        $this->jsonStorage->expects($this->never())
             ->method('saveRootModuleFile');
 
         $this->manager->renameModule('vendor/root', 'vendor/root');
@@ -522,7 +522,7 @@ class ModuleManagerImplTest extends ManagerTestCase
     {
         $this->initDefaultManager();
 
-        $this->moduleFileStorage->expects($this->never())
+        $this->jsonStorage->expects($this->never())
             ->method('saveRootModuleFile');
 
         $this->manager->renameModule('vendor/root', 'vendor/module1');
@@ -532,7 +532,7 @@ class ModuleManagerImplTest extends ManagerTestCase
     {
         $this->initDefaultManager();
 
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveRootModuleFile')
             ->with($this->rootModuleFile)
             ->willThrowException(new TestException());
@@ -552,7 +552,7 @@ class ModuleManagerImplTest extends ManagerTestCase
     {
         $this->initDefaultManager();
 
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveRootModuleFile')
             ->with($this->rootModuleFile)
             ->will($this->returnCallback(function (RootModuleFile $rootModuleFile) {
@@ -589,7 +589,7 @@ class ModuleManagerImplTest extends ManagerTestCase
     {
         $this->initDefaultManager();
 
-        $this->moduleFileStorage->expects($this->never())
+        $this->jsonStorage->expects($this->never())
             ->method('saveRootModuleFile');
 
         $this->manager->renameModule('vendor/module1', 'vendor/module1');
@@ -602,7 +602,7 @@ class ModuleManagerImplTest extends ManagerTestCase
     {
         $this->initDefaultManager();
 
-        $this->moduleFileStorage->expects($this->never())
+        $this->jsonStorage->expects($this->never())
             ->method('saveRootModuleFile');
 
         $this->manager->renameModule('vendor/module1', 'vendor/root');
@@ -612,7 +612,7 @@ class ModuleManagerImplTest extends ManagerTestCase
     {
         $this->initDefaultManager();
 
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveRootModuleFile')
             ->with($this->rootModuleFile)
             ->willThrowException(new TestException());
@@ -635,7 +635,7 @@ class ModuleManagerImplTest extends ManagerTestCase
 
         $moduleDir = $this->moduleDir1;
 
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveRootModuleFile')
             ->with($this->rootModuleFile)
             ->will($this->returnCallback(function (RootModuleFile $rootModuleFile) use ($moduleDir) {
@@ -655,7 +655,7 @@ class ModuleManagerImplTest extends ManagerTestCase
     {
         $this->initDefaultManager();
 
-        $this->moduleFileStorage->expects($this->never())
+        $this->jsonStorage->expects($this->never())
             ->method('saveRootModuleFile');
 
         $this->manager->removeModule('foobar');
@@ -667,7 +667,7 @@ class ModuleManagerImplTest extends ManagerTestCase
 
         $this->manager->getModules();
 
-        $this->moduleFileStorage->expects($this->never())
+        $this->jsonStorage->expects($this->never())
             ->method('saveRootModuleFile');
 
         $this->rootModuleFile->removeInstallInfo('vendor/module1');
@@ -685,7 +685,7 @@ class ModuleManagerImplTest extends ManagerTestCase
     {
         $this->initDefaultManager();
 
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveRootModuleFile')
             ->willThrowException(new TestException());
 
@@ -706,7 +706,7 @@ class ModuleManagerImplTest extends ManagerTestCase
 
         $moduleDir = $this->moduleDir1;
 
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveRootModuleFile')
             ->with($this->rootModuleFile)
             ->will($this->returnCallback(function (RootModuleFile $rootModuleFile) use ($moduleDir) {
@@ -740,7 +740,7 @@ class ModuleManagerImplTest extends ManagerTestCase
     {
         $this->initDefaultManager();
 
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveRootModuleFile')
             ->willThrowException(new TestException());
 
@@ -764,7 +764,7 @@ class ModuleManagerImplTest extends ManagerTestCase
 
         $moduleDir = $this->moduleDir1;
 
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveRootModuleFile')
             ->with($this->rootModuleFile)
             ->will($this->returnCallback(function (RootModuleFile $rootModuleFile) use ($moduleDir) {
@@ -830,6 +830,6 @@ class ModuleManagerImplTest extends ManagerTestCase
         $this->rootModuleFile->addInstallInfo($this->installInfo1);
         $this->rootModuleFile->addInstallInfo($this->installInfo2);
 
-        $this->manager = new ModuleManagerImpl($this->context, $this->moduleFileStorage);
+        $this->manager = new ModuleManagerImpl($this->context, $this->jsonStorage);
     }
 }

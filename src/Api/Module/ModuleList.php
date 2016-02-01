@@ -23,7 +23,7 @@ use IteratorAggregate;
  *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class ModuleCollection implements IteratorAggregate, Countable, ArrayAccess
+class ModuleList implements IteratorAggregate, Countable, ArrayAccess
 {
     /**
      * @var RootModule

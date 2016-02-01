@@ -11,6 +11,7 @@
 
 namespace Puli\Manager\Tests\Module;
 
+use PHPUnit_Framework_MockObject_MockObject;
 use PHPUnit_Framework_TestCase;
 use Puli\Discovery\Api\Type\BindingParameter;
 use Puli\Discovery\Api\Type\BindingType;
@@ -28,6 +29,7 @@ use Puli\Manager\Tests\Discovery\Fixtures\Bar;
 use Puli\Manager\Tests\Discovery\Fixtures\Baz;
 use Puli\Manager\Tests\Discovery\Fixtures\Foo;
 use Rhumsaa\Uuid\Uuid;
+use Webmozart\Json\Versioning\JsonVersioner;
 
 /**
  * @since  1.0
@@ -50,6 +52,11 @@ class ModuleFileConverterTest extends PHPUnit_Framework_TestCase
     private $baseConfig;
 
     /**
+     * @var PHPUnit_Framework_MockObject_MockObject|JsonVersioner
+     */
+    private $versioner;
+
+    /**
      * @var ModuleFileConverter
      */
     private $converter;
@@ -57,7 +64,8 @@ class ModuleFileConverterTest extends PHPUnit_Framework_TestCase
     protected function setUp()
     {
         $this->baseConfig = new Config();
-        $this->converter = new ModuleFileConverter();
+        $this->versioner = $this->getMock('Webmozart\Json\Versioning\JsonVersioner');
+        $this->converter = new ModuleFileConverter($this->versioner);
     }
 
     public function testToJson()
@@ -84,6 +92,7 @@ class ModuleFileConverterTest extends PHPUnit_Framework_TestCase
         ));
 
         $jsonData = (object) array(
+            '$schema' => 'http://puli.io/schema/2.0/manager/module',
             'name' => 'my/application',
             'path-mappings' => (object) array(
                 '/app' => 'res',
@@ -146,6 +155,7 @@ class ModuleFileConverterTest extends PHPUnit_Framework_TestCase
         $moduleFile->addBindingDescriptor($bindingDescriptor);
 
         $jsonData = (object) array(
+            '$schema' => 'http://puli.io/schema/2.0/manager/module',
             'bindings' => (object) array(
                 self::BINDING_UUID1 => (object) array(
                     '_class' => 'Puli\Discovery\Binding\ResourceBinding',
@@ -166,6 +176,7 @@ class ModuleFileConverterTest extends PHPUnit_Framework_TestCase
         $moduleFile->addPathMapping(new PathMapping('/vendor/b', 'foo'));
 
         $jsonData = (object) array(
+            '$schema' => 'http://puli.io/schema/2.0/manager/module',
             'path-mappings' => (object) array(
                 '/vendor/a' => 'foo',
                 '/vendor/b' => 'foo',
@@ -184,6 +195,7 @@ class ModuleFileConverterTest extends PHPUnit_Framework_TestCase
         $moduleFile->addTypeDescriptor(new BindingTypeDescriptor(new BindingType(Bar::clazz)));
 
         $jsonData = (object) array(
+            '$schema' => 'http://puli.io/schema/2.0/manager/module',
             'binding-types' => (object) array(
                 Bar::clazz => (object) array(),
                 Baz::clazz => (object) array(),
@@ -206,6 +218,7 @@ class ModuleFileConverterTest extends PHPUnit_Framework_TestCase
         $moduleFile->addTypeDescriptor(new BindingTypeDescriptor($type));
 
         $jsonData = (object) array(
+            '$schema' => 'http://puli.io/schema/2.0/manager/module',
             'binding-types' => (object) array(
                 Foo::clazz => (object) array(
                     'parameters' => (object) array(
@@ -235,6 +248,7 @@ class ModuleFileConverterTest extends PHPUnit_Framework_TestCase
 
         // sort by UUID
         $jsonData = (object) array(
+            '$schema' => 'http://puli.io/schema/2.0/manager/module',
             'bindings' => (object) array(
                 self::BINDING_UUID1 => (object) array(
                     '_class' => 'Puli\Discovery\Binding\ResourceBinding',
@@ -274,6 +288,7 @@ class ModuleFileConverterTest extends PHPUnit_Framework_TestCase
         $moduleFile->addBindingDescriptor(new BindingDescriptor($binding));
 
         $jsonData = (object) array(
+            '$schema' => 'http://puli.io/schema/2.0/manager/module',
             'bindings' => (object) array(
                 self::BINDING_UUID1 => (object) array(
                     '_class' => 'Puli\Discovery\Binding\ResourceBinding',
@@ -299,6 +314,7 @@ class ModuleFileConverterTest extends PHPUnit_Framework_TestCase
         $moduleFile->addBindingDescriptor(new BindingDescriptor($binding));
 
         $jsonData = (object) array(
+            '$schema' => 'http://puli.io/schema/2.0/manager/module',
             'bindings' => (object) array(
                 self::BINDING_UUID1 => (object) array(
                     '_class' => 'Puli\Discovery\Binding\ResourceBinding',
@@ -319,6 +335,7 @@ class ModuleFileConverterTest extends PHPUnit_Framework_TestCase
         $moduleFile->addTypeDescriptor(new BindingTypeDescriptor(new BindingType(Foo::clazz)));
 
         $jsonData = (object) array(
+            '$schema' => 'http://puli.io/schema/2.0/manager/module',
             'binding-types' => (object) array(
                 Foo::clazz => (object) array(),
             ),
@@ -337,6 +354,7 @@ class ModuleFileConverterTest extends PHPUnit_Framework_TestCase
         $moduleFile->addTypeDescriptor(new BindingTypeDescriptor($type));
 
         $jsonData = (object) array(
+            '$schema' => 'http://puli.io/schema/2.0/manager/module',
             'binding-types' => (object) array(
                 Foo::clazz => (object) array(
                     'parameters' => (object) array(
@@ -363,6 +381,7 @@ class ModuleFileConverterTest extends PHPUnit_Framework_TestCase
         )));
 
         $jsonData = (object) array(
+            '$schema' => 'http://puli.io/schema/2.0/manager/module',
             'binding-types' => (object) array(
                 Foo::clazz => (object) array(
                     'parameters' => (object) array(
@@ -387,6 +406,7 @@ class ModuleFileConverterTest extends PHPUnit_Framework_TestCase
         $moduleFile->addTypeDescriptor(new BindingTypeDescriptor($type));
 
         $jsonData = (object) array(
+            '$schema' => 'http://puli.io/schema/2.0/manager/module',
             'binding-types' => (object) array(
                 Foo::clazz => (object) array(
                     'parameters' => (object) array(
@@ -407,6 +427,7 @@ class ModuleFileConverterTest extends PHPUnit_Framework_TestCase
         $moduleFile->addPathMapping(new PathMapping('/app', array('res', 'assets')));
 
         $jsonData = (object) array(
+            '$schema' => 'http://puli.io/schema/2.0/manager/module',
             'path-mappings' => (object) array(
                 '/app' => array('res', 'assets'),
             ),
@@ -421,6 +442,7 @@ class ModuleFileConverterTest extends PHPUnit_Framework_TestCase
         $moduleFile->setOverriddenModules(array('acme/blog1', 'acme/blog2'));
 
         $jsonData = (object) array(
+            '$schema' => 'http://puli.io/schema/2.0/manager/module',
             'override' => array(
                 'acme/blog1',
                 'acme/blog2',
@@ -469,6 +491,11 @@ class ModuleFileConverterTest extends PHPUnit_Framework_TestCase
             ),
         );
 
+        $this->versioner->expects($this->once())
+            ->method('parseVersion')
+            ->with($jsonData)
+            ->willReturn('2.0');
+
         $moduleFile = $this->converter->fromJson($jsonData, array(
             'path' => '/path',
         ));
@@ -483,6 +510,7 @@ class ModuleFileConverterTest extends PHPUnit_Framework_TestCase
         $this->assertInstanceOf('Puli\Manager\Api\Module\ModuleFile', $moduleFile);
         $this->assertNotInstanceOf('Puli\Manager\Api\Module\RootModuleFile', $moduleFile);
         $this->assertSame('/path', $moduleFile->getPath());
+        $this->assertSame('2.0', $moduleFile->getVersion());
         $this->assertSame('my/application', $moduleFile->getModuleName());
         $this->assertEquals(array('/app' => new PathMapping('/app', array('res'))), $moduleFile->getPathMappings());
         $this->assertEquals(array(new BindingDescriptor($resourceBinding), new BindingDescriptor($classBinding)), $moduleFile->getBindingDescriptors());
@@ -499,6 +527,10 @@ class ModuleFileConverterTest extends PHPUnit_Framework_TestCase
 
     public function testFromJsonEmptyPath()
     {
+        $this->versioner->expects($this->once())
+            ->method('parseVersion')
+            ->willReturn('2.0');
+
         $moduleFile = $this->converter->fromJson((object) array());
 
         $this->assertNull($moduleFile->getPath());
@@ -506,6 +538,10 @@ class ModuleFileConverterTest extends PHPUnit_Framework_TestCase
 
     public function testFromJsonMinimal()
     {
+        $this->versioner->expects($this->once())
+            ->method('parseVersion')
+            ->willReturn('2.0');
+
         $moduleFile = $this->converter->fromJson((object) array(), array(
             'path' => '/path',
         ));
@@ -513,6 +549,7 @@ class ModuleFileConverterTest extends PHPUnit_Framework_TestCase
         $this->assertInstanceOf('Puli\Manager\Api\Module\ModuleFile', $moduleFile);
         $this->assertNotInstanceOf('Puli\Manager\Api\Module\RootModuleFile', $moduleFile);
         $this->assertSame('/path', $moduleFile->getPath());
+        $this->assertSame('2.0', $moduleFile->getVersion());
         $this->assertNull($moduleFile->getModuleName());
         $this->assertSame(array(), $moduleFile->getPathMappings());
         $this->assertSame(array(), $moduleFile->getBindingDescriptors());
@@ -532,6 +569,11 @@ class ModuleFileConverterTest extends PHPUnit_Framework_TestCase
                 ),
             ),
         );
+
+        $this->versioner->expects($this->once())
+            ->method('parseVersion')
+            ->with($jsonData)
+            ->willReturn('2.0');
 
         $moduleFile = $this->converter->fromJson($jsonData);
 
@@ -557,6 +599,11 @@ class ModuleFileConverterTest extends PHPUnit_Framework_TestCase
             ),
         );
 
+        $this->versioner->expects($this->once())
+            ->method('parseVersion')
+            ->with($jsonData)
+            ->willReturn('2.0');
+
         $moduleFile = $this->converter->fromJson($jsonData);
 
         $binding = new ResourceBinding('/path', Foo::clazz, array('param' => 'value'), 'glob', Uuid::fromString(self::BINDING_UUID1));
@@ -576,6 +623,11 @@ class ModuleFileConverterTest extends PHPUnit_Framework_TestCase
                 ),
             ),
         );
+
+        $this->versioner->expects($this->once())
+            ->method('parseVersion')
+            ->with($jsonData)
+            ->willReturn('2.0');
 
         $moduleFile = $this->converter->fromJson($jsonData);
 
@@ -597,6 +649,11 @@ class ModuleFileConverterTest extends PHPUnit_Framework_TestCase
             ),
         );
 
+        $this->versioner->expects($this->once())
+            ->method('parseVersion')
+            ->with($jsonData)
+            ->willReturn('2.0');
+
         $moduleFile = $this->converter->fromJson($jsonData);
 
         $binding = new ResourceBinding('/path', Foo::clazz, array(), 'glob', Uuid::fromString(self::BINDING_UUID1));
@@ -616,6 +673,11 @@ class ModuleFileConverterTest extends PHPUnit_Framework_TestCase
                 ),
             ),
         );
+
+        $this->versioner->expects($this->once())
+            ->method('parseVersion')
+            ->with($jsonData)
+            ->willReturn('2.0');
 
         $moduleFile = $this->converter->fromJson($jsonData);
 

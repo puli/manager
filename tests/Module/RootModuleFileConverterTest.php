@@ -11,6 +11,7 @@
 
 namespace Puli\Manager\Tests\Module;
 
+use PHPUnit_Framework_MockObject_MockObject;
 use PHPUnit_Framework_TestCase;
 use Puli\Discovery\Api\Type\BindingParameter;
 use Puli\Discovery\Api\Type\BindingType;
@@ -30,6 +31,7 @@ use Puli\Manager\Module\RootModuleFileConverter;
 use Puli\Manager\Tests\Discovery\Fixtures\Bar;
 use Puli\Manager\Tests\Discovery\Fixtures\Foo;
 use Rhumsaa\Uuid\Uuid;
+use Webmozart\Json\Versioning\JsonVersioner;
 
 /**
  * @since  1.0
@@ -50,6 +52,11 @@ class RootModuleFileConverterTest extends PHPUnit_Framework_TestCase
     private $baseConfig;
 
     /**
+     * @var PHPUnit_Framework_MockObject_MockObject|JsonVersioner
+     */
+    private $versioner;
+
+    /**
      * @var ModuleFileConverter
      */
     private $converter;
@@ -57,7 +64,8 @@ class RootModuleFileConverterTest extends PHPUnit_Framework_TestCase
     protected function setUp()
     {
         $this->baseConfig = new Config();
-        $this->converter = new RootModuleFileConverter();
+        $this->versioner = $this->getMock('Webmozart\Json\Versioning\JsonVersioner');
+        $this->converter = new RootModuleFileConverter($this->versioner);
     }
 
     public function testToJson()
@@ -106,6 +114,7 @@ class RootModuleFileConverterTest extends PHPUnit_Framework_TestCase
         ));
 
         $jsonData = (object) array(
+            '$schema' => 'http://puli.io/schema/2.0/manager/module',
             'name' => 'my/application',
             'path-mappings' => (object) array(
                 '/app' => 'res',
@@ -195,6 +204,7 @@ class RootModuleFileConverterTest extends PHPUnit_Framework_TestCase
         $moduleFile->addInstallInfo($installInfo3);
 
         $jsonData = (object) array(
+            '$schema' => 'http://puli.io/schema/2.0/manager/module',
             'modules' => (object) array(
                 'vendor/a' => (object) array(
                     'install-path' => '/path/to/module2',
@@ -219,6 +229,7 @@ class RootModuleFileConverterTest extends PHPUnit_Framework_TestCase
         $moduleFile->addPluginClass(__NAMESPACE__.'\PluginB');
 
         $jsonData = (object) array(
+            '$schema' => 'http://puli.io/schema/2.0/manager/module',
             'plugins' => array(
                 __NAMESPACE__.'\PluginA',
                 __NAMESPACE__.'\PluginB',
@@ -240,6 +251,7 @@ class RootModuleFileConverterTest extends PHPUnit_Framework_TestCase
         $moduleFile->addInstallInfo($installInfo);
 
         $jsonData = (object) array(
+            '$schema' => 'http://puli.io/schema/2.0/manager/module',
             'modules' => (object) array(
                 'vendor/module1' => (object) array(
                     'install-path' => '/path/to/module1',
@@ -260,7 +272,9 @@ class RootModuleFileConverterTest extends PHPUnit_Framework_TestCase
         $baseConfig = new Config();
         $moduleFile = new RootModuleFile(null, null, $baseConfig);
 
-        $this->assertEquals((object) array(), $this->converter->toJson($moduleFile));
+        $this->assertEquals((object) array(
+            '$schema' => 'http://puli.io/schema/2.0/manager/module',
+        ), $this->converter->toJson($moduleFile));
     }
 
     public function testToJsonDoesNotWriteBaseConfigValues()
@@ -269,7 +283,9 @@ class RootModuleFileConverterTest extends PHPUnit_Framework_TestCase
         $baseConfig->set(Config::PULI_DIR, 'puli-dir');
         $moduleFile = new RootModuleFile(null, null, $baseConfig);
 
-        $this->assertEquals((object) array(), $this->converter->toJson($moduleFile));
+        $this->assertEquals((object) array(
+            '$schema' => 'http://puli.io/schema/2.0/manager/module',
+        ), $this->converter->toJson($moduleFile));
     }
 
     public function testFromJson()
@@ -349,6 +365,11 @@ class RootModuleFileConverterTest extends PHPUnit_Framework_TestCase
             ),
         );
 
+        $this->versioner->expects($this->once())
+            ->method('parseVersion')
+            ->with($jsonData)
+            ->willReturn('2.0');
+
         $moduleFile = $this->converter->fromJson($jsonData, array(
             'path' => '/path',
             'baseConfig' => $this->baseConfig,
@@ -372,6 +393,7 @@ class RootModuleFileConverterTest extends PHPUnit_Framework_TestCase
         $config = $moduleFile->getConfig();
 
         $this->assertSame('/path', $moduleFile->getPath());
+        $this->assertSame('2.0', $moduleFile->getVersion());
         $this->assertSame('my/application', $moduleFile->getModuleName());
         $this->assertEquals(array('/app' => new PathMapping('/app', array('res'))), $moduleFile->getPathMappings());
         $this->assertEquals(array(new BindingDescriptor($resourceBinding), new BindingDescriptor($classBinding)), $moduleFile->getBindingDescriptors());
@@ -395,6 +417,10 @@ class RootModuleFileConverterTest extends PHPUnit_Framework_TestCase
 
     public function testFromJsonWithEmptyPath()
     {
+        $this->versioner->expects($this->once())
+            ->method('parseVersion')
+            ->willReturn('2.0');
+
         $moduleFile = $this->converter->fromJson((object) array(), array(
             'baseConfig' => $this->baseConfig,
         ));
@@ -404,6 +430,10 @@ class RootModuleFileConverterTest extends PHPUnit_Framework_TestCase
 
     public function testFromJsonMinimal()
     {
+        $this->versioner->expects($this->once())
+            ->method('parseVersion')
+            ->willReturn('2.0');
+
         $moduleFile = $this->converter->fromJson((object) array(), array(
             'path' => '/path',
             'baseConfig' => $this->baseConfig,
@@ -411,6 +441,7 @@ class RootModuleFileConverterTest extends PHPUnit_Framework_TestCase
 
         $this->assertInstanceOf('Puli\Manager\Api\Module\RootModuleFile', $moduleFile);
         $this->assertSame('/path', $moduleFile->getPath());
+        $this->assertSame('2.0', $moduleFile->getVersion());
         $this->assertNull($moduleFile->getModuleName());
         $this->assertSame(array(), $moduleFile->getPathMappings());
         $this->assertSame(array(), $moduleFile->getBindingDescriptors());
@@ -420,6 +451,10 @@ class RootModuleFileConverterTest extends PHPUnit_Framework_TestCase
 
     public function testFromJsonInheritsBaseConfig()
     {
+        $this->versioner->expects($this->once())
+            ->method('parseVersion')
+            ->willReturn('2.0');
+
         $moduleFile = $this->converter->fromJson((object) array(), array(
             'baseConfig' => $this->baseConfig,
         ));

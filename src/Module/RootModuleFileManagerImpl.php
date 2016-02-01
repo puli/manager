@@ -17,6 +17,7 @@ use Puli\Manager\Api\Context\ProjectContext;
 use Puli\Manager\Api\Module\RootModuleFile;
 use Puli\Manager\Api\Module\RootModuleFileManager;
 use Puli\Manager\Config\AbstractConfigManager;
+use Puli\Manager\Json\JsonStorage;
 use ReflectionClass;
 use ReflectionException;
 use Webmozart\Expression\Expr;
@@ -45,21 +46,21 @@ class RootModuleFileManagerImpl extends AbstractConfigManager implements RootMod
     private $rootModuleFile;
 
     /**
-     * @var ModuleFileStorage
+     * @var JsonStorage
      */
-    private $moduleFileStorage;
+    private $jsonStorage;
 
     /**
      * Creates a new module file manager.
      *
-     * @param ProjectContext    $context           The project context
-     * @param ModuleFileStorage $moduleFileStorage The module file storage.
+     * @param ProjectContext $context     The project context
+     * @param JsonStorage    $jsonStorage The module file storage.
      */
-    public function __construct(ProjectContext $context, ModuleFileStorage $moduleFileStorage)
+    public function __construct(ProjectContext $context, JsonStorage $jsonStorage)
     {
         $this->context = $context;
         $this->rootModuleFile = $context->getRootModuleFile();
-        $this->moduleFileStorage = $moduleFileStorage;
+        $this->jsonStorage = $jsonStorage;
     }
 
     /**
@@ -108,7 +109,7 @@ class RootModuleFileManagerImpl extends AbstractConfigManager implements RootMod
         $this->rootModuleFile->setModuleName($moduleName);
 
         try {
-            $this->moduleFileStorage->saveRootModuleFile($this->rootModuleFile);
+            $this->jsonStorage->saveRootModuleFile($this->rootModuleFile);
         } catch (Exception $e) {
             $this->rootModuleFile->setModuleName($previousName);
 
@@ -133,7 +134,7 @@ class RootModuleFileManagerImpl extends AbstractConfigManager implements RootMod
         $this->rootModuleFile->addPluginClass($pluginClass);
 
         try {
-            $this->moduleFileStorage->saveRootModuleFile($this->rootModuleFile);
+            $this->jsonStorage->saveRootModuleFile($this->rootModuleFile);
         } catch (Exception $e) {
             $this->rootModuleFile->setPluginClasses($previousClasses);
 
@@ -155,7 +156,7 @@ class RootModuleFileManagerImpl extends AbstractConfigManager implements RootMod
         $this->rootModuleFile->removePluginClass($pluginClass);
 
         try {
-            $this->moduleFileStorage->saveRootModuleFile($this->rootModuleFile);
+            $this->jsonStorage->saveRootModuleFile($this->rootModuleFile);
         } catch (Exception $e) {
             $this->rootModuleFile->setPluginClasses($previousClasses);
 
@@ -183,7 +184,7 @@ class RootModuleFileManagerImpl extends AbstractConfigManager implements RootMod
         }
 
         try {
-            $this->moduleFileStorage->saveRootModuleFile($this->rootModuleFile);
+            $this->jsonStorage->saveRootModuleFile($this->rootModuleFile);
         } catch (Exception $e) {
             $this->rootModuleFile->setPluginClasses($previousClasses);
 
@@ -264,7 +265,7 @@ class RootModuleFileManagerImpl extends AbstractConfigManager implements RootMod
         $this->rootModuleFile->setExtraKey($key, $value);
 
         try {
-            $this->moduleFileStorage->saveRootModuleFile($this->rootModuleFile);
+            $this->jsonStorage->saveRootModuleFile($this->rootModuleFile);
         } catch (Exception $e) {
             if ($previouslySet) {
                 $this->rootModuleFile->setExtraKey($key, $previousValue);
@@ -301,7 +302,7 @@ class RootModuleFileManagerImpl extends AbstractConfigManager implements RootMod
         $this->rootModuleFile->setExtraKeys($values);
 
         try {
-            $this->moduleFileStorage->saveRootModuleFile($this->rootModuleFile);
+            $this->jsonStorage->saveRootModuleFile($this->rootModuleFile);
         } catch (Exception $e) {
             foreach ($values as $key => $value) {
                 if (isset($previouslyUnset[$key])) {
@@ -329,7 +330,7 @@ class RootModuleFileManagerImpl extends AbstractConfigManager implements RootMod
         $this->rootModuleFile->removeExtraKey($key);
 
         try {
-            $this->moduleFileStorage->saveRootModuleFile($this->rootModuleFile);
+            $this->jsonStorage->saveRootModuleFile($this->rootModuleFile);
         } catch (Exception $e) {
             $this->rootModuleFile->setExtraKey($key, $previousValue);
 
@@ -357,7 +358,7 @@ class RootModuleFileManagerImpl extends AbstractConfigManager implements RootMod
         }
 
         try {
-            $this->moduleFileStorage->saveRootModuleFile($this->rootModuleFile);
+            $this->jsonStorage->saveRootModuleFile($this->rootModuleFile);
         } catch (Exception $e) {
             $this->rootModuleFile->setExtraKeys($previousValues);
 
@@ -379,7 +380,7 @@ class RootModuleFileManagerImpl extends AbstractConfigManager implements RootMod
         $this->rootModuleFile->clearExtraKeys();
 
         try {
-            $this->moduleFileStorage->saveRootModuleFile($this->rootModuleFile);
+            $this->jsonStorage->saveRootModuleFile($this->rootModuleFile);
         } catch (Exception $e) {
             $this->rootModuleFile->setExtraKeys($previousValues);
 
@@ -459,7 +460,7 @@ class RootModuleFileManagerImpl extends AbstractConfigManager implements RootMod
         $this->rootModuleFile->setVersion($targetVersion);
 
         try {
-            $this->moduleFileStorage->saveRootModuleFile($this->rootModuleFile);
+            $this->jsonStorage->saveRootModuleFile($this->rootModuleFile);
         } catch (Exception $e) {
             $this->rootModuleFile->setVersion($previousVersion);
 
@@ -472,7 +473,7 @@ class RootModuleFileManagerImpl extends AbstractConfigManager implements RootMod
      */
     protected function saveConfigFile()
     {
-        $this->moduleFileStorage->saveRootModuleFile($this->rootModuleFile);
+        $this->jsonStorage->saveRootModuleFile($this->rootModuleFile);
     }
 
     private function validatePluginClass($pluginClass)

@@ -13,8 +13,8 @@ namespace Puli\Manager\Tests\Conflict;
 
 use PHPUnit_Framework_TestCase;
 use Puli\Manager\Api\Module\Module;
-use Puli\Manager\Api\Module\ModuleCollection;
 use Puli\Manager\Api\Module\ModuleFile;
+use Puli\Manager\Api\Module\ModuleList;
 use Puli\Manager\Api\Module\RootModule;
 use Puli\Manager\Api\Module\RootModuleFile;
 use Puli\Manager\Conflict\OverrideGraph;
@@ -213,7 +213,7 @@ class OverrideGraphTest extends PHPUnit_Framework_TestCase
 
     public function testForModules()
     {
-        $modules = new ModuleCollection();
+        $modules = new ModuleList();
         $modules->add(new RootModule(new RootModuleFile('vendor/root'), __DIR__));
         $modules->add(new Module(new ModuleFile('vendor/module1'), __DIR__));
         $modules->add(new Module(new ModuleFile('vendor/module2'), __DIR__));
@@ -236,7 +236,7 @@ class OverrideGraphTest extends PHPUnit_Framework_TestCase
 
     public function testForModulesIgnoresModulesWithoutModuleFile()
     {
-        $modules = new ModuleCollection();
+        $modules = new ModuleList();
         $modules->add(new RootModule(new RootModuleFile('vendor/root'), __DIR__));
         $modules->add(new Module(null, __DIR__));
 

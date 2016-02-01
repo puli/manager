@@ -13,8 +13,8 @@ namespace Puli\Manager\Tests\Api\Module;
 
 use PHPUnit_Framework_TestCase;
 use Puli\Manager\Api\Module\Module;
-use Puli\Manager\Api\Module\ModuleCollection;
 use Puli\Manager\Api\Module\ModuleFile;
+use Puli\Manager\Api\Module\ModuleList;
 use Puli\Manager\Api\Module\RootModule;
 use Puli\Manager\Api\Module\RootModuleFile;
 
@@ -23,16 +23,16 @@ use Puli\Manager\Api\Module\RootModuleFile;
  *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class ModuleCollectionTest extends PHPUnit_Framework_TestCase
+class ModuleListTest extends PHPUnit_Framework_TestCase
 {
     /**
-     * @var ModuleCollection
+     * @var ModuleList
      */
     private $collection;
 
     protected function setUp()
     {
-        $this->collection = new ModuleCollection();
+        $this->collection = new ModuleList();
     }
 
     public function testGetModule()

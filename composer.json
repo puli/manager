@@ -1,6 +1,6 @@
 {
     "name": "puli/manager",
-    "description": "Generates Puli repositories from configured packages.",
+    "description": "Manages the puli.json file of a Puli project.",
     "homepage": "http://puli.io",
     "license": "MIT",
     "authors": [

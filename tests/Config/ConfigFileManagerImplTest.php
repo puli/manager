@@ -18,7 +18,7 @@ use Puli\Manager\Api\Config\Config;
 use Puli\Manager\Api\Config\ConfigFile;
 use Puli\Manager\Api\Context\Context;
 use Puli\Manager\Config\ConfigFileManagerImpl;
-use Puli\Manager\Config\ConfigFileStorage;
+use Puli\Manager\Json\JsonStorage;
 use Puli\Manager\Tests\TestException;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Webmozart\Expression\Expr;
@@ -56,9 +56,9 @@ class ConfigFileManagerImplTest extends PHPUnit_Framework_TestCase
     private $context;
 
     /**
-     * @var PHPUnit_Framework_MockObject_MockObject|ConfigFileStorage
+     * @var PHPUnit_Framework_MockObject_MockObject|JsonStorage
      */
-    private $configFileStorage;
+    private $jsonStorage;
 
     /**
      * @var ConfigFileManagerImpl
@@ -79,16 +79,16 @@ class ConfigFileManagerImplTest extends PHPUnit_Framework_TestCase
             $this->dispatcher
         );
 
-        $this->configFileStorage = $this->getMockBuilder('Puli\Manager\Config\ConfigFileStorage')
+        $this->jsonStorage = $this->getMockBuilder('Puli\Manager\Json\JsonStorage')
             ->disableOriginalConstructor()
             ->getMock();
 
-        $this->manager = new ConfigFileManagerImpl($this->context, $this->configFileStorage);
+        $this->manager = new ConfigFileManagerImpl($this->context, $this->jsonStorage);
     }
 
     public function testSetConfigKey()
     {
-        $this->configFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveConfigFile')
             ->with($this->configFile)
             ->will($this->returnCallback(function (ConfigFile $configFile) {
@@ -102,7 +102,7 @@ class ConfigFileManagerImplTest extends PHPUnit_Framework_TestCase
 
     public function testSetConfigKeyRevertsIfSavingNotPossible()
     {
-        $this->configFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveConfigFile')
             ->willThrowException(new TestException());
 
@@ -117,7 +117,7 @@ class ConfigFileManagerImplTest extends PHPUnit_Framework_TestCase
 
     public function testSetConfigKeyResetsToPreviousValueIfSavingNotPossible()
     {
-        $this->configFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveConfigFile')
             ->willThrowException(new TestException());
 
@@ -136,7 +136,7 @@ class ConfigFileManagerImplTest extends PHPUnit_Framework_TestCase
     {
         $this->configFile->getConfig()->set(Config::PULI_DIR, 'my-puli-dir');
 
-        $this->configFileStorage->expects($this->never())
+        $this->jsonStorage->expects($this->never())
             ->method('saveConfigFile');
 
         $this->manager->setConfigKey(Config::PULI_DIR, 'my-puli-dir');
@@ -144,7 +144,7 @@ class ConfigFileManagerImplTest extends PHPUnit_Framework_TestCase
 
     public function testSetConfigKeyAcceptsNewFalseValue()
     {
-        $this->configFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveConfigFile')
             ->with($this->configFile)
             ->will($this->returnCallback(function (ConfigFile $configFile) {
@@ -158,7 +158,7 @@ class ConfigFileManagerImplTest extends PHPUnit_Framework_TestCase
 
     public function testSetConfigKeyAcceptsNewNullValue()
     {
-        $this->configFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveConfigFile')
             ->with($this->configFile)
             ->will($this->returnCallback(function (ConfigFile $configFile) {
@@ -172,7 +172,7 @@ class ConfigFileManagerImplTest extends PHPUnit_Framework_TestCase
 
     public function testSetConfigKeys()
     {
-        $this->configFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveConfigFile')
             ->with($this->configFile)
             ->will($this->returnCallback(function (ConfigFile $configFile) {
@@ -190,7 +190,7 @@ class ConfigFileManagerImplTest extends PHPUnit_Framework_TestCase
 
     public function testSetConfigKeysRevertsIfSavingNotPossible()
     {
-        $this->configFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveConfigFile')
             ->willThrowException(new TestException());
 
@@ -472,7 +472,7 @@ class ConfigFileManagerImplTest extends PHPUnit_Framework_TestCase
         $this->configFile->getConfig()->set(Config::PULI_DIR, 'my-puli-dir');
         $this->configFile->getConfig()->set(Config::FACTORY_IN_FILE, 'MyServiceRegistry.php');
 
-        $this->configFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveConfigFile')
             ->with($this->configFile)
             ->will($this->returnCallback(function (ConfigFile $configFile) {
@@ -490,7 +490,7 @@ class ConfigFileManagerImplTest extends PHPUnit_Framework_TestCase
         $this->configFile->getConfig()->set(Config::PULI_DIR, 'my-puli-dir');
         $this->configFile->getConfig()->set(Config::FACTORY_IN_FILE, 'MyServiceRegistry.php');
 
-        $this->configFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveConfigFile')
             ->willThrowException(new TestException());
 
@@ -507,7 +507,7 @@ class ConfigFileManagerImplTest extends PHPUnit_Framework_TestCase
 
     public function testRemoveConfigKeyIgnoresUnsetValues()
     {
-        $this->configFileStorage->expects($this->never())
+        $this->jsonStorage->expects($this->never())
             ->method('saveConfigFile');
 
         $this->manager->removeConfigKey(Config::PULI_DIR);
@@ -518,7 +518,7 @@ class ConfigFileManagerImplTest extends PHPUnit_Framework_TestCase
         $this->configFile->getConfig()->set(Config::PULI_DIR, 'my-puli-dir');
         $this->configFile->getConfig()->set(Config::FACTORY_IN_FILE, 'MyServiceRegistry.php');
 
-        $this->configFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveConfigFile')
             ->with($this->configFile)
             ->will($this->returnCallback(function (ConfigFile $configFile) {
@@ -535,7 +535,7 @@ class ConfigFileManagerImplTest extends PHPUnit_Framework_TestCase
     {
         $this->configFile->getConfig()->set(Config::PULI_DIR, 'my-puli-dir');
 
-        $this->configFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveConfigFile')
             ->willThrowException(new TestException());
 
@@ -555,7 +555,7 @@ class ConfigFileManagerImplTest extends PHPUnit_Framework_TestCase
         $this->configFile->getConfig()->set(Config::PULI_DIR, 'my-puli-dir');
         $this->configFile->getConfig()->set(Config::FACTORY_IN_FILE, 'MyServiceRegistry.php');
 
-        $this->configFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveConfigFile')
             ->with($this->configFile)
             ->will($this->returnCallback(function (ConfigFile $configFile) {
@@ -572,7 +572,7 @@ class ConfigFileManagerImplTest extends PHPUnit_Framework_TestCase
     {
         $this->configFile->getConfig()->set(Config::PULI_DIR, 'my-puli-dir');
 
-        $this->configFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveConfigFile')
             ->willThrowException(new TestException());
 

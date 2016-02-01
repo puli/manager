@@ -9,9 +9,10 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\Manager\Module;
+namespace Puli\Manager\Json;
 
 use Puli\Manager\Api\Config\Config;
+use Puli\Manager\Api\Config\ConfigFile;
 use Puli\Manager\Api\Factory\FactoryManager;
 use Puli\Manager\Api\FileNotFoundException;
 use Puli\Manager\Api\InvalidConfigException;
@@ -22,20 +23,19 @@ use Puli\Manager\Api\Storage\Storage;
 use Puli\Manager\Api\Storage\WriteException;
 use stdClass;
 use Webmozart\Json\Conversion\ConversionFailedException;
-use Webmozart\Json\Conversion\JsonConverter;
 use Webmozart\Json\DecodingFailedException;
 use Webmozart\Json\EncodingFailedException;
 use Webmozart\Json\JsonDecoder;
 use Webmozart\Json\JsonEncoder;
 
 /**
- * Loads and saves module files.
+ * Loads and saves JSON files.
  *
  * @since  1.0
  *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class ModuleFileStorage
+class JsonStorage
 {
     /**
      * @var Storage
@@ -43,14 +43,9 @@ class ModuleFileStorage
     private $storage;
 
     /**
-     * @var JsonConverter
+     * @var JsonConverterProvider
      */
-    private $moduleFileConverter;
-
-    /**
-     * @var JsonConverter
-     */
-    private $rootModuleFileConverter;
+    private $converterProvider;
 
     /**
      * @var JsonEncoder
@@ -70,43 +65,71 @@ class ModuleFileStorage
     /**
      * Creates a new storage.
      *
-     * @param Storage             $storage                 The file storage.
-     * @param JsonConverter       $moduleFileConverter     The JSON converter for
-     *                                                     {@link ModuleFile}
-     *                                                     instances.
-     * @param JsonConverter       $rootModuleFileConverter The JSON converter
-     *                                                     for {@link RootModuleFile}
-     *                                                     instances.
-     * @param JsonEncoder         $jsonEncoder             The JSON encoder.
-     * @param JsonDecoder         $jsonDecoder             The JSON decoder.
-     * @param FactoryManager|null $factoryManager          The manager used to
-     *                                                     regenerate the factory
-     *                                                     class after saving
-     *                                                     the root module file.
+     * @param Storage               $storage           The file storage.
+     * @param JsonConverterProvider $converterProvider The provider for the JSON
+     *                                                 converters.
+     * @param JsonEncoder           $jsonEncoder       The JSON encoder.
+     * @param JsonDecoder           $jsonDecoder       The JSON decoder.
+     * @param FactoryManager|null   $factoryManager    The manager used to
+     *                                                 regenerate the factory
+     *                                                 class after saving a file.
      */
     public function __construct(
         Storage $storage,
-        JsonConverter $moduleFileConverter,
-        JsonConverter $rootModuleFileConverter,
+        JsonConverterProvider $converterProvider,
         JsonEncoder $jsonEncoder,
         JsonDecoder $jsonDecoder,
         FactoryManager $factoryManager = null
     ) {
         $this->storage = $storage;
-        $this->moduleFileConverter = $moduleFileConverter;
-        $this->rootModuleFileConverter = $rootModuleFileConverter;
+        $this->converterProvider = $converterProvider;
         $this->jsonEncoder = $jsonEncoder;
         $this->jsonDecoder = $jsonDecoder;
         $this->factoryManager = $factoryManager;
     }
 
     /**
+     * Loads a configuration file from a path.
+     *
+     * @param string      $path       The path to the configuration file.
+     * @param Config|null $baseConfig The configuration that the loaded
+     *                                configuration will inherit its values
+     *                                from.
+     *
+     * @return ConfigFile The loaded configuration file.
+     *
+     * @throws FileNotFoundException  If the file does not exist.
+     * @throws ReadException          If the file cannot be read.
+     * @throws InvalidConfigException If the file contains invalid configuration.
+     */
+    public function loadConfigFile($path, Config $baseConfig = null)
+    {
+        return $this->loadFile($path, 'Puli\Manager\Api\Config\ConfigFile', array(
+            'baseConfig' => $baseConfig,
+        ));
+    }
+
+    /**
+     * Saves a configuration file.
+     *
+     * The configuration file is saved to the same path that it was read from.
+     *
+     * @param ConfigFile $configFile The configuration file to save.
+     *
+     * @throws WriteException         If the file cannot be written.
+     * @throws InvalidConfigException If the file contains invalid configuration.
+     */
+    public function saveConfigFile(ConfigFile $configFile)
+    {
+        $this->saveFile($configFile, $configFile->getPath());
+
+        if ($this->factoryManager) {
+            $this->factoryManager->autoGenerateFactoryClass();
+        }
+    }
+
+    /**
      * Loads a module file from a file path.
-     *
-     * If the file does not exist, an empty configuration is returned.
-     *
-     * Loaded module files must have a module name set. If none is set, an
-     * exception is thrown.
      *
      * @param string $path The path to the module file.
      *
@@ -118,20 +141,7 @@ class ModuleFileStorage
      */
     public function loadModuleFile($path)
     {
-        $json = $this->storage->read($path);
-        $jsonData = $this->decode($json, $path);
-
-        try {
-            return $this->moduleFileConverter->fromJson($jsonData, array(
-                'path' => $path,
-            ));
-        } catch (ConversionFailedException $e) {
-            throw new InvalidConfigException(sprintf(
-                'The JSON in %s could not be converted: %s',
-                $path,
-                $e->getMessage()
-            ), 0, $e);
-        }
+        return $this->loadFile($path, 'Puli\Manager\Api\Module\ModuleFile');
     }
 
     /**
@@ -146,27 +156,13 @@ class ModuleFileStorage
      */
     public function saveModuleFile(ModuleFile $moduleFile)
     {
-        try {
-            $jsonData = $this->moduleFileConverter->toJson($moduleFile, array(
-                'targetVersion' => $moduleFile->getVersion(),
-            ));
-        } catch (ConversionFailedException $e) {
-            throw new InvalidConfigException(sprintf(
-                'The data written to %s could not be converted: %s',
-                $moduleFile->getPath(),
-                $e->getMessage()
-            ), 0, $e);
-        }
-
-        $json = $this->encode($jsonData, $moduleFile->getPath());
-
-        $this->storage->write($moduleFile->getPath(), $json);
+        $this->saveFile($moduleFile, $moduleFile->getPath(), array(
+            'targetVersion' => $moduleFile->getVersion(),
+        ));
     }
 
     /**
      * Loads a root module file from a file path.
-     *
-     * If the file does not exist, an empty configuration is returned.
      *
      * @param string $path       The path to the module configuration file.
      * @param Config $baseConfig The configuration that the module will inherit
@@ -180,21 +176,9 @@ class ModuleFileStorage
      */
     public function loadRootModuleFile($path, Config $baseConfig)
     {
-        $json = $this->storage->read($path);
-        $jsonData = $this->decode($json, $path);
-
-        try {
-            return $this->rootModuleFileConverter->fromJson($jsonData, array(
-                'path' => $path,
-                'baseConfig' => $baseConfig,
-            ));
-        } catch (ConversionFailedException $e) {
-            throw new InvalidConfigException(sprintf(
-                'The JSON in %s could not be converted: %s',
-                $path,
-                $e->getMessage()
-            ), 0, $e);
-        }
+        return $this->loadFile($path, 'Puli\Manager\Api\Module\RootModuleFile', array(
+            'baseConfig' => $baseConfig,
+        ));
     }
 
     /**
@@ -209,25 +193,49 @@ class ModuleFileStorage
      */
     public function saveRootModuleFile(RootModuleFile $moduleFile)
     {
-        try {
-            $jsonData = $this->rootModuleFileConverter->toJson($moduleFile, array(
-                'targetVersion' => $moduleFile->getVersion(),
-            ));
-        } catch (ConversionFailedException $e) {
-            throw new InvalidConfigException(sprintf(
-                'The data written to %s could not be converted: %s',
-                $moduleFile->getPath(),
-                $e->getMessage()
-            ), 0, $e);
-        }
-
-        $json = $this->encode($jsonData, $moduleFile->getPath());
-
-        $this->storage->write($moduleFile->getPath(), $json);
+        $this->saveFile($moduleFile, $moduleFile->getPath(), array(
+            'targetVersion' => $moduleFile->getVersion(),
+        ));
 
         if ($this->factoryManager) {
             $this->factoryManager->autoGenerateFactoryClass();
         }
+    }
+
+    private function loadFile($path, $className, array $options = array())
+    {
+        $json = $this->storage->read($path);
+        $jsonData = $this->decode($json, $path);
+        $options['path'] = $path;
+
+        try {
+            return $this->converterProvider->getJsonConverter($className)->fromJson($jsonData, $options);
+        } catch (ConversionFailedException $e) {
+            throw new InvalidConfigException(sprintf(
+                'The JSON in %s could not be converted: %s',
+                $path,
+                $e->getMessage()
+            ), 0, $e);
+        }
+    }
+
+    private function saveFile($file, $path, array $options = array())
+    {
+        $className = get_class($file);
+
+        try {
+            $jsonData = $this->converterProvider->getJsonConverter($className)->toJson($file, $options);
+        } catch (ConversionFailedException $e) {
+            throw new InvalidConfigException(sprintf(
+                'The data written to %s could not be converted: %s',
+                $path,
+                $e->getMessage()
+            ), 0, $e);
+        }
+
+        $json = $this->encode($jsonData, $path);
+
+        $this->storage->write($path, $json);
     }
 
     private function encode(stdClass $jsonData, $path)

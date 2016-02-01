@@ -17,7 +17,7 @@ use Puli\Manager\Api\Context\ProjectContext;
 use Puli\Manager\Api\Event\BuildRepositoryEvent;
 use Puli\Manager\Api\Event\PuliEvents;
 use Puli\Manager\Api\Module\Module;
-use Puli\Manager\Api\Module\ModuleCollection;
+use Puli\Manager\Api\Module\ModuleList;
 use Puli\Manager\Api\Module\RootModule;
 use Puli\Manager\Api\Module\RootModuleFile;
 use Puli\Manager\Api\Repository\DuplicatePathMappingException;
@@ -27,7 +27,7 @@ use Puli\Manager\Api\Repository\RepositoryManager;
 use Puli\Manager\Assert\Assert;
 use Puli\Manager\Conflict\ModuleConflictDetector;
 use Puli\Manager\Conflict\OverrideGraph;
-use Puli\Manager\Module\ModuleFileStorage;
+use Puli\Manager\Json\JsonStorage;
 use Puli\Manager\Repository\Mapping\AddPathMappingToModuleFile;
 use Puli\Manager\Repository\Mapping\ConflictCollection;
 use Puli\Manager\Repository\Mapping\LoadPathMapping;
@@ -89,14 +89,14 @@ class RepositoryManagerImpl implements RepositoryManager
     private $repo;
 
     /**
-     * @var ModuleCollection
+     * @var ModuleList
      */
     private $modules;
 
     /**
-     * @var ModuleFileStorage
+     * @var JsonStorage
      */
-    private $moduleFileStorage;
+    private $jsonStorage;
 
     /**
      * @var OverrideGraph
@@ -128,10 +128,10 @@ class RepositoryManagerImpl implements RepositoryManager
      *
      * @param ProjectContext     $context
      * @param EditableRepository $repo
-     * @param ModuleCollection   $modules
-     * @param ModuleFileStorage  $moduleFileStorage
+     * @param ModuleList         $modules
+     * @param JsonStorage        $jsonStorage
      */
-    public function __construct(ProjectContext $context, EditableRepository $repo, ModuleCollection $modules, ModuleFileStorage $moduleFileStorage)
+    public function __construct(ProjectContext $context, EditableRepository $repo, ModuleList $modules, JsonStorage $jsonStorage)
     {
         $this->context = $context;
         $this->dispatcher = $context->getEventDispatcher();
@@ -141,7 +141,7 @@ class RepositoryManagerImpl implements RepositoryManager
         $this->rootModule = $modules->getRootModule();
         $this->rootModuleFile = $context->getRootModuleFile();
         $this->modules = $modules;
-        $this->moduleFileStorage = $moduleFileStorage;
+        $this->jsonStorage = $jsonStorage;
     }
 
     /**
@@ -535,7 +535,7 @@ class RepositoryManagerImpl implements RepositoryManager
 
     private function saveRootModuleFile()
     {
-        $this->moduleFileStorage->saveRootModuleFile($this->rootModuleFile);
+        $this->jsonStorage->saveRootModuleFile($this->rootModuleFile);
     }
 
     private function removeResolvedConflicts()

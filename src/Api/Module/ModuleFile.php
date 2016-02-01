@@ -30,14 +30,9 @@ use Rhumsaa\Uuid\Uuid;
 class ModuleFile
 {
     /**
-     * The current puli.json version.
-     */
-    const DEFAULT_VERSION = '1.0';
-
-    /**
      * @var string
      */
-    private $version = self::DEFAULT_VERSION;
+    private $version;
 
     /**
      * @var string|null

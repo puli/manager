@@ -15,7 +15,7 @@ use PHPUnit_Framework_Assert;
 use PHPUnit_Framework_MockObject_MockObject;
 use Puli\Manager\Api\Config\Config;
 use Puli\Manager\Api\Module\RootModuleFile;
-use Puli\Manager\Module\ModuleFileStorage;
+use Puli\Manager\Json\JsonStorage;
 use Puli\Manager\Module\RootModuleFileManagerImpl;
 use Puli\Manager\Tests\ManagerTestCase;
 use Puli\Manager\Tests\TestException;
@@ -35,9 +35,9 @@ class RootModuleFileManagerImplTest extends ManagerTestCase
     const OTHER_PLUGIN_CLASS = 'Puli\Manager\Tests\Api\Module\Fixtures\OtherPlugin';
 
     /**
-     * @var PHPUnit_Framework_MockObject_MockObject|ModuleFileStorage
+     * @var PHPUnit_Framework_MockObject_MockObject|JsonStorage
      */
-    private $moduleFileStorage;
+    private $jsonStorage;
 
     /**
      * @var RootModuleFileManagerImpl
@@ -46,7 +46,7 @@ class RootModuleFileManagerImplTest extends ManagerTestCase
 
     protected function setUp()
     {
-        $this->moduleFileStorage = $this->getMockBuilder('Puli\Manager\Module\ModuleFileStorage')
+        $this->jsonStorage = $this->getMockBuilder('Puli\Manager\Json\JsonStorage')
             ->disableOriginalConstructor()
             ->getMock();
 
@@ -54,12 +54,12 @@ class RootModuleFileManagerImplTest extends ManagerTestCase
 
         $this->initContext(__DIR__.'/Fixtures/home', __DIR__.'/Fixtures/root');
 
-        $this->manager = new RootModuleFileManagerImpl($this->context, $this->moduleFileStorage);
+        $this->manager = new RootModuleFileManagerImpl($this->context, $this->jsonStorage);
     }
 
     public function testSetConfigKey()
     {
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveRootModuleFile')
             ->with($this->rootModuleFile)
             ->will($this->returnCallback(function (RootModuleFile $moduleFile) {
@@ -73,7 +73,7 @@ class RootModuleFileManagerImplTest extends ManagerTestCase
 
     public function testSetConfigKeys()
     {
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveRootModuleFile')
             ->with($this->rootModuleFile)
             ->will($this->returnCallback(function (RootModuleFile $moduleFile) {
@@ -243,7 +243,7 @@ class RootModuleFileManagerImplTest extends ManagerTestCase
         $this->rootModuleFile->getConfig()->set(Config::PULI_DIR, 'my-puli-dir');
         $this->rootModuleFile->getConfig()->set(Config::FACTORY_IN_FILE, 'MyFactory.php');
 
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveRootModuleFile')
             ->with($this->rootModuleFile)
             ->will($this->returnCallback(function (RootModuleFile $moduleFile) {
@@ -261,7 +261,7 @@ class RootModuleFileManagerImplTest extends ManagerTestCase
         $this->rootModuleFile->getConfig()->set(Config::PULI_DIR, 'my-puli-dir');
         $this->rootModuleFile->getConfig()->set(Config::FACTORY_IN_FILE, 'MyFactory.php');
 
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveRootModuleFile')
             ->with($this->rootModuleFile)
             ->will($this->returnCallback(function (RootModuleFile $moduleFile) {
@@ -276,7 +276,7 @@ class RootModuleFileManagerImplTest extends ManagerTestCase
 
     public function testAddPluginClass()
     {
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveRootModuleFile')
             ->with($this->rootModuleFile)
             ->will($this->returnCallback(function (RootModuleFile $moduleFile) {
@@ -290,7 +290,7 @@ class RootModuleFileManagerImplTest extends ManagerTestCase
 
     public function testAddPluginClassDoesNothingIfAlreadyInstalled()
     {
-        $this->moduleFileStorage->expects($this->never())
+        $this->jsonStorage->expects($this->never())
             ->method('saveRootModuleFile');
 
         $this->rootModuleFile->addPluginClass(self::PLUGIN_CLASS);
@@ -306,7 +306,7 @@ class RootModuleFileManagerImplTest extends ManagerTestCase
      */
     public function testAddPluginClassFailsIfClassNotFound()
     {
-        $this->moduleFileStorage->expects($this->never())
+        $this->jsonStorage->expects($this->never())
             ->method('saveRootModuleFile');
 
         $this->manager->addPluginClass(__NAMESPACE__.'/Foobar');
@@ -318,7 +318,7 @@ class RootModuleFileManagerImplTest extends ManagerTestCase
      */
     public function testAddPluginClassFailsIfInterface()
     {
-        $this->moduleFileStorage->expects($this->never())
+        $this->jsonStorage->expects($this->never())
             ->method('saveRootModuleFile');
 
         $this->manager->addPluginClass(self::PLUGIN_NAMESPACE.'\TestPluginInterface');
@@ -336,7 +336,7 @@ class RootModuleFileManagerImplTest extends ManagerTestCase
             return;
         }
 
-        $this->moduleFileStorage->expects($this->never())
+        $this->jsonStorage->expects($this->never())
             ->method('saveRootModuleFile');
 
         $this->manager->addPluginClass(self::PLUGIN_NAMESPACE.'\TestPluginTrait');
@@ -348,7 +348,7 @@ class RootModuleFileManagerImplTest extends ManagerTestCase
      */
     public function testAddPluginClassFailsIfNoPuliPlugin()
     {
-        $this->moduleFileStorage->expects($this->never())
+        $this->jsonStorage->expects($this->never())
             ->method('saveRootModuleFile');
 
         $this->manager->addPluginClass('stdClass');
@@ -360,7 +360,7 @@ class RootModuleFileManagerImplTest extends ManagerTestCase
      */
     public function testAddPluginClassFailsIfRequiredConstructorArgs()
     {
-        $this->moduleFileStorage->expects($this->never())
+        $this->jsonStorage->expects($this->never())
             ->method('saveRootModuleFile');
 
         $this->manager->addPluginClass(self::PLUGIN_NAMESPACE.'\TestPluginWithoutNoArgConstructor');
@@ -370,7 +370,7 @@ class RootModuleFileManagerImplTest extends ManagerTestCase
     {
         $this->rootModuleFile->addPluginClass(self::OTHER_PLUGIN_CLASS);
 
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveRootModuleFile')
             ->with($this->rootModuleFile)
             ->will($this->throwException(new TestException()));
@@ -386,7 +386,7 @@ class RootModuleFileManagerImplTest extends ManagerTestCase
 
     public function testRemovePluginClass()
     {
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveRootModuleFile')
             ->with($this->rootModuleFile)
             ->will($this->returnCallback(function (RootModuleFile $moduleFile) {
@@ -403,7 +403,7 @@ class RootModuleFileManagerImplTest extends ManagerTestCase
 
     public function testRemovePluginClassDoesNothingIfNotFound()
     {
-        $this->moduleFileStorage->expects($this->never())
+        $this->jsonStorage->expects($this->never())
             ->method('saveRootModuleFile');
 
         $this->rootModuleFile->addPluginClass(self::PLUGIN_CLASS);
@@ -418,7 +418,7 @@ class RootModuleFileManagerImplTest extends ManagerTestCase
         $this->rootModuleFile->addPluginClass(self::PLUGIN_CLASS);
         $this->rootModuleFile->addPluginClass(self::OTHER_PLUGIN_CLASS);
 
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveRootModuleFile')
             ->with($this->rootModuleFile)
             ->will($this->throwException(new TestException()));
@@ -434,7 +434,7 @@ class RootModuleFileManagerImplTest extends ManagerTestCase
 
     public function testRemovePluginClasses()
     {
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveRootModuleFile')
             ->with($this->rootModuleFile)
             ->will($this->returnCallback(function (RootModuleFile $moduleFile) {
@@ -451,7 +451,7 @@ class RootModuleFileManagerImplTest extends ManagerTestCase
 
     public function testRemovePluginClassesIgnoresNotFoundClasses()
     {
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveRootModuleFile')
             ->with($this->rootModuleFile)
             ->will($this->returnCallback(function (RootModuleFile $moduleFile) {
@@ -468,7 +468,7 @@ class RootModuleFileManagerImplTest extends ManagerTestCase
 
     public function testRemovePluginClassesDoesNothingIfNotFound()
     {
-        $this->moduleFileStorage->expects($this->never())
+        $this->jsonStorage->expects($this->never())
             ->method('saveRootModuleFile');
 
         $this->rootModuleFile->addPluginClass(self::PLUGIN_CLASS);
@@ -483,7 +483,7 @@ class RootModuleFileManagerImplTest extends ManagerTestCase
         $this->rootModuleFile->addPluginClass(self::PLUGIN_CLASS);
         $this->rootModuleFile->addPluginClass(self::OTHER_PLUGIN_CLASS);
 
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveRootModuleFile')
             ->with($this->rootModuleFile)
             ->will($this->throwException(new TestException()));
@@ -499,7 +499,7 @@ class RootModuleFileManagerImplTest extends ManagerTestCase
 
     public function testClearPluginClasses()
     {
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveRootModuleFile')
             ->with($this->rootModuleFile)
             ->will($this->returnCallback(function (RootModuleFile $moduleFile) {
@@ -516,7 +516,7 @@ class RootModuleFileManagerImplTest extends ManagerTestCase
 
     public function testClearPluginClassesDoesNothingIfNoneExist()
     {
-        $this->moduleFileStorage->expects($this->never())
+        $this->jsonStorage->expects($this->never())
             ->method('saveRootModuleFile');
 
         $this->manager->clearPluginClasses();
@@ -529,7 +529,7 @@ class RootModuleFileManagerImplTest extends ManagerTestCase
         $this->rootModuleFile->addPluginClass(self::PLUGIN_CLASS);
         $this->rootModuleFile->addPluginClass(self::OTHER_PLUGIN_CLASS);
 
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveRootModuleFile')
             ->with($this->rootModuleFile)
             ->will($this->throwException(new TestException()));
@@ -600,7 +600,7 @@ class RootModuleFileManagerImplTest extends ManagerTestCase
 
     public function testSetModuleName()
     {
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveRootModuleFile')
             ->with($this->rootModuleFile)
             ->will($this->returnCallback(function (RootModuleFile $moduleFile) {
@@ -616,7 +616,7 @@ class RootModuleFileManagerImplTest extends ManagerTestCase
     {
         $this->rootModuleFile->setModuleName('vendor/module');
 
-        $this->moduleFileStorage->expects($this->never())
+        $this->jsonStorage->expects($this->never())
             ->method('saveRootModuleFile');
 
         $this->manager->setModuleName('vendor/module');
@@ -628,7 +628,7 @@ class RootModuleFileManagerImplTest extends ManagerTestCase
     {
         $this->rootModuleFile->setModuleName('vendor/old');
 
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveRootModuleFile')
             ->with($this->rootModuleFile)
             ->will($this->throwException(new TestException()));
@@ -644,7 +644,7 @@ class RootModuleFileManagerImplTest extends ManagerTestCase
 
     public function testSetExtraKey()
     {
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveRootModuleFile')
             ->with($this->rootModuleFile)
             ->will($this->returnCallback(function (RootModuleFile $moduleFile) {
@@ -658,7 +658,7 @@ class RootModuleFileManagerImplTest extends ManagerTestCase
     {
         $this->rootModuleFile->setExtraKey('key', 'value');
 
-        $this->moduleFileStorage->expects($this->never())
+        $this->jsonStorage->expects($this->never())
             ->method('saveRootModuleFile');
 
         $this->manager->setExtraKey('key', 'value');
@@ -668,7 +668,7 @@ class RootModuleFileManagerImplTest extends ManagerTestCase
     {
         $this->rootModuleFile->setExtraKey('key', 'previous');
 
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveRootModuleFile')
             ->with($this->rootModuleFile)
             ->will($this->throwException(new TestException()));
@@ -684,7 +684,7 @@ class RootModuleFileManagerImplTest extends ManagerTestCase
 
     public function testSetExtraKeyRemovesPreviouslyUnsetKeysIfSavingFails()
     {
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveRootModuleFile')
             ->with($this->rootModuleFile)
             ->will($this->throwException(new TestException()));
@@ -700,7 +700,7 @@ class RootModuleFileManagerImplTest extends ManagerTestCase
 
     public function testSetExtraKeys()
     {
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveRootModuleFile')
             ->with($this->rootModuleFile)
             ->will($this->returnCallback(function (RootModuleFile $moduleFile) {
@@ -721,7 +721,7 @@ class RootModuleFileManagerImplTest extends ManagerTestCase
         $this->rootModuleFile->setExtraKey('key1', 'value1');
         $this->rootModuleFile->setExtraKey('key2', 'value2');
 
-        $this->moduleFileStorage->expects($this->never())
+        $this->jsonStorage->expects($this->never())
             ->method('saveRootModuleFile');
 
         $this->manager->setExtraKeys(array(
@@ -734,7 +734,7 @@ class RootModuleFileManagerImplTest extends ManagerTestCase
     {
         $this->rootModuleFile->setExtraKey('key1', 'previous');
 
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveRootModuleFile')
             ->with($this->rootModuleFile)
             ->will($this->throwException(new TestException()));
@@ -757,7 +757,7 @@ class RootModuleFileManagerImplTest extends ManagerTestCase
         $this->rootModuleFile->setExtraKey('key1', 'value1');
         $this->rootModuleFile->setExtraKey('key2', 'value2');
 
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveRootModuleFile')
             ->with($this->rootModuleFile)
             ->will($this->returnCallback(function (RootModuleFile $moduleFile) {
@@ -771,7 +771,7 @@ class RootModuleFileManagerImplTest extends ManagerTestCase
 
     public function testRemoveExtraKeyIgnoresNonExisting()
     {
-        $this->moduleFileStorage->expects($this->never())
+        $this->jsonStorage->expects($this->never())
             ->method('saveRootModuleFile');
 
         $this->manager->removeExtraKey('foobar');
@@ -781,7 +781,7 @@ class RootModuleFileManagerImplTest extends ManagerTestCase
     {
         $this->rootModuleFile->setExtraKey('key1', 'previous');
 
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveRootModuleFile')
             ->with($this->rootModuleFile)
             ->will($this->throwException(new TestException()));
@@ -801,7 +801,7 @@ class RootModuleFileManagerImplTest extends ManagerTestCase
         $this->rootModuleFile->setExtraKey('key2', 'value2');
         $this->rootModuleFile->setExtraKey('key3', 'value3');
 
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveRootModuleFile')
             ->with($this->rootModuleFile)
             ->will($this->returnCallback(function (RootModuleFile $moduleFile) {
@@ -815,7 +815,7 @@ class RootModuleFileManagerImplTest extends ManagerTestCase
 
     public function testRemoveExtraKeysIgnoresIfNoneRemoved()
     {
-        $this->moduleFileStorage->expects($this->never())
+        $this->jsonStorage->expects($this->never())
             ->method('saveRootModuleFile');
 
         $this->manager->removeExtraKeys(Expr::in(array('key1', 'key3')));
@@ -825,7 +825,7 @@ class RootModuleFileManagerImplTest extends ManagerTestCase
     {
         $this->rootModuleFile->setExtraKey('key1', 'previous');
 
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveRootModuleFile')
             ->with($this->rootModuleFile)
             ->will($this->throwException(new TestException()));
@@ -845,7 +845,7 @@ class RootModuleFileManagerImplTest extends ManagerTestCase
         $this->rootModuleFile->setExtraKey('key1', 'value1');
         $this->rootModuleFile->setExtraKey('key2', 'value2');
 
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveRootModuleFile')
             ->with($this->rootModuleFile)
             ->will($this->returnCallback(function (RootModuleFile $moduleFile) {
@@ -857,7 +857,7 @@ class RootModuleFileManagerImplTest extends ManagerTestCase
 
     public function testClearExtraKeysDoesNothingIfNoneSet()
     {
-        $this->moduleFileStorage->expects($this->never())
+        $this->jsonStorage->expects($this->never())
             ->method('saveRootModuleFile');
 
         $this->manager->clearExtraKeys();
@@ -868,7 +868,7 @@ class RootModuleFileManagerImplTest extends ManagerTestCase
         $this->rootModuleFile->setExtraKey('key1', 'value1');
         $this->rootModuleFile->setExtraKey('key2', 'value2');
 
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveRootModuleFile')
             ->with($this->rootModuleFile)
             ->will($this->throwException(new TestException()));
@@ -941,7 +941,7 @@ class RootModuleFileManagerImplTest extends ManagerTestCase
     {
         $this->rootModuleFile->setVersion('1.0');
 
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveRootModuleFile')
             ->with($this->rootModuleFile)
             ->willReturnCallback(function (RootModuleFile $rootModuleFile) {
@@ -957,7 +957,7 @@ class RootModuleFileManagerImplTest extends ManagerTestCase
     {
         $this->rootModuleFile->setVersion('1.0');
 
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveRootModuleFile')
             ->with($this->rootModuleFile)
             ->will($this->throwException(new TestException()));

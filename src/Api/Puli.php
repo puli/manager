@@ -11,6 +11,7 @@
 
 namespace Puli\Manager\Api;
 
+use JsonSchema\Uri\UriRetriever;
 use LogicException;
 use Psr\Log\LoggerInterface;
 use Puli\Discovery\Api\Discovery;
@@ -34,7 +35,6 @@ use Puli\Manager\Assert\Assert;
 use Puli\Manager\Asset\DiscoveryAssetManager;
 use Puli\Manager\Config\ConfigFileConverter;
 use Puli\Manager\Config\ConfigFileManagerImpl;
-use Puli\Manager\Config\ConfigFileStorage;
 use Puli\Manager\Config\DefaultConfig;
 use Puli\Manager\Config\EnvConfig;
 use Puli\Manager\Discovery\DiscoveryManagerImpl;
@@ -43,8 +43,12 @@ use Puli\Manager\Factory\Generator\DefaultGeneratorRegistry;
 use Puli\Manager\Filesystem\FilesystemStorage;
 use Puli\Manager\Installation\InstallationManagerImpl;
 use Puli\Manager\Installer\ModuleFileInstallerManager;
+use Puli\Manager\Json\ChainVersioner;
+use Puli\Manager\Json\JsonConverterProvider;
+use Puli\Manager\Json\JsonStorage;
+use Puli\Manager\Json\LocalUriRetriever;
+use Puli\Manager\Module\Migration\ModuleFile10To20Migration;
 use Puli\Manager\Module\ModuleFileConverter;
-use Puli\Manager\Module\ModuleFileStorage;
 use Puli\Manager\Module\ModuleManagerImpl;
 use Puli\Manager\Module\RootModuleFileConverter;
 use Puli\Manager\Module\RootModuleFileManagerImpl;
@@ -62,9 +66,13 @@ use Webmozart\Expression\Expr;
 use Webmozart\Json\Conversion\JsonConverter;
 use Webmozart\Json\JsonDecoder;
 use Webmozart\Json\JsonEncoder;
+use Webmozart\Json\JsonValidator;
 use Webmozart\Json\Migration\MigratingConverter;
 use Webmozart\Json\Migration\MigrationManager;
 use Webmozart\Json\Validation\ValidatingConverter;
+use Webmozart\Json\Versioning\JsonVersioner;
+use Webmozart\Json\Versioning\SchemaUriVersioner;
+use Webmozart\Json\Versioning\VersionFieldVersioner;
 use Webmozart\PathUtil\Path;
 
 /**
@@ -217,19 +225,14 @@ class Puli
     private $storage;
 
     /**
-     * @var ConfigFileStorage|null
+     * @var JsonStorage|null
      */
-    private $configFileStorage;
+    private $jsonStorage;
 
     /**
      * @var ConfigFileConverter|null
      */
     private $configFileConverter;
-
-    /**
-     * @var ModuleFileStorage|null
-     */
-    private $moduleFileStorage;
 
     /**
      * @var JsonConverter|null
@@ -252,6 +255,11 @@ class Puli
     private $legacyRootModuleFileConverter;
 
     /**
+     * @var MigrationManager|null
+     */
+    private $moduleFileMigrationManager;
+
+    /**
      * @var JsonEncoder
      */
     private $jsonEncoder;
@@ -260,6 +268,16 @@ class Puli
      * @var JsonDecoder
      */
     private $jsonDecoder;
+
+    /**
+     * @var JsonValidator
+     */
+    private $jsonValidator;
+
+    /**
+     * @var JsonVersioner
+     */
+    private $jsonVersioner;
 
     /**
      * @var LoggerInterface
@@ -618,7 +636,7 @@ class Puli
         if (!$this->configFileManager && $this->context->getHomeDirectory()) {
             $this->configFileManager = new ConfigFileManagerImpl(
                 $this->context,
-                $this->getConfigFileStorage()
+                $this->getJsonStorage()
             );
         }
 
@@ -639,7 +657,7 @@ class Puli
         if (!$this->rootModuleFileManager && $this->context instanceof ProjectContext) {
             $this->rootModuleFileManager = new RootModuleFileManagerImpl(
                 $this->context,
-                $this->getModuleFileStorage()
+                $this->getJsonStorage()
             );
         }
 
@@ -660,7 +678,7 @@ class Puli
         if (!$this->moduleManager && $this->context instanceof ProjectContext) {
             $this->moduleManager = new ModuleManagerImpl(
                 $this->context,
-                $this->getModuleFileStorage()
+                $this->getJsonStorage()
             );
         }
 
@@ -683,7 +701,7 @@ class Puli
                 $this->context,
                 $this->getRepository(),
                 $this->getModuleManager()->findModules(Expr::method('isEnabled', Expr::same(true))),
-                $this->getModuleFileStorage()
+                $this->getJsonStorage()
             );
         }
 
@@ -706,7 +724,7 @@ class Puli
                 $this->context,
                 $this->getDiscovery(),
                 $this->getModuleManager()->findModules(Expr::method('isEnabled', Expr::same(true))),
-                $this->getModuleFileStorage(),
+                $this->getJsonStorage(),
                 $this->logger
             );
         }
@@ -859,9 +877,8 @@ class Puli
     public function getModuleFileConverter()
     {
         if (!$this->moduleFileConverter) {
-            $this->moduleFileConverter = new ValidatingConverter(
-                new ModuleFileConverter(),
-                __DIR__.'/../../res/schema/module-schema-'.ModuleFileConverter::VERSION.'.json'
+            $this->moduleFileConverter = $this->createValidatingConverter(
+                new ModuleFileConverter($this->getJsonVersioner())
             );
         }
 
@@ -876,16 +893,19 @@ class Puli
     public function getLegacyModuleFileConverter()
     {
         if (!$this->legacyModuleFileConverter) {
-            $this->legacyModuleFileConverter = new ValidatingConverter(
+            $this->legacyModuleFileConverter = $this->createValidatingConverter(
                 new MigratingConverter(
                     $this->getModuleFileConverter(),
                     ModuleFileConverter::VERSION,
-                    new MigrationManager(array(
-                        // add future migrations here
-                    ))
+                    $this->getModuleFileMigrationManager()
                 ),
                 function (stdClass $jsonData) {
-                    return __DIR__.'/../../res/schema/module-schema-'.$jsonData->version.'.json';
+                    if (isset($jsonData->{'$schema'})) {
+                        return $jsonData->{'$schema'};
+                    }
+
+                    // BC with 1.0
+                    return 'http://puli.io/schema/1.0/manager/module';
                 }
             );
         }
@@ -901,9 +921,8 @@ class Puli
     public function getRootModuleFileConverter()
     {
         if (!$this->rootModuleFileConverter) {
-            $this->rootModuleFileConverter = new ValidatingConverter(
-                new RootModuleFileConverter(),
-                __DIR__.'/../../res/schema/module-schema-'.RootModuleFileConverter::VERSION.'.json'
+            $this->rootModuleFileConverter = $this->createValidatingConverter(
+                new RootModuleFileConverter($this->getJsonVersioner())
             );
         }
 
@@ -918,16 +937,19 @@ class Puli
     public function getLegacyRootModuleFileConverter()
     {
         if (!$this->legacyRootModuleFileConverter) {
-            $this->legacyRootModuleFileConverter = new ValidatingConverter(
+            $this->legacyRootModuleFileConverter = $this->createValidatingConverter(
                 new MigratingConverter(
                     $this->getRootModuleFileConverter(),
                     RootModuleFileConverter::VERSION,
-                    new MigrationManager(array(
-                        // add future migrations here
-                    ))
+                    $this->getModuleFileMigrationManager()
                 ),
                 function (stdClass $jsonData) {
-                    return __DIR__.'/../../res/schema/module-schema-'.$jsonData->version.'.json';
+                    if (isset($jsonData->{'$schema'})) {
+                        return $jsonData->{'$schema'};
+                    }
+
+                    // BC with 1.0
+                    return 'http://puli.io/schema/1.0/manager/module';
                 }
             );
         }
@@ -964,6 +986,25 @@ class Puli
         }
 
         return $this->jsonDecoder;
+    }
+
+    /**
+     * Returns the JSON validator.
+     *
+     * @return JsonValidator The JSON validator.
+     */
+    public function getJsonValidator()
+    {
+        if (!$this->jsonValidator) {
+            $uriRetriever = new UriRetriever();
+
+            // Load puli.io schemas from the schema/ directory
+            $uriRetriever->setUriRetriever(new LocalUriRetriever());
+
+            $this->jsonValidator = new JsonValidator(null, $uriRetriever);
+        }
+
+        return $this->jsonValidator;
     }
 
     private function activatePlugins()
@@ -1024,10 +1065,9 @@ class Puli
         }
 
         // Create a storage without the factory manager
-        $moduleFileStorage = new ModuleFileStorage(
+        $jsonStorage = new JsonStorage(
             $this->getStorage(),
-            $this->getLegacyModuleFileConverter(),
-            $this->getLegacyRootModuleFileConverter(),
+            new JsonConverterProvider($this),
             $this->getJsonEncoder(),
             $this->getJsonDecoder()
         );
@@ -1036,7 +1076,7 @@ class Puli
         $rootFilePath = $this->rootDir.'/puli.json';
 
         try {
-            $rootModuleFile = $moduleFileStorage->loadRootModuleFile($rootFilePath, $baseConfig);
+            $rootModuleFile = $jsonStorage->loadRootModuleFile($rootFilePath, $baseConfig);
         } catch (FileNotFoundException $e) {
             $rootModuleFile = new RootModuleFile(null, $rootFilePath, $baseConfig);
         }
@@ -1047,44 +1087,71 @@ class Puli
     }
 
     /**
-     * Returns the configuration file storage.
+     * Decorates a converter with a {@link ValidatingConverter}.
      *
-     * @return ConfigFileStorage The configuration file storage.
+     * @param JsonConverter        $innerConverter The converter to decorate.
+     * @param string|callable|null $schema         The schema.
+     *
+     * @return ValidatingConverter The decorated converter.
      */
-    private function getConfigFileStorage()
+    private function createValidatingConverter(JsonConverter $innerConverter, $schema = null)
     {
-        if (!$this->configFileStorage) {
-            $this->configFileStorage = new ConfigFileStorage(
-                $this->getStorage(),
-                $this->getConfigFileConverter(),
-                $this->getJsonEncoder(),
-                $this->getJsonDecoder(),
-                $this->getFactoryManager()
-            );
-        }
-
-        return $this->configFileStorage;
+        return new ValidatingConverter($innerConverter, $schema, $this->getJsonValidator());
     }
 
     /**
-     * Returns the module file storage.
+     * Returns the JSON file storage.
      *
-     * @return ModuleFileStorage The module file storage.
+     * @return JsonStorage The JSON file storage.
      */
-    private function getModuleFileStorage()
+    private function getJsonStorage()
     {
-        if (!$this->moduleFileStorage) {
-            $this->moduleFileStorage = new ModuleFileStorage(
+        if (!$this->jsonStorage) {
+            $this->jsonStorage = new JsonStorage(
                 $this->getStorage(),
-                $this->getLegacyModuleFileConverter(),
-                $this->getLegacyRootModuleFileConverter(),
+                new JsonConverterProvider($this),
                 $this->getJsonEncoder(),
                 $this->getJsonDecoder(),
                 $this->getFactoryManager()
             );
         }
 
-        return $this->moduleFileStorage;
+        return $this->jsonStorage;
+    }
+
+    /**
+     * Returns the JSON versioner.
+     *
+     * @return JsonVersioner The JSON versioner.
+     */
+    private function getJsonVersioner()
+    {
+        if (!$this->jsonVersioner) {
+            $this->jsonVersioner = new ChainVersioner(array(
+                // check the schema of the "$schema" field by default
+                new SchemaUriVersioner(),
+                // fall back to the "version" field for 1.0
+                new VersionFieldVersioner(),
+            ));
+        }
+
+        return $this->jsonVersioner;
+    }
+
+    /**
+     * Returns the migration manager for module files.
+     *
+     * @return MigrationManager The migration manager.
+     */
+    private function getModuleFileMigrationManager()
+    {
+        if (!$this->moduleFileMigrationManager) {
+            $this->moduleFileMigrationManager = new MigrationManager(array(
+                new ModuleFile10To20Migration(),
+            ), $this->getJsonVersioner());
+        }
+
+        return $this->moduleFileMigrationManager;
     }
 
     /**
@@ -1119,9 +1186,9 @@ class Puli
         Assert::directory($homeDir, 'Could not load Puli context: The home directory %s is a file. Expected a directory.');
 
         // Create a storage without the factory manager
-        $configStorage = new ConfigFileStorage(
+        $jsonStorage = new JsonStorage(
             $this->getStorage(),
-            $this->getConfigFileConverter(),
+            new JsonConverterProvider($this),
             $this->getJsonEncoder(),
             $this->getJsonDecoder()
         );
@@ -1129,7 +1196,7 @@ class Puli
         $configPath = Path::canonicalize($homeDir).'/config.json';
 
         try {
-            return $configStorage->loadConfigFile($configPath, $baseConfig);
+            return $jsonStorage->loadConfigFile($configPath, $baseConfig);
         } catch (FileNotFoundException $e) {
             // It's ok if no config.json exists. We'll work with
             // DefaultConfig instead

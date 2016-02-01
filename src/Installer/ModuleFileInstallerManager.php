@@ -17,7 +17,7 @@ use Puli\Manager\Api\Installer\InstallerManager;
 use Puli\Manager\Api\Installer\InstallerParameter;
 use Puli\Manager\Api\Installer\NoSuchInstallerException;
 use Puli\Manager\Api\Module\Module;
-use Puli\Manager\Api\Module\ModuleCollection;
+use Puli\Manager\Api\Module\ModuleList;
 use Puli\Manager\Api\Module\RootModule;
 use Puli\Manager\Api\Module\RootModuleFileManager;
 use RuntimeException;
@@ -67,7 +67,7 @@ class ModuleFileInstallerManager implements InstallerManager
     private $rootModuleFileManager;
 
     /**
-     * @var ModuleCollection
+     * @var ModuleList
      */
     private $modules;
 
@@ -86,7 +86,7 @@ class ModuleFileInstallerManager implements InstallerManager
      */
     private $rootInstallerDescriptors;
 
-    public function __construct(RootModuleFileManager $rootModuleFileManager, ModuleCollection $modules)
+    public function __construct(RootModuleFileManager $rootModuleFileManager, ModuleList $modules)
     {
         $this->rootModuleFileManager = $rootModuleFileManager;
         $this->modules = $modules;

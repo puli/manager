@@ -16,13 +16,13 @@ use PHPUnit_Framework_MockObject_MockObject;
 use Puli\Manager\Api\Event\BuildRepositoryEvent;
 use Puli\Manager\Api\Event\PuliEvents;
 use Puli\Manager\Api\Module\Module;
-use Puli\Manager\Api\Module\ModuleCollection;
 use Puli\Manager\Api\Module\ModuleFile;
+use Puli\Manager\Api\Module\ModuleList;
 use Puli\Manager\Api\Module\RootModule;
 use Puli\Manager\Api\Module\RootModuleFile;
 use Puli\Manager\Api\Repository\PathMapping;
 use Puli\Manager\Api\Repository\RepositoryManager;
-use Puli\Manager\Module\ModuleFileStorage;
+use Puli\Manager\Json\JsonStorage;
 use Puli\Manager\Repository\RepositoryManagerImpl;
 use Puli\Manager\Tests\ManagerTestCase;
 use Puli\Manager\Tests\TestException;
@@ -75,14 +75,14 @@ class RepositoryManagerImplTest extends ManagerTestCase
     private $moduleFile3;
 
     /**
-     * @var ModuleCollection
+     * @var ModuleList
      */
     private $modules;
 
     /**
-     * @var PHPUnit_Framework_MockObject_MockObject|ModuleFileStorage
+     * @var PHPUnit_Framework_MockObject_MockObject|JsonStorage
      */
-    private $moduleFileStorage;
+    private $jsonStorage;
 
     /**
      * @var RepositoryManagerImpl
@@ -104,9 +104,9 @@ class RepositoryManagerImplTest extends ManagerTestCase
         $this->moduleFile2 = new ModuleFile('vendor/module2');
         $this->moduleFile3 = new ModuleFile('vendor/module3');
 
-        $this->modules = new ModuleCollection();
+        $this->modules = new ModuleList();
 
-        $this->moduleFileStorage = $this->getMockBuilder('Puli\Manager\Module\ModuleFileStorage')
+        $this->jsonStorage = $this->getMockBuilder('Puli\Manager\Json\JsonStorage')
             ->disableOriginalConstructor()
             ->getMock();
 
@@ -124,7 +124,7 @@ class RepositoryManagerImplTest extends ManagerTestCase
         $this->modules->add(new RootModule($this->rootModuleFile, $this->rootDir));
         $this->modules->add(new Module(null, $this->moduleDir1));
 
-        $this->manager = new RepositoryManagerImpl($this->context, $this->repo, $this->modules, $this->moduleFileStorage);
+        $this->manager = new RepositoryManagerImpl($this->context, $this->repo, $this->modules, $this->jsonStorage);
 
         $this->assertEmpty($this->manager->getPathMappings());
     }
@@ -140,7 +140,7 @@ class RepositoryManagerImplTest extends ManagerTestCase
             ->method('add')
             ->with('/path', new DirectoryResource($this->rootDir.'/resources'));
 
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveRootModuleFile')
             ->with($this->rootModuleFile)
             ->will($this->returnCallback(function (RootModuleFile $rootModuleFile) {
@@ -170,7 +170,7 @@ class RepositoryManagerImplTest extends ManagerTestCase
         $this->repo->expects($this->never())
             ->method('add');
 
-        $this->moduleFileStorage->expects($this->never())
+        $this->jsonStorage->expects($this->never())
             ->method('saveRootModuleFile');
 
         $this->manager->addRootPathMapping(new PathMapping('/path', 'resources'));
@@ -191,7 +191,7 @@ class RepositoryManagerImplTest extends ManagerTestCase
             ->method('add')
             ->with('/path', new DirectoryResource($this->rootDir.'/resources'));
 
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveRootModuleFile')
             ->with($this->rootModuleFile)
             ->will($this->returnCallback(function (RootModuleFile $rootModuleFile) use ($mapping2) {
@@ -212,7 +212,7 @@ class RepositoryManagerImplTest extends ManagerTestCase
             ->method('add')
             ->with('/path/file', new FileResource($this->rootDir.'/resources/file'));
 
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveRootModuleFile')
             ->with($this->rootModuleFile)
             ->will($this->returnCallback(function (RootModuleFile $rootModuleFile) {
@@ -242,7 +242,7 @@ class RepositoryManagerImplTest extends ManagerTestCase
             ->method('add')
             ->with('/path', new DirectoryResource($this->rootDir.'/assets'));
 
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveRootModuleFile')
             ->with($this->rootModuleFile)
             ->will($this->returnCallback(function (RootModuleFile $rootModuleFile) {
@@ -268,7 +268,7 @@ class RepositoryManagerImplTest extends ManagerTestCase
             ->method('add')
             ->with('/path', new DirectoryResource($this->moduleDir1.'/resources'));
 
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveRootModuleFile')
             ->with($this->rootModuleFile)
             ->will($this->returnCallback(function (RootModuleFile $rootModuleFile) {
@@ -297,7 +297,7 @@ class RepositoryManagerImplTest extends ManagerTestCase
         $this->repo->expects($this->never())
             ->method('add');
 
-        $this->moduleFileStorage->expects($this->never())
+        $this->jsonStorage->expects($this->never())
             ->method('saveRootModuleFile');
 
         $this->manager->addRootPathMapping(new PathMapping('/path', '@foobar:resources'));
@@ -313,7 +313,7 @@ class RepositoryManagerImplTest extends ManagerTestCase
         $this->repo->expects($this->never())
             ->method('add');
 
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveRootModuleFile')
             ->with($this->rootModuleFile)
             ->will($this->returnCallback(function (RootModuleFile $rootModuleFile) {
@@ -339,7 +339,7 @@ class RepositoryManagerImplTest extends ManagerTestCase
             ->method('add')
             ->with('/path', new DirectoryResource($this->rootDir.'/override'));
 
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveRootModuleFile')
             ->with($this->rootModuleFile)
             ->will($this->returnCallback(function (RootModuleFile $rootModuleFile) {
@@ -374,7 +374,7 @@ class RepositoryManagerImplTest extends ManagerTestCase
             ->method('add')
             ->with('/path', new DirectoryResource($this->rootDir.'/resources'));
 
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveRootModuleFile')
             ->with($this->rootModuleFile)
             ->will($this->returnCallback(function (RootModuleFile $rootModuleFile) {
@@ -408,7 +408,7 @@ class RepositoryManagerImplTest extends ManagerTestCase
             ->method('add')
             ->with('/path', new DirectoryResource($this->rootDir.'/override'));
 
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveRootModuleFile')
             ->with($this->rootModuleFile)
             ->will($this->returnCallback(function (RootModuleFile $rootModuleFile) {
@@ -446,7 +446,7 @@ class RepositoryManagerImplTest extends ManagerTestCase
             ->method('add')
             ->with('/path', new DirectoryResource($this->rootDir.'/override'));
 
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveRootModuleFile')
             ->with($this->rootModuleFile)
             ->will($this->returnCallback(function (RootModuleFile $rootModuleFile) {
@@ -476,7 +476,7 @@ class RepositoryManagerImplTest extends ManagerTestCase
             ->method('add')
             ->with('/path/config', new DirectoryResource($this->rootDir.'/override'));
 
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveRootModuleFile')
             ->with($this->rootModuleFile)
             ->will($this->returnCallback(function (RootModuleFile $rootModuleFile) {
@@ -515,7 +515,7 @@ class RepositoryManagerImplTest extends ManagerTestCase
             ->method('add')
             ->with('/path', new DirectoryResource($this->moduleDir1.'/resources'));
 
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveRootModuleFile')
             ->willThrowException(new TestException('Cannot save'));
 
@@ -549,7 +549,7 @@ class RepositoryManagerImplTest extends ManagerTestCase
             ->method('add')
             ->with('/path', new DirectoryResource($this->moduleDir1.'/resources'));
 
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveRootModuleFile')
             ->willThrowException(new TestException('Cannot save'));
 
@@ -571,7 +571,7 @@ class RepositoryManagerImplTest extends ManagerTestCase
             ->method('remove')
             ->with('/app');
 
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveRootModuleFile')
             ->with($this->rootModuleFile)
             ->will($this->returnCallback(function (RootModuleFile $rootModuleFile) {
@@ -594,7 +594,7 @@ class RepositoryManagerImplTest extends ManagerTestCase
         $this->repo->expects($this->never())
             ->method('remove');
 
-        $this->moduleFileStorage->expects($this->never())
+        $this->jsonStorage->expects($this->never())
             ->method('saveRootModuleFile');
 
         $this->moduleFile1->addPathMapping($mapping = new PathMapping('/app', 'resources'));
@@ -611,7 +611,7 @@ class RepositoryManagerImplTest extends ManagerTestCase
         $this->repo->expects($this->never())
             ->method('remove');
 
-        $this->moduleFileStorage->expects($this->never())
+        $this->jsonStorage->expects($this->never())
             ->method('saveRootModuleFile');
 
         $this->manager->removeRootPathMapping('/app');
@@ -629,7 +629,7 @@ class RepositoryManagerImplTest extends ManagerTestCase
             ->method('add')
             ->with('/module1', new DirectoryResource($this->moduleDir1.'/resources'));
 
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveRootModuleFile')
             ->with($this->rootModuleFile)
             ->will($this->returnCallback(function (RootModuleFile $rootModuleFile) {
@@ -657,7 +657,7 @@ class RepositoryManagerImplTest extends ManagerTestCase
             ->method('add')
             ->with('/path', new DirectoryResource($this->moduleDir1.'/resources'));
 
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveRootModuleFile')
             ->with($this->rootModuleFile)
             ->will($this->returnCallback(function (RootModuleFile $rootModuleFile) {
@@ -686,7 +686,7 @@ class RepositoryManagerImplTest extends ManagerTestCase
             ->method('add')
             ->with('/path/config', new DirectoryResource($this->moduleDir1.'/resources'));
 
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveRootModuleFile')
             ->with($this->rootModuleFile)
             ->will($this->returnCallback(function (RootModuleFile $rootModuleFile) {
@@ -714,7 +714,7 @@ class RepositoryManagerImplTest extends ManagerTestCase
         $this->repo->expects($this->never())
             ->method('add');
 
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveRootModuleFile')
             ->with($this->rootModuleFile)
             ->will($this->returnCallback(function (RootModuleFile $rootModuleFile) {
@@ -744,7 +744,7 @@ class RepositoryManagerImplTest extends ManagerTestCase
             ->method('add')
             ->with('/path', new DirectoryResource($this->moduleDir1.'/resources'));
 
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveRootModuleFile')
             ->with($this->rootModuleFile)
             ->will($this->returnCallback(function (RootModuleFile $rootModuleFile) {
@@ -782,7 +782,7 @@ class RepositoryManagerImplTest extends ManagerTestCase
             ->method('add')
             ->with('/path', new DirectoryResource($this->rootDir.'/resources'));
 
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveRootModuleFile')
             ->willThrowException(new TestException('Cannot save'));
 
@@ -826,7 +826,7 @@ class RepositoryManagerImplTest extends ManagerTestCase
             ->method('add')
             ->with('/path', new DirectoryResource($this->moduleDir1.'/resources'));
 
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveRootModuleFile')
             ->willThrowException(new TestException('Cannot save'));
 
@@ -856,7 +856,7 @@ class RepositoryManagerImplTest extends ManagerTestCase
             ->method('remove')
             ->with('/path');
 
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveRootModuleFile')
             ->willThrowException(new TestException('Cannot save'));
 
@@ -887,7 +887,7 @@ class RepositoryManagerImplTest extends ManagerTestCase
             ->method('remove')
             ->with('/app2');
 
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveRootModuleFile')
             ->with($this->rootModuleFile)
             ->will($this->returnCallback(function (RootModuleFile $rootModuleFile) use ($mapping3) {
@@ -930,7 +930,7 @@ class RepositoryManagerImplTest extends ManagerTestCase
             ->method('add')
             ->with('/path1', new DirectoryResource($this->rootDir.'/resources'));
 
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveRootModuleFile')
             ->willThrowException(new TestException('Cannot save'));
 
@@ -965,7 +965,7 @@ class RepositoryManagerImplTest extends ManagerTestCase
             ->method('remove')
             ->with('/app2');
 
-        $this->moduleFileStorage->expects($this->once())
+        $this->jsonStorage->expects($this->once())
             ->method('saveRootModuleFile')
             ->with($this->rootModuleFile)
             ->will($this->returnCallback(function (RootModuleFile $rootModuleFile) {
@@ -1569,6 +1569,6 @@ class RepositoryManagerImplTest extends ManagerTestCase
         $this->modules->add(new Module($this->moduleFile2, $this->moduleDir2));
         $this->modules->add(new Module($this->moduleFile3, $this->moduleDir3));
 
-        $this->manager = new RepositoryManagerImpl($this->context, $this->repo, $this->modules, $this->moduleFileStorage);
+        $this->manager = new RepositoryManagerImpl($this->context, $this->repo, $this->modules, $this->jsonStorage);
     }
 }
