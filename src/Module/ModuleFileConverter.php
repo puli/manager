@@ -55,7 +55,7 @@ class ModuleFileConverter implements JsonConverter
         'resources',
         'bindings',
         'binding-types',
-        'override',
+        'depend',
         'extra',
     );
 
@@ -120,7 +120,7 @@ class ModuleFileConverter implements JsonConverter
         $mappings = $moduleFile->getPathMappings();
         $bindingDescriptors = $moduleFile->getBindingDescriptors();
         $typeDescriptors = $moduleFile->getTypeDescriptors();
-        $overrides = $moduleFile->getOverriddenModules();
+        $dependencies = $moduleFile->getDependencies();
         $extra = $moduleFile->getExtraKeys();
 
         if (null !== $moduleFile->getModuleName()) {
@@ -218,8 +218,8 @@ class ModuleFileConverter implements JsonConverter
             $jsonData->{'binding-types'} = (object) $bindingTypesData;
         }
 
-        if (count($overrides) > 0) {
-            $jsonData->override = $overrides;
+        if (count($dependencies) > 0) {
+            $jsonData->depend = $dependencies;
         }
 
         if (count($extra) > 0) {
@@ -303,8 +303,8 @@ class ModuleFileConverter implements JsonConverter
             }
         }
 
-        if (isset($jsonData->override)) {
-            $moduleFile->setOverriddenModules($jsonData->override);
+        if (isset($jsonData->depend)) {
+            $moduleFile->setDependencies($jsonData->depend);
         }
 
         if (isset($jsonData->extra)) {

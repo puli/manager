@@ -63,7 +63,7 @@
                 }
             }
         },
-        "override": {
+        "depend": {
             "type": "array",
             "items": {
                 "type": "string"

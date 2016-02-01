@@ -26,7 +26,7 @@ use Puli\Manager\Api\Repository\PathMapping;
 use Puli\Manager\Api\Repository\RepositoryManager;
 use Puli\Manager\Assert\Assert;
 use Puli\Manager\Conflict\ModuleConflictDetector;
-use Puli\Manager\Conflict\OverrideGraph;
+use Puli\Manager\Conflict\DependencyGraph;
 use Puli\Manager\Json\JsonStorage;
 use Puli\Manager\Repository\Mapping\AddPathMappingToModuleFile;
 use Puli\Manager\Repository\Mapping\ConflictCollection;
@@ -99,7 +99,7 @@ class RepositoryManagerImpl implements RepositoryManager
     private $jsonStorage;
 
     /**
-     * @var OverrideGraph
+     * @var DependencyGraph
      */
     private $overrideGraph;
 
@@ -472,7 +472,7 @@ class RepositoryManagerImpl implements RepositoryManager
 
     private function loadPathMappings()
     {
-        $this->overrideGraph = OverrideGraph::forModules($this->modules);
+        $this->overrideGraph = DependencyGraph::forModules($this->modules);
         $this->conflictDetector = new ModuleConflictDetector($this->overrideGraph);
         $this->mappings = new PathMappingCollection();
         $this->mappingsByResource = new PathMappingCollection();

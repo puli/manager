@@ -85,7 +85,7 @@ class ModuleFileConverterTest extends PHPUnit_Framework_TestCase
         $moduleFile->addTypeDescriptor(new BindingTypeDescriptor($type, 'Description of my type.', array(
             'param' => 'Description of the parameter.',
         )));
-        $moduleFile->setOverriddenModules(array('acme/blog'));
+        $moduleFile->setDependencies(array('acme/blog'));
         $moduleFile->setExtraKeys(array(
             'extra1' => 'value',
             'extra2' => (object) array('key' => 'value'),
@@ -120,7 +120,7 @@ class ModuleFileConverterTest extends PHPUnit_Framework_TestCase
                     ),
                 ),
             ),
-            'override' => array('acme/blog'),
+            'depend' => array('acme/blog'),
             'extra' => (object) array(
                 'extra1' => 'value',
                 'extra2' => (object) array(
@@ -439,11 +439,11 @@ class ModuleFileConverterTest extends PHPUnit_Framework_TestCase
     public function testToJsonMultipleOverriddenModules()
     {
         $moduleFile = new ModuleFile();
-        $moduleFile->setOverriddenModules(array('acme/blog1', 'acme/blog2'));
+        $moduleFile->setDependencies(array('acme/blog1', 'acme/blog2'));
 
         $jsonData = (object) array(
             '$schema' => 'http://puli.io/schema/2.0/manager/module',
-            'override' => array(
+            'depend' => array(
                 'acme/blog1',
                 'acme/blog2',
             ),
@@ -482,7 +482,7 @@ class ModuleFileConverterTest extends PHPUnit_Framework_TestCase
                     ),
                 ),
             ),
-            'override' => array('acme/blog'),
+            'depend' => array('acme/blog'),
             'extra' => (object) array(
                 'extra1' => 'value',
                 'extra2' => (object) array(
@@ -517,7 +517,7 @@ class ModuleFileConverterTest extends PHPUnit_Framework_TestCase
         $this->assertEquals(array(new BindingTypeDescriptor($type, 'Description of my type.', array(
             'param' => 'Description of the parameter.',
         ))), $moduleFile->getTypeDescriptors());
-        $this->assertSame(array('acme/blog'), $moduleFile->getOverriddenModules());
+        $this->assertSame(array('acme/blog'), $moduleFile->getDependencies());
         $this->assertEquals(array(
             'extra1' => 'value',
             'extra2' => (object) array('key' => 'value'),
@@ -553,7 +553,7 @@ class ModuleFileConverterTest extends PHPUnit_Framework_TestCase
         $this->assertNull($moduleFile->getModuleName());
         $this->assertSame(array(), $moduleFile->getPathMappings());
         $this->assertSame(array(), $moduleFile->getBindingDescriptors());
-        $this->assertSame(array(), $moduleFile->getOverriddenModules());
+        $this->assertSame(array(), $moduleFile->getDependencies());
     }
 
     public function testFromJsonBindingTypeWithRequiredParameter()

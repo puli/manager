@@ -62,7 +62,7 @@ class ModuleFile
     /**
      * @var bool[]
      */
-    private $overriddenModules = array();
+    private $dependencies = array();
 
     /**
      * @var array
@@ -147,45 +147,45 @@ class ModuleFile
     }
 
     /**
-     * Sets the names of the modules this module overrides.
+     * Sets the names of the modules this module depends on.
      *
-     * @param string[] $moduleNames The names of the overridden modules.
+     * @param string[] $moduleNames The names of the modules.
      */
-    public function setOverriddenModules(array $moduleNames)
+    public function setDependencies(array $moduleNames)
     {
-        $this->overriddenModules = array();
+        $this->dependencies = array();
 
         foreach ($moduleNames as $moduleName) {
-            $this->overriddenModules[$moduleName] = true;
+            $this->dependencies[$moduleName] = true;
         }
     }
 
     /**
-     * Adds an overridden module.
+     * Adds a dependency to a module.
      *
-     * @param string $moduleName The name of the overridden module.
+     * @param string $moduleName The name of the module.
      */
-    public function addOverriddenModule($moduleName)
+    public function addDependency($moduleName)
     {
-        $this->overriddenModules[$moduleName] = true;
+        $this->dependencies[$moduleName] = true;
     }
 
     /**
-     * Adds an overridden module.
+     * Adds a dependency to a module.
      *
-     * @param string $moduleName The name of the overridden module.
+     * @param string $moduleName The name of the module.
      */
-    public function removeOverriddenModule($moduleName)
+    public function removeDependency($moduleName)
     {
-        unset($this->overriddenModules[$moduleName]);
+        unset($this->dependencies[$moduleName]);
     }
 
     /**
-     * Removes all overridden modules.
+     * Removes all dependencies.
      */
-    public function clearOverriddenModules()
+    public function clearDependencies()
     {
-        $this->overriddenModules = array();
+        $this->dependencies = array();
     }
 
     /**
@@ -193,33 +193,32 @@ class ModuleFile
      *
      * @return string[] The names of the overridden modules.
      */
-    public function getOverriddenModules()
+    public function getDependencies()
     {
-        return array_keys($this->overriddenModules);
+        return array_keys($this->dependencies);
     }
 
     /**
-     * Returns whether the module overrides a given module.
+     * Returns whether the module depends on a given module.
      *
-     * @param string $moduleName The name of the overridden module.
+     * @param string $moduleName The name of the module.
      *
-     * @return bool Returns `true` if the module is overridden in the module
-     *              file.
+     * @return bool Returns `true` if the module depends on the given module.
      */
-    public function hasOverriddenModule($moduleName)
+    public function hasDependency($moduleName)
     {
-        return isset($this->overriddenModules[$moduleName]);
+        return isset($this->dependencies[$moduleName]);
     }
 
     /**
-     * Returns whether the module overrides any other module.
+     * Returns whether the module has dependencies on other modules.
      *
-     * @return bool Returns `true` if the module overrides other packgaes and
+     * @return bool Returns `true` if the module depends on other modules and
      *              `false` otherwise.
      */
-    public function hasOverriddenModules()
+    public function hasDependencies()
     {
-        return count($this->overriddenModules) > 0;
+        return count($this->dependencies) > 0;
     }
 
     /**

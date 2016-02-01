@@ -207,27 +207,27 @@ class ModuleFileTest extends PHPUnit_Framework_TestCase
     public function testSetOverriddenModules()
     {
         $moduleFile = new ModuleFile();
-        $moduleFile->setOverriddenModules(array('module1', 'module2'));
+        $moduleFile->setDependencies(array('module1', 'module2'));
 
-        $this->assertSame(array('module1', 'module2'), $moduleFile->getOverriddenModules());
+        $this->assertSame(array('module1', 'module2'), $moduleFile->getDependencies());
     }
 
     public function testAddOverriddenModule()
     {
         $moduleFile = new ModuleFile();
-        $moduleFile->setOverriddenModules(array('module1'));
-        $moduleFile->addOverriddenModule('module2');
+        $moduleFile->setDependencies(array('module1'));
+        $moduleFile->addDependency('module2');
 
-        $this->assertSame(array('module1', 'module2'), $moduleFile->getOverriddenModules());
+        $this->assertSame(array('module1', 'module2'), $moduleFile->getDependencies());
     }
 
     public function testAddOverriddenModuleIgnoresDuplicates()
     {
         $moduleFile = new ModuleFile();
-        $moduleFile->setOverriddenModules(array('module1'));
-        $moduleFile->addOverriddenModule('module1');
+        $moduleFile->setDependencies(array('module1'));
+        $moduleFile->addDependency('module1');
 
-        $this->assertSame(array('module1'), $moduleFile->getOverriddenModules());
+        $this->assertSame(array('module1'), $moduleFile->getDependencies());
     }
 
     public function testAddBindingDescriptor()

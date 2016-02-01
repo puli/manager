@@ -25,7 +25,7 @@ use Puli\Manager\Api\Php\Method;
 use Puli\Manager\Api\Php\ReturnValue;
 use Puli\Manager\Api\Server\ServerCollection;
 use Puli\Manager\Assert\Assert;
-use Puli\Manager\Conflict\OverrideGraph;
+use Puli\Manager\Conflict\DependencyGraph;
 use Puli\Manager\Php\ClassWriter;
 use Webmozart\PathUtil\Path;
 
@@ -415,7 +415,7 @@ EOF
         $moduleOrderString = '';
 
         if (count($this->modules) > 0) {
-            $overrideGraph = OverrideGraph::forModules($this->modules);
+            $overrideGraph = DependencyGraph::forModules($this->modules);
 
             foreach ($overrideGraph->getSortedModuleNames() as $moduleName) {
                 $moduleOrderString .= sprintf(

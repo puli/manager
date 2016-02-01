@@ -67,9 +67,9 @@ namespace Puli\Manager\Conflict;
 class ModuleConflictDetector
 {
     /**
-     * @var OverrideGraph
+     * @var DependencyGraph
      */
-    private $overrideGraph;
+    private $dependencyGraph;
 
     /**
      * @var bool[][]
@@ -79,13 +79,13 @@ class ModuleConflictDetector
     /**
      * Creates a new conflict detector.
      *
-     * @param OverrideGraph|null $overrideGraph The graph indicating which
-     *                                          module is overridden by which
-     *                                          other module.
+     * @param DependencyGraph|null $dependencyGraph The graph indicating which
+     *                                              module depends on which
+     *                                              other module.
      */
-    public function __construct(OverrideGraph $overrideGraph = null)
+    public function __construct(DependencyGraph $dependencyGraph = null)
     {
-        $this->overrideGraph = $overrideGraph ?: new OverrideGraph();
+        $this->dependencyGraph = $dependencyGraph ?: new DependencyGraph();
     }
 
     /**
@@ -153,13 +153,14 @@ class ModuleConflictDetector
                 continue;
             }
 
-            $sortedNames = $this->overrideGraph->getSortedModuleNames($moduleNames);
+            $sortedNames = $this->dependencyGraph->getSortedModuleNames($moduleNames);
             $conflictingNames = array();
 
             // An edge must exist between each module pair in the sorted set,
             // otherwise the dependencies are not sufficiently defined
             for ($i = 1, $l = count($sortedNames); $i < $l; ++$i) {
-                if (!$this->overrideGraph->hasEdge($sortedNames[$i - 1], $sortedNames[$i])) {
+                // Exclude recursive dependencies
+                if (!$this->dependencyGraph->hasDependency($sortedNames[$i], $sortedNames[$i - 1], false)) {
                     $conflictingNames[$sortedNames[$i - 1]] = true;
                     $conflictingNames[$sortedNames[$i]] = true;
                 }
