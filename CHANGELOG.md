@@ -12,6 +12,7 @@ Changelog
    `ModuleFileConverter` and `RootModuleFileConverter`
  * replaced `ConfigFileSerializer` and `ConfigJsonSerializer` by 
    `ConfigFileConverter`
+ * replaced `ConfigFileStorage` and `ModuleFileStorage` by `JsonStorage`
 
 * 1.0.0-beta10 (2016-01-14)
 

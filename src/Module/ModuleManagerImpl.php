@@ -16,10 +16,11 @@ use Puli\Manager\Api\Context\ProjectContext;
 use Puli\Manager\Api\Environment;
 use Puli\Manager\Api\FileNotFoundException;
 use Puli\Manager\Api\InvalidConfigException;
+use Puli\Manager\Api\Module\DependencyFile;
 use Puli\Manager\Api\Module\InstallInfo;
 use Puli\Manager\Api\Module\Module;
-use Puli\Manager\Api\Module\ModuleList;
 use Puli\Manager\Api\Module\ModuleFile;
+use Puli\Manager\Api\Module\ModuleList;
 use Puli\Manager\Api\Module\ModuleManager;
 use Puli\Manager\Api\Module\NameConflictException;
 use Puli\Manager\Api\Module\RootModule;
@@ -27,6 +28,7 @@ use Puli\Manager\Api\Module\RootModuleFile;
 use Puli\Manager\Api\Module\UnsupportedVersionException;
 use Puli\Manager\Api\NoDirectoryException;
 use Puli\Manager\Assert\Assert;
+use Puli\Manager\Json\JsonStorage;
 use Webmozart\Expression\Expr;
 use Webmozart\Expression\Expression;
 use Webmozart\PathUtil\Path;
@@ -56,9 +58,9 @@ class ModuleManagerImpl implements ModuleManager
     private $rootModuleFile;
 
     /**
-     * @var ModuleFileStorage
+     * @var JsonStorage
      */
-    private $moduleFileStorage;
+    private $jsonStorage;
 
     /**
      * @var ModuleList
@@ -66,22 +68,27 @@ class ModuleManagerImpl implements ModuleManager
     private $modules;
 
     /**
+     * @var DependencyFile[]
+     */
+    private $dependencyFilesByInstallerName = array();
+
+    /**
      * Loads the module repository for a given project.
      *
-     * @param ProjectContext    $context           The project context.
-     * @param ModuleFileStorage $moduleFileStorage The module file storage.
+     * @param ProjectContext $context     The project context.
+     * @param JsonStorage    $jsonStorage The module file storage.
      *
      * @throws FileNotFoundException  If the install path of a module not exist.
      * @throws NoDirectoryException   If the install path of a module points to a file.
      * @throws InvalidConfigException If a configuration file contains invalid configuration.
      * @throws NameConflictException  If a module has the same name as another loaded module.
      */
-    public function __construct(ProjectContext $context, ModuleFileStorage $moduleFileStorage)
+    public function __construct(ProjectContext $context, JsonStorage $jsonStorage)
     {
         $this->context = $context;
         $this->rootDir = $context->getRootDirectory();
         $this->rootModuleFile = $context->getRootModuleFile();
-        $this->moduleFileStorage = $moduleFileStorage;
+        $this->jsonStorage = $jsonStorage;
     }
 
     /**
@@ -134,7 +141,7 @@ class ModuleManagerImpl implements ModuleManager
         $this->rootModuleFile->addInstallInfo($installInfo);
 
         try {
-            $this->moduleFileStorage->saveRootModuleFile($this->rootModuleFile);
+            $this->jsonStorage->saveRootModuleFile($this->rootModuleFile);
         } catch (Exception $e) {
             $this->rootModuleFile->removeInstallInfo($name);
 
@@ -182,7 +189,7 @@ class ModuleManagerImpl implements ModuleManager
             $this->rootModuleFile->removeInstallInfo($name);
 
             try {
-                $this->moduleFileStorage->saveRootModuleFile($this->rootModuleFile);
+                $this->jsonStorage->saveRootModuleFile($this->rootModuleFile);
             } catch (Exception $e) {
                 $this->rootModuleFile->addInstallInfo($installInfo);
 
@@ -215,7 +222,7 @@ class ModuleManagerImpl implements ModuleManager
         }
 
         try {
-            $this->moduleFileStorage->saveRootModuleFile($this->rootModuleFile);
+            $this->jsonStorage->saveRootModuleFile($this->rootModuleFile);
         } catch (Exception $e) {
             $this->rootModuleFile->setInstallInfos($installInfos);
             $this->modules->replace($modules);
@@ -339,8 +346,6 @@ class ModuleManagerImpl implements ModuleManager
         $this->modules->add(new RootModule($this->rootModuleFile, $this->rootDir));
 
         foreach ($this->rootModuleFile->getInstallInfos() as $installInfo) {
-            // Catch and log exceptions so that single modules cannot break
-            // the whole repository
             $this->modules->add($this->loadModule($installInfo));
         }
     }
@@ -358,6 +363,8 @@ class ModuleManagerImpl implements ModuleManager
         $moduleFile = null;
         $loadError = null;
 
+        // Catch and log exceptions so that single modules cannot break
+        // the whole repository
         try {
             $moduleFile = $this->loadModuleFile($installPath);
         } catch (InvalidConfigException $loadError) {
@@ -393,7 +400,7 @@ class ModuleManagerImpl implements ModuleManager
         }
 
         try {
-            return $this->moduleFileStorage->loadModuleFile($installPath.'/puli.json');
+            return $this->jsonStorage->loadModuleFile($installPath.'/puli.json');
         } catch (FileNotFoundException $e) {
             // Modules without module files are ok
             return null;
@@ -424,7 +431,7 @@ class ModuleManagerImpl implements ModuleManager
         $moduleFile->setModuleName($newName);
 
         try {
-            $this->moduleFileStorage->saveRootModuleFile($this->rootModuleFile);
+            $this->jsonStorage->saveRootModuleFile($this->rootModuleFile);
         } catch (Exception $e) {
             $moduleFile->setModuleName($previousName);
 
@@ -450,7 +457,7 @@ class ModuleManagerImpl implements ModuleManager
         $this->rootModuleFile->addInstallInfo($installInfo);
 
         try {
-            $this->moduleFileStorage->saveRootModuleFile($this->rootModuleFile);
+            $this->jsonStorage->saveRootModuleFile($this->rootModuleFile);
         } catch (Exception $e) {
             $this->rootModuleFile->removeInstallInfo($newName);
             $this->rootModuleFile->addInstallInfo($previousInstallInfo);

@@ -9,15 +9,17 @@
  * file that was distributed with this source code.
  */
 
-namespace Puli\Manager\Tests\Module;
+namespace Puli\Manager\Tests\Json;
 
 use PHPUnit_Framework_MockObject_MockObject;
 use PHPUnit_Framework_TestCase;
 use Puli\Manager\Api\Config\Config;
+use Puli\Manager\Api\Config\ConfigFile;
 use Puli\Manager\Api\Module\ModuleFile;
 use Puli\Manager\Api\Module\RootModuleFile;
 use Puli\Manager\Api\Storage\Storage;
-use Puli\Manager\Module\ModuleFileStorage;
+use Puli\Manager\Json\JsonConverterProvider;
+use Puli\Manager\Json\JsonStorage;
 use stdClass;
 use Webmozart\Json\Conversion\ConversionFailedException;
 use Webmozart\Json\Conversion\JsonConverter;
@@ -31,12 +33,17 @@ use Webmozart\Json\JsonEncoder;
  *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class ModuleFileStorageTest extends PHPUnit_Framework_TestCase
+class JsonStorageTest extends PHPUnit_Framework_TestCase
 {
     /**
-     * @var ModuleFileStorage
+     * @var JsonStorage
      */
     private $storage;
+
+    /**
+     * @var PHPUnit_Framework_MockObject_MockObject|JsonConverter
+     */
+    private $configFileConverter;
 
     /**
      * @var PHPUnit_Framework_MockObject_MockObject|JsonConverter
@@ -47,6 +54,11 @@ class ModuleFileStorageTest extends PHPUnit_Framework_TestCase
      * @var PHPUnit_Framework_MockObject_MockObject|JsonConverter
      */
     private $rootModuleFileConverter;
+
+    /**
+     * @var PHPUnit_Framework_MockObject_MockObject|JsonConverterProvider
+     */
+    private $converterProvider;
 
     /**
      * @var PHPUnit_Framework_MockObject_MockObject|JsonEncoder
@@ -65,8 +77,12 @@ class ModuleFileStorageTest extends PHPUnit_Framework_TestCase
 
     protected function setUp()
     {
+        $this->configFileConverter = $this->getMock('Webmozart\Json\Conversion\JsonConverter');
         $this->moduleFileConverter = $this->getMock('Webmozart\Json\Conversion\JsonConverter');
         $this->rootModuleFileConverter = $this->getMock('Webmozart\Json\Conversion\JsonConverter');
+        $this->converterProvider = $this->getMockBuilder('Puli\Manager\Json\JsonConverterProvider')
+            ->disableOriginalConstructor()
+            ->getMock();
         $this->jsonEncoder = $this->getMockBuilder('Webmozart\Json\JsonEncoder')
             ->disableOriginalConstructor()
             ->getMock();
@@ -75,13 +91,198 @@ class ModuleFileStorageTest extends PHPUnit_Framework_TestCase
             ->getMock();
         $this->backend = $this->getMock('Puli\Manager\Api\Storage\Storage');
 
-        $this->storage = new ModuleFileStorage(
+        $this->converterProvider->expects($this->any())
+            ->method('getJsonConverter')
+            ->willReturnMap(array(
+                array('Puli\Manager\Api\Config\ConfigFile', $this->configFileConverter),
+                array('Puli\Manager\Api\Module\ModuleFile', $this->moduleFileConverter),
+                array('Puli\Manager\Api\Module\RootModuleFile', $this->rootModuleFileConverter),
+            ));
+
+        $this->storage = new JsonStorage(
             $this->backend,
-            $this->moduleFileConverter,
-            $this->rootModuleFileConverter,
+            $this->converterProvider,
             $this->jsonEncoder,
             $this->jsonDecoder
         );
+    }
+
+    public function testLoadConfigFile()
+    {
+        $baseConfig = new Config();
+        $configFile = new ConfigFile('/path', $baseConfig);
+        $jsonData = new stdClass();
+
+        $this->backend->expects($this->once())
+            ->method('read')
+            ->with('/path')
+            ->willReturn('SERIALIZED');
+
+        $this->jsonDecoder->expects($this->once())
+            ->method('decode')
+            ->with('SERIALIZED')
+            ->willReturn($jsonData);
+
+        $this->configFileConverter->expects($this->once())
+            ->method('fromJson')
+            ->with($jsonData, array('path' => '/path', 'baseConfig' => $baseConfig))
+            ->will($this->returnValue($configFile));
+
+        $this->assertSame($configFile, $this->storage->loadConfigFile('/path', $baseConfig));
+    }
+
+    /**
+     * @expectedException \Puli\Manager\Api\InvalidConfigException
+     */
+    public function testLoadConfigFileConvertsDecodingFailedException()
+    {
+        $baseConfig = new Config();
+
+        $this->backend->expects($this->once())
+            ->method('read')
+            ->with('/path')
+            ->willReturn('SERIALIZED');
+
+        $this->jsonDecoder->expects($this->once())
+            ->method('decode')
+            ->with('SERIALIZED')
+            ->willThrowException(new DecodingFailedException());
+
+        $this->configFileConverter->expects($this->never())
+            ->method('fromJson');
+
+        $this->storage->loadConfigFile('/path', $baseConfig);
+    }
+
+    /**
+     * @expectedException \Puli\Manager\Api\InvalidConfigException
+     */
+    public function testLoadConfigFileConvertsConversionFailedException()
+    {
+        $baseConfig = new Config();
+        $jsonData = new stdClass();
+
+        $this->backend->expects($this->once())
+            ->method('read')
+            ->with('/path')
+            ->willReturn('SERIALIZED');
+
+        $this->jsonDecoder->expects($this->once())
+            ->method('decode')
+            ->with('SERIALIZED')
+            ->willReturn($jsonData);
+
+        $this->configFileConverter->expects($this->once())
+            ->method('fromJson')
+            ->with($jsonData, array('path' => '/path', 'baseConfig' => $baseConfig))
+            ->willThrowException(new ConversionFailedException());
+
+        $this->storage->loadConfigFile('/path', $baseConfig);
+    }
+
+    public function testSaveConfigFile()
+    {
+        $baseConfig = new Config();
+        $configFile = new ConfigFile('/path', $baseConfig);
+        $jsonData = new stdClass();
+
+        $this->configFileConverter->expects($this->once())
+            ->method('toJson')
+            ->with($configFile)
+            ->willReturn($jsonData);
+
+        $this->jsonEncoder->expects($this->once())
+            ->method('encode')
+            ->with($jsonData)
+            ->willReturn('SERIALIZED');
+
+        $this->backend->expects($this->once())
+            ->method('write')
+            ->with('/path', 'SERIALIZED');
+
+        $this->storage->saveConfigFile($configFile);
+    }
+
+    /**
+     * @expectedException \Puli\Manager\Api\InvalidConfigException
+     */
+    public function testSaveConfigFileConvertsEncodingFailedException()
+    {
+        $baseConfig = new Config();
+        $configFile = new ConfigFile('/path', $baseConfig);
+        $jsonData = new stdClass();
+
+        $this->configFileConverter->expects($this->once())
+            ->method('toJson')
+            ->with($configFile)
+            ->willReturn($jsonData);
+
+        $this->jsonEncoder->expects($this->once())
+            ->method('encode')
+            ->with($jsonData)
+            ->willThrowException(new EncodingFailedException());
+
+        $this->backend->expects($this->never())
+            ->method('write');
+
+        $this->storage->saveConfigFile($configFile);
+    }
+
+    /**
+     * @expectedException \Puli\Manager\Api\InvalidConfigException
+     */
+    public function testSaveConfigFileConvertsConversionFailedException()
+    {
+        $baseConfig = new Config();
+        $configFile = new ConfigFile('/path', $baseConfig);
+
+        $this->configFileConverter->expects($this->once())
+            ->method('toJson')
+            ->with($configFile)
+            ->willThrowException(new ConversionFailedException());
+
+        $this->jsonEncoder->expects($this->never())
+            ->method('encode');
+
+        $this->backend->expects($this->never())
+            ->method('write');
+
+        $this->storage->saveConfigFile($configFile);
+    }
+
+    public function testSaveConfigFileGeneratesFactoryIfManagerAvailable()
+    {
+        $factoryManager = $this->getMock('Puli\Manager\Api\Factory\FactoryManager');
+        $baseConfig = new Config();
+        $configFile = new ConfigFile('/path', $baseConfig);
+        $jsonData = new stdClass();
+
+        $this->storage = new JsonStorage(
+            $this->backend,
+            $this->converterProvider,
+            $this->jsonEncoder,
+            $this->jsonDecoder,
+            $factoryManager
+        );
+
+        $this->configFileConverter->expects($this->once())
+            ->method('toJson')
+            ->with($configFile)
+            ->willReturn($jsonData);
+
+        $this->jsonEncoder->expects($this->once())
+            ->method('encode')
+            ->with($jsonData)
+            ->willReturn('SERIALIZED');
+
+        $this->backend->expects($this->once())
+            ->method('write')
+            ->with('/path', 'SERIALIZED');
+
+        $factoryManager->expects($this->once())
+            ->method('autoGenerateFactoryClass');
+
+        $this->storage->saveConfigFile($configFile);
     }
 
     public function testLoadModuleFile()
@@ -300,6 +501,7 @@ class ModuleFileStorageTest extends PHPUnit_Framework_TestCase
     {
         $baseConfig = new Config();
         $moduleFile = new RootModuleFile(null, '/path', $baseConfig);
+        $moduleFile->setVersion('1.0');
         $jsonData = new stdClass();
 
         $this->rootModuleFileConverter->expects($this->once())
@@ -373,12 +575,12 @@ class ModuleFileStorageTest extends PHPUnit_Framework_TestCase
         $factoryManager = $this->getMock('Puli\Manager\Api\Factory\FactoryManager');
         $baseConfig = new Config();
         $moduleFile = new RootModuleFile(null, '/path', $baseConfig);
+        $moduleFile->setVersion('1.0');
         $jsonData = new stdClass();
 
-        $this->storage = new ModuleFileStorage(
+        $this->storage = new JsonStorage(
             $this->backend,
-            $this->moduleFileConverter,
-            $this->rootModuleFileConverter,
+            $this->converterProvider,
             $this->jsonEncoder,
             $this->jsonDecoder,
             $factoryManager

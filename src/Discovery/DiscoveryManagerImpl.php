@@ -51,7 +51,7 @@ use Puli\Manager\Discovery\Type\RemoveTypeDescriptorFromModuleFile;
 use Puli\Manager\Discovery\Type\SyncTypeName;
 use Puli\Manager\Discovery\Type\UnloadTypeDescriptor;
 use Puli\Manager\Discovery\Type\UpdateDuplicateMarksForTypeName;
-use Puli\Manager\Module\ModuleFileStorage;
+use Puli\Manager\Json\JsonStorage;
 use Puli\Manager\Transaction\InterceptedOperation;
 use Puli\Manager\Transaction\Transaction;
 use Rhumsaa\Uuid\Uuid;
@@ -86,9 +86,9 @@ class DiscoveryManagerImpl implements DiscoveryManager
     private $modules;
 
     /**
-     * @var ModuleFileStorage
+     * @var JsonStorage
      */
-    private $moduleFileStorage;
+    private $jsonStorage;
 
     /**
      * @var RootModule
@@ -116,20 +116,20 @@ class DiscoveryManagerImpl implements DiscoveryManager
      * @param ProjectContext       $context
      * @param EditableDiscovery    $discovery
      * @param ModuleList           $modules
-     * @param ModuleFileStorage    $moduleFileStorage
+     * @param JsonStorage          $jsonStorage
      * @param LoggerInterface|null $logger
      */
     public function __construct(
         ProjectContext $context,
         EditableDiscovery $discovery,
         ModuleList $modules,
-        ModuleFileStorage $moduleFileStorage,
+        JsonStorage $jsonStorage,
         LoggerInterface $logger = null
     ) {
         $this->context = $context;
         $this->discovery = $discovery;
         $this->modules = $modules;
-        $this->moduleFileStorage = $moduleFileStorage;
+        $this->jsonStorage = $jsonStorage;
         $this->rootModule = $modules->getRootModule();
         $this->rootModuleFile = $context->getRootModuleFile();
         $this->logger = $logger ?: new NullLogger();
@@ -987,7 +987,7 @@ class DiscoveryManagerImpl implements DiscoveryManager
 
     private function saveRootModuleFile()
     {
-        $this->moduleFileStorage->saveRootModuleFile($this->rootModuleFile);
+        $this->jsonStorage->saveRootModuleFile($this->rootModuleFile);
     }
 
     private function addTypeDescriptorToModuleFile(BindingTypeDescriptor $typeDescriptor)

@@ -14,6 +14,7 @@ namespace Puli\Manager\Config;
 use Puli\Manager\Api\Config\ConfigFile;
 use Puli\Manager\Api\Config\ConfigFileManager;
 use Puli\Manager\Api\Context\Context;
+use Puli\Manager\Json\JsonStorage;
 
 /**
  * Manages changes to the global configuration file.
@@ -38,20 +39,20 @@ class ConfigFileManagerImpl extends AbstractConfigManager implements ConfigFileM
     private $configFile;
 
     /**
-     * @var ConfigFileStorage
+     * @var JsonStorage
      */
-    private $configFileStorage;
+    private $jsonStorage;
 
     /**
      * Creates the configuration manager.
      *
-     * @param Context           $context           The global context.
-     * @param ConfigFileStorage $configFileStorage The configuration file storage.
+     * @param Context     $context     The global context.
+     * @param JsonStorage $jsonStorage The configuration file storage.
      */
-    public function __construct(Context $context, ConfigFileStorage $configFileStorage)
+    public function __construct(Context $context, JsonStorage $jsonStorage)
     {
         $this->context = $context;
-        $this->configFileStorage = $configFileStorage;
+        $this->jsonStorage = $jsonStorage;
         $this->configFile = $context->getConfigFile();
     }
 
@@ -84,6 +85,6 @@ class ConfigFileManagerImpl extends AbstractConfigManager implements ConfigFileM
      */
     protected function saveConfigFile()
     {
-        $this->configFileStorage->saveConfigFile($this->configFile);
+        $this->jsonStorage->saveConfigFile($this->configFile);
     }
 }

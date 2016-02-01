@@ -23,6 +23,7 @@ use Puli\Manager\Assert\Assert;
 use Rhumsaa\Uuid\Uuid;
 use stdClass;
 use Webmozart\Json\Conversion\JsonConverter;
+use Webmozart\Json\Versioning\JsonVersioner;
 
 /**
  * Converts module files to JSON and back.
@@ -34,9 +35,14 @@ use Webmozart\Json\Conversion\JsonConverter;
 class ModuleFileConverter implements JsonConverter
 {
     /**
-     * The JSON version this converter supports.
+     * The version of the schema.
      */
-    const VERSION = '1.0';
+    const VERSION = '2.0';
+
+    /**
+     * The URI of the schema of this converter.
+     */
+    const SCHEMA = 'http://puli.io/schema/%s/manager/module';
 
     /**
      * The default order of the keys in the written module file.
@@ -44,7 +50,7 @@ class ModuleFileConverter implements JsonConverter
      * @var string[]
      */
     private static $keyOrder = array(
-        'version',
+        '$schema',
         'name',
         'path-mappings',
         'bindings',
@@ -53,10 +59,25 @@ class ModuleFileConverter implements JsonConverter
         'extra',
     );
 
+    /**
+     * @var JsonVersioner
+     */
+    protected $versioner;
+
     public static function compareBindingDescriptors(BindingDescriptor $a, BindingDescriptor $b)
     {
         // Make sure that bindings are always printed in the same order
         return strcmp($a->getUuid()->toString(), $b->getUuid()->toString());
+    }
+
+    /**
+     * Creates a new converter.
+     *
+     * @param JsonVersioner $versioner The JSON versioner.
+     */
+    public function __construct(JsonVersioner $versioner)
+    {
+        $this->versioner = $versioner;
     }
 
     /**
@@ -67,6 +88,7 @@ class ModuleFileConverter implements JsonConverter
         Assert::isInstanceOf($moduleFile, 'Puli\Manager\Api\Module\ModuleFile');
 
         $jsonData = new stdClass();
+        $jsonData->{'$schema'} = sprintf(self::SCHEMA, self::VERSION);
 
         $this->addModuleFileToJson($moduleFile, $jsonData);
 
@@ -86,6 +108,7 @@ class ModuleFileConverter implements JsonConverter
         Assert::isInstanceOf($jsonData, 'stdClass');
 
         $moduleFile = new ModuleFile(null, isset($options['path']) ? $options['path'] : null);
+        $moduleFile->setVersion($this->versioner->parseVersion($jsonData));
 
         $this->addJsonToModuleFile($jsonData, $moduleFile);
 

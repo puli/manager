@@ -13,8 +13,8 @@ namespace Puli\Manager\Tests\Repository;
 
 use PHPUnit_Framework_TestCase;
 use Puli\Manager\Api\Module\Module;
-use Puli\Manager\Api\Module\ModuleList;
 use Puli\Manager\Api\Module\ModuleFile;
+use Puli\Manager\Api\Module\ModuleList;
 use Puli\Manager\Api\Repository\PathConflict;
 use Puli\Manager\Api\Repository\PathMapping;
 

@@ -1,7 +1,7 @@
 {
     "version": "1.0",
     "name": "vendor/root",
-    "modules": {
+    "packages": {
         "vendor/module1": {
             "install-path": "module1"
         },

@@ -33,7 +33,7 @@ class RootModuleFileConverter extends ModuleFileConverter
      * @var string[]
      */
     private static $keyOrder = array(
-        'version',
+        '$schema',
         'name',
         'path-mappings',
         'bindings',
@@ -54,6 +54,7 @@ class RootModuleFileConverter extends ModuleFileConverter
         Assert::isInstanceOf($moduleFile, 'Puli\Manager\Api\Module\RootModuleFile');
 
         $jsonData = new stdClass();
+        $jsonData->{'$schema'} = sprintf(self::SCHEMA, self::VERSION);
 
         $this->addModuleFileToJson($moduleFile, $jsonData);
         $this->addRootModuleFileToJson($moduleFile, $jsonData);
@@ -78,6 +79,7 @@ class RootModuleFileConverter extends ModuleFileConverter
         Assert::nullOrIsInstanceOf($baseConfig, 'Puli\Manager\Api\Config\Config', 'The "baseConfig" option should be null or an instance of %2$s. Got: %s');
 
         $moduleFile = new RootModuleFile(null, $path, $baseConfig);
+        $moduleFile->setVersion($this->versioner->parseVersion($jsonData));
 
         $this->addJsonToModuleFile($jsonData, $moduleFile);
         $this->addJsonToRootModuleFile($jsonData, $moduleFile);

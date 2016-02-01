@@ -27,7 +27,7 @@ use Puli\Manager\Api\Repository\RepositoryManager;
 use Puli\Manager\Assert\Assert;
 use Puli\Manager\Conflict\ModuleConflictDetector;
 use Puli\Manager\Conflict\OverrideGraph;
-use Puli\Manager\Module\ModuleFileStorage;
+use Puli\Manager\Json\JsonStorage;
 use Puli\Manager\Repository\Mapping\AddPathMappingToModuleFile;
 use Puli\Manager\Repository\Mapping\ConflictCollection;
 use Puli\Manager\Repository\Mapping\LoadPathMapping;
@@ -94,9 +94,9 @@ class RepositoryManagerImpl implements RepositoryManager
     private $modules;
 
     /**
-     * @var ModuleFileStorage
+     * @var JsonStorage
      */
-    private $moduleFileStorage;
+    private $jsonStorage;
 
     /**
      * @var OverrideGraph
@@ -129,9 +129,9 @@ class RepositoryManagerImpl implements RepositoryManager
      * @param ProjectContext     $context
      * @param EditableRepository $repo
      * @param ModuleList         $modules
-     * @param ModuleFileStorage  $moduleFileStorage
+     * @param JsonStorage        $jsonStorage
      */
-    public function __construct(ProjectContext $context, EditableRepository $repo, ModuleList $modules, ModuleFileStorage $moduleFileStorage)
+    public function __construct(ProjectContext $context, EditableRepository $repo, ModuleList $modules, JsonStorage $jsonStorage)
     {
         $this->context = $context;
         $this->dispatcher = $context->getEventDispatcher();
@@ -141,7 +141,7 @@ class RepositoryManagerImpl implements RepositoryManager
         $this->rootModule = $modules->getRootModule();
         $this->rootModuleFile = $context->getRootModuleFile();
         $this->modules = $modules;
-        $this->moduleFileStorage = $moduleFileStorage;
+        $this->jsonStorage = $jsonStorage;
     }
 
     /**
@@ -535,7 +535,7 @@ class RepositoryManagerImpl implements RepositoryManager
 
     private function saveRootModuleFile()
     {
-        $this->moduleFileStorage->saveRootModuleFile($this->rootModuleFile);
+        $this->jsonStorage->saveRootModuleFile($this->rootModuleFile);
     }
 
     private function removeResolvedConflicts()

@@ -1,13 +1,9 @@
 {
-    "id": "http://puli.io/schema/1.0/manager/module",
+    "id": "http://puli.io/schema/2.0/manager/module",
     "$schema": "http://json-schema.org/draft-04/schema",
     "type": "object",
     "additionalProperties": false,
     "properties": {
-        "version": {
-            "type": "string",
-            "required": true
-        },
         "name": {
             "type": "string"
         },
@@ -93,7 +89,7 @@
             "type": "object",
             "additionalProperties": true
         },
-        "packages": {
+        "modules": {
             "type": "object",
             "additionalProperties": {
                 "type": "object",

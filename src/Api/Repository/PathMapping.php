@@ -111,12 +111,12 @@ class PathMapping
     /**
      * Loads the mapping.
      *
-     * @param Module     $containingModule       The module that contains the
-     *                                           mapping.
-     * @param ModuleList $modules                A list of modules that can
-     *                                           be referenced using
-     *                                           `@vendor/module:` prefixes
-     *                                           in the path references.
+     * @param Module     $containingModule The module that contains the
+     *                                     mapping.
+     * @param ModuleList $modules          A list of modules that can
+     *                                     be referenced using
+     *                                     `@vendor/module:` prefixes
+     *                                     in the path references.
      *
      * @throws AlreadyLoadedException If the mapping is already loaded.
      */
