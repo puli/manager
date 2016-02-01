@@ -12,8 +12,8 @@
 namespace Puli\Manager\Tests\Conflict;
 
 use PHPUnit_Framework_TestCase;
-use Puli\Manager\Conflict\ModuleConflictDetector;
 use Puli\Manager\Conflict\DependencyGraph;
+use Puli\Manager\Conflict\ModuleConflictDetector;
 
 /**
  * @since  1.0
