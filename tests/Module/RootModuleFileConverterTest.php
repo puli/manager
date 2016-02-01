@@ -142,7 +142,7 @@ class RootModuleFileConverterTest extends PHPUnit_Framework_TestCase
                     ),
                 ),
             ),
-            'override' => 'acme/blog',
+            'override' => array('acme/blog'),
             'extra' => (object) array(
                 'extra1' => 'value',
                 'extra2' => (object) array(
@@ -318,7 +318,7 @@ class RootModuleFileConverterTest extends PHPUnit_Framework_TestCase
                     ),
                 ),
             ),
-            'override' => 'acme/blog',
+            'override' => array('acme/blog'),
             'extra' => (object) array(
                 'extra1' => 'value',
                 'extra2' => (object) array(

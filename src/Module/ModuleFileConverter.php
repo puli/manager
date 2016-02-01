@@ -219,7 +219,7 @@ class ModuleFileConverter implements JsonConverter
         }
 
         if (count($overrides) > 0) {
-            $jsonData->override = count($overrides) > 1 ? $overrides : reset($overrides);
+            $jsonData->override = $overrides;
         }
 
         if (count($extra) > 0) {
@@ -304,7 +304,7 @@ class ModuleFileConverter implements JsonConverter
         }
 
         if (isset($jsonData->override)) {
-            $moduleFile->setOverriddenModules((array) $jsonData->override);
+            $moduleFile->setOverriddenModules($jsonData->override);
         }
 
         if (isset($jsonData->extra)) {

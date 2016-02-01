@@ -64,7 +64,7 @@
             }
         },
         "override": {
-            "type": [ "string", "array" ],
+            "type": "array",
             "items": {
                 "type": "string"
             }
