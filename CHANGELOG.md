@@ -15,6 +15,7 @@ Changelog
  * replaced `ConfigFileStorage` and `ModuleFileStorage` by `JsonStorage`
  * renamed `Puli` to `Container`
  * renamed key "path-mappings" to "resources"
+ * renamed key "override-order" to "order"
  * the key "override" must now always contain an array
 
 * 1.0.0-beta10 (2016-01-14)

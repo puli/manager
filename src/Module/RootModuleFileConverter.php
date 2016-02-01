@@ -89,14 +89,14 @@ class RootModuleFileConverter extends ModuleFileConverter
 
     protected function addRootModuleFileToJson(RootModuleFile $moduleFile, stdClass $jsonData)
     {
-        $overrideOrder = $moduleFile->getOverrideOrder();
+        $moduleOrder = $moduleFile->getModuleOrder();
         $installInfos = $moduleFile->getInstallInfos();
 
         // Pass false to exclude base configuration values
         $configValues = $moduleFile->getConfig()->toRawArray(false);
 
-        if (count($overrideOrder) > 0) {
-            $jsonData->{'override-order'} = $overrideOrder;
+        if (count($moduleOrder) > 0) {
+            $jsonData->order = $moduleOrder;
         }
 
         if (count($configValues) > 0) {
@@ -145,8 +145,8 @@ class RootModuleFileConverter extends ModuleFileConverter
 
     protected function addJsonToRootModuleFile(stdClass $jsonData, RootModuleFile $moduleFile)
     {
-        if (isset($jsonData->{'override-order'})) {
-            $moduleFile->setOverrideOrder((array) $jsonData->{'override-order'});
+        if (isset($jsonData->order)) {
+            $moduleFile->setModuleOrder((array) $jsonData->order);
         }
 
         if (isset($jsonData->plugins)) {

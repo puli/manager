@@ -26,7 +26,6 @@ use Puli\Manager\Api\Module\InstallInfo;
 use Puli\Manager\Api\Module\RootModuleFile;
 use Puli\Manager\Api\PuliPlugin;
 use Puli\Manager\Api\Repository\PathMapping;
-use Puli\Manager\Module\ModuleFileConverter;
 use Puli\Manager\Module\RootModuleFileConverter;
 use Puli\Manager\Tests\Discovery\Fixtures\Bar;
 use Puli\Manager\Tests\Discovery\Fixtures\Foo;
@@ -57,7 +56,7 @@ class RootModuleFileConverterTest extends PHPUnit_Framework_TestCase
     private $versioner;
 
     /**
-     * @var ModuleFileConverter
+     * @var RootModuleFileConverter
      */
     private $converter;
 
@@ -93,7 +92,7 @@ class RootModuleFileConverterTest extends PHPUnit_Framework_TestCase
             'param' => 'Description of the parameter.',
         )));
         $moduleFile->setOverriddenModules(array('acme/blog'));
-        $moduleFile->setOverrideOrder(array(
+        $moduleFile->setModuleOrder(array(
             'acme/blog-extension1',
             'acme/blog-extension2',
         ));
@@ -149,7 +148,7 @@ class RootModuleFileConverterTest extends PHPUnit_Framework_TestCase
                     'key' => 'value',
                 ),
             ),
-            'override-order' => array(
+            'order' => array(
                 'acme/blog-extension1',
                 'acme/blog-extension2',
             ),
@@ -325,7 +324,7 @@ class RootModuleFileConverterTest extends PHPUnit_Framework_TestCase
                     'key' => 'value',
                 ),
             ),
-            'override-order' => array(
+            'order' => array(
                 'acme/blog-extension1',
                 'acme/blog-extension2',
             ),
@@ -405,7 +404,7 @@ class RootModuleFileConverterTest extends PHPUnit_Framework_TestCase
             'extra1' => 'value',
             'extra2' => (object) array('key' => 'value'),
         ), $moduleFile->getExtraKeys());
-        $this->assertSame(array('acme/blog-extension1', 'acme/blog-extension2'), $moduleFile->getOverrideOrder());
+        $this->assertSame(array('acme/blog-extension1', 'acme/blog-extension2'), $moduleFile->getModuleOrder());
         $this->assertEquals(array($installInfo1, $installInfo2), $moduleFile->getInstallInfos());
         $this->assertSame('puli-dir', $config->get(Config::PULI_DIR));
         $this->assertSame('Puli\MyFactory', $config->get(Config::FACTORY_OUT_CLASS));
@@ -446,7 +445,7 @@ class RootModuleFileConverterTest extends PHPUnit_Framework_TestCase
         $this->assertSame(array(), $moduleFile->getPathMappings());
         $this->assertSame(array(), $moduleFile->getBindingDescriptors());
         $this->assertSame(array(), $moduleFile->getOverriddenModules());
-        $this->assertSame(array(), $moduleFile->getOverrideOrder());
+        $this->assertSame(array(), $moduleFile->getModuleOrder());
     }
 
     public function testFromJsonInheritsBaseConfig()

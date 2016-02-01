@@ -1449,7 +1449,7 @@ class RepositoryManagerImplTest extends ManagerTestCase
     {
         $this->initDefaultManager();
 
-        $this->rootModuleFile->setOverrideOrder(array('vendor/module1', 'vendor/module2'));
+        $this->rootModuleFile->setModuleOrder(array('vendor/module1', 'vendor/module2'));
         $this->moduleFile1->addPathMapping(new PathMapping('/path', 'resources'));
         $this->moduleFile2->addPathMapping(new PathMapping('/path', 'override'));
 
@@ -1472,7 +1472,7 @@ class RepositoryManagerImplTest extends ManagerTestCase
 
         $this->moduleFile2 = new RootModuleFile('vendor/module2');
         $this->moduleFile2->addPathMapping(new PathMapping('/path', 'override'));
-        $this->moduleFile2->setOverrideOrder(array('vendor/module1', 'vendor/module2'));
+        $this->moduleFile2->setModuleOrder(array('vendor/module1', 'vendor/module2'));
 
         // Update module file
         $this->modules->add(new Module($this->moduleFile2, $this->moduleDir2));

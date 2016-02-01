@@ -34,7 +34,7 @@ class RootModuleFile extends ModuleFile
     /**
      * @var string[]
      */
-    private $overrideOrder = array();
+    private $moduleOrder = array();
 
     /**
      * @var InstallInfo[]
@@ -86,9 +86,9 @@ class RootModuleFile extends ModuleFile
      *
      * @return string[] A list of module names.
      */
-    public function getOverrideOrder()
+    public function getModuleOrder()
     {
-        return $this->overrideOrder;
+        return $this->moduleOrder;
     }
 
     /**
@@ -99,11 +99,11 @@ class RootModuleFile extends ModuleFile
      * loaded. Alternatively, you can use {@link setOverriddenModules()} to
      * mark one of the modules to override the other one.
      *
-     * @param string[] $overrideOrder A list of module names.
+     * @param string[] $moduleOrder A list of module names.
      */
-    public function setOverrideOrder(array $overrideOrder)
+    public function setModuleOrder(array $moduleOrder)
     {
-        $this->overrideOrder = $overrideOrder;
+        $this->moduleOrder = $moduleOrder;
     }
 
     /**

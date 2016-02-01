@@ -51,6 +51,11 @@ class ModuleFile10To20Migration implements JsonMigration
         if (isset($data->override) && !is_array($data->override)) {
             $data->override = array($data->override);
         }
+
+        if (isset($data->{'override-order'})) {
+            $data->order = $data->{'override-order'};
+            unset($data->{'override-order'});
+        }
     }
 
     public function down(stdClass $data)
@@ -71,6 +76,11 @@ class ModuleFile10To20Migration implements JsonMigration
 
         if (isset($data->override) && 1 === count($data->override)) {
             $data->override = reset($data->override);
+        }
+
+        if (isset($data->order)) {
+            $data->{'override-order'} = $data->order;
+            unset($data->order);
         }
     }
 }

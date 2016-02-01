@@ -111,7 +111,7 @@ class OverrideGraph
         }
 
         // Make sure we have numeric, ascending keys here
-        $moduleOrder = array_values($modules->getRootModule()->getModuleFile()->getOverrideOrder());
+        $moduleOrder = array_values($modules->getRootModule()->getModuleFile()->getModuleOrder());
 
         // Each module overrides the previous one in the list
         for ($i = 1, $l = count($moduleOrder); $i < $l; ++$i) {
