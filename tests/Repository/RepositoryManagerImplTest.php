@@ -351,10 +351,10 @@ class RepositoryManagerImplTest extends ManagerTestCase
                 PHPUnit_Framework_Assert::assertTrue($mappings['/path']->isEnabled());
 
                 // Module was added to overridden modules
-                PHPUnit_Framework_Assert::assertSame(array('vendor/module1', 'vendor/module2'), $rootModuleFile->getOverriddenModules());
+                PHPUnit_Framework_Assert::assertSame(array('vendor/module1', 'vendor/module2'), $rootModuleFile->getDependencies());
             }));
 
-        $this->rootModuleFile->setOverriddenModules(array('vendor/module1'));
+        $this->rootModuleFile->setDependencies(array('vendor/module1'));
         $this->moduleFile2->addPathMapping(new PathMapping('/path', 'resources'));
 
         $this->manager->addRootPathMapping(new PathMapping('/path', 'override'));
@@ -387,12 +387,12 @@ class RepositoryManagerImplTest extends ManagerTestCase
 
                 // Only module2 was marked as overridden, because the
                 // dependency between module1 and module2 is clearly defined
-                PHPUnit_Framework_Assert::assertSame(array('vendor/module2'), $rootModuleFile->getOverriddenModules());
+                PHPUnit_Framework_Assert::assertSame(array('vendor/module2'), $rootModuleFile->getDependencies());
             }));
 
         $this->moduleFile1->addPathMapping(new PathMapping('/path', 'resources'));
         $this->moduleFile2->addPathMapping(new PathMapping('/path', 'resources'));
-        $this->moduleFile2->setOverriddenModules(array('vendor/module1'));
+        $this->moduleFile2->setDependencies(array('vendor/module1'));
 
         $this->manager->addRootPathMapping(new PathMapping('/path', 'resources'));
     }
@@ -418,7 +418,7 @@ class RepositoryManagerImplTest extends ManagerTestCase
                 PHPUnit_Framework_Assert::assertSame('/path', $mappings['/path']->getRepositoryPath());
                 PHPUnit_Framework_Assert::assertSame(array('override'), $mappings['/path']->getPathReferences());
                 PHPUnit_Framework_Assert::assertTrue($mappings['/path']->isEnabled());
-                PHPUnit_Framework_Assert::assertSame(array('vendor/module1'), $rootModuleFile->getOverriddenModules());
+                PHPUnit_Framework_Assert::assertSame(array('vendor/module1'), $rootModuleFile->getDependencies());
             }));
 
         $this->moduleFile1->addPathMapping(new PathMapping('/path', 'resources'));
@@ -456,7 +456,7 @@ class RepositoryManagerImplTest extends ManagerTestCase
                 PHPUnit_Framework_Assert::assertSame('/path', $mappings['/path']->getRepositoryPath());
                 PHPUnit_Framework_Assert::assertSame(array('override'), $mappings['/path']->getPathReferences());
                 PHPUnit_Framework_Assert::assertTrue($mappings['/path']->isEnabled());
-                PHPUnit_Framework_Assert::assertSame(array('vendor/module1'), $rootModuleFile->getOverriddenModules());
+                PHPUnit_Framework_Assert::assertSame(array('vendor/module1'), $rootModuleFile->getDependencies());
             }));
 
         $this->moduleFile1->addPathMapping(new PathMapping('/path/config', 'resources'));
@@ -486,7 +486,7 @@ class RepositoryManagerImplTest extends ManagerTestCase
                 PHPUnit_Framework_Assert::assertSame('/path/config', $mappings['/path/config']->getRepositoryPath());
                 PHPUnit_Framework_Assert::assertSame(array('override'), $mappings['/path/config']->getPathReferences());
                 PHPUnit_Framework_Assert::assertTrue($mappings['/path/config']->isEnabled());
-                PHPUnit_Framework_Assert::assertSame(array('vendor/module1'), $rootModuleFile->getOverriddenModules());
+                PHPUnit_Framework_Assert::assertSame(array('vendor/module1'), $rootModuleFile->getDependencies());
             }));
 
         $this->moduleFile1->addPathMapping(new PathMapping('/path', 'resources'));
@@ -640,7 +640,7 @@ class RepositoryManagerImplTest extends ManagerTestCase
 
         $this->moduleFile1->addPathMapping(new PathMapping('/module1', 'resources'));
         $this->rootModuleFile->addPathMapping(new PathMapping('/module1', 'resources'));
-        $this->rootModuleFile->setOverriddenModules(array('vendor/module1'));
+        $this->rootModuleFile->setDependencies(array('vendor/module1'));
 
         $this->manager->removeRootPathMapping('/module1');
     }
@@ -669,7 +669,7 @@ class RepositoryManagerImplTest extends ManagerTestCase
         // /override overrides /module1/resources/config
         $this->moduleFile1->addPathMapping(new PathMapping('/path', 'resources'));
         $this->rootModuleFile->addPathMapping(new PathMapping('/path/config', 'override'));
-        $this->rootModuleFile->setOverriddenModules(array('vendor/module1'));
+        $this->rootModuleFile->setDependencies(array('vendor/module1'));
 
         $this->manager->removeRootPathMapping('/path/config');
     }
@@ -698,7 +698,7 @@ class RepositoryManagerImplTest extends ManagerTestCase
         // /override/config overrides /module1/resources
         $this->moduleFile1->addPathMapping(new PathMapping('/path/config', 'resources'));
         $this->rootModuleFile->addPathMapping(new PathMapping('/path', 'override'));
-        $this->rootModuleFile->setOverriddenModules(array('vendor/module1'));
+        $this->rootModuleFile->setDependencies(array('vendor/module1'));
 
         $this->manager->removeRootPathMapping('/path');
     }
@@ -727,7 +727,7 @@ class RepositoryManagerImplTest extends ManagerTestCase
         $this->moduleFile1->addPathMapping(new PathMapping('/path', 'resources'));
         $this->moduleFile2->addPathMapping(new PathMapping('/path', 'resources'));
         $this->rootModuleFile->addPathMapping(new PathMapping('/path/config', 'override'));
-        $this->rootModuleFile->setOverriddenModules(array('vendor/module1'));
+        $this->rootModuleFile->setDependencies(array('vendor/module1'));
 
         $this->manager->removeRootPathMapping('/path/config');
     }
@@ -766,7 +766,7 @@ class RepositoryManagerImplTest extends ManagerTestCase
         $this->initDefaultManager();
 
         $this->rootModuleFile->addPathMapping($mapping1 = new PathMapping('/path', 'resources'));
-        $this->rootModuleFile->setOverriddenModules(array('vendor/module1'));
+        $this->rootModuleFile->setDependencies(array('vendor/module1'));
         $this->moduleFile1->addPathMapping($mapping2 = new PathMapping('/path', 'resources'));
 
         $this->repo->expects($this->at(0))
@@ -803,7 +803,7 @@ class RepositoryManagerImplTest extends ManagerTestCase
 
         $this->rootModuleFile->addPathMapping($mapping1 = new PathMapping('/path', 'resources'));
         $this->moduleFile1->addPathMapping($mapping2 = new PathMapping('/path', 'resources'));
-        $this->moduleFile1->setOverriddenModules(array('vendor/root'));
+        $this->moduleFile1->setDependencies(array('vendor/root'));
 
         $this->repo->expects($this->at(0))
             ->method('remove')
@@ -936,7 +936,7 @@ class RepositoryManagerImplTest extends ManagerTestCase
 
         $this->rootModuleFile->addPathMapping($mapping1 = new PathMapping('/path1', 'resources'));
         $this->rootModuleFile->addPathMapping($mapping2 = new PathMapping('/path2', 'resources'));
-        $this->rootModuleFile->setOverriddenModules(array('vendor/module1'));
+        $this->rootModuleFile->setDependencies(array('vendor/module1'));
         $this->moduleFile1->addPathMapping($mapping3 = new PathMapping('/path1', 'resources'));
         $this->moduleFile1->addPathMapping($mapping4 = new PathMapping('/path2', 'resources'));
 
@@ -1315,7 +1315,7 @@ class RepositoryManagerImplTest extends ManagerTestCase
         $this->moduleFile1->addPathMapping(new PathMapping('/module1/css', 'assets/css'));
         $this->moduleFile2->addPathMapping(new PathMapping('/module1', 'override'));
         $this->moduleFile2->addPathMapping(new PathMapping('/module1/css', 'css-override'));
-        $this->moduleFile2->setOverriddenModules(array('vendor/module1'));
+        $this->moduleFile2->setDependencies(array('vendor/module1'));
 
         $this->repo->expects($this->at(0))
             ->method('add')
@@ -1342,9 +1342,9 @@ class RepositoryManagerImplTest extends ManagerTestCase
 
         $this->moduleFile1->addPathMapping(new PathMapping('/module1', 'resources'));
         $this->moduleFile2->addPathMapping(new PathMapping('/module1', 'override'));
-        $this->moduleFile2->setOverriddenModules(array('vendor/module1'));
+        $this->moduleFile2->setDependencies(array('vendor/module1'));
         $this->moduleFile3->addPathMapping(new PathMapping('/module1', 'override2'));
-        $this->moduleFile3->setOverriddenModules(array('vendor/module2'));
+        $this->moduleFile3->setDependencies(array('vendor/module2'));
 
         $this->repo->expects($this->at(0))
             ->method('add')
@@ -1369,7 +1369,7 @@ class RepositoryManagerImplTest extends ManagerTestCase
         $this->moduleFile2->addPathMapping(new PathMapping('/module2', 'resources'));
         $this->moduleFile3->addPathMapping(new PathMapping('/module1', 'override1'));
         $this->moduleFile3->addPathMapping(new PathMapping('/module2', 'override2'));
-        $this->moduleFile3->setOverriddenModules(array('vendor/module1', 'vendor/module2'));
+        $this->moduleFile3->setDependencies(array('vendor/module1', 'vendor/module2'));
 
         $this->repo->expects($this->at(0))
             ->method('add')
@@ -1395,7 +1395,7 @@ class RepositoryManagerImplTest extends ManagerTestCase
         $this->initDefaultManager();
 
         $this->moduleFile1->addPathMapping(new PathMapping('/module', 'resources'));
-        $this->moduleFile1->setOverriddenModules(array('foobar'));
+        $this->moduleFile1->setDependencies(array('foobar'));
 
         $this->repo->expects($this->once())
             ->method('add')
@@ -1410,7 +1410,7 @@ class RepositoryManagerImplTest extends ManagerTestCase
 
         $this->moduleFile1->addPathMapping(new PathMapping('/module1', 'resources'));
         $this->moduleFile2->addPathMapping(new PathMapping('/module1', array('override', 'css-override')));
-        $this->moduleFile2->setOverriddenModules(array('vendor/module1'));
+        $this->moduleFile2->setDependencies(array('vendor/module1'));
 
         $this->repo->expects($this->at(0))
             ->method('add')
@@ -1449,7 +1449,7 @@ class RepositoryManagerImplTest extends ManagerTestCase
     {
         $this->initDefaultManager();
 
-        $this->rootModuleFile->setOverrideOrder(array('vendor/module1', 'vendor/module2'));
+        $this->rootModuleFile->setModuleOrder(array('vendor/module1', 'vendor/module2'));
         $this->moduleFile1->addPathMapping(new PathMapping('/path', 'resources'));
         $this->moduleFile2->addPathMapping(new PathMapping('/path', 'override'));
 
@@ -1472,7 +1472,7 @@ class RepositoryManagerImplTest extends ManagerTestCase
 
         $this->moduleFile2 = new RootModuleFile('vendor/module2');
         $this->moduleFile2->addPathMapping(new PathMapping('/path', 'override'));
-        $this->moduleFile2->setOverrideOrder(array('vendor/module1', 'vendor/module2'));
+        $this->moduleFile2->setModuleOrder(array('vendor/module1', 'vendor/module2'));
 
         // Update module file
         $this->modules->add(new Module($this->moduleFile2, $this->moduleDir2));

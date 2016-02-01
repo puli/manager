@@ -14,7 +14,7 @@ namespace Puli\Manager\Repository\Mapping;
 use Exception;
 use LogicException;
 use Puli\Manager\Api\Repository\PathMapping;
-use Puli\Manager\Conflict\OverrideGraph;
+use Puli\Manager\Conflict\DependencyGraph;
 use Puli\Manager\Transaction\AtomicOperation;
 use Puli\Repository\Api\EditableRepository;
 use Puli\Repository\Resource\DirectoryResource;
@@ -46,7 +46,7 @@ class SyncRepositoryPath implements AtomicOperation
     private $mappings;
 
     /**
-     * @var OverrideGraph
+     * @var DependencyGraph
      */
     private $overrideGraph;
 
@@ -64,9 +64,9 @@ class SyncRepositoryPath implements AtomicOperation
      * @param string                $repositoryPath
      * @param EditableRepository    $repo
      * @param PathMappingCollection $mappings
-     * @param OverrideGraph         $overrideGraph
+     * @param DependencyGraph       $overrideGraph
      */
-    public function __construct($repositoryPath, EditableRepository $repo, PathMappingCollection $mappings, OverrideGraph $overrideGraph)
+    public function __construct($repositoryPath, EditableRepository $repo, PathMappingCollection $mappings, DependencyGraph $overrideGraph)
     {
         $this->repositoryPath = $repositoryPath;
         $this->repo = $repo;

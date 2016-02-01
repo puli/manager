@@ -7,7 +7,7 @@
         "name": {
             "type": "string"
         },
-        "path-mappings": {
+        "resources": {
             "type": "object",
             "additionalProperties": {
                 "type": [ "string", "array" ]
@@ -63,13 +63,13 @@
                 }
             }
         },
-        "override": {
-            "type": [ "string", "array" ],
+        "depend": {
+            "type": "array",
             "items": {
                 "type": "string"
             }
         },
-        "override-order": {
+        "order": {
             "type": "array",
             "items": {
                 "type": "string"

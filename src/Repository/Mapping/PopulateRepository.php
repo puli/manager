@@ -13,7 +13,7 @@ namespace Puli\Manager\Repository\Mapping;
 
 use Exception;
 use Puli\Manager\Api\Repository\PathMapping;
-use Puli\Manager\Conflict\OverrideGraph;
+use Puli\Manager\Conflict\DependencyGraph;
 use Puli\Manager\Transaction\AtomicOperation;
 use Puli\Repository\Api\EditableRepository;
 use Puli\Repository\Resource\DirectoryResource;
@@ -39,7 +39,7 @@ class PopulateRepository implements AtomicOperation
     private $mappings;
 
     /**
-     * @var OverrideGraph
+     * @var DependencyGraph
      */
     private $overrideGraph;
 
@@ -48,7 +48,7 @@ class PopulateRepository implements AtomicOperation
      */
     private $added = false;
 
-    public function __construct(EditableRepository $repo, PathMappingCollection $mappings, OverrideGraph $overrideGraph)
+    public function __construct(EditableRepository $repo, PathMappingCollection $mappings, DependencyGraph $overrideGraph)
     {
         $this->repo = $repo;
         $this->mappings = $mappings;

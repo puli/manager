@@ -13,7 +13,7 @@ namespace Puli\Manager\Repository\Mapping;
 
 use Puli\Manager\Api\Module\RootModule;
 use Puli\Manager\Api\Repository\PathMapping;
-use Puli\Manager\Conflict\OverrideGraph;
+use Puli\Manager\Conflict\DependencyGraph;
 use Puli\Manager\Transaction\AtomicOperation;
 
 /**
@@ -36,7 +36,7 @@ class OverrideConflictingModules implements AtomicOperation
     private $rootModule;
 
     /**
-     * @var OverrideGraph
+     * @var DependencyGraph
      */
     private $overrideGraph;
 
@@ -50,7 +50,7 @@ class OverrideConflictingModules implements AtomicOperation
      */
     private $addedEdgesFrom = array();
 
-    public function __construct(PathMapping $mapping, RootModule $rootModule, OverrideGraph $overrideGraph)
+    public function __construct(PathMapping $mapping, RootModule $rootModule, DependencyGraph $overrideGraph)
     {
         $this->mapping = $mapping;
         $this->rootModule = $rootModule;
@@ -68,13 +68,15 @@ class OverrideConflictingModules implements AtomicOperation
         foreach ($this->mapping->getConflictingModules() as $conflictingModule) {
             $moduleName = $conflictingModule->getName();
 
-            if (!$rootModuleFile->hasOverriddenModule($moduleName)) {
-                $rootModuleFile->addOverriddenModule($moduleName);
+            if (!$rootModuleFile->hasDependency($moduleName)) {
+                $rootModuleFile->addDependency($moduleName);
                 $this->overriddenModules[] = $moduleName;
             }
 
-            if (!$this->overrideGraph->hasEdge($moduleName, $rootModuleName)) {
-                $this->overrideGraph->addEdge($moduleName, $rootModuleName);
+            if (!$this->overrideGraph->hasDependency($rootModuleName,
+                $moduleName)) {
+                $this->overrideGraph->addDependency($rootModuleName,
+                    $moduleName);
                 $this->addedEdgesFrom[] = $moduleName;
             }
         }
@@ -89,11 +91,11 @@ class OverrideConflictingModules implements AtomicOperation
         $rootModuleFile = $this->rootModule->getModuleFile();
 
         foreach ($this->overriddenModules as $moduleName) {
-            $rootModuleFile->removeOverriddenModule($moduleName);
+            $rootModuleFile->removeDependency($moduleName);
         }
 
         foreach ($this->addedEdgesFrom as $moduleName) {
-            $this->overrideGraph->removeEdge($moduleName, $rootModuleName);
+            $this->overrideGraph->removeDependency($rootModuleName, $moduleName);
         }
     }
 }

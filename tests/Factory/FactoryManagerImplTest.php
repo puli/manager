@@ -96,8 +96,8 @@ class FactoryManagerImplTest extends ManagerTestCase
         $this->modules->add(new Module(new ModuleFile('vendor/module2'), __DIR__));
         $this->modules->add(new Module(new ModuleFile('vendor/module3'), __DIR__));
         $this->modules->add(new Module(new ModuleFile('vendor/module4'), __DIR__));
-        $this->modules->get('vendor/module1')->getModuleFile()->setOverriddenModules(array('vendor/module2', 'vendor/module4'));
-        $this->modules->get('vendor/module3')->getModuleFile()->setOverriddenModules(array('vendor/module1'));
+        $this->modules->get('vendor/module1')->getModuleFile()->setDependencies(array('vendor/module2', 'vendor/module4'));
+        $this->modules->get('vendor/module3')->getModuleFile()->setDependencies(array('vendor/module1'));
         $this->servers = new ServerCollection(array(
             new Server('localhost', 'symlink', 'public_html', '/%s'),
             new Server('example.com', 'rsync', 'ssh://example.com', 'http://example.com/%s'),

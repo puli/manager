@@ -12,8 +12,8 @@
 namespace Puli\Manager\Tests\Conflict;
 
 use PHPUnit_Framework_TestCase;
+use Puli\Manager\Conflict\DependencyGraph;
 use Puli\Manager\Conflict\ModuleConflictDetector;
-use Puli\Manager\Conflict\OverrideGraph;
 
 /**
  * @since  1.0
@@ -23,9 +23,9 @@ use Puli\Manager\Conflict\OverrideGraph;
 class ModuleConflictDetectorTest extends PHPUnit_Framework_TestCase
 {
     /**
-     * @var OverrideGraph
+     * @var DependencyGraph
      */
-    private $overrideGraph;
+    private $dependencyGraph;
 
     /**
      * @var ModuleConflictDetector
@@ -34,12 +34,12 @@ class ModuleConflictDetectorTest extends PHPUnit_Framework_TestCase
 
     protected function setUp()
     {
-        $this->overrideGraph = new OverrideGraph(array(
+        $this->dependencyGraph = new DependencyGraph(array(
             'module1',
             'module2',
             'module3',
         ));
-        $this->detector = new ModuleConflictDetector($this->overrideGraph);
+        $this->detector = new ModuleConflictDetector($this->dependencyGraph);
     }
 
     public function testNoConflictIfDifferentClaims()
@@ -109,7 +109,7 @@ class ModuleConflictDetectorTest extends PHPUnit_Framework_TestCase
         $this->detector->claim('A', 'module1');
         $this->detector->claim('A', 'module2');
 
-        $this->overrideGraph->addEdge('module1', 'module2');
+        $this->dependencyGraph->addDependency('module2', 'module1');
 
         $this->assertCount(0, $this->detector->detectConflicts(array('A')));
     }
@@ -121,7 +121,7 @@ class ModuleConflictDetectorTest extends PHPUnit_Framework_TestCase
 
         $this->assertCount(1, $this->detector->detectConflicts(array('A')));
 
-        $this->overrideGraph->addEdge('module1', 'module2');
+        $this->dependencyGraph->addDependency('module2', 'module1');
 
         $this->assertCount(0, $this->detector->detectConflicts(array('A')));
     }
@@ -136,8 +136,8 @@ class ModuleConflictDetectorTest extends PHPUnit_Framework_TestCase
         // if module2 removes the override statement for module1, then
         // module3 and module1 suddenly have a conflict without changing their
         // configuration
-        $this->overrideGraph->addEdge('module1', 'module2');
-        $this->overrideGraph->addEdge('module2', 'module3');
+        $this->dependencyGraph->addDependency('module2', 'module1');
+        $this->dependencyGraph->addDependency('module3', 'module2');
 
         $conflicts = $this->detector->detectConflicts(array('A'));
 

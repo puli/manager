@@ -52,10 +52,10 @@ class ModuleFileConverter implements JsonConverter
     private static $keyOrder = array(
         '$schema',
         'name',
-        'path-mappings',
+        'resources',
         'bindings',
         'binding-types',
-        'override',
+        'depend',
         'extra',
     );
 
@@ -120,7 +120,7 @@ class ModuleFileConverter implements JsonConverter
         $mappings = $moduleFile->getPathMappings();
         $bindingDescriptors = $moduleFile->getBindingDescriptors();
         $typeDescriptors = $moduleFile->getTypeDescriptors();
-        $overrides = $moduleFile->getOverriddenModules();
+        $dependencies = $moduleFile->getDependencies();
         $extra = $moduleFile->getExtraKeys();
 
         if (null !== $moduleFile->getModuleName()) {
@@ -128,13 +128,13 @@ class ModuleFileConverter implements JsonConverter
         }
 
         if (count($mappings) > 0) {
-            $jsonData->{'path-mappings'} = new stdClass();
+            $jsonData->resources = new stdClass();
 
             foreach ($mappings as $mapping) {
                 $puliPath = $mapping->getRepositoryPath();
                 $localPaths = $mapping->getPathReferences();
 
-                $jsonData->{'path-mappings'}->$puliPath = count($localPaths) > 1 ? $localPaths : reset($localPaths);
+                $jsonData->resources->$puliPath = count($localPaths) > 1 ? $localPaths : reset($localPaths);
             }
         }
 
@@ -218,8 +218,8 @@ class ModuleFileConverter implements JsonConverter
             $jsonData->{'binding-types'} = (object) $bindingTypesData;
         }
 
-        if (count($overrides) > 0) {
-            $jsonData->override = count($overrides) > 1 ? $overrides : reset($overrides);
+        if (count($dependencies) > 0) {
+            $jsonData->depend = $dependencies;
         }
 
         if (count($extra) > 0) {
@@ -233,8 +233,8 @@ class ModuleFileConverter implements JsonConverter
             $moduleFile->setModuleName($jsonData->name);
         }
 
-        if (isset($jsonData->{'path-mappings'})) {
-            foreach ($jsonData->{'path-mappings'} as $path => $relativePaths) {
+        if (isset($jsonData->resources)) {
+            foreach ($jsonData->resources as $path => $relativePaths) {
                 $moduleFile->addPathMapping(new PathMapping($path, (array) $relativePaths));
             }
         }
@@ -303,8 +303,8 @@ class ModuleFileConverter implements JsonConverter
             }
         }
 
-        if (isset($jsonData->override)) {
-            $moduleFile->setOverriddenModules((array) $jsonData->override);
+        if (isset($jsonData->depend)) {
+            $moduleFile->setDependencies($jsonData->depend);
         }
 
         if (isset($jsonData->extra)) {
