@@ -76,7 +76,7 @@ use Webmozart\Json\Versioning\VersionFieldVersioner;
 use Webmozart\PathUtil\Path;
 
 /**
- * The Puli service locator.
+ * The Puli service container.
  *
  * Use this class to access the managers provided by this module:
  *
@@ -127,7 +127,7 @@ use Webmozart\PathUtil\Path;
  *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class Puli
+class Container
 {
     /**
      * @var string|null

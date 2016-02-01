@@ -11,7 +11,7 @@
 
 namespace Puli\Manager\Tests\Api\Module\Fixtures;
 
-use Puli\Manager\Api\Puli;
+use Puli\Manager\Api\Container;
 use Puli\Manager\Api\PuliPlugin;
 
 /**
@@ -22,24 +22,24 @@ use Puli\Manager\Api\PuliPlugin;
 class TestPlugin implements PuliPlugin
 {
     /**
-     * @var Puli
+     * @var Container
      */
-    private static $puli;
+    private static $container;
 
     private static $context;
 
     public static function reset()
     {
-        self::$puli = null;
+        self::$container = null;
         self::$context = null;
     }
 
     /**
-     * @return Puli
+     * @return Container
      */
-    public static function getPuli()
+    public static function getContainer()
     {
-        return self::$puli;
+        return self::$container;
     }
 
     public static function getContext()
@@ -47,11 +47,11 @@ class TestPlugin implements PuliPlugin
         return self::$context;
     }
 
-    public function activate(Puli $puli)
+    public function activate(Container $container)
     {
-        self::$puli = $puli;
+        self::$container = $container;
 
         // Test that Puli is started and the services are accessible
-        self::$context = $puli->getContext();
+        self::$context = $container->getContext();
     }
 }

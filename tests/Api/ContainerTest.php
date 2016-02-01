@@ -12,8 +12,8 @@
 namespace Puli\Manager\Tests\Api;
 
 use PHPUnit_Framework_TestCase;
+use Puli\Manager\Api\Container;
 use Puli\Manager\Api\Environment;
-use Puli\Manager\Api\Puli;
 use Puli\Manager\Tests\Api\Fixtures\BootstrapPlugin;
 use Puli\Manager\Tests\Api\Module\Fixtures\TestPlugin;
 use Symfony\Component\EventDispatcher\EventDispatcher;
@@ -27,7 +27,7 @@ use Webmozart\Glob\Test\TestUtil;
  *
  * @runTestsInSeparateProcesses
  */
-class PuliTest extends PHPUnit_Framework_TestCase
+class ContainerTest extends PHPUnit_Framework_TestCase
 {
     /**
      * @var string
@@ -45,7 +45,7 @@ class PuliTest extends PHPUnit_Framework_TestCase
     private $tempHome;
 
     /**
-     * @var Puli
+     * @var Container
      */
     private $puli;
 
@@ -67,7 +67,7 @@ class PuliTest extends PHPUnit_Framework_TestCase
         putenv('HOME=');
         putenv('APPDATA=');
 
-        $this->puli = new Puli();
+        $this->puli = new Container();
     }
 
     protected function tearDown()
@@ -546,7 +546,7 @@ class PuliTest extends PHPUnit_Framework_TestCase
         $this->puli->setRootDirectory($this->tempRoot);
         $this->puli->start();
 
-        $this->assertSame($this->puli, TestPlugin::getPuli());
+        $this->assertSame($this->puli, TestPlugin::getContainer());
         $this->assertSame($this->puli->getContext(), TestPlugin::getContext());
     }
 
@@ -554,7 +554,7 @@ class PuliTest extends PHPUnit_Framework_TestCase
     {
         $this->puli->start();
 
-        $this->assertNull(TestPlugin::getPuli());
+        $this->assertNull(TestPlugin::getContainer());
         $this->assertNull(TestPlugin::getContext());
     }
 
@@ -564,7 +564,7 @@ class PuliTest extends PHPUnit_Framework_TestCase
         $this->puli->disablePlugins();
         $this->puli->start();
 
-        $this->assertNull(TestPlugin::getPuli());
+        $this->assertNull(TestPlugin::getContainer());
         $this->assertNull(TestPlugin::getContext());
     }
 
