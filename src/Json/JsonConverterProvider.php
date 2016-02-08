@@ -49,6 +49,9 @@ class JsonConverterProvider
             case 'Puli\Manager\Api\Module\RootModuleFile':
                 return $this->container->getLegacyRootModuleFileConverter();
 
+            case 'Puli\Manager\Api\Cache\CacheFile':
+                return $this->container->getCacheFileConverter();
+
             default:
                 throw new InvalidArgumentException(sprintf(
                     'Could not find converter for class "%s".',

@@ -164,6 +164,8 @@ class Config
 
     const DISCOVERY_STORE_CACHE = 'discovery.store.cache';
 
+    const CACHE_FILE = 'cache-file';
+
     /**
      * The accepted config keys.
      *
@@ -203,6 +205,7 @@ class Config
         self::DISCOVERY_STORE_PORT => true,
         self::DISCOVERY_STORE_BUCKET => true,
         self::DISCOVERY_STORE_CACHE => true,
+        self::CACHE_FILE => true,
     );
 
     private static $compositeKeys = array(

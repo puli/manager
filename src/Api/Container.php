@@ -17,6 +17,7 @@ use Psr\Log\LoggerInterface;
 use Puli\Discovery\Api\Discovery;
 use Puli\Discovery\Api\EditableDiscovery;
 use Puli\Manager\Api\Asset\AssetManager;
+use Puli\Manager\Api\Cache\CacheManager;
 use Puli\Manager\Api\Config\Config;
 use Puli\Manager\Api\Config\ConfigFileManager;
 use Puli\Manager\Api\Context\Context;
@@ -33,6 +34,8 @@ use Puli\Manager\Api\Server\ServerManager;
 use Puli\Manager\Api\Storage\Storage;
 use Puli\Manager\Assert\Assert;
 use Puli\Manager\Asset\DiscoveryAssetManager;
+use Puli\Manager\Cache\CacheFileConverter;
+use Puli\Manager\Cache\CacheManagerImpl;
 use Puli\Manager\Config\ConfigFileConverter;
 use Puli\Manager\Config\ConfigFileManagerImpl;
 use Puli\Manager\Config\DefaultConfig;
@@ -283,6 +286,16 @@ class Container
      * @var LoggerInterface
      */
     private $logger;
+
+    /**
+     * @var CacheFileConverter|null
+     */
+    private $cacheFileConverter;
+
+    /**
+     * @var CacheManager|null
+     */
+    private $cacheManager;
 
     /**
      * @var bool
@@ -615,7 +628,7 @@ class Container
             );
 
             // Don't set via the constructor to prevent cyclic dependencies
-            $this->factoryManager->setModules($this->getModuleManager()->getModules());
+            $this->factoryManager->setModules($this->getCacheManager()->getModules());
             $this->factoryManager->setServers($this->getServerManager()->getServers());
         }
 
@@ -700,7 +713,7 @@ class Container
             $this->repositoryManager = new RepositoryManagerImpl(
                 $this->context,
                 $this->getRepository(),
-                $this->getModuleManager()->findModules(Expr::method('isEnabled', Expr::same(true))),
+                $this->getCacheManager()->findModules(Expr::method('isEnabled', Expr::same(true))),
                 $this->getJsonStorage()
             );
         }
@@ -723,7 +736,7 @@ class Container
             $this->discoveryManager = new DiscoveryManagerImpl(
                 $this->context,
                 $this->getDiscovery(),
-                $this->getModuleManager()->findModules(Expr::method('isEnabled', Expr::same(true))),
+                $this->getCacheManager()->findModules(Expr::method('isEnabled', Expr::same(true))),
                 $this->getJsonStorage(),
                 $this->logger
             );
@@ -790,7 +803,7 @@ class Container
         if (!$this->installerManager && $this->context instanceof ProjectContext) {
             $this->installerManager = new ModuleFileInstallerManager(
                 $this->getRootModuleFileManager(),
-                $this->getModuleManager()->getModules()
+                $this->getCacheManager()->getModules()
             );
         }
 
@@ -1005,6 +1018,40 @@ class Container
         }
 
         return $this->jsonValidator;
+    }
+
+    /**
+     * Returns the cache file converter.
+     *
+     * @return CacheFileConverter The cache file converter.
+     */
+    public function getCacheFileConverter()
+    {
+        if (!$this->cacheFileConverter) {
+            $this->cacheFileConverter = new CacheFileConverter(new ModuleFileConverter(
+                $this->getJsonVersioner()
+            ));
+        }
+
+        return $this->cacheFileConverter;
+    }
+
+    /**
+     * Returns the cached configuration manager.
+     *
+     * @return CacheManager The cached configuration manager.
+     */
+    public function getCacheManager()
+    {
+        if (!$this->cacheManager && $this->context instanceof ProjectContext) {
+            $this->cacheManager = new CacheManagerImpl(
+                $this->getModuleManager(),
+                $this->getJsonStorage(),
+                $this->context
+            );
+        }
+
+        return $this->cacheManager;
     }
 
     private function activatePlugins()

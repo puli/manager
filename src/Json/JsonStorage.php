@@ -11,6 +11,7 @@
 
 namespace Puli\Manager\Json;
 
+use Puli\Manager\Api\Cache\CacheFile;
 use Puli\Manager\Api\Config\Config;
 use Puli\Manager\Api\Config\ConfigFile;
 use Puli\Manager\Api\Factory\FactoryManager;
@@ -200,6 +201,51 @@ class JsonStorage
         if ($this->factoryManager) {
             $this->factoryManager->autoGenerateFactoryClass();
         }
+    }
+
+    /**
+     * Loads a cache file from a file path.
+     *
+     * @param string $path The path to the cache file.
+     *
+     * @return CacheFile The loaded cache file.
+     *
+     * @throws FileNotFoundException  If the file does not exist.
+     * @throws ReadException          If the file cannot be read.
+     * @throws InvalidConfigException If the file contains invalid
+     *                                configuration.
+     */
+    public function loadCacheFile($path)
+    {
+        return $this->loadFile($path, 'Puli\Manager\Api\Cache\CacheFile', array(
+            'path' => $path,
+        ));
+    }
+
+    /**
+     * Saves a cache file.
+     *
+     * The cache file is saved to the same path that it was read from.
+     *
+     * @param CacheFile $cacheFile The cache file to save.
+     *
+     * @throws WriteException If the file cannot be written.
+     */
+    public function saveCacheFile(CacheFile $cacheFile)
+    {
+        $this->saveFile($cacheFile, $cacheFile->getPath());
+    }
+
+    /**
+     * Returns whether a file exists.
+     *
+     * @param string $path File path.
+     *
+     * @return bool Returns `true` if file exists and `false` otherwise.
+     */
+    public function fileExists($path)
+    {
+        return $this->storage->exists($path);
     }
 
     private function loadFile($path, $className, array $options = array())

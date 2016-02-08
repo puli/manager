@@ -13,6 +13,7 @@ namespace Puli\Manager\Tests\Json;
 
 use PHPUnit_Framework_MockObject_MockObject;
 use PHPUnit_Framework_TestCase;
+use Puli\Manager\Api\Cache\CacheFile;
 use Puli\Manager\Api\Config\Config;
 use Puli\Manager\Api\Config\ConfigFile;
 use Puli\Manager\Api\Module\ModuleFile;
@@ -56,6 +57,11 @@ class JsonStorageTest extends PHPUnit_Framework_TestCase
     private $rootModuleFileConverter;
 
     /**
+     * @var PHPUnit_Framework_MockObject_MockObject|JsonConverter
+     */
+    private $cacheFileConverter;
+
+    /**
      * @var PHPUnit_Framework_MockObject_MockObject|JsonConverterProvider
      */
     private $converterProvider;
@@ -80,6 +86,7 @@ class JsonStorageTest extends PHPUnit_Framework_TestCase
         $this->configFileConverter = $this->getMock('Webmozart\Json\Conversion\JsonConverter');
         $this->moduleFileConverter = $this->getMock('Webmozart\Json\Conversion\JsonConverter');
         $this->rootModuleFileConverter = $this->getMock('Webmozart\Json\Conversion\JsonConverter');
+        $this->cacheFileConverter = $this->getMock('Webmozart\Json\Conversion\JsonConverter');
         $this->converterProvider = $this->getMockBuilder('Puli\Manager\Json\JsonConverterProvider')
             ->disableOriginalConstructor()
             ->getMock();
@@ -97,6 +104,7 @@ class JsonStorageTest extends PHPUnit_Framework_TestCase
                 array('Puli\Manager\Api\Config\ConfigFile', $this->configFileConverter),
                 array('Puli\Manager\Api\Module\ModuleFile', $this->moduleFileConverter),
                 array('Puli\Manager\Api\Module\RootModuleFile', $this->rootModuleFileConverter),
+                array('Puli\Manager\Api\Cache\CacheFile', $this->cacheFileConverter),
             ));
 
         $this->storage = new JsonStorage(
@@ -604,5 +612,165 @@ class JsonStorageTest extends PHPUnit_Framework_TestCase
             ->method('autoGenerateFactoryClass');
 
         $this->storage->saveRootModuleFile($moduleFile);
+    }
+
+    public function testLoadCacheFile()
+    {
+        $cacheFile = new CacheFile('/path');
+        $jsonData = new stdClass();
+
+        $this->backend->expects($this->once())
+            ->method('read')
+            ->with('/path')
+            ->willReturn('SERIALIZED');
+
+        $this->jsonDecoder->expects($this->once())
+            ->method('decode')
+            ->with('SERIALIZED')
+            ->willReturn($jsonData);
+
+        $this->cacheFileConverter->expects($this->once())
+            ->method('fromJson')
+            ->with($jsonData, array('path' => '/path'))
+            ->will($this->returnValue($cacheFile));
+
+        $this->assertSame($cacheFile, $this->storage->loadCacheFile('/path'));
+    }
+
+    /**
+     * @expectedException \Puli\Manager\Api\InvalidConfigException
+     */
+    public function testLoadCacheFileConvertsDecodingFailedException()
+    {
+        $this->backend->expects($this->once())
+            ->method('read')
+            ->with('/path')
+            ->willReturn('SERIALIZED');
+
+        $this->jsonDecoder->expects($this->once())
+            ->method('decode')
+            ->with('SERIALIZED')
+            ->willThrowException(new DecodingFailedException());
+
+        $this->cacheFileConverter->expects($this->never())
+            ->method('fromJson');
+
+        $this->storage->loadCacheFile('/path');
+    }
+
+    /**
+     * @expectedException \Puli\Manager\Api\InvalidConfigException
+     */
+    public function testLoadCacheFileConvertsConversionFailedException()
+    {
+        $jsonData = new stdClass();
+
+        $this->backend->expects($this->once())
+            ->method('read')
+            ->with('/path')
+            ->willReturn('SERIALIZED');
+
+        $this->jsonDecoder->expects($this->once())
+            ->method('decode')
+            ->with('SERIALIZED')
+            ->willReturn($jsonData);
+
+        $this->cacheFileConverter->expects($this->once())
+            ->method('fromJson')
+            ->with($jsonData, array('path' => '/path'))
+            ->willThrowException(new ConversionFailedException());
+
+        $this->storage->loadCacheFile('/path');
+    }
+
+    public function testSaveCacheFile()
+    {
+        $cacheFile = new CacheFile('/path');
+        $jsonData = new stdClass();
+
+        $this->cacheFileConverter->expects($this->once())
+            ->method('toJson')
+            ->with($cacheFile)
+            ->willReturn($jsonData);
+
+        $this->jsonEncoder->expects($this->once())
+            ->method('encode')
+            ->with($jsonData)
+            ->willReturn('SERIALIZED');
+
+        $this->backend->expects($this->once())
+            ->method('write')
+            ->with('/path', 'SERIALIZED');
+
+        $this->storage->saveCacheFile($cacheFile);
+    }
+
+    /**
+     * @expectedException \Puli\Manager\Api\InvalidConfigException
+     */
+    public function testSaveCacheFileConvertsEncodingFailedException()
+    {
+        $cacheFile = new CacheFile('/path');
+        $jsonData = new stdClass();
+
+        $this->cacheFileConverter->expects($this->once())
+            ->method('toJson')
+            ->with($cacheFile)
+            ->willReturn($jsonData);
+
+        $this->jsonEncoder->expects($this->once())
+            ->method('encode')
+            ->with($jsonData)
+            ->willThrowException(new EncodingFailedException());
+
+        $this->backend->expects($this->never())
+            ->method('write');
+
+        $this->storage->saveCacheFile($cacheFile);
+    }
+
+    /**
+     * @expectedException \Puli\Manager\Api\InvalidConfigException
+     */
+    public function testSaveCacheFileConvertsConversionFailedException()
+    {
+        $cacheFile = new CacheFile('/path');
+
+        $this->cacheFileConverter->expects($this->once())
+            ->method('toJson')
+            ->with($cacheFile)
+            ->willThrowException(new ConversionFailedException());
+
+        $this->jsonEncoder->expects($this->never())
+            ->method('encode');
+
+        $this->backend->expects($this->never())
+            ->method('write');
+
+        $this->storage->saveCacheFile($cacheFile);
+    }
+
+    public function testFileExists()
+    {
+        $this->backend->expects($this->once())
+            ->method('exists')
+            ->with('/path')
+            ->willReturn(true);
+
+        $fileExists = $this->storage->fileExists('/path');
+
+        $this->assertTrue($fileExists);
+    }
+
+    public function testFileNotExists()
+    {
+        $this->backend->expects($this->once())
+            ->method('exists')
+            ->with('/path')
+            ->willReturn(false);
+
+        $fileNotExists = $this->storage->fileExists('/path');
+
+        $this->assertFalse($fileNotExists);
     }
 }
