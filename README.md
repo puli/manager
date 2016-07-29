@@ -26,9 +26,9 @@ a puli.json configuration in the root of your project:
 This mapping can be loaded with the [`RepositoryManager`]:
 
 ```php
-use Puli\Manager\Api\Puli;
+use Puli\Manager\Api\Container;
 
-$puli = new Puli(getcwd());
+$puli = new Container(getcwd());
 $puli->start();
 
 $repoManager = $puli->getRepositoryManager();
