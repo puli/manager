@@ -12,13 +12,13 @@
 namespace Puli\Manager\Api\Module;
 
 use InvalidArgumentException;
+use Puli\Discovery\Api\Binding\Binding;
 use Puli\Manager\Api\Discovery\BindingDescriptor;
 use Puli\Manager\Api\Discovery\BindingTypeDescriptor;
 use Puli\Manager\Api\Discovery\NoSuchBindingException;
 use Puli\Manager\Api\Repository\NoSuchPathMappingException;
 use Puli\Manager\Api\Repository\PathMapping;
 use Puli\Manager\Assert\Assert;
-use Rhumsaa\Uuid\Uuid;
 
 /**
  * Stores the configuration of a module.
@@ -315,21 +315,21 @@ class ModuleFile
     /**
      * Returns the binding descriptor with the given UUID.
      *
-     * @param Uuid $uuid The UUID of the binding descriptor.
+     * @param Binding $binding The UUID of the binding descriptor.
      *
      * @return BindingDescriptor The binding descriptor.
      *
      * @throws NoSuchBindingException If the UUID was not found.
      */
-    public function getBindingDescriptor(Uuid $uuid)
+    public function getBindingDescriptor(Binding $binding)
     {
-        $uuidString = $uuid->toString();
-
-        if (!isset($this->bindingDescriptors[$uuidString])) {
-            throw NoSuchBindingException::forUuid($uuid);
+        foreach ($this->bindingDescriptors as $bindingDescriptor) {
+            if ($binding->equals($bindingDescriptor->getBinding())) {
+                return $bindingDescriptor;
+            }
         }
 
-        return $this->bindingDescriptors[$uuidString];
+        throw NoSuchBindingException::forBinding($binding);
     }
 
     /**
@@ -339,17 +339,24 @@ class ModuleFile
      */
     public function addBindingDescriptor(BindingDescriptor $descriptor)
     {
-        $this->bindingDescriptors[$descriptor->getUuid()->toString()] = $descriptor;
+        // Prevent duplicates
+        $this->removeBindingDescriptor($descriptor->getBinding());
+
+        $this->bindingDescriptors[] = $descriptor;
     }
 
     /**
      * Removes a binding descriptor.
      *
-     * @param Uuid $uuid The UUID of the binding descriptor to remove.
+     * @param Binding $binding The UUID of the binding descriptor to remove.
      */
-    public function removeBindingDescriptor(Uuid $uuid)
+    public function removeBindingDescriptor(Binding $binding)
     {
-        unset($this->bindingDescriptors[$uuid->toString()]);
+        foreach ($this->bindingDescriptors as $key => $bindingDescriptor) {
+            if ($binding->equals($bindingDescriptor->getBinding())) {
+                unset($this->bindingDescriptors[$key]);
+            }
+        }
     }
 
     /**
@@ -363,13 +370,19 @@ class ModuleFile
     /**
      * Returns whether the binding descriptor exists in this file.
      *
-     * @param Uuid $uuid The UUID of the binding descriptor.
+     * @param Binding $binding The UUID of the binding descriptor.
      *
      * @return bool Whether the file contains the binding descriptor.
      */
-    public function hasBindingDescriptor(Uuid $uuid)
+    public function hasBindingDescriptor(Binding $binding)
     {
-        return isset($this->bindingDescriptors[$uuid->toString()]);
+        foreach ($this->bindingDescriptors as $bindingDescriptor) {
+            if ($binding->equals($bindingDescriptor->getBinding())) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**

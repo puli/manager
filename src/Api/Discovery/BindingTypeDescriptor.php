@@ -49,6 +49,11 @@ class BindingTypeDescriptor
     private $parameterDescriptions = array();
 
     /**
+     * @var bool
+     */
+    private $bindingOrderStrict = false;
+
+    /**
      * @var int
      */
     private $state;
@@ -67,17 +72,22 @@ class BindingTypeDescriptor
      * @param string[]    $parameterDescriptions Human-readable descriptions
      *                                           indexed by the type's parameter
      *                                           names.
+     * @param bool        $bindingOrderStrict    Whether modules containing the
+     *                                           bindings of this type must be
+     *                                           strictly ordered with "depend"
+     *                                           statements.
      *
      * @throws NoSuchParameterException If a description is passed for an unset
      *                                  parameter.
      */
-    public function __construct(BindingType $type, $description = null, array $parameterDescriptions = array())
+    public function __construct(BindingType $type, $description = null, array $parameterDescriptions = array(), $bindingOrderStrict = false)
     {
         Assert::nullOrStringNotEmpty($description, 'The description must be a non-empty string or null. Got: %s');
         Assert::allStringNotEmpty($parameterDescriptions, 'The parameter description must be a non-empty string. Got: %s');
 
         $this->type = $type;
         $this->description = $description;
+        $this->bindingOrderStrict = (bool) $bindingOrderStrict;
 
         foreach ($parameterDescriptions as $parameterName => $parameterDescription) {
             if (!$type->hasParameter($parameterName)) {
@@ -243,6 +253,18 @@ class BindingTypeDescriptor
     public function hasParameterDescriptions()
     {
         return count($this->parameterDescriptions) > 0;
+    }
+
+    /**
+     * Returns whether the modules containing the bindings of this type must
+     * be strictly ordered.
+     *
+     * @return boolean Returns `true` if the modules must be strictly ordered
+     *                 and `false` otherwise.
+     */
+    public function isBindingOrderStrict()
+    {
+        return $this->bindingOrderStrict;
     }
 
     /**

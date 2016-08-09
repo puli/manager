@@ -14,6 +14,7 @@ namespace Puli\Manager\Discovery\Binding;
 use Puli\Discovery\Api\EditableDiscovery;
 use Puli\Manager\Api\Discovery\BindingDescriptor;
 use Puli\Manager\Transaction\AtomicOperation;
+use Webmozart\Expression\Expr;
 
 /**
  * Binds a binding descriptor to the resource discovery.
@@ -54,6 +55,9 @@ class AddBinding implements AtomicOperation
      */
     public function rollback()
     {
-        $this->discovery->removeBinding($this->bindingDescriptor->getUuid());
+        $this->discovery->removeBindings(
+            $this->bindingDescriptor->getTypeName(),
+            Expr::method('equals', $this->bindingDescriptor->getBinding(), Expr::same(true))
+        );
     }
 }

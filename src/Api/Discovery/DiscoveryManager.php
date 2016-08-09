@@ -12,8 +12,6 @@
 namespace Puli\Manager\Api\Discovery;
 
 use Puli\Manager\Api\Context\ProjectContext;
-use Puli\Manager\Api\NonRootModuleExpectedException;
-use Rhumsaa\Uuid\Uuid;
 use Webmozart\Expression\Expression;
 
 /**
@@ -211,16 +209,6 @@ interface DiscoveryManager
     public function addRootBindingDescriptor(BindingDescriptor $bindingDescriptor, $flags = 0);
 
     /**
-     * Removes a binding from the root module.
-     *
-     * The binding descriptor is removed from the root module file. If the
-     * binding is not found, this method does nothing.
-     *
-     * @param Uuid $uuid The UUID of the binding.
-     */
-    public function removeRootBindingDescriptor(Uuid $uuid);
-
-    /**
      * Removes all bindings matching the given expression.
      *
      * If no matching bindings are found, this method does nothing.
@@ -235,17 +223,6 @@ interface DiscoveryManager
      * If no bindings are found, this method does nothing.
      */
     public function clearRootBindingDescriptors();
-
-    /**
-     * Returns the binding with the given UUID in the root module.
-     *
-     * @param Uuid $uuid The UUID of the binding.
-     *
-     * @return BindingDescriptor The binding.
-     *
-     * @throws NoSuchBindingException If the binding does not exist.
-     */
-    public function getRootBindingDescriptor(Uuid $uuid);
 
     /**
      * Returns all bindings in the root module.
@@ -264,17 +241,6 @@ interface DiscoveryManager
     public function findRootBindingDescriptors(Expression $expr);
 
     /**
-     * Returns whether the binding with the given UUID exists in the root
-     * module.
-     *
-     * @param Uuid $uuid The UUID of the binding.
-     *
-     * @return bool Returns `true` if the binding exists in the root module and
-     *              `false` otherwise.
-     */
-    public function hasRootBindingDescriptor(Uuid $uuid);
-
-    /**
      * Returns whether the manager has any bindings in the root module.
      *
      * You can optionally pass an expression to check whether the manager has
@@ -288,58 +254,6 @@ interface DiscoveryManager
      *              matching the expression.
      */
     public function hasRootBindingDescriptors(Expression $expr = null);
-
-    /**
-     * Enables a binding.
-     *
-     * @param Uuid $uuid The UUID of the binding.
-     *
-     * @throws NoSuchBindingException         If the binding does not exist.
-     * @throws NoSuchTypeException            If the type referenced by the descriptor does
-     *                                        not exist.
-     * @throws TypeNotEnabledException        If the type referenced by the descriptor
-     *                                        is not enabled.
-     * @throws NonRootModuleExpectedException If the binding is in the root
-     *                                        module. Can only enable bindings
-     *                                        in non-root modules, because the
-     *                                        bindings in the root module are
-     *                                        implicitly enabled.
-     */
-    public function enableBindingDescriptor(Uuid $uuid);
-
-    /**
-     * Disables a binding.
-     *
-     * @param Uuid $uuid The UUID of the binding.
-     *
-     * @throws NoSuchBindingException         If the binding does not exist.
-     * @throws NoSuchTypeException            If the type referenced by the descriptor does
-     *                                        not exist.
-     * @throws TypeNotEnabledException        If the type referenced by the descriptor
-     *                                        is not enabled.
-     * @throws NonRootModuleExpectedException If the binding is in the root
-     *                                        module. Can only disable bindings
-     *                                        in non-root modules, because the
-     *                                        bindings in the root module are
-     *                                        implicitly enabled.
-     */
-    public function disableBindingDescriptor(Uuid $uuid);
-
-    /**
-     * Removes disabled binding UUIDs that were not found in any module.
-     */
-    public function removeObsoleteDisabledBindingDescriptors();
-
-    /**
-     * Returns the binding with the given UUID.
-     *
-     * @param Uuid $uuid The UUID of the binding.
-     *
-     * @return BindingDescriptor The binding.
-     *
-     * @throws NoSuchBindingException If the binding does not exist.
-     */
-    public function getBindingDescriptor(Uuid $uuid);
 
     /**
      * Returns all bindings.
@@ -356,15 +270,6 @@ interface DiscoveryManager
      * @return BindingDescriptor[] The bindings matching the expression.
      */
     public function findBindingDescriptors(Expression $expr);
-
-    /**
-     * Returns whether the binding with the given UUID exists.
-     *
-     * @param Uuid $uuid The UUID of the binding.
-     *
-     * @return bool Returns `true` if the binding exists and `false` otherwise.
-     */
-    public function hasBindingDescriptor(Uuid $uuid);
 
     /**
      * Returns whether the manager has any bindings.
