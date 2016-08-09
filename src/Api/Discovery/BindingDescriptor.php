@@ -21,10 +21,10 @@ use Puli\Manager\Api\NotLoadedException;
 use Rhumsaa\Uuid\Uuid;
 
 /**
- * Describes a resource binding.
+ * Describes a binding.
  *
- * This class contains a high-level model of {@link ResourceBinding} as it is
- * used in this module.
+ * This class contains a high-level model of {@link Binding} as it is used in
+ * the manager.
  *
  * @since  1.0
  *
@@ -128,16 +128,6 @@ class BindingDescriptor
     public function isLoaded()
     {
         return null !== $this->state;
-    }
-
-    /**
-     * Returns the UUID of the described binding.
-     *
-     * @return Uuid The UUID.
-     */
-    public function getUuid()
-    {
-        return $this->binding->getUuid();
     }
 
     /**
@@ -261,27 +251,6 @@ class BindingDescriptor
     }
 
     /**
-     * Returns whether the binding is disabled.
-     *
-     * The method {@link load()} needs to be called before calling this method,
-     * otherwise an exception is thrown.
-     *
-     * @return bool Returns `true` if the state is {@link BindingState::DISABLED}.
-     *
-     * @throws NotLoadedException If the descriptor is not loaded.
-     *
-     * @see BindingState::DISABLED
-     */
-    public function isDisabled()
-    {
-        if (null === $this->state) {
-            throw new NotLoadedException('The binding descriptor is not loaded.');
-        }
-
-        return BindingState::DISABLED === $this->state;
-    }
-
-    /**
      * Returns whether the type of the binding does not exist.
      *
      * The method {@link load()} needs to be called before calling this method,
@@ -354,8 +323,6 @@ class BindingDescriptor
             $this->state = BindingState::INVALID;
         } elseif ($this->containingModule instanceof RootModule) {
             $this->state = BindingState::ENABLED;
-        } elseif ($this->containingModule->getInstallInfo()->hasDisabledBindingUuid($this->binding->getUuid())) {
-            $this->state = BindingState::DISABLED;
         } else {
             $this->state = BindingState::ENABLED;
         }

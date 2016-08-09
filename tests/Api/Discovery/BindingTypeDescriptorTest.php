@@ -28,6 +28,8 @@ use Puli\Manager\Tests\Discovery\Fixtures\Foo;
  */
 class BindingTypeDescriptorTest extends PHPUnit_Framework_TestCase
 {
+    const CLASS_BINDING = 'Puli\Discovery\Binding\ClassBinding';
+
     /**
      * @var Module
      */
@@ -40,7 +42,7 @@ class BindingTypeDescriptorTest extends PHPUnit_Framework_TestCase
 
     public function testCreate()
     {
-        $type = new BindingType(Foo::clazz, array(
+        $type = new BindingType(Foo::clazz, self::CLASS_BINDING, array(
             new BindingParameter('param'),
         ));
 
@@ -56,7 +58,7 @@ class BindingTypeDescriptorTest extends PHPUnit_Framework_TestCase
 
     public function testCreateWithParameterDescription()
     {
-        $type = new BindingType(Foo::clazz, array(
+        $type = new BindingType(Foo::clazz, self::CLASS_BINDING, array(
             new BindingParameter('param'),
         ));
 
@@ -75,7 +77,7 @@ class BindingTypeDescriptorTest extends PHPUnit_Framework_TestCase
      */
     public function testDescriptionMustBeStringOrNull()
     {
-        new BindingTypeDescriptor(new BindingType(Foo::clazz), 1234);
+        new BindingTypeDescriptor(new BindingType(Foo::clazz, self::CLASS_BINDING), 1234);
     }
 
     /**
@@ -83,7 +85,7 @@ class BindingTypeDescriptorTest extends PHPUnit_Framework_TestCase
      */
     public function testDescriptionMustNotBeEmpty()
     {
-        new BindingTypeDescriptor(new BindingType(Foo::clazz), '');
+        new BindingTypeDescriptor(new BindingType(Foo::clazz, self::CLASS_BINDING), '');
     }
 
     /**
@@ -91,7 +93,7 @@ class BindingTypeDescriptorTest extends PHPUnit_Framework_TestCase
      */
     public function testParameterDescriptionsMustBeStringOrNull()
     {
-        $type = new BindingType(Foo::clazz, array(
+        $type = new BindingType(Foo::clazz, self::CLASS_BINDING, array(
             new BindingParameter('param'),
         ));
 
@@ -103,7 +105,7 @@ class BindingTypeDescriptorTest extends PHPUnit_Framework_TestCase
      */
     public function testParameterDescriptionsMustNotBeEmpty()
     {
-        $type = new BindingType(Foo::clazz, array(
+        $type = new BindingType(Foo::clazz, self::CLASS_BINDING, array(
             new BindingParameter('param'),
         ));
 
@@ -116,7 +118,7 @@ class BindingTypeDescriptorTest extends PHPUnit_Framework_TestCase
      */
     public function testCreateFailsIfInvalidParameter()
     {
-        $type = new BindingType(Foo::clazz);
+        $type = new BindingType(Foo::clazz, self::CLASS_BINDING);
 
         new BindingTypeDescriptor($type, null, array('foo' => 'The parameter description.'));
     }
@@ -126,7 +128,7 @@ class BindingTypeDescriptorTest extends PHPUnit_Framework_TestCase
      */
     public function testGetParameterDescriptionFailsIfUnknownParameter()
     {
-        $descriptor = new BindingTypeDescriptor(new BindingType(Foo::clazz));
+        $descriptor = new BindingTypeDescriptor(new BindingType(Foo::clazz, self::CLASS_BINDING));
 
         $descriptor->getParameterDescription('foobar');
     }
@@ -136,7 +138,7 @@ class BindingTypeDescriptorTest extends PHPUnit_Framework_TestCase
      */
     public function testGetParameterDescriptionFailsIfUndescribedParameter()
     {
-        $type = new BindingType(Foo::clazz, array(
+        $type = new BindingType(Foo::clazz, self::CLASS_BINDING, array(
             new BindingParameter('param'),
         ));
 
@@ -147,7 +149,7 @@ class BindingTypeDescriptorTest extends PHPUnit_Framework_TestCase
 
     public function testEnabledIfLoaded()
     {
-        $descriptor = new BindingTypeDescriptor(new BindingType(Foo::clazz));
+        $descriptor = new BindingTypeDescriptor(new BindingType(Foo::clazz, self::CLASS_BINDING));
         $descriptor->load($this->module);
 
         $this->assertSame(BindingTypeState::ENABLED, $descriptor->getState());
@@ -155,7 +157,7 @@ class BindingTypeDescriptorTest extends PHPUnit_Framework_TestCase
 
     public function testDuplicateIfMarkedDuplicate()
     {
-        $descriptor = new BindingTypeDescriptor(new BindingType(Foo::clazz));
+        $descriptor = new BindingTypeDescriptor(new BindingType(Foo::clazz, self::CLASS_BINDING));
         $descriptor->load($this->module);
         $descriptor->markDuplicate(true);
 

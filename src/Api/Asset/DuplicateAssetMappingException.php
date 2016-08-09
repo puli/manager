@@ -24,18 +24,20 @@ use Rhumsaa\Uuid\Uuid;
 class DuplicateAssetMappingException extends Exception
 {
     /**
-     * Creates an exception for a UUID that exists already.
+     * Creates an exception for an asset mapping that exists already.
      *
-     * @param Uuid           $uuid  The UUID of the mapping.
-     * @param Exception|null $cause The exception that caused this exception.
+     * @param AssetMapping   $assetMapping The duplicate asset mapping.
+     * @param Exception|null $cause        The exception that caused this exception.
      *
      * @return static The created exception.
      */
-    public static function forUuid(Uuid $uuid, Exception $cause = null)
+    public static function forAssetMapping(AssetMapping $assetMapping, Exception $cause = null)
     {
         return new static(sprintf(
-            'The asset mapping "%s" exists already.',
-            $uuid->toString()
+            'The asset mapping with glob "%s", server name "%s" and path "%s" exists already.',
+            $assetMapping->getGlob(),
+            $assetMapping->getServerName(),
+            $assetMapping->getServerPath()
         ), 0, $cause);
     }
 }

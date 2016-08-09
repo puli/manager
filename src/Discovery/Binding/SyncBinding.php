@@ -12,32 +12,34 @@
 namespace Puli\Manager\Discovery\Binding;
 
 use LogicException;
+use Puli\Discovery\Api\Binding\Binding;
 use Puli\Discovery\Api\EditableDiscovery;
 use Puli\Manager\Api\Discovery\BindingDescriptor;
 use Puli\Manager\Transaction\AtomicOperation;
 use Rhumsaa\Uuid\Uuid;
+use Webmozart\Expression\Expr;
 
 /**
- * Synchronizes a binding descriptor UUID with the discovery.
+ * Synchronizes a binding descriptor with the discovery.
  *
  * The method {@link takeSnapshot()} must be called before executing the
- * operation. This method will record whether a binding descriptor is currently
- * enabled (i.e. loaded in the discovery) for that UUID.
+ * operation. This method will record whether the binding descriptor is currently
+ * enabled (i.e. loaded in the discovery).
  *
  * Once the operation is executed, another snapshot is taken. If the snapshots
- * differ, the binding descriptor for the UUID is then either bound to or
- * unbound from the discovery, depending on the outcome.
+ * differ, the binding descriptor is then either added to or removed from the
+ * discovery, depending on the outcome.
  *
  * @since  1.0
  *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class SyncBindingUuid implements AtomicOperation
+class SyncBinding implements AtomicOperation
 {
     /**
-     * @var Uuid
+     * @var Binding
      */
-    private $uuid;
+    private $binding;
 
     /**
      * @var EditableDiscovery
@@ -64,9 +66,9 @@ class SyncBindingUuid implements AtomicOperation
      */
     private $snapshotTaken = false;
 
-    public function __construct(Uuid $uuid, EditableDiscovery $discovery, BindingDescriptorCollection $bindingDescriptors)
+    public function __construct(Binding $binding, EditableDiscovery $discovery, BindingDescriptorCollection $bindingDescriptors)
     {
-        $this->uuid = $uuid;
+        $this->binding = $binding;
         $this->discovery = $discovery;
         $this->bindingDescriptors = $bindingDescriptors;
     }
@@ -78,9 +80,7 @@ class SyncBindingUuid implements AtomicOperation
     {
         $this->enabledBindingBefore = null;
 
-        if ($this->bindingDescriptors->contains($this->uuid)) {
-            $bindingDescriptor = $this->bindingDescriptors->get($this->uuid);
-
+        foreach ($this->bindingDescriptors->listByBinding($this->binding) as $bindingDescriptor) {
             if ($bindingDescriptor->isEnabled()) {
                 // Clone so that rollback() works if the binding is unloaded
                 $this->enabledBindingBefore = clone $bindingDescriptor;
@@ -102,16 +102,14 @@ class SyncBindingUuid implements AtomicOperation
         // Remember for rollback()
         $this->enabledBindingAfter = null;
 
-        if ($this->bindingDescriptors->contains($this->uuid)) {
-            $bindingDescriptor = $this->bindingDescriptors->get($this->uuid);
-
+        foreach ($this->bindingDescriptors->listByBinding($this->binding) as $bindingDescriptor) {
             if ($bindingDescriptor->isEnabled()) {
                 // Clone so that rollback() works if the binding is unloaded
                 $this->enabledBindingAfter = clone $bindingDescriptor;
             }
         }
 
-        $this->syncBindingUuid($this->enabledBindingBefore, $this->enabledBindingAfter);
+        $this->syncBinding($this->enabledBindingBefore, $this->enabledBindingAfter);
     }
 
     /**
@@ -119,18 +117,24 @@ class SyncBindingUuid implements AtomicOperation
      */
     public function rollback()
     {
-        $this->syncBindingUuid($this->enabledBindingAfter, $this->enabledBindingBefore);
+        $this->syncBinding($this->enabledBindingAfter, $this->enabledBindingBefore);
     }
 
-    private function syncBindingUuid(BindingDescriptor $enabledBefore = null, BindingDescriptor $enabledAfter = null)
+    private function syncBinding(BindingDescriptor $enabledBefore = null, BindingDescriptor $enabledAfter = null)
     {
         if (!$enabledBefore && $enabledAfter) {
-            $this->discovery->addBinding($enabledAfter->getBinding());
+            $this->discovery->addBinding($this->binding);
         } elseif ($enabledBefore && !$enabledAfter) {
-            $this->discovery->removeBinding($enabledBefore->getUuid());
-        } elseif ($enabledBefore && $enabledAfter && $enabledBefore->getBinding() != $enabledAfter->getBinding()) {
-            $this->discovery->removeBinding($enabledBefore->getUuid());
-            $this->discovery->addBinding($enabledAfter->getBinding());
+            $this->discovery->removeBindings(
+                $this->binding->getTypeName(),
+                Expr::method('equals', $this->binding, Expr::same(true))
+            );
+//        } elseif ($enabledBefore && $enabledAfter && !$enabledBefore->getBinding()->equals($enabledAfter->getBinding())) {
+//            $this->discovery->removeBindings(
+//                $enabledBefore->getTypeName(),
+//                Expr::method('equals', $enabledBefore->getBinding(), Expr::same(true))
+//            );
+//            $this->discovery->addBinding($enabledAfter->getBinding());
         }
     }
 }

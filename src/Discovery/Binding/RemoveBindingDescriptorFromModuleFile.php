@@ -11,10 +11,12 @@
 
 namespace Puli\Manager\Discovery\Binding;
 
+use Puli\Discovery\Api\Binding\Binding;
 use Puli\Manager\Api\Discovery\BindingDescriptor;
 use Puli\Manager\Api\Module\RootModuleFile;
 use Puli\Manager\Transaction\AtomicOperation;
 use Rhumsaa\Uuid\Uuid;
+use Webmozart\Expression\Expr;
 
 /**
  * Removes a binding descriptor from the root module file.
@@ -26,9 +28,9 @@ use Rhumsaa\Uuid\Uuid;
 class RemoveBindingDescriptorFromModuleFile implements AtomicOperation
 {
     /**
-     * @var Uuid
+     * @var Binding
      */
-    private $uuid;
+    private $binding;
 
     /**
      * @var RootModuleFile
@@ -40,9 +42,9 @@ class RemoveBindingDescriptorFromModuleFile implements AtomicOperation
      */
     private $previousDescriptor;
 
-    public function __construct(Uuid $uuid, RootModuleFile $rootModuleFile)
+    public function __construct(Binding $binding, RootModuleFile $rootModuleFile)
     {
-        $this->uuid = $uuid;
+        $this->binding = $binding;
         $this->rootModuleFile = $rootModuleFile;
     }
 
@@ -51,12 +53,15 @@ class RemoveBindingDescriptorFromModuleFile implements AtomicOperation
      */
     public function execute()
     {
-        if (!$this->rootModuleFile->hasBindingDescriptor($this->uuid)) {
+        $expr = Expr::method('getBinding', Expr::method('equals', $this->binding, Expr::same(true)));
+        $matchingDescriptors = $this->rootModuleFile->findBindingDescriptors($expr);
+
+        if (0 === count($matchingDescriptors)) {
             return;
         }
 
-        $this->previousDescriptor = $this->rootModuleFile->getBindingDescriptor($this->uuid);
-        $this->rootModuleFile->removeBindingDescriptor($this->uuid);
+        $this->previousDescriptor = current($matchingDescriptors);
+        $this->rootModuleFile->removeBindingDescriptors($expr);
     }
 
     /**

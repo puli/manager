@@ -14,6 +14,7 @@ namespace Puli\Manager\Discovery\Binding;
 use Puli\Manager\Api\Discovery\BindingDescriptor;
 use Puli\Manager\Api\Module\RootModuleFile;
 use Puli\Manager\Transaction\AtomicOperation;
+use Webmozart\Expression\Expr;
 
 /**
  * Adds a binding descriptor to the root module file.
@@ -50,10 +51,14 @@ class AddBindingDescriptorToModuleFile implements AtomicOperation
      */
     public function execute()
     {
-        $uuid = $this->bindingDescriptor->getUuid();
+        $binding = $this->bindingDescriptor->getBinding();
 
-        if ($this->rootModuleFile->hasBindingDescriptor($uuid)) {
-            $this->previousDescriptor = $this->rootModuleFile->getBindingDescriptor($uuid);
+        $matchingDescriptors = $this->rootModuleFile->findBindingDescriptors(
+            Expr::method('getBinding', Expr::method('equals', $binding, Expr::same(true)))
+        );
+
+        if (count($matchingDescriptors) > 0) {
+            $this->previousDescriptor = current($matchingDescriptors);
         }
 
         $this->rootModuleFile->addBindingDescriptor($this->bindingDescriptor);
@@ -67,7 +72,11 @@ class AddBindingDescriptorToModuleFile implements AtomicOperation
         if ($this->previousDescriptor) {
             $this->rootModuleFile->addBindingDescriptor($this->previousDescriptor);
         } else {
-            $this->rootModuleFile->removeBindingDescriptor($this->bindingDescriptor->getUuid());
+            $binding = $this->bindingDescriptor->getBinding();
+
+            $this->rootModuleFile->removeBindingDescriptors(
+                Expr::method('getBinding', Expr::method('equals', $binding, Expr::same(true)))
+            );
         }
     }
 }

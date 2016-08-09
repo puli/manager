@@ -24,11 +24,6 @@ use Rhumsaa\Uuid\Uuid;
 class AssetMapping
 {
     /**
-     * @var Uuid
-     */
-    private $uuid;
-
-    /**
      * @var string
      */
     private $glob;
@@ -46,32 +41,20 @@ class AssetMapping
     /**
      * Creates the mapping.
      *
-     * @param string    $glob       A glob for resources in the repository.
-     * @param string    $serverName The name of the asset server.
-     * @param string    $serverPath The path of the resource in the document root
-     *                              of the server.
-     * @param Uuid|null $uuid       The UUID of the mapping.
+     * @param string $glob       A glob for resources in the repository.
+     * @param string $serverName The name of the asset server.
+     * @param string $serverPath The path of the resource in the document root
+     *                           of the server.
      */
-    public function __construct($glob, $serverName, $serverPath, Uuid $uuid = null)
+    public function __construct($glob, $serverName, $serverPath)
     {
         Assert::stringNotEmpty($glob, 'The glob must be a non-empty string. Got: %s');
         Assert::stringNotEmpty($serverName, 'The server name must be a non-empty string. Got: %s');
         Assert::string($serverPath, 'The public path must be a string. Got: %s');
 
-        $this->uuid = $uuid ?: Uuid::uuid4();
         $this->glob = $glob;
         $this->serverName = $serverName;
         $this->serverPath = '/'.trim($serverPath, '/');
-    }
-
-    /**
-     * Returns the UUID of the mapping.
-     *
-     * @return Uuid The UUID of the mapping.
-     */
-    public function getUuid()
-    {
-        return $this->uuid;
     }
 
     /**

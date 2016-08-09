@@ -17,8 +17,10 @@ use Puli\Discovery\Binding\ResourceBinding;
 use Puli\Manager\Api\Discovery\BindingDescriptor;
 use Puli\Manager\Api\Module\ModuleFile;
 use Puli\Manager\Api\Repository\PathMapping;
+use Puli\Manager\Tests\Discovery\Fixtures\Bar;
 use Puli\Manager\Tests\Discovery\Fixtures\Foo;
 use Rhumsaa\Uuid\Uuid;
+use Webmozart\Expression\Expr;
 
 /**
  * @since  1.0
@@ -238,45 +240,46 @@ class ModuleFileTest extends PHPUnit_Framework_TestCase
         $moduleFile = new ModuleFile();
         $moduleFile->addBindingDescriptor($descriptor);
 
-        $this->assertSame($descriptor, $moduleFile->getBindingDescriptor($binding->getUuid()));
+        $expr = Expr::method('getBinding', Expr::equals($binding));
+
+        $this->assertSame(array($descriptor), $moduleFile->findBindingDescriptors($expr));
         $this->assertSame(array($descriptor), $moduleFile->getBindingDescriptors());
     }
 
     public function testRemoveBindingDescriptor()
     {
         $binding1 = new ClassBinding(__CLASS__, Foo::clazz);
-        $binding2 = new ResourceBinding('/path', Foo::clazz);
+        $binding2 = new ClassBinding(__CLASS__, Bar::clazz);
         $descriptor1 = new BindingDescriptor($binding1);
         $descriptor2 = new BindingDescriptor($binding2);
 
         $moduleFile = new ModuleFile();
         $moduleFile->addBindingDescriptor($descriptor1);
         $moduleFile->addBindingDescriptor($descriptor2);
-        $moduleFile->removeBindingDescriptor($binding1->getUuid());
+        $moduleFile->removeBindingDescriptors(Expr::method('getBinding', Expr::equals($binding1)));
 
         $this->assertSame(array($descriptor2), $moduleFile->getBindingDescriptors());
     }
 
-    public function testHasBindingDescriptor()
+    public function testHasBindingDescriptors()
     {
         $binding = new ClassBinding(__CLASS__, Foo::clazz);
         $descriptor = new BindingDescriptor($binding);
 
         $moduleFile = new ModuleFile();
 
-        $this->assertFalse($moduleFile->hasBindingDescriptor($binding->getUuid()));
-        $moduleFile->addBindingDescriptor($descriptor);
-        $this->assertTrue($moduleFile->hasBindingDescriptor($binding->getUuid()));
-    }
+        $expr1 = Expr::method('getTypeName', Expr::same(Foo::clazz));
+        $expr2 = Expr::method('getTypeName', Expr::same(Bar::clazz));
 
-    /**
-     * @expectedException \Puli\Manager\Api\Discovery\NoSuchBindingException
-     * @expectedExceptionMessage 8546da2c-dfec-48be-8cd3-93798c41b72f
-     */
-    public function testGetBindingDescriptorFailsIfUnknownUuid()
-    {
-        $moduleFile = new ModuleFile();
-        $moduleFile->getBindingDescriptor(Uuid::fromString('8546da2c-dfec-48be-8cd3-93798c41b72f'));
+        $this->assertFalse($moduleFile->hasBindingDescriptors());
+        $this->assertFalse($moduleFile->hasBindingDescriptors($expr1));
+        $this->assertFalse($moduleFile->hasBindingDescriptors($expr2));
+
+        $moduleFile->addBindingDescriptor($descriptor);
+
+        $this->assertTrue($moduleFile->hasBindingDescriptors());
+        $this->assertTrue($moduleFile->hasBindingDescriptors($expr1));
+        $this->assertFalse($moduleFile->hasBindingDescriptors($expr2));
     }
 
     public function testSetExtraKey()

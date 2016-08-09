@@ -51,16 +51,6 @@ interface AssetManager
     public function addRootAssetMapping(AssetMapping $mapping, $flags = 0);
 
     /**
-     * Removes an asset mapping from the repository.
-     *
-     * The mapping is removed from the root module. If the UUID is not found,
-     * this method does nothing.
-     *
-     * @param Uuid $uuid The UUID of the mapping.
-     */
-    public function removeRootAssetMapping(Uuid $uuid);
-
-    /**
      * Removes all asset mappings matching the given expression.
      *
      * The mappings are removed from the root module. If no matching mappings
@@ -79,32 +69,11 @@ interface AssetManager
     public function clearRootAssetMappings();
 
     /**
-     * Returns the asset mapping from the root module.
-     *
-     * @param Uuid $uuid The UUID of the mapping.
-     *
-     * @return AssetMapping The corresponding asset mapping.
-     *
-     * @throws NoSuchAssetMappingException If the UUID is not found in the root
-     *                                     module.
-     */
-    public function getRootAssetMapping(Uuid $uuid);
-
-    /**
      * Returns all asset mappings in the root module.
      *
      * @return AssetMapping[] The asset mappings.
      */
     public function getRootAssetMappings();
-
-    /**
-     * Returns whether the root module contains a mapping with the given UUID.
-     *
-     * @param Uuid $uuid The UUID of the mapping.
-     *
-     * @return bool Returns `true` if the UUID exists in the root module.
-     */
-    public function hasRootAssetMapping(Uuid $uuid);
 
     /**
      * Returns all asset mappings in the root module matching the given
@@ -129,17 +98,6 @@ interface AssetManager
     public function hasRootAssetMappings(Expression $expr = null);
 
     /**
-     * Returns the asset mapping for a UUID.
-     *
-     * @param Uuid $uuid The UUID of the mapping.
-     *
-     * @return AssetMapping The corresponding asset mapping.
-     *
-     * @throws NoSuchAssetMappingException If the UUID does not exist.
-     */
-    public function getAssetMapping(Uuid $uuid);
-
-    /**
      * Returns all asset mappings.
      *
      * @return AssetMapping[] The asset mappings.
@@ -154,15 +112,6 @@ interface AssetManager
      * @return AssetMapping[] The asset mappings matching the expression.
      */
     public function findAssetMappings(Expression $expr);
-
-    /**
-     * Returns whether an asset mapping with the given UUID exists.
-     *
-     * @param Uuid $uuid The UUID of the mapping.
-     *
-     * @return bool Returns `true` if the UUID exists.
-     */
-    public function hasAssetMapping(Uuid $uuid);
 
     /**
      * Returns whether any asset mappings exist.

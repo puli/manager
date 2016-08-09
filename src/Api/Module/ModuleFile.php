@@ -12,13 +12,15 @@
 namespace Puli\Manager\Api\Module;
 
 use InvalidArgumentException;
+use Puli\Discovery\Api\Binding\Binding;
 use Puli\Manager\Api\Discovery\BindingDescriptor;
 use Puli\Manager\Api\Discovery\BindingTypeDescriptor;
 use Puli\Manager\Api\Discovery\NoSuchBindingException;
 use Puli\Manager\Api\Repository\NoSuchPathMappingException;
 use Puli\Manager\Api\Repository\PathMapping;
 use Puli\Manager\Assert\Assert;
-use Rhumsaa\Uuid\Uuid;
+use Webmozart\Expression\Expr;
+use Webmozart\Expression\Expression;
 
 /**
  * Stores the configuration of a module.
@@ -313,23 +315,23 @@ class ModuleFile
     }
 
     /**
-     * Returns the binding descriptor with the given UUID.
+     * Returns the matching binding descriptors.
      *
-     * @param Uuid $uuid The UUID of the binding descriptor.
+     * @param Expression $expr The expression to filter by.
      *
-     * @return BindingDescriptor The binding descriptor.
-     *
-     * @throws NoSuchBindingException If the UUID was not found.
+     * @return BindingDescriptor[] The matching binding descriptors.
      */
-    public function getBindingDescriptor(Uuid $uuid)
+    public function findBindingDescriptors(Expression $expr)
     {
-        $uuidString = $uuid->toString();
+        $bindingDescriptors = array();
 
-        if (!isset($this->bindingDescriptors[$uuidString])) {
-            throw NoSuchBindingException::forUuid($uuid);
+        foreach ($this->bindingDescriptors as $bindingDescriptor) {
+            if ($expr->evaluate($bindingDescriptor)) {
+                $bindingDescriptors[] = $bindingDescriptor;
+            }
         }
 
-        return $this->bindingDescriptors[$uuidString];
+        return $bindingDescriptors;
     }
 
     /**
@@ -339,17 +341,24 @@ class ModuleFile
      */
     public function addBindingDescriptor(BindingDescriptor $descriptor)
     {
-        $this->bindingDescriptors[$descriptor->getUuid()->toString()] = $descriptor;
+        // Prevent duplicates
+        $this->removeBindingDescriptors(Expr::method('getBinding', Expr::equals($descriptor->getBinding())));
+
+        $this->bindingDescriptors[] = $descriptor;
     }
 
     /**
      * Removes a binding descriptor.
      *
-     * @param Uuid $uuid The UUID of the binding descriptor to remove.
+     * @param Expression $expr The expression to filter by.
      */
-    public function removeBindingDescriptor(Uuid $uuid)
+    public function removeBindingDescriptors(Expression $expr)
     {
-        unset($this->bindingDescriptors[$uuid->toString()]);
+        foreach ($this->bindingDescriptors as $key => $bindingDescriptor) {
+            if ($expr->evaluate($bindingDescriptor)) {
+                unset($this->bindingDescriptors[$key]);
+            }
+        }
     }
 
     /**
@@ -361,26 +370,28 @@ class ModuleFile
     }
 
     /**
-     * Returns whether the binding descriptor exists in this file.
-     *
-     * @param Uuid $uuid The UUID of the binding descriptor.
-     *
-     * @return bool Whether the file contains the binding descriptor.
-     */
-    public function hasBindingDescriptor(Uuid $uuid)
-    {
-        return isset($this->bindingDescriptors[$uuid->toString()]);
-    }
-
-    /**
      * Returns whether the file contains any binding descriptors.
      *
-     * @return bool Returns `true` if the file contains binding descriptors and
-     *              `false` otherwise.
+     * @param Expression|null $expr The expression to filter by. If not
+     *                              provided, the method returns whether the
+     *                              file contains any binding descriptors.
+     *
+     * @return bool Returns `true` if the file contains binding descriptors
+     *              matching the given expression and `false` otherwise.
      */
-    public function hasBindingDescriptors()
+    public function hasBindingDescriptors(Expression $expr = null)
     {
-        return count($this->bindingDescriptors) > 0;
+        if (null === $expr) {
+            return count($this->bindingDescriptors) > 0;
+        }
+
+        foreach ($this->bindingDescriptors as $bindingDescriptor) {
+            if ($expr->evaluate($bindingDescriptor)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**

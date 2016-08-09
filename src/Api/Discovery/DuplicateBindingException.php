@@ -12,7 +12,7 @@
 namespace Puli\Manager\Api\Discovery;
 
 use Exception;
-use Rhumsaa\Uuid\Uuid;
+use Puli\Discovery\Api\Binding\Binding;
 use RuntimeException;
 
 /**
@@ -25,18 +25,18 @@ use RuntimeException;
 class DuplicateBindingException extends RuntimeException
 {
     /**
-     * Creates an exception for a duplicate UUID.
+     * Creates an exception for a binding.
      *
-     * @param Uuid           $uuid  The UUID.
-     * @param Exception|null $cause The exception that caused this exception.
+     * @param Binding        $binding The binding.
+     * @param Exception|null $cause   The exception that caused this exception.
      *
      * @return static The created exception.
      */
-    public static function forUuid(Uuid $uuid, Exception $cause = null)
+    public static function forBinding(Binding $binding, Exception $cause = null)
     {
         return new static(sprintf(
-            'A binding with UUID "%s" exists already.',
-            $uuid->toString()
+            'The binding of type "%s" is already defined.',
+            get_class($binding)
         ), 0, $cause);
     }
 }

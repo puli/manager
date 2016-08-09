@@ -29,18 +29,6 @@ class AssetMappingTest extends PHPUnit_Framework_TestCase
         $this->assertSame('/blog/public', $mapping->getGlob());
         $this->assertSame('local', $mapping->getServerName());
         $this->assertSame('/blog', $mapping->getServerPath());
-        $this->assertInstanceOf('Rhumsaa\Uuid\Uuid', $mapping->getUuid());
-    }
-
-    public function testCreateWithUuid()
-    {
-        $uuid = Uuid::uuid4();
-        $mapping = new AssetMapping('/blog/public', 'local', '/blog', $uuid);
-
-        $this->assertSame('/blog/public', $mapping->getGlob());
-        $this->assertSame('local', $mapping->getServerName());
-        $this->assertSame('/blog', $mapping->getServerPath());
-        $this->assertSame($uuid, $mapping->getUuid());
     }
 
     public function testCreateNormalizesServerPath()

@@ -16,7 +16,6 @@ use Puli\Manager\Api\Context\ProjectContext;
 use Puli\Manager\Api\Environment;
 use Puli\Manager\Api\FileNotFoundException;
 use Puli\Manager\Api\InvalidConfigException;
-use Puli\Manager\Api\Module\DependencyFile;
 use Puli\Manager\Api\Module\InstallInfo;
 use Puli\Manager\Api\Module\Module;
 use Puli\Manager\Api\Module\ModuleFile;
@@ -66,11 +65,6 @@ class ModuleManagerImpl implements ModuleManager
      * @var ModuleList
      */
     private $modules;
-
-    /**
-     * @var DependencyFile[]
-     */
-    private $dependencyFilesByInstallerName = array();
 
     /**
      * Loads the module repository for a given project.

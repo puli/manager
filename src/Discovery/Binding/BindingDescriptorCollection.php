@@ -12,7 +12,9 @@
 namespace Puli\Manager\Discovery\Binding;
 
 use OutOfBoundsException;
+use Puli\Discovery\Api\Binding\Binding;
 use Puli\Manager\Api\Discovery\BindingDescriptor;
+use Puli\Manager\Util\TwoDimensionalHashMap;
 use Rhumsaa\Uuid\Uuid;
 
 /**
@@ -25,17 +27,9 @@ use Rhumsaa\Uuid\Uuid;
 class BindingDescriptorCollection
 {
     /**
-     * @var BindingDescriptor[]
+     * @var BindingDescriptor[][]
      */
-    private $map;
-
-    /**
-     * Creates the store.
-     */
-    public function __construct()
-    {
-        $this->map = array();
-    }
+    private $map = array();
 
     /**
      * Adds a binding descriptor.
@@ -44,7 +38,11 @@ class BindingDescriptorCollection
      */
     public function add(BindingDescriptor $bindingDescriptor)
     {
-        $this->map[$bindingDescriptor->getUuid()->toString()] = $bindingDescriptor;
+        if ($this->contains($bindingDescriptor->getBinding(), $bindingDescriptor->getContainingModule()->getName())) {
+            return;
+        }
+
+        $this->map[$bindingDescriptor->getContainingModule()->getName()][] = $bindingDescriptor;
     }
 
     /**
@@ -52,68 +50,144 @@ class BindingDescriptorCollection
      *
      * This method ignores non-existing binding descriptors.
      *
-     * @param Uuid $uuid The UUID of the binding descriptor.
+     * @param Binding $binding    The described binding.
+     * @param string  $moduleName The name of the module containing the descriptor.
      */
-    public function remove(Uuid $uuid)
+    public function remove(Binding $binding, $moduleName)
     {
-        unset($this->map[$uuid->toString()]);
+        if (!isset($this->map[$moduleName])) {
+            return;
+        }
+
+        foreach ($this->map[$moduleName] as $key => $bindingDescriptor) {
+            if ($bindingDescriptor->getBinding()->equals($binding)) {
+                unset($this->map[$moduleName][$key]);
+
+                break;
+            }
+        }
     }
 
     /**
      * Returns a binding descriptor.
      *
-     * @param Uuid $uuid The UUID of the binding descriptor.
+     * @param Binding $binding    The described binding.
+     * @param string  $moduleName The name of the module containing the descriptor.
      *
      * @return BindingDescriptor The binding descriptor.
      *
      * @throws OutOfBoundsException If no binding descriptor was set for the
      *                              given UUID.
      */
-    public function get(Uuid $uuid)
+    public function get(Binding $binding, $moduleName)
     {
-        if (!isset($this->map[$uuid->toString()])) {
-            throw new OutOfBoundsException(sprintf(
-                'The binding with UUID "%s" does not exist.',
-                $uuid->toString()
-            ));
+        if (isset($this->map[$moduleName])) {
+            foreach ($this->map[$moduleName] as $bindingDescriptor) {
+                if ($bindingDescriptor->getBinding()->equals($binding)) {
+                    return $bindingDescriptor;
+                }
+            }
         }
 
-        return $this->map[$uuid->toString()];
+        throw new OutOfBoundsException(sprintf(
+            'The binding %s in module "%s" does not exist.',
+            get_class($binding),
+            $moduleName
+        ));
     }
 
     /**
      * Returns whether a binding descriptor exists.
      *
-     * @param Uuid $uuid The UUID of the binding descriptor.
+     * @param Binding $binding    The described binding.
+     * @param string  $moduleName The name of the module containing the descriptor.
      *
      * @return bool Returns `true` if a binding descriptor was set for the given
      *              UUID.
      */
-    public function contains(Uuid $uuid)
+    public function contains(Binding $binding, $moduleName = null)
     {
-        return isset($this->map[$uuid->toString()]);
+        if (null === $moduleName) {
+            foreach ($this->map as $bindingDescriptors) {
+                foreach ($bindingDescriptors as $key => $bindingDescriptor) {
+                    if ($bindingDescriptor->getBinding()->equals($binding)) {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        if (!isset($this->map[$moduleName])) {
+            return false;
+        }
+
+        foreach ($this->map[$moduleName] as $key => $bindingDescriptor) {
+            if ($bindingDescriptor->getBinding()->equals($binding)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
-     * Returns the UUIDs of all binding descriptors.
+     * @param Binding $binding
      *
-     * @return Uuid[] The UUIDs of the stored bindings.
+     * @return BindingDescriptor[]
      */
-    public function getUuids()
+    public function listByBinding(Binding $binding)
     {
-        $uuids = array();
+        $result = array();
 
-        foreach ($this->map as $bindingDescriptor) {
-            $uuids[] = $bindingDescriptor->getUuid();
+        foreach ($this->map as $bindingDescriptors) {
+            foreach ($bindingDescriptors as $bindingDescriptor) {
+                if ($bindingDescriptor->getBinding()->equals($binding)) {
+                    $result[] = $bindingDescriptor;
+                }
+            }
         }
 
-        return $uuids;
+        return $result;
+    }
+
+    /**
+     * @param string $typeName
+     *
+     * @return BindingDescriptor[]
+     */
+    public function listByTypeName($typeName)
+    {
+        $result = array();
+
+        foreach ($this->map as $bindingDescriptors) {
+            foreach ($bindingDescriptors as $bindingDescriptor) {
+                if ($typeName === $bindingDescriptor->getTypeName()) {
+                    $result[] = $bindingDescriptor;
+                }
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * @param string $moduleName
+     *
+     * @return BindingDescriptor[]
+     */
+    public function listByModuleName($moduleName)
+    {
+        return isset($this->map[$moduleName]) ? $this->map[$moduleName] : array();
     }
 
     /**
      * Returns the contents of the collection as array.
      *
-     * @return BindingDescriptor[] An array containing all bindings indexed by UUID.
+     * @return BindingDescriptor[][] An array containing arrays of binding
+     *                               descriptors. Each nested array has the
+     *                               module name as key.
      */
     public function toArray()
     {

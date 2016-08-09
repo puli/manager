@@ -82,9 +82,6 @@ class BindingExpressionBuilder implements ExpressionVisitor
     {
         if ($expr instanceof Method) {
             switch ($expr->getMethodName()) {
-                case 'getUuid':
-                    return Expr::method('getUuid', $expr->getExpression());
-
                 case 'getGlob':
                     $queryExpr = $expr->getExpression();
 
