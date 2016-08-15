@@ -291,7 +291,7 @@ class ModuleFileConverter implements JsonConverter
 
                         if (isset($parameterData->description)) {
                             $parameterDescriptions[$parameterName] = $parameterData->description;
-                        };
+                        }
                     }
                 }
 
