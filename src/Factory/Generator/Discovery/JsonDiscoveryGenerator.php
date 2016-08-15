@@ -47,7 +47,7 @@ class JsonDiscoveryGenerator implements ServiceGenerator
         $escPath = '__DIR__.'.var_export('/'.$relPath, true);
 
         $targetMethod->getClass()->addImport(new Import('Puli\Discovery\JsonDiscovery'));
-        $targetMethod->getClass()->addImport(new Import('Puli\Discovery\Binding\Initializer\ResourceBindingInitializer'));
+        $targetMethod->getClass()->addImport(new Import('Puli\Repository\Discovery\ResourceBindingInitializer'));
 
         $targetMethod->addBody(sprintf(
             "$%s = new JsonDiscovery(%s, array(\n    new ResourceBindingInitializer(\$repo),\n));",

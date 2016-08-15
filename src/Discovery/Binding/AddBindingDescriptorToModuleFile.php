@@ -50,10 +50,10 @@ class AddBindingDescriptorToModuleFile implements AtomicOperation
      */
     public function execute()
     {
-        $uuid = $this->bindingDescriptor->getUuid();
+        $binding = $this->bindingDescriptor->getBinding();
 
-        if ($this->rootModuleFile->hasBindingDescriptor($uuid)) {
-            $this->previousDescriptor = $this->rootModuleFile->getBindingDescriptor($uuid);
+        if ($this->rootModuleFile->hasBindingDescriptor($binding)) {
+            $this->previousDescriptor = $this->rootModuleFile->getBindingDescriptor($binding);
         }
 
         $this->rootModuleFile->addBindingDescriptor($this->bindingDescriptor);
@@ -67,7 +67,7 @@ class AddBindingDescriptorToModuleFile implements AtomicOperation
         if ($this->previousDescriptor) {
             $this->rootModuleFile->addBindingDescriptor($this->previousDescriptor);
         } else {
-            $this->rootModuleFile->removeBindingDescriptor($this->bindingDescriptor->getUuid());
+            $this->rootModuleFile->removeBindingDescriptor($this->bindingDescriptor->getBinding());
         }
     }
 }

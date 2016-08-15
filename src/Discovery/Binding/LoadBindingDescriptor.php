@@ -75,10 +75,11 @@ class LoadBindingDescriptor implements AtomicOperation
 
         $this->bindingDescriptor->load($this->containingModule, $typeDescriptor);
 
-        $uuid = $this->bindingDescriptor->getUuid();
+        $binding = $this->bindingDescriptor->getBinding();
+        $moduleName = $this->containingModule->getName();
 
-        if ($this->bindingDescriptors->contains($uuid)) {
-            $this->previousDescriptor = $this->bindingDescriptors->get($uuid);
+        if ($this->bindingDescriptors->contains($binding, $moduleName)) {
+            $this->previousDescriptor = $this->bindingDescriptors->get($binding, $moduleName);
         }
 
         $this->bindingDescriptors->add($this->bindingDescriptor);
@@ -102,7 +103,10 @@ class LoadBindingDescriptor implements AtomicOperation
             $this->bindingDescriptors->add($this->previousDescriptor);
         } else {
             // never fails
-            $this->bindingDescriptors->remove($this->bindingDescriptor->getUuid());
+            $this->bindingDescriptors->remove(
+                $this->bindingDescriptor->getBinding(),
+                $this->bindingDescriptor->getContainingModule()->getName()
+            );
         }
     }
 }

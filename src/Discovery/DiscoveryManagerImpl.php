@@ -14,6 +14,7 @@ namespace Puli\Manager\Discovery;
 use Exception;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
+use Puli\Discovery\Api\Binding\Binding;
 use Puli\Discovery\Api\EditableDiscovery;
 use Puli\Manager\Api\Context\ProjectContext;
 use Puli\Manager\Api\Discovery\BindingDescriptor;
@@ -39,9 +40,8 @@ use Puli\Manager\Discovery\Binding\DisableBindingUuid;
 use Puli\Manager\Discovery\Binding\EnableBindingUuid;
 use Puli\Manager\Discovery\Binding\LoadBindingDescriptor;
 use Puli\Manager\Discovery\Binding\ReloadBindingDescriptorsByTypeName;
-use Puli\Manager\Discovery\Binding\ReloadBindingDescriptorsByUuid;
 use Puli\Manager\Discovery\Binding\RemoveBindingDescriptorFromModuleFile;
-use Puli\Manager\Discovery\Binding\SyncBindingUuid;
+use Puli\Manager\Discovery\Binding\SyncBinding;
 use Puli\Manager\Discovery\Binding\UnloadBindingDescriptor;
 use Puli\Manager\Discovery\Type\AddBindingType;
 use Puli\Manager\Discovery\Type\AddTypeDescriptorToModuleFile;
@@ -165,7 +165,7 @@ class DiscoveryManagerImpl implements DiscoveryManager
             $syncBindingOps = array();
 
             foreach ($this->getUuidsByTypeName($typeName) as $uuid) {
-                $syncBindingOp = $this->syncBindingUuid($uuid);
+                $syncBindingOp = $this->syncBinding($uuid);
                 $syncBindingOp->takeSnapshot();
                 $syncBindingOps[] = $syncBindingOp;
             }
@@ -215,7 +215,7 @@ class DiscoveryManagerImpl implements DiscoveryManager
             $syncBindingOps = array();
 
             foreach ($this->getUuidsByTypeName($typeName) as $uuid) {
-                $syncBindingOp = $this->syncBindingUuid($uuid);
+                $syncBindingOp = $this->syncBinding($uuid);
                 $syncBindingOp->takeSnapshot();
                 $syncBindingOps[] = $syncBindingOp;
             }
@@ -260,7 +260,7 @@ class DiscoveryManagerImpl implements DiscoveryManager
                     $tx->execute($this->removeTypeDescriptorFromModuleFile($typeName));
 
                     foreach ($this->getUuidsByTypeName($typeName) as $uuid) {
-                        $syncBindingOp = $this->syncBindingUuid($uuid);
+                        $syncBindingOp = $this->syncBinding($uuid);
                         $syncBindingOp->takeSnapshot();
                         $syncBindingOps[] = $syncBindingOp;
                     }
@@ -464,21 +464,21 @@ class DiscoveryManagerImpl implements DiscoveryManager
             throw TypeNotEnabledException::forTypeName($typeName);
         }
 
-        $uuid = $bindingDescriptor->getUuid();
-        $exists = $this->bindingDescriptors->contains($uuid);
+        $binding = $bindingDescriptor->getBinding();
+        $exists = $this->bindingDescriptors->contains($binding);
         $existsInNonRoot = $exists
-            ? !($this->bindingDescriptors->get($uuid)->getContainingModule() instanceof RootModule)
+            ? !$this->bindingDescriptors->contains($binding, $this->rootModule->getName())
             : false;
 
         // We can only override bindings in the root module
         if ($existsInNonRoot || ($exists && !($flags & self::OVERRIDE))) {
-            throw DuplicateBindingException::forUuid($uuid);
+            throw DuplicateBindingException::forUuid($binding);
         }
 
         $tx = new Transaction();
 
         try {
-            $syncOp = $this->syncBindingUuid($uuid);
+            $syncOp = $this->syncBinding($binding);
             $syncOp->takeSnapshot();
 
             $tx->execute($this->loadBindingDescriptor($bindingDescriptor, $this->rootModule));
@@ -487,43 +487,6 @@ class DiscoveryManagerImpl implements DiscoveryManager
 
             $tx->execute($this->addBindingDescriptorToModuleFile($bindingDescriptor));
             $tx->execute($syncOp);
-
-            $this->saveRootModuleFile();
-
-            $tx->commit();
-        } catch (Exception $e) {
-            $tx->rollback();
-
-            throw $e;
-        }
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function removeRootBindingDescriptor(Uuid $uuid)
-    {
-        $this->assertModulesLoaded();
-
-        if (!$this->bindingDescriptors->contains($uuid)) {
-            return;
-        }
-
-        $bindingDescriptor = $this->bindingDescriptors->get($uuid);
-
-        if (!$bindingDescriptor->getContainingModule() instanceof RootModule) {
-            return;
-        }
-
-        $tx = new Transaction();
-
-        try {
-            $syncOp = $this->syncBindingUuid($uuid);
-            $syncOp->takeSnapshot();
-
-            $tx->execute($this->unloadBindingDescriptor($bindingDescriptor));
-            $tx->execute($syncOp);
-            $tx->execute($this->removeBindingDescriptorFromModuleFile($uuid));
 
             $this->saveRootModuleFile();
 
@@ -547,7 +510,7 @@ class DiscoveryManagerImpl implements DiscoveryManager
         try {
             foreach ($this->getRootBindingDescriptors() as $bindingDescriptor) {
                 if ($expr->evaluate($bindingDescriptor)) {
-                    $syncOp = $this->syncBindingUuid($bindingDescriptor->getUuid());
+                    $syncOp = $this->syncBinding($bindingDescriptor->getUuid());
                     $syncOp->takeSnapshot();
 
                     $tx->execute($this->unloadBindingDescriptor($bindingDescriptor));
@@ -572,20 +535,6 @@ class DiscoveryManagerImpl implements DiscoveryManager
     public function clearRootBindingDescriptors()
     {
         $this->removeRootBindingDescriptors(Expr::true());
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getRootBindingDescriptor(Uuid $uuid)
-    {
-        $binding = $this->getBindingDescriptor($uuid);
-
-        if (!$binding->getContainingModule() instanceof RootModule) {
-            throw NoSuchBindingException::forUuidAndModule($uuid, $this->rootModule->getName());
-        }
-
-        return $binding;
     }
 
     /**
@@ -620,14 +569,6 @@ class DiscoveryManagerImpl implements DiscoveryManager
     /**
      * {@inheritdoc}
      */
-    public function hasRootBindingDescriptor(Uuid $uuid)
-    {
-        return $this->hasBindingDescriptor($uuid) && $this->getBindingDescriptor($uuid)->getContainingModule() instanceof RootModule;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
     public function hasRootBindingDescriptors(Expression $expr = null)
     {
         $expr2 = Expr::method('getContainingModule', Expr::same($this->rootModule));
@@ -637,151 +578,6 @@ class DiscoveryManagerImpl implements DiscoveryManager
         }
 
         return $this->hasBindingDescriptors($expr2);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function enableBindingDescriptor(Uuid $uuid)
-    {
-        $this->assertModulesLoaded();
-
-        if (!$this->bindingDescriptors->contains($uuid)) {
-            throw NoSuchBindingException::forUuid($uuid);
-        }
-
-        $bindingDescriptor = $this->bindingDescriptors->get($uuid);
-        $module = $bindingDescriptor->getContainingModule();
-
-        if ($module instanceof RootModule) {
-            throw NonRootModuleExpectedException::cannotEnableBinding($uuid, $module->getName());
-        }
-
-        if ($bindingDescriptor->isTypeNotFound()) {
-            throw NoSuchTypeException::forTypeName($bindingDescriptor->getTypeName());
-        }
-
-        if ($bindingDescriptor->isTypeNotEnabled()) {
-            throw TypeNotEnabledException::forTypeName($bindingDescriptor->getTypeName());
-        }
-
-        if ($bindingDescriptor->isEnabled()) {
-            return;
-        }
-
-        $tx = new Transaction();
-
-        try {
-            $syncOp = $this->syncBindingUuid($uuid);
-            $syncOp->takeSnapshot();
-
-            $tx->execute($this->enableBindingUuid($uuid, $module->getInstallInfo()));
-            $tx->execute($syncOp);
-
-            $this->saveRootModuleFile();
-
-            $tx->commit();
-        } catch (Exception $e) {
-            $tx->rollback();
-
-            throw $e;
-        }
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function disableBindingDescriptor(Uuid $uuid)
-    {
-        $this->assertModulesLoaded();
-
-        if (!$this->bindingDescriptors->contains($uuid)) {
-            throw NoSuchBindingException::forUuid($uuid);
-        }
-
-        $bindingDescriptor = $this->bindingDescriptors->get($uuid);
-        $module = $bindingDescriptor->getContainingModule();
-
-        if ($module instanceof RootModule) {
-            throw NonRootModuleExpectedException::cannotDisableBinding($uuid, $module->getName());
-        }
-
-        if ($bindingDescriptor->isTypeNotFound()) {
-            throw NoSuchTypeException::forTypeName($bindingDescriptor->getTypeName());
-        }
-
-        if ($bindingDescriptor->isTypeNotEnabled()) {
-            throw TypeNotEnabledException::forTypeName($bindingDescriptor->getTypeName());
-        }
-
-        if ($bindingDescriptor->isDisabled()) {
-            return;
-        }
-
-        $tx = new Transaction();
-
-        try {
-            $syncOp = $this->syncBindingUuid($uuid);
-            $syncOp->takeSnapshot();
-
-            $tx->execute($this->disableBindingUuid($uuid, $module->getInstallInfo()));
-            $tx->execute($syncOp);
-
-            $this->saveRootModuleFile();
-
-            $tx->commit();
-        } catch (Exception $e) {
-            $tx->rollback();
-
-            throw $e;
-        }
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function removeObsoleteDisabledBindingDescriptors()
-    {
-        $this->assertModulesLoaded();
-
-        $removedUuidsByModule = array();
-
-        try {
-            foreach ($this->rootModuleFile->getInstallInfos() as $installInfo) {
-                foreach ($installInfo->getDisabledBindingUuids() as $uuid) {
-                    if (!$this->bindingDescriptors->contains($uuid)) {
-                        $installInfo->removeDisabledBindingUuid($uuid);
-                        $removedUuidsByModule[$installInfo->getModuleName()][] = $uuid;
-                    }
-                }
-            }
-
-            $this->saveRootModuleFile();
-        } catch (Exception $e) {
-            foreach ($removedUuidsByModule as $moduleName => $removedUuids) {
-                $installInfo = $this->rootModuleFile->getInstallInfo($moduleName);
-
-                foreach ($removedUuids as $uuid) {
-                    $installInfo->addDisabledBindingUuid($uuid);
-                }
-            }
-
-            throw $e;
-        }
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getBindingDescriptor(Uuid $uuid)
-    {
-        $this->assertModulesLoaded();
-
-        if (!$this->bindingDescriptors->contains($uuid)) {
-            throw NoSuchBindingException::forUuid($uuid);
-        }
-
-        return $this->bindingDescriptors->get($uuid);
     }
 
     /**
@@ -810,16 +606,6 @@ class DiscoveryManagerImpl implements DiscoveryManager
         }
 
         return $descriptors;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function hasBindingDescriptor(Uuid $uuid)
-    {
-        $this->assertModulesLoaded();
-
-        return $this->bindingDescriptors->contains($uuid);
     }
 
     /**
@@ -929,11 +715,6 @@ class DiscoveryManagerImpl implements DiscoveryManager
             }
 
             foreach ($module->getModuleFile()->getBindingDescriptors() as $bindingDescriptor) {
-                // This REALLY shouldn't happen
-                if ($this->bindingDescriptors->contains($bindingDescriptor->getUuid())) {
-                    throw DuplicateBindingException::forUuid($bindingDescriptor->getUuid());
-                }
-
                 $this->loadBindingDescriptor($bindingDescriptor, $module)->execute();
             }
         }
@@ -970,19 +751,6 @@ class DiscoveryManagerImpl implements DiscoveryManager
                 ));
             }
         }
-    }
-
-    private function getUuidsByTypeName($typeName)
-    {
-        $uuids = array();
-
-        foreach ($this->bindingDescriptors->getUuids() as $uuid) {
-            if ($typeName === $this->bindingDescriptors->get($uuid)->getTypeName()) {
-                $uuids[$uuid->toString()] = $uuid;
-            }
-        }
-
-        return $uuids;
     }
 
     private function saveRootModuleFile()
@@ -1056,29 +824,13 @@ class DiscoveryManagerImpl implements DiscoveryManager
         return new UnloadBindingDescriptor($bindingDescriptor, $this->bindingDescriptors);
     }
 
-    private function enableBindingUuid(Uuid $uuid, InstallInfo $installInfo)
-    {
-        return new InterceptedOperation(
-            new EnableBindingUuid($uuid, $installInfo),
-            new ReloadBindingDescriptorsByUuid($uuid, $this->bindingDescriptors, $this->typeDescriptors)
-        );
-    }
-
-    private function disableBindingUuid(Uuid $uuid, InstallInfo $installInfo)
-    {
-        return new InterceptedOperation(
-            new DisableBindingUuid($uuid, $installInfo),
-            new ReloadBindingDescriptorsByUuid($uuid, $this->bindingDescriptors, $this->typeDescriptors)
-        );
-    }
-
     private function addBinding(BindingDescriptor $bindingDescriptor)
     {
         return new AddBinding($bindingDescriptor, $this->discovery);
     }
 
-    private function syncBindingUuid(Uuid $uuid)
+    private function syncBinding(Binding $binding)
     {
-        return new SyncBindingUuid($uuid, $this->discovery, $this->bindingDescriptors);
+        return new SyncBinding($binding, $this->discovery, $this->bindingDescriptors);
     }
 }

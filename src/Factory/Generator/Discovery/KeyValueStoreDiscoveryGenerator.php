@@ -54,7 +54,7 @@ class KeyValueStoreDiscoveryGenerator implements ServiceGenerator
         $kvsGenerator->generateNewInstance('store', $targetMethod, $generatorRegistry, $kvsOptions);
 
         $targetMethod->getClass()->addImport(new Import('Puli\Discovery\KeyValueStoreDiscovery'));
-        $targetMethod->getClass()->addImport(new Import('Puli\Discovery\Binding\Initializer\ResourceBindingInitializer'));
+        $targetMethod->getClass()->addImport(new Import('Puli\Repository\Discovery\ResourceBindingInitializer'));
 
         $targetMethod->addBody(sprintf(
             "$%s = new KeyValueStoreDiscovery(\$store, array(\n    new ResourceBindingInitializer(\$repo),\n));",
