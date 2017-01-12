@@ -45,6 +45,7 @@ class DefaultConfig extends Config
             self::DISCOVERY_TYPE => 'json',
             self::DISCOVERY_PATH => '{$puli-dir}/bindings.json',
             self::DISCOVERY_STORE_CACHE => true,
+            self::CACHE_FILE => '{$puli-dir}/puli.json.cache',
         ));
     }
 }

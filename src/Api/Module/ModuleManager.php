@@ -23,7 +23,7 @@ use Webmozart\Expression\Expression;
  *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-interface ModuleManager
+interface ModuleManager extends ModuleProvider
 {
     /**
      * Returns the manager's context.
@@ -83,62 +83,4 @@ interface ModuleManager
      * If matching modules are found, this method does nothing.
      */
     public function clearModules();
-
-    /**
-     * Returns a module by name.
-     *
-     * @param string $name The module name.
-     *
-     * @return Module The module.
-     *
-     * @throws NoSuchModuleException If the module was not found.
-     */
-    public function getModule($name);
-
-    /**
-     * Returns the root module.
-     *
-     * @return RootModule The root module.
-     */
-    public function getRootModule();
-
-    /**
-     * Returns all installed modules.
-     *
-     * @return ModuleList The installed modules.
-     */
-    public function getModules();
-
-    /**
-     * Returns all modules matching the given expression.
-     *
-     * @param Expression $expr The search criteria.
-     *
-     * @return ModuleList The modules matching the expression.
-     */
-    public function findModules(Expression $expr);
-
-    /**
-     * Returns whether the manager has the module with the given name.
-     *
-     * @param string $name The module name.
-     *
-     * @return bool Whether the manager has a module with that name.
-     */
-    public function hasModule($name);
-
-    /**
-     * Returns whether the manager has any modules.
-     *
-     * You can optionally pass an expression to check whether the manager has
-     * modules matching the expression.
-     *
-     * @param Expression|null $expr The search criteria.
-     *
-     * @return bool Returns `true` if the manager has modules and `false`
-     *              otherwise. If an expression was passed, this method only
-     *              returns `true` if the manager has modules matching the
-     *              expression.
-     */
-    public function hasModules(Expression $expr = null);
 }

@@ -610,4 +610,21 @@ class ContainerTest extends PHPUnit_Framework_TestCase
         $this->puli->setRootDirectory($this->tempRoot);
         $this->puli->start();
     }
+
+    public function testGetCacheManagerInProjectContext()
+    {
+        $this->puli->setRootDirectory($this->tempRoot);
+        $this->puli->start();
+        $manager = $this->puli->getCacheManager();
+
+        $this->assertInstanceOf('Puli\Manager\Api\Cache\CacheManager', $manager);
+        $this->assertSame($this->puli->getContext(), $manager->getContext());
+    }
+
+    public function testGetCacheManagerInGlobalContext()
+    {
+        $this->puli->start();
+
+        $this->assertNull($this->puli->getCacheManager());
+    }
 }
