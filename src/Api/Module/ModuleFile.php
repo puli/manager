@@ -29,6 +29,8 @@ use Rhumsaa\Uuid\Uuid;
  */
 class ModuleFile
 {
+    const DEFAULT_VERSION = '1.0';
+
     /**
      * @var string
      */
